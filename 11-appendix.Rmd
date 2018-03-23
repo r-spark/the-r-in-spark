@@ -1,0 +1,38 @@
+# Appendix {-}
+
+## Worlds Store Capacity {#storage-capacity}
+
+```{r eval=FALSE}
+library(tidyverse)
+read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
+  gather(key = storage, value = capacity, analog, digital) %>%
+  mutate(year = X1, terabytes = capacity / 1e+12) %>%
+  ggplot(aes(x = year, y = terabytes, group = storage)) +
+    geom_line(aes(linetype = storage)) +
+    geom_point(aes(shape = storage)) +
+    scale_y_log10(
+      breaks = scales::trans_breaks("log10", function(x) 10^x),
+      labels = scales::trans_format("log10", scales::math_format(10^x))
+    ) +
+    theme_light() +
+    theme(legend.position = "bottom")
+```
+
+## Daily downloads of CRAN packages {#cran-downloads}
+
+```{r eval=FALSE}
+downloads_csv <- "data/01-intro-r-cran-downloads.csv"
+if (!file.exists(downloads_csv)) {
+  downloads <- cranlogs::cran_downloads(from = "2014-01-01", to = "2018-01-01")
+  readr::write_csv(downloads, downloads_csv)
+}
+
+cran_downloads <- readr::read_csv(downloads_csv)
+
+ggplot(cran_downloads, aes(date, count)) + 
+  geom_point(colour="black", pch = 21, size = 1) +
+  scale_x_date() +
+  xlab("") +
+  ylab("") +
+  theme_light()
+```
