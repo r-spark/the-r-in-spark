@@ -32,8 +32,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="clusters.html">
-<link rel="next" href="extensions.html">
+<link rel="prev" href="references.html">
+
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -189,23 +189,46 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="data" class="section level1">
-<h1><span class="header-section-number">Chapter 6</span> Data Sources</h1>
-<div id="csv" class="section level2">
-<h2><span class="header-section-number">6.1</span> CSV</h2>
+<div id="appendix" class="section level1 unnumbered">
+<h1>Appendix</h1>
+<div id="storage-capacity" class="section level2">
+<h2><span class="header-section-number">9.3</span> Worlds Store Capacity</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyverse)
+<span class="kw">read_csv</span>(<span class="st">&quot;data/01-worlds-capacity-to-store-information.csv&quot;</span>, <span class="dt">skip =</span> <span class="dv">8</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">gather</span>(<span class="dt">key =</span> storage, <span class="dt">value =</span> capacity, analog, digital) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">year =</span> X1, <span class="dt">terabytes =</span> capacity <span class="op">/</span><span class="st"> </span><span class="fl">1e+12</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> year, <span class="dt">y =</span> terabytes, <span class="dt">group =</span> storage)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">linetype =</span> storage)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">shape =</span> storage)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">scale_y_log10</span>(
+      <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw">trans_breaks</span>(<span class="st">&quot;log10&quot;</span>, <span class="cf">function</span>(x) <span class="dv">10</span><span class="op">^</span>x),
+      <span class="dt">labels =</span> scales<span class="op">::</span><span class="kw">trans_format</span>(<span class="st">&quot;log10&quot;</span>, scales<span class="op">::</span><span class="kw">math_format</span>(<span class="dv">10</span><span class="op">^</span>x))
+    ) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_light</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</code></pre></div>
 </div>
-<div id="text" class="section level2">
-<h2><span class="header-section-number">6.2</span> Text</h2>
-</div>
-<div id="parquet" class="section level2">
-<h2><span class="header-section-number">6.3</span> Parquet</h2>
-</div>
-<div id="jdbc" class="section level2">
-<h2><span class="header-section-number">6.4</span> JDBC</h2>
-</div>
-<div id="others" class="section level2">
-<h2><span class="header-section-number">6.5</span> Others</h2>
+<div id="cran-downloads" class="section level2">
+<h2><span class="header-section-number">9.4</span> Daily downloads of CRAN packages</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">downloads_csv &lt;-<span class="st"> &quot;data/01-intro-r-cran-downloads.csv&quot;</span>
+<span class="cf">if</span> (<span class="op">!</span><span class="kw">file.exists</span>(downloads_csv)) {
+  downloads &lt;-<span class="st"> </span>cranlogs<span class="op">::</span><span class="kw">cran_downloads</span>(<span class="dt">from =</span> <span class="st">&quot;2014-01-01&quot;</span>, <span class="dt">to =</span> <span class="st">&quot;2018-01-01&quot;</span>)
+  readr<span class="op">::</span><span class="kw">write_csv</span>(downloads, downloads_csv)
+}
 
+cran_downloads &lt;-<span class="st"> </span>readr<span class="op">::</span><span class="kw">read_csv</span>(downloads_csv)
+
+<span class="kw">ggplot</span>(cran_downloads, <span class="kw">aes</span>(date, count)) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">colour=</span><span class="st">&quot;black&quot;</span>, <span class="dt">pch =</span> <span class="dv">21</span>, <span class="dt">size =</span> <span class="dv">1</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_x_date</span>() <span class="op">+</span>
+<span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme_light</span>()</code></pre></div>
+
+<div id="refs" class="references">
+<div>
+<p>French, Carl. 1996. <em>Data Processing and Information Technology</em>. Cengage Learning Business Press. <a href="https://www.amazon.com/Data-Processing-Information-Technology-French/dp/1844801004" class="uri">https://www.amazon.com/Data-Processing-Information-Technology-French/dp/1844801004</a>.</p>
+</div>
+</div>
 </div>
 </div>
             </section>
@@ -213,8 +236,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           </div>
         </div>
       </div>
-<a href="clusters.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="extensions.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="references.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -243,7 +266,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/rstudio/bookdown-demo/edit/master/06-data-sources.Rmd",
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/11-appendix.Rmd",
 "text": "Edit"
 },
 "download": ["bookdown-demo.pdf", "bookdown-demo.epub"],
