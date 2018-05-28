@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{2018-04-19}
+  \date{2018-05-28}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -160,8 +160,8 @@
 \chapter*{The R in Spark}\label{the-r-in-spark}}
 \addcontentsline{toc}{chapter}{The R in Spark}
 
-In this book you will learn Apache Spark using R. The book intends to
-take someone unfamiliar with Spark or R and help them become
+In this book you will learn Apache Spark using R with sparklyr. The book
+intends to take someone unfamiliar with Spark or R and help them become
 intermediate users by teaching a set of tools, skills and practices
 applicable to data science.
 
@@ -191,7 +191,7 @@ possible to distinguish four distinct phases development: pre-mechanical
 from traditional industries to an economy based on information
 technology} our footprint of digital information has kept growing at
 \href{http://documents.worldbank.org/curated/en/896971468194972881/310436360_201602630200201/additional/102725-PUB-Replacement-PUBLIC.pdf}{exponential
-rates} (see Section \ref{storage-capacity}):
+rates}:
 
 \begin{figure}
 \centering
@@ -419,15 +419,16 @@ to get some sense of R's recent growth (see Section
 \section{sparklyr}\label{sparklyr}}
 
 Back in 2016, there was a need in the R community to support Spark
-through a clean interface compatible with other R packages and available
-in CRAN. To this end, development of \texttt{sparklyr} started in 2016
-by RStudio under JJ Allaire, Kevin Ushey and Javier Luraschi, version
-0.4 was released in summer during the \emph{useR!} conference, this
-first version added support for \texttt{dplyr}, \texttt{DBI}, modeling
-with \texttt{MLlib} and an extensible API that enabled extensions like
-H2Os \href{https://github.com/h2oai/rsparkling/}{rsparkling} package.
-Since then, many new features have been added and support across many
-Spark distributions and cloud services has made available.
+through an interface compatible with other R packages, easy to use and
+available in CRAN. To this end, development of \texttt{sparklyr} started
+in 2016 by RStudio under JJ Allaire, Kevin Ushey and Javier Luraschi,
+version 0.4 was released in summer during the \emph{useR!} conference,
+this first version added support for \texttt{dplyr}, \texttt{DBI},
+modeling with \texttt{MLlib} and an extensible API that enabled
+extensions like H2Os
+\href{https://github.com/h2oai/rsparkling/}{rsparkling} package. Since
+then, many new features have been added and support across many Spark
+distributions and cloud services has made available.
 
 Officially,
 
@@ -438,9 +439,9 @@ Officially,
 \end{quote}
 
 It's available in CRAN and works like any other CRAN package, meaning
-that: it's agnostic to versions, it's easy to install, it serves the R
-community, it embraces other packages and practices from the R community
-and so on. It's hosted in GitHub under
+that: it's agnostic to Spark versions, it's easy to install, it serves
+the R community, it embraces other packages and practices from the R
+community and so on. It's hosted in GitHub under
 \href{github.com/rstudio/sparklyr}{https://github.com/rstudio/sparklyr}
 and licensed under Apache 2.0 which is allows you to clone, modify and
 contribute back to this project.
@@ -507,8 +508,8 @@ Here are some resources to help you get involved:
   with us in Gitter (\url{https://gitter.im/rstudio/sparklyr}).
 \end{itemize}
 
-\hypertarget{started}{%
-\chapter{Getting Started}\label{started}}
+\hypertarget{installation}{%
+\chapter{Installation}\label{installation}}
 
 From R, installing and launching a local Spark cluster using
 \texttt{sparklyr} is as easy as running:
@@ -521,21 +522,21 @@ From R, installing and launching a local Spark cluster using
 \end{Shaded}
 
 However, to make sure we can all run the code above and understand it,
-this section will walk you through installing the prerequisites,
+this chapter will walk you through installing the prerequisites,
 installing Spark and connecting to a local Spark cluster.
 
 \hypertarget{prerequisites}{%
 \section{Prerequisites}\label{prerequisites}}
 
-As briefly mentioned in Section \ref{intro}, R is a programming language
-that can run in many platforms and environments. Most people making use
-of a programming language also choose tools to make them more productive
-in it; for R, RStudio would be such tool. Strictly speaking, RStudio is
-an Integrated Development Environment or IDE for short, which also
-happens to support many platforms and environments. R and RStudio are
-the free software tools this book will make use of and therefore, I
-strongly recommend you get those installed if you haven't done so
-already.
+As briefly mentioned in the \protect\hyperlink{intro}{Introduction}
+chapter, R is a programming language that can run in many platforms and
+environments. Most people making use of a programming language also
+choose tools to make them more productive in it; for R, RStudio would be
+such tool. Strictly speaking, RStudio is an Integrated Development
+Environment or IDE for short, which also happens to support many
+platforms and environments. R and RStudio are the free software tools
+this book will make use of and therefore, I strongly recommend you get
+those installed if you haven't done so already.
 
 Additionally, since Spark is build in the Scala programming language
 which is run by the Java Virtual Machine, you also need to install Java
@@ -550,7 +551,7 @@ the installer for your platform, Windows, Macs or Linux available.
 
 \begin{figure}
 
-{\centering \includegraphics{the-r-in-spark_files/figure-latex/r-download-1} 
+{\centering \includegraphics[width=13.78in]{images/02-getting-started-download-r} 
 
 }
 
@@ -576,6 +577,10 @@ installing the JDK in the first place.
 
 \caption{Java Download.}\label{fig:java-download}
 \end{figure}
+
+Starting with Spark 2.1, Java 8 is required; however, previous versions
+of Spark support Java 7. Regardless, we recommend installing Java 8 as
+described in this chapter
 
 \hypertarget{install-rstudio}{%
 \subsection{Install RStudio}\label{install-rstudio}}
@@ -795,11 +800,11 @@ of tasks in the cluster. For local clusters, we can retrieve the
 \end{Shaded}
 
 \begin{verbatim}
-## 18/04/19 22:25:03 INFO SparkContext: Submitted application: sparklyr
-## 18/04/19 22:25:04 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.4/Resources/library/sparklyr/java/sparklyr-2.2-2.11.jar at spark://127.0.0.1:55445/jars/sparklyr-2.2-2.11.jar with timestamp 1524201904194
-## 18/04/19 22:25:10 INFO Executor: Fetching spark://127.0.0.1:55445/jars/sparklyr-2.2-2.11.jar with timestamp 1524201904194
-## 18/04/19 22:25:10 INFO Utils: Fetching spark://127.0.0.1:55445/jars/sparklyr-2.2-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-bc2b9a07-421c-4130-8d4d-59a98d9f9b9a/userFiles-4e80b486-36e0-480b-abf1-e2ac62e7a11a/fetchFileTemp7505929974481292946.tmp
-## 18/04/19 22:25:10 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-bc2b9a07-421c-4130-8d4d-59a98d9f9b9a/userFiles-4e80b486-36e0-480b-abf1-e2ac62e7a11a/sparklyr-2.2-2.11.jar to class loader
+## 18/05/28 13:48:43 INFO SparkContext: Submitted application: sparklyr
+## 18/05/28 13:48:44 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:58019/jars/sparklyr-2.3-2.11.jar with timestamp 1527540524227
+## 18/05/28 13:48:47 INFO Executor: Fetching spark://localhost:58019/jars/sparklyr-2.3-2.11.jar with timestamp 1527540524227
+## 18/05/28 13:48:47 INFO Utils: Fetching spark://localhost:58019/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-c0c8dc9f-039a-4747-a480-da0361d5a0de/userFiles-1b40bd81-8795-431a-89a2-3b40f37d4f59/fetchFileTemp1785844422091785902.tmp
+## 18/05/28 13:48:47 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-c0c8dc9f-039a-4747-a480-da0361d5a0de/userFiles-1b40bd81-8795-431a-89a2-3b40f37d4f59/sparklyr-2.3-2.11.jar to class loader
 \end{verbatim}
 
 \hypertarget{disconnecting}{%
@@ -838,66 +843,280 @@ error message or open a GitHub issue under
 \url{https://github.com/rstudio/sparklyr/issues} to help you get going.
 
 \hypertarget{dplyr}{%
-\chapter{Data Analysis}\label{dplyr}}
+\chapter{Analysis}\label{dplyr}}
+
+While \textbf{this chatper has not been written}, a few resources and
+basic examples were made available to help out until this chapter is
+written.
 
 \hypertarget{dplyr-1}{%
 \section{dplyr}\label{dplyr-1}}
 
+Using \texttt{sparklyr}, you can apply the same data analysis techniques
+described in \href{http://r4ds.had.co.nz/transform.html}{Chapter 5 -
+Data transformation - R for Data Science} by Garrett Grolemund and
+Hadley Wickham.
+
+Once you understand \texttt{dplyr}, you can make use of \texttt{dplyr}
+and \texttt{sparklyr} as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(sparklyr)}
+\KeywordTok{library}\NormalTok{(dplyr)}
+
+\CommentTok{# Connect to Spark}
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local"}\NormalTok{)}
+
+\CommentTok{# Use dplyr's copy_to() to copy the iris dataset to Spark}
+\NormalTok{iris_tbl <-}\StringTok{ }\KeywordTok{copy_to}\NormalTok{(sc, iris, }\DataTypeTok{overwrite =} \OtherTok{TRUE}\NormalTok{)}
+
+\CommentTok{# The iris_tbl is a Spark data frame compatible with dplyr}
+\NormalTok{iris_tbl}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # Source:   table<iris> [?? x 5]
+## # Database: spark_connection
+##    Sepal_Length Sepal_Width Petal_Length Petal_Width Species
+##           <dbl>       <dbl>        <dbl>       <dbl> <chr>  
+##  1          5.1         3.5          1.4         0.2 setosa 
+##  2          4.9         3            1.4         0.2 setosa 
+##  3          4.7         3.2          1.3         0.2 setosa 
+##  4          4.6         3.1          1.5         0.2 setosa 
+##  5          5           3.6          1.4         0.2 setosa 
+##  6          5.4         3.9          1.7         0.4 setosa 
+##  7          4.6         3.4          1.4         0.3 setosa 
+##  8          5           3.4          1.5         0.2 setosa 
+##  9          4.4         2.9          1.4         0.2 setosa 
+## 10          4.9         3.1          1.5         0.1 setosa 
+## # ... with more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Transform iris_tbl with dplyr as usual}
+\NormalTok{iris_tbl }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(Species) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise_all}\NormalTok{(}\KeywordTok{funs}\NormalTok{(mean))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # Source:   lazy query [?? x 5]
+## # Database: spark_connection
+##   Species    Sepal_Length Sepal_Width Petal_Length Petal_Width
+##   <chr>             <dbl>       <dbl>        <dbl>       <dbl>
+## 1 versicolor         5.94        2.77         4.26       1.33 
+## 2 virginica          6.59        2.97         5.55       2.03 
+## 3 setosa             5.01        3.43         1.46       0.246
+\end{verbatim}
+
+To understand \texttt{dplyr} further, I would recommend taking a look at
+the following vignettes:
+
+\begin{itemize}
+\tightlist
+\item
+  \href{https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html}{Introduction
+  to dplyr}
+\item
+  \href{https://cran.r-project.org/web/packages/dplyr/vignettes/two-table.html}{Two-table
+  verbs}
+\item
+  \href{https://cran.r-project.org/web/packages/dplyr/vignettes/window-functions.html}{Window
+  functions}
+\item
+  \href{https://cran.r-project.org/web/packages/dplyr/vignettes/programming.html}{Programming
+  with dplyr}
+\end{itemize}
+
 \hypertarget{dbi}{%
 \section{DBI}\label{dbi}}
+
+The \texttt{DBI} provides an database interface for R, meaning, if you
+are familiar with SQL, you can make use of \texttt{DBI} to perform SQL
+queries in Spark using \texttt{sparklyr}. To learn more about
+\texttt{DBI}, I would recommend reading first
+\href{https://cran.r-project.org/web/packages/DBI/vignettes/DBI-1.html}{A
+Common Database Interface (DBI)}. Once you are familiar with
+\texttt{DBI}, you can use this package with \texttt{sparklyr} as
+follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(DBI)}
+
+\KeywordTok{dbGetQuery}\NormalTok{(sc,}
+  \StringTok{"SELECT mean(Sepal_Length), mean(Sepal_Width), }
+\StringTok{          mean(Petal_Length), mean(Petal_Width)}
+\StringTok{   FROM iris}
+\StringTok{   GROUP BY Species"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   avg(Sepal_Length) avg(Sepal_Width) avg(Petal_Length) avg(Petal_Width)
+## 1             5.936            2.770             4.260            1.326
+## 2             6.588            2.974             5.552            2.026
+## 3             5.006            3.428             1.462            0.246
+\end{verbatim}
+
+More advanced \texttt{DBI} resources are available in the following
+vignettes:
+
+\begin{itemize}
+\tightlist
+\item
+  \href{https://cran.r-project.org/web/packages/DBI/vignettes/DBI-proposal.html}{A
+  Common Interface to Relational Databases from R and S -- A Proposal}
+\item
+  \href{https://cran.r-project.org/web/packages/DBI/vignettes/backend.html}{Implementing
+  a new backend}
+\item
+  \href{https://cran.r-project.org/web/packages/DBI/vignettes/spec.html}{DBI
+  specification}
+\end{itemize}
 
 \hypertarget{modeling}{%
 \chapter{Modeling}\label{modeling}}
 
-\hypertarget{mllib}{%
-\section{mllib}\label{mllib}}
+While \textbf{this chatper has not been written}, I want to provide a
+few resources and basic examples to help out while the chapter is
+written.
+
+\hypertarget{overview}{%
+\section{Overview}\label{overview}}
+
+MLlib is Apache Spark's scalable machine learning library and is
+available through \texttt{sparklyr}, mostly, with functions prefixed
+with \texttt{ml\_}. The following table describes some of the modeling
+algorithms supported:
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+Algorithm & Function\tabularnewline
+\midrule
+\endhead
+Accelerated Failure Time Survival Regression &
+ml\_aft\_survival\_regression\tabularnewline
+Alternating Least Squares Factorization & ml\_als\tabularnewline
+Correlation Matrix & ml\_corr\tabularnewline
+Decision Trees & ml\_decision\_tree\tabularnewline
+Generalized Linear Regression &
+ml\_generalized\_linear\_regression\tabularnewline
+Gradient-Boosted Trees & ml\_gradient\_boosted\_trees\tabularnewline
+Isotonic Regression & ml\_isotonic\_regression\tabularnewline
+K-Means Clustering & ml\_kmeans\tabularnewline
+Latent Dirichlet Allocation & ml\_lda\tabularnewline
+Linear Regression & ml\_linear\_regression\tabularnewline
+Linear Support Vector Machines & ml\_linear\_svc\tabularnewline
+Logistic Regression & ml\_logistic\_regression\tabularnewline
+Multilayer Perceptron & ml\_multilayer\_perceptron\tabularnewline
+Naive-Bayes & ml\_naive\_bayes\tabularnewline
+One vs Rest & ml\_one\_vs\_rest\tabularnewline
+Principal Components Analysis & ml\_pca\tabularnewline
+Random Forests & ml\_random\_forest\tabularnewline
+Survival Regression & ml\_survival\_regression\tabularnewline
+\bottomrule
+\end{longtable}
+
+Here is an example to get you started with K-Means:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(sparklyr)}
+
+\CommentTok{# Connect to Spark in local mode}
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Re-using existing Spark connection to local
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Copy iris to Spark}
+\NormalTok{iris_tbl <-}\StringTok{ }\KeywordTok{sdf_copy_to}\NormalTok{(sc, iris, }\DataTypeTok{overwrite =} \OtherTok{TRUE}\NormalTok{)}
+
+\CommentTok{# Run K-Means for Species using only Petal_Width and Petal_Length as features}
+\NormalTok{iris_tbl }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ml_kmeans}\NormalTok{(}\DataTypeTok{centers =} \DecValTok{3}\NormalTok{, Species }\OperatorTok{~}\StringTok{ }\NormalTok{Petal_Width }\OperatorTok{+}\StringTok{ }\NormalTok{Petal_Length)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## K-means clustering with 3 clusters
+## 
+## Cluster centers:
+##   Petal_Width Petal_Length
+## 1    1.359259     4.292593
+## 2    0.246000     1.462000
+## 3    2.047826     5.626087
+## 
+## Within Set Sum of Squared Errors =  31.41289
+\end{verbatim}
+
+More examples are reosurces are available in
+\href{http://spark.rstudio.com/mlib/}{spark.rstudio.com/mlib}.
 
 \hypertarget{clusters}{%
 \chapter{Clusters}\label{clusters}}
 
 Previous chapters focused on using Spark over a single computing
 instance, your personal computer. In this chapter we will introduce
-techniques to run Spark over multiple computing instances to do proper
-data science at scale.
+techniques to run Spark over multiple computing instances, also known as
+a computing cluster, to analyze data at scale.
 
-However, you might already have a Spark cluster in your organization,
-being that the case, you could consider skipping to the next chapter,
-Connections, which will teach you how to connect to an existing
-clusters.
+If you already have a Spark cluster in your organization, you could
+consider skipping to the next chapter,
+\protect\hyperlink{connections-1}{Connections}, which will teach you how
+to connect to an existing cluster.
 
-For those that don't have a cluster or are considering improvements to
-their existing infrastructure, this chapter will introduce the most
-common cluster architectures available today.
+If don't have a cluster or are considering improvements to your existing
+infrastructure, this chapter will introduce some of the cluster trends,
+managers and providers available today.
 
-\hypertarget{overview}{%
-\section{Overview}\label{overview}}
+\hypertarget{overview-1}{%
+\section{Overview}\label{overview-1}}
 
-While working with clusters of many computing instances, you will need
-to find enough computing instances to perform de computation at the
-scale you intend. There are two options available today known as
-\emph{on-prem} or \emph{cloud}.
+There are three major trends in cluster computing worth discussing:
+\textbf{on-premise}, \textbf{cloud computing} and \textbf{kubernetes}.
+Framing these trends over time will help us understand how they came to
+be, what they are and what their future might be:
 
-\emph{On-prem} stands for on-premise, meaning that someone, either
-yourself or someone in your organiation purchased physical computers
-that are intended to be used for cluster computing. The computers in
-this cluster can made of \emph{off-the-shelf} hardware, meaning that
-someone place an order to purchase computers usually found in stores
-shelves or, \emph{high-performance} hardware, meaning that a computing
-vendor provided highly customized computing hardware which also comes
-optimized for high-performance network connectivity, power consumption,
-etc. When purchasing hundreds or thousands of computing instances, it
-doesn't make sense to keep them in the usual computing casing that we
-are all familiar with, but rather, it makes sense to stack them as
-efficient as possible on top of each other to minimize space and help
-disipate heat. This group of efficiently stacked computing instances is
-known as a \href{https://en.wikipedia.org/wiki/Rack_unit}{rack}. Once
-you have thousands or, yes, even millions of computers, you will also
-need many racks of computing devices and yes, you would also need
-significant physycal space to hosts those racks, a building that
-provides racks of computing instances is usually known as a Data Center.
-A data center is a building designated to hold many racks with many
-computing instances in each. At the scale of a data center, optimizing
-the building that holds them, their heating system, power suply, network
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-21-1} 
+
+}
+
+\caption{Google trends for on-premise (mainframe), cloud computing and kubernetes.}\label{fig:unnamed-chunk-21}
+\end{figure}
+
+For \textbf{on-premise} clusters, someone, either yourself or someone in
+your organiation purchased physical computers that are intended to be
+used for cluster computing. The computers in this cluster can made of
+\emph{off-the-shelf} hardware, meaning that someone placed an order to
+purchase computers usually found in stores shelves or,
+\emph{high-performance} hardware, meaning that a computing vendor
+provided highly customized computing hardware which also comes optimized
+for high-performance network connectivity, power consumption, etc. When
+purchasing hundreds or thousands of computing instances, it doesn't make
+sense to keep them in the usual computing case that we are all familiar
+with, but rather, it makes sense to stack them as efficient as possible
+on top of each other to minimize room space. This group of efficiently
+stacked computing instances is known as a
+\href{https://en.wikipedia.org/wiki/Rack_unit}{rack}. Once a cluster
+grows to thousands of computers, you will also need to host hundreds of
+racks of computing devices, at this scale, you would also need
+significant physical space to hosts those racks. A building that
+provides racks of computing instances is usually known as a
+\emph{data-center}. At the scale of a data center, optimizing the
+building that holds them, their heating system, power suply, network
 connectivity, etc. becomes also relevant to optimize. In 2011, Facebook
 \href{https://code.facebook.com/posts/187637061409082/building-efficient-data-centers-with-the-open-compute-project/}{announced}
 the \href{http://www.opencompute.org/}{Open Compute Project} inniciative
@@ -913,93 +1132,275 @@ access to virtual servers}, in their data centers to the public and, in
 2004, Amazon Web Services launched as a way to let anyone rent a subset
 of their datacenters on-demand, meaning that one did not have to
 purchase, configure, maintain nor teardown it's own clusters but could
-rather rent them from Amazon directly. cloud computing.
+rather rent them from Amazon directly.
 
-The on-demand compute model is what we know today as \emph{Cloud} and
-stands for Cloud Computing. It's a concept that evolved from Amazon Web
-Services providing their data centers as a service. In the cloud, the
-cluster you use is not owned by you and is neither in your physical
-building, but rather, it's a data center owned and managed by someone
-else. Today, there are many cloud providers in this space ranging from
-Amazon, Microsoft, Google, IBM and many others. Most cloud computing
-platforms provide a user interface either through a web applciation and
-command line to request resources, connect to them and tear them down
+The on-demand compute model is what we know today as \textbf{Cloud
+Computing}. It's a concept that evolved from Amazon Web Services
+providing their data centers as a service. In the cloud, the cluster you
+use is not owned by you and is neither in your physical building, but
+rather, it's a data center owned and managed by someone else. Today,
+there are many cloud providers in this space ranging from Amazon,
+Microsoft, Google, IBM and many others. Most cloud computing platforms
+provide a user interface either through a web applciation and command
+line to request and manage resources.
+
+While the bennefits of processing data in the \emph{cloud} were obvious
+for many years, picking a cloud provider had the unintended side-effect
+of locking organizations with one particular provider, making it hard to
+switch between provideers or back to on-premise clusters.
+\textbf{Kubernetes}, announced by Google in 2014, is an
+\href{https://github.com/kubernetes/kubernetes/}{open source system for
+managing containerized applications across multiple hosts}. In practice,
+it provides common infrastructure otherwise proprietary to cloud
+providers making it much easier to deploy across multiple cloud
+providers and on-premise as well. However, being a much newer paradigm
+than on-premise or cloud computing, it is still in it's adoption phase
+but, nevertheless, promising for cluster computing in general and,
+specifically, for Apache Spark.
+
+\hypertarget{managers}{%
+\section{Managers}\label{managers}}
+
+In order to run Spark within a computing cluster, one needs to run
+something capable of initializing Spark over each compute instance, this
+is known as a
+\href{https://en.wikipedia.org/wiki/Cluster_manager}{cluster manager}.
+The available cluster managers in Spark are: \textbf{Spark Standalone},
+\textbf{YARN}, \textbf{Mesos} and \textbf{Kubernetes}.
+
+\hypertarget{clusters-standalone}{%
+\subsection{Standalone}\label{clusters-standalone}}
+
+In \textbf{Spark Standalone}, Spark works on it's own without additional
+software requirements since it provides it's own cluster manager as part
+of the Spark installation.
 
 \begin{figure}
-\centering
-\includegraphics{the-r-in-spark_files/figure-latex/unnamed-chunk-17-1.pdf}
-\caption{\label{fig:unnamed-chunk-17}Google trends for mainframes, cloud
-computing and kubernetes.}
+
+{\centering \includegraphics[width=13.78in]{images/05-clusters-spark-standalone} 
+
+}
+
+\caption{Spark Standalone Site.}\label{fig:spark-standalone}
 \end{figure}
 
-\hypertarget{on-prem-vs-cloud}{%
-\section{On-Prem vs Cloud}\label{on-prem-vs-cloud}}
+By completing the \protect\hyperlink{installation}{Installation}
+chapter, you should have a local Spark installation available, which we
+can use to initialize a local stanalone Spark cluster. First, retrieve
+the \texttt{SPARK\_HOME} directory by running
+\texttt{sparklyr::spark\_home\_dir()} from R and then, from a terminal
+or R, use \texttt{start-master.sh} and \texttt{start-slave.sh} as
+follows:
 
-First, we can start by asking where are the machines for your cluster
-will be located? For historical reasons, most organizations have choosen
-to colocate their cluster machiens with their business, as in, there is
-a room full of computers hosting a variety of software. More recently,
-software companies have made available clusters of machines available in
-their own data centers that one can connect to and rent. We call the
-former, on-premise cluster or on-prem for short and, cloud clusters or
-on-demand cluster for the latter one. Each have different tradeoffs
-worth considering.
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Retrieve the Spark installation directory}
+\NormalTok{spark_home <-}\StringTok{ }\NormalTok{sparklyr}\OperatorTok{::}\KeywordTok{spark_home_dir}\NormalTok{()}
 
-For those readers that already have an Spark cluster in their
-organization, you should ask your cluster administrator to provide
-connection information for this cluster and read carefully their usage
-policies and constraints. A cluster is usually shared among many users
-so you want to be respectful of others time and resources while using a
-shared cluster environment. Your system administrator will describe if
-it's an \textbf{on-prem} vs \textbf{cloud} cluster, the
-\textbf{distribution}, the cluster \textbf{manager} being used,
-supported \textbf{connections} and supported \textbf{tools}.
+\CommentTok{# Build path to start-master.sh}
+\NormalTok{start_master <-}\StringTok{ }\KeywordTok{file.path}\NormalTok{(spark_home, }\StringTok{"sbin"}\NormalTok{, }\StringTok{"start-master.sh"}\NormalTok{)}
 
-For those readers that don't have a cluster yet, it is likely that you
-will want to choose a cloud cluster, reading throught this chapter will
-help you an overview of all the different approaches you can take to
-create your own cluster or decide which cluster provider to use. At the
-end, there is no right answer for all readers, but my hope if that this
-will help you take a sensible decision on which cluster provider and
-distribution to choose.
+\CommentTok{# Execute start-master.sh to start the cluster manager master node}
+\KeywordTok{system2}\NormalTok{(start_master)}
 
-\hypertarget{on-prem}{%
-\subsection{On-Prem}\label{on-prem}}
+\CommentTok{# Build path to start-slave}
+\NormalTok{start_slave <-}\StringTok{ }\KeywordTok{file.path}\NormalTok{(spark_home, }\StringTok{"sbin"}\NormalTok{, }\StringTok{"start-slave.sh"}\NormalTok{)}
 
-For on-premise clusters, a set of machines is managed by an
-organization. The machines are usually colocated with their physical
-location and are managed by staff usually employed by their
-organization. These clusters can be highly customized and controlled;
-however, they inccur significant initial expenses and high management
-costs.
+\CommentTok{# Execute start-slave.sh to start a worker and register in master node}
+\KeywordTok{system2}\NormalTok{(start_slave, }\KeywordTok{paste0}\NormalTok{(}\StringTok{"spark://"}\NormalTok{, }\KeywordTok{system2}\NormalTok{(}\StringTok{"hostname"}\NormalTok{, }\DataTypeTok{stdout =} \OtherTok{TRUE}\NormalTok{), }\StringTok{":7077"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
 
-\textbf{Cloudera}
+The previous command initialized the master node and a worker node, the
+master node interface can be accessed under
+\href{http://localhost:8080}{localhost:8080} and looks like the
+following:
 
 \begin{figure}
 
-{\centering \includegraphics[width=13.78in]{images/05-clusters-cloudera-landing} 
+{\centering \includegraphics[width=13.78in]{images/05-clusters-spark-standalone-web-ui} 
+
+}
+
+\caption{Spark Standalone Web Interface.}\label{fig:spark-standalone-web-ui}
+\end{figure}
+
+Notice that there is one worker register in Spark standalone, you can
+follow the link to this worker node to see additional information:
+
+\begin{figure}
+
+{\centering \includegraphics[width=13.78in]{images/05-clusters-spark-standalone-web-ui-worker} 
+
+}
+
+\caption{Spark Standalone Worker Web Interface.}\label{fig:spark-standalone-web-ui-worker}
+\end{figure}
+
+Once data analysis is complete, one can simply stop all the running
+nodes in this local cluster by running:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{stop_all <-}\StringTok{ }\KeywordTok{file.path}\NormalTok{(spark_home, }\StringTok{"sbin"}\NormalTok{, }\StringTok{"stop-all.sh"}\NormalTok{)}
+\KeywordTok{system2}\NormalTok{(stop_all)}
+\end{Highlighting}
+\end{Shaded}
+
+A similar approach can be followed to configure a cluster by running
+each \texttt{start-slave.sh} command over each machine in the cluster.
+
+Further reading:
+\href{https://spark.apache.org/docs/latest/spark-standalone.html}{Spark
+Standalone Mode}
+
+\hypertarget{yarn}{%
+\subsection{Yarn}\label{yarn}}
+
+YARN for short, or Hadoop YARN, is the resource manager introduced in
+2012 to the Hadoop project. As mentioned in in the
+\protect\hyperlink{intro}{Introduction} chapter, Spark was built
+initially to speed up computation over Hadoop; then, when Hadoop 2 was
+launched, it introduced YARN as a component to manage resources in the
+cluster, to this date, using Hadoop YARN with Apache Spark is still very
+common.
+
+YARN applications can be submitted in two modes: \textbf{yarn-client}
+and \textbf{yarn-cluster}. In yarn-cluster mode the driver is running
+remotely, while in yarn-client mode, the driver is on the machine that
+started the job, \texttt{sparklyr} supports both modes.
+
+\begin{figure}
+
+{\centering \includegraphics[width=13.78in]{images/05-clusters-yarn} 
+
+}
+
+\caption{Hadoop YARN Site}\label{fig:hadoop-yarn}
+\end{figure}
+
+Further reading:
+\href{https://spark.apache.org/docs/latest/running-on-yarn.html}{Running
+Spark on YARN}
+
+\hypertarget{mesos}{%
+\subsection{Mesos}\label{mesos}}
+
+Apache Mesos is an open-source project to manage computer clusters.
+Mesos began as a research project in the UC Berkeley RAD Lab by then PhD
+students Benjamin Hindman, Andy Konwinski, and Matei Zaharia, as well as
+professor Ion Stoica. Mesos uses Linux
+\href{https://en.wikipedia.org/wiki/Cgroups}{Cgroups} to provide
+isolation for CPU, memory, I/O and file system.
+
+\begin{figure}
+
+{\centering \includegraphics[width=13.78in]{images/05-clusters-mesos} 
+
+}
+
+\caption{Mesos Landing Site}\label{fig:mesos-spark}
+\end{figure}
+
+Further reading:
+\href{https://spark.apache.org/docs/latest/running-on-mesos.html}{Running
+Spark on Mesos}
+
+\hypertarget{kubernetes}{%
+\subsection{Kubernetes}\label{kubernetes}}
+
+Kubernetes is an open-source container-orchestration system for
+automating deployment, scaling and management of containerized
+applications that was originally designed by Google and now maintained
+by the \href{https://www.cncf.io/}{Cloud Native Computing Foundation}.
+
+\begin{figure}
+
+{\centering \includegraphics[width=13.78in]{images/05-clusters-kubernetes} 
+
+}
+
+\caption{Kubernetes Landing Site.}\label{fig:kubernetes-spark}
+\end{figure}
+
+Further reading:
+\href{https://spark.apache.org/docs/latest/running-on-kubernetes.html}{Running
+Spark on Kubernetes}
+
+\hypertarget{on-premise}{%
+\section{On-Premise}\label{on-premise}}
+
+As mentioned in the overview section, on-premise clusters represent a
+set of computing instances procured, colocated and managed by staff
+members from your organization. These clusters can be highly customized
+and controlled; however, they can also inccur significant initial
+expenses and maintenance costs.
+
+One can use a cluster manager in on-premise clusters as described in the
+previous section; however, many organizations choose to partner with
+companies providing additional management software, services and
+resources to manage software in their cluster including, but not limited
+to, Apache Spark. Some of the on-premise cluster providers include:
+Cloudera, Hortonworks and MapR to mention a few which will be briefly
+introduced.
+
+\hypertarget{cloudera}{%
+\subsection{Cloudera}\label{cloudera}}
+
+Cloudera, Inc.~is a United States-based software company that provides
+Apache Hadoop and Apache Spark-based software, support and services, and
+training to business customers.
+
+Cloudera's hybrid open-source Apache Hadoop distribution, CDH (Cloudera
+Distribution Including Apache Hadoop), targets enterprise-class
+deployments of that technology. Cloudera says that more than 50\% of its
+engineering output is donated upstream to the various Apache-licensed
+open source projects (Apache Hive, Apache Avro, Apache HBase, and so on)
+that combine to form the Apache Hadoop platform. Cloudera is also a
+sponsor of the Apache Software Foundation.
+
+\begin{figure}
+
+{\centering \includegraphics[width=13.78in]{images/05-clusters-cloudera} 
 
 }
 
 \caption{Cloudera Landing Site.}\label{fig:cloudera-spark}
 \end{figure}
 
-\textbf{Hortonworks}
+\hypertarget{hortonworks}{%
+\subsection{Hortonworks}\label{hortonworks}}
+
+Hortonworks is a big data software company based in Santa Clara,
+California. The company develops, supports, and provides expertise on an
+expansive set of entirely open source software designed to manage data
+and processing for everything from IOT, to advanced analytics and
+machine learning. Hortonworks believes it is a data management company
+bridging the cloud and the datacenter.
 
 \begin{figure}
 
-{\centering \includegraphics[width=13.78in]{images/05-clusters-hortonworks-landing} 
+{\centering \includegraphics[width=13.78in]{images/05-clusters-hortonworks} 
 
 }
 
 \caption{Hortonworks Landing Site.}\label{fig:hortonworks-spark}
 \end{figure}
 
-\textbf{MapR}
+\hypertarget{mapr}{%
+\subsection{MapR}\label{mapr}}
+
+MapR is a business software company headquartered in Santa Clara,
+California. MapR provides access to a variety of data sources from a
+single computer cluster, including big data workloads such as Apache
+Hadoop and Apache Spark, a distributed file system, a multi-model
+database management system, and event stream processing, combining
+analytics in real-time with operational applications. Its technology
+runs on both commodity hardware and public cloud computing services.
 
 \begin{figure}
 
-{\centering \includegraphics[width=13.78in]{images/05-clusters-mapr-landing} 
+{\centering \includegraphics[width=13.78in]{images/05-clusters-mapr} 
 
 }
 
@@ -1007,42 +1408,64 @@ costs.
 \end{figure}
 
 \hypertarget{cloud}{%
-\subsection{Cloud}\label{cloud}}
+\section{Cloud}\label{cloud}}
 
-For cloud clusters, the machines are rented from a cloud provider by an
-hourly and even by the minute or second basis. The cloud providers with
-highest market captical are: Amazon, Google and Microsoft.
+For those readers that don't have a cluster yet, it is likely that you
+will want to choose a cloud cluster, this section will briefly mention
+some of the major cloud infrastructure providers as a starting point to
+choose the right one for you.
 
-\textbf{Amazon} provides cloud services through
+It is worth mentioning that in a cloud service model, the compute
+instances are charged by the hour and times the number of instances
+reserved for your cluster. Since the cluster size is flexible, it is a
+good practice to start with small clusters and scale compute resources
+as needed. Even if you know in advance that a cluster of significant
+size will be required, starting small provides an opportunity to
+troubleshoot issues at a lower cost since it's unlikely that your data
+analysis will run at scale flawlessly on the first try.
+
+The major providers of cloud computing infrastructure are: Amazon,
+Google and Microsoft that this section will briefly introduce.
+
+\hypertarget{amazon}{%
+\subsection{Amazon}\label{amazon}}
+
+Amazon provides cloud services through
 \href{https://aws.amazon.com/}{Amazon Web Services}; more specifically,
 they provide an on-demand Spark cluster through
-\href{https://aws.amazon.com/emr/}{Amazon Elastic Mad Reduce} or EMR for
+\href{https://aws.amazon.com/emr/}{Amazon Elastic Map Reduce} or EMR for
 short.
 
 \begin{figure}
 
-{\centering \includegraphics[width=13.78in]{images/05-clusters-amazon-emr-landing} 
+{\centering \includegraphics[width=13.78in]{images/05-clusters-amazon-emr} 
 
 }
 
 \caption{Amazon EMR Landing Site.}\label{fig:amazon-emr}
 \end{figure}
 
-\textbf{Google} provides their on-demand computing services through
-their \href{https://cloud.google.com/}{Google Cloud}, on-demand Spark
-cluster are provided by \href{https://cloud.google.com/dataproc/}{Google
+\hypertarget{google}{%
+\subsection{Google}\label{google}}
+
+Google provides their on-demand computing services through their
+\href{https://cloud.google.com/}{Google Cloud}, on-demand Spark cluster
+are provided by \href{https://cloud.google.com/dataproc/}{Google
 Dataproc}.
 
 \begin{figure}
 
-{\centering \includegraphics[width=13.78in]{images/05-clusters-dataproc-landing} 
+{\centering \includegraphics[width=13.78in]{images/05-clusters-dataproc} 
 
 }
 
 \caption{Google Dataprox Landing Site.}\label{fig:google-dataproc}
 \end{figure}
 
-\textbf{Microsoft} provides cloud services thorugh
+\hypertarget{microsoft}{%
+\subsection{Microsoft}\label{microsoft}}
+
+Microsoft provides cloud services thorugh
 \href{https://azure.microsoft.com/}{Microsft Azure} and Spark clusters
 through
 \href{https://azure.microsoft.com/en-us/services/hdinsight/}{Azure
@@ -1050,44 +1473,63 @@ HDInsight}.
 
 \begin{figure}
 
-{\centering \includegraphics[width=13.78in]{images/05-clusters-azure-landing} 
+{\centering \includegraphics[width=13.78in]{images/05-clusters-azure} 
 
 }
 
 \caption{Azure HDInsight Landing Site.}\label{fig:azure-hdinsight}
 \end{figure}
 
-\hypertarget{distributions}{%
-\section{Distributions}\label{distributions}}
+\hypertarget{tools}{%
+\section{Tools}\label{tools}}
 
-\hypertarget{managers}{%
-\section{Managers}\label{managers}}
+While using only R and Spark can be sufficient for some clusters, it is
+common to install complementary tools in your cluster to improve:
+monitoring, sql analysis, workflow coordination, etc. with applications
+like \href{http://ganglia.info/}{Ganglia},
+\href{http://gethue.com/}{Hue} and
+\href{https://oozie.apache.org}{Oozie} respectevly. This secton is not
+meant to cover all, but rather mention two that are relevant to R and
+\texttt{sparklyr}.
 
-While running Spark over multiple machines, the first challenge one
-would encounter is how to manage all those machines with ease. One
-approach would be to manually set up and configure Spark over each
-machine, while possible, this is usually impractical due to the
-innificiencies of managing one machine at a time; instead of installing
-Spark, Hadoop, etc. manually over every machine, what is known as a
-\href{https://en.wikipedia.org/wiki/Cluster_manager}{cluster manager} is
-usually installed only once. Once a cluster manager is installed, it
-will provide the tools to install additional software over each node,
-Hadoop, Spark, etc. There are many cluster managers
+\hypertarget{rstudio}{%
+\subsection{RStudio}\label{rstudio}}
 
-\hypertarget{standalone}{%
-\subsection{Standalone}\label{standalone}}
+RStudio's open source and professional products, like: RStudio Server,
+\href{https://www.rstudio.com/products/rstudio-server-pro/}{RStudio
+Server Pro}, \href{https://www.rstudio.com/products/shiny/}{Shiny
+Server}, \href{https://www.rstudio.com/products/shiny-server-pro/}{Shiny
+Server Pro}, or \href{https://www.rstudio.com/products/connect/}{RStudio
+Connect}; can be installed within the cluster to support many R
+workflows, while \texttt{sparklyr} does not require any additional
+tools, they provide significant productivity gains worth considering.
 
-\hypertarget{yarn}{%
-\subsection{Yarn}\label{yarn}}
+\begin{figure}
 
-\hypertarget{mesos}{%
-\subsection{Mesos}\label{mesos}}
+{\centering \includegraphics[width=13.78in]{images/05-clusters-rstudio-server} 
 
-\hypertarget{kubernetes}{%
-\subsection{Kubernetes}\label{kubernetes}}
+}
 
-\hypertarget{livy}{%
-\subsection{Livy}\label{livy}}
+\caption{Rstudio Server}\label{fig:rstudio-server}
+\end{figure}
+
+\hypertarget{clusters-livy}{%
+\subsection{Livy}\label{clusters-livy}}
+
+\href{https://livy.incubator.apache.org/}{Apapche Livy} is an incubation
+project in Apache providing support to use Spark clusters remotely
+through a web interface. It is ideal to connect directly into the Spark
+cluster; however, there are times where connecting directly to the
+cluster is not feasible. When facing those constraints, one can consider
+installing Livy in their cluster and secure it properly to enable remote
+use over web protocols.
+
+However, there is a significant performance overhead from using Livy in
+\texttt{sparklyr} for experimentation, meaning that, executing many
+client comamnds over Livy has a significant overhead; however, running a
+few commands to generate complex analysis is usually performant since
+the performance overhead of starting computation can be insignificant
+compared to the actual cluster computation.
 
 \begin{figure}
 
@@ -1095,72 +1537,628 @@ Hadoop, Spark, etc. There are many cluster managers
 
 }
 
-\caption{Apache Livy.}\label{fig:apache-livy}
+\caption{Apache Livy Landing Site.}\label{fig:apache-livy}
 \end{figure}
 
-\hypertarget{remote-clusters}{%
-\section{Remote Clusters}\label{remote-clusters}}
+\hypertarget{recap-1}{%
+\section{Recap}\label{recap-1}}
 
-In this section we will explore how to connect
+This chapter explained the history and tradeoffs of on-premise, cloud
+computing and presented Kubernetes as a promising framework to provide
+flexibility across on-premise and cloud providers. It also introduced
+cluster managers (Spark Standalone, YARN, Mesos and Kubernetes) as the
+software needed to run Spark as a cluster application. This chapter
+briefly mentioned on-premise cluster providers like Cloudera,
+Hortonworks and MapR as well as the major cloud providers: Amazon,
+Google and Microsoft.
 
-\hypertarget{same-network}{%
-\subsection{Same Network}\label{same-network}}
+While this chapter provided a solid foundation to understand current
+computing trends, cluster tools and providers useful to perform data
+science; it falls short to help those tasked with deliberately choosing
+a cluster manager, service provider or architecture. If you have this
+task assigned to you, use this chapter as a starting point to reach to
+many more resources to complete your understanding of the platform your
+organization needs.
 
-\hypertarget{different-network}{%
-\subsection{Different Network}\label{different-network}}
-
-Connecting from RStudio Server to remote Spark
+The next chapter, \protect\hyperlink{connections-1}{Connections},
+assumes a Spark cluster is already available to you and will focus on
+understanding how to connect to it from sparklyr.
 
 \hypertarget{connections}{%
 \chapter{Connections}\label{connections}}
 
-\hypertarget{overview-1}{%
-\section{Overview}\label{overview-1}}
+The previous chapter, \protect\hyperlink{clusters}{Clusters}, presented
+the major cluster computing paradigms, cluster managers and cluster
+providers; this section explains the internal components of a Spark
+cluster and the how to perform connections to any cluster running Apache
+Spark.
+
+\hypertarget{overview-2}{%
+\section{Overview}\label{overview-2}}
+
+Before explaining how to connect to Spark clusters, it is worth
+discussing the components of a Spark cluster and how they interact, this
+is often known as the cluster architecture of Apache Spark.
+
+First, lets go over a couple definitions. As you know form previous
+chapters, a cluster is a collection of machines to perform analysis
+beyond a single computer. However, in distributed systems and clusters
+literature, we often reffer to each physical machine as a compute
+instance, compute node, or simply instance or node for short. It is
+helpful to remind this while reading through this chapter and making use
+of external resource.
+
+In a Spark cluster, there are three types of compute instances that are
+relevant to Spark: The \textbf{driver node}, the \textbf{worker nodes}
+and the \textbf{cluster manager}. A cluster manager is a service that
+allos Spark to be executed in the clsuter and was explained in the
+\href{Managers}{Cluster Managers} section. The driver node is tasked
+with delegating work to the worker nodes, but also for aggregating their
+results and iterating further if needed. For the most part, aggregation
+happens in the worker nodes; however, even after the nodes aggregate
+data, it is often the case that the driver node would have to aggregate
+the worker results. Therefore, the driver node has at least, but often,
+much more compute resources (read RAM, CPU, Local Storage, etc.) then
+the worker node.
+
+Strictly speaking, the driver node and worker nodes are just names
+assigned to machines with particular roles, while the actual computation
+in the driver node is performed by the \textbf{spark context}. The Spark
+context is a Spark component tasked with scheduling tasks, managing data
+and so on. In the worker nodes, the actual computation is performed
+under a \textbf{spark executor}, which is also a Spark component tasked
+with executing subtasks against a data partition.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth,height=220pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-26-1} 
+
+}
+
+\caption{Apache Spark Architecture}\label{fig:unnamed-chunk-26}
+\end{figure}
+
+If you already have an Spark cluster in their organization, you should
+ask your cluster administrator to provide connection information for
+this cluster and read carefully their usage policies and constraints. A
+cluster is usually shared among many users so you want to be respectful
+of others time and resources while using a shared cluster environment.
+Your system administrator will describe if it's an \textbf{on-premise}
+vs \textbf{cloud} cluster, the \textbf{cluster manager} being used,
+supported \textbf{connections} and supported \textbf{tools}. You can use
+this information to jump directly to \protect\hyperlink{local}{Local},
+\protect\hyperlink{standalone}{Standalone},
+\protect\hyperlink{yarn-1}{Yarn}, \protect\hyperlink{mesos-1}{Mesos},
+\protect\hyperlink{livy}{Livy} or
+\protect\hyperlink{kubernetes-1}{Kubernetes} based on the information
+provided to you.
+
+\hypertarget{edge-nodes}{%
+\subsection{Edge Nodes}\label{edge-nodes}}
+
+Before connecting to Apache Spark, you will first have to connect to the
+cluster. Usually, by connecting to an edge node within the cluster. An
+edge node, is a machine that can accessed from outside the cluster but
+which is also part of the cluster. There are two methods to connect to
+this edge instance:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Terminal}: Using a
+  \href{https://en.wikipedia.org/wiki/Computer_terminal}{computer
+  terminal} applicaiton, one can use a
+  \href{https://en.wikipedia.org/wiki/Secure_Shell}{secure shell} to
+  establish a remote connection into the cluster, once you connect into
+  the cluster, you can launch R and then use \texttt{sparklyr}.
+\item
+  \textbf{Web Browser}: While using \texttt{sparklyr} from a terminal is
+  possible, it is usually more producty to install a \textbf{web server}
+  in an edge node that provides more tools and functionality to run R
+  with \texttt{sparklyr}. Most likely, you will want to consider using
+  \href{RStudio\%20Server}{RStudio Server} rather than connecting from
+  the terminal.
+\end{itemize}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth,height=140pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-27-1} 
+
+}
+
+\caption{Using a Spark Cluster from an Edge Node}\label{fig:unnamed-chunk-27}
+\end{figure}
+
+\hypertarget{spark-home}{%
+\subsection{Spark Home}\label{spark-home}}
+
+It is important to mention that, while connecting to a Spark cluster,
+you will need to find out the correct \texttt{SPARK\_HOME} path which
+contains the installation of Spark in the given instance. The
+\texttt{SPARK\_HOME} path must be set as an environment variable before
+connecting or explicitly specified in \texttt{spark\_connect()} using
+the \texttt{spark\_home} parameter.
+
+For system administrators, we recommend you set \texttt{SPARK\_HOME} for
+all the users in your cluster; however, if this is not set in your
+cluster you can also specify \texttt{SPARK\_HOME} while using
+\texttt{spark\_connect()} as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"cluster-master"}\NormalTok{, }\DataTypeTok{spark_home =} \StringTok{"local/path/to/spark"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Where \texttt{cluster-master} is set to the correct cluster manager
+master for \href{Standalone}{Spark Standalone}, \href{Yarn}{YARN},
+\protect\hyperlink{mesos-1}{Mesos}, etc.
 
 \hypertarget{local}{%
 \section{Local}\label{local}}
 
-\hypertarget{spark-1}{%
-\section{Spark}\label{spark-1}}
+When connecting to Spark in local mode, Spark starts as a single
+application simulating a cluster with a single node, this is not a
+proper computing cluster but is ideal to perform work offline and
+troubleshoot issues. A local connection to Spark is represented in the
+following diagram:
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth,height=160pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-29-1} 
+
+}
+
+\caption{Local Connection Diagram}\label{fig:unnamed-chunk-29}
+\end{figure}
+
+Notice that in the local connections diagram, there is no cluster
+manager nor worker process since, in local mode, everything runs inside
+the driver application. It's also worth pointing out that
+\texttt{sparklyr} starts the Spark Context through
+\texttt{spark-submit}, a script available in every Spark installation to
+enable users to submit custom application to Spark which
+\texttt{sparklyr} makes use of to submit itself to Spark. For the
+curious reader, the \protect\hyperlink{contributing}{Contributing}
+chapter explains the internal processes that take place in
+\texttt{sparklyr} to submit this application and connect properly from
+R.
+
+To perform this local connection, we can connect with the following
+familiar code used in previous chapters:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Connect to local Spark instance}
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+By default, \texttt{sparklyr}, will connect using as many CPU cores are
+available in your compute instance; however, this can be customized by
+connecting using \texttt{master="local{[}n{]}"}, where \texttt{n} is the
+desired number of cores to use. For example, we can connect using only 2
+CPU cores as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Connect to local Spark instance using 2 cores}
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local[2]"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{standalone}{%
+\section{Standalone}\label{standalone}}
+
+Connecting to a Spark Standalone cluster requires the location of the
+cluster manager's master instance, this location can be found in the
+cluster manager web interface as described in the
+\href{standalone\%20cluster}{clusters-standalone} section, you can find
+this location by looking for a URL starting with \texttt{spark://}.
+
+A connection in standalone mode starts from \texttt{sparklyr} launching
+\texttt{spark-submit} to submit the \texttt{sparklyr} application and
+creating the Spark Context, which requests executors to Spark's
+standalone cluster manager in the \texttt{master} location:
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-32-1} 
+
+}
+
+\caption{Spark Standalone Connection Diagram}\label{fig:unnamed-chunk-32}
+\end{figure}
+
+In order to connect, use \texttt{master="spark://hostname:port"} in
+\texttt{spark\_connect()} as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"spark://hostname:port"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
 \hypertarget{yarn-1}{%
 \section{Yarn}\label{yarn-1}}
 
-\hypertarget{client}{%
-\subsection{Client}\label{client}}
+Hadoop YARN supports two connection modes: YARN Client and YARN Cluster.
+However, YARN Client mode is much more common that YARN Cluster since
+it's more efficient and easier to set up.
 
-\hypertarget{server}{%
-\subsection{Server}\label{server}}
+\hypertarget{yarn-client}{%
+\subsection{Yarn Client}\label{yarn-client}}
+
+When connecting in YARN Client mode, the driver instance runs R,
+sparklyr and the Spark Context which requests worker nodes from YARN to
+run Spark executors as follows:
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-34-1} 
+
+}
+
+\caption{YARN Client Connection Diagram}\label{fig:unnamed-chunk-34}
+\end{figure}
+
+To connect, one can simply run with \texttt{master\ =\ "yarn"} as
+follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"yarn-client"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Once connected, you can use all techniques described in previous
+chapters using the \texttt{sc} connection; for instances, you can do
+\href{analysis}{data analysis} or
+\protect\hyperlink{modeling}{modeling}.
+
+\hypertarget{yarn-cluster}{%
+\subsection{Yarn Cluster}\label{yarn-cluster}}
+
+The main difference between YARN Cluster mode and YARN Client mode is
+that in YARN Cluster mode, the driver node is not required to be the
+node where R and sparklyr get started; instead, the driver node remains
+the designated driver node which is usually a different node than the
+edge node where R is running. It can be helpful to consider using YARN
+Cluster when the edge node has too many concurrent users, is lacking
+computing resources or where tools (like RStudio) need to be managed
+independently of other clsuter resources.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-36-1} 
+
+}
+
+\caption{YARN Cluster Connection Diagram}\label{fig:unnamed-chunk-36}
+\end{figure}
+
+To connect in YARN Cluster mode, we can simple run:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"yarn-cluster"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+This connection assumes that the node running \texttt{spark\_connect()}
+is properly configured, meaning that, \texttt{yarn-site.xml} exists and
+the \texttt{YARN\_CONF\_DIR} environment variable is properly set. When
+using Hadoop as a file system, one would also need the
+\texttt{HADOOP\_CONF\_DIR} environment variable properly configured.
+This configuration is usually provided by your system administrator and
+is not something that you would have to manually configure.
+
+\hypertarget{livy}{%
+\section{Livy}\label{livy}}
+
+As opposed to other connection methods which require using an edge node
+in the cluster, \href{clusters-livy}{Livy} Livy provides a \textbf{Web
+API} that makes the Spark cluster accessible from outside the cluster
+and neither requires a local installation in the client. Once connected
+through the Web API, the \textbf{Livy Service} starts the Spark context
+by requesting reosurces from the cluster manager and distributing work
+as usual.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-38-1} 
+
+}
+
+\caption{Livy Connection Diagram}\label{fig:unnamed-chunk-38}
+\end{figure}
+
+Conencting through Livy requires the URL to the Livy service which
+should be similar to \texttt{https://hostname:port/livy}. Since remote
+connections are allowed, connections usually requires, at the very
+least, basic authentication:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"https://hostname:port/livy"}\NormalTok{, }\DataTypeTok{method =} \StringTok{"livy"}\NormalTok{, }\DataTypeTok{config =} \KeywordTok{livy_config}\NormalTok{(}
+  \DataTypeTok{username=}\StringTok{"<username>"}\NormalTok{,}
+  \DataTypeTok{password=}\StringTok{"<password>"}
+\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Once connected through Livy, operations you can make use of an other
+\texttt{sparklyr} feature; however, Livy is not suitable for
+experimental data analysis, since executing commands have a significant
+delay; that said, while running long running computations, this overhead
+could be considered irrelevant. In general, it is preffered to avoid
+using Livy and work directly within an edge node in the cluster; if this
+is not feasible, using Livy could be a reasonable approach.
 
 \hypertarget{mesos-1}{%
 \section{Mesos}\label{mesos-1}}
 
-\hypertarget{livy-1}{%
-\section{Livy}\label{livy-1}}
+Similar to YARN, Mesos supports client mode and a cluster mode. However,
+\texttt{sparklyr} currently only supports client mode for Mesos.
 
-\hypertarget{data}{%
-\chapter{Data Sources}\label{data}}
+\begin{figure}
 
-\hypertarget{csv}{%
-\section{CSV}\label{csv}}
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-40-1} 
+
+}
+
+\caption{Mesos Connection Diagram}\label{fig:unnamed-chunk-40}
+\end{figure}
+
+Connecting requires the address to the Mesos master node, usually in the
+form of \texttt{mesos://host:port} or
+\texttt{mesos://zk://host1:2181,host2:2181,host3:2181/mesos} for Mesos
+using ZooKeeper.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"mesos://host:port"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{kubernetes-1}{%
+\section{Kubernetes}\label{kubernetes-1}}
+
+Kubernetes cluster do not support client modes similar to Mesos or YARN,
+instead, the connection model is similar to YARN Cluster, where the
+driver node is assigned by Kubernetes.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-42-1} 
+
+}
+
+\caption{Kubernetes Connection Diagram}\label{fig:unnamed-chunk-42}
+\end{figure}
+
+Kubernetes support is scheduled to be added to \texttt{sparklyr} with
+\href{https://github.com/rstudio/sparklyr/issues/1525}{sparklyr/issues/1525},
+please follow progress for this feature directly in github. Once
+Kubernetes becomes supported in \texttt{sparklyr}, connecting to
+Kubernetes will work as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}
+  \DataTypeTok{master =} \StringTok{"k8s://https://<apiserver-host>:<apiserver-port>"}
+  \DataTypeTok{config =} \KeywordTok{list}\NormalTok{(}
+    \DataTypeTok{spark.executor.instances =} \DecValTok{2}\NormalTok{,}
+    \DataTypeTok{spark.kubernetes.container.image =} \StringTok{"spark-image"}
+\NormalTok{  )}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+If your computer is already configured to use a Kubernetes cluster, you
+can use the following commmand to find the \texttt{apiserver-host} and
+\texttt{apiserver-port}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{system2}\NormalTok{(}\StringTok{"kubectl"}\NormalTok{, }\StringTok{"cluster-info"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{multiple}{%
+\section{Multiple}\label{multiple}}
+
+It is common to connect once, and only once, to Spark. However, you can
+also open multiple connections to Spark by connecting to different
+clusters or by specifying the \texttt{app\_name} parameter, this can be
+helpful to compare Spark versions or validate you analysis before
+submitting to the cluster. The following example opens connections to
+Spark 1.6.3, 2.3.0 and Spark Standalone:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Connect to local Spark 1.6.3}
+\NormalTok{sc_}\DecValTok{1}\NormalTok{_}\DecValTok{6}\NormalTok{_}\DecValTok{3}\NormalTok{ <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local"}\NormalTok{, }\DataTypeTok{version =} \StringTok{"1.6.3"}\NormalTok{)}
+
+\CommentTok{# Connect to local Spark 2.3.0}
+\NormalTok{sc_}\DecValTok{2}\NormalTok{_}\DecValTok{3}\NormalTok{_}\DecValTok{0}\NormalTok{ <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local"}\NormalTok{, }\DataTypeTok{version =} \StringTok{"2.3.0"}\NormalTok{, }\DataTypeTok{appName =} \StringTok{"Spark23"}\NormalTok{)}
+
+\CommentTok{# Connect to local Spark Standalone}
+\NormalTok{sc_standalone <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"spark://host:port"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Finally, we can disconnect from each connection:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{spark_disconnect}\NormalTok{(sc_}\DecValTok{1}\NormalTok{_}\DecValTok{6}\NormalTok{_}\DecValTok{3}\NormalTok{)}
+\KeywordTok{spark_disconnect}\NormalTok{(sc_}\DecValTok{2}\NormalTok{_}\DecValTok{3}\NormalTok{_}\DecValTok{0}\NormalTok{)}
+\KeywordTok{spark_disconnect}\NormalTok{(sc_standalone)}
+\end{Highlighting}
+\end{Shaded}
+
+Alternatevely, you can disconnect from all connections at once:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{spark_disconnect_all}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{recap-2}{%
+\section{Recap}\label{recap-2}}
+
+This chapter presented an overview of Spark's architecture and detailed
+connections concepts and examples to connect in local mode, standalone,
+YARN, Mesos, Kubernetes and Livy. It also presented edge nodes and their
+role while connecting to Spark clusters. This information should give
+you enough information to effectevely connect to any cluster with Apache
+Spark enabled.
+
+To troubleshoot connection problems, it is recommended to search for the
+connection problem in StackOverflow, the
+\href{https://github.com/rstudio/sparklyr/issues}{sparklyr github
+issues} and, if needed, open a
+\href{https://github.com/rstudio/sparklyr/issues/new}{new GitHub issue
+in sparklyr} to assist further.
+
+The next chapter, \protect\hyperlink{configuration}{Configuration}, will
+present the tools and best practices to configure the resources and
+behavior of your Spark connection.
+
+\hypertarget{configuration}{%
+\chapter{Configuration}\label{configuration}}
+
+\textbf{This chatper has not been written.}
+
+The previous chapter, \protect\hyperlink{connections-1}{Connections},
+explained how to connect to Spark clusters; however, it is often the
+case that connection is not sufficient to run proper analysis at scale
+since the default settings (say number of executors, avaialble memory,
+etc) that a system administrator configured need to be modified to your
+particular needs. This chapter will explain how to configure, what can
+be configured and the important use cases you want to consider while
+configuring your Spark environment.
+
+\hypertarget{overview-3}{%
+\section{Overview}\label{overview-3}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{config <-}\StringTok{ }\KeywordTok{spark_config}\NormalTok{()}
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local"}\NormalTok{)}
+
+\KeywordTok{spark_context_config}\NormalTok{(sc)}
+
+\KeywordTok{spark_session_config}\NormalTok{(sc)}
+
+\CommentTok{# Previous versions}
+\KeywordTok{spark_hive_config}\NormalTok{(sc)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{tools-1}{%
+\section{Tools}\label{tools-1}}
+
+\hypertarget{resources}{%
+\section{Resources}\label{resources}}
+
+\url{https://spark.apache.org/docs/latest/configuration.html}
+
+\hypertarget{sources}{%
+\chapter{Sources}\label{sources}}
+
+\textbf{This chatper has not been written.}
 
 \hypertarget{text}{%
 \section{Text}\label{text}}
 
+(What is a text file?) (Diagram)
+
+\hypertarget{csv}{%
+\section{CSV}\label{csv}}
+
+(What is CSV?) (Diagram)
+
 \hypertarget{parquet}{%
 \section{Parquet}\label{parquet}}
+
+(What is Parquet?) (Diagram)
+
+\hypertarget{avro}{%
+\section{Avro}\label{avro}}
+
+(What is Avro?) (Diagram)
+
+\hypertarget{orc}{%
+\section{ORC}\label{orc}}
+
+(What is ORC?) (Diagram)
 
 \hypertarget{jdbc}{%
 \section{JDBC}\label{jdbc}}
 
-\hypertarget{others}{%
-\section{Others}\label{others}}
+(What is JDBC?) (Diagram)
+
+\hypertarget{generic-sources}{%
+\section{Generic Sources}\label{generic-sources}}
 
 \hypertarget{tuning}{%
 \chapter{Tuning}\label{tuning}}
 
+\textbf{This chatper has not been written.}
+
+\hypertarget{overview-4}{%
+\section{Overview}\label{overview-4}}
+
+(explain RDDs)
+
 \hypertarget{caching}{%
 \section{Caching}\label{caching}}
+
+Most sparklyr operations that retrieve a Spark data frame, cache the
+results in-memory, for instance, running \texttt{spark\_read\_parquet()}
+or \texttt{sdf\_copy\_to()} will provide a Spark dataframe that is
+already cached in-memory. As a Spark data frame, this object can be used
+in most sparklyr functions, including data analysis with dplyr or
+machine learning.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(sparklyr)}
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{iris_tbl <-}\StringTok{ }\KeywordTok{sdf_copy_to}\NormalTok{(sc, iris, }\DataTypeTok{overwrite =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+You can inspect which tables are cached by navigating to the Spark UI
+using \texttt{spark\_web(sc)}, opening the storage tab, and clicking on
+a given RDD:
+
+\begin{figure}
+
+{\centering \includegraphics[width=13.78in]{images/07-tuning-cache-rdd-web} 
+
+}
+
+\caption{Cached RDD in Spark Web Interface.}\label{fig:spark-standalone-rdd-web}
+\end{figure}
+
+Data loaded in memory will be released when the R session terminates
+either explicitly or implicitly with a restart or disconnection;
+however, to free up resources, you can use \texttt{tbl\_uncache()}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tbl_uncache}\NormalTok{(sc, }\StringTok{"iris"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
 \hypertarget{partitions}{%
 \section{Partitions}\label{partitions}}
@@ -1171,23 +2169,116 @@ Connecting from RStudio Server to remote Spark
 \hypertarget{checkpointing}{%
 \section{Checkpointing}\label{checkpointing}}
 
+\hypertarget{troubleshooting}{%
+\section{Troubleshooting}\label{troubleshooting}}
+
+Logs, \texttt{spark\_debug\_string}
+
 \hypertarget{extensions}{%
 \chapter{Extensions}\label{extensions}}
+
+While \textbf{this chatper has not been written.}, a few resources are
+available to help explore these topics until this chapter gets written.
 
 \hypertarget{using-extensions}{%
 \section{Using Extensions}\label{using-extensions}}
 
+\hypertarget{graphframes}{%
+\subsection{GraphFrames}\label{graphframes}}
+
+See
+\href{http://spark.rstudio.com/graphframes/}{spark.rstudio.com/graphframes}.
+
+\hypertarget{mleap}{%
+\subsection{Mleap}\label{mleap}}
+
+See
+\href{http://spark.rstudio.com/guides/mleap/}{spark.rstudio.com/guides/mleap}.
+
+\hypertarget{h2o}{%
+\subsection{H2O}\label{h2o}}
+
+See
+\href{http://spark.rstudio.com/guides/h2o/}{spark.rstudio.com/guides/h2o}.
+
+\hypertarget{others}{%
+\subsection{Others}\label{others}}
+
+See also
+\href{https://github.com/chezou/sparkavro}{github.com/chezou/sparkavro}.
+
 \hypertarget{writting-extensions}{%
 \section{Writting Extensions}\label{writting-extensions}}
+
+See
+\href{http://spark.rstudio.com/extensions/}{spark.rstudio.com/extensions}.
+
+\hypertarget{pipelines}{%
+\section{Pipelines}\label{pipelines}}
+
+\textbf{This chatper has not been written.}
+
+\hypertarget{overview-5}{%
+\section{Overview}\label{overview-5}}
+
+Spark's ML Pipelines provide a way to easily combine multiple
+transformations and algorithms into a single workflow, or pipeline.
+
+Take a look at
+\href{http://spark.rstudio.com/guides/pipelines/}{spark.rstudio.com/guides/pipelines}
+to learn about their purpose and functionality.
 
 \hypertarget{distributed}{%
 \chapter{Distributed R}\label{distributed}}
 
+While \textbf{this chatper has not been written.}, use
+\href{http://spark.rstudio.com/guides/distributed-r/}{spark.rstudio.com/guides/distributed-r}
+to learn how to use R directly over each worker node.
+
 \hypertarget{use-cases}{%
 \section{Use Cases}\label{use-cases}}
 
-\hypertarget{troubleshooting}{%
-\section{Troubleshooting}\label{troubleshooting}}
+\hypertarget{packages}{%
+\section{Packages}\label{packages}}
+
+\hypertarget{restrictions}{%
+\section{Restrictions}\label{restrictions}}
+
+\hypertarget{troubleshooting-1}{%
+\section{Troubleshooting}\label{troubleshooting-1}}
+
+\hypertarget{contributing}{%
+\chapter{Contributing}\label{contributing}}
+
+\textbf{This chatper has not been written.}
+
+While there are many ways to contribute to \texttt{sparklyr} from
+helping community members to opening github issues, this chapter focuses
+on those readers interested in contributing fixes and features to
+\texttt{sparklyr} but will also help those who want to understand how
+\texttt{sparklyr} works internally.
+
+\hypertarget{overview-6}{%
+\section{Overview}\label{overview-6}}
+
+(architecture overview)
+
+\hypertarget{serialization}{%
+\section{Serialization}\label{serialization}}
+
+\hypertarget{invocations}{%
+\section{Invocations}\label{invocations}}
+
+\hypertarget{r-packages}{%
+\section{R Packages}\label{r-packages}}
+
+(dbi, dplyr, broom, etc)
+
+\hypertarget{connections-1}{%
+\section{Connections}\label{connections-1}}
+
+\hypertarget{distributed-r}{%
+\section{Distributed R}\label{distributed-r}}
 
 \hypertarget{appendix}{%
 \chapter*{Appendix}\label{appendix}}
@@ -1233,6 +2324,20 @@ Connecting from RStudio Server to remote Spark
 \StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{""}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{""}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme_light}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{cluster-trends}{%
+\section{Google trends for mainframes, cloud computing and
+kubernetes}\label{cluster-trends}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(r2d3)}
+
+\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/05-cluster-trends.csv"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{month =} \KeywordTok{as.Date}\NormalTok{(}\KeywordTok{paste}\NormalTok{(month, }\StringTok{"-01"}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{))) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{r2d3}\NormalTok{(}\DataTypeTok{script=}\StringTok{"images/05-clusters-trends.js"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
