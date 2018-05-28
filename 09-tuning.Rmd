@@ -1,0 +1,54 @@
+# Tuning {#tuning}
+
+**This chatper has not been written.**
+
+## Overview
+
+(explain RDDs)
+
+## Caching
+
+Most sparklyr operations that retrieve a Spark data frame, cache the results in-memory, for instance, running `spark_read_parquet()` or `sdf_copy_to()` will provide a Spark dataframe that is already cached in-memory. As a Spark data frame, this object can be used in most sparklyr functions, including data analysis with dplyr or machine learning.
+
+```{r eval=FALSE}
+library(sparklyr)
+sc <- spark_connect(master = "local")
+```
+
+```{r eval=FALSE}
+iris_tbl <- sdf_copy_to(sc, iris, overwrite = TRUE)
+```
+
+You can inspect which tables are cached by navigating to the Spark UI using `spark_web(sc)`, opening the storage tab, and clicking on a given RDD:
+
+```{r echo=FALSE, eval=FALSE}
+invisible(webshot::webshot(
+  "http://localhost:4040/storage/rdd/?id=9",
+  "images/07-tuning-cache-rdd-web.png",
+  cliprect = "viewport"
+))
+```
+
+```{r spark-standalone-rdd-web, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Cached RDD in Spark Web Interface.'}
+knitr::include_graphics("images/07-tuning-cache-rdd-web.png")
+```
+
+Data loaded in memory will be released when the R session terminates either explicitly or implicitly with a restart or disconnection; however, to free up resources, you can use `tbl_uncache()`:
+
+```{r eval=FALSE}
+tbl_uncache(sc, "iris")
+```
+
+```{r eval=FALSE, echo=FALSE}
+spark_disconnect(sc)
+```
+
+## Partitions
+
+## Shuffling
+
+## Checkpointing
+
+## Troubleshooting
+
+Logs, `spark_debug_string`

@@ -1,4 +1,4 @@
-# Getting Started {#started}
+# Installation {#installation}
 
 From R, installing and launching a local Spark cluster using `sparklyr` is as easy as running:
 
@@ -7,11 +7,11 @@ spark_install()
 sc <- spark_connect(master = "local")
 ```
 
-However, to make sure we can all run the code above and understand it, this section will walk you through installing the prerequisites, installing Spark and connecting to a local Spark cluster.
+However, to make sure we can all run the code above and understand it, this chapter will walk you through installing the prerequisites, installing Spark and connecting to a local Spark cluster.
 
 ## Prerequisites {#prerequisites}
 
-As briefly mentioned in Section \@ref(intro), R is a programming language that can run in many platforms and environments. Most people making use of a programming language also choose tools to make them more productive in it; for R, RStudio would be such tool. Strictly speaking, RStudio is an Integrated Development Environment or IDE for short, which also happens to support many platforms and environments. R and RStudio are the free software tools this book will make use of and therefore, I strongly recommend you get those installed if you haven't done so already. 
+As briefly mentioned in the [Introduction] chapter, R is a programming language that can run in many platforms and environments. Most people making use of a programming language also choose tools to make them more productive in it; for R, RStudio would be such tool. Strictly speaking, RStudio is an Integrated Development Environment or IDE for short, which also happens to support many platforms and environments. R and RStudio are the free software tools this book will make use of and therefore, I strongly recommend you get those installed if you haven't done so already. 
 
 Additionally, since Spark is build in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java 7 or newer in your system. It is likely that your system already has Java installed, but is probably worth updating with the steps bellow.
 
@@ -19,12 +19,8 @@ Additionally, since Spark is build in the Scala programming language which is ru
 
 From [r-project.org](https://r-project.org/), download and launch the installer for your platform, Windows, Macs or Linux available.
 
-```{r r-download, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='The R Project for Statistical Computing.'}
-if (nchar(Sys.which("phantomjs")[[1]]) == 0) webshot::install_phantomjs()
-
-webshot::webshot(
-  "https://r-project.org/", cliprect = "viewport"
-)
+```{r r-download, echo=FALSE, fig.width = 4, fig.align = 'center', fig.cap='The R Project for Statistical Computing.'}
+knitr::include_graphics("images/02-getting-started-download-r.png")
 ```
 
 ### Install Java
@@ -35,7 +31,7 @@ From [oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](
 knitr::include_graphics("images/02-getting-started-jdk-8.png")
 ```
 
-Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java 8 as described in this section.
+Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java 8 as described in this chapter
 
 ### Install RStudio
 
@@ -135,11 +131,11 @@ spark_web(sc)
 ```
 
 ```{r spark-web, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Apache Spark Web Interface.'}
-webshot::webshot(
+invisible(webshot::webshot(
   "http://localhost:4040/",
   "images/02-getting-started-spark-web.png",
   cliprect = "viewport"
-)
+))
 
 knitr::include_graphics("images/02-getting-started-spark-web.png")
 ```
@@ -156,7 +152,7 @@ spark_log(sc, filter = "sparklyr", n = 5)
 
 For local clusters and, really, any cluster; once you are done processing data you should disconnect by running:
 
-```{r}
+```{r eval=FALSE}
 spark_disconnect(sc)
 ```
 

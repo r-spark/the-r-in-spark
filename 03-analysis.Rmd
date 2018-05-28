@@ -1,0 +1,57 @@
+# Analysis {#dplyr}
+
+While **this chatper has not been written**, a few resources and basic examples were made available to help out until this chapter is written.
+
+## dplyr
+
+Using `sparklyr`, you can apply the same data analysis techniques described in [Chapter 5 - Data transformation - R for Data Science](http://r4ds.had.co.nz/transform.html) by Garrett Grolemund and Hadley Wickham. 
+
+Once you understand `dplyr`, you can make use of `dplyr` and `sparklyr` as follows:
+
+```{r warning=FALSE, message=FALSE}
+library(sparklyr)
+library(dplyr)
+
+# Connect to Spark
+sc <- spark_connect(master = "local")
+
+# Use dplyr's copy_to() to copy the iris dataset to Spark
+iris_tbl <- copy_to(sc, iris, overwrite = TRUE)
+
+# The iris_tbl is a Spark data frame compatible with dplyr
+iris_tbl
+```
+
+```{r warning=FALSE}
+# Transform iris_tbl with dplyr as usual
+iris_tbl %>% 
+  group_by(Species) %>% 
+  summarise_all(funs(mean))
+```
+
+To understand `dplyr` further, I would recommend taking a look at the following vignettes:
+
+- [Introduction to dplyr](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)
+- [Two-table verbs](https://cran.r-project.org/web/packages/dplyr/vignettes/two-table.html)
+- [Window functions](https://cran.r-project.org/web/packages/dplyr/vignettes/window-functions.html)
+- [Programming with dplyr](https://cran.r-project.org/web/packages/dplyr/vignettes/programming.html)
+
+## DBI
+
+The `DBI` provides an database interface for R, meaning, if you are familiar with SQL, you can make use of `DBI` to perform SQL queries in Spark using `sparklyr`. To learn more about `DBI`, I would recommend reading first [A Common Database Interface (DBI)](https://cran.r-project.org/web/packages/DBI/vignettes/DBI-1.html). Once you are familiar with `DBI`, you can use this package with `sparklyr` as follows:
+
+```{r warning=FALSE, message=FALSE}
+library(DBI)
+
+dbGetQuery(sc,
+  "SELECT mean(Sepal_Length), mean(Sepal_Width), 
+          mean(Petal_Length), mean(Petal_Width)
+   FROM iris
+   GROUP BY Species")
+```
+
+More advanced `DBI` resources are available in the following vignettes:
+
+- [A Common Interface to Relational Databases from R and S – A Proposal](https://cran.r-project.org/web/packages/DBI/vignettes/DBI-proposal.html)
+- [Implementing a new backend](https://cran.r-project.org/web/packages/DBI/vignettes/backend.html)
+- [DBI specification](https://cran.r-project.org/web/packages/DBI/vignettes/spec.html)

@@ -1,6 +1,8 @@
 webshots_create <- function() {
+  if (nchar(Sys.which("phantomjs")[[1]]) == 0) webshot::install_phantomjs()
 
   webshots <- list(
+    "02-getting-started-download-r.png"    = "https://r-project.org/",
     "02-getting-started-jdk-8.png"         = "http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html",
     "02-getting-started-rstudio.png"       = "https://www.rstudio.com/products/rstudio/download/",
     "05-clusters-cloudera.png"             = "https://www.cloudera.com/products/open-source/apache-hadoop/apache-spark.html",
@@ -12,6 +14,9 @@ webshots_create <- function() {
     "05-clusters-apache-livy.png"          = "https://livy.incubator.apache.org/",
     "05-clusters-kubernetes.png"           = "https://kubernetes.io/",
     "05-clusters-mesos.png"                = "http://mesos.apache.org/",
+    "05-clusters-yarn.png"                 = "https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html",
+    "05-clusters-rstudio-server"           = "https://www.rstudio.com/products/rstudio/",
+    "05-clusters-spark-standalone"         = "https://spark.apache.org/docs/latest/spark-standalone.html"
   )
 
   webshot::webshot(

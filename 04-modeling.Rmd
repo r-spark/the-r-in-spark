@@ -1,3 +1,46 @@
 # Modeling {#modeling}
 
-## mllib
+While **this chatper has not been written**, I want to provide a few resources and basic examples to help out while the chapter is written.
+
+## Overview
+
+MLlib is Apache Spark's scalable machine learning library and is available through `sparklyr`, mostly, with functions prefixed with `ml_`. The following table describes some of the modeling algorithms supported:
+
+Algorithm | Function
+----------|---------
+Accelerated Failure Time Survival Regression | ml_aft_survival_regression
+Alternating Least Squares Factorization | ml_als
+Correlation Matrix | ml_corr
+Decision Trees | ml_decision_tree	
+Generalized Linear Regression | ml_generalized_linear_regression
+Gradient-Boosted Trees | ml_gradient_boosted_trees
+Isotonic Regression | ml_isotonic_regression
+K-Means Clustering | ml_kmeans	
+Latent Dirichlet Allocation | ml_lda
+Linear Regression | ml_linear_regression
+Linear Support Vector Machines | ml_linear_svc
+Logistic Regression | ml_logistic_regression
+Multilayer Perceptron | ml_multilayer_perceptron
+Naive-Bayes | ml_naive_bayes
+One vs Rest | ml_one_vs_rest
+Principal Components Analysis | ml_pca
+Random Forests | ml_random_forest
+Survival Regression | ml_survival_regression
+
+Here is an example to get you started with K-Means:
+
+```{r}
+library(sparklyr)
+
+# Connect to Spark in local mode
+sc <- spark_connect(master = "local")
+
+# Copy iris to Spark
+iris_tbl <- sdf_copy_to(sc, iris, overwrite = TRUE)
+
+# Run K-Means for Species using only Petal_Width and Petal_Length as features
+iris_tbl %>%
+  ml_kmeans(centers = 3, Species ~ Petal_Width + Petal_Length)
+```
+
+More examples are reosurces are available in [spark.rstudio.com/mlib](http://spark.rstudio.com/mlib/).
