@@ -125,7 +125,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2018-07-10}
+    \date{2018-07-11}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -161,7 +161,7 @@
 \chapter*{Preface}\label{preface}}
 \addcontentsline{toc}{chapter}{Preface}
 
-In this book you will learn how to use Apache Spark using R using the
+In this book you will learn how to use Apache Spark with R using the
 \textbf{sparklyr} R package. The book intends to take someone unfamiliar
 with Spark or R and help them become intermediate users by teaching a
 set of tools, skills and practices applicable to data science.
@@ -173,7 +173,7 @@ Commons Attribution-NonCommercial-NoDerivs 3.0} United States License.
 \hypertarget{intro}{%
 \chapter{Introduction}\label{intro}}
 
-This chapters covers the historical background that lead to the
+This chapter covers the historical background that lead to the
 development of Spark, introduces R in the context of Spark and
 \texttt{sparklyr} as a project bridging Spark and R.
 
@@ -184,51 +184,65 @@ development of Spark, introduces R in the context of Spark and
 been storing, retrieving, manipulating, and communicating information
 since the Sumerians in Mesopotamia developed writing in about 3000 BC}.
 Based on the storage and processing technologies employed, it is
-possible to distinguish four distinct phases development: pre-mechanical
-(3000 BC -- 1450 AD), mechanical (1450--1840), electromechanical
-(1840--1940), and electronic (1940--present).
+possible to distinguish four distinct phases of development:
+pre-mechanical (3000 BC -- 1450 AD), mechanical (1450--1840),
+electromechanical (1840--1940), and electronic (1940--present)
+\citep{information-technology}.
 
-\href{https://en.wikipedia.org/wiki/Information_Age}{As humanity moves
+During this last phase,
+\href{https://en.wikipedia.org/wiki/Information_Age}{humanity is moving
 from traditional industries to an economy based on information
-technology} our footprint of digital information has kept growing at
-\href{http://documents.worldbank.org/curated/en/896971468194972881/310436360_201602630200201/additional/102725-PUB-Replacement-PUBLIC.pdf}{exponential
-rates}:
+technology} and our footprint of digital information has kept growing at
+\protect\hyperlink{storage-capacity}{exponential rates}
+\citep{data-revolution}:
 
 \begin{figure}
-\centering
-\includegraphics{the-r-in-spark_files/figure-latex/unnamed-chunk-1-1.pdf}
-\caption{\label{fig:unnamed-chunk-1}World's capacity to store information.}
+
+{\centering \includegraphics{the-r-in-spark_files/figure-latex/unnamed-chunk-1-1} 
+
+}
+
+\caption{World’s capacity to store information.}\label{fig:unnamed-chunk-1}
 \end{figure}
 
 With the ambition to provide a searchable tool to all this new digital
 information, many companies attempted to provide such functionality with
-what we now know as web search or search engines. Managing information
-at this scale was a challenging problem that companies had to tackle
-from the very beginning. Given the vast amount of digital information,
-search engiens were unble to store all the web page information required
-to support web searches in a single computer. This meant that they had
-to split information across many machines, which was accomlished by
-splitting this data and storing it as many files across many machines,
-this approach became known as the Google File System from a research
-paper published in 2003 by Google which has served for others to build
-on.
+what we know today as web search or search engines. Given the vast
+amount of digital information, managing information at this scale was a
+challenging problem that companies had to tackle. Search engines were
+unble to store all the web page information required to support web
+searches in a single computer. This meant that they had to split
+information across many machines, which was accomlished by splitting
+this data and storing it as many files across many machines, this
+approach became known as the Google File System from a research paper
+published in 2003 by Google \citep{google-file-system}.
 
 One year later, in 2004, Google published a new paper describing how to
 perform operations across the Google File System, this approach came to
-be known as \textbf{MapReduce}. As you would expect, there are two
-operations in MapReduce: Map and Reduce. We can think of the mapping
-operation as a way to transform each file into a new file and, reuduce
-as a way of combining two files into a new one. It happens to be the
-case that using these two operations is sufficient to perform
-interesting operations; for instance, MapReduce can be used to rank web
-pages efficietly across a cluster of machines.
+be known as \textbf{MapReduce} \citep{google-map-reduce}. As you would
+expect, there are two operations in MapReduce: Map and Reduce. The
+\textbf{map operation} provides an arbitrary way to transform each file
+into a new file, usually defined by arbitrary code that scans the file
+and outputs a different file. The \textbf{reduce operation} combines two
+files into a new one. These two operations are sufficient to process
+data at the scale of the data available in the web. For instance, one
+could define a mapping operation that splits each word in a text file
+and outputs a new file counting occurrence of words; the reduce
+operation can be defined to take two word-counting files and combine
+them by aggregating the total occurrences for each worf. Once defined, a
+cluster implementing MapReduce can perform this operation several times
+across many machines to process data at the scale of the entire web.
+Counting words is often the most basic example, but MapReduce can be
+also used to rank web pages efficietly and many other much more
+interesting applications.
 
-Since the papers were released by Google, a team in Yahoo worked on
-implementing the Google File System and MapReduce as free open source
-projects. This project was released in 2006 as \textbf{Hadoop} and the
-Google File System became implemented as the Hadoop File System, or HDFS
-for short. The Hadoop project made distributed file-based computing
-accessible to many users and organizations.
+After these papers were released by Google, a team in Yahoo worked on
+implementing the Google File System and MapReduce as a single open
+source project. This project was released in 2006 as \textbf{Hadoop}
+implementing MapReduce and the Google File System implemented as the
+Hadoop File System, or \textbf{HDFS} for short. The Hadoop project made
+distributed file-based computing accessible to a wider range of users
+and organizations that made use of MapReduce beyond web data processing.
 
 While Hadoop provided support to perform map/reduce operations over a
 distributed file system, it still required each map/reduce operation to
@@ -290,7 +304,7 @@ meaning that Spark is a tool designed to support:
 Spark is good at tackling large-scale data processing problems, this
 usually known as \textbf{big data}
 (\href{https://en.wikipedia.org/wiki/big_data}{data sets that are more
-voluminous and complex that traditional ones}, but also is good at
+voluminous and complex that traditional ones}), but also is good at
 tackling large-scale computation problems, known as \textbf{big compute}
 (\href{https://www.nimbix.net/glossary/big-compute/}{tools and
 approaches using a large amount of CPU and memory resources in a
@@ -334,8 +348,10 @@ For the third problem space, there are a few use cases this breaks to:
 
 Some people refer to some of these benefits as
 \href{http://www.theserverside.com/feature/Handling-the-four-Vs-of-big-data-volume-velocity-variety-and-veracity}{the
-four 'V's of big data}: Velocity, Variety, Volume and Veracity. Others
-have gone as far as expending this to
+four 'V's of big data}: Velocity, Variety, Volume and Veracity (which
+asserts that data can vary greatly in quality which require analysis
+methods to improve accuracy across a variety of sources). Others have
+gone as far as expending this to
 \href{https://en.wikipedia.org/wiki/Big_data}{five} or even as
 \href{https://tdwi.org/articles/2017/02/08/10-vs-of-big-data.aspx}{the
 10 Vs of Big Data}. Mnemonics set aside, cluster computing is being used
@@ -344,21 +360,26 @@ organizations experimenting with new workflows and a variety of tasks
 that were traditionally uncommon for cluster computing. Much of the hype
 attributed to big data falls into this space, where some will argue that
 everything should be considered big data and where others will argue
-than almost nothing should. My hope is that this book will help you
-understand the opportunities and limitations of Apache Spark with R.
+than nothing should. My hope is that this book will help you understand
+the opportunities and limitations of Apache Spark with R.
 
 \hypertarget{r}{%
 \section{R}\label{r}}
 
 R is a computing language with it's inception dating back to Bell
-Laboratories. At that time, computing was done by calling Fortran
-subroutines which, apparently, were not pleasant to deal with. The S
-computing language was designed as an interface language to support
-higher abstractions to perform statistical computing over existing
-subroutines:
+Laboratories. John Chambers explained in useR 2016 that at the time,
+computing was done by calling Fortran subroutines which, apparently,
+were not pleasant to deal with. The S computing language was designed as
+an interface language to support higher abstractions to perform
+statistical computing over existing subroutines:
 
 \begin{figure}
-\includegraphics[width=22.22in]{images/01-intro-s-algorithm-interface} \caption{Interface language diagram by John Chambers from useR 2016.}\label{fig:s-diagram}
+
+{\centering \includegraphics[width=22.22in]{images/01-intro-s-algorithm-interface} 
+
+}
+
+\caption{Interface language diagram by John Chambers from useR 2016.}\label{fig:s-diagram}
 \end{figure}
 
 R is a modern and free implementation of S, specifically:
@@ -392,7 +413,12 @@ languages while working with data:
   available in R. In addition, the R community is a welcoming and active
   group of talented individuals motivated to help you succeed. Many
   packages provided by the R community make R, by far, the place to do
-  statistical computing.
+  statistical computing. To mention some of the popular packages:
+  \href{https://CRAN.R-project.org/package=dplyr}{dplyr} to manipulate
+  data, \href{https://CRAN.R-project.org/package=cluster}{cluster} to
+  analyze clusters and
+  \href{https://CRAN.R-project.org/package=ggplot2}{ggplot2} to
+  visualize data.
 \end{itemize}
 
 One can argue to what degree other fields, like machine learning,
@@ -401,13 +427,16 @@ is non-trivial. Similar arguments can be made for data science, big
 data, deep learning and beyond. With the continuous rise of popularity
 of R, I can only expect R's influence and scope to keep growing over
 time; we can take a look at the historic downloads of R packages in CRAN
-to get some sense of R's recent growth (see Section
-\ref{cran-downloads}):
+to get some sense of R's \protect\hyperlink{cran-downloads}{recent
+growth}:
 
 \begin{figure}
-\centering
-\includegraphics{the-r-in-spark_files/figure-latex/unnamed-chunk-2-1.pdf}
-\caption{\label{fig:unnamed-chunk-2}Daily downloads of CRAN packages.}
+
+{\centering \includegraphics{the-r-in-spark_files/figure-latex/unnamed-chunk-2-1} 
+
+}
+
+\caption{Daily downloads of CRAN packages.}\label{fig:unnamed-chunk-2}
 \end{figure}
 
 \hypertarget{sparklyr}{%
@@ -416,14 +445,21 @@ to get some sense of R's recent growth (see Section
 Back in 2016, there was a need in the R community to support Spark
 through an interface compatible with other R packages, easy to use and
 available in CRAN. To this end, development of \texttt{sparklyr} started
-in 2016 by RStudio under JJ Allaire, Kevin Ushey and Javier Luraschi,
-version 0.4 was released in summer during the \emph{useR!} conference,
-this first version added support for \texttt{dplyr}, \texttt{DBI},
-modeling with \texttt{MLlib} and an extensible API that enabled
-extensions like H2Os
+in 2016 by RStudio under \href{https://github.com/jjallaire}{JJ
+Allaire}, \href{https://github.com/kevinushey}{Kevin Ushey} and
+\href{https://github.com/javierluraschi}{Javier Luraschi}, version
+\href{https://blog.rstudio.com/2016/09/27/sparklyr-r-interface-for-apache-spark/}{0.4
+was released} in summer during the \emph{useR!} conference, this first
+version added support for \texttt{dplyr}, \texttt{DBI}, modeling with
+\texttt{MLlib} and an extensible API that enabled extensions like
+\href{https://www.h2o.ai/}{H2O}'s
 \href{https://github.com/h2oai/rsparkling/}{rsparkling} package. Since
-then, many new features have been added and support across many Spark
-distributions and cloud services has made available.
+then, many new features and improvements have been made available
+through
+\href{https://blog.rstudio.com/2017/01/24/sparklyr-0-5/}{sparklyr 0.5},
+\href{https://blog.rstudio.com/2017/07/31/sparklyr-0-6/}{0.6},
+\href{https://blog.rstudio.com/2018/01/29/sparklyr-0-7/}{0.7} and
+\href{https://blog.rstudio.com/2018/05/14/sparklyr-0-8/}{0.8}.
 
 Officially,
 
@@ -437,9 +473,9 @@ It's available in CRAN and works like any other CRAN package, meaning
 that: it's agnostic to Spark versions, it's easy to install, it serves
 the R community, it embraces other packages and practices from the R
 community and so on. It's hosted in GitHub under
-\href{github.com/rstudio/sparklyr}{https://github.com/rstudio/sparklyr}
+\href{https://github.com/rstudio/sparklyr}{github.com/rstudio/sparklyr}
 and licensed under Apache 2.0 which is allows you to clone, modify and
-\href{contributing}{contribute back} to this project.
+\protect\hyperlink{contributing}{contribute back} to this project.
 
 While thinking of who and why should use \texttt{sparklyr}, the
 following roles come to mind:
@@ -447,25 +483,28 @@ following roles come to mind:
 \begin{itemize}
 \tightlist
 \item
-  \textbf{New Users}: For new users, I'm going to argue that
-  \texttt{sparklyr} is the best way to get started with Spark. My hope
-  is that the first chapters of this book will get you up running with
-  ease and set you up for long term success.
+  \textbf{New Users}: For new users, \texttt{sparklyr} provides the
+  easiest way to get started with Spark. My hope is that the first
+  chapters of this book will get you up running with ease and set you up
+  for long term success.
 \item
-  \textbf{Data Scientists}: I do believe, strongly, that
-  \texttt{sparklyr} in combination with many other R packages and tools
-  is the most productive environment for the modern data scientists.
-  \texttt{sparklyr} allows support for high-level tasks and low-level
-  extensibility mechanisms to match the needs and skills of every data
-  scientists.
+  \textbf{Data Scientists}: For data scientists that already use and
+  love R, \texttt{sparklyr} integrates with many other R practices and
+  packages like \texttt{dplyr}, \texttt{magrittr}, \texttt{broom},
+  \texttt{DBI}, \texttt{tibble} and many others that will make you feel
+  at home while working with Spark. For those new to R and Spark, the
+  combination of high-level workflows available in \texttt{sparklyr} and
+  low-level extensibility mechanisms make it a productive environment to
+  match the needs and skills of every data scientist.
 \item
   \textbf{Expert Users}: For those users that are already immersed in
-  Spark and can write code natively inScala, I'm going to argue that
-  making their work available as an \texttt{sparklyr} extension is very
-  desirable for them and the community. The R community is one of the
-  most welcoming and supportive communities I've known, so I can't think
-  of better ways of helping the expert users share their work and
-  knowledge than by making it available in CRAN to R community.
+  Spark and can write code natively in Scala, consider making your
+  libraries available as an \texttt{sparklyr}
+  \protect\hyperlink{writting-extensions}{extension} to the R community,
+  a diverse and skilled community that can put your contributions to
+  good use while moving
+  \href{https://en.wikipedia.org/wiki/Open_science}{open science}
+  forward.
 \end{itemize}
 
 This book is titled ``The R in Spark'' as a way to describe and teach
@@ -489,18 +528,18 @@ Here are some resources to help you get involved:
 \item
   \textbf{Documentation}: This should be your entry point to learn more
   about sparklyr, the documentation is kept up to date with examples,
-  reference functions and many more relevant resources
-  (\url{https://spark.rstudio.com}).
+  reference functions and many more relevant resources,
+  \url{https://spark.rstudio.com}.
 \item
   \textbf{Github}: If you believe something needs to get fixed, open a
-  GitHub issue or send us a pull request
-  (\url{https://github.com/rstudio/sparklyr}).
+  GitHub issue or send us a pull request,
+  \url{https://github.com/rstudio/sparklyr}.
 \item
   \textbf{Stack Overflow}: For general questions, Stack Overflow is a
-  good place to start (\url{stackoverflow.com/tags/sparklyr}).
+  good place to start, \url{stackoverflow.com/tags/sparklyr}.
 \item
   \textbf{Gitter}: For urgent issues or to keep in touch you can chat
-  with us in Gitter (\url{https://gitter.im/rstudio/sparklyr}).
+  with us in Gitter, \url{https://gitter.im/rstudio/sparklyr}.
 \end{itemize}
 
 \hypertarget{installation}{%
@@ -581,11 +620,11 @@ described in this chapter
 \subsection{Install RStudio}\label{install-rstudio}}
 
 While installing RStudio is not strictly required to work with
-\texttt{sparklyr} in R, it will make you much more production and
-therefore, I highly recommend you take the time to install RStudio from
+\texttt{sparklyr} in R, it will make you much more productive and
+therefore, I would recommend you take the time to install RStudio from
 \href{https://www.rstudio.com/products/rstudio/download/}{rstudio.com/products/rstudio/download/},
-then download and launch the installer for your platform, Windows, Macs
-or Linux available.
+then download and launch the installer for your platform: Windows, Macs
+or Linux.
 
 \begin{figure}
 
@@ -795,11 +834,11 @@ of tasks in the cluster. For local clusters, we can retrieve the
 \end{Shaded}
 
 \begin{verbatim}
-## 18/07/10 22:46:39 INFO SparkContext: Submitted application: sparklyr
-## 18/07/10 22:46:40 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:54736/jars/sparklyr-2.3-2.11.jar with timestamp 1531288000092
-## 18/07/10 22:46:43 INFO Executor: Fetching spark://localhost:54736/jars/sparklyr-2.3-2.11.jar with timestamp 1531288000092
-## 18/07/10 22:46:43 INFO Utils: Fetching spark://localhost:54736/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-3b510b5c-80f3-425a-9d3e-a266a7b2232f/userFiles-08ecd99d-b30f-48e4-92ec-e9a3f11cb6b3/fetchFileTemp4867202294005349977.tmp
-## 18/07/10 22:46:43 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-3b510b5c-80f3-425a-9d3e-a266a7b2232f/userFiles-08ecd99d-b30f-48e4-92ec-e9a3f11cb6b3/sparklyr-2.3-2.11.jar to class loader
+## 18/07/11 14:47:28 INFO SparkContext: Submitted application: sparklyr
+## 18/07/11 14:47:28 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:51313/jars/sparklyr-2.3-2.11.jar with timestamp 1531345648407
+## 18/07/11 14:47:31 INFO Executor: Fetching spark://localhost:51313/jars/sparklyr-2.3-2.11.jar with timestamp 1531345648407
+## 18/07/11 14:47:31 INFO Utils: Fetching spark://localhost:51313/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-fb96fa01-2677-48c5-b094-8e097ad9ccae/userFiles-2422dc43-cba0-478c-85e6-dc99bdc11093/fetchFileTemp6743287094392214052.tmp
+## 18/07/11 14:47:31 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-fb96fa01-2677-48c5-b094-8e097ad9ccae/userFiles-2422dc43-cba0-478c-85e6-dc99bdc11093/sparklyr-2.3-2.11.jar to class loader
 \end{verbatim}
 
 \hypertarget{using-spark-from-rstudio}{%
@@ -842,6 +881,143 @@ modeling tasks without any makor blockers. However, if you hit any
 installation or connection issues, start by browsing online for the
 error message or open a GitHub issue under
 \url{https://github.com/rstudio/sparklyr/issues} to help you get going.
+
+\hypertarget{dplyr}{%
+\chapter{Analysis}\label{dplyr}}
+
+While \textbf{this chatper has not been written}, a few resources and
+basic examples were made available to help out until this chapter is
+written.
+
+\hypertarget{dplyr-1}{%
+\section{dplyr}\label{dplyr-1}}
+
+Using \texttt{sparklyr}, you can apply the same data analysis techniques
+described in \href{http://r4ds.had.co.nz/transform.html}{Chapter 5 -
+Data transformation - R for Data Science} by Garrett Grolemund and
+Hadley Wickham.
+
+Once you understand \texttt{dplyr}, you can make use of \texttt{dplyr}
+and \texttt{sparklyr} as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(sparklyr)}
+\KeywordTok{library}\NormalTok{(dplyr)}
+
+\CommentTok{# Connect to Spark}
+\NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local"}\NormalTok{)}
+
+\CommentTok{# Use dplyr's copy_to() to copy the iris dataset to Spark}
+\NormalTok{iris_tbl <-}\StringTok{ }\KeywordTok{copy_to}\NormalTok{(sc, iris, }\DataTypeTok{overwrite =} \OtherTok{TRUE}\NormalTok{)}
+
+\CommentTok{# The iris_tbl is a Spark data frame compatible with dplyr}
+\NormalTok{iris_tbl}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # Source:   table<iris> [?? x 5]
+## # Database: spark_connection
+##    Sepal_Length Sepal_Width Petal_Length Petal_Width Species
+##           <dbl>       <dbl>        <dbl>       <dbl> <chr>  
+##  1          5.1         3.5          1.4         0.2 setosa 
+##  2          4.9         3            1.4         0.2 setosa 
+##  3          4.7         3.2          1.3         0.2 setosa 
+##  4          4.6         3.1          1.5         0.2 setosa 
+##  5          5           3.6          1.4         0.2 setosa 
+##  6          5.4         3.9          1.7         0.4 setosa 
+##  7          4.6         3.4          1.4         0.3 setosa 
+##  8          5           3.4          1.5         0.2 setosa 
+##  9          4.4         2.9          1.4         0.2 setosa 
+## 10          4.9         3.1          1.5         0.1 setosa 
+## # ... with more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Transform iris_tbl with dplyr as usual}
+\NormalTok{iris_tbl }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(Species) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise_all}\NormalTok{(}\KeywordTok{funs}\NormalTok{(mean))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # Source:   lazy query [?? x 5]
+## # Database: spark_connection
+##   Species    Sepal_Length Sepal_Width Petal_Length Petal_Width
+##   <chr>             <dbl>       <dbl>        <dbl>       <dbl>
+## 1 versicolor         5.94        2.77         4.26       1.33 
+## 2 virginica          6.59        2.97         5.55       2.03 
+## 3 setosa             5.01        3.43         1.46       0.246
+\end{verbatim}
+
+To understand \texttt{dplyr} further, I would recommend taking a look at
+the following vignettes:
+
+\begin{itemize}
+\tightlist
+\item
+  \href{https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html}{Introduction
+  to dplyr}
+\item
+  \href{https://cran.r-project.org/web/packages/dplyr/vignettes/two-table.html}{Two-table
+  verbs}
+\item
+  \href{https://cran.r-project.org/web/packages/dplyr/vignettes/window-functions.html}{Window
+  functions}
+\item
+  \href{https://cran.r-project.org/web/packages/dplyr/vignettes/programming.html}{Programming
+  with dplyr}
+\end{itemize}
+
+\hypertarget{dbi}{%
+\section{DBI}\label{dbi}}
+
+The \texttt{DBI} provides an database interface for R, meaning, if you
+are familiar with SQL, you can make use of \texttt{DBI} to perform SQL
+queries in Spark using \texttt{sparklyr}. To learn more about
+\texttt{DBI}, I would recommend reading first
+\href{https://cran.r-project.org/web/packages/DBI/vignettes/DBI-1.html}{A
+Common Database Interface (DBI)}. Once you are familiar with
+\texttt{DBI}, you can use this package with \texttt{sparklyr} as
+follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(DBI)}
+
+\KeywordTok{dbGetQuery}\NormalTok{(sc,}
+  \StringTok{"SELECT mean(Sepal_Length), mean(Sepal_Width), }
+\StringTok{          mean(Petal_Length), mean(Petal_Width)}
+\StringTok{   FROM iris}
+\StringTok{   GROUP BY Species"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   avg(Sepal_Length) avg(Sepal_Width) avg(Petal_Length) avg(Petal_Width)
+## 1             5.936            2.770             4.260            1.326
+## 2             6.588            2.974             5.552            2.026
+## 3             5.006            3.428             1.462            0.246
+\end{verbatim}
+
+More advanced \texttt{DBI} resources are available in the following
+vignettes:
+
+\begin{itemize}
+\tightlist
+\item
+  \href{https://cran.r-project.org/web/packages/DBI/vignettes/DBI-proposal.html}{A
+  Common Interface to Relational Databases from R and S -- A Proposal}
+\item
+  \href{https://cran.r-project.org/web/packages/DBI/vignettes/backend.html}{Implementing
+  a new backend}
+\item
+  \href{https://cran.r-project.org/web/packages/DBI/vignettes/spec.html}{DBI
+  specification}
+\end{itemize}
 
 \hypertarget{modeling}{%
 \chapter{Modeling}\label{modeling}}
@@ -956,11 +1132,11 @@ be, what they are and what their future might be:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-18-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-21-1} 
 
 }
 
-\caption{Google trends for on-premise (mainframe), cloud computing and kubernetes.}\label{fig:unnamed-chunk-18}
+\caption{Google trends for on-premise (mainframe), cloud computing and kubernetes.}\label{fig:unnamed-chunk-21}
 \end{figure}
 
 For \textbf{on-premise} clusters, someone, either yourself or someone in
@@ -1514,11 +1690,11 @@ with executing subtasks against a data partition.
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=220pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-26-1} 
+{\centering \includegraphics[width=1\linewidth,height=220pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-29-1} 
 
 }
 
-\caption{Apache Spark Architecture}\label{fig:unnamed-chunk-26}
+\caption{Apache Spark Architecture}\label{fig:unnamed-chunk-29}
 \end{figure}
 
 If you already have an Spark cluster in their organization, you should
@@ -1565,11 +1741,11 @@ this edge instance:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=140pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-27-1} 
+{\centering \includegraphics[width=1\linewidth,height=140pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-30-1} 
 
 }
 
-\caption{Using a Spark Cluster from an Edge Node}\label{fig:unnamed-chunk-27}
+\caption{Using a Spark Cluster from an Edge Node}\label{fig:unnamed-chunk-30}
 \end{figure}
 
 \hypertarget{spark-home}{%
@@ -1611,11 +1787,11 @@ following diagram:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=160pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-29-1} 
+{\centering \includegraphics[width=1\linewidth,height=160pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-32-1} 
 
 }
 
-\caption{Local Connection Diagram}\label{fig:unnamed-chunk-29}
+\caption{Local Connection Diagram}\label{fig:unnamed-chunk-32}
 \end{figure}
 
 Notice that in the local connections diagram, there is no cluster
@@ -1669,11 +1845,11 @@ standalone cluster manager in the \texttt{master} location:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-32-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-35-1} 
 
 }
 
-\caption{Spark Standalone Connection Diagram}\label{fig:unnamed-chunk-32}
+\caption{Spark Standalone Connection Diagram}\label{fig:unnamed-chunk-35}
 \end{figure}
 
 In order to connect, use \texttt{master="spark://hostname:port"} in
@@ -1701,11 +1877,11 @@ run Spark executors as follows:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-34-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-37-1} 
 
 }
 
-\caption{YARN Client Connection Diagram}\label{fig:unnamed-chunk-34}
+\caption{YARN Client Connection Diagram}\label{fig:unnamed-chunk-37}
 \end{figure}
 
 To connect, one can simply run with \texttt{master\ =\ "yarn"} as
@@ -1736,11 +1912,11 @@ independently of other clsuter resources.
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-36-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-39-1} 
 
 }
 
-\caption{YARN Cluster Connection Diagram}\label{fig:unnamed-chunk-36}
+\caption{YARN Cluster Connection Diagram}\label{fig:unnamed-chunk-39}
 \end{figure}
 
 To connect in YARN Cluster mode, we can simple run:
@@ -1772,11 +1948,11 @@ as usual.
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-38-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-41-1} 
 
 }
 
-\caption{Livy Connection Diagram}\label{fig:unnamed-chunk-38}
+\caption{Livy Connection Diagram}\label{fig:unnamed-chunk-41}
 \end{figure}
 
 Conencting through Livy requires the URL to the Livy service which
@@ -1809,11 +1985,11 @@ Similar to YARN, Mesos supports client mode and a cluster mode. However,
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-40-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-43-1} 
 
 }
 
-\caption{Mesos Connection Diagram}\label{fig:unnamed-chunk-40}
+\caption{Mesos Connection Diagram}\label{fig:unnamed-chunk-43}
 \end{figure}
 
 Connecting requires the address to the Mesos master node, usually in the
@@ -1836,11 +2012,11 @@ driver node is assigned by Kubernetes.
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-42-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-45-1} 
 
 }
 
-\caption{Kubernetes Connection Diagram}\label{fig:unnamed-chunk-42}
+\caption{Kubernetes Connection Diagram}\label{fig:unnamed-chunk-45}
 \end{figure}
 
 Kubernetes support is scheduled to be added to \texttt{sparklyr} with
@@ -2071,7 +2247,7 @@ resource usage and performance.
 
 }
 
-\caption{Spark RDDs}\label{fig:unnamed-chunk-57}
+\caption{Spark RDDs}\label{fig:unnamed-chunk-60}
 \end{figure}
 
 \begin{Shaded}
@@ -2172,7 +2348,7 @@ however, to free up resources, you can use \texttt{tbl\_uncache()}:
 
 }
 
-\caption{Spark Graph Visualization}\label{fig:unnamed-chunk-66}
+\caption{Spark Graph Visualization}\label{fig:unnamed-chunk-69}
 \end{figure}
 
 \hypertarget{event-timeline}{%
@@ -2199,7 +2375,7 @@ by a given column using three partitions:
 
 }
 
-\caption{Spark Event Timeline}\label{fig:unnamed-chunk-70}
+\caption{Spark Event Timeline}\label{fig:unnamed-chunk-73}
 \end{figure}
 
 \hypertarget{recap-3}{%
@@ -2287,7 +2463,7 @@ with at-least-once guarantees (where each message is certain to be
 delivered, but may do so multiple times).
 
 In order to use structured streams in \texttt{sparklyr}, one needs to
-define the \textbf{sources}, \textbf{transformations} and
+define the \textbf{sources}, \textbf{transformations} and a
 \textbf{destination}:
 
 \begin{itemize}
@@ -2333,20 +2509,17 @@ time:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-75-1} 
+{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-78-1} 
 
 }
 
-\caption{Viewing a Spark Stream with sparklyr}\label{fig:unnamed-chunk-75}
+\caption{Viewing a Spark Stream with sparklyr}\label{fig:unnamed-chunk-78}
 \end{figure}
 
-For the stream sources, rps tracks the actual number of rows being
-processed, since there is no objective way of measuring how fast the
-source can deliver rows appart from counting the rows a streaming
-sources provides. However, when writting rows into a streaming
-destination, we Spark can measure how fast rows were actually processed
-and therefore, in a healthy systems, the destination rps should be
-higher than the source to keep up with incoming data.
+Notice that the rows-per-second in the destination stream are higher
+than the rows-per-second in the source stream; this is expected and
+desireable since Spark measures incoming rates from the source, but
+actual row processing times in the destination stream.
 
 Use \texttt{stream\_stop()} to properly stop processing data from this
 stream:
@@ -2357,12 +2530,12 @@ stream:
 \end{Highlighting}
 \end{Shaded}
 
-Notice that, in order to reproduce the above example, one needs to feed
-streaming data into the \texttt{source/} path. This was accomplished by
-running, before \texttt{stream\_view(stream)}, the following script to
-produce a file every second containing lines of text that follow two
-overlapping binomial distribution. In practice, you would connect to
-existing sources without having to generate data artificially.
+In order to reproduce the above example, one needs to feed streaming
+data into the \texttt{source/} path. This was accomplished by running,
+before \texttt{stream\_view(stream)}, the following script to produce a
+file every second containing lines of text that follow two overlapping
+binomial distributions. In practice, you would connect to existing
+sources without having to generate data artificially.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2378,8 +2551,8 @@ existing sources without having to generate data artificially.
 \end{Highlighting}
 \end{Shaded}
 
-For the subsequent examples, a stream processing one hundred rows of
-data will be used:
+For the subsequent examples, a stream with one hundred rows of text will
+be used:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2390,22 +2563,22 @@ data will be used:
 \hypertarget{transformations}{%
 \section{Transformations}\label{transformations}}
 
-Streams can be transformed using \texttt{dplyr}, \texttt{SQL}, scoring
-pipelines or R code through \texttt{spark\_apply()}. We can use as many
-transformations as needed in the same way that Spark data frame can be
-transformed with \texttt{sparklyr}. The transformation source can be
-streams or data frames but the output is always a stream. If needed, one
-can always take a snapshot from the destination stream and save the
-output as a data frame, but even in this case, the destination stream
-must be defined. Conceptually, this looks as follows:
+Streams can be transformed using \texttt{dplyr}, SQL, pipelines or R
+code. We can use as many transformations as needed in the same way that
+Spark data frames can be transformed with \texttt{sparklyr}. The
+transformation source can be streams or data frames but the output is
+always a stream. If needed, one can always take a snapshot from the
+destination stream and save the output as a data frame, which is what
+\texttt{sparklyr} will do for you if a destination stream is not
+specified. Conceptually, this looks as follows:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-79-1} 
+{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-82-1} 
 
 }
 
-\caption{Stream Transformations Diagram}\label{fig:unnamed-chunk-79}
+\caption{Streams Transformation Diagram}\label{fig:unnamed-chunk-82}
 \end{figure}
 
 \hypertarget{streams-dplyr}{%
@@ -2442,10 +2615,9 @@ one:
 ## # ... with more rows
 \end{verbatim}
 
-Notice that in the example above, the destination was not specified;
-when this happens, \texttt{sparklyr} creates a temporary memory stream
-and previews the contents of a stream by capturing a few seconds of
-streaming data.
+Since the destination was not specified, \texttt{sparklyr} creates a
+temporary memory stream and previews the contents of a stream by
+capturing a few seconds of streaming data.
 
 We can also aggregate data with \texttt{dplyr},
 
@@ -2484,32 +2656,31 @@ and even join across many concurrent streams:
 ## # Database: spark_connection
 ##    text   timestamp           random
 ##    <chr>  <dttm>               <dbl>
-##  1 Row 5  2018-07-11 05:48:13 0.665 
-##  2 Row 10 2018-07-11 05:48:13 0.525 
-##  3 Row 14 2018-07-11 05:48:13 0.0523
-##  4 Row 30 2018-07-11 05:48:13 0.339 
-##  5 Row 54 2018-07-11 05:48:13 0.0671
-##  6 Row 55 2018-07-11 05:48:13 0.196 
-##  7 Row 62 2018-07-11 05:48:13 0.437 
-##  8 Row 83 2018-07-11 05:48:13 0.769 
-##  9 Row 18 2018-07-11 05:48:13 0.699 
-## 10 Row 37 2018-07-11 05:48:13 0.907 
+##  1 Row 7  2018-07-11 21:49:09 0.263 
+##  2 Row 9  2018-07-11 21:49:09 0.888 
+##  3 Row 24 2018-07-11 21:49:09 0.0222
+##  4 Row 40 2018-07-11 21:49:09 0.362 
+##  5 Row 43 2018-07-11 21:49:09 0.327 
+##  6 Row 51 2018-07-11 21:49:09 0.742 
+##  7 Row 55 2018-07-11 21:49:09 0.118 
+##  8 Row 63 2018-07-11 21:49:09 0.647 
+##  9 Row 70 2018-07-11 21:49:09 0.946 
+## 10 Row 76 2018-07-11 21:49:09 0.129 
 ## # ... with more rows
 \end{verbatim}
 
-Notice that some operations, like joins, require watermarks to define
-late data and specify when to stop waiting for it. You can specify
-watermarks in \texttt{sparklyr} using \texttt{stream\_watermak()}, see
-also
+However, some operations, require watermarks to define when to stop
+waiting for late data. You can specify watermarks in \texttt{sparklyr}
+using \texttt{stream\_watermak()}, see also
 \href{https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html\#handling-late-data-and-watermarking}{handling
 late data} in Spark's documentation.
 
 \hypertarget{streams-pipelines}{%
 \subsection{Pipelines}\label{streams-pipelines}}
 
-Spark pipelines can be used for scoring streams; however, not to train
-over streaming data. The former is fully supperted while the latter is a
-feature under acteve development by the Spark community.
+Spark pipelines can be used for scoring streams, but not to train over
+streaming data. The former is fully supported while the latter is a
+feature under active development by the Spark community.
 
 To use a pipeline for scoring a stream, first train a Spark pipeline
 over a static dataset. Once trained, save the pipeline, then reload and
@@ -2529,10 +2700,11 @@ score over a stream as follows:
 \subsection{R Code}\label{streams-r}}
 
 Arbitrary R code can also be used to transform a stream with the use of
-\texttt{spark\_apply()}. Just like processing data over a Spark
-dataframe, \texttt{spark\_apply()} runs over each executor in the
-cluster where data is partitioned to parallelize over wide streams and
-resuce latency.
+\texttt{spark\_apply()}. Following the same principles from executing R
+code over Spark data frames, for structured streams,
+\texttt{spark\_apply()} runs R code over each executor in the cluster
+where data is available, this enables processing high-throughput streams
+and fullfill low-latency requirements.
 
 The following example splits a stream of \texttt{Row\ \#} line entries
 and adds jitter using R code:
@@ -2542,31 +2714,27 @@ and adds jitter using R code:
 \KeywordTok{stream_read_text}\NormalTok{(sc, }\StringTok{"source/"}\NormalTok{) }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{spark_apply}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(df) \{}
     \KeywordTok{data.frame}\NormalTok{(}
-      \DataTypeTok{rows =} \KeywordTok{jitter}\NormalTok{(}
-        \KeywordTok{as.numeric}\NormalTok{(}
-          \KeywordTok{gsub}\NormalTok{(}\StringTok{"Row "}\NormalTok{, }\StringTok{""}\NormalTok{, df}\OperatorTok{$}\NormalTok{text)}
-\NormalTok{        )}
-\NormalTok{      )}
+      \DataTypeTok{data =} \KeywordTok{jitter}\NormalTok{(}\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{gsub}\NormalTok{(}\StringTok{"Row "}\NormalTok{, }\StringTok{""}\NormalTok{, df}\OperatorTok{$}\NormalTok{text)))}
 \NormalTok{    )}
 \NormalTok{  \})}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## # Source:   table<sparklyr_tmp_9ff35b334e9e> [?? x 1]
+## # Source:   table<sparklyr_tmp_48d069829d40> [?? x 1]
 ## # Database: spark_connection
-##     rows
+##     data
 ##    <dbl>
-##  1 0.872
-##  2 2.01 
-##  3 3.05 
-##  4 4.04 
-##  5 5.13 
-##  6 6.19 
-##  7 7.09 
-##  8 8.18 
-##  9 8.95 
-## 10 9.89 
+##  1  1.16
+##  2  2.15
+##  3  3.10
+##  4  4.02
+##  5  4.83
+##  6  6.12
+##  7  7.16
+##  8  7.93
+##  9  9.18
+## 10  9.96
 ## # ... with more rows
 \end{verbatim}
 
@@ -2576,11 +2744,12 @@ and adds jitter using R code:
 Streams can be used with Shiny by making use of the
 \texttt{reactiveSpark()} to retrieve the stream as a reactive data
 source. Internally, \texttt{reactiveSpark()} makes use of
-\texttt{reactivePoll()} to check the stream's timestamp and collect the
-stream contents when needed.
+\href{https://shiny.rstudio.com/reference/shiny/latest/reactivePoll.html}{reactivePoll()}
+to check the stream's timestamp and collect the stream contents when
+needed.
 
-A simple Shiny application using a \texttt{reactiveSpark()} source looks
-like:
+The following Shiny application makes use of \texttt{reactiveSpark()} to
+view a Spark stream summarized with \texttt{dplyr}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
