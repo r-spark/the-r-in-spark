@@ -61,7 +61,9 @@ sc <- spark_connect(master = "cluster-master", spark_home = "local/path/to/spark
 
 Where `cluster-master` is set to the correct cluster manager master for [Spark Standalone](Standalone), [YARN](Yarn), [Mesos], etc.
 
-## Local
+## Types
+
+### Local
 
 When connecting to Spark in local mode, Spark starts as a single application simulating a cluster with a single node, this is not a proper computing cluster but is ideal to perform work offline and troubleshoot issues. A local connection to Spark is represented in the following diagram:
 
@@ -85,7 +87,7 @@ By default, `sparklyr`, will connect using as many CPU cores are available in yo
 sc <- spark_connect(master = "local[2]")
 ```
 
-## Standalone
+### Standalone
 
 Connecting to a Spark Standalone cluster requires the location of the cluster manager's master instance, this location can be found in the cluster manager web interface as described in the [clusters-standalone](standalone cluster) section, you can find this location by looking for a URL starting with `spark://`.
 
@@ -101,11 +103,11 @@ In order to connect, use `master="spark://hostname:port"` in `spark_connect()` a
 sc <- spark_connect(master = "spark://hostname:port")
 ```
 
-## Yarn
+### Yarn
 
 Hadoop YARN supports two connection modes: YARN Client and YARN Cluster. However, YARN Client mode is much more common that YARN Cluster since it's more efficient and easier to set up.
 
-### Yarn Client
+#### Yarn Client
 
 When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as follows:
 
@@ -121,7 +123,7 @@ sc <- spark_connect(master = "yarn-client")
 
 Once connected, you can use all techniques described in previous chapters using the `sc` connection; for instances, you can do [data analysis](analysis) or [modeling].
 
-### Yarn Cluster
+#### Yarn Cluster
 
 The main difference between YARN Cluster mode and YARN Client mode is that in YARN Cluster mode, the driver node is not required to be the node where R and sparklyr get started; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using YARN Cluster when the edge node has too many concurrent users, is lacking computing resources or where tools (like RStudio) need to be managed independently of other clsuter resources.
 
@@ -137,7 +139,7 @@ sc <- spark_connect(master = "yarn-cluster")
 
 This connection assumes that the node running `spark_connect()` is properly configured, meaning that, `yarn-site.xml` exists and the `YARN_CONF_DIR` environment variable is properly set. When using Hadoop as a file system, one would also need the `HADOOP_CONF_DIR` environment variable properly configured. This configuration is usually provided by your system administrator and is not something that you would have to manually configure.
 
-## Livy
+### Livy
 
 As opposed to other connection methods which require using an edge node in the cluster, [Livy](clusters-livy) Livy provides a **Web API** that makes the Spark cluster accessible from outside the cluster and neither requires a local installation in the client. Once connected through the Web API, the **Livy Service** starts the Spark context by requesting reosurces from the cluster manager and distributing work as usual.
 
@@ -156,7 +158,7 @@ sc <- spark_connect(master = "https://hostname:port/livy", method = "livy", conf
 
 Once connected through Livy, operations you can make use of an other `sparklyr` feature; however, Livy is not suitable for experimental data analysis, since executing commands have a significant delay; that said, while running long running computations, this overhead could be considered irrelevant. In general, it is preffered to avoid using Livy and work directly within an edge node in the cluster; if this is not feasible, using Livy could be a reasonable approach.
 
-## Mesos
+### Mesos
 
 Similar to YARN, Mesos supports client mode and a cluster mode. However, `sparklyr` currently only supports client mode for Mesos.
 
@@ -170,7 +172,7 @@ Connecting requires the address to the Mesos master node, usually in the form of
 sc <- spark_connect(master = "mesos://host:port")
 ```
 
-## Kubernetes
+### Kubernetes
 
 Kubernetes cluster do not support client modes similar to Mesos or YARN, instead, the connection model is similar to YARN Cluster, where the driver node is assigned by Kubernetes.
 
@@ -196,7 +198,36 @@ If your computer is already configured to use a Kubernetes cluster, you can use 
 system2("kubectl", "cluster-info")
 ```
 
-## Multiple
+## Troubleshooting
+
+### Logging
+
+One first step is to troubleshoot connections is to run in verbose to print directly to the console additional error messages:
+
+```{r}
+sc <- spark_connect(master = "local", log = "console")
+```
+
+### Spark Submit {#troubleshoot-spark-submit}
+
+If connections fail in `sparklyr`, first troubleshoot if this issue is specific to `sparklyr` or Spark in general. This can be accomplished by running an example `spark-submit` job and validating that no errors are thrown:
+
+```{r eval=FALSE}
+# Find the spark directory using an environment variable
+Sys.getenv("SPARK_HOME")
+
+# Or by getting the local spark installation
+sparklyr::spark_home_dir()
+```
+
+From the terminal run:
+
+```{bash}
+cd path/to/spark/
+bin/spark-submit 
+```
+
+### Multiple
 
 It is common to connect once, and only once, to Spark. However, you can also open multiple connections to Spark by connecting to different clusters or by specifying the `app_name` parameter, this can be helpful to compare Spark versions or validate you analysis before submitting to the cluster. The following example opens connections to Spark 1.6.3, 2.3.0 and Spark Standalone:
 
@@ -225,10 +256,66 @@ Alternatevely, you can disconnect from all connections at once:
 spark_disconnect_all()
 ```
 
+### Windows
+
+Connecting from Windows is, in most cases, as straightforward as connecting from Linux or OS X; however, there are a few common connection issues you might hit t
+
+- Firewalls and atni-viruse software might block ports for your connection. The default port used by `sparklyr` is `8880`, double check this port is not being blocked.
+- Long path names can cause issues in, specially, older Windows systems like Windows 7. When using these systems, try connecting with Spark installed with all folders using 8 characters or less.
+ 
+### Submit Manually
+
+To troubleshoot Windows connections in detail, you can use a 2-step initialization that is often very helpful to diagnose connection issues.
+
+This 2-step initialization os performed by launching `sparklyr` through `spark-submit` followed by connecting with `sparklyr` from R.
+
+First, [identify the Spark installation directory](troubleshoot-spark-submit). Second, identify the path to the correct `sparklyr*.jar`, you can find this path by running;
+
+```{r}
+dir(system.file("java", package = "sparklyr"), pattern = "sparklyr", full.names = T)
+```
+
+Make sure you identify the correct version that matches your Spark cluster, for isntance `sparklyr-2.1-2.11.jar` for Spark 2.1.
+
+Third, from the terminal run:
+
+```{r echo=FALSE}
+Sys.setenv(PATH_TO_SPARKLYR_JAR = dir(system.file("java", package = "sparklyr"), pattern = gsub("\\.0", "", paste("sparklyr", sparklyr::spark_default_version()$spark, sep = "-")), full.names = T))
+```
+
+```{r echo=FALSE}
+Sys.setenv(SPARK_HOME = sparklyr::spark_home_dir())
+```
+
+```{bash eval=FALSE}
+$SPARK_HOME/bin/spark-submit --class sparklyr.Shell $PATH_TO_SPARKLYR_JAR 8880 12345
+```
+
+```
+18/06/11 12:13:53 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+18/06/11 12:13:53 INFO sparklyr: Session (12345) is starting under 127.0.0.1 port 8880
+18/06/11 12:13:53 INFO sparklyr: Session (12345) found port 8880 is available
+18/06/11 12:13:53 INFO sparklyr: Gateway (12345) is waiting for sparklyr client to connect to port 8880
+```
+
+The parameter `8880` represents the default port to use in `sparklyr` while `12345` is the session number, this is a cryptographically secure number generated by `sparklyr`, but for troubleshooting purpuses can be as simple as `12345`.
+
+Then, from R, connect as follows, notice that there is a 60 seconds timeout, so you'll have to run the R command immediately after running the terminal command:
+
+```{r eval=FALSE}
+library(sparklyr)
+sc <- spark_connect(master = "sparklyr://localhost:8880/12345", version = "2.3")
+```
+
+```{r eval=FALSE, echo=FALSE}
+spark_disconnect_all()
+Sys.setenv(SPARK_HOME = "")
+```
+
 ## Recap
 
 This chapter presented an overview of Spark's architecture and detailed connections concepts and examples to connect in local mode, standalone, YARN, Mesos, Kubernetes and Livy. It also presented edge nodes and their role while connecting to Spark clusters. This information should give you enough information to effectevely connect to any cluster with Apache Spark enabled.
 
 To troubleshoot connection problems, it is recommended to search for the connection problem in StackOverflow, the [sparklyr github issues](https://github.com/rstudio/sparklyr/issues) and, if needed, open a [new GitHub issue in sparklyr](https://github.com/rstudio/sparklyr/issues/new) to assist further.
 
-The next chapter, [Configuration], will present the tools and best practices to configure the resources and behavior of your Spark connection.
+In the next chapter, [Tuning], you will learn in-detail how Spark works and use this knowledge to optimize it's resource usage and performance.
