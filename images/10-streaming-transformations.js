@@ -13,7 +13,7 @@ var streamingSorucesBlock = drawBlock(root, {
   x: blockWidth / 2,
   y: blockHeight / 2,
   height: blockHeight,
-  label: "Source Streams",
+  label: "Streaming Sources",
   childrens: [
     {label: "Kafka"},
     {label: "JDBC"},
@@ -26,7 +26,7 @@ var staticSorucesBlock = drawBlock(root, {
   x: blockWidth / 2,
   y: height - blockHeight / 2,
   height: blockHeight,
-  label: "Data Frames",
+  label: "Data Sources",
   childrens: [
     {label: "Parquet"},
     {label: "CSV"},
@@ -55,7 +55,7 @@ var destinationBlock = drawBlock(root, {
   x: width - blockWidth / 2,
   y: height / 2,
   height: blockHeight,
-  label: "Destination Stream",
+  label: "Output Streams",
   childrens: [
     {label: "Kafka"},
     {label: "Memory"},

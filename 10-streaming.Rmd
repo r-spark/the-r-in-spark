@@ -6,7 +6,7 @@ One can understand a stream as an unbound data frame, meaning, a data frame with
 
 Spark provided initial support for streams with Spark's DStreams; however, a more versatile and efficient replacement is available through [Spark structured streams](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html). Structured streams provide scalable and fault-torerant data processing over streams of data. Meaning that, one can use many machines to process multiple streaming sources, perform joins with other streams or static sources, and recover from failures with at-least-once guarantees (where each message is certain to be delivered, but may do so multiple times).
 
-In order to use structured streams in `sparklyr`, one needs to define the **sources**, **transformations** and **destination**:
+In order to use structured streams in `sparklyr`, one needs to define the **sources**, **transformations** and a **destination**:
 
 * The **sources** are defined using any of the `stream_read_*()` functions to read streams of data from various data sources.
 * The **transformations** can be specified using `dplyr`, `SQL`, scoring pipelines or R code through `spark_apply()`.
@@ -53,7 +53,7 @@ library(sparklyr)
 readRDS("data/10-streaming-overview.rds") %>% stream_render(stats = .)
 ```
 
-For the stream sources, rps tracks the actual number of rows being processed, since there is no objective way of measuring how fast the source can deliver rows appart from counting the rows a streaming sources provides. However, when writting rows into a streaming destination, we Spark can measure how fast rows were actually processed and therefore, in a healthy systems, the destination rps should be higher than the source to keep up with incoming data.
+Notice that the rows-per-second in the destination stream are higher than the rows-per-second in the source stream; this is expected and desireable since Spark measures incoming rates from the source, but actual row processing times in the destination stream.
 
 Use `stream_stop()` to properly stop processing data from this stream:
 
@@ -61,7 +61,7 @@ Use `stream_stop()` to properly stop processing data from this stream:
 stream_stop(stream)
 ```
 
-Notice that, in order to reproduce the above example, one needs to feed streaming data into the `source/` path. This was accomplished by running, before `stream_view(stream)`, the following script to produce a file every second containing lines of text that follow two overlapping binomial distribution. In practice, you would connect to existing sources without having to generate data artificially.
+Notice that, in order to reproduce the above example, one needs to feed streaming data into the `source/` path. This was accomplished by running, before `stream_view(stream)`, the following script to produce a file every second containing lines of text that follow two overlapping binomial distributions. In practice, you would connect to existing sources without having to generate data artificially.
 
 ```{r eval=FALSE}
 unlink(c("source/", "destination/"), recursive = TRUE)
@@ -75,7 +75,7 @@ callr::r_bg(function() {
 })
 ```
 
-For the subsequent examples, a stream processing one hundred rows of data will be used:
+For the subsequent examples, a stream with one hundred rows of text will be used:
 
 ```{r}
 writeLines(paste("Row", 1:100), "source/rows.txt")
@@ -83,9 +83,9 @@ writeLines(paste("Row", 1:100), "source/rows.txt")
 
 ## Transformations
 
-Streams can be transformed using `dplyr`, `SQL`, scoring pipelines or R code through `spark_apply()`. We can use as many transformations as needed in the same way that Spark data frame can be transformed with `sparklyr`. The transformation source can be streams or data frames but the output is always a stream. If needed, one can always take a snapshot from the destination stream and save the output as a data frame, but even in this case, the destination stream must be defined. Conceptually, this looks as follows:
+Streams can be transformed using `dplyr`, SQL, pipelines or R code. We can use as many transformations as needed in the same way that Spark data frames can be transformed with `sparklyr`. The transformation source can be streams or data frames but the output is always a stream. If needed, one can always take a snapshot from the destination stream and save the output as a data frame, which is what `sparklyr` will do for you if a destination stream is not specified. Conceptually, this looks as follows:
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='280pt', fig.cap='Stream Transformations Diagram'}
+```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='280pt', fig.cap='Streams Transformation Diagram'}
 r2d3::r2d3(
   c(),
   file.path("images", "10-streaming-transformations.js"),
@@ -105,7 +105,7 @@ stream_read_text(sc, "source/") %>%
   filter(text %like% "%1%")
 ```
 
-Notice that in the example above, the destination was not specified; when this happens, `sparklyr` creates a temporary memory stream and previews the contents of a stream by capturing a few seconds of streaming data.
+Since the destination was not specified, `sparklyr` creates a temporary memory stream and previews the contents of a stream by capturing a few seconds of streaming data.
 
 We can also aggregate data with `dplyr`,
 
@@ -141,7 +141,7 @@ stream_read_csv(sc, "iris-in") %>%
 
 ### R Code {#streams-r}
 
-Arbitrary R code can also be used to transform a stream with the use of `spark_apply()`. Just like processing data over a Spark dataframe, `spark_apply()` runs over each executor in the cluster where data is partitioned to parallelize over wide streams and resuce latency.
+Arbitrary R code can also be used to transform a stream with the use of `spark_apply()`. Just like processing data over a Spark data frame, `spark_apply()` runs over each executor in the cluster where data is partitioned to parallelize over wide streams or reduce latency.
 
 The following example splits a stream of `Row #` line entries and adds jitter using R code:
 
