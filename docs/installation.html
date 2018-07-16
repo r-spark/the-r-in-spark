@@ -6,26 +6,26 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>The R in Spark: Learning Apache Spark with R</title>
-  <meta name="description" content="A book to learn Apache Spark using R.">
+  <meta name="description" content="A book to learn Apache Spark with R using the sparklyr R package.">
   <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
 
   <meta property="og:title" content="The R in Spark: Learning Apache Spark with R" />
   <meta property="og:type" content="book" />
   
   
-  <meta property="og:description" content="A book to learn Apache Spark using R." />
+  <meta property="og:description" content="A book to learn Apache Spark with R using the sparklyr R package." />
   <meta name="github-repo" content="javierluraschi/the-r-in-spark" />
 
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="The R in Spark: Learning Apache Spark with R" />
   
-  <meta name="twitter:description" content="A book to learn Apache Spark using R." />
+  <meta name="twitter:description" content="A book to learn Apache Spark with R using the sparklyr R package." />
   
 
 <meta name="author" content="Javier Luraschi">
 
 
-<meta name="date" content="2018-07-11">
+<meta name="date" content="2018-07-16">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -261,6 +261,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="10.2.3" data-path="streaming.html"><a href="streaming.html#streams-r"><i class="fa fa-check"></i><b>10.2.3</b> R Code</a></li>
 </ul></li>
 <li class="chapter" data-level="10.3" data-path="streaming.html"><a href="streaming.html#shiny"><i class="fa fa-check"></i><b>10.3</b> Shiny</a></li>
+<li class="chapter" data-level="10.4" data-path="streaming.html"><a href="streaming.html#formats"><i class="fa fa-check"></i><b>10.4</b> Formats</a></li>
 </ul></li>
 <li class="chapter" data-level="11" data-path="contributing.html"><a href="contributing.html"><i class="fa fa-check"></i><b>11</b> Contributing</a><ul>
 <li class="chapter" data-level="11.1" data-path="contributing.html"><a href="contributing.html#overview-5"><i class="fa fa-check"></i><b>11.1</b> Overview</a></li>
@@ -409,11 +410,11 @@ FIGURE 2.4: Apache Spark Web Interface.
 <h3><span class="header-section-number">2.4.2</span> Logs</h3>
 <p>Another common tool is to read through the Spark logs, a log is just a text file where Spark will append information relevant to the execution of tasks in the cluster. For local clusters, we can retrieve the <code>sparklyr</code> related log entries by running:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">spark_log</span>(sc, <span class="dt">filter =</span> <span class="st">&quot;sparklyr&quot;</span>, <span class="dt">n =</span> <span class="dv">5</span>)</a></code></pre></div>
-<pre><code>## 18/07/11 14:46:14 INFO SparkContext: Submitted application: sparklyr
-## 18/07/11 14:46:15 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:50956/jars/sparklyr-2.3-2.11.jar with timestamp 1531345575569
-## 18/07/11 14:46:19 INFO Executor: Fetching spark://localhost:50956/jars/sparklyr-2.3-2.11.jar with timestamp 1531345575569
-## 18/07/11 14:46:19 INFO Utils: Fetching spark://localhost:50956/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-27009ad8-f29a-444e-9c30-25f5cce6f255/userFiles-eca2b314-342d-457d-99eb-1eef8555c67c/fetchFileTemp6096277097998209743.tmp
-## 18/07/11 14:46:19 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-27009ad8-f29a-444e-9c30-25f5cce6f255/userFiles-eca2b314-342d-457d-99eb-1eef8555c67c/sparklyr-2.3-2.11.jar to class loader</code></pre>
+<pre><code>## 18/07/16 10:20:07 INFO SparkContext: Submitted application: sparklyr
+## 18/07/16 10:20:08 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:55034/jars/sparklyr-2.3-2.11.jar with timestamp 1531761608200
+## 18/07/16 10:20:12 INFO Executor: Fetching spark://localhost:55034/jars/sparklyr-2.3-2.11.jar with timestamp 1531761608200
+## 18/07/16 10:20:12 INFO Utils: Fetching spark://localhost:55034/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-ed6c532d-2091-427f-8d43-b39c5b7fc601/userFiles-423eb386-04f3-49cf-b0ce-ac42ccb3e4df/fetchFileTemp9178265736397677671.tmp
+## 18/07/16 10:20:12 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-ed6c532d-2091-427f-8d43-b39c5b7fc601/userFiles-423eb386-04f3-49cf-b0ce-ac42ccb3e4df/sparklyr-2.3-2.11.jar to class loader</code></pre>
 </div>
 <div id="using-spark-from-rstudio" class="section level3">
 <h3><span class="header-section-number">2.4.3</span> RStudio</h3>

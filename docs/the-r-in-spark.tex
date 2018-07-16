@@ -125,7 +125,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2018-07-11}
+    \date{2018-07-16}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -161,10 +161,13 @@
 \chapter*{Preface}\label{preface}}
 \addcontentsline{toc}{chapter}{Preface}
 
-In this book you will learn how to use Apache Spark with R using the
-\textbf{sparklyr} R package. The book intends to take someone unfamiliar
-with Spark or R and help them become intermediate users by teaching a
-set of tools, skills and practices applicable to data science.
+In this book you will learn how to use
+\href{https://spark.apache.org}{Apache Spark} with
+\href{http://www.r-project.org/}{R} using the
+\href{https://github.com/rstudio/sparklyr}{sparklyr} R package. The book
+intends to take someone unfamiliar with Spark or R and help them become
+intermediate users by teaching a set of tools, skills and practices
+applicable to data science.
 
 This work is licensed under the
 \href{http://creativecommons.org/licenses/by-nc-nd/3.0/us/}{Creative
@@ -174,8 +177,9 @@ Commons Attribution-NonCommercial-NoDerivs 3.0} United States License.
 \chapter{Introduction}\label{intro}}
 
 This chapter covers the historical background that lead to the
-development of Spark, introduces R in the context of Spark and
-\texttt{sparklyr} as a project bridging Spark and R.
+development of Apache Spark, introduces R in the context of Spark and
+\href{https://github.com/rstudio/sparklyr}{sparklyr} as a project
+bridging Spark and R.
 
 \hypertarget{background}{%
 \section{Background}\label{background}}
@@ -834,11 +838,11 @@ of tasks in the cluster. For local clusters, we can retrieve the
 \end{Shaded}
 
 \begin{verbatim}
-## 18/07/11 14:47:28 INFO SparkContext: Submitted application: sparklyr
-## 18/07/11 14:47:28 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:51313/jars/sparklyr-2.3-2.11.jar with timestamp 1531345648407
-## 18/07/11 14:47:31 INFO Executor: Fetching spark://localhost:51313/jars/sparklyr-2.3-2.11.jar with timestamp 1531345648407
-## 18/07/11 14:47:31 INFO Utils: Fetching spark://localhost:51313/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-fb96fa01-2677-48c5-b094-8e097ad9ccae/userFiles-2422dc43-cba0-478c-85e6-dc99bdc11093/fetchFileTemp6743287094392214052.tmp
-## 18/07/11 14:47:31 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-fb96fa01-2677-48c5-b094-8e097ad9ccae/userFiles-2422dc43-cba0-478c-85e6-dc99bdc11093/sparklyr-2.3-2.11.jar to class loader
+## 18/07/16 10:21:20 INFO SparkContext: Submitted application: sparklyr
+## 18/07/16 10:21:20 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:55314/jars/sparklyr-2.3-2.11.jar with timestamp 1531761680925
+## 18/07/16 10:21:24 INFO Executor: Fetching spark://localhost:55314/jars/sparklyr-2.3-2.11.jar with timestamp 1531761680925
+## 18/07/16 10:21:24 INFO Utils: Fetching spark://localhost:55314/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-ec1df593-9e04-4ccb-a7d7-1ef2d1e57904/userFiles-048b9d91-c9da-41f3-a301-a399cf1fce20/fetchFileTemp8702458663170880290.tmp
+## 18/07/16 10:21:24 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-ec1df593-9e04-4ccb-a7d7-1ef2d1e57904/userFiles-048b9d91-c9da-41f3-a301-a399cf1fce20/sparklyr-2.3-2.11.jar to class loader
 \end{verbatim}
 
 \hypertarget{using-spark-from-rstudio}{%
@@ -2445,7 +2449,7 @@ to learn how to use R directly over each worker node.
 \hypertarget{overview-4}{%
 \section{Overview}\label{overview-4}}
 
-One can understand a stream as an unbound data frame, meaning, a data
+One can understand a stream as an unbounded data frame, meaning, a data
 frame with finite columns but infinite rows. Streams are most relevant
 when processing real time data; for example, when analyzing a Twitter
 feed or stock prices. Both examples have well defined columns, like
@@ -2456,11 +2460,11 @@ Spark provided initial support for streams with Spark's DStreams;
 however, a more versatile and efficient replacement is available through
 \href{https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html}{Spark
 structured streams}. Structured streams provide scalable and
-fault-torerant data processing over streams of data. Meaning that, one
-can use many machines to process multiple streaming sources, perform
-joins with other streams or static sources, and recover from failures
-with at-least-once guarantees (where each message is certain to be
-delivered, but may do so multiple times).
+fault-torerant data processing over streams of data. That means, one can
+use many machines to process multiple streaming sources, perform joins
+with other streams or static sources, and recover from failures with
+at-least-once guarantees (where each message is certain to be delivered,
+but may do so multiple times).
 
 In order to use structured streams in \texttt{sparklyr}, one needs to
 define the \textbf{sources}, \textbf{transformations} and a
@@ -2495,9 +2499,10 @@ copy-stream in \texttt{sparklyr} as follows:
 \end{Highlighting}
 \end{Shaded}
 
-Once executed, the stream will monitor the \texttt{source} path and
-process data into the \texttt{destination/} path as it arrives. We can
-use \texttt{view\_stream()} to track the \textbf{rows per second (rps)}
+The streams starts running with \texttt{stream\_write\_*()}; once
+executed, the stream will monitor the \texttt{source} path and process
+data into the \texttt{destination/} path as it arrives. We can use
+\texttt{view\_stream()} to track the \textbf{rows per second (rps)}
 being processed in the source, destination and their latest values over
 time:
 
@@ -2656,16 +2661,16 @@ and even join across many concurrent streams:
 ## # Database: spark_connection
 ##    text   timestamp           random
 ##    <chr>  <dttm>               <dbl>
-##  1 Row 7  2018-07-11 21:49:09 0.263 
-##  2 Row 9  2018-07-11 21:49:09 0.888 
-##  3 Row 24 2018-07-11 21:49:09 0.0222
-##  4 Row 40 2018-07-11 21:49:09 0.362 
-##  5 Row 43 2018-07-11 21:49:09 0.327 
-##  6 Row 51 2018-07-11 21:49:09 0.742 
-##  7 Row 55 2018-07-11 21:49:09 0.118 
-##  8 Row 63 2018-07-11 21:49:09 0.647 
-##  9 Row 70 2018-07-11 21:49:09 0.946 
-## 10 Row 76 2018-07-11 21:49:09 0.129 
+##  1 Row 8  2018-07-16 17:23:05  0.108
+##  2 Row 15 2018-07-16 17:23:05  0.965
+##  3 Row 16 2018-07-16 17:23:05  0.171
+##  4 Row 20 2018-07-16 17:23:05  0.282
+##  5 Row 22 2018-07-16 17:23:05  0.868
+##  6 Row 27 2018-07-16 17:23:05  0.660
+##  7 Row 35 2018-07-16 17:23:05  0.492
+##  8 Row 38 2018-07-16 17:23:05  0.609
+##  9 Row 39 2018-07-16 17:23:05  0.461
+## 10 Row 48 2018-07-16 17:23:05  0.342
 ## # ... with more rows
 \end{verbatim}
 
@@ -2721,20 +2726,20 @@ and adds jitter using R code:
 \end{Shaded}
 
 \begin{verbatim}
-## # Source:   table<sparklyr_tmp_48d069829d40> [?? x 1]
+## # Source:   table<sparklyr_tmp_781e6cb21c24> [?? x 1]
 ## # Database: spark_connection
-##     data
-##    <dbl>
-##  1  1.16
-##  2  2.15
-##  3  3.10
-##  4  4.02
-##  5  4.83
-##  6  6.12
-##  7  7.16
-##  8  7.93
-##  9  9.18
-## 10  9.96
+##      data
+##     <dbl>
+##  1  0.866
+##  2  1.95 
+##  3  2.92 
+##  4  3.92 
+##  5  5.09 
+##  6  6.16 
+##  7  6.94 
+##  8  8.15 
+##  9  8.81 
+## 10 10.1  
 ## # ... with more rows
 \end{verbatim}
 
@@ -2780,6 +2785,27 @@ view a Spark stream summarized with \texttt{dplyr}:
 \KeywordTok{shinyApp}\NormalTok{(}\DataTypeTok{ui =}\NormalTok{ ui, }\DataTypeTok{server =}\NormalTok{ server)}
 \end{Highlighting}
 \end{Shaded}
+
+\hypertarget{formats}{%
+\section{Formats}\label{formats}}
+
+The following formats are available to read and write streaming data:
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule
+Format & Read & Write\tabularnewline
+\midrule
+\endhead
+CSV & stream\_read\_csv & stream\_write\_csv\tabularnewline
+JDBC & stream\_read\_jdbc & stream\_write\_jdbc\tabularnewline
+JSON & stream\_read\_json & stream\_write\_json\tabularnewline
+Kafka & stream\_read\_kafka & stream\_write\_kafka\tabularnewline
+ORC & stream\_read\_orc & stream\_write\_orc\tabularnewline
+Parquet & stream\_read\_parquet & stream\_write\_parquet\tabularnewline
+Text & stream\_read\_text & stream\_write\_text\tabularnewline
+Memory & & stream\_write\_memory\tabularnewline
+\bottomrule
+\end{longtable}
 
 \hypertarget{contributing}{%
 \chapter{Contributing}\label{contributing}}
