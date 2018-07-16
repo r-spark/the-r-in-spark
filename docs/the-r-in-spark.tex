@@ -838,11 +838,11 @@ of tasks in the cluster. For local clusters, we can retrieve the
 \end{Shaded}
 
 \begin{verbatim}
-## 18/07/16 10:21:20 INFO SparkContext: Submitted application: sparklyr
-## 18/07/16 10:21:20 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:55314/jars/sparklyr-2.3-2.11.jar with timestamp 1531761680925
-## 18/07/16 10:21:24 INFO Executor: Fetching spark://localhost:55314/jars/sparklyr-2.3-2.11.jar with timestamp 1531761680925
-## 18/07/16 10:21:24 INFO Utils: Fetching spark://localhost:55314/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-ec1df593-9e04-4ccb-a7d7-1ef2d1e57904/userFiles-048b9d91-c9da-41f3-a301-a399cf1fce20/fetchFileTemp8702458663170880290.tmp
-## 18/07/16 10:21:24 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-ec1df593-9e04-4ccb-a7d7-1ef2d1e57904/userFiles-048b9d91-c9da-41f3-a301-a399cf1fce20/sparklyr-2.3-2.11.jar to class loader
+## 18/07/16 16:32:38 INFO SparkContext: Submitted application: sparklyr
+## 18/07/16 16:32:39 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:51666/jars/sparklyr-2.3-2.11.jar with timestamp 1531783959303
+## 18/07/16 16:32:42 INFO Executor: Fetching spark://localhost:51666/jars/sparklyr-2.3-2.11.jar with timestamp 1531783959303
+## 18/07/16 16:32:42 INFO Utils: Fetching spark://localhost:51666/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-23c3be98-f643-4c26-bca0-add6d53b83d2/userFiles-43f7518f-b719-45b1-9543-60bc14371931/fetchFileTemp716811559375777767.tmp
+## 18/07/16 16:32:42 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-23c3be98-f643-4c26-bca0-add6d53b83d2/userFiles-43f7518f-b719-45b1-9543-60bc14371931/sparklyr-2.3-2.11.jar to class loader
 \end{verbatim}
 
 \hypertarget{using-spark-from-rstudio}{%
@@ -2536,23 +2536,17 @@ stream:
 \end{Shaded}
 
 In order to reproduce the above example, one needs to feed streaming
-data into the \texttt{source/} path. This was accomplished by running,
-before \texttt{stream\_view(stream)}, the following script to produce a
-file every second containing lines of text that follow two overlapping
-binomial distributions. In practice, you would connect to existing
-sources without having to generate data artificially.
+data into the \texttt{source/} path. This was accomplished by running
+\texttt{stream\_generate\_test()} to produce a file every second
+containing lines of text that follow overlapping binomial distributions.
+In practice, you would connect to existing sources without having to
+generate data artificially. See \texttt{?stream\_generate\_test} for
+additional details and make sure the \texttt{later} package is
+installed.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{unlink}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"source/"}\NormalTok{, }\StringTok{"destination/"}\NormalTok{), }\DataTypeTok{recursive =} \OtherTok{TRUE}\NormalTok{)}
-\KeywordTok{dir.create}\NormalTok{(}\StringTok{"source"}\NormalTok{)}
-\NormalTok{callr}\OperatorTok{::}\KeywordTok{r_bg}\NormalTok{(}\ControlFlowTok{function}\NormalTok{() \{}
-\NormalTok{  dist <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(}\DecValTok{10} \OperatorTok{+}\StringTok{ }\FloatTok{1e5} \OperatorTok{*}\StringTok{ }\NormalTok{(}\KeywordTok{dbinom}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{50}\NormalTok{, }\DecValTok{50}\NormalTok{, }\FloatTok{0.7}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{dbinom}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{50}\NormalTok{, }\DecValTok{50}\NormalTok{, }\FloatTok{0.3}\NormalTok{)))}
-  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \KeywordTok{seq_len}\NormalTok{(}\DecValTok{10}\NormalTok{)) \{}
-    \KeywordTok{writeLines}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"Row"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\NormalTok{dist[i]), }\KeywordTok{paste0}\NormalTok{(}\StringTok{"source/hello_"}\NormalTok{, i, }\StringTok{".txt"}\NormalTok{))}
-    \KeywordTok{Sys.sleep}\NormalTok{(}\DecValTok{1}\NormalTok{)}
-\NormalTok{  \}}
-\NormalTok{\})}
+\KeywordTok{stream_generate_test}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"Row"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{), }\StringTok{"source/"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -2661,16 +2655,16 @@ and even join across many concurrent streams:
 ## # Database: spark_connection
 ##    text   timestamp           random
 ##    <chr>  <dttm>               <dbl>
-##  1 Row 8  2018-07-16 17:23:05  0.108
-##  2 Row 15 2018-07-16 17:23:05  0.965
-##  3 Row 16 2018-07-16 17:23:05  0.171
-##  4 Row 20 2018-07-16 17:23:05  0.282
-##  5 Row 22 2018-07-16 17:23:05  0.868
-##  6 Row 27 2018-07-16 17:23:05  0.660
-##  7 Row 35 2018-07-16 17:23:05  0.492
-##  8 Row 38 2018-07-16 17:23:05  0.609
-##  9 Row 39 2018-07-16 17:23:05  0.461
-## 10 Row 48 2018-07-16 17:23:05  0.342
+##  1 Row 18 2018-07-16 23:34:27 0.589 
+##  2 Row 40 2018-07-16 23:34:27 0.539 
+##  3 Row 43 2018-07-16 23:34:27 0.649 
+##  4 Row 52 2018-07-16 23:34:27 0.0344
+##  5 Row 66 2018-07-16 23:34:27 0.156 
+##  6 Row 67 2018-07-16 23:34:27 0.879 
+##  7 Row 70 2018-07-16 23:34:27 0.523 
+##  8 Row 97 2018-07-16 23:34:27 0.529 
+##  9 Row 5  2018-07-16 23:34:27 0.746 
+## 10 Row 22 2018-07-16 23:34:27 0.204 
 ## # ... with more rows
 \end{verbatim}
 
@@ -2717,29 +2711,25 @@ and adds jitter using R code:
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{stream_read_text}\NormalTok{(sc, }\StringTok{"source/"}\NormalTok{) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{spark_apply}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(df) \{}
-    \KeywordTok{data.frame}\NormalTok{(}
-      \DataTypeTok{data =} \KeywordTok{jitter}\NormalTok{(}\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{gsub}\NormalTok{(}\StringTok{"Row "}\NormalTok{, }\StringTok{""}\NormalTok{, df}\OperatorTok{$}\NormalTok{text)))}
-\NormalTok{    )}
-\NormalTok{  \})}
+\StringTok{  }\KeywordTok{spark_apply}\NormalTok{(}\OperatorTok{~}\StringTok{ }\KeywordTok{jitter}\NormalTok{(}\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{gsub}\NormalTok{(}\StringTok{"Row "}\NormalTok{, }\StringTok{""}\NormalTok{, .x}\OperatorTok{$}\NormalTok{text))))}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## # Source:   table<sparklyr_tmp_781e6cb21c24> [?? x 1]
+## # Source:   table<sparklyr_tmp_c6c46dcf5cd3> [?? x 1]
 ## # Database: spark_connection
-##      data
+##    result
 ##     <dbl>
-##  1  0.866
-##  2  1.95 
-##  3  2.92 
-##  4  3.92 
-##  5  5.09 
-##  6  6.16 
-##  7  6.94 
-##  8  8.15 
-##  9  8.81 
-## 10 10.1  
+##  1  0.815
+##  2  2.20 
+##  3  2.86 
+##  4  3.85 
+##  5  4.85 
+##  6  6.19 
+##  7  6.90 
+##  8  8.14 
+##  9  8.88 
+## 10  9.90 
 ## # ... with more rows
 \end{verbatim}
 
