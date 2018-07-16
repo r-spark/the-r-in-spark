@@ -61,18 +61,10 @@ Use `stream_stop()` to properly stop processing data from this stream:
 stream_stop(stream)
 ```
 
-In order to reproduce the above example, one needs to feed streaming data into the `source/` path. This was accomplished by running, before `stream_view(stream)`, the following script to produce a file every second containing lines of text that follow two overlapping binomial distributions. In practice, you would connect to existing sources without having to generate data artificially.
+In order to reproduce the above example, one needs to feed streaming data into the `source/` path. This was accomplished by running `stream_generate_test()` to produce a file every second containing lines of text that follow overlapping binomial distributions. In practice, you would connect to existing sources without having to generate data artificially. See `?stream_generate_test` for additional details and make sure the `later` package is installed.
 
 ```{r eval=FALSE}
-unlink(c("source/", "destination/"), recursive = TRUE)
-dir.create("source")
-callr::r_bg(function() {
-  dist <- floor(10 + 1e5 * (dbinom(1:50, 50, 0.7) + dbinom(1:50, 50, 0.3)))
-  for (i in seq_len(10)) {
-    writeLines(paste("Row", 1:dist[i]), paste0("source/hello_", i, ".txt"))
-    Sys.sleep(1)
-  }
-})
+stream_generate_test(paste("Row", 1:1000), "source/")
 ```
 
 For the subsequent examples, a stream with one hundred rows of text will be used:
@@ -147,11 +139,7 @@ The following example splits a stream of `Row #` line entries and adds jitter us
 
 ```{r}
 stream_read_text(sc, "source/") %>%
-  spark_apply(function(df) {
-    data.frame(
-      data = jitter(as.numeric(gsub("Row ", "", df$text)))
-    )
-  })
+  spark_apply(~ jitter(as.numeric(gsub("Row ", "", .x$text))))
 ```
 
 ## Shiny
