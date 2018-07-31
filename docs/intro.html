@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi">
 
 
-<meta name="date" content="2018-07-16">
+<meta name="date" content="2018-07-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -175,7 +175,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a><ul>
 <li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
-<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>4.2</b> Pipelines</a></li>
+<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#supervised"><i class="fa fa-check"></i><b>4.2</b> Supervised</a></li>
+<li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#unsupervised"><i class="fa fa-check"></i><b>4.3</b> Unsupervised</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="modeling.html"><a href="modeling.html#k-means-clustering"><i class="fa fa-check"></i><b>4.3.1</b> K-Means Clustering</a></li>
+<li class="chapter" data-level="4.3.2" data-path="modeling.html"><a href="modeling.html#gaussian-mixture-clustering"><i class="fa fa-check"></i><b>4.3.2</b> Gaussian Mixture Clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="modeling.html"><a href="modeling.html#broom"><i class="fa fa-check"></i><b>4.4</b> Broom</a></li>
+<li class="chapter" data-level="4.5" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>4.5</b> Pipelines</a></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>5</b> Clusters</a><ul>
 <li class="chapter" data-level="5.1" data-path="clusters.html"><a href="clusters.html#overview-1"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
@@ -325,11 +331,12 @@ FIGURE 1.1: World’s capacity to store information.
 <p>meaning that Spark is a tool designed to support:</p>
 <ul>
 <li><strong>Data Processing</strong>: Data processing is the collection and manipulation of items of data to produce meaningful information <span class="citation">(French <a href="#ref-data-processing">1996</a>)</span>.</li>
-<li><strong>Large-Scale</strong>: What <em>large</em> means is hard to quantify, but one can interpret this as cluster-scale instead, which represents a set of connected computers that work together.</li>
-<li><strong>General</strong>: Spark optimizes and executes parallel generic code, as in, there is no restriction as to what type of code one can write in Spark.</li>
+<li><strong>General</strong>: Spark optimizes and executes parallel generic code, as in, there are no restrictions as to what type of code one can write in Spark.</li>
+<li><strong>Large-Scale</strong>: One can interpret this as cluster-scale, as in, a set of connected computers working together to accomplish specific goals.</li>
 <li><strong>Fast</strong>: Spark is much faster than its predecessor by making efficient use of memory to speed data access while running algorithms at scale.</li>
 </ul>
-<p>Spark is good at tackling large-scale data processing problems, this usually known as <strong>big data</strong> (<a href="https://en.wikipedia.org/wiki/big_data">data sets that are more voluminous and complex that traditional ones</a>), but also is good at tackling large-scale computation problems, known as <strong>big compute</strong> (<a href="https://www.nimbix.net/glossary/big-compute/">tools and approaches using a large amount of CPU and memory resources in a coordinated way</a>). There is a third problem space where data nor compute are necessarily large scale and yet, there are significant benefits from using the same tools.</p>
+<p><em>Data</em> <em>Processing</em> means you can use Spark to process data, which is not surprising but also, not very descriptive. <em>General</em> is required to allow you to run any data analysis but is not interesting in it’s own. Describing Spark as <em>large</em> <em>scale</em> is relevant since it implies that a good use case for Spark is tackling problems that can be solved with multiple machines. For instance, when data does not fit in a single disk driver or does not fit into memory, Spark is a good candidate to consider. However, Spark is also <em>fast</em>, meaning, that is worth considering for problems that are not large-scale, but where using multiple processors could speed up computation. For instance, sorting large datasets that fit in memory or cpu intensive models could also bennefit from running in Spark.</p>
+<p>Therefore, Spark is good at tackling large-scale data processing problems, this usually known as <strong>big data</strong> (<a href="https://en.wikipedia.org/wiki/big_data">data sets that are more voluminous and complex that traditional ones</a>), but also is good at tackling large-scale computation problems, known as <strong>big compute</strong> (<a href="https://www.nimbix.net/glossary/big-compute/">tools and approaches using a large amount of CPU and memory resources in a coordinated way</a>). There is a third problem space where data nor compute are necessarily large scale and yet, there are significant benefits from using the same tools.</p>
 <p>Big data and big compute problems are usually easy to spot, if the data does not fit into a single machine, you might have a big data problem; if the data fits into a single machine but a process over the data takes days, weeks or months to compute, you might have a big compute problem.</p>
 <p>For the third problem space, there are a few use cases this breaks to:</p>
 <ol style="list-style-type: decimal">

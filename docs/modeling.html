@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi">
 
 
-<meta name="date" content="2018-07-16">
+<meta name="date" content="2018-07-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -175,7 +175,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a><ul>
 <li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
-<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>4.2</b> Pipelines</a></li>
+<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#supervised"><i class="fa fa-check"></i><b>4.2</b> Supervised</a></li>
+<li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#unsupervised"><i class="fa fa-check"></i><b>4.3</b> Unsupervised</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="modeling.html"><a href="modeling.html#k-means-clustering"><i class="fa fa-check"></i><b>4.3.1</b> K-Means Clustering</a></li>
+<li class="chapter" data-level="4.3.2" data-path="modeling.html"><a href="modeling.html#gaussian-mixture-clustering"><i class="fa fa-check"></i><b>4.3.2</b> Gaussian Mixture Clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="modeling.html"><a href="modeling.html#broom"><i class="fa fa-check"></i><b>4.4</b> Broom</a></li>
+<li class="chapter" data-level="4.5" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>4.5</b> Pipelines</a></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>5</b> Clusters</a><ul>
 <li class="chapter" data-level="5.1" data-path="clusters.html"><a href="clusters.html#overview-1"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
@@ -299,7 +305,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="modeling" class="section level1">
 <h1><span class="header-section-number">Chapter 4</span> Modeling</h1>
-<p>While <strong>this chatper has not been written</strong>, a few resources and basic examples were made available to help out until this chapter is written.</p>
+<p>While <strong>this chatper has not been written</strong>, a few resources and basic examples were made available to help out until this chapter is completed.</p>
 <div id="overview" class="section level2">
 <h2><span class="header-section-number">4.1</span> Overview</h2>
 <p>MLlib is Apache Spark’s scalable machine learning library and is available through <code>sparklyr</code>, mostly, with functions prefixed with <code>ml_</code>. The following table describes some of the modeling algorithms supported:</p>
@@ -313,78 +319,234 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <tbody>
 <tr class="odd">
 <td>Accelerated Failure Time Survival Regression</td>
-<td>ml_aft_survival_regression</td>
+<td>ml_aft_survival_regression()</td>
 </tr>
 <tr class="even">
 <td>Alternating Least Squares Factorization</td>
-<td>ml_als</td>
+<td>ml_als()</td>
+</tr>
+<tr class="odd">
+<td>Bisecting K-Means Clustering</td>
+<td>ml_bisecting_kmeans()</td>
+</tr>
+<tr class="even">
+<td>Chi-square Hypothesis Testing</td>
+<td>ml_chisquare_test()</td>
 </tr>
 <tr class="odd">
 <td>Correlation Matrix</td>
-<td>ml_corr</td>
+<td>ml_corr()</td>
 </tr>
 <tr class="even">
 <td>Decision Trees</td>
-<td>ml_decision_tree</td>
+<td>ml_decision_tree ()</td>
+</tr>
+<tr class="odd">
+<td>Frequent Pattern Mining</td>
+<td>ml_fpgrowth()</td>
+</tr>
+<tr class="even">
+<td>Gaussian Mixture Clustering</td>
+<td>ml_gaussian_mixture()</td>
 </tr>
 <tr class="odd">
 <td>Generalized Linear Regression</td>
-<td>ml_generalized_linear_regression</td>
+<td>ml_generalized_linear_regression()</td>
 </tr>
 <tr class="even">
 <td>Gradient-Boosted Trees</td>
-<td>ml_gradient_boosted_trees</td>
+<td>ml_gradient_boosted_trees()</td>
 </tr>
 <tr class="odd">
 <td>Isotonic Regression</td>
-<td>ml_isotonic_regression</td>
+<td>ml_isotonic_regression()</td>
 </tr>
 <tr class="even">
 <td>K-Means Clustering</td>
-<td>ml_kmeans</td>
+<td>ml_kmeans()</td>
 </tr>
 <tr class="odd">
 <td>Latent Dirichlet Allocation</td>
-<td>ml_lda</td>
+<td>ml_lda()</td>
 </tr>
 <tr class="even">
 <td>Linear Regression</td>
-<td>ml_linear_regression</td>
+<td>ml_linear_regression()</td>
 </tr>
 <tr class="odd">
 <td>Linear Support Vector Machines</td>
-<td>ml_linear_svc</td>
+<td>ml_linear_svc()</td>
 </tr>
 <tr class="even">
 <td>Logistic Regression</td>
-<td>ml_logistic_regression</td>
+<td>ml_logistic_regression()</td>
 </tr>
 <tr class="odd">
 <td>Multilayer Perceptron</td>
-<td>ml_multilayer_perceptron</td>
+<td>ml_multilayer_perceptron()</td>
 </tr>
 <tr class="even">
 <td>Naive-Bayes</td>
-<td>ml_naive_bayes</td>
+<td>ml_naive_bayes()</td>
 </tr>
 <tr class="odd">
 <td>One vs Rest</td>
-<td>ml_one_vs_rest</td>
+<td>ml_one_vs_rest()</td>
 </tr>
 <tr class="even">
 <td>Principal Components Analysis</td>
-<td>ml_pca</td>
+<td>ml_pca()</td>
 </tr>
 <tr class="odd">
 <td>Random Forests</td>
-<td>ml_random_forest</td>
+<td>ml_random_forest()</td>
 </tr>
 <tr class="even">
 <td>Survival Regression</td>
-<td>ml_survival_regression</td>
+<td>ml_survival_regression()</td>
 </tr>
 </tbody>
 </table>
+<p>To complement those algorithms, you will often also want to consider using the following feature transformers:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Transformer</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Binarizer</td>
+<td>ft_binarizer()</td>
+</tr>
+<tr class="even">
+<td>Bucketizer</td>
+<td>ft_bucketizer()</td>
+</tr>
+<tr class="odd">
+<td>Chi-Squared Feature Selector</td>
+<td>ft_chisq_selector()</td>
+</tr>
+<tr class="even">
+<td>Vocabulary from Document Collections</td>
+<td>ft_count_vectorizer()</td>
+</tr>
+<tr class="odd">
+<td>Discrete Cosine Transform</td>
+<td>ft_discrete_cosine_transform()</td>
+</tr>
+<tr class="even">
+<td>Transformation using dplyr</td>
+<td>ft_dplyr_transformer()</td>
+</tr>
+<tr class="odd">
+<td>Hadamard Product</td>
+<td>ft_elementwise_product()</td>
+</tr>
+<tr class="even">
+<td>Feature Hasher</td>
+<td>ft_feature_hasher()</td>
+</tr>
+<tr class="odd">
+<td>Term Frequencies using Hashing</td>
+<td>export(ft_hashing_tf)</td>
+</tr>
+<tr class="even">
+<td>Inverse Document Frequency</td>
+<td>ft_idf()</td>
+</tr>
+<tr class="odd">
+<td>Imputation for Missing Values</td>
+<td>export(ft_imputer)</td>
+</tr>
+<tr class="even">
+<td>Index to String</td>
+<td>ft_index_to_string()</td>
+</tr>
+<tr class="odd">
+<td>Feature Interaction Transform</td>
+<td>ft_interaction()</td>
+</tr>
+<tr class="even">
+<td>Rescale to [-1, 1] Range</td>
+<td>ft_max_abs_scaler()</td>
+</tr>
+<tr class="odd">
+<td>Rescale to [min, max] Range</td>
+<td>ft_min_max_scaler()</td>
+</tr>
+<tr class="even">
+<td>Locality Sensitive Hashing</td>
+<td>ft_minhash_lsh()</td>
+</tr>
+<tr class="odd">
+<td>Converts to n-grams</td>
+<td>ft_ngram()</td>
+</tr>
+<tr class="even">
+<td>Normalize using the given P-Norm</td>
+<td>ft_normalizer()</td>
+</tr>
+<tr class="odd">
+<td>One-Hot Encoding</td>
+<td>ft_one_hot_encoder()</td>
+</tr>
+<tr class="even">
+<td>Feature Expansion in Polynomial Space</td>
+<td>ft_polynomial_expansion()</td>
+</tr>
+<tr class="odd">
+<td>Maps to Binned Categorical Features</td>
+<td>ft_quantile_discretizer()</td>
+</tr>
+<tr class="even">
+<td>SQL Transformation</td>
+<td>ft_sql_transformer()</td>
+</tr>
+<tr class="odd">
+<td>Standardizes Features using Corrected STD</td>
+<td>ft_standard_scaler()</td>
+</tr>
+<tr class="even">
+<td>Filters out Stop Words</td>
+<td>ft_stop_words_remover()</td>
+</tr>
+<tr class="odd">
+<td>Map to Label Indices</td>
+<td>ft_string_indexer()</td>
+</tr>
+<tr class="even">
+<td>Splits by White Spaces</td>
+<td>export(ft_tokenizer)</td>
+</tr>
+<tr class="odd">
+<td>Combine Vectors to Row Vector</td>
+<td>ft_vector_assembler()</td>
+</tr>
+<tr class="even">
+<td>Indexing Categorical Feature</td>
+<td>ft_vector_indexer()</td>
+</tr>
+<tr class="odd">
+<td>Subarray of the Original Feature</td>
+<td>ft_vector_slicer()</td>
+</tr>
+<tr class="even">
+<td>Transform Word into Code</td>
+<td>ft_word2vec()</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="supervised" class="section level2">
+<h2><span class="header-section-number">4.2</span> Supervised</h2>
+<p>Examples are reosurces are available in <a href="http://spark.rstudio.com/mlib/">spark.rstudio.com/mlib</a>.</p>
+</div>
+<div id="unsupervised" class="section level2">
+<h2><span class="header-section-number">4.3</span> Unsupervised</h2>
+<div id="k-means-clustering" class="section level3">
+<h3><span class="header-section-number">4.3.1</span> K-Means Clustering</h3>
 <p>Here is an example to get you started with K-Means:</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a>
 <a class="sourceLine" id="cb24-2" data-line-number="2"></a>
@@ -397,19 +559,67 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb24-9" data-line-number="9"><span class="co"># Run K-Means for Species using only Petal_Width and Petal_Length as features</span></a>
 <a class="sourceLine" id="cb24-10" data-line-number="10">iris_tbl <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb24-11" data-line-number="11"><span class="st">  </span><span class="kw">ml_kmeans</span>(<span class="dt">centers =</span> <span class="dv">3</span>, Species <span class="op">~</span><span class="st"> </span>Petal_Width <span class="op">+</span><span class="st"> </span>Petal_Length)</a></code></pre></div>
-<pre><code>## K-means clustering with 3 clusters
-## 
-## Cluster centers:
-##   Petal_Width Petal_Length
-## 1    1.359259     4.292593
-## 2    0.246000     1.462000
-## 3    2.047826     5.626087
-## 
-## Within Set Sum of Squared Errors =  31.41289</code></pre>
-<p>More examples are reosurces are available in <a href="http://spark.rstudio.com/mlib/">spark.rstudio.com/mlib</a>.</p>
+</div>
+<div id="gaussian-mixture-clustering" class="section level3">
+<h3><span class="header-section-number">4.3.2</span> Gaussian Mixture Clustering</h3>
+<p>Alternatevely, we can also cluster using <a href="https://en.wikipedia.org/wiki/Mixture_model#Gaussian_mixture_model">Gaussian Mixture Models</a> (GMMs).</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" data-line-number="1">predictions &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, fueleconomy<span class="op">::</span>vehicles) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb25-2" data-line-number="2"><span class="st">  </span><span class="kw">ml_gaussian_mixture</span>(<span class="op">~</span><span class="st"> </span>hwy <span class="op">+</span><span class="st"> </span>cty, <span class="dt">k =</span> <span class="dv">3</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb25-3" data-line-number="3"><span class="st">  </span><span class="kw">ml_predict</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>()</a>
+<a class="sourceLine" id="cb25-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb25-5" data-line-number="5">predictions <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb25-6" data-line-number="6"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(hwy, cty)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb25-7" data-line-number="7"><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(hwy, cty, <span class="dt">col =</span> <span class="kw">factor</span>(prediction)), <span class="dt">size =</span> <span class="dv">2</span>, <span class="dt">alpha =</span> <span class="fl">0.4</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb25-8" data-line-number="8"><span class="st">  </span><span class="kw">scale_color_discrete</span>(<span class="dt">name =</span> <span class="st">&quot;&quot;</span>, <span class="dt">labels =</span> <span class="kw">paste</span>(<span class="st">&quot;Cluster&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb25-9" data-line-number="9"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Highway&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;City&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme_light</span>()</a></code></pre></div>
+<div class="figure"><span id="fig:unnamed-chunk-24"></span>
+<img src="the-r-in-spark_files/figure-html/unnamed-chunk-24-1.png" alt="Fuel economy data for 1984-2015 from the US EPA" width="672" />
+<p class="caption">
+FIGURE 4.1: Fuel economy data for 1984-2015 from the US EPA
+</p>
+</div>
+</div>
+</div>
+<div id="broom" class="section level2">
+<h2><span class="header-section-number">4.4</span> Broom</h2>
+<p>You can turn your <code>sparklyr</code> models into data frames using the <code>broom</code> package:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1">model &lt;-<span class="st"> </span>cars_tbl <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb26-2" data-line-number="2"><span class="st">  </span><span class="kw">ml_linear_regression</span>(mpg <span class="op">~</span><span class="st"> </span>wt <span class="op">+</span><span class="st"> </span>cyl)</a>
+<a class="sourceLine" id="cb26-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb26-4" data-line-number="4"><span class="co"># Turn a model object into a data frame</span></a>
+<a class="sourceLine" id="cb26-5" data-line-number="5">broom<span class="op">::</span><span class="kw">tidy</span>(model)</a></code></pre></div>
+<pre><code>## # A tibble: 3 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)    39.7      1.71      23.1  0       
+## 2 wt             -3.19     0.757     -4.22 0.000222
+## 3 cyl            -1.51     0.415     -3.64 0.00106</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1"><span class="co"># Construct a single row summary</span></a>
+<a class="sourceLine" id="cb28-2" data-line-number="2">broom<span class="op">::</span><span class="kw">glance</span>(model)</a></code></pre></div>
+<pre><code>## # A tibble: 1 x 5
+##   explained.variance mean.absolute.error mean.squared.error r.squared
+##                &lt;dbl&gt;               &lt;dbl&gt;              &lt;dbl&gt;     &lt;dbl&gt;
+## 1               29.2                1.92               5.97     0.830
+## # ... with 1 more variable: root.mean.squared.error &lt;dbl&gt;</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="co"># Augments each observation in the dataset with the model</span></a>
+<a class="sourceLine" id="cb30-2" data-line-number="2">broom<span class="op">::</span><span class="kw">augment</span>(model, cars_tbl)</a></code></pre></div>
+<pre><code>## # A tibble: 32 x 14
+##    `_c0`   mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##    &lt;chr&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+##  1 Mazd…  21       6  160    110  3.9   2.62  16.5     0     1     4     4
+##  2 Mazd…  21       6  160    110  3.9   2.88  17.0     0     1     4     4
+##  3 Dats…  22.8     4  108     93  3.85  2.32  18.6     1     1     4     1
+##  4 Horn…  21.4     6  258    110  3.08  3.22  19.4     1     0     3     1
+##  5 Horn…  18.7     8  360    175  3.15  3.44  17.0     0     0     3     2
+##  6 Vali…  18.1     6  225    105  2.76  3.46  20.2     1     0     3     1
+##  7 Dust…  14.3     8  360    245  3.21  3.57  15.8     0     0     3     4
+##  8 Merc…  24.4     4  147.    62  3.69  3.19  20       1     0     4     2
+##  9 Merc…  22.8     4  141.    95  3.92  3.15  22.9     1     0     4     2
+## 10 Merc…  19.2     6  168.   123  3.92  3.44  18.3     1     0     4     4
+## # ... with 22 more rows, and 2 more variables: fitted &lt;dbl&gt;, resid &lt;dbl&gt;</code></pre>
 </div>
 <div id="pipelines" class="section level2">
-<h2><span class="header-section-number">4.2</span> Pipelines</h2>
+<h2><span class="header-section-number">4.5</span> Pipelines</h2>
 <p>Spark’s ML Pipelines provide a way to easily combine multiple transformations and algorithms into a single workflow, or pipeline.</p>
 <p>Take a look at <a href="http://spark.rstudio.com/guides/pipelines/">spark.rstudio.com/guides/pipelines</a> to learn about their purpose and functionality.</p>
 

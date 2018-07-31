@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi">
 
 
-<meta name="date" content="2018-07-16">
+<meta name="date" content="2018-07-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -175,7 +175,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a><ul>
 <li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
-<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>4.2</b> Pipelines</a></li>
+<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#supervised"><i class="fa fa-check"></i><b>4.2</b> Supervised</a></li>
+<li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#unsupervised"><i class="fa fa-check"></i><b>4.3</b> Unsupervised</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="modeling.html"><a href="modeling.html#k-means-clustering"><i class="fa fa-check"></i><b>4.3.1</b> K-Means Clustering</a></li>
+<li class="chapter" data-level="4.3.2" data-path="modeling.html"><a href="modeling.html#gaussian-mixture-clustering"><i class="fa fa-check"></i><b>4.3.2</b> Gaussian Mixture Clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="modeling.html"><a href="modeling.html#broom"><i class="fa fa-check"></i><b>4.4</b> Broom</a></li>
+<li class="chapter" data-level="4.5" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>4.5</b> Pipelines</a></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>5</b> Clusters</a><ul>
 <li class="chapter" data-level="5.1" data-path="clusters.html"><a href="clusters.html#overview-1"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
@@ -302,39 +308,39 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><strong>This chatper has not been written.</strong></p>
 <div id="overview-3" class="section level2">
 <h2><span class="header-section-number">7.1</span> Overview</h2>
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-60"></span>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-72"></span>
 <img src="images/07-tuning-spark-rdds.png" alt="Spark RDDs" width="1057" />
 <p class="caption">
 FIGURE 7.1: Spark RDDs
 </p>
 </div>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" data-line-number="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">memory =</span> <span class="st">&quot;4g&quot;</span>, <span class="dt">cores =</span> <span class="dv">8</span>)</a>
-<a class="sourceLine" id="cb52-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb52-3" data-line-number="3">entries &lt;-<span class="st"> </span><span class="dv">100000000</span></a>
-<a class="sourceLine" id="cb52-4" data-line-number="4">sort_r &lt;-<span class="st"> </span><span class="kw">system.time</span>(<span class="kw">runif</span>(entries, <span class="dv">0</span>, <span class="dv">100</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sort</span>())[<span class="st">&quot;elapsed&quot;</span>]</a>
-<a class="sourceLine" id="cb52-5" data-line-number="5">sort_spark &lt;-<span class="st"> </span><span class="kw">system.time</span>(<span class="kw">sdf_len</span>(sc, entries) <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw">mutate</span>(<span class="dt">x =</span> <span class="kw">rand</span>()) <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw">arrange</span>() <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw">compute</span>())[<span class="st">&quot;elapsed&quot;</span>]</a>
-<a class="sourceLine" id="cb52-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb52-7" data-line-number="7"><span class="kw">lapply</span>(<span class="kw">expt</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" data-line-number="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">memory =</span> <span class="st">&quot;4g&quot;</span>, <span class="dt">cores =</span> <span class="dv">8</span>)</a>
+<a class="sourceLine" id="cb59-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb59-3" data-line-number="3">entries &lt;-<span class="st"> </span><span class="dv">100000000</span></a>
+<a class="sourceLine" id="cb59-4" data-line-number="4">sort_r &lt;-<span class="st"> </span><span class="kw">system.time</span>(<span class="kw">runif</span>(entries, <span class="dv">0</span>, <span class="dv">100</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sort</span>())[<span class="st">&quot;elapsed&quot;</span>]</a>
+<a class="sourceLine" id="cb59-5" data-line-number="5">sort_spark &lt;-<span class="st"> </span><span class="kw">system.time</span>(<span class="kw">sdf_len</span>(sc, entries) <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw">mutate</span>(<span class="dt">x =</span> <span class="kw">rand</span>()) <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw">arrange</span>() <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw">compute</span>())[<span class="st">&quot;elapsed&quot;</span>]</a>
+<a class="sourceLine" id="cb59-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb59-7" data-line-number="7"><span class="kw">lapply</span>(<span class="kw">expt</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>))</a></code></pre></div>
 </div>
 <div id="configuration" class="section level2">
 <h2><span class="header-section-number">7.2</span> Configuration</h2>
-<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" data-line-number="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
-<a class="sourceLine" id="cb53-2" data-line-number="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a>
-<a class="sourceLine" id="cb53-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb53-4" data-line-number="4"><span class="kw">spark_context_config</span>(sc)</a>
-<a class="sourceLine" id="cb53-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb53-6" data-line-number="6"><span class="kw">spark_session_config</span>(sc)</a>
-<a class="sourceLine" id="cb53-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb53-8" data-line-number="8"><span class="co"># Previous versions</span></a>
-<a class="sourceLine" id="cb53-9" data-line-number="9"><span class="kw">spark_hive_config</span>(sc)</a></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" data-line-number="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
+<a class="sourceLine" id="cb60-2" data-line-number="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a>
+<a class="sourceLine" id="cb60-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb60-4" data-line-number="4"><span class="kw">spark_context_config</span>(sc)</a>
+<a class="sourceLine" id="cb60-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb60-6" data-line-number="6"><span class="kw">spark_session_config</span>(sc)</a>
+<a class="sourceLine" id="cb60-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb60-8" data-line-number="8"><span class="co"># Previous versions</span></a>
+<a class="sourceLine" id="cb60-9" data-line-number="9"><span class="kw">spark_hive_config</span>(sc)</a></code></pre></div>
 <p><a href="https://spark.apache.org/docs/latest/configuration.html" class="uri">https://spark.apache.org/docs/latest/configuration.html</a></p>
 </div>
 <div id="caching" class="section level2">
 <h2><span class="header-section-number">7.3</span> Caching</h2>
 <p>Most sparklyr operations that retrieve a Spark data frame, cache the results in-memory, for instance, running <code>spark_read_parquet()</code> or <code>sdf_copy_to()</code> will provide a Spark dataframe that is already cached in-memory. As a Spark data frame, this object can be used in most sparklyr functions, including data analysis with dplyr or machine learning.</p>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb54-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a>
-<a class="sourceLine" id="cb54-2" data-line-number="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a></code></pre></div>
-<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" data-line-number="1">iris_tbl &lt;-<span class="st"> </span><span class="kw">sdf_copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb61-2" data-line-number="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb62-1" data-line-number="1">iris_tbl &lt;-<span class="st"> </span><span class="kw">sdf_copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <p>You can inspect which tables are cached by navigating to the Spark UI using <code>spark_web(sc)</code>, opening the storage tab, and clicking on a given RDD:</p>
 <div class="figure" style="text-align: center"><span id="fig:spark-standalone-rdd-web"></span>
 <img src="images/07-tuning-cache-rdd-web.png" alt="Cached RDD in Spark Web Interface." width="496" />
@@ -343,7 +349,7 @@ FIGURE 7.2: Cached RDD in Spark Web Interface.
 </p>
 </div>
 <p>Data loaded in memory will be released when the R session terminates either explicitly or implicitly with a restart or disconnection; however, to free up resources, you can use <code>tbl_uncache()</code>:</p>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb56-1" data-line-number="1"><span class="kw">tbl_uncache</span>(sc, <span class="st">&quot;iris&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" data-line-number="1"><span class="kw">tbl_uncache</span>(sc, <span class="st">&quot;iris&quot;</span>)</a></code></pre></div>
 </div>
 <div id="partitions" class="section level2">
 <h2><span class="header-section-number">7.4</span> Partitions</h2>
@@ -358,7 +364,7 @@ FIGURE 7.2: Cached RDD in Spark Web Interface.
 <h2><span class="header-section-number">7.7</span> Troubleshooting</h2>
 <div id="graph-visualization" class="section level3">
 <h3><span class="header-section-number">7.7.1</span> Graph Visualization</h3>
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-69"></span>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-81"></span>
 <img src="images/07-tuning-spark-graph-visualization.png" alt="Spark Graph Visualization" width="476" />
 <p class="caption">
 FIGURE 7.3: Spark Graph Visualization
@@ -369,10 +375,10 @@ FIGURE 7.3: Spark Graph Visualization
 <h3><span class="header-section-number">7.7.2</span> Event Timeline</h3>
 <p>One of the best ways to tune your Spark jobs is to use the Spark’s <a href="spark-web-interface">web interface</a>, click on the job being diagnosed, then the stage and then expand the <strong>event timeline</strong>.</p>
 <p>Lets the take a look at the event timeline for the ordering a data frame by a given column using three partitions:</p>
-<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" data-line-number="1"><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb57-2" data-line-number="2"><span class="st">  </span><span class="kw">copy_to</span>(iris, <span class="dt">repartition =</span> <span class="dv">3</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb57-3" data-line-number="3"><span class="st">  </span><span class="kw">arrange</span>(Sepal_Width)</a></code></pre></div>
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-73"></span>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb64-1" data-line-number="1"><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb64-2" data-line-number="2"><span class="st">  </span><span class="kw">copy_to</span>(iris, <span class="dt">repartition =</span> <span class="dv">3</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb64-3" data-line-number="3"><span class="st">  </span><span class="kw">arrange</span>(Sepal_Width)</a></code></pre></div>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-85"></span>
 <img src="images/07-tuning-spark-event-timeline.png" alt="Spark Event Timeline" width="90%" />
 <p class="caption">
 FIGURE 7.4: Spark Event Timeline

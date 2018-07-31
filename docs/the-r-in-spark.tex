@@ -125,7 +125,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2018-07-16}
+    \date{2018-07-30}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -292,21 +292,34 @@ meaning that Spark is a tool designed to support:
   manipulation of items of data to produce meaningful information
   \citep{data-processing}.
 \item
-  \textbf{Large-Scale}: What \emph{large} means is hard to quantify, but
-  one can interpret this as cluster-scale instead, which represents a
-  set of connected computers that work together.
-\item
   \textbf{General}: Spark optimizes and executes parallel generic code,
-  as in, there is no restriction as to what type of code one can write
+  as in, there are no restrictions as to what type of code one can write
   in Spark.
+\item
+  \textbf{Large-Scale}: One can interpret this as cluster-scale, as in,
+  a set of connected computers working together to accomplish specific
+  goals.
 \item
   \textbf{Fast}: Spark is much faster than its predecessor by making
   efficient use of memory to speed data access while running algorithms
   at scale.
 \end{itemize}
 
-Spark is good at tackling large-scale data processing problems, this
-usually known as \textbf{big data}
+\emph{Data} \emph{Processing} means you can use Spark to process data,
+which is not surprising but also, not very descriptive. \emph{General}
+is required to allow you to run any data analysis but is not interesting
+in it's own. Describing Spark as \emph{large} \emph{scale} is relevant
+since it implies that a good use case for Spark is tackling problems
+that can be solved with multiple machines. For instance, when data does
+not fit in a single disk driver or does not fit into memory, Spark is a
+good candidate to consider. However, Spark is also \emph{fast}, meaning,
+that is worth considering for problems that are not large-scale, but
+where using multiple processors could speed up computation. For
+instance, sorting large datasets that fit in memory or cpu intensive
+models could also bennefit from running in Spark.
+
+Therefore, Spark is good at tackling large-scale data processing
+problems, this usually known as \textbf{big data}
 (\href{https://en.wikipedia.org/wiki/big_data}{data sets that are more
 voluminous and complex that traditional ones}), but also is good at
 tackling large-scale computation problems, known as \textbf{big compute}
@@ -838,11 +851,11 @@ of tasks in the cluster. For local clusters, we can retrieve the
 \end{Shaded}
 
 \begin{verbatim}
-## 18/07/16 16:32:38 INFO SparkContext: Submitted application: sparklyr
-## 18/07/16 16:32:39 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:51666/jars/sparklyr-2.3-2.11.jar with timestamp 1531783959303
-## 18/07/16 16:32:42 INFO Executor: Fetching spark://localhost:51666/jars/sparklyr-2.3-2.11.jar with timestamp 1531783959303
-## 18/07/16 16:32:42 INFO Utils: Fetching spark://localhost:51666/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-23c3be98-f643-4c26-bca0-add6d53b83d2/userFiles-43f7518f-b719-45b1-9543-60bc14371931/fetchFileTemp716811559375777767.tmp
-## 18/07/16 16:32:42 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-23c3be98-f643-4c26-bca0-add6d53b83d2/userFiles-43f7518f-b719-45b1-9543-60bc14371931/sparklyr-2.3-2.11.jar to class loader
+## 18/07/30 22:07:14 INFO SparkContext: Submitted application: sparklyr
+## 18/07/30 22:07:14 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:61221/jars/sparklyr-2.3-2.11.jar with timestamp 1533013634759
+## 18/07/30 22:07:18 INFO Executor: Fetching spark://localhost:61221/jars/sparklyr-2.3-2.11.jar with timestamp 1533013634759
+## 18/07/30 22:07:18 INFO Utils: Fetching spark://localhost:61221/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-fbc16169-da10-43e1-822f-de9d4444aad3/userFiles-f1992f22-c7d4-42ba-8acc-7f86eeec49d5/fetchFileTemp3335186390879314888.tmp
+## 18/07/30 22:07:18 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-fbc16169-da10-43e1-822f-de9d4444aad3/userFiles-f1992f22-c7d4-42ba-8acc-7f86eeec49d5/sparklyr-2.3-2.11.jar to class loader
 \end{verbatim}
 
 \hypertarget{using-spark-from-rstudio}{%
@@ -1028,7 +1041,7 @@ vignettes:
 
 While \textbf{this chatper has not been written}, a few resources and
 basic examples were made available to help out until this chapter is
-written.
+completed.
 
 \hypertarget{overview}{%
 \section{Overview}\label{overview}}
@@ -1044,27 +1057,89 @@ Algorithm & Function\tabularnewline
 \midrule
 \endhead
 Accelerated Failure Time Survival Regression &
-ml\_aft\_survival\_regression\tabularnewline
-Alternating Least Squares Factorization & ml\_als\tabularnewline
-Correlation Matrix & ml\_corr\tabularnewline
-Decision Trees & ml\_decision\_tree\tabularnewline
+ml\_aft\_survival\_regression()\tabularnewline
+Alternating Least Squares Factorization & ml\_als()\tabularnewline
+Bisecting K-Means Clustering & ml\_bisecting\_kmeans()\tabularnewline
+Chi-square Hypothesis Testing & ml\_chisquare\_test()\tabularnewline
+Correlation Matrix & ml\_corr()\tabularnewline
+Decision Trees & ml\_decision\_tree ()\tabularnewline
+Frequent Pattern Mining & ml\_fpgrowth()\tabularnewline
+Gaussian Mixture Clustering & ml\_gaussian\_mixture()\tabularnewline
 Generalized Linear Regression &
-ml\_generalized\_linear\_regression\tabularnewline
-Gradient-Boosted Trees & ml\_gradient\_boosted\_trees\tabularnewline
-Isotonic Regression & ml\_isotonic\_regression\tabularnewline
-K-Means Clustering & ml\_kmeans\tabularnewline
-Latent Dirichlet Allocation & ml\_lda\tabularnewline
-Linear Regression & ml\_linear\_regression\tabularnewline
-Linear Support Vector Machines & ml\_linear\_svc\tabularnewline
-Logistic Regression & ml\_logistic\_regression\tabularnewline
-Multilayer Perceptron & ml\_multilayer\_perceptron\tabularnewline
-Naive-Bayes & ml\_naive\_bayes\tabularnewline
-One vs Rest & ml\_one\_vs\_rest\tabularnewline
-Principal Components Analysis & ml\_pca\tabularnewline
-Random Forests & ml\_random\_forest\tabularnewline
-Survival Regression & ml\_survival\_regression\tabularnewline
+ml\_generalized\_linear\_regression()\tabularnewline
+Gradient-Boosted Trees & ml\_gradient\_boosted\_trees()\tabularnewline
+Isotonic Regression & ml\_isotonic\_regression()\tabularnewline
+K-Means Clustering & ml\_kmeans()\tabularnewline
+Latent Dirichlet Allocation & ml\_lda()\tabularnewline
+Linear Regression & ml\_linear\_regression()\tabularnewline
+Linear Support Vector Machines & ml\_linear\_svc()\tabularnewline
+Logistic Regression & ml\_logistic\_regression()\tabularnewline
+Multilayer Perceptron & ml\_multilayer\_perceptron()\tabularnewline
+Naive-Bayes & ml\_naive\_bayes()\tabularnewline
+One vs Rest & ml\_one\_vs\_rest()\tabularnewline
+Principal Components Analysis & ml\_pca()\tabularnewline
+Random Forests & ml\_random\_forest()\tabularnewline
+Survival Regression & ml\_survival\_regression()\tabularnewline
 \bottomrule
 \end{longtable}
+
+To complement those algorithms, you will often also want to consider
+using the following feature transformers:
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+Transformer & Function\tabularnewline
+\midrule
+\endhead
+Binarizer & ft\_binarizer()\tabularnewline
+Bucketizer & ft\_bucketizer()\tabularnewline
+Chi-Squared Feature Selector & ft\_chisq\_selector()\tabularnewline
+Vocabulary from Document Collections &
+ft\_count\_vectorizer()\tabularnewline
+Discrete Cosine Transform &
+ft\_discrete\_cosine\_transform()\tabularnewline
+Transformation using dplyr & ft\_dplyr\_transformer()\tabularnewline
+Hadamard Product & ft\_elementwise\_product()\tabularnewline
+Feature Hasher & ft\_feature\_hasher()\tabularnewline
+Term Frequencies using Hashing & export(ft\_hashing\_tf)\tabularnewline
+Inverse Document Frequency & ft\_idf()\tabularnewline
+Imputation for Missing Values & export(ft\_imputer)\tabularnewline
+Index to String & ft\_index\_to\_string()\tabularnewline
+Feature Interaction Transform & ft\_interaction()\tabularnewline
+Rescale to {[}-1, 1{]} Range & ft\_max\_abs\_scaler()\tabularnewline
+Rescale to {[}min, max{]} Range & ft\_min\_max\_scaler()\tabularnewline
+Locality Sensitive Hashing & ft\_minhash\_lsh()\tabularnewline
+Converts to n-grams & ft\_ngram()\tabularnewline
+Normalize using the given P-Norm & ft\_normalizer()\tabularnewline
+One-Hot Encoding & ft\_one\_hot\_encoder()\tabularnewline
+Feature Expansion in Polynomial Space &
+ft\_polynomial\_expansion()\tabularnewline
+Maps to Binned Categorical Features &
+ft\_quantile\_discretizer()\tabularnewline
+SQL Transformation & ft\_sql\_transformer()\tabularnewline
+Standardizes Features using Corrected STD &
+ft\_standard\_scaler()\tabularnewline
+Filters out Stop Words & ft\_stop\_words\_remover()\tabularnewline
+Map to Label Indices & ft\_string\_indexer()\tabularnewline
+Splits by White Spaces & export(ft\_tokenizer)\tabularnewline
+Combine Vectors to Row Vector & ft\_vector\_assembler()\tabularnewline
+Indexing Categorical Feature & ft\_vector\_indexer()\tabularnewline
+Subarray of the Original Feature & ft\_vector\_slicer()\tabularnewline
+Transform Word into Code & ft\_word2vec()\tabularnewline
+\bottomrule
+\end{longtable}
+
+\hypertarget{supervised}{%
+\section{Supervised}\label{supervised}}
+
+Examples are reosurces are available in
+\href{http://spark.rstudio.com/mlib/}{spark.rstudio.com/mlib}.
+
+\hypertarget{unsupervised}{%
+\section{Unsupervised}\label{unsupervised}}
+
+\hypertarget{k-means-clustering}{%
+\subsection{K-Means Clustering}\label{k-means-clustering}}
 
 Here is an example to get you started with K-Means:
 
@@ -1084,20 +1159,98 @@ Here is an example to get you started with K-Means:
 \end{Highlighting}
 \end{Shaded}
 
+\hypertarget{gaussian-mixture-clustering}{%
+\subsection{Gaussian Mixture
+Clustering}\label{gaussian-mixture-clustering}}
+
+Alternatevely, we can also cluster using
+\href{https://en.wikipedia.org/wiki/Mixture_model\#Gaussian_mixture_model}{Gaussian
+Mixture Models} (GMMs).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\KeywordTok{copy_to}\NormalTok{(sc, fueleconomy}\OperatorTok{::}\NormalTok{vehicles) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ml_gaussian_mixture}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{hwy }\OperatorTok{+}\StringTok{ }\NormalTok{cty, }\DataTypeTok{k =} \DecValTok{3}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ml_predict}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }\KeywordTok{collect}\NormalTok{()}
+
+\NormalTok{predictions }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(hwy, cty)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(hwy, cty, }\DataTypeTok{col =} \KeywordTok{factor}\NormalTok{(prediction)), }\DataTypeTok{size =} \DecValTok{2}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.4}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_color_discrete}\NormalTok{(}\DataTypeTok{name =} \StringTok{""}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{paste}\NormalTok{(}\StringTok{"Cluster"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Highway"}\NormalTok{, }\DataTypeTok{y =} \StringTok{"City"}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_light}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+\centering
+\includegraphics{the-r-in-spark_files/figure-latex/unnamed-chunk-24-1.pdf}
+\caption{\label{fig:unnamed-chunk-24}Fuel economy data for 1984-2015 from
+the US EPA}
+\end{figure}
+
+\hypertarget{broom}{%
+\section{Broom}\label{broom}}
+
+You can turn your \texttt{sparklyr} models into data frames using the
+\texttt{broom} package:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model <-}\StringTok{ }\NormalTok{cars_tbl }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ml_linear_regression}\NormalTok{(mpg }\OperatorTok{~}\StringTok{ }\NormalTok{wt }\OperatorTok{+}\StringTok{ }\NormalTok{cyl)}
+
+\CommentTok{# Turn a model object into a data frame}
+\NormalTok{broom}\OperatorTok{::}\KeywordTok{tidy}\NormalTok{(model)}
+\end{Highlighting}
+\end{Shaded}
+
 \begin{verbatim}
-## K-means clustering with 3 clusters
-## 
-## Cluster centers:
-##   Petal_Width Petal_Length
-## 1    1.359259     4.292593
-## 2    0.246000     1.462000
-## 3    2.047826     5.626087
-## 
-## Within Set Sum of Squared Errors =  31.41289
+## # A tibble: 3 x 5
+##   term        estimate std.error statistic  p.value
+##   <chr>          <dbl>     <dbl>     <dbl>    <dbl>
+## 1 (Intercept)    39.7      1.71      23.1  0       
+## 2 wt             -3.19     0.757     -4.22 0.000222
+## 3 cyl            -1.51     0.415     -3.64 0.00106
 \end{verbatim}
 
-More examples are reosurces are available in
-\href{http://spark.rstudio.com/mlib/}{spark.rstudio.com/mlib}.
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Construct a single row summary}
+\NormalTok{broom}\OperatorTok{::}\KeywordTok{glance}\NormalTok{(model)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 5
+##   explained.variance mean.absolute.error mean.squared.error r.squared
+##                <dbl>               <dbl>              <dbl>     <dbl>
+## 1               29.2                1.92               5.97     0.830
+## # ... with 1 more variable: root.mean.squared.error <dbl>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Augments each observation in the dataset with the model}
+\NormalTok{broom}\OperatorTok{::}\KeywordTok{augment}\NormalTok{(model, cars_tbl)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 32 x 14
+##    `_c0`   mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##    <chr> <dbl> <int> <dbl> <int> <dbl> <dbl> <dbl> <int> <int> <int> <int>
+##  1 Mazd~  21       6  160    110  3.9   2.62  16.5     0     1     4     4
+##  2 Mazd~  21       6  160    110  3.9   2.88  17.0     0     1     4     4
+##  3 Dats~  22.8     4  108     93  3.85  2.32  18.6     1     1     4     1
+##  4 Horn~  21.4     6  258    110  3.08  3.22  19.4     1     0     3     1
+##  5 Horn~  18.7     8  360    175  3.15  3.44  17.0     0     0     3     2
+##  6 Vali~  18.1     6  225    105  2.76  3.46  20.2     1     0     3     1
+##  7 Dust~  14.3     8  360    245  3.21  3.57  15.8     0     0     3     4
+##  8 Merc~  24.4     4  147.    62  3.69  3.19  20       1     0     4     2
+##  9 Merc~  22.8     4  141.    95  3.92  3.15  22.9     1     0     4     2
+## 10 Merc~  19.2     6  168.   123  3.92  3.44  18.3     1     0     4     4
+## # ... with 22 more rows, and 2 more variables: fitted <dbl>, resid <dbl>
+\end{verbatim}
 
 \hypertarget{pipelines}{%
 \section{Pipelines}\label{pipelines}}
@@ -1136,11 +1289,11 @@ be, what they are and what their future might be:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-21-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-33-1} 
 
 }
 
-\caption{Google trends for on-premise (mainframe), cloud computing and kubernetes.}\label{fig:unnamed-chunk-21}
+\caption{Google trends for on-premise (mainframe), cloud computing and kubernetes.}\label{fig:unnamed-chunk-33}
 \end{figure}
 
 For \textbf{on-premise} clusters, someone, either yourself or someone in
@@ -1694,11 +1847,11 @@ with executing subtasks against a data partition.
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=220pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-29-1} 
+{\centering \includegraphics[width=1\linewidth,height=220pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-41-1} 
 
 }
 
-\caption{Apache Spark Architecture}\label{fig:unnamed-chunk-29}
+\caption{Apache Spark Architecture}\label{fig:unnamed-chunk-41}
 \end{figure}
 
 If you already have an Spark cluster in their organization, you should
@@ -1745,11 +1898,11 @@ this edge instance:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=140pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-30-1} 
+{\centering \includegraphics[width=1\linewidth,height=140pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-42-1} 
 
 }
 
-\caption{Using a Spark Cluster from an Edge Node}\label{fig:unnamed-chunk-30}
+\caption{Using a Spark Cluster from an Edge Node}\label{fig:unnamed-chunk-42}
 \end{figure}
 
 \hypertarget{spark-home}{%
@@ -1791,11 +1944,11 @@ following diagram:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=160pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-32-1} 
+{\centering \includegraphics[width=1\linewidth,height=160pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-44-1} 
 
 }
 
-\caption{Local Connection Diagram}\label{fig:unnamed-chunk-32}
+\caption{Local Connection Diagram}\label{fig:unnamed-chunk-44}
 \end{figure}
 
 Notice that in the local connections diagram, there is no cluster
@@ -1849,11 +2002,11 @@ standalone cluster manager in the \texttt{master} location:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-35-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-47-1} 
 
 }
 
-\caption{Spark Standalone Connection Diagram}\label{fig:unnamed-chunk-35}
+\caption{Spark Standalone Connection Diagram}\label{fig:unnamed-chunk-47}
 \end{figure}
 
 In order to connect, use \texttt{master="spark://hostname:port"} in
@@ -1881,11 +2034,11 @@ run Spark executors as follows:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-37-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-49-1} 
 
 }
 
-\caption{YARN Client Connection Diagram}\label{fig:unnamed-chunk-37}
+\caption{YARN Client Connection Diagram}\label{fig:unnamed-chunk-49}
 \end{figure}
 
 To connect, one can simply run with \texttt{master\ =\ "yarn"} as
@@ -1916,11 +2069,11 @@ independently of other clsuter resources.
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-39-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-51-1} 
 
 }
 
-\caption{YARN Cluster Connection Diagram}\label{fig:unnamed-chunk-39}
+\caption{YARN Cluster Connection Diagram}\label{fig:unnamed-chunk-51}
 \end{figure}
 
 To connect in YARN Cluster mode, we can simple run:
@@ -1952,11 +2105,11 @@ as usual.
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-41-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-53-1} 
 
 }
 
-\caption{Livy Connection Diagram}\label{fig:unnamed-chunk-41}
+\caption{Livy Connection Diagram}\label{fig:unnamed-chunk-53}
 \end{figure}
 
 Conencting through Livy requires the URL to the Livy service which
@@ -1989,11 +2142,11 @@ Similar to YARN, Mesos supports client mode and a cluster mode. However,
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-43-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-55-1} 
 
 }
 
-\caption{Mesos Connection Diagram}\label{fig:unnamed-chunk-43}
+\caption{Mesos Connection Diagram}\label{fig:unnamed-chunk-55}
 \end{figure}
 
 Connecting requires the address to the Mesos master node, usually in the
@@ -2016,11 +2169,11 @@ driver node is assigned by Kubernetes.
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-45-1} 
+{\centering \includegraphics[width=1\linewidth]{the-r-in-spark_files/figure-latex/unnamed-chunk-57-1} 
 
 }
 
-\caption{Kubernetes Connection Diagram}\label{fig:unnamed-chunk-45}
+\caption{Kubernetes Connection Diagram}\label{fig:unnamed-chunk-57}
 \end{figure}
 
 Kubernetes support is scheduled to be added to \texttt{sparklyr} with
@@ -2065,6 +2218,10 @@ print directly to the console additional error messages:
 \NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local"}\NormalTok{, }\DataTypeTok{log =} \StringTok{"console"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{verbatim}
+## Re-using existing Spark connection to local
+\end{verbatim}
 
 \hypertarget{troubleshoot-spark-submit}{%
 \subsection{Spark Submit}\label{troubleshoot-spark-submit}}
@@ -2251,7 +2408,7 @@ resource usage and performance.
 
 }
 
-\caption{Spark RDDs}\label{fig:unnamed-chunk-60}
+\caption{Spark RDDs}\label{fig:unnamed-chunk-72}
 \end{figure}
 
 \begin{Shaded}
@@ -2352,7 +2509,7 @@ however, to free up resources, you can use \texttt{tbl\_uncache()}:
 
 }
 
-\caption{Spark Graph Visualization}\label{fig:unnamed-chunk-69}
+\caption{Spark Graph Visualization}\label{fig:unnamed-chunk-81}
 \end{figure}
 
 \hypertarget{event-timeline}{%
@@ -2379,7 +2536,7 @@ by a given column using three partitions:
 
 }
 
-\caption{Spark Event Timeline}\label{fig:unnamed-chunk-73}
+\caption{Spark Event Timeline}\label{fig:unnamed-chunk-85}
 \end{figure}
 
 \hypertarget{recap-3}{%
@@ -2420,6 +2577,13 @@ See
 
 \hypertarget{rstudio-projects}{%
 \subsection{RStudio Projects}\label{rstudio-projects}}
+
+You can create an \texttt{sparklyr} extension with ease from RStudio.
+This feature requires RStudio 1.1 or newer and the \texttt{sparklyr}
+package to be installed. Then, from the \texttt{File} menu,
+\texttt{New\ Project...}, select \texttt{R\ Packag\ using\ sparklyr}:
+
+\includegraphics{images/08-extensions-rstudio-project.png}
 
 \hypertarget{distributed}{%
 \chapter{Distributed R}\label{distributed}}
@@ -2495,6 +2659,15 @@ copy-stream in \texttt{sparklyr} as follows:
 \begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(sparklyr)}
 \NormalTok{sc <-}\StringTok{ }\KeywordTok{spark_connect}\NormalTok{(}\DataTypeTok{master =} \StringTok{"local"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Re-using existing Spark connection to local
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \NormalTok{stream <-}\StringTok{ }\KeywordTok{stream_read_text}\NormalTok{(sc, }\StringTok{"source/"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{stream_write_text}\NormalTok{(}\StringTok{"destination/"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -2514,17 +2687,20 @@ time:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-78-1} 
+{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-90-1} 
 
 }
 
-\caption{Viewing a Spark Stream with sparklyr}\label{fig:unnamed-chunk-78}
+\caption{Viewing a Spark Stream with sparklyr}\label{fig:unnamed-chunk-90}
 \end{figure}
 
 Notice that the rows-per-second in the destination stream are higher
 than the rows-per-second in the source stream; this is expected and
 desireable since Spark measures incoming rates from the source, but
-actual row processing times in the destination stream.
+actual row processing times in the destination stream. For example, if
+10 rows-per-second are written to the \texttt{source/} path, the
+incoming rate is 10 RPS. However, if it takes Spark only 0.01 seconds to
+write all those 10 rows, the output rate is 100 RPS.
 
 Use \texttt{stream\_stop()} to properly stop processing data from this
 stream:
@@ -2573,11 +2749,11 @@ specified. Conceptually, this looks as follows:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-82-1} 
+{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-94-1} 
 
 }
 
-\caption{Streams Transformation Diagram}\label{fig:unnamed-chunk-82}
+\caption{Streams Transformation Diagram}\label{fig:unnamed-chunk-94}
 \end{figure}
 
 \hypertarget{streams-dplyr}{%
@@ -2655,16 +2831,16 @@ and even join across many concurrent streams:
 ## # Database: spark_connection
 ##    text   timestamp           random
 ##    <chr>  <dttm>               <dbl>
-##  1 Row 18 2018-07-16 23:34:27 0.589 
-##  2 Row 40 2018-07-16 23:34:27 0.539 
-##  3 Row 43 2018-07-16 23:34:27 0.649 
-##  4 Row 52 2018-07-16 23:34:27 0.0344
-##  5 Row 66 2018-07-16 23:34:27 0.156 
-##  6 Row 67 2018-07-16 23:34:27 0.879 
-##  7 Row 70 2018-07-16 23:34:27 0.523 
-##  8 Row 97 2018-07-16 23:34:27 0.529 
-##  9 Row 5  2018-07-16 23:34:27 0.746 
-## 10 Row 22 2018-07-16 23:34:27 0.204 
+##  1 Row 15 2018-07-31 05:08:42  0.605
+##  2 Row 25 2018-07-31 05:08:42  0.940
+##  3 Row 26 2018-07-31 05:08:42  0.123
+##  4 Row 34 2018-07-31 05:08:42  0.385
+##  5 Row 43 2018-07-31 05:08:42  0.731
+##  6 Row 62 2018-07-31 05:08:42  0.783
+##  7 Row 63 2018-07-31 05:08:42  0.443
+##  8 Row 79 2018-07-31 05:08:42  0.563
+##  9 Row 91 2018-07-31 05:08:42  0.572
+## 10 Row 95 2018-07-31 05:08:42  0.497
 ## # ... with more rows
 \end{verbatim}
 
@@ -2716,20 +2892,20 @@ and adds jitter using R code:
 \end{Shaded}
 
 \begin{verbatim}
-## # Source:   table<sparklyr_tmp_c6c46dcf5cd3> [?? x 1]
+## # Source:   table<sparklyr_tmp_305f5b75c0fd> [?? x 1]
 ## # Database: spark_connection
 ##    result
 ##     <dbl>
-##  1  0.815
-##  2  2.20 
-##  3  2.86 
-##  4  3.85 
-##  5  4.85 
-##  6  6.19 
-##  7  6.90 
-##  8  8.14 
-##  9  8.88 
-## 10  9.90 
+##  1   1.13
+##  2   1.93
+##  3   3.08
+##  4   3.87
+##  5   4.86
+##  6   6.17
+##  7   7.08
+##  8   8.10
+##  9   9.04
+## 10   9.94
 ## # ... with more rows
 \end{verbatim}
 

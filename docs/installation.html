@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi">
 
 
-<meta name="date" content="2018-07-16">
+<meta name="date" content="2018-07-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -175,7 +175,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a><ul>
 <li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
-<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>4.2</b> Pipelines</a></li>
+<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#supervised"><i class="fa fa-check"></i><b>4.2</b> Supervised</a></li>
+<li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#unsupervised"><i class="fa fa-check"></i><b>4.3</b> Unsupervised</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="modeling.html"><a href="modeling.html#k-means-clustering"><i class="fa fa-check"></i><b>4.3.1</b> K-Means Clustering</a></li>
+<li class="chapter" data-level="4.3.2" data-path="modeling.html"><a href="modeling.html#gaussian-mixture-clustering"><i class="fa fa-check"></i><b>4.3.2</b> Gaussian Mixture Clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="modeling.html"><a href="modeling.html#broom"><i class="fa fa-check"></i><b>4.4</b> Broom</a></li>
+<li class="chapter" data-level="4.5" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>4.5</b> Pipelines</a></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>5</b> Clusters</a><ul>
 <li class="chapter" data-level="5.1" data-path="clusters.html"><a href="clusters.html#overview-1"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
@@ -410,11 +416,11 @@ FIGURE 2.4: Apache Spark Web Interface.
 <h3><span class="header-section-number">2.4.2</span> Logs</h3>
 <p>Another common tool is to read through the Spark logs, a log is just a text file where Spark will append information relevant to the execution of tasks in the cluster. For local clusters, we can retrieve the <code>sparklyr</code> related log entries by running:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">spark_log</span>(sc, <span class="dt">filter =</span> <span class="st">&quot;sparklyr&quot;</span>, <span class="dt">n =</span> <span class="dv">5</span>)</a></code></pre></div>
-<pre><code>## 18/07/16 16:31:30 INFO SparkContext: Submitted application: sparklyr
-## 18/07/16 16:31:30 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:51370/jars/sparklyr-2.3-2.11.jar with timestamp 1531783890549
-## 18/07/16 16:31:34 INFO Executor: Fetching spark://localhost:51370/jars/sparklyr-2.3-2.11.jar with timestamp 1531783890549
-## 18/07/16 16:31:34 INFO Utils: Fetching spark://localhost:51370/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-fd84005b-c27a-43fc-8ddb-868ef0ff514f/userFiles-5a34662f-fd21-41f9-96be-cbd56399a207/fetchFileTemp6342252211960260648.tmp
-## 18/07/16 16:31:34 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-fd84005b-c27a-43fc-8ddb-868ef0ff514f/userFiles-5a34662f-fd21-41f9-96be-cbd56399a207/sparklyr-2.3-2.11.jar to class loader</code></pre>
+<pre><code>## 18/07/30 22:06:27 INFO SparkContext: Submitted application: sparklyr
+## 18/07/30 22:06:27 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:60924/jars/sparklyr-2.3-2.11.jar with timestamp 1533013587616
+## 18/07/30 22:06:31 INFO Executor: Fetching spark://localhost:60924/jars/sparklyr-2.3-2.11.jar with timestamp 1533013587616
+## 18/07/30 22:06:31 INFO Utils: Fetching spark://localhost:60924/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-9a07ff56-b7f6-45e6-ac62-1d1ef786b6a3/userFiles-794f850a-e000-4d8a-888c-de8a4072a7a9/fetchFileTemp8086438395887599157.tmp
+## 18/07/30 22:06:31 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-9a07ff56-b7f6-45e6-ac62-1d1ef786b6a3/userFiles-794f850a-e000-4d8a-888c-de8a4072a7a9/sparklyr-2.3-2.11.jar to class loader</code></pre>
 </div>
 <div id="using-spark-from-rstudio" class="section level3">
 <h3><span class="header-section-number">2.4.3</span> RStudio</h3>

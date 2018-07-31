@@ -1,6 +1,11 @@
 # Modeling {#modeling}
 
-While **this chatper has not been written**, a few resources and basic examples were made available to help out until this chapter is written.
+While **this chatper has not been written**, a few resources and basic examples were made available to help out until this chapter is completed.
+
+```{r include=FALSE}
+library(dplyr)
+library(ggplot2)
+```
 
 ## Overview
 
@@ -8,28 +13,75 @@ MLlib is Apache Spark's scalable machine learning library and is available throu
 
 Algorithm | Function
 ----------|---------
-Accelerated Failure Time Survival Regression | ml_aft_survival_regression
-Alternating Least Squares Factorization | ml_als
-Correlation Matrix | ml_corr
-Decision Trees | ml_decision_tree	
-Generalized Linear Regression | ml_generalized_linear_regression
-Gradient-Boosted Trees | ml_gradient_boosted_trees
-Isotonic Regression | ml_isotonic_regression
-K-Means Clustering | ml_kmeans	
-Latent Dirichlet Allocation | ml_lda
-Linear Regression | ml_linear_regression
-Linear Support Vector Machines | ml_linear_svc
-Logistic Regression | ml_logistic_regression
-Multilayer Perceptron | ml_multilayer_perceptron
-Naive-Bayes | ml_naive_bayes
-One vs Rest | ml_one_vs_rest
-Principal Components Analysis | ml_pca
-Random Forests | ml_random_forest
-Survival Regression | ml_survival_regression
+Accelerated Failure Time Survival Regression | ml_aft_survival_regression()
+Alternating Least Squares Factorization | ml_als()
+Bisecting K-Means Clustering | ml_bisecting_kmeans()
+Chi-square Hypothesis Testing | ml_chisquare_test()
+Correlation Matrix | ml_corr()
+Decision Trees | ml_decision_tree	()
+Frequent Pattern Mining | ml_fpgrowth()
+Gaussian Mixture Clustering | ml_gaussian_mixture()
+Generalized Linear Regression | ml_generalized_linear_regression()
+Gradient-Boosted Trees | ml_gradient_boosted_trees()
+Isotonic Regression | ml_isotonic_regression()
+K-Means Clustering | ml_kmeans()
+Latent Dirichlet Allocation | ml_lda()
+Linear Regression | ml_linear_regression()
+Linear Support Vector Machines | ml_linear_svc()
+Logistic Regression | ml_logistic_regression()
+Multilayer Perceptron | ml_multilayer_perceptron()
+Naive-Bayes | ml_naive_bayes()
+One vs Rest | ml_one_vs_rest()
+Principal Components Analysis | ml_pca()
+Random Forests | ml_random_forest()
+Survival Regression | ml_survival_regression()
+
+To complement those algorithms, you will often also want to consider using the following feature transformers:
+
+Transformer | Function
+------------|---------
+Binarizer | ft_binarizer()
+Bucketizer | ft_bucketizer()
+Chi-Squared Feature Selector | ft_chisq_selector()
+Vocabulary from Document Collections | ft_count_vectorizer()
+Discrete Cosine Transform  | ft_discrete_cosine_transform()
+Transformation using dplyr | ft_dplyr_transformer()
+Hadamard Product | ft_elementwise_product()
+Feature Hasher | ft_feature_hasher()
+Term Frequencies using Hashing | export(ft_hashing_tf)
+Inverse Document Frequency | ft_idf()
+Imputation for Missing Values | export(ft_imputer)
+Index to String | ft_index_to_string()
+Feature Interaction Transform | ft_interaction()
+Rescale to [-1, 1] Range | ft_max_abs_scaler()
+Rescale to [min, max] Range | ft_min_max_scaler()
+Locality Sensitive Hashing | ft_minhash_lsh()
+Converts to n-grams | ft_ngram()
+Normalize using the given P-Norm | ft_normalizer()
+One-Hot Encoding | ft_one_hot_encoder()
+Feature Expansion in Polynomial Space | ft_polynomial_expansion()
+Maps to Binned Categorical Features | ft_quantile_discretizer()
+SQL Transformation | ft_sql_transformer()
+Standardizes Features using Corrected STD | ft_standard_scaler()
+Filters out Stop Words | ft_stop_words_remover()
+Map to Label Indices | ft_string_indexer()
+Splits by White Spaces | export(ft_tokenizer)
+Combine Vectors to Row Vector | ft_vector_assembler()
+Indexing Categorical Feature | ft_vector_indexer()
+Subarray of the Original Feature | ft_vector_slicer()
+Transform Word into Code | ft_word2vec()
+
+## Supervised
+
+Examples are reosurces are available in [spark.rstudio.com/mlib](http://spark.rstudio.com/mlib/).
+
+## Unsupervised
+
+### K-Means Clustering
 
 Here is an example to get you started with K-Means:
 
-```{r}
+```{r eval=FALSE}
 library(sparklyr)
 
 # Connect to Spark in local mode
@@ -43,7 +95,89 @@ iris_tbl %>%
   ml_kmeans(centers = 3, Species ~ Petal_Width + Petal_Length)
 ```
 
-More examples are reosurces are available in [spark.rstudio.com/mlib](http://spark.rstudio.com/mlib/).
+### Gaussian Mixture Clustering
+
+Alternatevely, we can also cluster using [Gaussian Mixture Models](https://en.wikipedia.org/wiki/Mixture_model#Gaussian_mixture_model) (GMMs).
+
+```{r eval=FALSE, echo=FALSE}
+devtools::install_github("hadley/fueleconomy")
+
+library(sparklyr)
+sc <- spark_connect(master = "local", version = "2.3.0")
+vehicles_tbl <- copy_to(sc, fueleconomy::vehicles, overwrite = TRUE)
+
+predictions <- vehicles_tbl %>%
+  ml_gaussian_mixture(~ hwy + cty, k = 3) %>%
+  ml_predict() %>%
+  collect()
+
+saveRDS(predictions, "data/03-gaussian-mixture-prediction.rds")
+```
+```{r eval=FALSE}
+predictions <- copy_to(sc, fueleconomy::vehicles) %>%
+  ml_gaussian_mixture(~ hwy + cty, k = 3) %>%
+  ml_predict() %>% collect()
+
+predictions %>%
+  ggplot(aes(hwy, cty)) +
+  geom_point(aes(hwy, cty, col = factor(prediction)), size = 2, alpha = 0.4) + 
+  scale_color_discrete(name = "", labels = paste("Cluster", 1:3)) +
+  labs(x = "Highway", y = "City") + theme_light()
+```
+```{r echo=FALSE, fig.cap="Fuel economy data for 1984-2015 from the US EPA"}
+predictions <- readRDS("data/03-gaussian-mixture-prediction.rds")
+predictions %>%
+  ggplot(aes(hwy, cty)) +
+  geom_point(aes(hwy, cty, col = factor(prediction)), size = 2, alpha = 0.4) + 
+  scale_color_discrete(name = "", labels = paste("Cluster", 1:3)) +
+  labs(x = "Highway", y = "City") +
+  theme_light()
+```
+
+## Broom
+
+You can turn your `sparklyr` models into data frames using the `broom` package:
+
+```{r eval=FALSE, echo=FALSE}
+library(sparklyr)
+library(dplyr)
+sc <- spark_connect(master = "local", version = "2.3.0")
+cars_tbl <- spark_read_csv(sc, "cars", "input/")
+model <- cars_tbl %>% ml_linear_regression(mpg ~ wt + cyl)
+tidy_model <- list(
+  broom::tidy(model),
+  broom::glance(model),
+  collect(broom::augment(model, cars_tbl))
+)
+saveRDS(tidy_model, "data/03-broom-examples.rds")
+```
+```{r echo=FALSE}
+tidy_model <- readRDS("data/03-broom-examples.rds")
+```
+```{r eval=FALSE}
+model <- cars_tbl %>%
+  ml_linear_regression(mpg ~ wt + cyl)
+
+# Turn a model object into a data frame
+broom::tidy(model)
+```
+```{r echo=FALSE}
+tidy_model[[1]]
+```
+```{r eval=FALSE}
+# Construct a single row summary
+broom::glance(model)
+```
+```{r echo=FALSE}
+tidy_model[[2]]
+```
+```{r eval=FALSE}
+# Augments each observation in the dataset with the model
+broom::augment(model, cars_tbl)
+```
+```{r echo=FALSE, rows.print=3}
+tidy_model[[3]]
+```
 
 ## Pipelines
 

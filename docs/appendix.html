@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi">
 
 
-<meta name="date" content="2018-07-16">
+<meta name="date" content="2018-07-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -175,7 +175,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a><ul>
 <li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
-<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>4.2</b> Pipelines</a></li>
+<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#supervised"><i class="fa fa-check"></i><b>4.2</b> Supervised</a></li>
+<li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#unsupervised"><i class="fa fa-check"></i><b>4.3</b> Unsupervised</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="modeling.html"><a href="modeling.html#k-means-clustering"><i class="fa fa-check"></i><b>4.3.1</b> K-Means Clustering</a></li>
+<li class="chapter" data-level="4.3.2" data-path="modeling.html"><a href="modeling.html#gaussian-mixture-clustering"><i class="fa fa-check"></i><b>4.3.2</b> Gaussian Mixture Clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="modeling.html"><a href="modeling.html#broom"><i class="fa fa-check"></i><b>4.4</b> Broom</a></li>
+<li class="chapter" data-level="4.5" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>4.5</b> Pipelines</a></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>5</b> Clusters</a><ul>
 <li class="chapter" data-level="5.1" data-path="clusters.html"><a href="clusters.html#overview-1"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
@@ -301,44 +307,44 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1>Appendix</h1>
 <div id="storage-capacity" class="section level2">
 <h2><span class="header-section-number">11.7</span> Worlds Store Capacity</h2>
-<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb74-1" data-line-number="1"><span class="kw">library</span>(tidyverse)</a>
-<a class="sourceLine" id="cb74-2" data-line-number="2"><span class="kw">read_csv</span>(<span class="st">&quot;data/01-worlds-capacity-to-store-information.csv&quot;</span>, <span class="dt">skip =</span> <span class="dv">8</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb74-3" data-line-number="3"><span class="st">  </span><span class="kw">gather</span>(<span class="dt">key =</span> storage, <span class="dt">value =</span> capacity, analog, digital) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb74-4" data-line-number="4"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">year =</span> X1, <span class="dt">terabytes =</span> capacity <span class="op">/</span><span class="st"> </span><span class="fl">1e+12</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb74-5" data-line-number="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> year, <span class="dt">y =</span> terabytes, <span class="dt">group =</span> storage)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb74-6" data-line-number="6"><span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">linetype =</span> storage)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb74-7" data-line-number="7"><span class="st">    </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">shape =</span> storage)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb74-8" data-line-number="8"><span class="st">    </span><span class="kw">scale_y_log10</span>(</a>
-<a class="sourceLine" id="cb74-9" data-line-number="9">      <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw">trans_breaks</span>(<span class="st">&quot;log10&quot;</span>, <span class="cf">function</span>(x) <span class="dv">10</span><span class="op">^</span>x),</a>
-<a class="sourceLine" id="cb74-10" data-line-number="10">      <span class="dt">labels =</span> scales<span class="op">::</span><span class="kw">trans_format</span>(<span class="st">&quot;log10&quot;</span>, scales<span class="op">::</span><span class="kw">math_format</span>(<span class="dv">10</span><span class="op">^</span>x))</a>
-<a class="sourceLine" id="cb74-11" data-line-number="11">    ) <span class="op">+</span></a>
-<a class="sourceLine" id="cb74-12" data-line-number="12"><span class="st">    </span><span class="kw">theme_light</span>() <span class="op">+</span></a>
-<a class="sourceLine" id="cb74-13" data-line-number="13"><span class="st">    </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb83-1" data-line-number="1"><span class="kw">library</span>(tidyverse)</a>
+<a class="sourceLine" id="cb83-2" data-line-number="2"><span class="kw">read_csv</span>(<span class="st">&quot;data/01-worlds-capacity-to-store-information.csv&quot;</span>, <span class="dt">skip =</span> <span class="dv">8</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb83-3" data-line-number="3"><span class="st">  </span><span class="kw">gather</span>(<span class="dt">key =</span> storage, <span class="dt">value =</span> capacity, analog, digital) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb83-4" data-line-number="4"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">year =</span> X1, <span class="dt">terabytes =</span> capacity <span class="op">/</span><span class="st"> </span><span class="fl">1e+12</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb83-5" data-line-number="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> year, <span class="dt">y =</span> terabytes, <span class="dt">group =</span> storage)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb83-6" data-line-number="6"><span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">linetype =</span> storage)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb83-7" data-line-number="7"><span class="st">    </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">shape =</span> storage)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb83-8" data-line-number="8"><span class="st">    </span><span class="kw">scale_y_log10</span>(</a>
+<a class="sourceLine" id="cb83-9" data-line-number="9">      <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw">trans_breaks</span>(<span class="st">&quot;log10&quot;</span>, <span class="cf">function</span>(x) <span class="dv">10</span><span class="op">^</span>x),</a>
+<a class="sourceLine" id="cb83-10" data-line-number="10">      <span class="dt">labels =</span> scales<span class="op">::</span><span class="kw">trans_format</span>(<span class="st">&quot;log10&quot;</span>, scales<span class="op">::</span><span class="kw">math_format</span>(<span class="dv">10</span><span class="op">^</span>x))</a>
+<a class="sourceLine" id="cb83-11" data-line-number="11">    ) <span class="op">+</span></a>
+<a class="sourceLine" id="cb83-12" data-line-number="12"><span class="st">    </span><span class="kw">theme_light</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb83-13" data-line-number="13"><span class="st">    </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</a></code></pre></div>
 </div>
 <div id="cran-downloads" class="section level2">
 <h2><span class="header-section-number">11.8</span> Daily downloads of CRAN packages</h2>
-<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb75-1" data-line-number="1">downloads_csv &lt;-<span class="st"> &quot;data/01-intro-r-cran-downloads.csv&quot;</span></a>
-<a class="sourceLine" id="cb75-2" data-line-number="2"><span class="cf">if</span> (<span class="op">!</span><span class="kw">file.exists</span>(downloads_csv)) {</a>
-<a class="sourceLine" id="cb75-3" data-line-number="3">  downloads &lt;-<span class="st"> </span>cranlogs<span class="op">::</span><span class="kw">cran_downloads</span>(<span class="dt">from =</span> <span class="st">&quot;2014-01-01&quot;</span>, <span class="dt">to =</span> <span class="st">&quot;2018-01-01&quot;</span>)</a>
-<a class="sourceLine" id="cb75-4" data-line-number="4">  readr<span class="op">::</span><span class="kw">write_csv</span>(downloads, downloads_csv)</a>
-<a class="sourceLine" id="cb75-5" data-line-number="5">}</a>
-<a class="sourceLine" id="cb75-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb75-7" data-line-number="7">cran_downloads &lt;-<span class="st"> </span>readr<span class="op">::</span><span class="kw">read_csv</span>(downloads_csv)</a>
-<a class="sourceLine" id="cb75-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb75-9" data-line-number="9"><span class="kw">ggplot</span>(cran_downloads, <span class="kw">aes</span>(date, count)) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb75-10" data-line-number="10"><span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">colour=</span><span class="st">&quot;black&quot;</span>, <span class="dt">pch =</span> <span class="dv">21</span>, <span class="dt">size =</span> <span class="dv">1</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb75-11" data-line-number="11"><span class="st">  </span><span class="kw">scale_x_date</span>() <span class="op">+</span></a>
-<a class="sourceLine" id="cb75-12" data-line-number="12"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;&quot;</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb75-13" data-line-number="13"><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;&quot;</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb75-14" data-line-number="14"><span class="st">  </span><span class="kw">theme_light</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb84-1" data-line-number="1">downloads_csv &lt;-<span class="st"> &quot;data/01-intro-r-cran-downloads.csv&quot;</span></a>
+<a class="sourceLine" id="cb84-2" data-line-number="2"><span class="cf">if</span> (<span class="op">!</span><span class="kw">file.exists</span>(downloads_csv)) {</a>
+<a class="sourceLine" id="cb84-3" data-line-number="3">  downloads &lt;-<span class="st"> </span>cranlogs<span class="op">::</span><span class="kw">cran_downloads</span>(<span class="dt">from =</span> <span class="st">&quot;2014-01-01&quot;</span>, <span class="dt">to =</span> <span class="st">&quot;2018-01-01&quot;</span>)</a>
+<a class="sourceLine" id="cb84-4" data-line-number="4">  readr<span class="op">::</span><span class="kw">write_csv</span>(downloads, downloads_csv)</a>
+<a class="sourceLine" id="cb84-5" data-line-number="5">}</a>
+<a class="sourceLine" id="cb84-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb84-7" data-line-number="7">cran_downloads &lt;-<span class="st"> </span>readr<span class="op">::</span><span class="kw">read_csv</span>(downloads_csv)</a>
+<a class="sourceLine" id="cb84-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb84-9" data-line-number="9"><span class="kw">ggplot</span>(cran_downloads, <span class="kw">aes</span>(date, count)) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb84-10" data-line-number="10"><span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">colour=</span><span class="st">&quot;black&quot;</span>, <span class="dt">pch =</span> <span class="dv">21</span>, <span class="dt">size =</span> <span class="dv">1</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb84-11" data-line-number="11"><span class="st">  </span><span class="kw">scale_x_date</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb84-12" data-line-number="12"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb84-13" data-line-number="13"><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb84-14" data-line-number="14"><span class="st">  </span><span class="kw">theme_light</span>()</a></code></pre></div>
 </div>
 <div id="cluster-trends" class="section level2">
 <h2><span class="header-section-number">11.9</span> Google trends for mainframes, cloud computing and kubernetes</h2>
-<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb76-1" data-line-number="1"><span class="kw">library</span>(r2d3)</a>
-<a class="sourceLine" id="cb76-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb76-3" data-line-number="3"><span class="kw">read.csv</span>(<span class="st">&quot;data/05-cluster-trends.csv&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb76-4" data-line-number="4"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">month =</span> <span class="kw">as.Date</span>(<span class="kw">paste</span>(month, <span class="st">&quot;-01&quot;</span>, <span class="dt">sep =</span> <span class="st">&quot;&quot;</span>))) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb76-5" data-line-number="5"><span class="st">  </span><span class="kw">r2d3</span>(<span class="dt">script=</span><span class="st">&quot;images/05-clusters-trends.js&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb85-1" data-line-number="1"><span class="kw">library</span>(r2d3)</a>
+<a class="sourceLine" id="cb85-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb85-3" data-line-number="3"><span class="kw">read.csv</span>(<span class="st">&quot;data/05-cluster-trends.csv&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb85-4" data-line-number="4"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">month =</span> <span class="kw">as.Date</span>(<span class="kw">paste</span>(month, <span class="st">&quot;-01&quot;</span>, <span class="dt">sep =</span> <span class="st">&quot;&quot;</span>))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb85-5" data-line-number="5"><span class="st">  </span><span class="kw">r2d3</span>(<span class="dt">script=</span><span class="st">&quot;images/05-clusters-trends.js&quot;</span>)</a></code></pre></div>
 
 <div id="refs" class="references">
 <div>

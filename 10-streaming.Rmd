@@ -53,7 +53,7 @@ library(sparklyr)
 readRDS("data/10-streaming-overview.rds") %>% stream_render(stats = .)
 ```
 
-Notice that the rows-per-second in the destination stream are higher than the rows-per-second in the source stream; this is expected and desireable since Spark measures incoming rates from the source, but actual row processing times in the destination stream.
+Notice that the rows-per-second in the destination stream are higher than the rows-per-second in the source stream; this is expected and desireable since Spark measures incoming rates from the source, but actual row processing times in the destination stream. For example, if 10 rows-per-second are written to the `source/` path, the incoming rate is 10 RPS. However, if it takes Spark only 0.01 seconds to write all those 10 rows, the output rate is 100 RPS.
 
 Use `stream_stop()` to properly stop processing data from this stream:
 
