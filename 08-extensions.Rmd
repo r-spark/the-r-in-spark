@@ -4,17 +4,130 @@ While **this chatper has not been written.**, a few resources are available to h
 
 ## Using Extensions
 
+### RSparkling
+
+[rsparkling](https://github.com/h2oai/rsparkling) provies [H2O](https://www.h2o.ai/) support in Spark using `sparklyr`:
+
+```{r eval=FALSE, echo=FALSE}
+library(rsparkling)
+library(sparklyr)
+library(h2o)
+
+sc <- spark_connect(master = "local", version = "2.1.0")
+cars_tbl <- sdf_copy_to(sc, mtcars, "mtcars")
+
+cars_h2o <- as_h2o_frame(sc, mtcars_tbl, strict_version_check = FALSE)
+
+model <- h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = cars_h2o, lambda_search = TRUE)
+saveRDS(model, "data/08-extensions-h2o-glm.rds")
+```
+```{r eval=FALSE, }
+library(rsparkling)
+library(sparklyr)
+library(h2o)
+
+cars_h2o <- as_h2o_frame(sc, cars_tbl, strict_version_check = FALSE)
+h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = mtcars_h2o, lambda_search = TRUE)
+```
+```{r echo=FALSE}
+readRDS("data/08-extensions-h2o-glm.rds")
+```
+
+See [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/).
+
 ### GraphFrames
 
-See [spark.rstudio.com/graphframes](http://spark.rstudio.com/graphframes/).
+[GraphFrames](https://graphframes.github.io/) provides graph algorithms: PageRank, ShortestPaths, etc.
+
+```{r eval=FALSE, echo=FALSE}
+library(ggraph)
+library(igraph)
+library(graphframes)
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local", version = "2.1.0")
+highschool_tbl <- sdf_copy_to(sc, ggraph::highschool, "highschool", overwrite = TRUE)
+highschool_tbl <- highschool_tbl %>% filter(year == 1957)
+
+from_tbl <- highschool_tbl %>% distinct(from) %>% transmute(id = from)
+to_tbl <- highschool_tbl %>% distinct(to) %>% transmute(id = to)
+
+vertices_tbl <- from_tbl %>% sdf_bind_rows(to_tbl)
+edges_tbl <- highschool_tbl %>% transmute(src = from, dst = to)
+
+model <- gf_graphframe(vertices_tbl, edges_tbl) %>%
+  gf_pagerank(reset_prob = 0.15, max_iter = 10L)
+
+highschool_tbl %>% collect() %>%
+  saveRDS("data/08-extensions-graphframes-highschool.rds")
+```
+```{r eval=FALSE}
+gf_graphframe(vertices_tbl, edges_tbl) %>% gf_pagerank(reset_prob = 0.15, max_iter = 10L)
+```
+```
+GraphFrame
+Vertices:
+  $ id       <dbl> 12, 12, 59, 59, 1, 20, 20, 45, 45, 8, 8, 9, 9, 26, 26, 37, 37, 47, 47, 16, 16, 71, 71, ...
+  $ pagerank <dbl> 0.0058199702, 0.0058199702, 0.0000000000, 0.0000000000, 0.1500000000, 0.0344953402, 0.0...
+Edges:
+  $ src    <dbl> 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 58, 58, 58, 58, 58, 58, 5...
+  $ dst    <dbl> 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 65, 65, 65, 65, 65, 65, 6...
+  $ weight <dbl> 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0...
+```
+```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, fig.cap='Highschool ggraph dataset with pagerank highlighted.', fig.align='center'}
+library(ggraph)
+library(igraph)
+highschool_rdf <- readRDS("data/08-extensions-graphframes-highschool.rds")
+highschool_rdf %>% graph_from_data_frame() %>%
+  ggraph(layout = 'kk') + 
+    geom_edge_link(alpha = 0.1) + 
+    geom_node_point(size = 2, alpha = 0.4) + theme_light() +
+    annotate("point", x = -1.18, y = -3.55, size = 3) +
+    annotate("point", x = 6.25, y = 2.85, size = 3) + xlab("") + ylab("")
+```
+
+See also [spark.rstudio.com/graphframes](http://spark.rstudio.com/graphframes/).
 
 ### Mleap
 
-See [spark.rstudio.com/guides/mleap](http://spark.rstudio.com/guides/mleap/).
+[Mleap](https://github.com/rstudio/mleap) enables Spark pipelines in production.
 
-### H2O
+```{r eval=FALSE}
+# Create pipeline
+pipeline_model <- ml_pipeline(sc) %>%
+  ft_binarizer("hp", "big_hp", threshold = 100) %>%
+  ft_vector_assembler(c("big_hp", "wt", "qsec"), "features") %>%
+  ml_gbt_regressor(label_col = "mpg") %>%
+  ml_fit(cars_tbl)
 
-See [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/).
+# Perform predictions
+predictions_tbl <- ml_predict(pipeline_model, mtcars_tbl)
+
+# Export model with mleap
+ml_write_bundle(pipeline_model, predictions_tbl, "mtcars_model.zip")
+```
+
+Use model outside Spark and productions systems. For instance, in <span class="javaHighlight">Java:</span>
+
+<div class="java">
+```{java}
+import ml.combust.mleap.runtime.MleapContext;
+
+// Initialize
+BundleBuilder bundleBuilder = new BundleBuilder();
+MleapContext context = (new ContextBuilder()).createMleapContext();
+Bundle<Transformer> bundle = bundleBuilder.load(new File(request.get("mtcars_model.zip")), context);
+
+// Read into Mleap DataFrame
+DefaultLeapFrame inputLeapFrame = new DefaultLeapFrame();
+
+// Perform Mleap transformation
+DefaultLeapFrame transformedLeapFrame = bundle.root().transform(inputLeapFrame).get();
+```
+</div>
+
+See also [spark.rstudio.com/guides/mleap](http://spark.rstudio.com/guides/mleap/).
 
 ## Writting Extensions {#writting-extensions}
 
