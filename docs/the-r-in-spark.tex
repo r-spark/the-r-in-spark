@@ -125,7 +125,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2018-07-30}
+    \date{2018-08-01}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -851,11 +851,11 @@ of tasks in the cluster. For local clusters, we can retrieve the
 \end{Shaded}
 
 \begin{verbatim}
-## 18/07/30 22:07:14 INFO SparkContext: Submitted application: sparklyr
-## 18/07/30 22:07:14 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:61221/jars/sparklyr-2.3-2.11.jar with timestamp 1533013634759
-## 18/07/30 22:07:18 INFO Executor: Fetching spark://localhost:61221/jars/sparklyr-2.3-2.11.jar with timestamp 1533013634759
-## 18/07/30 22:07:18 INFO Utils: Fetching spark://localhost:61221/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-fbc16169-da10-43e1-822f-de9d4444aad3/userFiles-f1992f22-c7d4-42ba-8acc-7f86eeec49d5/fetchFileTemp3335186390879314888.tmp
-## 18/07/30 22:07:18 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-fbc16169-da10-43e1-822f-de9d4444aad3/userFiles-f1992f22-c7d4-42ba-8acc-7f86eeec49d5/sparklyr-2.3-2.11.jar to class loader
+## 18/08/01 10:05:56 INFO SparkContext: Submitted application: sparklyr
+## 18/08/01 10:05:56 INFO SparkContext: Added JAR file:/Library/Frameworks/R.framework/Versions/3.5/Resources/library/sparklyr/java/sparklyr-2.3-2.11.jar at spark://localhost:55079/jars/sparklyr-2.3-2.11.jar with timestamp 1533143156572
+## 18/08/01 10:05:59 INFO Executor: Fetching spark://localhost:55079/jars/sparklyr-2.3-2.11.jar with timestamp 1533143156572
+## 18/08/01 10:05:59 INFO Utils: Fetching spark://localhost:55079/jars/sparklyr-2.3-2.11.jar to /private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-3159d0d2-b988-4220-9b1b-c725908c1164/userFiles-7f9b9f26-5b17-486c-8f45-9b56864e6e94/fetchFileTemp8718362186921391867.tmp
+## 18/08/01 10:05:59 INFO Executor: Adding file:/private/var/folders/fz/v6wfsg2x1fb1rw4f6r0x4jwm0000gn/T/spark-3159d0d2-b988-4220-9b1b-c725908c1164/userFiles-7f9b9f26-5b17-486c-8f45-9b56864e6e94/sparklyr-2.3-2.11.jar to class loader
 \end{verbatim}
 
 \hypertarget{using-spark-from-rstudio}{%
@@ -2551,23 +2551,145 @@ available to help explore these topics until this chapter gets written.
 \hypertarget{using-extensions}{%
 \section{Using Extensions}\label{using-extensions}}
 
+\hypertarget{rsparkling}{%
+\subsection{RSparkling}\label{rsparkling}}
+
+\href{https://github.com/h2oai/rsparkling}{rsparkling} provies
+\href{https://www.h2o.ai/}{H2O} support in Spark using
+\texttt{sparklyr}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(rsparkling)}
+\KeywordTok{library}\NormalTok{(sparklyr)}
+\KeywordTok{library}\NormalTok{(h2o)}
+
+\NormalTok{cars_h2o <-}\StringTok{ }\KeywordTok{as_h2o_frame}\NormalTok{(sc, cars_tbl, }\DataTypeTok{strict_version_check =} \OtherTok{FALSE}\NormalTok{)}
+\KeywordTok{h2o.glm}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{c}\NormalTok{(}\StringTok{"wt"}\NormalTok{, }\StringTok{"cyl"}\NormalTok{), }\DataTypeTok{y =} \StringTok{"mpg"}\NormalTok{, }\DataTypeTok{training_frame =}\NormalTok{ mtcars_h2o, }\DataTypeTok{lambda_search =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Model Details:
+## ==============
+## 
+## H2ORegressionModel: glm
+## Model ID:  GLM_model_R_1533086487173_1 
+## GLM Model: summary
+##     family     link                              regularization
+## 1 gaussian identity Elastic Net (alpha = 0.5, lambda = 0.1013 )
+##                                                                lambda_search
+## 1 nlambda = 100, lambda.max = 10.132, lambda.min = 0.1013, lambda.1se = -1.0
+##   number_of_predictors_total number_of_active_predictors
+## 1                          2                           2
+##   number_of_iterations                                training_frame
+## 1                  100 frame_rdd_33_a539369727fb5223dbccfbc5b7894962
+## 
+## Coefficients: glm coefficients
+##       names coefficients standardized_coefficients
+## 1 Intercept    38.941654                 20.090625
+## 2       cyl    -1.468783                 -2.623132
+## 3        wt    -3.034558                 -2.969186
+## 
+## H2ORegressionMetrics: glm
+## ** Reported on training data. **
+## 
+## MSE:  6.017684
+## RMSE:  2.453097
+## MAE:  1.940985
+## RMSLE:  0.1114801
+## Mean Residual Deviance :  6.017684
+## R^2 :  0.8289895
+## Null Deviance :1126.047
+## Null D.o.F. :31
+## Residual Deviance :192.5659
+## Residual D.o.F. :29
+## AIC :156.2425
+\end{verbatim}
+
+See
+\href{http://spark.rstudio.com/guides/h2o/}{spark.rstudio.com/guides/h2o}.
+
 \hypertarget{graphframes}{%
 \subsection{GraphFrames}\label{graphframes}}
 
-See
+\href{https://graphframes.github.io/}{GraphFrames} provides graph
+algorithms: PageRank, ShortestPaths, etc.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{gf_graphframe}\NormalTok{(vertices_tbl, edges_tbl) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{gf_pagerank}\NormalTok{(}\DataTypeTok{reset_prob =} \FloatTok{0.15}\NormalTok{, }\DataTypeTok{max_iter =}\NormalTok{ 10L)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+GraphFrame
+Vertices:
+  $ id       <dbl> 12, 12, 59, 59, 1, 20, 20, 45, 45, 8, 8, 9, 9, 26, 26, 37, 37, 47, 47, 16, 16, 71, 71, ...
+  $ pagerank <dbl> 0.0058199702, 0.0058199702, 0.0000000000, 0.0000000000, 0.1500000000, 0.0344953402, 0.0...
+Edges:
+  $ src    <dbl> 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 58, 58, 58, 58, 58, 58, 5...
+  $ dst    <dbl> 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 65, 65, 65, 65, 65, 65, 6...
+  $ weight <dbl> 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0...
+\end{verbatim}
+
+\begin{figure}
+
+{\centering \includegraphics{the-r-in-spark_files/figure-latex/unnamed-chunk-91-1} 
+
+}
+
+\caption{Highschool ggraph dataset with pagerank highlighted.}\label{fig:unnamed-chunk-91}
+\end{figure}
+
+See also
 \href{http://spark.rstudio.com/graphframes/}{spark.rstudio.com/graphframes}.
 
 \hypertarget{mleap}{%
 \subsection{Mleap}\label{mleap}}
 
-See
+\href{https://github.com/rstudio/mleap}{Mleap} enables Spark pipelines
+in production.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Create pipeline}
+\NormalTok{pipeline_model <-}\StringTok{ }\KeywordTok{ml_pipeline}\NormalTok{(sc) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ft_binarizer}\NormalTok{(}\StringTok{"hp"}\NormalTok{, }\StringTok{"big_hp"}\NormalTok{, }\DataTypeTok{threshold =} \DecValTok{100}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ft_vector_assembler}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"big_hp"}\NormalTok{, }\StringTok{"wt"}\NormalTok{, }\StringTok{"qsec"}\NormalTok{), }\StringTok{"features"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ml_gbt_regressor}\NormalTok{(}\DataTypeTok{label_col =} \StringTok{"mpg"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ml_fit}\NormalTok{(cars_tbl)}
+
+\CommentTok{# Perform predictions}
+\NormalTok{predictions_tbl <-}\StringTok{ }\KeywordTok{ml_predict}\NormalTok{(pipeline_model, mtcars_tbl)}
+
+\CommentTok{# Export model with mleap}
+\KeywordTok{ml_write_bundle}\NormalTok{(pipeline_model, predictions_tbl, }\StringTok{"mtcars_model.zip"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Use model outside Spark and productions systems. For instance, in
+{Java:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{import}\ImportTok{ ml.combust.mleap.runtime.MleapContext;}
+
+\CommentTok{// Initialize}
+\NormalTok{BundleBuilder bundleBuilder = }\KeywordTok{new} \FunctionTok{BundleBuilder}\NormalTok{();}
+\NormalTok{MleapContext context = (}\KeywordTok{new} \FunctionTok{ContextBuilder}\NormalTok{()).}\FunctionTok{createMleapContext}\NormalTok{();}
+\NormalTok{Bundle<}\BuiltInTok{Transformer}\NormalTok{> bundle = bundleBuilder.}\FunctionTok{load}\NormalTok{(}\KeywordTok{new} \BuiltInTok{File}\NormalTok{(request.}\FunctionTok{get}\NormalTok{(}\StringTok{"mtcars_model.zip"}\NormalTok{)), context);}
+
+\CommentTok{// Read into Mleap DataFrame}
+\NormalTok{DefaultLeapFrame inputLeapFrame = }\KeywordTok{new} \FunctionTok{DefaultLeapFrame}\NormalTok{();}
+
+\CommentTok{// Perform Mleap transformation}
+\NormalTok{DefaultLeapFrame transformedLeapFrame = bundle.}\FunctionTok{root}\NormalTok{().}\FunctionTok{transform}\NormalTok{(inputLeapFrame).}\FunctionTok{get}\NormalTok{();}
+\end{Highlighting}
+\end{Shaded}
+
+See also
 \href{http://spark.rstudio.com/guides/mleap/}{spark.rstudio.com/guides/mleap}.
-
-\hypertarget{h2o}{%
-\subsection{H2O}\label{h2o}}
-
-See
-\href{http://spark.rstudio.com/guides/h2o/}{spark.rstudio.com/guides/h2o}.
 
 \hypertarget{writting-extensions}{%
 \section{Writting Extensions}\label{writting-extensions}}
@@ -2687,11 +2809,11 @@ time:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-90-1} 
+{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-98-1} 
 
 }
 
-\caption{Viewing a Spark Stream with sparklyr}\label{fig:unnamed-chunk-90}
+\caption{Viewing a Spark Stream with sparklyr}\label{fig:unnamed-chunk-98}
 \end{figure}
 
 Notice that the rows-per-second in the destination stream are higher
@@ -2749,11 +2871,11 @@ specified. Conceptually, this looks as follows:
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-94-1} 
+{\centering \includegraphics[width=1\linewidth,height=280pt]{the-r-in-spark_files/figure-latex/unnamed-chunk-102-1} 
 
 }
 
-\caption{Streams Transformation Diagram}\label{fig:unnamed-chunk-94}
+\caption{Streams Transformation Diagram}\label{fig:unnamed-chunk-102}
 \end{figure}
 
 \hypertarget{streams-dplyr}{%
@@ -2831,16 +2953,16 @@ and even join across many concurrent streams:
 ## # Database: spark_connection
 ##    text   timestamp           random
 ##    <chr>  <dttm>               <dbl>
-##  1 Row 15 2018-07-31 05:08:42  0.605
-##  2 Row 25 2018-07-31 05:08:42  0.940
-##  3 Row 26 2018-07-31 05:08:42  0.123
-##  4 Row 34 2018-07-31 05:08:42  0.385
-##  5 Row 43 2018-07-31 05:08:42  0.731
-##  6 Row 62 2018-07-31 05:08:42  0.783
-##  7 Row 63 2018-07-31 05:08:42  0.443
-##  8 Row 79 2018-07-31 05:08:42  0.563
-##  9 Row 91 2018-07-31 05:08:42  0.572
-## 10 Row 95 2018-07-31 05:08:42  0.497
+##  1 Row 5  2018-08-01 17:07:22  0.755
+##  2 Row 16 2018-08-01 17:07:22  0.289
+##  3 Row 22 2018-08-01 17:07:22  0.218
+##  4 Row 27 2018-08-01 17:07:22  0.715
+##  5 Row 44 2018-08-01 17:07:22  0.357
+##  6 Row 52 2018-08-01 17:07:22  0.205
+##  7 Row 62 2018-08-01 17:07:22  0.272
+##  8 Row 75 2018-08-01 17:07:22  0.306
+##  9 Row 79 2018-08-01 17:07:22  0.159
+## 10 Row 82 2018-08-01 17:07:22  0.395
 ## # ... with more rows
 \end{verbatim}
 
@@ -2892,20 +3014,20 @@ and adds jitter using R code:
 \end{Shaded}
 
 \begin{verbatim}
-## # Source:   table<sparklyr_tmp_305f5b75c0fd> [?? x 1]
+## # Source:   table<sparklyr_tmp_8e333a81d692> [?? x 1]
 ## # Database: spark_connection
 ##    result
 ##     <dbl>
-##  1   1.13
-##  2   1.93
-##  3   3.08
-##  4   3.87
-##  5   4.86
-##  6   6.17
-##  7   7.08
-##  8   8.10
-##  9   9.04
-## 10   9.94
+##  1  0.880
+##  2  2.10 
+##  3  2.90 
+##  4  3.83 
+##  5  4.96 
+##  6  6.04 
+##  7  6.88 
+##  8  7.83 
+##  9  8.91 
+## 10  9.92 
 ## # ... with more rows
 \end{verbatim}
 
