@@ -1704,35 +1704,47 @@ $(document).ready(function () {
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShzcGFya2x5cilcbmBgYCJ9 -->
 <pre class="r"><code>library(sparklyr)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3BhcmtfaW5zdGFsbCgpICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAjIEluc3RhbGwgQXBhY2hlIFNwYXJrXG5zYyA8LSBzcGFya19jb25uZWN0KG1hc3RlciA9IFwibG9jYWxcIikgICAgICAgICAgICAgICAgIyBDb25uZWN0IHRvIFNwYXJrIGNsdXN0ZXJcbmBgYCJ9 -->
-<pre class="r"><code>spark_install()                                      # Install Apache Spark
-sc &lt;- spark_connect(master = &quot;local&quot;)                # Connect to Spark cluster</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShkcGx5cilcbmxpYnJhcnkoREJJKVxuXG5kaXIuY3JlYXRlKFwiaW5wdXRcIikgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIyBDcmVhdGUgY2FycyBmb2xkZXJcbndyaXRlLmNzdihtdGNhcnMsIFwiaW5wdXQvY2Fycy5jc3ZcIikgICAgICAgICAgICAgICAgICAjIFdyaXRlIGRhdGEgaW4gUlxuYGBgIn0= -->
-<pre class="r"><code>library(dplyr)
-library(DBI)
+<!-- rnb-output-begin eyJkYXRhIjoiXG5BdHRhY2hpbmcgcGFja2FnZTog4oCYc3BhcmtseXLigJlcblxuVGhlIGZvbGxvd2luZyBvYmplY3QgaXMgbWFza2VkIGZyb20g4oCYcGFja2FnZTpwdXJycuKAmTpcblxuICAgIGludm9rZVxuIn0= -->
+<pre><code>
+Attaching package: ‘sparklyr’
 
-dir.create(&quot;input&quot;)                                  # Create cars folder
-write.csv(mtcars, &quot;input/cars.csv&quot;)                  # Write data in R</code></pre>
-<!-- rnb-source-end -->
+The following object is masked from ‘package:purrr’:
+
+    invoke</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2Fyc190YmwgPC0gc3BhcmtfcmVhZF9jc3Yoc2MsIFwiY2Fyc1wiLCBcImlucHV0L1wiKSAgICAgIyBSZWFkIGRhdGEgaW4gU3Bhcmtcblxuc3VtbWFyaXplKGNhcnNfdGJsLCBuID0gbigpKSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIyBDb3VudCByZWNvcmRzIHdpdGggZHBseXJcbmRiR2V0UXVlcnkoc2MsIFwiU0VMRUNUIGNvdW50KCopIEZST00gY2Fyc1wiKSAgICAgICAgICAjIENvdW50IHJlY29yZHMgd2l0aCBEQklcbmBgYCJ9 -->
-<pre class="r"><code>cars_tbl &lt;- spark_read_csv(sc, &quot;cars&quot;, &quot;input/&quot;)     # Read data in Spark
-
-summarize(cars_tbl, n = n())                             # Count records with dplyr
-dbGetQuery(sc, &quot;SELECT count(*) FROM cars&quot;)          # Count records with DBI</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2MgPC0gc3BhcmtfY29ubmVjdChtYXN0ZXIgPSBcImxvY2FsXCIpICAgICAgICAgICAgICAgICMgQ29ubmVjdCB0byBTcGFyayBjbHVzdGVyXG5cbmBgYCJ9 -->
+<pre class="r"><code>sc &lt;- spark_connect(master = &quot;local&quot;)                # Connect to Spark cluster
+</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiKiBVc2luZyBTcGFyazogMi4zLjBcbiJ9 -->
+<pre><code>* Using Spark: 2.3.0</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGlyLmNyZWF0ZShcImlucHV0XCIpICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICMgQ3JlYXRlIGNhcnMgZm9sZGVyXG5cbmBgYCJ9 -->
+<pre class="r"><code>dir.create(&quot;input&quot;)                                  # Create cars folder
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiJ2lucHV0JyBhbHJlYWR5IGV4aXN0c1xuIn0= -->
+<pre><code>'input' already exists</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibmNvbCI6MSwibnJvdyI6MX0sInJkZiI6Ikg0c0lBQUFBQUFBQUExMVBRUTZDTUJCY0NsVnBJaUh4RTNxQWlDL2c0QXM4Y2EybEtoRmJBaVg2ZXJRbGJTTHRvYnM3MlptZHVaeXJFNmtJQUNBSWNRQW8xRzJFOUJkQUJMR3BINEJ3TndNQWlhbGxDZll0RnJHZ0x6N29KdjBETjB5T1F1MkxnN2NjOS9LZE84TFdxZ2UrSW12cDRDdVNtaXFhMzNyTjFkUGtVZGF5VTQwVW1vU01aK3lSZzk0RDBsRVlGM1hHSHFONFpzWFJYTEIyWUduTnQ0bStWZ3RiclJVWDkwWndaNzZsVjk3YUlkRng1N1I1MXpkQ3VTZ2FIWElsRlhWN2hNbldJWE00bUg3ZUVyQXdvZ0VBQUE9PSJ9 -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["count(1)"],"name":[1],"type":["dbl"],"align":["right"]}],"data":[{"1":"32"}],"options":{"columns":{"min":{},"max":[10],"total":[1]},"rows":{"min":[10],"max":[10],"total":[1]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
@@ -1748,25 +1760,39 @@ ml_pipeline(sc) %&gt;%                                  # Define Spark pipeline
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3BhcmtfY29udGV4dChzYykgJT4lIGludm9rZShcInZlcnNpb25cIikgICAgICAgICAgICAgICMgRXh0ZW5kIHNwYXJrbHlyIHdpdGggU2NhbGFcbmBgYCJ9 -->
-<pre class="r"><code>spark_context(sc) %&gt;% invoke(&quot;version&quot;)              # Extend sparklyr with Scala</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3BhcmtfY29udGV4dChzYykgJT4lIGludm9rZShcInZlcnNpb25cIikgICAgICAgICAgICAgICMgRXh0ZW5kIHNwYXJrbHlyIHdpdGggU2NhbGFcblxuYGBgIn0= -->
+<pre class="r"><code>spark_context(sc) %&gt;% invoke(&quot;version&quot;)              # Extend sparklyr with Scala
+</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiMi4zLjBcIlxuIn0= -->
+<pre><code>[1] &quot;2.3.0&quot;</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3BhcmtfYXBwbHkoY2Fyc190YmwsIG5yb3cpICAgICAgICAgICAgICAgICAgICAgICAgICAjIEV4dGVuZCBzcGFya2x5ciB3aXRoIFJcbmBgYCJ9 -->
-<pre class="r"><code>spark_apply(cars_tbl, nrow)                          # Extend sparklyr with R</code></pre>
-<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9zcGFyayIsInRibF9zcWwiLCJ0YmxfbGF6eSIsInRibCJdLCJuY29sIjoxLCJucm93IjpbXX0sInJkZiI6Ikg0c0lBQUFBQUFBQUExMVFRUXJDTUJEY3BrYXhvQWgrd0E4MG9IajM0Z3M4ZVkwMWFqRW1rcVRvVGQvaUMzMUI2NllrSU5uRDd1eGsyTjNKYnJ0ZkZmc0NBQWprTkFPU0l4d1FUQmtNWU96ckV5Q2Y5d1RBSk5SRklxS1Y1TllpbVAyUnhaRTd6azZHMzBRcVY4aWw4cUVSdHBFdWtZNk5mckFvOSt2SkcxT0hnYVZOeENOOWQ3VldLQ1grWXBwc3lFeEN6QnJsUngvTDZ0S29hN2xjKzZ1RFJSOVRqMTlmRDBlZjJHKys0YlhmblhkaEpvMDJoRHJYU2tTbmtoK0VETTBVdmZSVzJOM1V5c1Z2UXRZeXB4MlB1cUxTTWpLOVNXaC9haXBvV3FnQkFBQT0ifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["result"],"name":[1],"type":["int"],"align":["right"]}],"data":[{"1":"32"}],"options":{"columns":{"min":{},"max":[10],"total":[1]},"rows":{"min":[10],"max":[10],"total":["NA"]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RyZWFtX3JlYWRfY3N2KHNjLCBcImlucHV0L1wiKSAlPiUgICAgICAgICAgICAgICAgICAgICMgRGVmaW5lIFNwYXJrIHN0cmVhbVxuICBmaWx0ZXIobXBnID4gMzApICU+JSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAjIEFkZCBkcGx5ciB0cmFuc2Zvcm1hdGlvblxuICBzdHJlYW1fd3JpdGVfanNvbihcIm91dHB1dC9cIikgICAgICAgICAgICAgICAgICAgICAgICMgU3RhcnQgcHJvY2Vzc2luZyBzdHJlYW1cbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RyZWFtX3JlYWRfY3N2KHNjLCBcImlucHV0L1wiKSAlPiUgICAgICAgICAgICAgICAgICAgICMgRGVmaW5lIFNwYXJrIHN0cmVhbVxuICBmaWx0ZXIobXBnID4gMzApICU+JSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAjIEFkZCBkcGx5ciB0cmFuc2Zvcm1hdGlvblxuICBzdHJlYW1fd3JpdGVfanNvbihcIm91dHB1dC9cIikgICAgICAgICAgICAgICAgICAgICAgICMgU3RhcnQgcHJvY2Vzc2luZyBzdHJlYW1cblxuYGBgIn0= -->
 <pre class="r"><code>stream_read_csv(sc, &quot;input/&quot;) %&gt;%                    # Define Spark stream
   filter(mpg &gt; 30) %&gt;%                               # Add dplyr transformation
-  stream_write_json(&quot;output/&quot;)                       # Start processing stream</code></pre>
+  stream_write_json(&quot;output/&quot;)                       # Start processing stream
+</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiU3RyZWFtOiA4Mjk2MDNhNi1iNmQ2LTQwN2QtODBmZC1iN2U1YjI1NDY3YmNcblN0YXR1czogV2FpdGluZyBmb3IgbmV4dCB0cmlnZ2VyXG5BY3RpdmU6IFRSVUVcbiJ9 -->
+<pre><code>Stream: 829603a6-b6d6-407d-80fd-b7e5b25467bc
+Status: Waiting for next trigger
+Active: TRUE</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>From the terminal, you can simulate simulate the input stream by coping the original file multiple times using <code>cp cars.csv $RANDOM.csv</code>.</p>

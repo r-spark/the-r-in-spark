@@ -40,7 +40,7 @@ function drawBlock(parent, block) {
   if (!block.y) block.y = 0;
   if (!block.width) block.width = blockWidth;
   if (!block.height) block.height = blockHeight;
-  if (!block.color) block.color = "#86aedb";
+  if (!block.color) block.color = "#bbcce0";
   if (!block.label) block.label = "<label>";
   if (!block.style) block.style = "block";
 
@@ -62,22 +62,24 @@ function drawBlock(parent, block) {
     .text(block.label);
 
   if (block.childrens) {
-    var posY = 46;
     for (var childIdx in block.childrens) {
       var child = block.childrens[childIdx];
 
+      if (!child.width) child.width = block.width - 20;
+      if (!child.x) child.x = block.x;
+      if (child.position === undefined) child.position = childIdx;
+      if (child.style === undefined) child.style = "block-children";
+
       var childBlock = {
-        x: block.x,
-        y: startY + posY,
-        width: block.width - 20,
+        x: child.x,
+        y: startY + 46 + child.position * 34,
+        width: child.width,
         height: 30,
         label: child.label,
-        style: "block-children"
+        style: child.style
       };
 
       drawBlock(parent, childBlock);
-
-      posY += 34;
     }
   }
 

@@ -1,8 +1,10 @@
-# Analysis {#dplyr}
+# Analysis {#analysis}
 
 While **this chatper has not been written**, a few resources and basic examples were made available to help out until this chapter is written.
 
-## dplyr
+## Overview
+
+## dplyr {#dplyr}
 
 Using `sparklyr`, you can apply the same data analysis techniques described in [Chapter 5 - Data transformation - R for Data Science](http://r4ds.had.co.nz/transform.html) by Garrett Grolemund and Hadley Wickham. 
 
@@ -29,6 +31,17 @@ iris_tbl %>%
   summarise_all(funs(mean))
 ```
 
+### Pass-through Functions
+
+```{r eval=FALSE}
+dates_tbl <- copy_to(sc, data.frame(a = "1/2/2001"))
+dates_tbl %>% select(b = to_date(a)) %>% as.sql()
+```
+
+See [Spark SQL built-in functions](https://spark.apache.org/docs/2.3.0/api/sql/index.html).
+
+### Resources {#dplyr-reosurces}
+
 To understand `dplyr` further, I would recommend taking a look at the following vignettes:
 
 - [Introduction to dplyr](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)
@@ -36,7 +49,7 @@ To understand `dplyr` further, I would recommend taking a look at the following 
 - [Window functions](https://cran.r-project.org/web/packages/dplyr/vignettes/window-functions.html)
 - [Programming with dplyr](https://cran.r-project.org/web/packages/dplyr/vignettes/programming.html)
 
-## DBI
+## DBI {#dbi}
 
 The `DBI` provides an database interface for R, meaning, if you are familiar with SQL, you can make use of `DBI` to perform SQL queries in Spark using `sparklyr`. To learn more about `DBI`, I would recommend reading first [A Common Database Interface (DBI)](https://cran.r-project.org/web/packages/DBI/vignettes/DBI-1.html). Once you are familiar with `DBI`, you can use this package with `sparklyr` as follows:
 

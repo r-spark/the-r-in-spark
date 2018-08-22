@@ -1,0 +1,116 @@
+# Data {#data}
+
+While **this chatper has not been written.**, a few resources are available to help explore these topics until this chapter gets written.
+
+## Overview
+
+## Formats
+
+```
+spark_read_csv()
+spark_read_jdbc()
+spark_read_json()
+spark_read_libsvm()
+spark_read_orc()
+spark_read_parquet()
+spark_read_source()
+spark_read_table()
+spark_read_text()
+```
+
+## External
+
+### Cassandra
+
+See [https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources](https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources).
+
+### Databases
+
+See [https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources](https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources).
+
+### HBase
+
+## Troubleshooting
+
+### Troubleshoot CSVs
+
+```{r eval=FALSE}
+writeLines(c("bad", 1, 2, 3, "broken"), "tmp/bad.csv")
+```
+
+There are a couple modes that can help troubleshoot parsing issues:
+- **PERMISSIVE**: `NULL`s are inserted for missing tokens.
+- **DROPMALFORMED**: Drops lines which are malformed.
+- **FAILFAST**: Aborts if encounters any malformed line.
+
+Which can be used as follows:
+
+```{r=FALSE}
+spark_read_csv(
+  sc,
+  "bad",
+  "tmp/bad.csv",
+  columns = list(foo = "integer"),
+  infer_schema = FALSE,
+  options = list(mode = "DROPMALFORMED"))
+```
+```
+# Source:   table<bad> [?? x 1]
+# Database: spark_connection
+    foo
+  <int>
+1     1
+2     2
+3     3
+```
+
+In Spark 2.X, there is also a secret column `_corrupt_record` that can be used to output those incorrect records:
+
+```{r eval=FALSE}
+spark_read_csv(
+  sc,
+  "decimals",
+  "tmp/bad.csv",
+  columns = list(foo = "integer", "_corrupt_record" = "character"),
+  infer_schema = FALSE,
+  options = list(mode = "PERMISIVE")
+)
+```
+```
+# Source:   table<decimals> [?? x 2]
+# Database: spark_connection
+    foo `_corrupt_record`   
+  <int> <chr>               
+1     1 NA                  
+2     2 NA                  
+3     3 NA                  
+4    NA sdfsdfds            
+5    NA 2.16027303300001e+31
+```
+
+### Column Names
+
+By default, `sparklyr` sanitizes column names by translating characters like `.` to `_`, this was required in Spark 1.6.X to avoid couple nuances in Spark. However, to disable this functionality, you can run the following code:
+
+```{r eval=FALSE}
+options(sparklyr.sanitize.column.names = FALSE)
+dplyr::copy_to(sc, iris, overwrite = TRUE)
+```
+```
+# Source:   table<iris> [?? x 5]
+# Database: spark_connection
+   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+          <dbl>       <dbl>        <dbl>       <dbl> <chr>  
+ 1          5.1         3.5          1.4         0.2 setosa 
+ 2          4.9         3            1.4         0.2 setosa 
+ 3          4.7         3.2          1.3         0.2 setosa 
+ 4          4.6         3.1          1.5         0.2 setosa 
+ 5          5           3.6          1.4         0.2 setosa 
+ 6          5.4         3.9          1.7         0.4 setosa 
+ 7          4.6         3.4          1.4         0.3 setosa 
+ 8          5           3.4          1.5         0.2 setosa 
+ 9          4.4         2.9          1.4         0.2 setosa 
+10          4.9         3.1          1.5         0.1 setosa 
+# ... with more rows
+```
+
