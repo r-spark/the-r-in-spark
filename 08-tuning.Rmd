@@ -1,0 +1,393 @@
+# Tuning {#tuning}
+
+Previous chapters focused on installing, using and connecting to Spark clusters, we've assumed so far that computation in a Spark cluster works efficiently. While this is true in many cases, it is often required to have some knowledge of how Spark works internally to perform tunning operations that will make computations run efficiently. Tunning is often required to run operations over datasets that make use of all resources in the Spark cluster. This chapter will explain how Spark works and provide details on how to tune its operations.
+
+```{r echo=FALSE}
+library(sparklyr)
+```
+
+## Overview
+
+Spark performs distributed computation by: configuring cluster resources and partitioning, executing, shuffling, caching and serializing data across machines.
+
+- [**Configuring**](#tunning-configuring) requests the cluster manager for resources: total machines, memory, etc.
+- [**Partitioning**](#tunning-configuring) splits the data among various machines. Partitions can be either implicit or explicit.
+- [**Executing**](#tunning-configuring) means running an arbitrary transformation over each partition.
+- [**Shuffling**](#tunning-configuring) redistributes data when data to the correct machine.
+- [**Caching**](#tunning-configuring) preserves data in-memory across different computation cycles.
+- [**Serializing**](#tunning-serializing) transforms data partitions or data collection to be sent over the network to other workers or back to the driver node.
+
+The following diagram shows an example on how a sorting **job** would conceptually work across a cluster of machines. First, Spark would **configure** the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the data is already partitioned, each worker node loads this implicit **partition**; for instance, `4,9,1` is loaded in the first worker node. Afterwards, a custom transformation is applied to each partition in each worker node, this is denoted by `f(x)` in the diagram bellow and is defined as a **stage** in Spark terminalogy. In this example, `f(x)` **executes** a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed. Once the execution completes, the result is **shuffled** to the right machine to finish the sorting operation across the entire dataset. Once the data is sorted across the cluster, the sorted results can be optionally **cached** in memory to avoid rerunning this computation multiple times. Finally, a small subset of the cached results is **serialized**, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.
+
+```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Spark Overview'}
+
+r2d3::r2d3(
+  c(),
+  "images/08-tuning-spark-overview.js",
+  dependencies = "images/06-connections-diagram.js",
+  css = "images/08-tuning-spark-overview.css"
+)
+```
+
+Notice that while the diagram above describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, these lower level operations are not exposed in `sparklyr`, instead, `sparklyr` makes those operations available through higher level commands provided by the data [analysis] tools like [dplyr] or [DBI], [modeling] and by using many [community extensions](#using-extensions). For advanced use cases, one can always use the Spark's Scala API through an `sparklyr` [custom extensions](#custom-extensions) or run custom [distributed] R code. 
+
+In order to effectevely tune Spark computations, there are two toolsthat are useful to understand: the [**graph visualization**](#tunning-graph-vusualization) and the [**event timeline**](#tunning-event-timeline). Both tools are accessible through the [Spark Web Interface](#spark-web-interface) and then selecting a particular job and a oarticular state under this job.
+
+### Graph Visualization {#tunning-graph-vusualization}
+
+This **graph visualization** is found under each stage by expanding "DAG Visualization". DAG stands for Directed Acyclic Graph, since all computations in Spark move computaiton forward without repeating previous steps, this helps Spark optimize computations more effectevely.
+
+What you will see in this visualization is a breakdown of the operations that Spark had to perform (or is performing if the stage is still active) to execute your computation. It's hard to understand what they mean the first time you see them, but as you execute more Spark jobs, this graph will become more familiar and will help you identify unexpected steps to investigate further.
+
+The following graph represents the stage from ordering a dataset:
+
+```{r eval=FALSE, echo=FALSE}
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local")
+iris_tbl <- copy_to(sc, iris, repartition = 3)
+
+iris_df <- iris_tbl %>% arrange(Sepal_Width) %>% collect()
+
+webshot::webshot(
+  "http://localhost:4040/stages/stage/?id=1&attempt=0",
+  file = "images/08-tuning-spark-graph-visualization.png",
+  eval = "
+  casper.waitForSelector(
+    '#stage-dag-viz',
+    function() {
+      this.click('#stage-dag-viz');
+    }
+  );",
+  selector = c("#dag-viz-graph"))
+
+spark_disconnect(sc)
+```
+
+```{r echo=FALSE, fig.align = 'center', fig.cap='Spark Graph Visualization'}
+knitr::include_graphics("images/08-tuning-spark-graph-visualization.png")
+```
+
+### Event Timeline {#tunning-event-timeline}
+
+The **event timeline** is one of the best ways to optimize your Spark jobs is to use the Spark's [web interface](spark-web-interface), it's also available for each Spark stage and gives you a great summary of how Spark is spending computation cycles. In general, you want to see a lot of CPU usage since the other tasks can be considered overhead. You also want to see one event lane per CPU allocated from the cluster to your job so ensure you are fully utilizing your Spark cluster.
+
+Lets the take a look at the event timeline for the ordering a data frame by a given column using three partitions:
+
+```{r eval=FALSE, echo=FALSE}
+library(sparklyr)
+library(dplyr)
+```
+
+```{r eval=FALSE}
+spark_connect(master = "local") %>%
+  copy_to(iris, repartition = 3) %>%
+  arrange(Sepal_Width)
+```
+
+```{r eval=FALSE, echo=FALSE}
+webshot::webshot(
+  "http://localhost:4040/stages/stage/?id=1&attempt=0",
+  file = "images/08-tuning-spark-event-timeline.png",
+  eval = "
+  casper.waitForSelector(
+    '#task-assignment-timeline',
+    function() {
+      this.click('.expand-task-assignment-timeline');
+    }
+  );",
+  selector = c(".legend-area", "#task-summary-table"))
+
+spark_disconnect(sc)
+```
+
+```{r echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline'}
+knitr::include_graphics("images/08-tuning-spark-event-timeline.png")
+```
+
+## Configuring {#tunning-configuring}
+
+When tuning a Spark application, consider defining a configuration specification to describe the resources your application needs to successfully run at scale.
+
+Some of the most obvious resources you would want to define are:
+
+- **Memory in Driver:** The amount of memory available in the driver node, it is convenient to have significantly more memory available in the driver than the worker nodes.
+- **Number of Workers:**. The number of workers required to be configured for this session.
+- **Memory per Worker:** The amount of memory available to the worker node.
+
+In local mode, `spark_connect(master = "local")`; as mentioned in the [local connections](#connection-local) section, there are no workers; however, but we can set the driver settings through:
+
+```{r eval=FALSE}
+# Initialize configuration with defaults
+config <- spark_config()
+
+# Memory in Driver
+config["sparklyr.shell.driver-memory"] <- "2g"
+
+# Number of Workers
+config["sparklyr.connect.cores.local"] <- 2
+
+# Connect to local cluster with custom configuration
+sc <- spark_connect(master = "local", config = config)
+```
+
+When Spark runs in Hadoop Yarn, `spark_connect(master = "yarn")`:
+
+```{r eval=FALSE}
+# Initialize configuration with defaults
+config <- spark_config()
+
+# Memory in Driver
+config["sparklyr.shell.driver-memory"] <- "2g"
+
+# Number of Workers
+config["sparklyr.shell.executor-cores"] <- 3
+
+# Memory per Worker
+config["sparklyr.shell.executor-memory"] <- "2g"
+
+# Connect to Yarn with custom configuration
+sc <- spark_connect(master = "yarn", config = config)
+```
+
+Notice that some of the settings are different between [clusters], local and Yarn in the examples above. Therefore, it is common to research online which settings your cluster managers expects.
+
+There are a few types of configuration settings:
+
+- **Submit** settings are set while `sparklyr` is being submitted to Spark. For instance, they can configure the driver node.
+- **Runtime** settings configure Spark when the Spark session is created. For instance, to configure worker nodes settings.
+- **Sparklyr** settings configure `sparklyr` behaviour. For instance,`sparklyr.verbose` controls how much diagnostics data is printed. 
+
+### Submit Settings {#submit-settings}
+
+Some settings must be specified when `spark-submit` (the terminal application that launches Spark) is run. For instance, since `spark-submit` launches driver node which runs as a Java instance, choosing how much memory is allocated needs to be specified as a parameter to `spark-submit`.
+
+You can list all the available `spark-submit` parameters by running:
+
+```{r eval=FALSE}
+spark_home_dir() %>% file.path("bin", "spark-submit") %>% system2()
+```
+```{r echo=FALSE, comment=''}
+system2(file.path(spark_home_dir(), "bin", "spark-submit"), stdout = "stdout.txt", stderr = "stderr.txt")
+cat(paste(readLines("stderr.txt"), collapse = "\n"))
+```
+
+Notice for instance the `--driver-memory` parameter, which we previously configured by setting:
+
+```{r eval=FALSE}
+config <- spark_config()
+config["sparklyr.shell.driver-memory"] <- "2gb"
+```
+
+In general, any `spark-submit` setting is configured through `sparklyr.shell.X` where `X` is the name of the `spark-submit` parameter without the `--` prefix.
+
+### Runtime Settings
+
+As mentioned, some **Spark** settings configure the session runtime. The runtime settings are a superset of the [submit settings](#submit-settings) since is usually helpfull to retrieve the current configuration even if a setting can't be changed.
+
+To list all the Spark settings available at runtime, we can run:
+
+```{r eval=FALSE}
+spark_session_config(sc)
+```
+```{r echo=FALSE}
+sc <- spark_connect(master = "local")
+
+settings <- spark_session_config(sc)
+cleaned <- gsub("Frameworks/R.framework/Versions/3.5/Resources/library", "...", settings)
+cleaned <- gsub("javierluraschi", "...", cleaned)
+cleaned <- gsub("^file:", "", cleaned)
+knitr::kable(data.frame(name = names(settings), value = unlist(unname(cleaned))))
+```
+
+See also, [spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html).
+
+### Sparklyr Settings
+
+Appart from Spark settings, there are a few settings particular to sparklyr listed bellow. `sparklyr.connect.cores` is useful to set the CPU cores to use in local mode; the remaining ones are not used as much while tuning, but they can prove helpful while troubleshooting other issues.
+
+```{r eval=F}
+spark_config_settings()
+```
+```{r echo=F}
+knitr::kable(spark_config_settings())
+```
+
+## Partitioning {#tunning-partitioning}
+
+As mentioned in the [introduction](#intro-background) chapter, MapReduce and Spark were designed with the purpuse of performing computations against data stored across many machines, the subset of the data available for computation over each compute instance is known as a **partition**.
+
+By default, Spark will compute over each existing **implicit** partition since it's more effective to run computaitons were the data is already located. However, there are cases where you will want to set an **explicit** partition to help Spark use more efficient use of your cluster resources.
+
+### Implicit
+
+There is always an implicit partition for each Spark computation. If your data is already spread across your cluster evenly, there is usually no need to tune this further.
+
+You can get the number of partitions a computation will require through `sdf_num_partitions()`:
+
+```{r eval=FALSE}
+sdf_len(sc, 10) %>% sdf_num_partitions()
+```
+
+### Explicit
+
+There will be times when you have many more compute instances than data partitions, or much less compute instances than the number of partitions in your data. In both cases, it can help to **repartition** data to match your cluster resources.
+
+Various [data](#data) functions, like `spark_read_csv()`, already support a `repartition` parameter to requrest Spark to repartition data appropriately. For instance, we can create a sequence of 10 numbers partitioned by 10 as follows:
+
+```{r eval=FALSE}
+sdf_len(sc, 10, repartition = 10) %>% sdf_num_partitions()
+```
+
+For datasets that are already repartitioned, we can also use `sdf_repartition`:
+
+```{r eval=FALSE}
+sdf_len(sc, 10, repartition = 10) %>% 
+  sdf_repartition(4) %>%
+  sdf_num_partitions()
+```
+
+However, lets look at this with a practical example. Suppose that we want to sort a large dataset that does not even fit in memory, for simplicity, we will generate this dataset by generating 1 billion rows and appending a column of random values. A first attempt to sort this in Spark would be to run:
+
+```{r eval=FALSE}
+# Attempt to sort 20 GB dataset in disk with one billion entries
+sdf_len(sc, 10^9) %>%
+  mutate(x = rand()) %>%
+  arrange(x) %>%
+  spark_write_csv("billion.csv")
+```
+
+However, since each partition needs to fit in memory in Spark, the code above will result in an `OutOfMemory` exception that shuts down Spark completely. Instead, we can explicitly partition the data into chunks that would fit in the default memory configureation by explicitly defining the total number of partitions to use with the `repartition` parameter set to 10,000 as follows:
+
+```{r eval=FALSE}
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local")
+
+# Sort 20 GB dataset in disk with one billion entries
+sdf_len(sc, 10^9, repartition = 10^4) %>%
+  mutate(x = rand()) %>%
+  arrange(x) %>%
+  spark_write_csv("billion.csv")
+```
+
+## Caching {#tunning-caching}
+
+From the [introduction](Intro) chapter, we know that Spark was designed to be faster than it's predecesors by using memory instead of disk to store data, this is formally known as an Spark **RDD** and stands for resilient distributed dataset. An RDD is resilient by duplicating copies of the same data across many machines, such that, if one machine fails other can complete the task. Resiliency is important in distributed systems since, while things will usually work in one machine, when running over thousands of machines the likelyhood of something failing is much higher; when a failure happens, it is prefferable be fault tolerant to avoid loosing the work of all the other machines. RDDs are fault tolerant by tracking data lineage information to rebuild lost data automatically on failure.
+
+In `sparklyr`, you can control when an RDD gets loaded or unloaded from memory using `tbl_cache()` and `tbl_uncache()`.
+
+Most sparklyr operations that retrieve a Spark data frame, cache the results in-memory, for instance, running `spark_read_parquet()` or `sdf_copy_to()` will provide a Spark dataframe that is already cached in-memory. As a Spark data frame, this object can be used in most sparklyr functions, including data analysis with dplyr or machine learning.
+
+```{r eval=FALSE}
+library(sparklyr)
+sc <- spark_connect(master = "local")
+```
+
+```{r eval=FALSE}
+iris_tbl <- sdf_copy_to(sc, iris, overwrite = TRUE)
+```
+
+You can inspect which tables are cached by navigating to the Spark UI using `spark_web(sc)`, opening the storage tab, and clicking on a given RDD:
+
+```{r echo=FALSE, eval=FALSE}
+invisible(webshot::webshot(
+  "http://localhost:4040/storage/rdd/?id=9",
+  "images/08-tuning-cache-rdd-web.png",
+  cliprect = "viewport"
+))
+```
+
+```{r spark-standalone-rdd-web, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Cached RDD in Spark Web Interface.'}
+knitr::include_graphics("images/08-tuning-cache-rdd-web.png")
+```
+
+Data loaded in memory will be released when the R session terminates either explicitly or implicitly with a restart or disconnection; however, to free up resources, you can use `tbl_uncache()`:
+
+```{r eval=FALSE}
+tbl_uncache(sc, "iris")
+```
+
+```{r eval=FALSE, echo=FALSE}
+spark_disconnect(sc)
+```
+
+### Checkpointing
+
+Checkpointing is a slightly different type of caching, while it also persists data it will, additionally, break the graph computation lineage. So for instance, if a cached partition is lost, it can be computed from the computation graph which is not possible while checkpointing since the source of computation is lost.
+
+When performing expensive computation graphs, it can make sense to checkpoint to persist and break the computation lineage, this to help Spark reduce graph computation resources; otherwise, Spark might try to over-optimize a computation graph that is really not useful to optimize.
+
+You can checkpoint explicitly by saving to CSV, Parquet, etc. files. Or let Spark checkpoint this for you using `sdf_checkpoint()` in `sparklyr` as follows.
+
+Notice that checkpointing truncates the computation lineage graph which can speed up performance if the same intermediate result is used multiple times.
+
+### Memory {#tunning-memory}
+
+Memory in Spark is categorized into: reserved, user, execution or storage:
+
+- **Reserved:** Reserved memory is the memory required by Spark to function and therefore, is overhead that is required and should not be configured. This value defaults to 300MB.
+- **User:** User memory is the memory used to execute custom code, `sparklyr` only makes use of this memory indirectly when executing `dplyr` expressions or modeling a dataset.
+- **Execution:** Execution memory is used to execute code by Spark, mostly, to process the results from the partition and perform shuffling.
+- **Storage:** Storage memory is used to cache RDDs, for instance, when using `tbl_cache()` in `sparklyr`.
+
+As part of tuning execution, you can consider tweaking the amount of memory allocated for **user**, **execution** and **storage** by creating a Spark connection with different values than the defaults provided in Spark:
+
+```{r eval=FALSE}
+config <- spark_config()
+
+# define memory available for storage and execution
+config$spark.memory.fraction <- 0.75
+
+# define memory available for storage
+config$spark.memory.storageFraction <- 0.5
+```
+
+For instance, if you want to use Spark to store large amounts of data in-memory with the purpuse of filtering and retrieving subsets quickly, you can expect Spark to use little execution or user memory; therefore, to maximize storage memory, one can tune Spark as follows:
+
+```{r eval=FALSE}
+config <- spark_config()
+
+# define memory available for storage and execution
+config$spark.memory.fraction <- 0.90
+
+# define memory available for storage
+config$spark.memory.storageFraction <- 0.90
+```
+
+However, notice that Spark will borrow execution memory from storage and viceversa if needed and if possible; therefore, in practice, there should be little need to tune the memory settings.
+
+## Shuffling {#tunning-shuffling}
+
+Shuffling, is the operation that redistributes data across machines, it is usually an expensive operation and therefore, one we try to minimize. One can easily identify is significant time is being spent shuffling by looking at the [event timeline](#tunning-event-timeline). It is possible to reduce shuffling by reframing data analysis questions or hinting Spark appropriately.
+
+For instance, when joining dataframes that differ in size significantly, as in, one set being orders of magnitude smaller than the other one. You can consider using `sdf_broadcast()` to mark a dataframe as small enough for use in broadcast joins, meaning, it pushes one of the smaller dataframes to each of the worker nodes to reduce shuffling the bigger dataframe. One example for `sdf_broadcast()` follows:
+
+```{r eval=FALSE}
+sdf_len(sc, 10000) %>%
+    sdf_broadcast() %>%
+    left_join(sdf_len(sc, 100))
+```
+
+## Serialization {#tunning-serialization}
+
+It is not that common to have to adjust serialization when tunning Spark; however, it is worth mentioning there are alternative serialization modules like the [Kryo Serializer](https://github.com/EsotericSoftware/kryo) that can provide performance improvements over the default [Java Serializer](http://docs.oracle.com/javase/6/docs/api/java/io/Serializable.html).
+
+The Kryo Serializer can be enabled in `sparklyr` through:
+
+```{r eval=FALSE}
+config <- spark_config()
+
+config$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
+sc <- spark_connect(master = "local", config = config)
+```
+
+## Recap
+
+This chapter provided a broad but also detailed overview to help you speed up and reduce resource consumption in Spark, it provided the foundations to understand bottlenecks and some common workarounds to known issues; however, fine-tunning Spark is a broad topic that would require many more chapters to cover extensively. Therefore, while troubleshooting Spark's performance and scalability, searching the web and consulting online communities is often necessary to fine-tune your particular environment.
+
+```{r echo=FALSE, message=FALSE}
+spark_disconnect(sc)
+```

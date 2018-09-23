@@ -8,7 +8,7 @@ Before explaining how to connect to Spark clusters, it is worth discussing the c
 
 First, lets go over a couple definitions. As you know form previous chapters, a cluster is a collection of machines to perform analysis beyond a single computer. However, in distributed systems and clusters literature, we often reffer to each physical machine as a compute instance, compute node, or simply instance or node for short. It is helpful to remind this while reading through this chapter and making use of external resource.
 
-In a Spark cluster, there are three types of compute instances that are relevant to Spark: The **driver node**, the **worker nodes** and the **cluster manager**. A cluster manager is a service that allos Spark to be executed in the clsuter and was explained in the [Cluster Managers](Managers) section. The driver node is tasked with delegating work to the worker nodes, but also for aggregating their results and iterating further if needed. For the most part, aggregation happens in the worker nodes; however, even after the nodes aggregate data, it is often the case that the driver node would have to aggregate the worker results. Therefore, the driver node has at least, but often, much more compute resources (read RAM, CPU, Local Storage, etc.) then the worker node.
+In a Spark cluster, there are three types of compute instances that are relevant to Spark: The **driver node**, the **worker nodes** and the **cluster manager**. A cluster manager is a service that allows Spark to be executed in the clsuter and was explained in the [Cluster Managers](Managers) section. The **driver node** is tasked with delegating work to the worker nodes, but also for aggregating their results and controlling computation flow. For the most part, aggregation happens in the worker nodes; however, even after the nodes aggregate data, it is often the case that the driver node would have to collect the worker's results. Therefore, the driver node usually has at least, but often much more, compute resources (read RAM, CPU, Local Storage, etc.) than the worker node. The **worker nodes** execute compute tasks over partitioned data and communicate intermediate results to other workers or back to the driver node, worker nodes are also reffered as **executors**.
 
 Strictly speaking, the driver node and worker nodes are just names assigned to machines with particular roles, while the actual computation in the driver node is performed by the **spark context**. The Spark context is a Spark component tasked with scheduling tasks, managing data and so on. In the worker nodes, the actual computation is performed under a **spark executor**, which is also a Spark component tasked with executing subtasks against a data partition.
 
@@ -63,7 +63,7 @@ Where `cluster-master` is set to the correct cluster manager master for [Spark S
 
 ## Types
 
-### Local
+### Local {#connection-local}
 
 When connecting to Spark in local mode, Spark starts as a single application simulating a cluster with a single node, this is not a proper computing cluster but is ideal to perform work offline and troubleshoot issues. A local connection to Spark is represented in the following diagram:
 
@@ -208,6 +208,12 @@ One first step is to troubleshoot connections is to run in verbose to print dire
 sc <- spark_connect(master = "local", log = "console")
 ```
 
+Verbose logging can also be enabled with the follwing option:
+
+```{r}
+options(sparklyr.verbose = TRUE)
+```
+
 ### Spark Submit {#troubleshoot-spark-submit}
 
 If connections fail in `sparklyr`, first troubleshoot if this issue is specific to `sparklyr` or Spark in general. This can be accomplished by running an example `spark-submit` job and validating that no errors are thrown:
@@ -280,7 +286,8 @@ Make sure you identify the correct version that matches your Spark cluster, for 
 Third, from the terminal run:
 
 ```{r echo=FALSE}
-Sys.setenv(PATH_TO_SPARKLYR_JAR = dir(system.file("java", package = "sparklyr"), pattern = gsub("\\.0", "", paste("sparklyr", sparklyr::spark_default_version()$spark, sep = "-")), full.names = T))
+recent_jars <- dir(system.file("java", package = "sparklyr"), pattern = gsub("\\.[0-9]", "", paste("sparklyr", sparklyr::spark_default_version()$spark, sep = "-")), full.names = T)
+Sys.setenv(PATH_TO_SPARKLYR_JAR = recent_jars[[length(recent_jars)]])
 ```
 
 ```{r echo=FALSE}
@@ -318,4 +325,4 @@ This chapter presented an overview of Spark's architecture and detailed connecti
 
 To troubleshoot connection problems, it is recommended to search for the connection problem in StackOverflow, the [sparklyr github issues](https://github.com/rstudio/sparklyr/issues) and, if needed, open a [new GitHub issue in sparklyr](https://github.com/rstudio/sparklyr/issues/new) to assist further.
 
-In the next chapter, [Tuning], you will learn in-detail how Spark works and use this knowledge to optimize it's resource usage and performance.
+In the next chapter, [Data], you will learn how to read and write over multiple data sources and understand in-depth what a Spark dataframe is.

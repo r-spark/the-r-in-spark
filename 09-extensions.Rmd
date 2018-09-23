@@ -19,7 +19,7 @@ cars_tbl <- sdf_copy_to(sc, mtcars, "mtcars")
 cars_h2o <- as_h2o_frame(sc, mtcars_tbl, strict_version_check = FALSE)
 
 model <- h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = cars_h2o, lambda_search = TRUE)
-saveRDS(model, "data/08-extensions-h2o-glm.rds")
+saveRDS(model, "data/09-extensions-h2o-glm.rds")
 ```
 ```{r eval=FALSE, }
 library(rsparkling)
@@ -30,7 +30,7 @@ cars_h2o <- as_h2o_frame(sc, cars_tbl, strict_version_check = FALSE)
 h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = mtcars_h2o, lambda_search = TRUE)
 ```
 ```{r echo=FALSE}
-readRDS("data/08-extensions-h2o-glm.rds")
+readRDS("data/09-extensions-h2o-glm.rds")
 ```
 
 See [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/).
@@ -60,7 +60,7 @@ model <- gf_graphframe(vertices_tbl, edges_tbl) %>%
   gf_pagerank(reset_prob = 0.15, max_iter = 10L)
 
 highschool_tbl %>% collect() %>%
-  saveRDS("data/08-extensions-graphframes-highschool.rds")
+  saveRDS("data/09-extensions-graphframes-highschool.rds")
 ```
 ```{r eval=FALSE}
 gf_graphframe(vertices_tbl, edges_tbl) %>% gf_pagerank(reset_prob = 0.15, max_iter = 10L)
@@ -78,7 +78,7 @@ Edges:
 ```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, fig.cap='Highschool ggraph dataset with pagerank highlighted.', fig.align='center'}
 library(ggraph)
 library(igraph)
-highschool_rdf <- readRDS("data/08-extensions-graphframes-highschool.rds")
+highschool_rdf <- readRDS("data/09-extensions-graphframes-highschool.rds")
 highschool_rdf %>% graph_from_data_frame() %>%
   ggraph(layout = 'kk') + 
     geom_edge_link(alpha = 0.1) + 
@@ -129,7 +129,7 @@ DefaultLeapFrame transformedLeapFrame = bundle.root().transform(inputLeapFrame).
 
 See also [spark.rstudio.com/guides/mleap](http://spark.rstudio.com/guides/mleap/).
 
-## Writting Extensions {#writting-extensions}
+## Writting Extensions {#custom-extensions}
 
 See [spark.rstudio.com/extensions](http://spark.rstudio.com/extensions/).
 
@@ -137,13 +137,13 @@ See [spark.rstudio.com/extensions](http://spark.rstudio.com/extensions/).
 
 You can create an `sparklyr` extension with ease from RStudio. This feature requires RStudio 1.1 or newer and the `sparklyr` package to be installed. Then, from the `File` menu, `New Project...`, select `R Packag using sparklyr`:
 
-![](images/08-extensions-rstudio-project.png)
+![](images/09-extensions-rstudio-project.png)
 
 ### Troubleshooting
 
 We can trace all the calls made to `invoke()`, `invoke_new()` and `invoke_static()` using the `sparklyr.invoke.trace` and `sparklyr.invoke.trace.callstack` options as follows:
 
-```{eval=FALSE}
+```{r eval=FALSE}
 config <- spark_config()
 config$sparklyr.invoke.trace <- TRUE
 

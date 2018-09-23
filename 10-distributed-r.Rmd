@@ -4,6 +4,19 @@ While **this chatper has not been written.**, use [spark.rstudio.com/guides/dist
 
 ## Use Cases
 
+## Columns
+
+### Inference
+
+### Excplicit
+
+```{r eval=FALSE}
+iris_tbl <- spark_apply(
+  I,
+  columns = lapply(iris, class)
+)
+```
+
 ## Grouping
 
 ## Packages
@@ -11,3 +24,20 @@ While **this chatper has not been written.**, use [spark.rstudio.com/guides/dist
 ## Restrictions
 
 ## Troubleshooting
+
+### Tips
+
+```{r eval=FALSE}
+odbc_logs %>% head() %>% spark_apply(function(df) {
+    tryCatch({
+        webreadr::read_s3(df[[1]])
+        ""
+    }, error = function(e) {
+        e$message
+    })
+})
+```
+
+### Logs
+
+### Debugging
