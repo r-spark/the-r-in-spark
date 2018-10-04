@@ -1,8 +1,18 @@
+# (PART) Advanced {-}
+
 # Distributed R {#distributed}
 
 While **this chatper has not been written.**, use [spark.rstudio.com/guides/distributed-r](http://spark.rstudio.com/guides/distributed-r/) to learn how to use R directly over each worker node.
 
 ## Use Cases
+
+### Embarrassingly Parallel
+
+```{r eval=FALSE}
+sdf_len(sc, total_executors, repartition = total_executors) %>%
+  spark_apply(~ data.frame(pi = 3.1416), columns = c(pi = "character")) %>%
+  summarize(mean = mean(pi))
+```
 
 ## Columns
 

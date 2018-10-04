@@ -1,10 +1,10 @@
+# (PART) Extensions {-}
+
 # Extensions {#extensions}
 
 While **this chatper has not been written.**, a few resources are available to help explore these topics until this chapter gets written.
 
-## Using Extensions
-
-### RSparkling
+## RSparkling
 
 [rsparkling](https://github.com/h2oai/rsparkling) provies [H2O](https://www.h2o.ai/) support in Spark using `sparklyr`:
 
@@ -35,7 +35,7 @@ readRDS("data/09-extensions-h2o-glm.rds")
 
 See [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/).
 
-### GraphFrames
+## GraphFrames
 
 [GraphFrames](https://graphframes.github.io/) provides graph algorithms: PageRank, ShortestPaths, etc.
 
@@ -89,7 +89,7 @@ highschool_rdf %>% graph_from_data_frame() %>%
 
 See also [spark.rstudio.com/graphframes](http://spark.rstudio.com/graphframes/).
 
-### Mleap
+## Mleap
 
 [Mleap](https://github.com/rstudio/mleap) enables Spark pipelines in production.
 
@@ -129,24 +129,8 @@ DefaultLeapFrame transformedLeapFrame = bundle.root().transform(inputLeapFrame).
 
 See also [spark.rstudio.com/guides/mleap](http://spark.rstudio.com/guides/mleap/).
 
-## Writting Extensions {#custom-extensions}
-
-See [spark.rstudio.com/extensions](http://spark.rstudio.com/extensions/).
-
-### RStudio Projects
-
-You can create an `sparklyr` extension with ease from RStudio. This feature requires RStudio 1.1 or newer and the `sparklyr` package to be installed. Then, from the `File` menu, `New Project...`, select `R Packag using sparklyr`:
-
-![](images/09-extensions-rstudio-project.png)
-
-### Troubleshooting
-
-We can trace all the calls made to `invoke()`, `invoke_new()` and `invoke_static()` using the `sparklyr.invoke.trace` and `sparklyr.invoke.trace.callstack` options as follows:
+## Nested Data {#extensions-nested-data}
 
 ```{r eval=FALSE}
-config <- spark_config()
-config$sparklyr.invoke.trace <- TRUE
-
-spark_connect(master = "local", config = config)
+library(sparklyr.nested)
 ```
-

@@ -30,6 +30,19 @@ spark_read_table()
 spark_read_text()
 ```
 
+## Data Types
+
+### Dates
+
+Note: Some Spark date/time functions make timezone assumtions, for isntance, the following code makes use of `to_date()` which assumes the timestamp will be given in the local time zone. This is not to discourage use of date/time funcitons, but to be aware of time zones to be handled with care.
+
+```{r eval=FALSE}
+sdf_len(sc, 1) %>%
+  transmute(
+    date = timestamp(1419126103) %>% from_utc_timestamp('UTC') %>% to_date() %>% as.character()
+  )
+```
+
 ## External
 
 ### Amazon S3
@@ -46,7 +59,27 @@ See [https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources](ht
 
 See [https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources](https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources).
 
+### Switching
+
+You can query multiple databases registered in Spark using the `.` syntax, as in:
+
+```{r eval=FALSE}
+DBI::dbSendQuery("SELECT * FROM databasename.table")
+```
+
+However, if you preffer to switch to a particular database and make it the default, you can run:
+
+```{r eval=FALSE}
+tbl_change_db(sc, “db_name”)
+```
+
+which an alias over `DBI::dbGetQuery(sc, "use db_name”)`.
+
 ### HBase
+
+### Nested Data
+
+See [nested data extension](#extensions-nested-data).
 
 ## Troubleshooting
 
