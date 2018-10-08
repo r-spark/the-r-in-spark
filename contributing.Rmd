@@ -2,13 +2,36 @@
 
 **This chatper has not been written.**
 
-While there are many ways to contribute to `sparklyr` from helping community members to opening github issues, this chapter focuses on those readers interested in contributing fixes and features to `sparklyr` but will also help those who want to understand how `sparklyr` works internally.
+While there are many ways to contribute to `sparklyr` from helping community members to opening github issues, this chapter focuses on those readers interested in contributing `sparklyr` extensions or fixes and features to `sparklyr`. However, this chapter will also help those who want to understand how `sparklyr` works internally.
 
 ## Overview
 
 (architecture overview)
 
-## Scala
+## Extensions {#contributing-extensions}
+
+See [spark.rstudio.com/extensions](http://spark.rstudio.com/extensions/).
+
+### RStudio Projects
+
+You can create an `sparklyr` extension with ease from RStudio. This feature requires RStudio 1.1 or newer and the `sparklyr` package to be installed. Then, from the `File` menu, `New Project...`, select `R Packag using sparklyr`:
+
+![](images/09-extensions-rstudio-project.png)
+
+### Troubleshooting
+
+We can trace all the calls made to `invoke()`, `invoke_new()` and `invoke_static()` using the `sparklyr.invoke.trace` and `sparklyr.invoke.trace.callstack` options as follows:
+
+```{r eval=FALSE}
+config <- spark_config()
+config$sparklyr.invoke.trace <- TRUE
+
+spark_connect(master = "local", config = config)
+```
+
+## sparklyr {#contributing-sparklyr}
+
+### Scala
 
 Changes in the scala sources require the Scala compilers to be installed. You can install the required compilers by running:
 
@@ -21,14 +44,14 @@ Which will download the correct compilers from [https://www.scala-lang.org/](htt
 
 Then you can recompile all the jars by running `configure.R` in the root of the `sparklyr` sources.
 
-## Serialization
+### Serialization
 
-## Invocations
+### Invocations
 
-## R Packages
+### R Packages
 
 (dbi, dplyr, broom, etc)
 
-## Connections
+### Connections
 
-## Distributed R
+### Distributed R
