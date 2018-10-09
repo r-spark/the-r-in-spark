@@ -32,8 +32,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="external.html">
-<link rel="next" href="recap-3.html">
+<link rel="prev" href="index.html">
+<link rel="next" href="structure.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -362,78 +362,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="troubleshooting-1" class="section level2">
-<h2><span class="header-section-number">7.6</span> Troubleshooting</h2>
-<div id="troubleshoot-csvs" class="section level3">
-<h3><span class="header-section-number">7.6.1</span> Troubleshoot CSVs</h3>
-<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb66-1" data-line-number="1"><span class="kw">writeLines</span>(<span class="kw">c</span>(<span class="st">&quot;bad&quot;</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="st">&quot;broken&quot;</span>), <span class="st">&quot;tmp/bad.csv&quot;</span>)</a></code></pre></div>
-<p>There are a couple modes that can help troubleshoot parsing issues:
-- <strong>PERMISSIVE</strong>: <code>NULL</code>s are inserted for missing tokens.
-- <strong>DROPMALFORMED</strong>: Drops lines which are malformed.
-- <strong>FAILFAST</strong>: Aborts if encounters any malformed line.</p>
-<p>Which can be used as follows:</p>
-<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" data-line-number="1"><span class="kw">spark_read_csv</span>(</a>
-<a class="sourceLine" id="cb67-2" data-line-number="2">  sc,</a>
-<a class="sourceLine" id="cb67-3" data-line-number="3">  <span class="st">&quot;bad&quot;</span>,</a>
-<a class="sourceLine" id="cb67-4" data-line-number="4">  <span class="st">&quot;tmp/bad.csv&quot;</span>,</a>
-<a class="sourceLine" id="cb67-5" data-line-number="5">  <span class="dt">columns =</span> <span class="kw">list</span>(<span class="dt">foo =</span> <span class="st">&quot;integer&quot;</span>),</a>
-<a class="sourceLine" id="cb67-6" data-line-number="6">  <span class="dt">infer_schema =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb67-7" data-line-number="7">  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">mode =</span> <span class="st">&quot;DROPMALFORMED&quot;</span>))</a></code></pre></div>
-<pre><code># Source:   table&lt;bad&gt; [?? x 1]
-# Database: spark_connection
-    foo
-  &lt;int&gt;
-1     1
-2     2
-3     3</code></pre>
-<p>In Spark 2.X, there is also a secret column <code>_corrupt_record</code> that can be used to output those incorrect records:</p>
-<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb69-1" data-line-number="1"><span class="kw">spark_read_csv</span>(</a>
-<a class="sourceLine" id="cb69-2" data-line-number="2">  sc,</a>
-<a class="sourceLine" id="cb69-3" data-line-number="3">  <span class="st">&quot;decimals&quot;</span>,</a>
-<a class="sourceLine" id="cb69-4" data-line-number="4">  <span class="st">&quot;tmp/bad.csv&quot;</span>,</a>
-<a class="sourceLine" id="cb69-5" data-line-number="5">  <span class="dt">columns =</span> <span class="kw">list</span>(<span class="dt">foo =</span> <span class="st">&quot;integer&quot;</span>, <span class="st">&quot;_corrupt_record&quot;</span> =<span class="st"> &quot;character&quot;</span>),</a>
-<a class="sourceLine" id="cb69-6" data-line-number="6">  <span class="dt">infer_schema =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb69-7" data-line-number="7">  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">mode =</span> <span class="st">&quot;PERMISIVE&quot;</span>)</a>
-<a class="sourceLine" id="cb69-8" data-line-number="8">)</a></code></pre></div>
-<pre><code># Source:   table&lt;decimals&gt; [?? x 2]
-# Database: spark_connection
-    foo `_corrupt_record`   
-  &lt;int&gt; &lt;chr&gt;               
-1     1 NA                  
-2     2 NA                  
-3     3 NA                  
-4    NA sdfsdfds            
-5    NA 2.16027303300001e+31</code></pre>
-</div>
-<div id="column-names" class="section level3">
-<h3><span class="header-section-number">7.6.2</span> Column Names</h3>
-<p>By default, <code>sparklyr</code> sanitizes column names by translating characters like <code>.</code> to <code>_</code>, this was required in Spark 1.6.X to avoid couple nuances in Spark. However, to disable this functionality, you can run the following code:</p>
-<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb71-1" data-line-number="1"><span class="kw">options</span>(<span class="dt">sparklyr.sanitize.column.names =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb71-2" data-line-number="2">dplyr<span class="op">::</span><span class="kw">copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
-<pre><code># Source:   table&lt;iris&gt; [?? x 5]
-# Database: spark_connection
-   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
-          &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;  
- 1          5.1         3.5          1.4         0.2 setosa 
- 2          4.9         3            1.4         0.2 setosa 
- 3          4.7         3.2          1.3         0.2 setosa 
- 4          4.6         3.1          1.5         0.2 setosa 
- 5          5           3.6          1.4         0.2 setosa 
- 6          5.4         3.9          1.7         0.4 setosa 
- 7          4.6         3.4          1.4         0.3 setosa 
- 8          5           3.4          1.5         0.2 setosa 
- 9          4.4         2.9          1.4         0.2 setosa 
-10          4.9         3.1          1.5         0.1 setosa 
-# ... with more rows</code></pre>
-</div>
+<div id="why" class="section level2 unnumbered">
+<h2>Why</h2>
+<p>Various books have been written for learning Apache Spark; for instance, <a href="@information-technology">Spark: The Definitive Guide: Big Data Processing Made Simple</a> is a comprehensive resource while <a href="@spark-learning-karau">Learning Spark: Lightning-Fast Big Data Analysis</a> is an introductory book meant to help users get up an running. However, as of this writting, there is no book to learn Apache Spark using the R programming language and neither, a book specifically designed for the R user nor the aspiring R user.</p>
+<p>There are some resources online to learn Apache Spark with R, most notably, the <a href="https://spark.rstudio.com">spark.rstudio.com</a> site and the Spark documentation site under <a href="https://spark.apache.org/docs/latest/index.html">spark.apache.org</a>. Both sites are great online resources; however, the content is not intended to be read from start to finish and assumes the reader has some context on Apache Spark, R and cluster computing.</p>
+<p>The goal of this book is to help anyone get started with Apache Spark using R, with the first chapters being mostly introductory, but quickly ramping up to relevant data science topics, cluster computing and closing on advanced topics which should interst even the most advanced users.</p>
+<p>This book is inteded to be a useful resource for a wide range of users; from those of you curious to learn the tools used in Big Data and Big Compute, to those of you experienced in those topics seeking to understand deeper topics while working with Apache Spark from R.</p>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="external.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="recap-3.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="structure.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
