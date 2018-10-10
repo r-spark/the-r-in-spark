@@ -65,7 +65,7 @@
 <style type="text/css">
 a.sourceLine { display: inline-block; line-height: 1.25; }
 a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; position: absolute; }
+a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
@@ -78,13 +78,11 @@ code.sourceCode { white-space: pre-wrap; }
 a.sourceLine { text-indent: -1em; padding-left: 1em; }
 }
 pre.numberSource a.sourceLine
-  { position: relative; }
-pre.numberSource a.sourceLine:empty
-  { position: absolute; }
+  { position: relative; left: -4em; }
 pre.numberSource a.sourceLine::before
   { content: attr(data-line-number);
-    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all;
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -168,9 +166,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.4" data-path="starting.html"><a href="starting.html#using-spark"><i class="fa fa-check"></i><b>2.4</b> Using Spark</a><ul>
 <li class="chapter" data-level="2.4.1" data-path="starting.html"><a href="starting.html#spark-web-interface"><i class="fa fa-check"></i><b>2.4.1</b> Web Interface</a></li>
 <li class="chapter" data-level="2.4.2" data-path="starting.html"><a href="starting.html#logs"><i class="fa fa-check"></i><b>2.4.2</b> Logs</a></li>
-<li class="chapter" data-level="2.4.3" data-path="starting.html"><a href="starting.html#using-spark-from-rstudio"><i class="fa fa-check"></i><b>2.4.3</b> RStudio</a></li>
 </ul></li>
-<li class="chapter" data-level="2.5" data-path="starting.html"><a href="starting.html#disconnecting"><i class="fa fa-check"></i><b>2.5</b> Disconnecting</a></li>
+<li class="chapter" data-level="2.5" data-path="starting.html"><a href="starting.html#disconnecting"><i class="fa fa-check"></i><b>2.5</b> Disconnecting</a><ul>
+<li class="chapter" data-level="2.5.1" data-path="starting.html"><a href="starting.html#using-spark-from-rstudio"><i class="fa fa-check"></i><b>2.5.1</b> RStudio</a></li>
+</ul></li>
 <li class="chapter" data-level="2.6" data-path="starting.html"><a href="starting.html#recap"><i class="fa fa-check"></i><b>2.6</b> Recap</a></li>
 </ul></li>
 <li class="part"><span><b>I Analysis</b></span></li>
@@ -371,17 +370,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">3.2</span> dplyr</h2>
 <p>Using <code>sparklyr</code>, you can apply the same data analysis techniques described in <a href="http://r4ds.had.co.nz/transform.html">Chapter 5 - Data transformation - R for Data Science</a> by Garrett Grolemund and Hadley Wickham.</p>
 <p>Once you understand <code>dplyr</code>, you can make use of <code>dplyr</code> and <code>sparklyr</code> as follows:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a>
-<a class="sourceLine" id="cb18-2" data-line-number="2"><span class="kw">library</span>(dplyr)</a>
-<a class="sourceLine" id="cb18-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb18-4" data-line-number="4"><span class="co"># Connect to Spark</span></a>
-<a class="sourceLine" id="cb18-5" data-line-number="5">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a>
-<a class="sourceLine" id="cb18-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb18-7" data-line-number="7"><span class="co"># Use dplyr&#39;s copy_to() to copy the iris dataset to Spark</span></a>
-<a class="sourceLine" id="cb18-8" data-line-number="8">iris_tbl &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb18-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb18-10" data-line-number="10"><span class="co"># The iris_tbl is a Spark data frame compatible with dplyr</span></a>
-<a class="sourceLine" id="cb18-11" data-line-number="11">iris_tbl</a></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb22-2" data-line-number="2"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb22-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb22-4" data-line-number="4"><span class="co"># Connect to Spark</span></a>
+<a class="sourceLine" id="cb22-5" data-line-number="5">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a>
+<a class="sourceLine" id="cb22-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb22-7" data-line-number="7"><span class="co"># Use dplyr&#39;s copy_to() to copy the iris dataset to Spark</span></a>
+<a class="sourceLine" id="cb22-8" data-line-number="8">iris_tbl &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb22-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb22-10" data-line-number="10"><span class="co"># The iris_tbl is a Spark data frame compatible with dplyr</span></a>
+<a class="sourceLine" id="cb22-11" data-line-number="11">iris_tbl</a></code></pre></div>
 <pre><code>## # Source: spark&lt;iris&gt; [?? x 5]
 ##    Sepal_Length Sepal_Width Petal_Length Petal_Width Species
 ##  *        &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;  
@@ -396,10 +395,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  9          4.4         2.9          1.4         0.2 setosa 
 ## 10          4.9         3.1          1.5         0.1 setosa 
 ## # ... with more rows</code></pre>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="co"># Transform iris_tbl with dplyr as usual</span></a>
-<a class="sourceLine" id="cb20-2" data-line-number="2">iris_tbl <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb20-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(Species) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb20-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise_all</span>(<span class="kw">funs</span>(mean))</a></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="co"># Transform iris_tbl with dplyr as usual</span></a>
+<a class="sourceLine" id="cb24-2" data-line-number="2">iris_tbl <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb24-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(Species) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb24-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise_all</span>(<span class="kw">funs</span>(mean))</a></code></pre></div>
 <pre><code>## # Source: spark&lt;?&gt; [?? x 5]
 ##   Species    Sepal_Length Sepal_Width Petal_Length Petal_Width
 ## * &lt;chr&gt;             &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
@@ -408,8 +407,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 3 setosa             5.01        3.43         1.46       0.246</code></pre>
 <div id="pass-through-functions" class="section level3">
 <h3><span class="header-section-number">3.2.1</span> Pass-through Functions</h3>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1">dates_tbl &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">a =</span> <span class="st">&quot;1/2/2001&quot;</span>))</a>
-<a class="sourceLine" id="cb22-2" data-line-number="2">dates_tbl <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="dt">b =</span> <span class="kw">to_date</span>(a)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as.sql</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1">dates_tbl &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">a =</span> <span class="st">&quot;1/2/2001&quot;</span>))</a>
+<a class="sourceLine" id="cb26-2" data-line-number="2">dates_tbl <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="dt">b =</span> <span class="kw">to_date</span>(a)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as.sql</span>()</a></code></pre></div>
 <p>See <a href="https://spark.apache.org/docs/2.3.0/api/sql/index.html">Spark SQL built-in functions</a>.</p>
 </div>
 <div id="dplyr-reosurces" class="section level3">
@@ -426,13 +425,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="dbi" class="section level2">
 <h2><span class="header-section-number">3.3</span> DBI</h2>
 <p>The <code>DBI</code> provides an database interface for R, meaning, if you are familiar with SQL, you can make use of <code>DBI</code> to perform SQL queries in Spark using <code>sparklyr</code>. To learn more about <code>DBI</code>, I would recommend reading first <a href="https://cran.r-project.org/web/packages/DBI/vignettes/DBI-1.html">A Common Database Interface (DBI)</a>. Once you are familiar with <code>DBI</code>, you can use this package with <code>sparklyr</code> as follows:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1"><span class="kw">library</span>(DBI)</a>
-<a class="sourceLine" id="cb23-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb23-3" data-line-number="3"><span class="kw">dbGetQuery</span>(sc,</a>
-<a class="sourceLine" id="cb23-4" data-line-number="4">  <span class="st">&quot;SELECT mean(Sepal_Length), mean(Sepal_Width), </span></a>
-<a class="sourceLine" id="cb23-5" data-line-number="5"><span class="st">          mean(Petal_Length), mean(Petal_Width)</span></a>
-<a class="sourceLine" id="cb23-6" data-line-number="6"><span class="st">   FROM iris</span></a>
-<a class="sourceLine" id="cb23-7" data-line-number="7"><span class="st">   GROUP BY Species&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" data-line-number="1"><span class="kw">library</span>(DBI)</a>
+<a class="sourceLine" id="cb27-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb27-3" data-line-number="3"><span class="kw">dbGetQuery</span>(sc,</a>
+<a class="sourceLine" id="cb27-4" data-line-number="4">  <span class="st">&quot;SELECT mean(Sepal_Length), mean(Sepal_Width), </span></a>
+<a class="sourceLine" id="cb27-5" data-line-number="5"><span class="st">          mean(Petal_Length), mean(Petal_Width)</span></a>
+<a class="sourceLine" id="cb27-6" data-line-number="6"><span class="st">   FROM iris</span></a>
+<a class="sourceLine" id="cb27-7" data-line-number="7"><span class="st">   GROUP BY Species&quot;</span>)</a></code></pre></div>
 <pre><code>##   avg(Sepal_Length) avg(Sepal_Width) avg(Petal_Length) avg(Petal_Width)
 ## 1             5.936            2.770             4.260            1.326
 ## 2             6.588            2.974             5.552            2.026

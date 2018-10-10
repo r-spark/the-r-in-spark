@@ -65,7 +65,7 @@
 <style type="text/css">
 a.sourceLine { display: inline-block; line-height: 1.25; }
 a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; position: absolute; }
+a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
@@ -78,13 +78,11 @@ code.sourceCode { white-space: pre-wrap; }
 a.sourceLine { text-indent: -1em; padding-left: 1em; }
 }
 pre.numberSource a.sourceLine
-  { position: relative; }
-pre.numberSource a.sourceLine:empty
-  { position: absolute; }
+  { position: relative; left: -4em; }
 pre.numberSource a.sourceLine::before
   { content: attr(data-line-number);
-    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all;
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -168,9 +166,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.4" data-path="starting.html"><a href="starting.html#using-spark"><i class="fa fa-check"></i><b>2.4</b> Using Spark</a><ul>
 <li class="chapter" data-level="2.4.1" data-path="starting.html"><a href="starting.html#spark-web-interface"><i class="fa fa-check"></i><b>2.4.1</b> Web Interface</a></li>
 <li class="chapter" data-level="2.4.2" data-path="starting.html"><a href="starting.html#logs"><i class="fa fa-check"></i><b>2.4.2</b> Logs</a></li>
-<li class="chapter" data-level="2.4.3" data-path="starting.html"><a href="starting.html#using-spark-from-rstudio"><i class="fa fa-check"></i><b>2.4.3</b> RStudio</a></li>
 </ul></li>
-<li class="chapter" data-level="2.5" data-path="starting.html"><a href="starting.html#disconnecting"><i class="fa fa-check"></i><b>2.5</b> Disconnecting</a></li>
+<li class="chapter" data-level="2.5" data-path="starting.html"><a href="starting.html#disconnecting"><i class="fa fa-check"></i><b>2.5</b> Disconnecting</a><ul>
+<li class="chapter" data-level="2.5.1" data-path="starting.html"><a href="starting.html#using-spark-from-rstudio"><i class="fa fa-check"></i><b>2.5.1</b> RStudio</a></li>
+</ul></li>
 <li class="chapter" data-level="2.6" data-path="starting.html"><a href="starting.html#recap"><i class="fa fa-check"></i><b>2.6</b> Recap</a></li>
 </ul></li>
 <li class="part"><span><b>I Analysis</b></span></li>
@@ -368,9 +367,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">10.1</span> Use Cases</h2>
 <div id="embarrassingly-parallel" class="section level3">
 <h3><span class="header-section-number">10.1.1</span> Embarrassingly Parallel</h3>
-<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb106-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, total_executors, <span class="dt">repartition =</span> total_executors) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb106-2" data-line-number="2"><span class="st">  </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">pi =</span> <span class="fl">3.1416</span>), <span class="dt">columns =</span> <span class="kw">c</span>(<span class="dt">pi =</span> <span class="st">&quot;character&quot;</span>)) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb106-3" data-line-number="3"><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">mean =</span> <span class="kw">mean</span>(pi))</a></code></pre></div>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb110-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, total_executors, <span class="dt">repartition =</span> total_executors) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb110-2" data-line-number="2"><span class="st">  </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">pi =</span> <span class="fl">3.1416</span>), <span class="dt">columns =</span> <span class="kw">c</span>(<span class="dt">pi =</span> <span class="st">&quot;character&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb110-3" data-line-number="3"><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">mean =</span> <span class="kw">mean</span>(pi))</a></code></pre></div>
 </div>
 </div>
 <div id="columns" class="section level2">
@@ -380,10 +379,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="excplicit" class="section level3">
 <h3><span class="header-section-number">10.2.2</span> Excplicit</h3>
-<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb107-1" data-line-number="1">iris_tbl &lt;-<span class="st"> </span><span class="kw">spark_apply</span>(</a>
-<a class="sourceLine" id="cb107-2" data-line-number="2">  I,</a>
-<a class="sourceLine" id="cb107-3" data-line-number="3">  <span class="dt">columns =</span> <span class="kw">lapply</span>(iris, class)</a>
-<a class="sourceLine" id="cb107-4" data-line-number="4">)</a></code></pre></div>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb111-1" data-line-number="1">iris_tbl &lt;-<span class="st"> </span><span class="kw">spark_apply</span>(</a>
+<a class="sourceLine" id="cb111-2" data-line-number="2">  I,</a>
+<a class="sourceLine" id="cb111-3" data-line-number="3">  <span class="dt">columns =</span> <span class="kw">lapply</span>(iris, class)</a>
+<a class="sourceLine" id="cb111-4" data-line-number="4">)</a></code></pre></div>
 </div>
 </div>
 <div id="grouping" class="section level2">
@@ -399,14 +398,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">10.6</span> Troubleshooting</h2>
 <div id="tips" class="section level3">
 <h3><span class="header-section-number">10.6.1</span> Tips</h3>
-<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb108-1" data-line-number="1">odbc_logs <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="cf">function</span>(df) {</a>
-<a class="sourceLine" id="cb108-2" data-line-number="2">    <span class="kw">tryCatch</span>({</a>
-<a class="sourceLine" id="cb108-3" data-line-number="3">        webreadr<span class="op">::</span><span class="kw">read_s3</span>(df[[<span class="dv">1</span>]])</a>
-<a class="sourceLine" id="cb108-4" data-line-number="4">        <span class="st">&quot;&quot;</span></a>
-<a class="sourceLine" id="cb108-5" data-line-number="5">    }, <span class="dt">error =</span> <span class="cf">function</span>(e) {</a>
-<a class="sourceLine" id="cb108-6" data-line-number="6">        e<span class="op">$</span>message</a>
-<a class="sourceLine" id="cb108-7" data-line-number="7">    })</a>
-<a class="sourceLine" id="cb108-8" data-line-number="8">})</a></code></pre></div>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb112-1" data-line-number="1">odbc_logs <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="cf">function</span>(df) {</a>
+<a class="sourceLine" id="cb112-2" data-line-number="2">    <span class="kw">tryCatch</span>({</a>
+<a class="sourceLine" id="cb112-3" data-line-number="3">        webreadr<span class="op">::</span><span class="kw">read_s3</span>(df[[<span class="dv">1</span>]])</a>
+<a class="sourceLine" id="cb112-4" data-line-number="4">        <span class="st">&quot;&quot;</span></a>
+<a class="sourceLine" id="cb112-5" data-line-number="5">    }, <span class="dt">error =</span> <span class="cf">function</span>(e) {</a>
+<a class="sourceLine" id="cb112-6" data-line-number="6">        e<span class="op">$</span>message</a>
+<a class="sourceLine" id="cb112-7" data-line-number="7">    })</a>
+<a class="sourceLine" id="cb112-8" data-line-number="8">})</a></code></pre></div>
 </div>
 <div id="logs-1" class="section level3">
 <h3><span class="header-section-number">10.6.2</span> Logs</h3>
