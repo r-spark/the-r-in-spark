@@ -5,11 +5,11 @@
 
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>The R in Spark: Learning Apache Spark with R using sparklyr</title>
+  <title>The R in Spark: Learning Apache Spark with R</title>
   <meta name="description" content="A book to learn Apache Spark with R using the sparklyr R package.">
   <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
 
-  <meta property="og:title" content="The R in Spark: Learning Apache Spark with R using sparklyr" />
+  <meta property="og:title" content="The R in Spark: Learning Apache Spark with R" />
   <meta property="og:type" content="book" />
   
   
@@ -17,14 +17,14 @@
   <meta name="github-repo" content="javierluraschi/the-r-in-spark" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="The R in Spark: Learning Apache Spark with R using sparklyr" />
+  <meta name="twitter:title" content="The R in Spark: Learning Apache Spark with R" />
   
   <meta name="twitter:description" content="A book to learn Apache Spark with R using the sparklyr R package." />
   
 
 
 
-<meta name="date" content="2018-10-09">
+<meta name="date" content="2018-10-31">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -46,11 +46,15 @@
 
 
 
-<script src="libs/htmlwidgets-1.2/htmlwidgets.js"></script>
+<script src="libs/htmlwidgets-1.3/htmlwidgets.js"></script>
 <script src="libs/r2d3-render-0.1.0/r2d3-render.js"></script>
 <script src="libs/webcomponents-2.0.0/webcomponents.js"></script>
 <script src="libs/r2d3-binding-0.2.2/r2d3.js"></script>
 <script src="libs/d3v5-5.0.0/d3.min.js"></script>
+<script src="libs/dagre-0.0.1/dagre.min.js"></script>
+<script src="libs/lodash-3.7.0/lodash.js"></script>
+<script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
+<script src="libs/nomnoml-binding-0.1.0/nomnoml.js"></script>
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119986300-1"></script>
 <script>
@@ -163,14 +167,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="2.2" data-path="starting.html"><a href="starting.html#installing-spark"><i class="fa fa-check"></i><b>2.2</b> Installing Spark</a></li>
 <li class="chapter" data-level="2.3" data-path="starting.html"><a href="starting.html#connecting-to-spark"><i class="fa fa-check"></i><b>2.3</b> Connecting to Spark</a></li>
-<li class="chapter" data-level="2.4" data-path="starting.html"><a href="starting.html#using-spark"><i class="fa fa-check"></i><b>2.4</b> Using Spark</a><ul>
+<li class="chapter" data-level="2.4" data-path="starting.html"><a href="starting.html#sparklyr-hello-world"><i class="fa fa-check"></i><b>2.4</b> Using Spark</a><ul>
 <li class="chapter" data-level="2.4.1" data-path="starting.html"><a href="starting.html#spark-web-interface"><i class="fa fa-check"></i><b>2.4.1</b> Web Interface</a></li>
 <li class="chapter" data-level="2.4.2" data-path="starting.html"><a href="starting.html#logs"><i class="fa fa-check"></i><b>2.4.2</b> Logs</a></li>
 </ul></li>
-<li class="chapter" data-level="2.5" data-path="starting.html"><a href="starting.html#disconnecting"><i class="fa fa-check"></i><b>2.5</b> Disconnecting</a><ul>
-<li class="chapter" data-level="2.5.1" data-path="starting.html"><a href="starting.html#using-spark-from-rstudio"><i class="fa fa-check"></i><b>2.5.1</b> RStudio</a></li>
-</ul></li>
-<li class="chapter" data-level="2.6" data-path="starting.html"><a href="starting.html#recap"><i class="fa fa-check"></i><b>2.6</b> Recap</a></li>
+<li class="chapter" data-level="2.5" data-path="starting.html"><a href="starting.html#disconnecting"><i class="fa fa-check"></i><b>2.5</b> Disconnecting</a></li>
+<li class="chapter" data-level="2.6" data-path="starting.html"><a href="starting.html#using-spark-from-rstudio"><i class="fa fa-check"></i><b>2.6</b> RStudio</a></li>
+<li class="chapter" data-level="2.7" data-path="starting.html"><a href="starting.html#recap"><i class="fa fa-check"></i><b>2.7</b> Recap</a></li>
 </ul></li>
 <li class="part"><span><b>I Analysis</b></span></li>
 <li class="chapter" data-level="3" data-path="analysis.html"><a href="analysis.html"><i class="fa fa-check"></i><b>3</b> Analysis</a><ul>
@@ -243,6 +246,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="7.1" data-path="data.html"><a href="data.html#overview-4"><i class="fa fa-check"></i><b>7.1</b> Overview</a></li>
 <li class="chapter" data-level="7.2" data-path="data.html"><a href="data.html#dataframes"><i class="fa fa-check"></i><b>7.2</b> DataFrames</a><ul>
 <li class="chapter" data-level="7.2.1" data-path="data.html"><a href="data.html#data-sdf-functions"><i class="fa fa-check"></i><b>7.2.1</b> Functions</a></li>
+<li class="chapter" data-level="7.2.2" data-path="data.html"><a href="data.html#pivoting"><i class="fa fa-check"></i><b>7.2.2</b> Pivoting</a></li>
 </ul></li>
 <li class="chapter" data-level="7.3" data-path="data.html"><a href="data.html#formats"><i class="fa fa-check"></i><b>7.3</b> Formats</a></li>
 <li class="chapter" data-level="7.4" data-path="data.html"><a href="data.html#data-types"><i class="fa fa-check"></i><b>7.4</b> Data Types</a><ul>
@@ -286,7 +290,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="part"><span><b>IV Extensions</b></span></li>
 <li class="chapter" data-level="9" data-path="extensions.html"><a href="extensions.html"><i class="fa fa-check"></i><b>9</b> Extensions</a><ul>
-<li class="chapter" data-level="9.1" data-path="extensions.html"><a href="extensions.html#rsparkling"><i class="fa fa-check"></i><b>9.1</b> RSparkling</a></li>
+<li class="chapter" data-level="9.1" data-path="extensions.html"><a href="extensions.html#rsparkling"><i class="fa fa-check"></i><b>9.1</b> RSparkling</a><ul>
+<li class="chapter" data-level="9.1.1" data-path="extensions.html"><a href="extensions.html#trpoubleshooting"><i class="fa fa-check"></i><b>9.1.1</b> Trpoubleshooting</a></li>
+</ul></li>
 <li class="chapter" data-level="9.2" data-path="extensions.html"><a href="extensions.html#graphframes"><i class="fa fa-check"></i><b>9.2</b> GraphFrames</a></li>
 <li class="chapter" data-level="9.3" data-path="extensions.html"><a href="extensions.html#mleap"><i class="fa fa-check"></i><b>9.3</b> Mleap</a></li>
 <li class="chapter" data-level="9.4" data-path="extensions.html"><a href="extensions.html#extensions-nested-data"><i class="fa fa-check"></i><b>9.4</b> Nested Data</a></li>
@@ -321,18 +327,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="12" data-path="contributing.html"><a href="contributing.html"><i class="fa fa-check"></i><b>12</b> Contributing</a><ul>
 <li class="chapter" data-level="12.1" data-path="contributing.html"><a href="contributing.html#overview-7"><i class="fa fa-check"></i><b>12.1</b> Overview</a></li>
-<li class="chapter" data-level="12.2" data-path="contributing.html"><a href="contributing.html#contributing-extensions"><i class="fa fa-check"></i><b>12.2</b> Extensions</a><ul>
-<li class="chapter" data-level="12.2.1" data-path="contributing.html"><a href="contributing.html#rstudio-projects"><i class="fa fa-check"></i><b>12.2.1</b> RStudio Projects</a></li>
-<li class="chapter" data-level="12.2.2" data-path="contributing.html"><a href="contributing.html#troubleshooting-3"><i class="fa fa-check"></i><b>12.2.2</b> Troubleshooting</a></li>
+<li class="chapter" data-level="12.2" data-path="contributing.html"><a href="contributing.html#r-extension"><i class="fa fa-check"></i><b>12.2</b> R Extensions</a></li>
+<li class="chapter" data-level="12.3" data-path="contributing.html"><a href="contributing.html#scala-extensions"><i class="fa fa-check"></i><b>12.3</b> Scala Extensions</a><ul>
+<li class="chapter" data-level="12.3.1" data-path="contributing.html"><a href="contributing.html#scala-extension-prereq"><i class="fa fa-check"></i><b>12.3.1</b> Prerequisites</a></li>
 </ul></li>
-<li class="chapter" data-level="12.3" data-path="contributing.html"><a href="contributing.html#contributing-sparklyr"><i class="fa fa-check"></i><b>12.3</b> sparklyr</a><ul>
-<li class="chapter" data-level="12.3.1" data-path="contributing.html"><a href="contributing.html#scala"><i class="fa fa-check"></i><b>12.3.1</b> Scala</a></li>
-<li class="chapter" data-level="12.3.2" data-path="contributing.html"><a href="contributing.html#serialization"><i class="fa fa-check"></i><b>12.3.2</b> Serialization</a></li>
-<li class="chapter" data-level="12.3.3" data-path="contributing.html"><a href="contributing.html#invocations"><i class="fa fa-check"></i><b>12.3.3</b> Invocations</a></li>
-<li class="chapter" data-level="12.3.4" data-path="contributing.html"><a href="contributing.html#r-packages"><i class="fa fa-check"></i><b>12.3.4</b> R Packages</a></li>
-<li class="chapter" data-level="12.3.5" data-path="contributing.html"><a href="contributing.html#connections-1"><i class="fa fa-check"></i><b>12.3.5</b> Connections</a></li>
-<li class="chapter" data-level="12.3.6" data-path="contributing.html"><a href="contributing.html#distributed-r"><i class="fa fa-check"></i><b>12.3.6</b> Distributed R</a></li>
+<li class="chapter" data-level="12.4" data-path="contributing.html"><a href="contributing.html#spark-extensions"><i class="fa fa-check"></i><b>12.4</b> Spark Extensions</a></li>
+<li class="chapter" data-level="12.5" data-path="contributing.html"><a href="contributing.html#r-packages"><i class="fa fa-check"></i><b>12.5</b> R Packages</a><ul>
+<li class="chapter" data-level="12.5.1" data-path="contributing.html"><a href="contributing.html#rstudio-projects"><i class="fa fa-check"></i><b>12.5.1</b> RStudio Projects</a></li>
+<li class="chapter" data-level="12.5.2" data-path="contributing.html"><a href="contributing.html#troubleshooting-3"><i class="fa fa-check"></i><b>12.5.2</b> Troubleshooting</a></li>
 </ul></li>
+<li class="chapter" data-level="12.6" data-path="contributing.html"><a href="contributing.html#contributing-sparklyr"><i class="fa fa-check"></i><b>12.6</b> sparklyr</a><ul>
+<li class="chapter" data-level="12.6.1" data-path="contributing.html"><a href="contributing.html#compiling"><i class="fa fa-check"></i><b>12.6.1</b> Compiling</a></li>
+<li class="chapter" data-level="12.6.2" data-path="contributing.html"><a href="contributing.html#serialization"><i class="fa fa-check"></i><b>12.6.2</b> Serialization</a></li>
+<li class="chapter" data-level="12.6.3" data-path="contributing.html"><a href="contributing.html#invocations"><i class="fa fa-check"></i><b>12.6.3</b> Invocations</a></li>
+<li class="chapter" data-level="12.6.4" data-path="contributing.html"><a href="contributing.html#r-packages-1"><i class="fa fa-check"></i><b>12.6.4</b> R Packages</a></li>
+<li class="chapter" data-level="12.6.5" data-path="contributing.html"><a href="contributing.html#connections-1"><i class="fa fa-check"></i><b>12.6.5</b> Connections</a></li>
+<li class="chapter" data-level="12.6.6" data-path="contributing.html"><a href="contributing.html#distributed-r"><i class="fa fa-check"></i><b>12.6.6</b> Distributed R</a></li>
+</ul></li>
+<li class="chapter" data-level="12.7" data-path="contributing.html"><a href="contributing.html#recap-5"><i class="fa fa-check"></i><b>12.7</b> Recap</a></li>
 </ul></li>
 <li class="part"><span><b>VI Appendix</b></span></li>
 <li class="chapter" data-level="13" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>13</b> Appendix</a><ul>
@@ -352,7 +364,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">The R in Spark: Learning Apache Spark with R using sparklyr</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">The R in Spark: Learning Apache Spark with R</a>
           </h1>
         </div>
 
@@ -367,14 +379,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">1.1</span> Background</h2>
 <p><a href="https://en.wikipedia.org/wiki/Information_technology">Humans have been storing, retrieving, manipulating, and communicating information since the Sumerians in Mesopotamia developed writing in about 3000 BC</a>. Based on the storage and processing technologies employed, it is possible to distinguish four distinct phases of development: pre-mechanical (3000 BC – 1450 AD), mechanical (1450–1840), electromechanical (1840–1940), and electronic (1940–present) <span class="citation">(Kenneth C. Laudon <a href="#ref-information-technology">1996</a>)</span>.</p>
 <p>During this last phase, <a href="https://en.wikipedia.org/wiki/Information_Age">humanity is moving from traditional industries to an economy based on information technology</a> and our footprint of digital information has kept growing at <a href="appendix.html#storage-capacity">exponential rates</a> <span class="citation">(<em>The Data Revolution</em> <a href="#ref-data-revolution">2016</a>)</span>:</p>
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-1"></span>
-<img src="the-r-in-spark_files/figure-html/unnamed-chunk-1-1.png" alt="World’s capacity to store information." width="672" />
-<p class="caption">
-FIGURE 1.1: World’s capacity to store information.
-</p>
+<div class="figure">
+<img src="images/01-intro-world-store-capacity.png" alt="World’s capacity to store information." />
+<p class="caption">World’s capacity to store information.</p>
 </div>
 <p>With the ambition to provide a searchable tool to all this new digital information, many companies attempted to provide such functionality with what we know today as web search or search engines. Given the vast amount of digital information, managing information at this scale was a challenging problem that companies had to tackle. Search engines were unble to store all the web page information required to support web searches in a single computer. This meant that they had to split information across many machines, which was accomlished by splitting this data and storing it as many files across many machines, this approach became known as the Google File System from a research paper published in 2003 by Google <span class="citation">(Ghemawat, Gobioff, and Leung <a href="#ref-google-file-system">2003</a>)</span>.</p>
-<p>One year later, in 2004, Google published a new paper describing how to perform operations across the Google File System, this approach came to be known as <strong>MapReduce</strong> <span class="citation">(Dean and Ghemawat <a href="#ref-google-map-reduce">2008</a>)</span>. As you would expect, there are two operations in MapReduce: Map and Reduce. The <strong>map operation</strong> provides an arbitrary way to transform each file into a new file, usually defined by arbitrary code that scans the file and outputs a different file. The <strong>reduce operation</strong> combines two files into a new one. These two operations are sufficient to process data at the scale of the data available in the web. For instance, one could define a mapping operation that splits each word in a text file and outputs a new file counting occurrence of words; the reduce operation can be defined to take two word-counting files and combine them by aggregating the total occurrences for each word. Once defined, a cluster implementing MapReduce can perform this operation several times across many machines to process data at the scale of the entire web. Counting words is often the most basic example, but MapReduce can be also used to rank web pages efficietly and many other much more interesting applications.</p>
+<p>One year later, in 2004, Google published a new paper describing how to perform operations across the Google File System, this approach came to be known as <strong>MapReduce</strong> <span class="citation">(Dean and Ghemawat <a href="#ref-google-map-reduce">2008</a>)</span>. As you would expect, there are two operations in MapReduce: Map and Reduce. The <strong>map operation</strong> provides an arbitrary way to transform each file into a new file, usually defined by arbitrary code that scans the file and outputs a different file. The <strong>reduce operation</strong> combines two files into a new one. These two operations are sufficient to process data at the scale of the data available in the web.</p>
+<p>As an example of MapReduce, one could define a mapping operation that splits each word in a text file and outputs a new file counting occurrence of words; the reduce operation can be defined to take two word-counting files and combine them by aggregating the total occurrences for each word. Once defined, a group of machines implementing MapReduce can perform this operation several times across many machines to process data at the scale of the entire web. Counting words is often the most basic example, but MapReduce can be also used to rank web pages efficietly and many, much more interesting, applications.</p>
 <p>After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as <strong>Hadoop</strong> implementing MapReduce and the Google File System implemented as the Hadoop File System, or <strong>HDFS</strong> for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations that made use of MapReduce beyond web data processing.</p>
 <p>While Hadoop provided support to perform map/reduce operations over a distributed file system, it still required each map/reduce operation to be written with code every time a data analysys was run. The <strong>Hive</strong> project, released in 2008 by Facebook, brought Structured Query Language (SQL) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each map/reduce operation, but instead, one could write generic data analysis statements that are much easier to understand and write.</p>
 </div>
@@ -387,31 +398,32 @@ FIGURE 1.1: World’s capacity to store information.
 <p>“Apache Spark is a fast and general engine for large-scale data processing.”</p>
 <p>— <a href="http://spark.apache.org/">spark.apache.org</a></p>
 </blockquote>
-<p>meaning that Spark is a tool designed to support:</p>
+<p>To help us understand this definition of Apache Spark, we will break it down as follows:</p>
 <ul>
 <li><strong>Data Processing</strong>: Data processing is the collection and manipulation of items of data to produce meaningful information <span class="citation">(French <a href="#ref-data-processing">1996</a>)</span>.</li>
 <li><strong>General</strong>: Spark optimizes and executes parallel generic code, as in, there are no restrictions as to what type of code one can write in Spark.</li>
-<li><strong>Large-Scale</strong>: One can interpret this as cluster-scale, as in, a set of connected computers working together to accomplish specific goals.</li>
+<li><strong>Engine</strong>:</li>
+<li><strong>Large-Scale</strong>: One can interpret this as <strong>cluster</strong>-scale, as in, a set of connected computers working together to accomplish specific goals.</li>
 <li><strong>Fast</strong>: Spark is much faster than its predecessor by making efficient use of memory to speed data access while running algorithms at scale.</li>
 </ul>
-<p><em>Data</em> <em>Processing</em> means you can use Spark to process data, which is not surprising but also, not very descriptive. <em>General</em> is required to allow you to run any data analysis but is not interesting in it’s own. Describing Spark as <em>large</em> <em>scale</em> is relevant since it implies that a good use case for Spark is tackling problems that can be solved with multiple machines. For instance, when data does not fit in a single disk driver or does not fit into memory, Spark is a good candidate to consider. However, Spark is also <em>fast</em>, meaning, that is worth considering for problems that are not large-scale, but where using multiple processors could speed up computation. For instance, sorting large datasets that fit in memory or cpu intensive models could also bennefit from running in Spark.</p>
-<p>Therefore, Spark is good at tackling large-scale data processing problems, this usually known as <strong>big data</strong> (<a href="https://en.wikipedia.org/wiki/big_data">data sets that are more voluminous and complex that traditional ones</a>), but also is good at tackling large-scale computation problems, known as <strong>big compute</strong> (<a href="https://www.nimbix.net/glossary/big-compute/">tools and approaches using a large amount of CPU and memory resources in a coordinated way</a>). There is a third problem space where data nor compute are necessarily large scale and yet, there are significant benefits from using the same tools.</p>
-<p>Big data and big compute problems are usually easy to spot, if the data does not fit into a single machine, you might have a big data problem; if the data fits into a single machine but a process over the data takes days, weeks or months to compute, you might have a big compute problem.</p>
-<p>For the third problem space, there are a few use cases this breaks to:</p>
+<p>Since Spark is <em>general</em>, you can use Spark to solve many problems, from calculating averages to approximating the value of Pi, <a href="https://mapr.com/blog/churn-prediction-sparkml/">predicting customer churn</a>, <a href="https://academic.oup.com/gigascience/article/7/8/giy098/5067872">aligning protein sequences</a> or analyzing <a href="https://db-blog.web.cern.ch/blog/luca-canali/2017-08-apache-spark-and-cern-open-data-example">high energy physics at CERN</a>.</p>
+<p>Describing Spark as <em>large</em> <em>scale</em> implies that a good use case for Spark is tackling problems that can be solved with multiple machines. For instance, when data does not fit in a single disk driver or does not fit into memory, Spark is a good candidate to consider.</p>
+<p>Since Spark is <em>fast</em>, it is worth considering for problems that may not be large-scale, but where using multiple processors could speed up computation. For instance, sorting large datasets or cpu intensive models could also bennefit from running in Spark.</p>
+<p>Therefore, Spark is good at tackling large-scale data processing problems, this usually known as <strong>big data</strong> (<a href="https://en.wikipedia.org/wiki/big_data">data sets that are more voluminous and complex that traditional ones</a>), but also is good at tackling large-scale computation problems, known as <strong>big compute</strong> (<a href="https://www.nimbix.net/glossary/big-compute/">tools and approaches using a large amount of CPU and memory resources in a coordinated way</a>).</p>
+<p>Big data and big compute problems are usually easy to spot, if the data does not fit into a single machine, you might have a big data problem; if the data fits into a single machine but a process over the data takes days, weeks or even months to compute, you might have a big compute problem.</p>
+<p>However, there is also a third problem space where data nor compute are necessarily large-scale and yet, there are significant benefits from using Spark. For this third problem space, there are a few use cases this breaks to:</p>
 <ol style="list-style-type: decimal">
 <li><p><strong>Velocity</strong>: One can have a dataset of 10GB in size and a process that takes 30min to run over this data, this is by no means big-compute nor big-data; however, if a data scientist is researching ways to improve accuracy for their models, reducing the runtime down to 3min it’s a 10X improvement, this improvement can lead to significant advances and productivity gains by increasing the velocity at which one can analyze data.</p></li>
 <li><p><strong>Variety</strong>: One can have an efficient process to collect data from many sources into a single location, usually a database, this process could be already running efficiently and close to realtime. Such processes are known at ETL (Extract-Transform-Load); data is extracted from multiple sources, transformed to the required format and loaded in a single data store. While this has worked for years, the tradeoff from this system is that adding a new data source is expensive, the system is centralized and tightly controlled. Since making changes to this type of systems could cause the entire process to come to a halt, adding new data sources usually takes long to be implemented. Instead, one can store all data its natural format and process it as needed using cluster computing, this architecture is currently known as a <a href="https://en.wikipedia.org/wiki/Data_lake">data lake</a>.</p></li>
 </ol>
-<p>Some people refer to some of these benefits as <a href="http://www.theserverside.com/feature/Handling-the-four-Vs-of-big-data-volume-velocity-variety-and-veracity">the four ’V’s of big data</a>: Velocity, Variety, Volume and Veracity (which asserts that data can vary greatly in quality which require analysis methods to improve accuracy across a variety of sources). Others have gone as far as expending this to <a href="https://en.wikipedia.org/wiki/Big_data">five</a> or even as <a href="https://tdwi.org/articles/2017/02/08/10-vs-of-big-data.aspx">the 10 Vs of Big Data</a>. Mnemonics set aside, cluster computing is being used today in more innovative ways and and is not uncommon to see organizations experimenting with new workflows and a variety of tasks that were traditionally uncommon for cluster computing. Much of the hype attributed to big data falls into this space, where some will argue that everything should be considered big data and where others will argue than nothing should. My hope is that this book will help you understand the opportunities and limitations of Apache Spark with R.</p>
+<p>Some people refer to some of these benefits as <a href="http://www.theserverside.com/feature/Handling-the-four-Vs-of-big-data-volume-velocity-variety-and-veracity">the four ’V’s of big data</a>: Velocity, Variety, Volume and Veracity (which asserts that data can vary greatly in quality which require analysis methods to improve accuracy across a variety of sources). Others have gone as far as expending this to <a href="https://en.wikipedia.org/wiki/Big_data">five</a> or even as <a href="https://tdwi.org/articles/2017/02/08/10-vs-of-big-data.aspx">the 10 Vs of Big Data</a>. Mnemonics set aside, cluster computing is being used today in more innovative ways and and is not uncommon to see organizations experimenting with new workflows and a variety of tasks that were traditionally uncommon for cluster computing. Much of the hype attributed to big data falls into this space where, strictly speaking, one is not handling big data but there are still beneffits from using tools designed for big data and big compute. My hope is that this book will help you understand the opportunities and limitations of cluster computing, and specifically, the opportunities and limitations from using Apache Spark with R.</p>
 </div>
 <div id="r" class="section level2">
 <h2><span class="header-section-number">1.3</span> R</h2>
-<p>R is a computing language with it’s inception dating back to Bell Laboratories. <a href="https://t.co/OLfHEdiynA">Rick Becker explained in useR 2016</a> that at the time, computing was done by calling Fortran subroutines which, apparently, were not pleasant to deal with. The S computing language was designed as an interface language to support higher abstractions to perform statistical computing over existing subroutines:</p>
-<div class="figure" style="text-align: center"><span id="fig:s-diagram"></span>
-<img src="images/01-intro-s-algorithm-interface.png" alt="Interface language diagram by John Chambers - Rick Becker useR 2016." width="800" />
-<p class="caption">
-FIGURE 1.2: Interface language diagram by John Chambers - Rick Becker useR 2016.
-</p>
+<p>R is a computing language with it’s inception dating back to Bell Laboratories. R was not created at Bell Labs, but it’s predecesor, the S computing language was. <a href="https://blog.revolutionanalytics.com/2016/07/rick-becker-s-talk.html">Rick Becker explained in useR 2016</a> that at that time in Bell Labs, computing was done by calling subroutines written in the Fortran language which, apparently, were not pleasant to deal with. The S computing language was designed as an interface language to solve particular problems without having to worry about other languages, Fortran at that time. The creator of S, <a href="https://en.wikipedia.org/wiki/John_Chambers_(statistician)">John Chambers</a>, describes how S was designed to provide an interface through the following diagram:</p>
+<div class="figure">
+<img src="images/01-intro-s-algorithm-interface.png" alt="Interface language diagram by John Chambers - Rick Becker useR 2016." />
+<p class="caption">Interface language diagram by John Chambers - Rick Becker useR 2016.</p>
 </div>
 <p>R is a modern and free implementation of S, specifically:</p>
 <blockquote>
@@ -424,11 +436,9 @@ FIGURE 1.2: Interface language diagram by John Chambers - Rick Becker useR 2016.
 <li>The <strong>R Community</strong> provides a rich package archive provided by CRAN (<a href="https://cran.r-project.org/">The Comprehensive R Archive Network</a>) which allows you to install ready-to-use packages to perform many tasks, most notably, high-quality statistic models with many only available in R. In addition, the R community is a welcoming and active group of talented individuals motivated to help you succeed. Many packages provided by the R community make R, by far, the place to do statistical computing. To mention some of the popular packages: <a href="https://CRAN.R-project.org/package=dplyr">dplyr</a> to manipulate data, <a href="https://CRAN.R-project.org/package=cluster">cluster</a> to analyze clusters and <a href="https://CRAN.R-project.org/package=ggplot2">ggplot2</a> to visualize data.</li>
 </ul>
 <p>One can argue to what degree other fields, like machine learning, overlap with statistics; so far, most people will argue that the overlap is non-trivial. Similar arguments can be made for data science, big data, deep learning and beyond. With the continuous rise of popularity of R, I can only expect R’s influence and scope to keep growing over time; we can take a look at the historic downloads of R packages in CRAN to get some sense of R’s <a href="appendix.html#cran-downloads">recent growth</a>:</p>
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-2"></span>
-<img src="the-r-in-spark_files/figure-html/unnamed-chunk-2-1.png" alt="Daily downloads of CRAN packages." width="672" />
-<p class="caption">
-FIGURE 1.3: Daily downloads of CRAN packages.
-</p>
+<div class="figure">
+<img src="images/01-intro-daily-cran-downloads.png" alt="Daily downloads of CRAN packages." />
+<p class="caption">Daily downloads of CRAN packages.</p>
 </div>
 </div>
 <div id="sparklyr" class="section level2">
