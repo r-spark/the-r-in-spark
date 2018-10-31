@@ -6,6 +6,10 @@ While **this chatper has not been written.**, a few resources are available to h
 
 ## DataFrames
 
+TODO: Introduce Data Frames
+
+`sparklyr` provides access to  Data Frame functionality, mostly for completeness and advanced use cases. As `sparklyr` keeps evolving, it is our goal to reduce the use of this functions and provide instead propert wrappers with practices known in the R community. For instnace, we will introduce a function to **pivot** data, which is quite useful but would rather preffer to support `tidyr::spread()` and `tidyr::gather()` implementations which are already well known in the R community.
+
 ### Functions {#data-sdf-functions}
 
 ```
@@ -13,7 +17,42 @@ sdf_nrow()
 sdf_ncol()
 sdf_dim()
 sdf_len()
+sdf_pivot()
 ...
+```
+
+### Pivoting
+
+```{r eval=F}
+sensors <- data.frame(
+  sensor = c("sensor1", "sensor1", "sensor1", "sensor2", "sensor2", "sensor2"),
+  time = c(1, 2, 3, 1, 2, 3),
+  metric = c(1, 2, 3, 10, 20, 30)
+)
+```
+
+```
+   sensor time metric
+1 sensor1    1      1
+2 sensor1    2      2
+3 sensor1    3      3
+4 sensor2    1     10
+5 sensor2    2     20
+6 sensor2    3     30
+```
+
+```{r eval=F}
+sensors_tbl <- sdf_copy_to(sc, sensors, overwrite = T)
+sensors_tbl %>% sdf_pivot(time ~ sensor, fun.aggregate = c("avg", "metric"))
+```
+
+```
+# Source: spark<?> [?? x 3]
+   time sensor1 sensor2
+* <dbl>   <dbl>   <dbl>
+1     3       3      30
+2     1       1      10
+3     2       2      20
 ```
 
 ## Formats
