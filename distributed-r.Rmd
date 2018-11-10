@@ -51,3 +51,30 @@ odbc_logs %>% head() %>% spark_apply(function(df) {
 ### Logs
 
 ### Debugging
+
+If a particular partition fails, you can detect the broken partition by computing a digest, and then retrieving that particular partition as follows:
+
+```{r eval=FALSE}
+sdf_len(sc, 3) %>% spark_apply(function(x) {
+    worker_log("processing ", digest::digest(x), " partition")
+    # your code
+})
+```
+
+This will add an entry similar to:
+
+```
+18/11/03 14:48:32 INFO sparklyr: RScript (2566) processing f35b1c321df0162e3f914adfb70b5416 partition 
+```
+
+When executing this in your cluster, you will have to look in the logs for the task that is not finishing, once you have that digest, you can cancel the job.
+
+Then you can use that digest to retrieve that specific data frame to R with something like:
+
+```{r eval=FALSE}
+broken_partition <- sdf_len(sc, 3) %>% spark_apply(function(x) {
+    if (identical(digest::digest(x), "f35b1c321df0162e3f914adfb70b5416")) x else x[0,]
+}) %>% collect()
+```
+
+WHich you can then run in R to troubleshoot further.

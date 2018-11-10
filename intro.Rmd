@@ -9,15 +9,17 @@ This chapter covers the historical background that lead to the development of Ap
 
 ## Background {#intro-background}
 
-[Humans have been storing, retrieving, manipulating, and communicating information since the Sumerians in Mesopotamia developed writing in about 3000 BC](https://en.wikipedia.org/wiki/Information_technology). Based on the storage and processing technologies employed, it is possible to distinguish four distinct phases of development: pre-mechanical (3000 BC – 1450 AD), mechanical (1450–1840), electromechanical (1840–1940), and electronic (1940–present) [@information-technology].
+As humans, we have been storing, retrieving, manipulating, and communicating information since the Sumerians in Mesopotamia developed writing in about 3000 BC. Based on the storage and processing technologies employed, it is possible to distinguish four distinct phases of development: pre-mechanical (3000 BC – 1450 AD), mechanical (1450–1840), electromechanical (1840–1940), and electronic (1940–present) [@information-technology].
 
-During this last phase, [humanity is moving from traditional industries to an economy based on information technology](https://en.wikipedia.org/wiki/Information_Age) and our footprint of digital information has kept growing at [exponential rates](#storage-capacity) [@data-revolution]:
+Mathematician George Stibitz used the word **digital** to describe fast electric pulses back in 1942 [@computing-concise-history]. To this day, we describe information stored electronically as digital information, stored and processed in electronic computers. In contrast, **analog** information is defined as, not digital [@webster2006merriam] and it represents everything we have stored by any non-electronic means such as: hand written notes, books, newspapers and so on.
+
+The world bank report on digital development[@data-revolution] provides an estimate of digital and analog information stored over the last decades. This report found out that digital information surpassed analog information around 2003, at that time, there were aboput 10M terabytes of digital information, which is roughly about 10M computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at [exponential rates](#storage-capacity):
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='World’s capacity to store information.', fig.align = 'center', eval=FALSE}
 library(tidyverse)
 read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
   gather(key = storage, value = capacity, analog, digital) %>%
-  mutate(year = X1, terabytes = capacity / 1e+12) %>%
+  mutate(year = X1, terabytes = capacity / 10^12) %>%
   ggplot(aes(x = year, y = terabytes, group = storage)) +
     geom_line(aes(linetype = storage)) +
     geom_point(aes(shape = storage)) +
@@ -25,21 +27,42 @@ read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x))
     ) +
+    scale_y_log10(name="World's Information (terabytes)") +
     theme_light() +
     theme(legend.position = "bottom") +
     ggsave("images/01-intro-world-store-capacity.png", width = 10, height = 6)
 ```
 ![World’s capacity to store information.](images/01-intro-world-store-capacity.png)
 
-With the ambition to provide a searchable tool to all this new digital information, many companies attempted to provide such functionality with what we know today as web search or search engines. Given the vast amount of digital information, managing information at this scale was a challenging problem that companies had to tackle. Search engines were unble to store all the web page information required to support web searches in a single computer. This meant that they had to split information across many machines, which was accomlished by splitting this data and storing it as many files across many machines, this approach became known as the Google File System from a research paper published in 2003 by Google [@google-file-system].
+With the ambition to provide tools capable of searching all this new digital information, many companies attempted to provide such functionality with what we know today as search engines used when searching the web. Given the vast amount of digital information, managing information at this scale was a challenging problem. Search engines were unble to store all the web page information required to support web searches in a single computer. This meant that they had to split information across many machines, which was accomlished by splitting this data and storing it as many files across many machines. This approach became known as the Google File System from a research paper published in 2003 by Google [@google-file-system].
 
 One year later, in 2004, Google published a new paper describing how to perform operations across the Google File System, this approach came to be known as **MapReduce** [@google-map-reduce]. As you would expect, there are two operations in MapReduce: Map and Reduce. The **map operation** provides an arbitrary way to transform each file into a new file, usually defined by arbitrary code that scans the file and outputs a different file. The **reduce operation** combines two files into a new one. These two operations are sufficient to process data at the scale of the data available in the web.
 
-As an example of MapReduce, one could define a mapping operation that splits each word in a text file and outputs a new file counting occurrence of words; the reduce operation can be defined to take two word-counting files and combine them by aggregating the total occurrences for each word. Once defined, a group of machines implementing MapReduce can perform this operation several times across many machines to process data at the scale of the entire web. Counting words is often the most basic example, but MapReduce can be also used to rank web pages efficietly and many, much more interesting, applications.
+For example, we can use MapReduce to count words in two different text files. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files. Counting words is often the most basic example, but MapReduce can be also used to rank web pages efficietly and many other, much more interesting, applications.
 
-After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as **Hadoop** implementing MapReduce and the Google File System  implemented as the Hadoop File System, or **HDFS** for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations that made use of MapReduce beyond web data processing.
+```{r echo=FALSE, fig.cap='Simple MapReduce Example.'}
+nomnoml::nomnoml("
+#spacing: 80
+#orient: right
+[Alice's File|I like apples]
+[Bob's File|I like bananas]
 
-While Hadoop provided support to perform map/reduce operations over a distributed file system, it still required each map/reduce operation to be written with code every time a data analysys was run. The **Hive** project, released in 2008 by Facebook, brought Structured Query Language (SQL) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each map/reduce operation, but instead, one could write generic data analysis statements that are much easier to understand and write.
+[Alice's File]-Map[Alice's Words]
+[Bob's File]-Map[Bob's Words]
+
+[Alice's Words|I,1|like,1|apples,1]
+[Bob's Words|I,1|like,1|bananas,1]
+
+[Alice's Words]- Reduce[Word Counts]
+[Bob's Words]- Reduce[Word Counts]
+
+[Word Counts|I,2|like,2|apples,1|bananas,1]
+")
+```
+
+After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as **Hadoop** with the Google File System implemented as the Hadoop File System, or **HDFS** for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations that made use of MapReduce beyond web data processing.
+
+While Hadoop provided support to perform MapReduce operations over a distributed file system, it still required MapReduce operations to be written with code every time a data analysis was run. To improve over this tedious process, the **Hive** project released in 2008 by Facebook, brought Structured Query Language (**SQL**) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each MapReduce operation; instead, one could write generic data analysis statements in SQL that are much easier to understand and write.
 
 ## Spark
 
