@@ -16,7 +16,8 @@ webshots_create <- function() {
     "05-clusters-mesos.png"                = "http://mesos.apache.org/",
     "05-clusters-yarn.png"                 = "https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html",
     "05-clusters-rstudio-server"           = "https://www.rstudio.com/products/rstudio/",
-    "05-clusters-spark-standalone"         = "https://spark.apache.org/docs/latest/spark-standalone.html"
+    "05-clusters-spark-standalone"         = "https://spark.apache.org/docs/latest/spark-standalone.html",
+    "05-clusters-jupyter.png"              = "https://jupyter.org/"
   )
 
   webshot::webshot(
