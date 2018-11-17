@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2018-11-09">
+<meta name="date" content="2018-11-17">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -47,14 +47,14 @@
 
 
 <script src="libs/htmlwidgets-1.3/htmlwidgets.js"></script>
-<script src="libs/dagre-0.0.1/dagre.min.js"></script>
-<script src="libs/lodash-3.7.0/lodash.js"></script>
-<script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
-<script src="libs/nomnoml-binding-0.1.0/nomnoml.js"></script>
 <script src="libs/r2d3-render-0.1.0/r2d3-render.js"></script>
 <script src="libs/webcomponents-2.0.0/webcomponents.js"></script>
 <script src="libs/r2d3-binding-0.2.2/r2d3.js"></script>
 <script src="libs/d3v5-5.0.0/d3.min.js"></script>
+<script src="libs/dagre-0.0.1/dagre.min.js"></script>
+<script src="libs/lodash-3.7.0/lodash.js"></script>
+<script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
+<script src="libs/nomnoml-binding-0.1.0/nomnoml.js"></script>
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119986300-1"></script>
 <script>
@@ -216,7 +216,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="5.5" data-path="clusters.html"><a href="clusters.html#tools"><i class="fa fa-check"></i><b>5.5</b> Tools</a><ul>
 <li class="chapter" data-level="5.5.1" data-path="clusters.html"><a href="clusters.html#rstudio"><i class="fa fa-check"></i><b>5.5.1</b> RStudio</a></li>
-<li class="chapter" data-level="5.5.2" data-path="clusters.html"><a href="clusters.html#clusters-livy"><i class="fa fa-check"></i><b>5.5.2</b> Livy</a></li>
+<li class="chapter" data-level="5.5.2" data-path="clusters.html"><a href="clusters.html#jupyter"><i class="fa fa-check"></i><b>5.5.2</b> Jupyter</a></li>
+<li class="chapter" data-level="5.5.3" data-path="clusters.html"><a href="clusters.html#clusters-livy"><i class="fa fa-check"></i><b>5.5.3</b> Livy</a></li>
 </ul></li>
 <li class="chapter" data-level="5.6" data-path="clusters.html"><a href="clusters.html#recap-1"><i class="fa fa-check"></i><b>5.6</b> Recap</a></li>
 </ul></li>
@@ -254,9 +255,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="7.5" data-path="data.html"><a href="data.html#external"><i class="fa fa-check"></i><b>7.5</b> External</a><ul>
 <li class="chapter" data-level="7.5.1" data-path="data.html"><a href="data.html#amazon-s3"><i class="fa fa-check"></i><b>7.5.1</b> Amazon S3</a></li>
-<li class="chapter" data-level="7.5.2" data-path="data.html"><a href="data.html#cassandra"><i class="fa fa-check"></i><b>7.5.2</b> Cassandra</a></li>
-<li class="chapter" data-level="7.5.3" data-path="data.html"><a href="data.html#databases"><i class="fa fa-check"></i><b>7.5.3</b> Databases</a></li>
-<li class="chapter" data-level="7.5.4" data-path="data.html"><a href="data.html#switching"><i class="fa fa-check"></i><b>7.5.4</b> Switching</a></li>
+<li class="chapter" data-level="7.5.2" data-path="data.html"><a href="data.html#azure-storage"><i class="fa fa-check"></i><b>7.5.2</b> Azure Storage</a></li>
+<li class="chapter" data-level="7.5.3" data-path="data.html"><a href="data.html#cassandra"><i class="fa fa-check"></i><b>7.5.3</b> Cassandra</a></li>
+<li class="chapter" data-level="7.5.4" data-path="data.html"><a href="data.html#databases"><i class="fa fa-check"></i><b>7.5.4</b> Databases</a></li>
 <li class="chapter" data-level="7.5.5" data-path="data.html"><a href="data.html#hbase"><i class="fa fa-check"></i><b>7.5.5</b> HBase</a></li>
 <li class="chapter" data-level="7.5.6" data-path="data.html"><a href="data.html#nested-data"><i class="fa fa-check"></i><b>7.5.6</b> Nested Data</a></li>
 </ul></li>
@@ -378,21 +379,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="intro-background" class="section level2">
 <h2><span class="header-section-number">1.1</span> Background</h2>
 <p>As humans, we have been storing, retrieving, manipulating, and communicating information since the Sumerians in Mesopotamia developed writing in about 3000 BC. Based on the storage and processing technologies employed, it is possible to distinguish four distinct phases of development: pre-mechanical (3000 BC – 1450 AD), mechanical (1450–1840), electromechanical (1840–1940), and electronic (1940–present) <span class="citation">(Kenneth C. Laudon <a href="#ref-information-technology">1996</a>)</span>.</p>
-<p>Mathematician George Stibitz used the word <strong>digital</strong> to describe fast electric pulses back in 1942 <span class="citation">(Ceruzzi <a href="#ref-computing-concise-history">2012</a>)</span>. To this day, we describe information stored electronically as digital information, stored and processed in electronic computers. In contrast, <strong>analog</strong> information is defined as, not digital <span class="citation">(Webster <a href="#ref-webster2006merriam">2006</a>)</span> and it represents everything we have stored by any non-electronic means such as: hand written notes, books, newspapers and so on.</p>
-<p>The world bank report on digital development<span class="citation">(<em>The Data Revolution</em> <a href="#ref-data-revolution">2016</a>)</span> provides an estimate of digital and analog information stored over the last decades. This report found out that digital information surpassed analog information around 2003, at that time, there were aboput 10M terabytes of digital information, which is roughly about 10M computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at <a href="appendix.html#storage-capacity">exponential rates</a>:</p>
+<p>Mathematician George Stibitz used the word <strong>digital</strong> to describe fast electric pulses back in 1942 <span class="citation">(Ceruzzi <a href="#ref-computing-concise-history">2012</a>)</span> and, to this day, we describe information stored electronically as digital information. In contrast, <strong>analog</strong> information is defined as, not digital <span class="citation">(Webster <a href="#ref-webster2006merriam">2006</a>)</span> and it represents everything we have stored by any non-electronic means such as: hand written notes, books, newspapers and so on.</p>
+<p>The world bank report on digital development <span class="citation">(<em>The Data Revolution</em> <a href="#ref-data-revolution">2016</a>)</span> provides an estimate of digital and analog information stored over the last decades. This report found out that digital information surpassed analog information around 2003, at that time, there were aboput 10M terabytes of digital information, which is roughly about 10M computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at <a href="appendix.html#storage-capacity">exponential rates</a>:</p>
 <div class="figure">
-<img src="images/01-intro-world-store-capacity.png" alt="World’s capacity to store information." />
+<img src="images/intro-world-store-capacity.png" alt="World’s capacity to store information." />
 <p class="caption">World’s capacity to store information.</p>
 </div>
-<p>With the ambition to provide tools capable of searching all this new digital information, many companies attempted to provide such functionality with what we know today as search engines used when searching the web. Given the vast amount of digital information, managing information at this scale was a challenging problem. Search engines were unble to store all the web page information required to support web searches in a single computer. This meant that they had to split information across many machines, which was accomlished by splitting this data and storing it as many files across many machines. This approach became known as the Google File System from a research paper published in 2003 by Google <span class="citation">(Ghemawat, Gobioff, and Leung <a href="#ref-google-file-system">2003</a>)</span>.</p>
+<p>With the ambition to provide tools capable of searching all this new digital information, many companies attempted to provide such functionality with what we know today as search engines, used when searching the web. Given the vast amount of digital information, managing information at this scale was a challenging problem. Search engines were unble to store all the web page information required to support web searches in a single computer. This meant that they had to split information across many machines, which was accomlished by splitting this data and storing it as many files across many machines. This approach became known as the Google File System from a research paper published in 2003 by Google <span class="citation">(Ghemawat, Gobioff, and Leung <a href="#ref-google-file-system">2003</a>)</span>.</p>
 <p>One year later, in 2004, Google published a new paper describing how to perform operations across the Google File System, this approach came to be known as <strong>MapReduce</strong> <span class="citation">(Dean and Ghemawat <a href="#ref-google-map-reduce">2008</a>)</span>. As you would expect, there are two operations in MapReduce: Map and Reduce. The <strong>map operation</strong> provides an arbitrary way to transform each file into a new file, usually defined by arbitrary code that scans the file and outputs a different file. The <strong>reduce operation</strong> combines two files into a new one. These two operations are sufficient to process data at the scale of the data available in the web.</p>
 <p>For example, we can use MapReduce to count words in two different text files. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files. Counting words is often the most basic example, but MapReduce can be also used to rank web pages efficietly and many other, much more interesting, applications.</p>
-<div class="figure"><span id="fig:unnamed-chunk-2"></span>
-<div id="htmlwidget-aae1bd5d29dab1ed407f" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-aae1bd5d29dab1ed407f">{"x":{"code":"\n  #direction: right\n  #fill: #FEFEFF\n  #lineWidth: 1\n   \n#spacing: 80\n#orient: right\n[Alice's File|I like apples]\n[Bob's File|I like bananas]\n\n[Alice's File]-Map[Alice's Words]\n[Bob's File]-Map[Bob's Words]\n\n[Alice's Words|I,1|like,1|apples,1]\n[Bob's Words|I,1|like,1|bananas,1]\n\n[Alice's Words]- Reduce[Word Counts]\n[Bob's Words]- Reduce[Word Counts]\n\n[Word Counts|I,2|like,2|apples,1|bananas,1]\n","className":null},"evals":[],"jsHooks":[]}</script>
-<p class="caption">
-FIGURE 1.1: Simple MapReduce Example.
-</p>
+<div class="figure">
+<img src="images/intro-simple-map-reduce-example.png" alt="Simple MapReduce Example." />
+<p class="caption">Simple MapReduce Example.</p>
 </div>
 <p>After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as <strong>Hadoop</strong> with the Google File System implemented as the Hadoop File System, or <strong>HDFS</strong> for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations that made use of MapReduce beyond web data processing.</p>
 <p>While Hadoop provided support to perform MapReduce operations over a distributed file system, it still required MapReduce operations to be written with code every time a data analysis was run. To improve over this tedious process, the <strong>Hive</strong> project released in 2008 by Facebook, brought Structured Query Language (<strong>SQL</strong>) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each MapReduce operation; instead, one could write generic data analysis statements in SQL that are much easier to understand and write.</p>
@@ -410,7 +408,6 @@ FIGURE 1.1: Simple MapReduce Example.
 <ul>
 <li><strong>Data Processing</strong>: Data processing is the collection and manipulation of items of data to produce meaningful information <span class="citation">(French <a href="#ref-data-processing">1996</a>)</span>.</li>
 <li><strong>General</strong>: Spark optimizes and executes parallel generic code, as in, there are no restrictions as to what type of code one can write in Spark.</li>
-<li><strong>Engine</strong>:</li>
 <li><strong>Large-Scale</strong>: One can interpret this as <strong>cluster</strong>-scale, as in, a set of connected computers working together to accomplish specific goals.</li>
 <li><strong>Fast</strong>: Spark is much faster than its predecessor by making efficient use of memory to speed data access while running algorithms at scale.</li>
 </ul>
@@ -430,7 +427,7 @@ FIGURE 1.1: Simple MapReduce Example.
 <h2><span class="header-section-number">1.3</span> R</h2>
 <p>R is a computing language with it’s inception dating back to Bell Laboratories. R was not created at Bell Labs, but it’s predecesor, the S computing language was. <a href="https://blog.revolutionanalytics.com/2016/07/rick-becker-s-talk.html">Rick Becker explained in useR 2016</a> that at that time in Bell Labs, computing was done by calling subroutines written in the Fortran language which, apparently, were not pleasant to deal with. The S computing language was designed as an interface language to solve particular problems without having to worry about other languages, Fortran at that time. The creator of S, <a href="https://en.wikipedia.org/wiki/John_Chambers_(statistician)">John Chambers</a>, describes how S was designed to provide an interface through the following diagram:</p>
 <div class="figure">
-<img src="images/01-intro-s-algorithm-interface.png" alt="Interface language diagram by John Chambers - Rick Becker useR 2016." />
+<img src="images/intro-s-algorithm-interface.png" alt="Interface language diagram by John Chambers - Rick Becker useR 2016." />
 <p class="caption">Interface language diagram by John Chambers - Rick Becker useR 2016.</p>
 </div>
 <p>R is a modern and free implementation of S, specifically:</p>
@@ -438,20 +435,25 @@ FIGURE 1.1: Simple MapReduce Example.
 <p>R is a programming language and free software environment for statistical computing and graphics.</p>
 <p>— <a href="https://www.r-project.org/">The R Project for Statistical Computing</a></p>
 </blockquote>
-<p>There are two strong arguments for choosing R over other computing languages while working with data:</p>
+<p>While working with data, I believe there are two strong arguments for using R:</p>
 <ul>
-<li>The <strong>R Language</strong> was designed by statisticians for statisticians, meaning, this is one of the few successful languages designed for non-programmers; so learning R will probably feel more natural. Additionally, since the R language was designed to be an interface to other tools and languages, R allows you to focus more on modeling and less on the peculiarities of computer science and engineering.</li>
-<li>The <strong>R Community</strong> provides a rich package archive provided by CRAN (<a href="https://cran.r-project.org/">The Comprehensive R Archive Network</a>) which allows you to install ready-to-use packages to perform many tasks, most notably, high-quality statistic models with many only available in R. In addition, the R community is a welcoming and active group of talented individuals motivated to help you succeed. Many packages provided by the R community make R, by far, the place to do statistical computing. To mention some of the popular packages: <a href="https://CRAN.R-project.org/package=dplyr">dplyr</a> to manipulate data, <a href="https://CRAN.R-project.org/package=cluster">cluster</a> to analyze clusters and <a href="https://CRAN.R-project.org/package=ggplot2">ggplot2</a> to visualize data.</li>
+<li>The <strong>R Language</strong> was designed by statisticians for statisticians, meaning, this is one of the few successful languages designed for non-programmers; so learning R will probably feel more natural. Additionally, since the R language was designed to be an interface to other tools and languages, R allows you to focus more on modeling and less on peculiarities of computer science and engineering.</li>
+<li>The <strong>R Community</strong> provides a rich package archive provided by CRAN (<a href="https://cran.r-project.org/">The Comprehensive R Archive Network</a>) which allows you to install ready-to-use packages to perform many tasks, most notably, high-quality statistic models with many only available in R. In addition, the R community is a welcoming and active group of talented individuals motivated to help you succeed. Many packages provided by the R community make R, by far, the place to do statistical computing. To mention some of the popular packages: <a href="https://CRAN.R-project.org/package=dplyr">dplyr</a> to manipulate data, <a href="https://CRAN.R-project.org/package=cluster">cluster</a> to analyze clusters and <a href="https://CRAN.R-project.org/package=ggplot2">ggplot2</a> to visualize data. We can quantify the <a href="appendix.html#cran-downloads">growth of the R community</a> by plotting daily downloads of R packages in CRAN.</li>
 </ul>
-<p>One can argue to what degree other fields, like machine learning, overlap with statistics; so far, most people will argue that the overlap is non-trivial. Similar arguments can be made for data science, big data, deep learning and beyond. With the continuous rise of popularity of R, I can only expect R’s influence and scope to keep growing over time; we can take a look at the historic downloads of R packages in CRAN to get some sense of R’s <a href="appendix.html#cran-downloads">recent growth</a>:</p>
 <div class="figure">
-<img src="images/01-intro-daily-cran-downloads.png" alt="Daily downloads of CRAN packages." />
+<img src="images/intro-daily-cran-downloads.png" alt="Daily downloads of CRAN packages." />
 <p class="caption">Daily downloads of CRAN packages.</p>
 </div>
+<p>Aside from statistics, R is also used in many other fields, the following ones are particularily relevant to this book:</p>
+<ul>
+<li><strong>Data Science</strong>: An exciting discipline that allows you to turn raw data into understanding, insight, and knowledge <span class="citation">(Wickham and Grolemund <a href="#ref-r-for-data-science">2016</a>)</span>. In 1997, C.F. Jeff Wu advocated that statistics be renamed data science <span class="citation">(Wu <a href="#ref-statisticsisdatascience">1997</a>)</span>; however, in 2001, William S. Cleveland introduced data science as an independent discipline extending the field of statistics to incorporate “advances in computing with data” <span class="citation">(S. Cleveland&quot; <a href="#ref-datascienceindependent">2001</a>)</span>.</li>
+<li><strong>Machine Learning</strong>: Field of artificial intelligence that uses statistical techniques to give computer systems the ability to “learn” from data. Arthur Samuel coined the term “machine learning” in 1959 while designing programs to play checkers using alpha-beta prunning <span class="citation">(Samuel <a href="#ref-samuel1959some">1959</a>)</span>. Machine learning is employed in computing tasks where designing explicit algorithms is difficult; for example, email filtering, detection of network intruders, and computer vision.</li>
+<li><strong>Deep Learning</strong>: A field of machine learning where models are vaguely inspired in biological nervous systems. In 2006, Geoffrey E. Hinton overcomed the vanishing-gradient-problem in deep neural networks by pre-training one layer at a time <span class="citation">(Hinton, Osindero, and Teh <a href="#ref-hinton2006fast">2006</a>)</span>. In 2012, convolutions and GPUs were introduced by Alex Krizhevsky making them the best image classification model over ImageNet <span class="citation">(Krizhevsky, Sutskever, and Hinton <a href="#ref-krizhevsky2012imagenet">2012</a>)</span>.</li>
+</ul>
 </div>
 <div id="sparklyr" class="section level2">
 <h2><span class="header-section-number">1.4</span> sparklyr</h2>
-<p>Back in 2016, there was a need in the R community to support Spark through an interface compatible with other R packages, easy to use and available in CRAN. To this end, development of <code>sparklyr</code> started in 2016 by RStudio under <a href="https://github.com/jjallaire">JJ Allaire</a>, <a href="https://github.com/kevinushey">Kevin Ushey</a> and <a href="https://github.com/javierluraschi">Javier Luraschi</a>, version <a href="https://blog.rstudio.com/2016/09/27/sparklyr-r-interface-for-apache-spark/">0.4 was released</a> in summer during the <em>useR!</em> conference, this first version added support for <code>dplyr</code>, <code>DBI</code>, modeling with <code>MLlib</code> and an extensible API that enabled extensions like <a href="https://www.h2o.ai/">H2O</a>’s <a href="https://github.com/h2oai/rsparkling/">rsparkling</a> package. Since then, many new features and improvements have been made available through <a href="https://blog.rstudio.com/2017/01/24/sparklyr-0-5/">sparklyr 0.5</a>, <a href="https://blog.rstudio.com/2017/07/31/sparklyr-0-6/">0.6</a>, <a href="https://blog.rstudio.com/2018/01/29/sparklyr-0-7/">0.7</a> and <a href="https://blog.rstudio.com/2018/05/14/sparklyr-0-8/">0.8</a>.</p>
+<p>Back in 2016, there was a need in the R community to support Spark through an R package that would provide an interface compatible with other R packages, easy to use and available in CRAN. To this end, development of <code>sparklyr</code> started in 2016 by RStudio under <a href="https://github.com/jjallaire">JJ Allaire</a>, <a href="https://github.com/kevinushey">Kevin Ushey</a> and <a href="https://github.com/javierluraschi">Javier Luraschi</a>, version <a href="https://blog.rstudio.com/2016/09/27/sparklyr-r-interface-for-apache-spark/">0.4 was released</a> in summer during the <em>useR!</em> conference, this first version added support for <code>dplyr</code>, <code>DBI</code>, modeling with <code>MLlib</code> and an extensible API that enabled extensions like <a href="https://www.h2o.ai/">H2O</a>’s <a href="https://github.com/h2oai/rsparkling/">rsparkling</a> package. Since then, many new features and improvements have been made available through <a href="https://blog.rstudio.com/2017/01/24/sparklyr-0-5/">sparklyr 0.5</a>, <a href="https://blog.rstudio.com/2017/07/31/sparklyr-0-6/">0.6</a>, <a href="https://blog.rstudio.com/2018/01/29/sparklyr-0-7/">0.7</a>, <a href="https://blog.rstudio.com/2018/05/14/sparklyr-0-8/">0.8</a> and <a href="https://blog.rstudio.com/2018/10/01/sparklyr-0-9/">0.9</a>.</p>
 <p>Officially,</p>
 <blockquote>
 <p><code>sparklyr</code> is an R interface for Apache Spark.</p>
@@ -462,7 +464,7 @@ FIGURE 1.1: Simple MapReduce Example.
 <ul>
 <li><strong>New Users</strong>: For new users, <code>sparklyr</code> provides the easiest way to get started with Spark. My hope is that the first chapters of this book will get you up running with ease and set you up for long term success.</li>
 <li><strong>Data Scientists</strong>: For data scientists that already use and love R, <code>sparklyr</code> integrates with many other R practices and packages like <code>dplyr</code>, <code>magrittr</code>, <code>broom</code>, <code>DBI</code>, <code>tibble</code> and many others that will make you feel at home while working with Spark. For those new to R and Spark, the combination of high-level workflows available in <code>sparklyr</code> and low-level extensibility mechanisms make it a productive environment to match the needs and skills of every data scientist.</li>
-<li><strong>Expert Users</strong>: For those users that are already immersed in Spark and can write code natively in Scala, consider making your libraries available as an <code>sparklyr</code> <a href="#custom-extensions">custom extension</a> to the R community, a diverse and skilled community that can put your contributions to good use while moving <a href="https://en.wikipedia.org/wiki/Open_science">open science</a> forward.</li>
+<li><strong>Expert Users</strong>: For those users that are already immersed in Spark and can write code natively in Scala, consider making your libraries available as an <code>sparklyr</code> <a href="contributing.html#r-extension">custom extension</a> to the R community, a diverse and skilled community that can put your contributions to good use while moving <a href="https://en.wikipedia.org/wiki/Open_science">open science</a> forward.</li>
 </ul>
 <p>This book is titled “The R in Spark” as a way to describe and teach that area of overlap between Spark and R. The R package that represents this overlap is <code>sparklyr</code>; however, the overlap goes beyond a package. It’s an overlap of communities, expectations, future directions, packages and package extensions as well. Naming this book <code>sparklyr</code> or “Introduction to sparklyr” would have left behind a much more exciting opportunity, an opportunity to present this book as an intersection of the R and Spark communities. Both are solving very similar problems with a set of different skills and backgrounds; therefore, it is my hope that <code>sparklyr</code> can be a fertile ground for innovation, a welcoming place to newcomers, a productive place for experienced data scientists and an open community where cluster computing and modeling can come together.</p>
 <p>Here are some resources to help you get involved:</p>
@@ -497,6 +499,24 @@ FIGURE 1.1: Simple MapReduce Example.
 </div>
 <div id="ref-data-processing">
 <p>French, Carl. 1996. <em>Data Processing and Information Technology</em>. Cengage Learning Business Press. <a href="https://www.amazon.com/Data-Processing-Information-Technology-French/dp/1844801004">https://www.amazon.com/Data-Processing-Information-Technology-French/dp/1844801004</a>.</p>
+</div>
+<div id="ref-r-for-data-science">
+<p>Wickham, Hadley, and Garrett Grolemund. 2016. <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. &quot; O’Reilly Media, Inc.&quot;.</p>
+</div>
+<div id="ref-statisticsisdatascience">
+<p>Wu, C.F. Jeff. 1997. “&quot;Statistics = Data Science?&quot;.” <a href="http://www2.isye.gatech.edu/~jeffwu/presentations/datascience.pdf">http://www2.isye.gatech.edu/~jeffwu/presentations/datascience.pdf</a>.</p>
+</div>
+<div id="ref-datascienceindependent">
+<p>S. Cleveland&quot;. 2001. “&quot;Data Science: An Action Plan for Expanding the Technical Areas of the Field of Statistics?&quot;.” <a href="https://pdfs.semanticscholar.org/915c/d8e2b39eb02723553913d592b2237d4d9960.pdf">https://pdfs.semanticscholar.org/915c/d8e2b39eb02723553913d592b2237d4d9960.pdf</a>.</p>
+</div>
+<div id="ref-samuel1959some">
+<p>Samuel, Arthur L. 1959. “Some Studies in Machine Learning Using the Game of Checkers.” <em>IBM Journal of Research and Development</em> 3 (3). IBM: 210–29.</p>
+</div>
+<div id="ref-hinton2006fast">
+<p>Hinton, Geoffrey E, Simon Osindero, and Yee-Whye Teh. 2006. “A Fast Learning Algorithm for Deep Belief Nets.” <em>Neural Computation</em> 18 (7). MIT Press: 1527–54.</p>
+</div>
+<div id="ref-krizhevsky2012imagenet">
+<p>Krizhevsky, Alex, Ilya Sutskever, and Geoffrey E Hinton. 2012. “Imagenet Classification with Deep Convolutional Neural Networks.” In <em>Advances in Neural Information Processing Systems</em>, 1097–1105.</p>
 </div>
 </div>
             </section>

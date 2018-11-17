@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2018-11-09">
+<meta name="date" content="2018-11-17">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -47,14 +47,14 @@
 
 
 <script src="libs/htmlwidgets-1.3/htmlwidgets.js"></script>
-<script src="libs/dagre-0.0.1/dagre.min.js"></script>
-<script src="libs/lodash-3.7.0/lodash.js"></script>
-<script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
-<script src="libs/nomnoml-binding-0.1.0/nomnoml.js"></script>
 <script src="libs/r2d3-render-0.1.0/r2d3-render.js"></script>
 <script src="libs/webcomponents-2.0.0/webcomponents.js"></script>
 <script src="libs/r2d3-binding-0.2.2/r2d3.js"></script>
 <script src="libs/d3v5-5.0.0/d3.min.js"></script>
+<script src="libs/dagre-0.0.1/dagre.min.js"></script>
+<script src="libs/lodash-3.7.0/lodash.js"></script>
+<script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
+<script src="libs/nomnoml-binding-0.1.0/nomnoml.js"></script>
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119986300-1"></script>
 <script>
@@ -216,7 +216,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="5.5" data-path="clusters.html"><a href="clusters.html#tools"><i class="fa fa-check"></i><b>5.5</b> Tools</a><ul>
 <li class="chapter" data-level="5.5.1" data-path="clusters.html"><a href="clusters.html#rstudio"><i class="fa fa-check"></i><b>5.5.1</b> RStudio</a></li>
-<li class="chapter" data-level="5.5.2" data-path="clusters.html"><a href="clusters.html#clusters-livy"><i class="fa fa-check"></i><b>5.5.2</b> Livy</a></li>
+<li class="chapter" data-level="5.5.2" data-path="clusters.html"><a href="clusters.html#jupyter"><i class="fa fa-check"></i><b>5.5.2</b> Jupyter</a></li>
+<li class="chapter" data-level="5.5.3" data-path="clusters.html"><a href="clusters.html#clusters-livy"><i class="fa fa-check"></i><b>5.5.3</b> Livy</a></li>
 </ul></li>
 <li class="chapter" data-level="5.6" data-path="clusters.html"><a href="clusters.html#recap-1"><i class="fa fa-check"></i><b>5.6</b> Recap</a></li>
 </ul></li>
@@ -254,9 +255,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="7.5" data-path="data.html"><a href="data.html#external"><i class="fa fa-check"></i><b>7.5</b> External</a><ul>
 <li class="chapter" data-level="7.5.1" data-path="data.html"><a href="data.html#amazon-s3"><i class="fa fa-check"></i><b>7.5.1</b> Amazon S3</a></li>
-<li class="chapter" data-level="7.5.2" data-path="data.html"><a href="data.html#cassandra"><i class="fa fa-check"></i><b>7.5.2</b> Cassandra</a></li>
-<li class="chapter" data-level="7.5.3" data-path="data.html"><a href="data.html#databases"><i class="fa fa-check"></i><b>7.5.3</b> Databases</a></li>
-<li class="chapter" data-level="7.5.4" data-path="data.html"><a href="data.html#switching"><i class="fa fa-check"></i><b>7.5.4</b> Switching</a></li>
+<li class="chapter" data-level="7.5.2" data-path="data.html"><a href="data.html#azure-storage"><i class="fa fa-check"></i><b>7.5.2</b> Azure Storage</a></li>
+<li class="chapter" data-level="7.5.3" data-path="data.html"><a href="data.html#cassandra"><i class="fa fa-check"></i><b>7.5.3</b> Cassandra</a></li>
+<li class="chapter" data-level="7.5.4" data-path="data.html"><a href="data.html#databases"><i class="fa fa-check"></i><b>7.5.4</b> Databases</a></li>
 <li class="chapter" data-level="7.5.5" data-path="data.html"><a href="data.html#hbase"><i class="fa fa-check"></i><b>7.5.5</b> HBase</a></li>
 <li class="chapter" data-level="7.5.6" data-path="data.html"><a href="data.html#nested-data"><i class="fa fa-check"></i><b>7.5.6</b> Nested Data</a></li>
 </ul></li>
@@ -378,12 +379,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="rsparkling" class="section level2">
 <h2><span class="header-section-number">9.1</span> RSparkling</h2>
 <p><a href="https://github.com/h2oai/rsparkling">rsparkling</a> provies <a href="https://www.h2o.ai/">H2O</a> support in Spark using <code>sparklyr</code>:</p>
-<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb104-1" data-line-number="1"><span class="kw">library</span>(rsparkling)</a>
-<a class="sourceLine" id="cb104-2" data-line-number="2"><span class="kw">library</span>(sparklyr)</a>
-<a class="sourceLine" id="cb104-3" data-line-number="3"><span class="kw">library</span>(h2o)</a>
-<a class="sourceLine" id="cb104-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb104-5" data-line-number="5">cars_h2o &lt;-<span class="st"> </span><span class="kw">as_h2o_frame</span>(sc, cars_tbl, <span class="dt">strict_version_check =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb104-6" data-line-number="6"><span class="kw">h2o.glm</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="st">&quot;wt&quot;</span>, <span class="st">&quot;cyl&quot;</span>), <span class="dt">y =</span> <span class="st">&quot;mpg&quot;</span>, <span class="dt">training_frame =</span> mtcars_h2o, <span class="dt">lambda_search =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb103-1" data-line-number="1"><span class="kw">library</span>(rsparkling)</a>
+<a class="sourceLine" id="cb103-2" data-line-number="2"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb103-3" data-line-number="3"><span class="kw">library</span>(h2o)</a>
+<a class="sourceLine" id="cb103-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb103-5" data-line-number="5">cars_h2o &lt;-<span class="st"> </span><span class="kw">as_h2o_frame</span>(sc, cars_tbl, <span class="dt">strict_version_check =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb103-6" data-line-number="6"><span class="kw">h2o.glm</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="st">&quot;wt&quot;</span>, <span class="st">&quot;cyl&quot;</span>), <span class="dt">y =</span> <span class="st">&quot;mpg&quot;</span>, <span class="dt">training_frame =</span> mtcars_h2o, <span class="dt">lambda_search =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <pre><code>## Loading required package: h2o</code></pre>
 <pre><code>## 
 ## ----------------------------------------------------------------------
@@ -447,13 +448,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="trpoubleshooting" class="section level3">
 <h3><span class="header-section-number">9.1.1</span> Trpoubleshooting</h3>
 <p><a href="http://ant.apache.org/ivy/">Apache IVY</a> is a popular dependency manager focusing on flexibility and simplicity, which happens to be used by Apache Spark while installing extensions. When connection fails while using <code>rsparkling</code>, consider clearing your <a href="http://ant.apache.org/ivy/history/2.0.0/settings/caches.html">IVY Cache</a> by running:</p>
-<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb111-1" data-line-number="1"><span class="kw">unlink</span>(<span class="st">&quot;~/.ivy2/cache&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb110-1" data-line-number="1"><span class="kw">unlink</span>(<span class="st">&quot;~/.ivy2/cache&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 </div>
 </div>
 <div id="graphframes" class="section level2">
 <h2><span class="header-section-number">9.2</span> GraphFrames</h2>
 <p><a href="https://graphframes.github.io/">GraphFrames</a> provides graph algorithms: PageRank, ShortestPaths, etc.</p>
-<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb112-1" data-line-number="1"><span class="kw">gf_graphframe</span>(vertices_tbl, edges_tbl) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">gf_pagerank</span>(<span class="dt">reset_prob =</span> <span class="fl">0.15</span>, <span class="dt">max_iter =</span> 10L)</a></code></pre></div>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb111-1" data-line-number="1"><span class="kw">gf_graphframe</span>(vertices_tbl, edges_tbl) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">gf_pagerank</span>(<span class="dt">reset_prob =</span> <span class="fl">0.15</span>, <span class="dt">max_iter =</span> 10L)</a></code></pre></div>
 <pre><code>GraphFrame
 Vertices:
   $ id       &lt;dbl&gt; 12, 12, 59, 59, 1, 20, 20, 45, 45, 8, 8, 9, 9, 26, 26, 37, 37, 47, 47, 16, 16, 71, 71, ...
@@ -462,8 +463,8 @@ Edges:
   $ src    &lt;dbl&gt; 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 58, 58, 58, 58, 58, 58, 5...
   $ dst    &lt;dbl&gt; 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 65, 65, 65, 65, 65, 65, 6...
   $ weight &lt;dbl&gt; 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0...</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-127"></span>
-<img src="the-r-in-spark_files/figure-html/unnamed-chunk-127-1.png" alt="Highschool ggraph dataset with pagerank highlighted." width="672" />
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-128"></span>
+<img src="the-r-in-spark_files/figure-html/unnamed-chunk-128-1.png" alt="Highschool ggraph dataset with pagerank highlighted." width="672" />
 <p class="caption">
 FIGURE 9.1: Highschool ggraph dataset with pagerank highlighted.
 </p>
@@ -473,38 +474,38 @@ FIGURE 9.1: Highschool ggraph dataset with pagerank highlighted.
 <div id="mleap" class="section level2">
 <h2><span class="header-section-number">9.3</span> Mleap</h2>
 <p><a href="https://github.com/rstudio/mleap">Mleap</a> enables Spark pipelines in production.</p>
-<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb114-1" data-line-number="1"><span class="co"># Create pipeline</span></a>
-<a class="sourceLine" id="cb114-2" data-line-number="2">pipeline_model &lt;-<span class="st"> </span><span class="kw">ml_pipeline</span>(sc) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb114-3" data-line-number="3"><span class="st">  </span><span class="kw">ft_binarizer</span>(<span class="st">&quot;hp&quot;</span>, <span class="st">&quot;big_hp&quot;</span>, <span class="dt">threshold =</span> <span class="dv">100</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb114-4" data-line-number="4"><span class="st">  </span><span class="kw">ft_vector_assembler</span>(<span class="kw">c</span>(<span class="st">&quot;big_hp&quot;</span>, <span class="st">&quot;wt&quot;</span>, <span class="st">&quot;qsec&quot;</span>), <span class="st">&quot;features&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb114-5" data-line-number="5"><span class="st">  </span><span class="kw">ml_gbt_regressor</span>(<span class="dt">label_col =</span> <span class="st">&quot;mpg&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb114-6" data-line-number="6"><span class="st">  </span><span class="kw">ml_fit</span>(cars_tbl)</a>
-<a class="sourceLine" id="cb114-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb114-8" data-line-number="8"><span class="co"># Perform predictions</span></a>
-<a class="sourceLine" id="cb114-9" data-line-number="9">predictions_tbl &lt;-<span class="st"> </span><span class="kw">ml_predict</span>(pipeline_model, mtcars_tbl)</a>
-<a class="sourceLine" id="cb114-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb114-11" data-line-number="11"><span class="co"># Export model with mleap</span></a>
-<a class="sourceLine" id="cb114-12" data-line-number="12"><span class="kw">ml_write_bundle</span>(pipeline_model, predictions_tbl, <span class="st">&quot;mtcars_model.zip&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb113-1" data-line-number="1"><span class="co"># Create pipeline</span></a>
+<a class="sourceLine" id="cb113-2" data-line-number="2">pipeline_model &lt;-<span class="st"> </span><span class="kw">ml_pipeline</span>(sc) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb113-3" data-line-number="3"><span class="st">  </span><span class="kw">ft_binarizer</span>(<span class="st">&quot;hp&quot;</span>, <span class="st">&quot;big_hp&quot;</span>, <span class="dt">threshold =</span> <span class="dv">100</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb113-4" data-line-number="4"><span class="st">  </span><span class="kw">ft_vector_assembler</span>(<span class="kw">c</span>(<span class="st">&quot;big_hp&quot;</span>, <span class="st">&quot;wt&quot;</span>, <span class="st">&quot;qsec&quot;</span>), <span class="st">&quot;features&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb113-5" data-line-number="5"><span class="st">  </span><span class="kw">ml_gbt_regressor</span>(<span class="dt">label_col =</span> <span class="st">&quot;mpg&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb113-6" data-line-number="6"><span class="st">  </span><span class="kw">ml_fit</span>(cars_tbl)</a>
+<a class="sourceLine" id="cb113-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb113-8" data-line-number="8"><span class="co"># Perform predictions</span></a>
+<a class="sourceLine" id="cb113-9" data-line-number="9">predictions_tbl &lt;-<span class="st"> </span><span class="kw">ml_predict</span>(pipeline_model, mtcars_tbl)</a>
+<a class="sourceLine" id="cb113-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb113-11" data-line-number="11"><span class="co"># Export model with mleap</span></a>
+<a class="sourceLine" id="cb113-12" data-line-number="12"><span class="kw">ml_write_bundle</span>(pipeline_model, predictions_tbl, <span class="st">&quot;mtcars_model.zip&quot;</span>)</a></code></pre></div>
 <p>Use model outside Spark and productions systems. For instance, in <span class="javaHighlight">Java:</span></p>
 <div class="java">
-<div class="sourceCode" id="cb115"><pre class="sourceCode java"><code class="sourceCode java"><a class="sourceLine" id="cb115-1" data-line-number="1"><span class="kw">import</span><span class="im"> ml.combust.mleap.runtime.MleapContext;</span></a>
-<a class="sourceLine" id="cb115-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb115-3" data-line-number="3"><span class="co">// Initialize</span></a>
-<a class="sourceLine" id="cb115-4" data-line-number="4">BundleBuilder bundleBuilder = <span class="kw">new</span> <span class="fu">BundleBuilder</span>();</a>
-<a class="sourceLine" id="cb115-5" data-line-number="5">MleapContext context = (<span class="kw">new</span> <span class="fu">ContextBuilder</span>()).<span class="fu">createMleapContext</span>();</a>
-<a class="sourceLine" id="cb115-6" data-line-number="6">Bundle&lt;<span class="bu">Transformer</span>&gt; bundle = bundleBuilder.<span class="fu">load</span>(<span class="kw">new</span> <span class="bu">File</span>(request.<span class="fu">get</span>(<span class="st">&quot;mtcars_model.zip&quot;</span>)), context);</a>
-<a class="sourceLine" id="cb115-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb115-8" data-line-number="8"><span class="co">// Read into Mleap DataFrame</span></a>
-<a class="sourceLine" id="cb115-9" data-line-number="9">DefaultLeapFrame inputLeapFrame = <span class="kw">new</span> <span class="fu">DefaultLeapFrame</span>();</a>
-<a class="sourceLine" id="cb115-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb115-11" data-line-number="11"><span class="co">// Perform Mleap transformation</span></a>
-<a class="sourceLine" id="cb115-12" data-line-number="12">DefaultLeapFrame transformedLeapFrame = bundle.<span class="fu">root</span>().<span class="fu">transform</span>(inputLeapFrame).<span class="fu">get</span>();</a></code></pre></div>
+<div class="sourceCode" id="cb114"><pre class="sourceCode java"><code class="sourceCode java"><a class="sourceLine" id="cb114-1" data-line-number="1"><span class="kw">import</span><span class="im"> ml.combust.mleap.runtime.MleapContext;</span></a>
+<a class="sourceLine" id="cb114-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb114-3" data-line-number="3"><span class="co">// Initialize</span></a>
+<a class="sourceLine" id="cb114-4" data-line-number="4">BundleBuilder bundleBuilder = <span class="kw">new</span> <span class="fu">BundleBuilder</span>();</a>
+<a class="sourceLine" id="cb114-5" data-line-number="5">MleapContext context = (<span class="kw">new</span> <span class="fu">ContextBuilder</span>()).<span class="fu">createMleapContext</span>();</a>
+<a class="sourceLine" id="cb114-6" data-line-number="6">Bundle&lt;<span class="bu">Transformer</span>&gt; bundle = bundleBuilder.<span class="fu">load</span>(<span class="kw">new</span> <span class="bu">File</span>(request.<span class="fu">get</span>(<span class="st">&quot;mtcars_model.zip&quot;</span>)), context);</a>
+<a class="sourceLine" id="cb114-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb114-8" data-line-number="8"><span class="co">// Read into Mleap DataFrame</span></a>
+<a class="sourceLine" id="cb114-9" data-line-number="9">DefaultLeapFrame inputLeapFrame = <span class="kw">new</span> <span class="fu">DefaultLeapFrame</span>();</a>
+<a class="sourceLine" id="cb114-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb114-11" data-line-number="11"><span class="co">// Perform Mleap transformation</span></a>
+<a class="sourceLine" id="cb114-12" data-line-number="12">DefaultLeapFrame transformedLeapFrame = bundle.<span class="fu">root</span>().<span class="fu">transform</span>(inputLeapFrame).<span class="fu">get</span>();</a></code></pre></div>
 </div>
 <p>See also <a href="http://spark.rstudio.com/guides/mleap/">spark.rstudio.com/guides/mleap</a>.</p>
 </div>
 <div id="extensions-nested-data" class="section level2">
 <h2><span class="header-section-number">9.4</span> Nested Data</h2>
-<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb116-1" data-line-number="1"><span class="kw">library</span>(sparklyr.nested)</a></code></pre></div>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb115-1" data-line-number="1"><span class="kw">library</span>(sparklyr.nested)</a></code></pre></div>
 
 </div>
 </div>
