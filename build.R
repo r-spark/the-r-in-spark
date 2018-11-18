@@ -5,6 +5,7 @@ if (!dir.exists("mds")) dir.create("mds")
 
 chapters <- list(
   "intro",
+  "starting",
   "appendix"
 )
 chapters_pattern <- paste(chapters, collapse = "|")
