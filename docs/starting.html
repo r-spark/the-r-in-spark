@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2018-11-17">
+<meta name="date" content="2018-11-18">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -388,32 +388,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="install-r" class="section level3">
 <h3><span class="header-section-number">2.1.1</span> Install R</h3>
 <p>From <a href="https://r-project.org/">r-project.org</a>, download and launch the installer for your platform, Windows, Macs or Linux available.</p>
-<div class="figure" style="text-align: center"><span id="fig:r-download"></span>
-<img src="images/02-getting-started-download-r.png" alt="The R Project for Statistical Computing." width="496" />
-<p class="caption">
-FIGURE 2.1: The R Project for Statistical Computing.
-</p>
+<div class="figure">
+<img src="images/starting-download-r.png" alt="The R Project for Statistical Computing." />
+<p class="caption">The R Project for Statistical Computing.</p>
 </div>
 </div>
 <div id="install-java" class="section level3">
 <h3><span class="header-section-number">2.1.2</span> Install Java</h3>
 <p>From <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html</a>, download and launch the installer for your platform, Windows, Macs or Linux available. While installing the JRE (Java Runtime Environment) is sufficient for most operations, in order to build extensions you will need the JDK (Java Developer Kit); therefore, I rather recommend installing the JDK in the first place.</p>
-<div class="figure" style="text-align: center"><span id="fig:java-download"></span>
-<img src="images/02-getting-started-jdk-8.png" alt="Java Download." width="496" />
-<p class="caption">
-FIGURE 2.2: Java Download.
-</p>
+<div class="figure">
+<img src="images/starting-jdk-8.png" alt="Java Download." />
+<p class="caption">Java Download.</p>
 </div>
 <p>Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java 8 as described in this chapter</p>
 </div>
 <div id="install-rstudio" class="section level3">
 <h3><span class="header-section-number">2.1.3</span> Install RStudio</h3>
 <p>While installing RStudio is not strictly required to work with <code>sparklyr</code> in R, it will make you much more productive and therefore, I would recommend you take the time to install RStudio from <a href="https://www.rstudio.com/products/rstudio/download/">rstudio.com/products/rstudio/download/</a>, then download and launch the installer for your platform: Windows, Macs or Linux.</p>
-<div class="figure" style="text-align: center"><span id="fig:rstudio-download"></span>
-<img src="images/02-getting-started-rstudio.png" alt="RStudio Downloads." width="496" />
-<p class="caption">
-FIGURE 2.3: RStudio Downloads.
-</p>
+<div class="figure">
+<img src="images/starting-rstudio.png" alt="RStudio Downloads." />
+<p class="caption">RStudio Downloads.</p>
 </div>
 <p>After launching RStudio, identify the Console panel since this is where most of the code will be executed in this book. For additional learning resources on R and RStudio consider visiting: <a href="https://www.rstudio.com/online-learning/">rstudio.com/online-learning/</a>.</p>
 </div>
@@ -453,8 +447,8 @@ FIGURE 2.3: RStudio Downloads.
 <p>A specific version can be installed using the Spark version and, optionally, by also specifying the Hadoop version. For instance, to install Spark 1.6.3, we would run <code>spark_install(&quot;1.6.3&quot;)</code>.</p>
 <p>You can also check which versions are installed by running:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">spark_installed_versions</span>()</a></code></pre></div>
-<pre><code>  spark hadoop                                             dir
-7 2.3.1    2.7 /Users/username/spark/spark-2.3.1-bin-hadoop2.7</code></pre>
+<pre><code>  spark hadoop                              dir
+7 2.3.1    2.7 /spark/spark-2.3.1-bin-hadoop2.7</code></pre>
 <p>Finally, in order to uninstall an specific version of Spark you can run <code>spark_uninstall()</code> by specifying the Spark and Hadoop versions, for instance:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">spark_uninstall</span>(<span class="dt">version =</span> <span class="st">&quot;2.3.1&quot;</span>, <span class="dt">hadoop =</span> <span class="st">&quot;2.7&quot;</span>)</a></code></pre></div>
 </div>
@@ -467,7 +461,7 @@ FIGURE 2.3: RStudio Downloads.
 </div>
 <div id="sparklyr-hello-world" class="section level2">
 <h2><span class="header-section-number">2.4</span> Using Spark</h2>
-<p>Now that you are connected, we can run a simple commands. For instance, let’s start by loading some data into Apache Spark.</p>
+<p>Now that you are connected, we can run a few simple commands. For instance, let’s start by loading some data into Apache Spark.</p>
 <p>To accomplish this, lets first create a text file by running:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">write</span>(<span class="st">&quot;Hello World!&quot;</span>, <span class="st">&quot;hello.txt&quot;</span>)</a></code></pre></div>
 <p>We can now read this text file back from Spark by running:</p>
@@ -483,18 +477,14 @@ FIGURE 2.3: RStudio Downloads.
 <h3><span class="header-section-number">2.4.1</span> Web Interface</h3>
 <p>Most of the Spark commands will get started from the R console; however, it is often the case that monitoring and analyzing execution is done through Sparks web interface. This interface is a web page provided by Spark which can be accessed from <code>sparklyr</code> by running:</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw">spark_web</span>(sc)</a></code></pre></div>
-<div class="figure" style="text-align: center"><span id="fig:spark-web"></span>
-<img src="images/02-getting-started-spark-web.png" alt="Apache Spark Web Interface." width="496" />
-<p class="caption">
-FIGURE 2.4: Apache Spark Web Interface.
-</p>
+<div class="figure">
+<img src="images/starting-spark-web.png" alt="Apache Spark Web Interface." />
+<p class="caption">Apache Spark Web Interface.</p>
 </div>
 <p>As mentioned, printing the “hello” dataset collected a few records to be displayed in the R console. You can see in the Spark web interface that a job was started to collect this information back from Spark. You can also select the <strong>storage</strong> tab to see the “hello” dataset cached in-memory in Spark:</p>
-<div class="figure" style="text-align: center"><span id="fig:spark-web-storage"></span>
-<img src="images/02-getting-started-spark-web-storage.png" alt="Apache Spark Web Interface - Storage Tab." width="496" />
-<p class="caption">
-FIGURE 2.5: Apache Spark Web Interface - Storage Tab.
-</p>
+<div class="figure">
+<img src="images/starting-spark-web-storage.png" alt="Apache Spark Web Interface - Storage Tab." />
+<p class="caption">Apache Spark Web Interface - Storage Tab.</p>
 </div>
 <p>The <a href="tunning-caching">caching</a> section in the [tunning] chapter will cover this in detail, but as a start, it’s worth noticing that this dataset is fully loaded into memory since the <strong>fraction cached</strong> is 100%, it is useful also to point out the <strong>size in memory</strong> column which tracks the total memory being used by this dataset.</p>
 </div>
@@ -518,7 +508,7 @@ FIGURE 2.5: Apache Spark Web Interface - Storage Tab.
 </div>
 <div id="disconnecting" class="section level2">
 <h2><span class="header-section-number">2.5</span> Disconnecting</h2>
-<p>For local clusters and, really, any cluster; once you are done processing data you should disconnect by running:</p>
+<p>For local clusters and really, any cluster; once you are done processing data you should disconnect by running:</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1"><span class="kw">spark_disconnect</span>(sc)</a></code></pre></div>
 <p>this will terminate the connection to the cluster but also terminate the cluster tasks as well. If multiple Spark connections are active, or if the conneciton instance <code>sc</code> is no longer available, you can also disconnect all your Spark connections by running <code>spark_disconnect_all()</code>.</p>
 </div>
@@ -530,32 +520,20 @@ FIGURE 2.5: Apache Spark Web Interface - Storage Tab.
 <li><strong>Packages</strong>: This pane allows you to install <code>sparklyr</code> with ease, check its version, navigate to the help contents, etc.</li>
 <li><strong>Connections</strong>: This pane allows you to connecto to Spark, manage your active connection and view the available datasets.</li>
 </ul>
-<div class="figure" style="text-align: center"><span id="fig:spark-rstudio-overview"></span>
-<img src="images/02-getting-started-rstudio-overview.png" alt="RStudio Overview." width="1197" />
-<p class="caption">
-FIGURE 2.6: RStudio Overview.
-</p>
+<div class="figure">
+<img src="images/starting-rstudio-overview.png" alt="RStudio Overview." />
+<p class="caption">RStudio Overview.</p>
 </div>
-<p>To start a new connections to Spark, you can use <code>spark_connect()</code> from the R console or, alternatevely, use the <strong>new connection</strong> action from the <strong>connections pane</strong> and, select a Spark connection in this dialog:</p>
-<div class="figure" style="text-align: center"><span id="fig:spark-rstudio-new-connection"></span>
-<img src="images/02-getting-started-rstudio-new-connection.png" alt="RStudio New Connection." width="574" />
-<p class="caption">
-FIGURE 2.7: RStudio New Connection.
-</p>
-</div>
+<p>To start a new connections to Spark, you can use <code>spark_connect()</code> from the R console or, alternatevely, use the <strong>new connection</strong> action from the <strong>connections pane</strong> and then, select the Spark connection.</p>
 <p>Once a Spark connection is selected, you can customize the versions and connect to Spark which will simply generate the right <code>spark_connect()</code> command and execute this in the R console for you:</p>
-<div class="figure" style="text-align: center"><span id="fig:spark-rstudio-new-spark-connection"></span>
-<img src="images/02-getting-started-rstudio-new-spark-connection.png" alt="RStudio New Spark Connection." width="583" />
-<p class="caption">
-FIGURE 2.8: RStudio New Spark Connection.
-</p>
+<div class="figure">
+<img src="images/starting-rstudio-new-spark-connection.png" alt="RStudio New Spark Connection." />
+<p class="caption">RStudio New Spark Connection.</p>
 </div>
 <p>Once connected to Spark, either by using the R console or through RStudio’s connections pane, RStudio will display your datasets available in the connections pane. This is a useful way to track your existing datasets and provides an easy way to explore each of them:</p>
-<div class="figure" style="text-align: center"><span id="fig:spark-rstudio-connections-pane"></span>
-<img src="images/02-getting-started-rstudio-connections-pane.png" alt="RStudio Connections Pane." width="506" />
-<p class="caption">
-FIGURE 2.9: RStudio Connections Pane.
-</p>
+<div class="figure">
+<img src="images/starting-rstudio-connections-pane.png" alt="RStudio Connections Pane." />
+<p class="caption">RStudio Connections Pane.</p>
 </div>
 <p>Additionally, an active connection provides the following custom actions:</p>
 <ul>
