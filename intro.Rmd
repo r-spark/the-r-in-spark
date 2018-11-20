@@ -38,7 +38,7 @@ With the ambition to provide tools capable of searching all this new digital inf
 
 One year later, in 2004, Google published a new paper describing how to perform operations across the Google File System, this approach came to be known as **MapReduce** [@google-map-reduce]. As you would expect, there are two operations in MapReduce: Map and Reduce. The **map operation** provides an arbitrary way to transform each file into a new file, usually defined by arbitrary code that scans the file and outputs a different file. The **reduce operation** combines two files into a new one. These two operations are sufficient to process data at the scale of the data available in the web.
 
-For example, we can use MapReduce to count words in two different text files. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files. Counting words is often the most basic example, but MapReduce can be also used to rank web pages efficietly and many other, much more interesting, applications.
+For example, we can use MapReduce to count words in two different text files. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files.
 
 ```{r echo=FALSE, eval=FALSE, fig.cap='Simple MapReduce Example.'}
 nomnoml::nomnoml("
@@ -61,17 +61,19 @@ nomnoml::nomnoml("
 ```
 ![Simple MapReduce Example.](images/intro-simple-map-reduce-example.png)
 
+Counting words is often the most basic MapReduce example, but it can be also used for much more sophisticated and interesting applications. For instance, MapReduce can be used to rank web pages in Google's **PageRank** algorithm, which assigns ranks to web pages based on the count of hyperlinks linking to a web page and the rank of the page linking to it.
+
 After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as **Hadoop** with the Google File System implemented as the Hadoop File System, or **HDFS** for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations that made use of MapReduce beyond web data processing.
 
 While Hadoop provided support to perform MapReduce operations over a distributed file system, it still required MapReduce operations to be written with code every time a data analysis was run. To improve over this tedious process, the **Hive** project released in 2008 by Facebook, brought Structured Query Language (**SQL**) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each MapReduce operation; instead, one could write generic data analysis statements in SQL that are much easier to understand and write.
 
 ## Spark
 
-While Hadoop with Hive is a powerful tool to this date, it works over a distributed disk-based file system and is dependent on map/reduce operations. While disk drives are affordable, they are also significantly slower than a computer's memory. Addtionally, new processors started focusing in multi-CPU architectures to improve performance, making parallel computing much more relevant to take advantage of new processor architectures.
+In 2009, the **Apache Spark** projects starts as a research project at the UC Berkeley AMPLab to improve over MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines and, by loading data in-memory which made operations much fasters than Hadoop's on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the [modeling] chapter, allowed Spark to run 10x faster than Hadoop by making use of in-memory datasets [@zaharia2010spark].
 
-In 2009, the **Apache Spark** projects starts in Berkeley to improve over Hadoop. Specifically, by making use of memory (instead of disk drives) and by providing a richer set of verbs beyond map/reduce to facilitate writting code optimized to run in multiple CPUs, this allowed Spark to be much faster and generic than its predecessors.
+However, it is a common misconception that Spark requires all data to be stored in-memory; while Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. In 2014, Spark won the record in large scale sorting, one was able [sort 100TB of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23min using Spark](https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html). In this benchmark, data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU's cache to dramatically improve performance.
 
-For instance, one can [sort 100TB of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23min using Spark](https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html). Spark was build using the Scala programming language, but interfaces to other programming languages are also provided today. Spark was released as an open source project in 2010 with the scope of the project defined as follows:
+Spark was released as an open source project in 2010, from its project website:
 
 > "Apache Spark is a fast and general engine for large-scale data processing."
 >
@@ -82,13 +84,13 @@ To help us understand this definition of Apache Spark, we will break it down as 
 - **Data Processing**: Data processing is the collection and manipulation of items of data to produce meaningful information [@data-processing].
 - **General**: Spark optimizes and executes parallel generic code, as in, there are no restrictions as to what type of code one can write in Spark.
 - **Large-Scale**: One can interpret this as **cluster**-scale, as in, a set of connected computers working together to accomplish specific goals.
-- **Fast**: Spark is much faster than its predecessor by making efficient use of memory to speed data access while running algorithms at scale.
+- **Fast**: Spark is much faster than its predecessor by making efficient use of memory, network and CPUs to speed data processing algorithms in computing cluster.
 
 Since Spark is _general_, you can use Spark to solve many problems, from calculating averages to approximating the value of Pi, [predicting customer churn](https://mapr.com/blog/churn-prediction-sparkml/), [aligning protein sequences](https://academic.oup.com/gigascience/article/7/8/giy098/5067872) or analyzing [high energy physics at CERN](https://db-blog.web.cern.ch/blog/luca-canali/2017-08-apache-spark-and-cern-open-data-example).
 
 Describing Spark as _large_ _scale_ implies that a good use case for Spark is tackling problems that can be solved with multiple machines. For instance, when data does not fit in a single disk driver or does not fit into memory, Spark is a good candidate to consider.
 
-Since Spark is _fast_, it is worth considering for problems that may not be large-scale, but where using multiple processors could speed up computation. For instance, sorting large datasets or cpu intensive models could also bennefit from running in Spark.
+Since Spark is _fast_, it is worth considering for problems that may not be large-scale, but where using multiple processors could speed up computation. For instance, sorting large datasets or CPU intensive models could also bennefit from running in Spark.
 
 Therefore, Spark is good at tackling large-scale data processing problems, this usually known as **big data** ([data sets that are more voluminous and complex that traditional ones](https://en.wikipedia.org/wiki/big_data)), but also is good at tackling large-scale computation problems, known as **big compute** ([tools and approaches using a large amount of CPU and memory resources in a coordinated way](https://www.nimbix.net/glossary/big-compute/)). 
 
@@ -166,10 +168,3 @@ While thinking of who and why should use `sparklyr`, the following roles come to
 - **Expert Users**: For those users that are already immersed in Spark and can write code natively in Scala, consider making your libraries available as an `sparklyr` [custom extension](#r-extension) to the R community, a diverse and skilled community that can put your contributions to good use while moving [open science](https://en.wikipedia.org/wiki/Open_science) forward.
 
 This book is titled "The R in Spark" as a way to describe and teach that area of overlap between Spark and R. The R package that represents this overlap is `sparklyr`; however, the overlap goes beyond a package. It's an overlap of communities, expectations, future directions, packages and package extensions as well. Naming this book `sparklyr` or "Introduction to sparklyr" would have left behind a much more exciting opportunity, an opportunity to present this book as an intersection of the R and Spark communities. Both are solving very similar problems with a set of different skills and backgrounds; therefore, it is my hope that `sparklyr` can be a fertile ground for innovation, a welcoming place to newcomers, a productive place for experienced data scientists and an open community where cluster computing and modeling can come together.
-
-Here are some resources to help you get involved:
-
-- **Documentation**: This should be your entry point to learn more about sparklyr, the documentation is kept up to date with examples, reference functions and many more relevant resources, [https://spark.rstudio.com](https://spark.rstudio.com).
-- **Github**: If you believe something needs to get fixed, open a GitHub issue or send us a pull request, [https://github.com/rstudio/sparklyr](https://github.com/rstudio/sparklyr).
-- **Stack Overflow**: For general questions, Stack Overflow is a good place to start, [stackoverflow.com/tags/sparklyr](stackoverflow.com/tags/sparklyr).
-- **Gitter**: For urgent issues or to keep in touch you can chat with us in Gitter, [https://gitter.im/rstudio/sparklyr](https://gitter.im/rstudio/sparklyr).
