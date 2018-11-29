@@ -63,17 +63,45 @@ nomnoml::nomnoml("
 
 Counting words is often the most basic MapReduce example, but it can be also used for much more sophisticated and interesting applications. For instance, MapReduce can be used to rank web pages in Google's **PageRank** algorithm, which assigns ranks to web pages based on the count of hyperlinks linking to a web page and the rank of the page linking to it.
 
-After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as **Hadoop** with the Google File System implemented as the Hadoop File System, or **HDFS** for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations that made use of MapReduce beyond web data processing.
+After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as **Hadoop** with the Google File System implemented as the Hadoop File System, or **HDFS** for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations which enabled them to make use of MapReduce beyond web data processing.
 
 While Hadoop provided support to perform MapReduce operations over a distributed file system, it still required MapReduce operations to be written with code every time a data analysis was run. To improve over this tedious process, the **Hive** project released in 2008 by Facebook, brought Structured Query Language (**SQL**) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each MapReduce operation; instead, one could write generic data analysis statements in SQL that are much easier to understand and write.
 
 ## Spark
 
-In 2009, the **Apache Spark** projects starts as a research project at the UC Berkeley AMPLab to improve over MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines and, by loading data in-memory which made operations much fasters than Hadoop's on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the [modeling] chapter, allowed Spark to run 10x faster than Hadoop by making use of in-memory datasets [@zaharia2010spark].
+In 2009, **Apache Spark** starts as a research project at the UC Berkeley's AMPLab to improve over MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines and, by loading data in-memory which made operations much fasters than Hadoop's on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the [modeling] chapter, allowed Spark to run 10x faster than Hadoop by making use of in-memory datasets [@zaharia2010spark].
 
-However, it is a common misconception that Spark requires all data to be stored in-memory; while Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. In 2014, Spark won the record in large scale sorting, one was able [sort 100TB of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23min using Spark](https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html). In this benchmark, data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU's cache to dramatically improve performance.
 
-Spark was released as an open source project in 2010, from its project website:
+```{r eval=FALSE, echo=FALSE}
+iterations <- c(1, 1:6 * 5)
+data.frame(
+  iteration = rep(iterations, 2),
+  cluster = c(rep("hadoop", length(iterations)), rep("spark", length(iterations))),
+  seconds = c(iterations * 127, 174 + (iterations - 1) * 6)) %>%
+  ggplot(aes(x=iteration, y=seconds, fill=cluster)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  labs(x = "Number of Iterations", y = "Running Time (s)") +
+  theme_light() +
+  ggsave("images/intro-hadoop-spark-logistic-regression.png", width = 10, height = 4)
+```
+![Logistic regression performance in Hadoop and Spark.](images/intro-hadoop-spark-logistic-regression.png)
+
+While Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. For instance, Spark holds [records in large-scale sorting](http://sortbenchmark.org/), where data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU's cache to dramatically improve performance. For comparison, one can [sort 100TB of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23min using Spark](https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html), it's also the case that [Spark holds the record in the cloud sorting benchmark ](https://spark.apache.org/news/spark-wins-cloudsort-100tb-benchmark.html), which makes Spark the most cost effective solution for large-scale sorting.
+
+|                  | Hadoop Record | Spark Record  |
+|------------------|---------------|---------------|
+| Data Size        | 102.5 TB      | 100 TB        |
+| Elapsed Time     | 72 mins       | 23 mins       |
+| Nodes            | 2100          | 206           |
+| Cores            | 50400         | 6592          |
+| Disk             | 3150 GB/s     | 618 GB/s      |
+| Network          | 10Gbps        | 10Gbps        |
+| Sort rate        | 1.42 TB/min   | 4.27 TB/min   |
+| Sort rate / node | 0.67 GB/min   | 20.7 GB/min   |
+
+In 2010, Spark was released as an open source project and then donated to the Apache Software Foundation in 2013. Spark is licensed under the [Apache 2.0](https://en.wikipedia.org/wiki/Apache_License), which allows you to freely use, modify, and distribute it. In 2015, Spark reaches more than 1000 contributors, making it one of the most active projects in the Apache Software Foundation.
+
+This gives an overview of how Spark came to be, which we can now use to formally introduce Apache Spark as follows:
 
 > "Apache Spark is a fast and general engine for large-scale data processing."
 >

@@ -19,7 +19,7 @@ Spark performs distributed computation by: configuring cluster resources and par
 
 The following diagram shows an example on how a sorting **job** would conceptually work across a cluster of machines. First, Spark would **configure** the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the data is already partitioned, each worker node loads this implicit **partition**; for instance, `4,9,1` is loaded in the first worker node. Afterwards, a custom transformation is applied to each partition in each worker node, this is denoted by `f(x)` in the diagram below and is defined as a **stage** in Spark terminalogy. In this example, `f(x)` **executes** a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed. Once the execution completes, the result is **shuffled** to the right machine to finish the sorting operation across the entire dataset. Once the data is sorted across the cluster, the sorted results can be optionally **cached** in memory to avoid rerunning this computation multiple times. Finally, a small subset of the cached results is **serialized**, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Spark Overview'}
+```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Spark Sorting Overview'}
 
 r2d3::r2d3(
   c(),
@@ -31,11 +31,11 @@ r2d3::r2d3(
 
 Notice that while the diagram above describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, these lower level operations are not exposed in `sparklyr`, instead, `sparklyr` makes those operations available through higher level commands provided by the data [analysis] tools like [dplyr] or [DBI], [modeling] and by using many [community extensions](#using-extensions). For advanced use cases, one can always use the Spark's Scala API through an `sparklyr` [custom extensions](#r-extension) or run custom [distributed] R code. 
 
-In order to effectevely tune Spark computations, there are two toolsthat are useful to understand: the [**graph visualization**](#tunning-graph-vusualization) and the [**event timeline**](#tunning-event-timeline). Both tools are accessible through the [Spark Web Interface](#spark-web-interface) and then selecting a particular job and a oarticular state under this job.
+In order to effectevely tune Spark computations, there are two toolsthat are useful to understand: the [**graph visualization**](#tunning-graph-visualization) and the [**event timeline**](#tunning-event-timeline). Both tools are accessible through the [Spark Web Interface](#spark-web-interface) and then selecting a particular job and a oarticular state under this job.
 
-### Graph Visualization {#tunning-graph-vusualization}
+### Graph Visualization {#tunning-graph-visualization}
 
-This **graph visualization** is found under each stage by expanding "DAG Visualization". DAG stands for Directed Acyclic Graph, since all computations in Spark move computaiton forward without repeating previous steps, this helps Spark optimize computations more effectevely.
+This **graph visualization** is found under each stage by expanding "DAG Visualization". DAG stands for Directed Acyclic Graph, since all computations in Spark move computaiton forward without repeating previous steps, this helps Spark optimize computations effectevely.
 
 What you will see in this visualization is a breakdown of the operations that Spark had to perform (or is performing if the stage is still active) to execute your computation. It's hard to understand what they mean the first time you see them, but as you execute more Spark jobs, this graph will become more familiar and will help you identify unexpected steps to investigate further.
 
@@ -141,8 +141,11 @@ config <- spark_config()
 # Memory in Driver
 config["sparklyr.shell.driver-memory"] <- "2g"
 
-# Number of Workers
-config["sparklyr.shell.executor-cores"] <- 3
+# Total Workers
+config["sparklyr.shell.num-executors"] <- 3
+
+# Cores per Worker
+config["sparklyr.shell.executor-cores"] <- 4
 
 # Memory per Worker
 config["sparklyr.shell.executor-memory"] <- "2g"
@@ -157,7 +160,7 @@ There are a few types of configuration settings:
 
 - **Submit** settings are set while `sparklyr` is being submitted to Spark. For instance, they can configure the driver node.
 - **Runtime** settings configure Spark when the Spark session is created. For instance, to configure worker nodes settings.
-- **Sparklyr** settings configure `sparklyr` behaviour. For instance,`sparklyr.verbose` controls how much diagnostics data is printed. 
+- **sparklyr** settings configure `sparklyr` behaviour. For instance,`sparklyr.verbose` controls how much diagnostics data is printed. 
 
 ### Submit Settings {#submit-settings}
 
@@ -203,7 +206,7 @@ knitr::kable(data.frame(name = names(settings), value = unlist(unname(cleaned)))
 
 See also, [spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html).
 
-### Sparklyr Settings
+### sparklyr Settings
 
 Appart from Spark settings, there are a few settings particular to sparklyr listed below. `sparklyr.connect.cores` is useful to set the CPU cores to use in local mode; the remaining ones are not used as much while tuning, but they can prove helpful while troubleshooting other issues.
 
