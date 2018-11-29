@@ -31,7 +31,7 @@ r2d3::r2d3(
 
 Notice that while the diagram above describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, these lower level operations are not exposed in `sparklyr`, instead, `sparklyr` makes those operations available through higher level commands provided by the data [analysis] tools like [dplyr] or [DBI], [modeling] and by using many [community extensions](#using-extensions). For advanced use cases, one can always use the Spark's Scala API through an `sparklyr` [custom extensions](#r-extension) or run custom [distributed] R code. 
 
-In order to effectevely tune Spark computations, there are two toolsthat are useful to understand: the [**graph visualization**](#tunning-graph-visualization) and the [**event timeline**](#tunning-event-timeline). Both tools are accessible through the [Spark Web Interface](#spark-web-interface) and then selecting a particular job and a oarticular state under this job.
+In order to effectevely tune Spark computations, there are two toolsthat are useful to understand: the [**graph visualization**](#tunning-graph-visualization) and the [**event timeline**](#tunning-event-timeline). Both tools are accessible through the [Spark Web Interface](#starting-spark-web-interface) and then selecting a particular job and a oarticular state under this job.
 
 ### Graph Visualization {#tunning-graph-visualization}
 
@@ -71,7 +71,7 @@ knitr::include_graphics("images/08-tuning-spark-graph-visualization.png")
 
 ### Event Timeline {#tunning-event-timeline}
 
-The **event timeline** is one of the best ways to optimize your Spark jobs is to use the Spark's [web interface](spark-web-interface), it's also available for each Spark stage and gives you a great summary of how Spark is spending computation cycles. In general, you want to see a lot of CPU usage since the other tasks can be considered overhead. You also want to see one event lane per CPU allocated from the cluster to your job so ensure you are fully utilizing your Spark cluster.
+The **event timeline** is one of the best ways to optimize your Spark jobs is to use the Spark's [web interface](#starting-spark-web-interface), it's also available for each Spark stage and gives you a great summary of how Spark is spending computation cycles. In general, you want to see a lot of CPU usage since the other tasks can be considered overhead. You also want to see one event lane per CPU allocated from the cluster to your job so ensure you are fully utilizing your Spark cluster.
 
 Lets the take a look at the event timeline for the ordering a data frame by a given column using three partitions:
 

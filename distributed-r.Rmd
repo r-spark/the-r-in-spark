@@ -31,6 +31,49 @@ iris_tbl <- spark_apply(
 
 ## Packages
 
+## Context
+
+```{r eval=F}
+sdf_len(sc, 3, repartition = 3) %>%
+  spark_apply(function(data, context) context, context = data.frame(something = c("foo", "bar")))
+```
+```
+# Source: spark<?> [?? x 1]
+      a
+* <dbl>
+1     1
+2     2
+3     3
+4     1
+5     2
+6     3
+```
+
+```{r eval=F}
+sdf_len(sc, 3, repartition = 3) %>%
+  spark_apply(
+    function(data, context) context$numbers * context$constant,
+    context = list(
+      numbers = c(2, 3, 5),
+      constant = 10
+    )
+  )
+```
+```
+# Source: spark<?> [?? x 1]
+  result
+*  <dbl>
+1     20
+2     30
+3     50
+4     20
+5     30
+6     50
+7     20
+8     30
+9     50
+```
+
 ## Restrictions
 
 ## Troubleshooting

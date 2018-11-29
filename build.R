@@ -19,7 +19,7 @@ references <- list(
 for (chapter_file in dir(pattern = paste0(chapters_pattern, ".Rmd"))) {
   chapter_name <- tools::file_path_sans_ext(basename(chapter_file))
 
-  rmarkdown::render(chapter_file, output_format = rmarkdown::md_document(), output_dir = "mds")
+  knitr::knit(chapter_file, file.path("mds", paste(chapter_name, "md", sep = ".")))
   rmarkdown::pandoc_convert(
     input = normalizePath(paste0("mds/", chapter_name, ".md")),
     to = "asciidoc",

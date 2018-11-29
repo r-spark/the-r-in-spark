@@ -13,7 +13,7 @@ As humans, we have been storing, retrieving, manipulating, and communicating inf
 
 Mathematician George Stibitz used the word **digital** to describe fast electric pulses back in 1942 [@computing-concise-history] and, to this day, we describe information stored electronically as digital information. In contrast, **analog** information is defined as, not digital [@webster2006merriam] and it represents everything we have stored by any non-electronic means such as: hand written notes, books, newspapers and so on.
 
-The world bank report on digital development [@data-revolution] provides an estimate of digital and analog information stored over the last decades. This report found out that digital information surpassed analog information around 2003, at that time, there were aboput 10M terabytes of digital information, which is roughly about 10M computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at [exponential rates](#storage-capacity):
+The world bank report on digital development [@data-revolution] provides an estimate of digital and analog information stored over the last decades. This report found out that digital information surpassed analog information around 2003, at that time, there were aboput 10M terabytes of digital information, which is roughly about 10M computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at [exponential rates](#appendix-storage-capacity):
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='World’s capacity to store information.', fig.align = 'center', eval=FALSE}
 library(tidyverse)
@@ -67,9 +67,9 @@ After these papers were released by Google, a team in Yahoo worked on implementi
 
 While Hadoop provided support to perform MapReduce operations over a distributed file system, it still required MapReduce operations to be written with code every time a data analysis was run. To improve over this tedious process, the **Hive** project released in 2008 by Facebook, brought Structured Query Language (**SQL**) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each MapReduce operation; instead, one could write generic data analysis statements in SQL that are much easier to understand and write.
 
-## Spark
+## Spark {#intro-spark}
 
-In 2009, **Apache Spark** starts as a research project at the UC Berkeley's AMPLab to improve over MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines and, by loading data in-memory which made operations much fasters than Hadoop's on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the [modeling] chapter, allowed Spark to run 10x faster than Hadoop by making use of in-memory datasets [@zaharia2010spark].
+In 2009, **Apache Spark** starts as a research project at the UC Berkeley's AMPLab to improve over MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines and, by loading data in-memory which made operations much fasters than Hadoop's on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the [modeling](#modeling) chapter, allowed Spark to run 10x faster than Hadoop by making use of in-memory datasets [@zaharia2010spark].
 
 
 ```{r eval=FALSE, echo=FALSE}
@@ -132,7 +132,7 @@ However, there is also a third problem space where data nor compute are necessar
 
 Some people refer to some of these benefits as [the four 'V's of big data](http://www.theserverside.com/feature/Handling-the-four-Vs-of-big-data-volume-velocity-variety-and-veracity): Velocity, Variety, Volume and Veracity (which asserts that data can vary greatly in quality which require analysis methods to improve accuracy across a variety of sources). Others have gone as far as expending this to [five](https://en.wikipedia.org/wiki/Big_data) or even as [the 10 Vs of Big Data](https://tdwi.org/articles/2017/02/08/10-vs-of-big-data.aspx). Mnemonics set aside, cluster computing is being used today in more innovative ways and and is not uncommon to see organizations experimenting with new workflows and a variety of tasks that were traditionally uncommon for cluster computing. Much of the hype attributed to big data falls into this space where, strictly speaking, one is not handling big data but there are still beneffits from using tools designed for big data and big compute. My hope is that this book will help you understand the opportunities and limitations of cluster computing, and specifically, the opportunities and limitations from using Apache Spark with R.
 
-## R
+## R {#intro-r}
 
 R is a computing language with it's inception dating back to Bell Laboratories. R was not created at Bell Labs, but it's predecesor, the S computing language was. [Rick Becker explained in useR 2016](https://blog.revolutionanalytics.com/2016/07/rick-becker-s-talk.html) that at that time in Bell Labs, computing was done by calling subroutines written in the Fortran language which, apparently, were not pleasant to deal with. The S computing language was designed as an interface language to solve particular problems without having to worry about other languages, Fortran at that time. The creator of S, [John Chambers](https://en.wikipedia.org/wiki/John_Chambers_(statistician)), describes how S was designed to provide an interface through the following diagram:
 
@@ -177,7 +177,7 @@ Aside from statistics, R is also used in many other fields, the following ones a
 - **Machine Learning**: Field of artificial intelligence that uses statistical techniques to give computer systems the ability to "learn" from data. Arthur Samuel coined the term "machine learning" in 1959 while designing programs to play checkers using alpha-beta prunning [@samuel1959some]. Machine learning is employed in computing tasks where designing explicit algorithms is difficult; for example, email filtering, detection of network intruders, and computer vision.
 - **Deep Learning**: A field of machine learning where models are vaguely inspired in biological nervous systems. In 2006, Geoffrey E. Hinton overcomed the vanishing-gradient-problem in deep neural networks by pre-training one layer at a time [@hinton2006fast]. In 2012, convolutions and GPUs were introduced by Alex Krizhevsky  making them the best image classification model over ImageNet [@krizhevsky2012imagenet].
 
-## sparklyr
+## sparklyr {#intro-sparklyr}
 
 Back in 2016, there was a need in the R community to support Spark through an R package that would provide an interface compatible with other R packages, easy to use and available in CRAN. To this end, development of `sparklyr` started in 2016 by RStudio under [JJ Allaire](https://github.com/jjallaire), [Kevin Ushey](https://github.com/kevinushey) and [Javier Luraschi](https://github.com/javierluraschi), version [0.4 was released](https://blog.rstudio.com/2016/09/27/sparklyr-r-interface-for-apache-spark/) in summer during the _useR!_ conference, this first version added support for `dplyr`, `DBI`, modeling with `MLlib` and an extensible API that enabled extensions like [H2O](https://www.h2o.ai/)'s [rsparkling](https://github.com/h2oai/rsparkling/) package. Since then, many new features and improvements have been made available through [sparklyr 0.5](https://blog.rstudio.com/2017/01/24/sparklyr-0-5/), [0.6](https://blog.rstudio.com/2017/07/31/sparklyr-0-6/), [0.7](https://blog.rstudio.com/2018/01/29/sparklyr-0-7/), [0.8](https://blog.rstudio.com/2018/05/14/sparklyr-0-8/) and [0.9](https://blog.rstudio.com/2018/10/01/sparklyr-0-9/).
 
@@ -185,7 +185,7 @@ Officially,
 
 > `sparklyr` is an R interface for Apache Spark.
 >
-> ---[github.com/rstudio/sparklyr](https://github.com/rstudio/sparklyr)
+> --- [github.com/rstudio/sparklyr](https://github.com/rstudio/sparklyr)
 
 It's available in CRAN and works like any other CRAN package, meaning that: it's agnostic to Spark versions, it's easy to install, it serves the R community, it embraces other packages and practices from the R community and so on. It's hosted in GitHub under [github.com/rstudio/sparklyr](https://github.com/rstudio/sparklyr) and licensed under Apache 2.0 which is allows you to clone, modify and [contribute back](#contributing) to this project.
 
@@ -193,6 +193,6 @@ While thinking of who and why should use `sparklyr`, the following roles come to
 
 - **New Users**: For new users, `sparklyr` provides the easiest way to get started with Spark. My hope is that the first chapters of this book will get you up running with ease and set you up for long term success.
 - **Data Scientists**: For data scientists that already use and love R, `sparklyr` integrates with many other R practices and packages like `dplyr`, `magrittr`, `broom`, `DBI`, `tibble` and many others that will make you feel at home while working with Spark. For those new to R and Spark, the combination of high-level workflows available in `sparklyr` and low-level extensibility mechanisms make it a productive environment to match the needs and skills of every data scientist.
-- **Expert Users**: For those users that are already immersed in Spark and can write code natively in Scala, consider making your libraries available as an `sparklyr` [custom extension](#r-extension) to the R community, a diverse and skilled community that can put your contributions to good use while moving [open science](https://en.wikipedia.org/wiki/Open_science) forward.
+- **Expert Users**: For those users that are already immersed in Spark and can write code natively in Scala, consider making your libraries available as an `sparklyr` [custom extension](#contributing-r-extension) to the R community, a diverse and skilled community that can put your contributions to good use while moving [open science](https://en.wikipedia.org/wiki/Open_science) forward.
 
 This book is titled "The R in Spark" as a way to describe and teach that area of overlap between Spark and R. The R package that represents this overlap is `sparklyr`; however, the overlap goes beyond a package. It's an overlap of communities, expectations, future directions, packages and package extensions as well. Naming this book `sparklyr` or "Introduction to sparklyr" would have left behind a much more exciting opportunity, an opportunity to present this book as an intersection of the R and Spark communities. Both are solving very similar problems with a set of different skills and backgrounds; therefore, it is my hope that `sparklyr` can be a fertile ground for innovation, a welcoming place to newcomers, a productive place for experienced data scientists and an open community where cluster computing and modeling can come together.

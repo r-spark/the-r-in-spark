@@ -1,27 +1,29 @@
 # Getting Started {#starting}
 
-From R, getting started with Spark using a local cluster is as easy as running, `library(sparklyr)` followed by:
+From R, getting started with Spark using a local cluster is as easy as running:
 
 ```{r eval=FALSE}
+library(sparklyr)
+
 spark_install()
 sc <- spark_connect(master = "local")
 ```
 
 To make sure we can all run the code above and understand it, this chapter will walk you through installing the prerequisites, installing Spark, connecting to a local Spark cluster and briefly explaining how to use Spark.
 
-If a Spark cluster and R environment have been made available to you, you do not need to install the [prerequisites] nor [install Spark](installing-spark) yourself. Instead, you should ask for the Spark `master` parameter and connect as follows, this parameter will be formally introduced under the [clusters] and [connections] chapters.
+However, if a Spark cluster and R environment have been made available to you, you do not need to install the [prerequisites](#starting-prerequisites) nor [install Spark](#starting-installing-spark) yourself. Instead, you should ask for the Spark `master` parameter and connect as follows, this parameter will be formally introduced under the [clusters](#clusters) and [connections](#connections) chapters.
 
 ```{r eval=FALSE}
-sc <- spark_connect(master = "<your-cluster-master>")
+sc <- spark_connect(master = "<cluster-master>")
 ```
 
-## Prerequisites {#prerequisites}
+## Prerequisites {#starting-prerequisites}
 
-As briefly mentioned in the [Introduction] chapter, R is a programming language that can run in many platforms and environments. Most people making use of a programming language also choose tools to make them more productive in it; for R, RStudio would be such tool. Strictly speaking, RStudio is an Integrated Development Environment or IDE for short, which also happens to support many platforms and environments. R and RStudio are the free software tools this book will make use of and therefore, I strongly recommend you get those installed if you haven't done so already. 
+As briefly mentioned in the [Introduction](#intro) chapter, R is a programming language that can run in many platforms and environments. Most people making use of a programming language also choose tools to make them more productive in it; for R, RStudio would be such tool. Strictly speaking, RStudio is an Integrated Development Environment or IDE for short, which also happens to support many platforms and environments. R and RStudio are the free software tools this book will make use of and therefore, I strongly recommend you get those installed if you haven't done so already. 
 
-Additionally, since Spark is build in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java 8 in your system. It is likely that your system already has Java installed, but you should still check the version and update if needed as described in the [Install Java] section.
+Additionally, since Spark is build in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java 8 in your system. It is likely that your system already has Java installed, but you should still check the version and update if needed as described in the [Install Java](#starting-install-java) section.
 
-### Install R
+### Install R {#starting-install-r}
 
 From [r-project.org](https://r-project.org/), download and launch the installer for your platform, Windows, Macs or Linux available.
 
@@ -30,7 +32,7 @@ knitr::include_graphics("images/starting-download-r.png")
 ```
 ![The R Project for Statistical Computing.](images/starting-download-r.png)
 
-### Install Java {#install-java}
+### Install Java {#starting-install-java}
 
 From [oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html), download and launch the installer for your platform, Windows, Macs or Linux available. While installing the JRE (Java Runtime Environment) is sufficient for most operations, in order to build extensions you will need the JDK (Java Developer Kit); therefore, I rather recommend installing the JDK in the first place.
 
@@ -41,7 +43,7 @@ knitr::include_graphics("images/starting-jdk-8.png")
 
 Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java 8 as described in this chapter
 
-### Install RStudio
+### Install RStudio {#starting-install-rstudio}
 
 While installing RStudio is not strictly required to work with `sparklyr` in R, it will make you much more productive and therefore, I would recommend you take the time to install RStudio from [rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/), then download and launch the installer for your platform: Windows, Macs or Linux.
 
@@ -52,7 +54,7 @@ knitr::include_graphics("images/starting-rstudio.png")
 
 After launching RStudio, identify the Console panel since this is where most of the code will be executed in this book. For additional learning resources on R and RStudio consider visiting: [rstudio.com/online-learning/](https://www.rstudio.com/online-learning/).
 
-### Install sparklyr
+### Install sparklyr {#starting-install-sparklyr}
 
 First of all, we would want to install `sparkylr`. As many other R packages, `sparklyr` is available in [CRAN](https://CRAN.R-project.org/package=sparklyr) and can be easily installed as follows:
 
@@ -67,7 +69,7 @@ install.packages("devtools")
 devtools::install_github("rstudio/sparklyr")
 ```
 
-## Installing Spark {#installing-spark}
+## Installing Spark {#starting-installing-spark}
 
 Start by loading `sparklyr`, 
 
@@ -107,7 +109,7 @@ Finally, in order to uninstall an specific version of Spark you can run `spark_u
 spark_uninstall(version = "2.3.1", hadoop = "2.7")
 ```
 
-## Connecting to Spark
+## Connecting to Spark {#starting-connect-to-spark}
 
 It's important to mention that, so far, we've only installed a local Spark cluster. A local cluster is really helpful to get started, test code and troubleshoot with ease; further chapters will explain where to find, install and connect to real Spark clusters with many machines; but for the first few chapters, we will focus on using local clusters.
 
@@ -119,7 +121,7 @@ sc <- spark_connect(master = "local")
 
 The `master` parameter helps `sparklyr` find which is the "main" machine from the Spark cluster, this machine is often call the driver node. While working with real clusters using many machines, most machines will be worker machines and one will be the master. Since we only have a local cluster with only one machine, we will default to use `"local"` for now.
 
-## Using Spark {#sparklyr-hello-world}
+## Using Spark {#starting-sparklyr-hello-world}
 
 Now that you are connected, we can run a few simple commands. For instance, let's start by loading some data into Apache Spark.
 
@@ -147,7 +149,7 @@ Let's explain what's going on in `spark_read_text()`. The first parameter, `sc`,
 
 We will now use this simple example to present various useful tools in Spark we should get familiar with.
 
-### Web Interface {#spark-web-interface}
+### Web Interface {#starting-spark-web-interface}
 
 Most of the Spark commands will get started from the R console; however, it is often the case that monitoring and analyzing execution is done through Sparks web interface. This interface is a web page provided by Spark which can be accessed from `sparklyr` by running:
 
@@ -182,9 +184,9 @@ knitr::include_graphics("images/starting-spark-web-storage.png")
 ```
 ![Apache Spark Web Interface - Storage Tab.](images/starting-spark-web-storage.png)
 
-The [caching](tunning-caching) section in the [tunning] chapter will cover this in detail, but as a start, it's worth noticing that this dataset is fully loaded into memory since the **fraction cached** is 100%, it is useful also to point out the **size in memory** column which tracks the total memory being used by this dataset.
+The [caching](#tunning-caching) section in the [tunning](#tunning) chapter will cover this in detail, but as a start, it's worth noticing that this dataset is fully loaded into memory since the **fraction cached** is 100%, it is useful also to point out the **size in memory** column which tracks the total memory being used by this dataset.
 
-### Logs
+### Logs {#starting-logs}
 
 Another common tool to use in Spark that you should familiarize with are the Spark logs. A log is just a text file where Spark will append information relevant to the execution of tasks in the cluster. For local clusters, we can retrieve all the logs by running:
 
@@ -212,7 +214,7 @@ spark_log(sc, filter = "sparklyr", n = 5)
 ## 18/10/09 18:53:27 INFO Executor: Adding file:/private/var/folders/ks/wm_bx4cn70s6h0r5vgqpsldm0000gn/T/spark-141b51a3-f277-4530-aa6a-69be176e0c0b/userFiles-3d94e32b-c65d-4081-a85e-d1e4716e0cef/sparklyr-2.3-2.11.jar to class loader
 ```
 
-## Disconnecting
+## Disconnecting {#starting-disconnecting}
 
 For local clusters and really, any cluster; once you are done processing data you should disconnect by running:
 
@@ -222,7 +224,7 @@ spark_disconnect(sc)
 
 this will terminate the connection to the cluster but also terminate the cluster tasks as well. If multiple Spark connections are active, or if the conneciton instance `sc` is no longer available, you can also disconnect all your Spark connections by running `spark_disconnect_all()`.
 
-## RStudio {#using-spark-from-rstudio}
+## RStudio {#starting-using-spark-from-rstudio}
 
 If you are not familiar with RStudio, you will want to identify at least the following panes:
 
@@ -255,13 +257,13 @@ Additionally, an active connection provides the following custom actions:
 
 - **Spark UI**: Opens the Spark web interface, a shortcut to `spark_ui(sc)`.
 - **Log**: Opens the Spark web logs, a shortcut to `spark_log(sc)`.
-- **SQL**: Opens a new SQL query, see `DBI` and SQL support in the data [analysis] chapter.
+- **SQL**: Opens a new SQL query, see `DBI` and SQL support in the data [analysis](#analysis) chapter.
 - **Help**: Opens the `sparklyr` reference documentation in a new web browser window.
 - **Disconnect**: Disconnects from Spark, a shortcut to `spark_disconnect(sc)`.
 
 The rest of this book will not cover any additional topics related to RStudio, whether you are using plain R from a terminal or the R console from RStudio, the code provided in this book executes in the same way across any R environment.
 
-## Troubleshooting
+## Troubleshooting {#starting-troubleshooting}
 
 While we've put significant effort to simplify the onboarding process, it is now a good time to give you additional resources that can help you troubleshoot particular issues while getting started and, in general, while working with Spark from R. We hope you will find the following resources helpful:
 
@@ -271,8 +273,8 @@ While we've put significant effort to simplify the onboarding process, it is now
 - **Github**: If you believe something needs to get fixed, open a GitHub issue or send us a pull request, [github.com/rstudio/sparklyr](https://github.com/rstudio/sparklyr).
 - **Gitter**: For urgent issues or to keep in touch you can chat with us in Gitter, [gitter.im/rstudio/sparklyr](https://gitter.im/rstudio/sparklyr).
 
-## Recap
+## Recap {#starting-recap}
 
 This chapter walked you through installing R, Java, RStudio and `sparklyr` as the main tools required to use Spark from R. We covered installing local Spark clusters using `spark_install()`, connecting using `spark_connect()` and learned how to launch the web interface and logs using `spark_web(sc)` and `spark_log(sc)` respectedly.
 
-It is my hope that this chapter will help anyone interested in learning cluster computing using Spark and R to get you started, ready to experiment on your own and ready to tackle actual data analysis and modeling tasks without any makor blockers. However, if you hit any installation or connection issues, start by browsing online for the error message or open a GitHub issue under [https://github.com/rstudio/sparklyr/issues](https://github.com/rstudio/sparklyr/issues) to help you get going.
+It is my hope that this chapter will help anyone interested in learning cluster computing using Spark and R getting started, ready to experiment on your own and ready to tackle actual data analysis and modeling tasks without any major blockers.
