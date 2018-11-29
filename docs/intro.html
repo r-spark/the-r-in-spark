@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2018-11-19">
+<meta name="date" content="2018-11-28">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -270,13 +270,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="8" data-path="tuning.html"><a href="tuning.html"><i class="fa fa-check"></i><b>8</b> Tuning</a><ul>
 <li class="chapter" data-level="8.1" data-path="tuning.html"><a href="tuning.html#overview-5"><i class="fa fa-check"></i><b>8.1</b> Overview</a><ul>
-<li class="chapter" data-level="8.1.1" data-path="tuning.html"><a href="tuning.html#tunning-graph-vusualization"><i class="fa fa-check"></i><b>8.1.1</b> Graph Visualization</a></li>
+<li class="chapter" data-level="8.1.1" data-path="tuning.html"><a href="tuning.html#tunning-graph-visualization"><i class="fa fa-check"></i><b>8.1.1</b> Graph Visualization</a></li>
 <li class="chapter" data-level="8.1.2" data-path="tuning.html"><a href="tuning.html#tunning-event-timeline"><i class="fa fa-check"></i><b>8.1.2</b> Event Timeline</a></li>
 </ul></li>
 <li class="chapter" data-level="8.2" data-path="tuning.html"><a href="tuning.html#tunning-configuring"><i class="fa fa-check"></i><b>8.2</b> Configuring</a><ul>
 <li class="chapter" data-level="8.2.1" data-path="tuning.html"><a href="tuning.html#submit-settings"><i class="fa fa-check"></i><b>8.2.1</b> Submit Settings</a></li>
 <li class="chapter" data-level="8.2.2" data-path="tuning.html"><a href="tuning.html#runtime-settings"><i class="fa fa-check"></i><b>8.2.2</b> Runtime Settings</a></li>
-<li class="chapter" data-level="8.2.3" data-path="tuning.html"><a href="tuning.html#sparklyr-settings"><i class="fa fa-check"></i><b>8.2.3</b> Sparklyr Settings</a></li>
+<li class="chapter" data-level="8.2.3" data-path="tuning.html"><a href="tuning.html#sparklyr-settings"><i class="fa fa-check"></i><b>8.2.3</b> sparklyr Settings</a></li>
 </ul></li>
 <li class="chapter" data-level="8.3" data-path="tuning.html"><a href="tuning.html#tunning-partitioning"><i class="fa fa-check"></i><b>8.3</b> Partitioning</a><ul>
 <li class="chapter" data-level="8.3.1" data-path="tuning.html"><a href="tuning.html#implicit"><i class="fa fa-check"></i><b>8.3.1</b> Implicit</a></li>
@@ -394,14 +394,70 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p class="caption">Simple MapReduce Example.</p>
 </div>
 <p>Counting words is often the most basic MapReduce example, but it can be also used for much more sophisticated and interesting applications. For instance, MapReduce can be used to rank web pages in Google’s <strong>PageRank</strong> algorithm, which assigns ranks to web pages based on the count of hyperlinks linking to a web page and the rank of the page linking to it.</p>
-<p>After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as <strong>Hadoop</strong> with the Google File System implemented as the Hadoop File System, or <strong>HDFS</strong> for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations that made use of MapReduce beyond web data processing.</p>
+<p>After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as <strong>Hadoop</strong> with the Google File System implemented as the Hadoop File System, or <strong>HDFS</strong> for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations which enabled them to make use of MapReduce beyond web data processing.</p>
 <p>While Hadoop provided support to perform MapReduce operations over a distributed file system, it still required MapReduce operations to be written with code every time a data analysis was run. To improve over this tedious process, the <strong>Hive</strong> project released in 2008 by Facebook, brought Structured Query Language (<strong>SQL</strong>) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each MapReduce operation; instead, one could write generic data analysis statements in SQL that are much easier to understand and write.</p>
 </div>
 <div id="spark" class="section level2">
 <h2><span class="header-section-number">1.2</span> Spark</h2>
-<p>In 2009, the <strong>Apache Spark</strong> projects starts as a research project at the UC Berkeley AMPLab to improve over MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines and, by loading data in-memory which made operations much fasters than Hadoop’s on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the <a href="modeling.html#modeling">modeling</a> chapter, allowed Spark to run 10x faster than Hadoop by making use of in-memory datasets <span class="citation">(Zaharia et al. <a href="#ref-zaharia2010spark">2010</a>)</span>.</p>
-<p>However, it is a common misconception that Spark requires all data to be stored in-memory; while Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. In 2014, Spark won the record in large scale sorting, one was able <a href="https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html">sort 100TB of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23min using Spark</a>. In this benchmark, data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU’s cache to dramatically improve performance.</p>
-<p>Spark was released as an open source project in 2010, from its project website:</p>
+<p>In 2009, <strong>Apache Spark</strong> starts as a research project at the UC Berkeley’s AMPLab to improve over MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines and, by loading data in-memory which made operations much fasters than Hadoop’s on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the <a href="modeling.html#modeling">modeling</a> chapter, allowed Spark to run 10x faster than Hadoop by making use of in-memory datasets <span class="citation">(Zaharia et al. <a href="#ref-zaharia2010spark">2010</a>)</span>.</p>
+<div class="figure">
+<img src="images/intro-hadoop-spark-logistic-regression.png" alt="Logistic regression performance in Hadoop and Spark." />
+<p class="caption">Logistic regression performance in Hadoop and Spark.</p>
+</div>
+<p>While Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. For instance, Spark holds <a href="http://sortbenchmark.org/">records in large-scale sorting</a>, where data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU’s cache to dramatically improve performance. For comparison, one can <a href="https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html">sort 100TB of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23min using Spark</a>, it’s also the case that <a href="https://spark.apache.org/news/spark-wins-cloudsort-100tb-benchmark.html">Spark holds the record in the cloud sorting benchmark</a>, which makes Spark the most cost effective solution for large-scale sorting.</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Hadoop Record</th>
+<th>Spark Record</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Data Size</td>
+<td>102.5 TB</td>
+<td>100 TB</td>
+</tr>
+<tr class="even">
+<td>Elapsed Time</td>
+<td>72 mins</td>
+<td>23 mins</td>
+</tr>
+<tr class="odd">
+<td>Nodes</td>
+<td>2100</td>
+<td>206</td>
+</tr>
+<tr class="even">
+<td>Cores</td>
+<td>50400</td>
+<td>6592</td>
+</tr>
+<tr class="odd">
+<td>Disk</td>
+<td>3150 GB/s</td>
+<td>618 GB/s</td>
+</tr>
+<tr class="even">
+<td>Network</td>
+<td>10Gbps</td>
+<td>10Gbps</td>
+</tr>
+<tr class="odd">
+<td>Sort rate</td>
+<td>1.42 TB/min</td>
+<td>4.27 TB/min</td>
+</tr>
+<tr class="even">
+<td>Sort rate / node</td>
+<td>0.67 GB/min</td>
+<td>20.7 GB/min</td>
+</tr>
+</tbody>
+</table>
+<p>In 2010, Spark was released as an open source project and then donated to the Apache Software Foundation in 2013. Spark is licensed under the <a href="https://en.wikipedia.org/wiki/Apache_License">Apache 2.0</a>, which allows you to freely use, modify, and distribute it. In 2015, Spark reaches more than 1000 contributors, making it one of the most active projects in the Apache Software Foundation.</p>
+<p>This gives an overview of how Spark came to be, which we can now use to formally introduce Apache Spark as follows:</p>
 <blockquote>
 <p>“Apache Spark is a fast and general engine for large-scale data processing.”</p>
 <p>— <a href="http://spark.apache.org/">spark.apache.org</a></p>

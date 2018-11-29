@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2018-11-19">
+<meta name="date" content="2018-11-28">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -270,13 +270,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="8" data-path="tuning.html"><a href="tuning.html"><i class="fa fa-check"></i><b>8</b> Tuning</a><ul>
 <li class="chapter" data-level="8.1" data-path="tuning.html"><a href="tuning.html#overview-5"><i class="fa fa-check"></i><b>8.1</b> Overview</a><ul>
-<li class="chapter" data-level="8.1.1" data-path="tuning.html"><a href="tuning.html#tunning-graph-vusualization"><i class="fa fa-check"></i><b>8.1.1</b> Graph Visualization</a></li>
+<li class="chapter" data-level="8.1.1" data-path="tuning.html"><a href="tuning.html#tunning-graph-visualization"><i class="fa fa-check"></i><b>8.1.1</b> Graph Visualization</a></li>
 <li class="chapter" data-level="8.1.2" data-path="tuning.html"><a href="tuning.html#tunning-event-timeline"><i class="fa fa-check"></i><b>8.1.2</b> Event Timeline</a></li>
 </ul></li>
 <li class="chapter" data-level="8.2" data-path="tuning.html"><a href="tuning.html#tunning-configuring"><i class="fa fa-check"></i><b>8.2</b> Configuring</a><ul>
 <li class="chapter" data-level="8.2.1" data-path="tuning.html"><a href="tuning.html#submit-settings"><i class="fa fa-check"></i><b>8.2.1</b> Submit Settings</a></li>
 <li class="chapter" data-level="8.2.2" data-path="tuning.html"><a href="tuning.html#runtime-settings"><i class="fa fa-check"></i><b>8.2.2</b> Runtime Settings</a></li>
-<li class="chapter" data-level="8.2.3" data-path="tuning.html"><a href="tuning.html#sparklyr-settings"><i class="fa fa-check"></i><b>8.2.3</b> Sparklyr Settings</a></li>
+<li class="chapter" data-level="8.2.3" data-path="tuning.html"><a href="tuning.html#sparklyr-settings"><i class="fa fa-check"></i><b>8.2.3</b> sparklyr Settings</a></li>
 </ul></li>
 <li class="chapter" data-level="8.3" data-path="tuning.html"><a href="tuning.html#tunning-partitioning"><i class="fa fa-check"></i><b>8.3</b> Partitioning</a><ul>
 <li class="chapter" data-level="8.3.1" data-path="tuning.html"><a href="tuning.html#implicit"><i class="fa fa-check"></i><b>8.3.1</b> Implicit</a></li>
@@ -381,9 +381,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">10.1</span> Use Cases</h2>
 <div id="embarrassingly-parallel" class="section level3">
 <h3><span class="header-section-number">10.1.1</span> Embarrassingly Parallel</h3>
-<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb116-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, total_executors, <span class="dt">repartition =</span> total_executors) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb116-2" data-line-number="2"><span class="st">  </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">pi =</span> <span class="fl">3.1416</span>), <span class="dt">columns =</span> <span class="kw">c</span>(<span class="dt">pi =</span> <span class="st">&quot;character&quot;</span>)) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb116-3" data-line-number="3"><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">mean =</span> <span class="kw">mean</span>(pi))</a></code></pre></div>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb117-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, total_executors, <span class="dt">repartition =</span> total_executors) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb117-2" data-line-number="2"><span class="st">  </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">pi =</span> <span class="fl">3.1416</span>), <span class="dt">columns =</span> <span class="kw">c</span>(<span class="dt">pi =</span> <span class="st">&quot;character&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb117-3" data-line-number="3"><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">mean =</span> <span class="kw">mean</span>(pi))</a></code></pre></div>
 </div>
 </div>
 <div id="columns" class="section level2">
@@ -393,10 +393,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="excplicit" class="section level3">
 <h3><span class="header-section-number">10.2.2</span> Excplicit</h3>
-<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb117-1" data-line-number="1">iris_tbl &lt;-<span class="st"> </span><span class="kw">spark_apply</span>(</a>
-<a class="sourceLine" id="cb117-2" data-line-number="2">  I,</a>
-<a class="sourceLine" id="cb117-3" data-line-number="3">  <span class="dt">columns =</span> <span class="kw">lapply</span>(iris, class)</a>
-<a class="sourceLine" id="cb117-4" data-line-number="4">)</a></code></pre></div>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb118-1" data-line-number="1">iris_tbl &lt;-<span class="st"> </span><span class="kw">spark_apply</span>(</a>
+<a class="sourceLine" id="cb118-2" data-line-number="2">  I,</a>
+<a class="sourceLine" id="cb118-3" data-line-number="3">  <span class="dt">columns =</span> <span class="kw">lapply</span>(iris, class)</a>
+<a class="sourceLine" id="cb118-4" data-line-number="4">)</a></code></pre></div>
 </div>
 </div>
 <div id="grouping" class="section level2">
@@ -412,14 +412,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">10.6</span> Troubleshooting</h2>
 <div id="tips" class="section level3">
 <h3><span class="header-section-number">10.6.1</span> Tips</h3>
-<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb118-1" data-line-number="1">odbc_logs <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="cf">function</span>(df) {</a>
-<a class="sourceLine" id="cb118-2" data-line-number="2">    <span class="kw">tryCatch</span>({</a>
-<a class="sourceLine" id="cb118-3" data-line-number="3">        webreadr<span class="op">::</span><span class="kw">read_s3</span>(df[[<span class="dv">1</span>]])</a>
-<a class="sourceLine" id="cb118-4" data-line-number="4">        <span class="st">&quot;&quot;</span></a>
-<a class="sourceLine" id="cb118-5" data-line-number="5">    }, <span class="dt">error =</span> <span class="cf">function</span>(e) {</a>
-<a class="sourceLine" id="cb118-6" data-line-number="6">        e<span class="op">$</span>message</a>
-<a class="sourceLine" id="cb118-7" data-line-number="7">    })</a>
-<a class="sourceLine" id="cb118-8" data-line-number="8">})</a></code></pre></div>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb119-1" data-line-number="1">odbc_logs <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="cf">function</span>(df) {</a>
+<a class="sourceLine" id="cb119-2" data-line-number="2">    <span class="kw">tryCatch</span>({</a>
+<a class="sourceLine" id="cb119-3" data-line-number="3">        webreadr<span class="op">::</span><span class="kw">read_s3</span>(df[[<span class="dv">1</span>]])</a>
+<a class="sourceLine" id="cb119-4" data-line-number="4">        <span class="st">&quot;&quot;</span></a>
+<a class="sourceLine" id="cb119-5" data-line-number="5">    }, <span class="dt">error =</span> <span class="cf">function</span>(e) {</a>
+<a class="sourceLine" id="cb119-6" data-line-number="6">        e<span class="op">$</span>message</a>
+<a class="sourceLine" id="cb119-7" data-line-number="7">    })</a>
+<a class="sourceLine" id="cb119-8" data-line-number="8">})</a></code></pre></div>
 </div>
 <div id="logs-1" class="section level3">
 <h3><span class="header-section-number">10.6.2</span> Logs</h3>
@@ -427,17 +427,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="debugging" class="section level3">
 <h3><span class="header-section-number">10.6.3</span> Debugging</h3>
 <p>If a particular partition fails, you can detect the broken partition by computing a digest, and then retrieving that particular partition as follows:</p>
-<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb119-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, <span class="dv">3</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="cf">function</span>(x) {</a>
-<a class="sourceLine" id="cb119-2" data-line-number="2">    <span class="kw">worker_log</span>(<span class="st">&quot;processing &quot;</span>, digest<span class="op">::</span><span class="kw">digest</span>(x), <span class="st">&quot; partition&quot;</span>)</a>
-<a class="sourceLine" id="cb119-3" data-line-number="3">    <span class="co"># your code</span></a>
-<a class="sourceLine" id="cb119-4" data-line-number="4">})</a></code></pre></div>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb120-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, <span class="dv">3</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb120-2" data-line-number="2">    <span class="kw">worker_log</span>(<span class="st">&quot;processing &quot;</span>, digest<span class="op">::</span><span class="kw">digest</span>(x), <span class="st">&quot; partition&quot;</span>)</a>
+<a class="sourceLine" id="cb120-3" data-line-number="3">    <span class="co"># your code</span></a>
+<a class="sourceLine" id="cb120-4" data-line-number="4">})</a></code></pre></div>
 <p>This will add an entry similar to:</p>
 <pre><code>18/11/03 14:48:32 INFO sparklyr: RScript (2566) processing f35b1c321df0162e3f914adfb70b5416 partition </code></pre>
 <p>When executing this in your cluster, you will have to look in the logs for the task that is not finishing, once you have that digest, you can cancel the job.</p>
 <p>Then you can use that digest to retrieve that specific data frame to R with something like:</p>
-<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb121-1" data-line-number="1">broken_partition &lt;-<span class="st"> </span><span class="kw">sdf_len</span>(sc, <span class="dv">3</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="cf">function</span>(x) {</a>
-<a class="sourceLine" id="cb121-2" data-line-number="2">    <span class="cf">if</span> (<span class="kw">identical</span>(digest<span class="op">::</span><span class="kw">digest</span>(x), <span class="st">&quot;f35b1c321df0162e3f914adfb70b5416&quot;</span>)) x <span class="cf">else</span> x[<span class="dv">0</span>,]</a>
-<a class="sourceLine" id="cb121-3" data-line-number="3">}) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb122-1" data-line-number="1">broken_partition &lt;-<span class="st"> </span><span class="kw">sdf_len</span>(sc, <span class="dv">3</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb122-2" data-line-number="2">    <span class="cf">if</span> (<span class="kw">identical</span>(digest<span class="op">::</span><span class="kw">digest</span>(x), <span class="st">&quot;f35b1c321df0162e3f914adfb70b5416&quot;</span>)) x <span class="cf">else</span> x[<span class="dv">0</span>,]</a>
+<a class="sourceLine" id="cb122-3" data-line-number="3">}) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>()</a></code></pre></div>
 <p>WHich you can then run in R to troubleshoot further.</p>
 
 </div>
