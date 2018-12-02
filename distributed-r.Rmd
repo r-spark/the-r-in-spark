@@ -1,5 +1,3 @@
-# (PART) Advanced {-}
-
 # Distributed R {#distributed}
 
 While **this chatper has not been written.**, use [spark.rstudio.com/guides/distributed-r](http://spark.rstudio.com/guides/distributed-r/) to learn how to use R directly over each worker node.
@@ -28,6 +26,56 @@ iris_tbl <- spark_apply(
 ```
 
 ## Grouping
+
+```{r eval=FALSE}
+sdf_len(sc, 10, repartition = 1) %>%
+  transmute(groups = floor(id / 2)) %>%
+  spark_apply(~nrow(.x))
+```
+
+```
+# Source: spark<?> [?? x 1]
+  result
+*  <int>
+1      5
+2      5
+```
+
+```{r eval=FALSE}
+sdf_len(sc, 10, repartition = 1) %>%
+  transmute(groups = floor(id / 2)) %>%
+  sdf_repartition(partition_by = "groups") %>%
+  spark_apply(~nrow(.x))
+```
+```
+# Source: spark<?> [?? x 1]
+  result
+*  <int>
+1      4
+2      1
+3      4
+4      1
+```
+
+```{r eval=FALSE}
+sdf_len(sc, 10, repartition = 1) %>%
+  transmute(groups = floor(id / 2)) %>%
+  sdf_repartition(partition_by = "groups") %>%
+  spark_apply(~nrow(.x), group_by = "groups")
+```
+```
+# Source: spark<?> [?? x 2]
+  groups result
+*  <dbl>  <int>
+1      1      2
+2      2      2
+3      5      1
+4      3      2
+5      4      2
+6      0      1
+```
+
+Notice that `spark_apply()` does not repartition data automatically, so optimizing how data is repartitioned mus be considered using `sdf_repartition()`.
 
 ## Packages
 
