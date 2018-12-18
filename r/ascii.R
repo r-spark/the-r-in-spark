@@ -1,17 +1,3 @@
-ascii_add_references <- function(lines, references) {
-  fixed <- c()
-  for (line in lines) {
-    if (line %in% names(references)) {
-      fixed <- c(
-        fixed,
-        paste0("[[", references[[line]], "]]")
-      )
-    }
-    fixed <- c(fixed, line)
-  }
-
-  fixed
-}
 
 ascii_add_footnotes <- function(line, books_bib) {
   if (grepl("\\[@[a-zA-Z\\-]+\\]", line)) {
@@ -28,6 +14,21 @@ ascii_add_footnotes <- function(line, books_bib) {
     )
 
     gsub("\n", " ", line)
+  }
+
+  line
+}
+
+ascii_add_image_captions <- function(line) {
+  if (grepl("^image:images.*", line)) {
+    parts <- regmatches(line, regexec("^image:images[^\\[]+\\[([^\\]+)\\].*", line))[[1]]
+    image_caption <- gsub("\n", " ", parts[2])
+
+    line <- paste0(
+      "[[", gsub("[^a-zA-Z]+", "_", image_caption), "]]\n",
+      ".", image_caption, "\n",
+      gsub("image:images", "image::images", line)
+    )
   }
 
   line

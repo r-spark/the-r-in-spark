@@ -12,12 +12,6 @@ chapters <- list(
 )
 chapters_pattern <- paste(chapters, collapse = "|")
 
-references <- list(
-  "Worlds Store Capacity" = "storage-capacity",
-  "Daily downloads of CRAN packages" = "cran-downloads",
-  "Google trends for mainframes, cloud computing and kubernetes" = "cluster-trends"
-)
-
 for (chapter_file in dir(pattern = paste0(chapters_pattern, ".Rmd"))) {
   chapter_name <- tools::file_path_sans_ext(basename(chapter_file))
 
@@ -25,6 +19,7 @@ for (chapter_file in dir(pattern = paste0(chapters_pattern, ".Rmd"))) {
   rmarkdown::pandoc_convert(
     input = normalizePath(paste0("mds/", chapter_name, ".md")),
     to = "asciidoc",
+    options = c("--columns=120"),
     output = file.path("../ascii", paste0(chapter_name, ".asciidoc"))
   )
 
@@ -42,11 +37,10 @@ books_bib <- bibtex::read.bib("book.bib")
 for (file in files) {
   lines <- readLines(file)
 
-  lines <- ascii_add_references(lines, references)
-
   fixed <- c()
   for (line in lines) {
     line <- ascii_add_footnotes(line, books_bib)
+    line <- ascii_add_image_captions(line)
     fixed <- c(fixed, line)
   }
 
