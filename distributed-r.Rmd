@@ -124,24 +124,27 @@ sdf_len(sc, 3, repartition = 3) %>%
 
 ## Restrictions
 
-## Troubleshooting
 
-### Tips
+### Troubleshooting
+
+There are a couple common troubleshooting techniquest in `spark_apply()` 
+
+#### Worker Logs
+
+#### Worker Error
 
 ```{r eval=FALSE}
-odbc_logs %>% head() %>% spark_apply(function(df) {
+sdf_len(sc, 1) %>% spark_apply(function(df) {
     tryCatch({
-        webreadr::read_s3(df[[1]])
-        ""
+        stop("an error")
     }, error = function(e) {
         e$message
     })
 })
 ```
 
-### Logs
 
-### Debugging
+#### Worker Partitions
 
 If a particular partition fails, you can detect the broken partition by computing a digest, and then retrieving that particular partition as follows:
 
@@ -169,3 +172,12 @@ broken_partition <- sdf_len(sc, 3) %>% spark_apply(function(x) {
 ```
 
 WHich you can then run in R to troubleshoot further.
+
+#### Worker Debugger
+
+```{r eval=FALSE}
+  stop("Error!")
+}, debug = TRUE)
+```
+
+

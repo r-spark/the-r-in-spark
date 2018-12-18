@@ -1,11 +1,11 @@
-// !preview r2d3 data=read.csv("data/05-cluster-trends.csv") %>% mutate(month = as.Date(paste(month, "-01", sep = "")))
+// !preview r2d3 data=read.csv("data/clusters-trends.csv") %>% mutate(month = as.Date(paste(month, "-01", sep = "")))
 
 function drawAll(width, height, animate) {
   var scaleX = d3.scaleTime()
     .domain([new Date(2004, 1, 1), new Date(2018, 6, 1)])
     .range([0, width]);
 
-  var axisHeight = 20;
+  var axisHeight = height / 20;
   var axisX = d3.axisBottom(scaleX)
     .ticks(10);
 
@@ -21,7 +21,11 @@ function drawAll(width, height, animate) {
     .call(axisX);
 
   svg.selectAll(".domain").attr("stroke", theme.foreground);
-  svg.selectAll(".tick text").attr("fill", theme.foreground);
+
+  svg.selectAll(".tick text")
+    .attr("fill", theme.foreground)
+    .attr("font-size", (axisHeight / 20) + "em");
+
   svg.selectAll(".tick line").attr("stroke", theme.foreground);
 
   var lines = svg.append("g");
@@ -53,7 +57,7 @@ function drawAll(width, height, animate) {
     var text = lines
       .data([data])
       .datum(function(d) { return d[d.length - 1]; })
-      .attr("font-size", Math.min(width / 900, 0.8) + "em")
+      .attr("font-size", Math.min(width / 900, 1.6) + "em")
       .attr("font-family", "sans-serif")
       .attr("class", "chart-line");
 

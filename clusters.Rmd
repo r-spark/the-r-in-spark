@@ -10,7 +10,7 @@ If you don't have a cluster or are considering improvements to your existing inf
 
 There are three major trends in cluster computing worth discussing: **on-premise**, **cloud computing** and **kubernetes**. Framing these trends over time will help us understand how they came to be, what they are and what their future might be:
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Google trends for on-premise (mainframe), cloud computing and kubernetes.'}
+```{r eval=FALSE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Google trends for on-premise (mainframe), cloud computing and kubernetes.'}
 library(dplyr)
 library(r2d3)
 
@@ -18,6 +18,7 @@ read.csv("data/clusters-trends.csv") %>%
   mutate(month = as.Date(paste(month, "-01", sep = ""))) %>%
   r2d3(script="images/clusters-trends.js")
 ```
+![Google trends for on-premise (mainframe), cloud computing and kubernetes.](images/clusters-trends.png)
 
 For **on-premise** clusters, someone, either yourself or someone in your organization purchased physical computers that were intended to be used for cluster computing. The computers in this cluster are made of _off-the-shelf_ hardware, meaning that someone placed an order to purchase computers usually found in stores shelves or, _high-performance_ hardware, meaning that a computing vendor provided highly customized computing hardware which also comes optimized for high-performance network connectivity, power consumption, etc. When purchasing hundreds or thousands of computing instances, it doesn't make sense to keep them in the usual computing case that we are all familiar with, but rather, it makes sense to stack them as efficient as possible on top of each other to minimize room space. This group of efficiently stacked computing instances is known as a [rack](https://en.wikipedia.org/wiki/Rack_unit). Once a cluster grows to thousands of computers, you will also need to host hundreds of racks of computing devices, at this scale, you would also need significant physical space to hosts those racks. A building that provides racks of computing instances is usually known as a _data-center_. At the scale of a data center, optimizing the building that holds them, their heating system, power supply, network connectivity, etc. becomes also relevant to optimize. In 2011, Facebook [announced](https://code.facebook.com/posts/187637061409082/building-efficient-data-centers-with-the-open-compute-project/) the [Open Compute Project](http://www.opencompute.org/) initiative which provides a set of data center blueprints free for anyone to use.
 
