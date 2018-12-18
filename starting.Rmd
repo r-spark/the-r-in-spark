@@ -1,10 +1,8 @@
 # Getting Started {#starting}
 
-From R, getting started with Spark using a local cluster is as easy as running:
+From R, getting started with Spark using `sparklyr` and a local cluster is as easy as running:
 
 ```{r eval=FALSE}
-library(sparklyr)
-
 spark_install()
 sc <- spark_connect(master = "local")
 ```
@@ -19,13 +17,13 @@ sc <- spark_connect(master = "<cluster-master>")
 
 ## Prerequisites {#starting-prerequisites}
 
-As briefly mentioned in the [Introduction](#intro) chapter, R is a programming language that can run in many platforms and environments. Most people making use of a programming language also choose tools to make them more productive in it; for R, RStudio would be such tool. Strictly speaking, RStudio is an Integrated Development Environment or IDE for short, which also happens to support many platforms and environments. R and RStudio are the free software tools this book will make use of and therefore, I strongly recommend you get those installed if you haven't done so already. 
+As briefly mentioned in the [introduction](#intro) chapter, R is a programming language that can run in many platforms and environments. Most people making use of a programming language also choose tools to make them more productive in it; for R, RStudio would be such tool. Strictly speaking, RStudio is an Integrated Development Environment or IDE for short, which also happens to support many platforms and environments. R and RStudio are the free software tools this book will make use of and therefore, I strongly recommend you get those installed if you haven't done so already. 
 
-Additionally, since Spark is build in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java 8 in your system. It is likely that your system already has Java installed, but you should still check the version and update if needed as described in the [Install Java](#starting-install-java) section.
+Additionally, since Spark is build in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java in your system. It is likely that your system already has Java installed, but you should still check the version and update if needed as described in the [Install Java](#starting-install-java) section.
 
 ### Install R {#starting-install-r}
 
-From [r-project.org](https://r-project.org/), download and launch the installer for your platform, Windows, Macs or Linux available.
+From [r-project.org](https://r-project.org/), download and launch the R installer for your platform, Windows, Macs or Linux available.
 
 ```{r r-download, eval=FALSE, echo=FALSE, fig.width = 4, fig.align = 'center', fig.cap='The R Project for Statistical Computing.'}
 knitr::include_graphics("images/starting-download-r.png")
@@ -34,40 +32,48 @@ knitr::include_graphics("images/starting-download-r.png")
 
 ### Install Java {#starting-install-java}
 
-From [oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html), download and launch the installer for your platform, Windows, Macs or Linux available. While installing the JRE (Java Runtime Environment) is sufficient for most operations, in order to build extensions you will need the JDK (Java Developer Kit); therefore, I rather recommend installing the JDK in the first place.
+From [java.com/download](https://java.com/download), download and launch the installer for your platform, Windows, Macs or Linux are also available.
 
 ```{r java-download, eval=FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Java Download.'}
-knitr::include_graphics("images/starting-jdk-8.png")
+knitr::include_graphics("images/starting-download-java.png")
 ```
-![Java Download.](images/starting-jdk-8.png)
+![Java Download.](images/starting-download-java.png)
 
-Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java 8 as described in this chapter
+Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java 8.
 
 ### Install RStudio {#starting-install-rstudio}
 
-While installing RStudio is not strictly required to work with `sparklyr` in R, it will make you much more productive and therefore, I would recommend you take the time to install RStudio from [rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/), then download and launch the installer for your platform: Windows, Macs or Linux.
+While installing RStudio is not strictly required to work with `sparklyr` in R, it will make you much more productive and therefore, I would recommend you take the time to install RStudio from [rstudio.com/download](https://www.rstudio.com/download), then download and launch the installer for your platform: Windows, Macs or Linux.
 
 ```{r rstudio-download, eval=FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='RStudio Downloads.'}
 knitr::include_graphics("images/starting-rstudio.png")
 ```
 ![RStudio Downloads.](images/starting-rstudio.png)
 
-After launching RStudio, identify the Console panel since this is where most of the code will be executed in this book. For additional learning resources on R and RStudio consider visiting: [rstudio.com/online-learning/](https://www.rstudio.com/online-learning/).
+After launching RStudio, you can use RStudio's console panel to execute the code provided in this chapter.
 
 ### Install sparklyr {#starting-install-sparklyr}
 
-First of all, we would want to install `sparkylr`. As many other R packages, `sparklyr` is available in [CRAN](https://CRAN.R-project.org/package=sparklyr) and can be easily installed as follows:
+As many other R packages, `sparkylr` is available to be installed from [CRAN](https://CRAN.R-project.org/package=sparklyr) and can be easily installed as follows:
 
 ```{r eval=FALSE}
 install.packages("sparklyr")
 ```
 
-The CRAN release of `sparklyr` contains the most stable version and it's the recommended version to use; however, for those that need or might want to try newer features being developed in `sparklyr` you can install directly from GitHub using the `devtools` package. First install the `devtools` package and then `sparklyr` as follows:
+The CRAN release of `sparklyr` contains the most stable version and it's the recommended version to use; however, to try out features being developed in `sparklyr`, you can install directly from GitHub using the `devtools` package. First, install the `devtools` package and then install `sparklyr` as follows:
 
 ```{r eval=FALSE}
 install.packages("devtools")
 devtools::install_github("rstudio/sparklyr")
 ```
+
+The `sparklyr` GitHub repository contains all the latest features,issues and project updates; it's the place where `sparklyr` is actevely developed and a resource that is helpful while troubleshooting issues.
+
+```{r rstudio-sparklyr-github, eval=FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='GitHub Repository for sparklyr.'}
+knitr::include_graphics("images/starting-sparklyr-github.png")
+```
+
+![The sparklyr GitHub code repository.](images/starting-sparklyr-github.png)
 
 ## Installing Spark {#starting-installing-spark}
 
@@ -91,7 +97,11 @@ All the versions of Spark that are available for installation can be displayed w
 spark_available_versions()
 ```
 
-A specific version can be installed using the Spark version and, optionally, by also specifying the Hadoop version. For instance, to install Spark 1.6.3, we would run `spark_install("1.6.3")`.
+A specific version can be installed using the Spark version and, optionally, by also specifying the Hadoop version. For instance, to install Spark 1.6.3, we would run:
+
+```{r eval=FALSE}
+spark_install(version = "1.6.3")
+```
 
 You can also check which versions are installed by running:
 
@@ -102,6 +112,8 @@ spark_installed_versions()
   spark hadoop                              dir
 7 2.3.1    2.7 /spark/spark-2.3.1-bin-hadoop2.7
 ```
+
+The path where Spark is installed is referenced as Spark's home, which is defined in R code and system configuration settings with the `SPARK_HOME` identifier. When using a local Spark cluster installed with `sparklyr`, this path is already known and no additional configuration needs to take place.
 
 Finally, in order to uninstall an specific version of Spark you can run `spark_uninstall()` by specifying the Spark and Hadoop versions, for instance:
 
@@ -151,7 +163,7 @@ We will now use this simple example to present various useful tools in Spark we 
 
 ### Web Interface {#starting-spark-web-interface}
 
-Most of the Spark commands will get started from the R console; however, it is often the case that monitoring and analyzing execution is done through Sparks web interface. This interface is a web page provided by Spark which can be accessed from `sparklyr` by running:
+Most of the Spark commands will get started from the R console; however, it is often the case that monitoring and analyzing execution is done through Spark's web interface. This interface is a web page provided by Spark which can be accessed from `sparklyr` by running:
 
 ```{r eval=FALSE}
 spark_web(sc)
@@ -161,7 +173,8 @@ spark_web(sc)
 invisible(webshot::webshot(
   "http://localhost:4040/",
   "images/starting-spark-web.png",
-  cliprect = c(0, 0, 992, 600)
+  cliprect = c(0, 0, 992, 600),
+  zoom = 2
 ))
 ```
 ```{r spark-web, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Apache Spark Web Interface.'}
@@ -176,7 +189,8 @@ As mentioned, printing the "hello" dataset collected a few records to be display
 invisible(webshot::webshot(
   "http://localhost:4040/storage/",
   "images/starting-spark-web-storage.png",
-  cliprect = c(0, 0, 992, 300)
+  cliprect = c(0, 0, 992, 300),
+  zoom = 2
 ))
 ```
 ```{r spark-web-storage, eval=FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Apache Spark Web Interface - Storage Tab.'}
@@ -222,7 +236,13 @@ For local clusters and really, any cluster; once you are done processing data yo
 spark_disconnect(sc)
 ```
 
-this will terminate the connection to the cluster but also terminate the cluster tasks as well. If multiple Spark connections are active, or if the conneciton instance `sc` is no longer available, you can also disconnect all your Spark connections by running `spark_disconnect_all()`.
+This will terminate the connection to the cluster but also terminate the cluster tasks as well. If multiple Spark connections are active, or if the conneciton instance `sc` is no longer available, you can also disconnect all your Spark connections by running:
+
+```{r eval=FALSE}
+spark_disconnect_all()
+```
+
+Notice that exiting R, RStudio or restarting your R session will also cause the Spark connection to terminate, which in turn terminates the Spark cluster and cached data that is not explicitly persisted.
 
 ## RStudio {#starting-using-spark-from-rstudio}
 
@@ -268,7 +288,7 @@ The rest of this book will not cover any additional topics related to RStudio, w
 While we've put significant effort to simplify the onboarding process, it is now a good time to give you additional resources that can help you troubleshoot particular issues while getting started and, in general, while working with Spark from R. We hope you will find the following resources helpful:
 
 - **Documentation**: This should be your entry point to learn more about sparklyr, the documentation is kept up to date with examples, reference functions and many more relevant resources, [spark.rstudio.com](https://spark.rstudio.com).
-- **RStudio Community**: For general `sparklyr` questions, you can post then in the RStudio Community tagged as `sparklyr`, [https://community.rstudio.com/tags/sparklyr](https://community.rstudio.com/tags/sparklyr).
+- **RStudio Community**: For general `sparklyr` questions, you can post then in the RStudio Community tagged as `sparklyr`, [community.rstudio.com/tags/sparklyr](https://community.rstudio.com/tags/sparklyr).
 - **Stack Overflow**: For general Spark questions, Stack Overflow is the good start, [stackoverflow.com/questions/tagged/apache-spark](https://stackoverflow.com/questions/tagged/apache-spark).
 - **Github**: If you believe something needs to get fixed, open a GitHub issue or send us a pull request, [github.com/rstudio/sparklyr](https://github.com/rstudio/sparklyr).
 - **Gitter**: For urgent issues or to keep in touch you can chat with us in Gitter, [gitter.im/rstudio/sparklyr](https://gitter.im/rstudio/sparklyr).
