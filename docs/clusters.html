@@ -391,11 +391,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="clusters-standalone" class="section level3">
 <h3><span class="header-section-number">5.2.1</span> Standalone</h3>
 <p>In <strong>Spark Standalone</strong>, Spark works on it’s own without additional software requirements since it provides it’s own cluster manager as part of the Spark installation.</p>
-<div class="figure" style="text-align: center"><span id="fig:spark-standalone"></span>
-<img src="images/clusters-spark-standalone.png" alt="Spark Standalone Site." width="496" />
-<p class="caption">
-FIGURE 5.1: Spark Standalone Site.
-</p>
+<div class="figure">
+<img src="images/clusters-spark-standalone.png" alt="Spark Standalone Site." />
+<p class="caption">Spark Standalone Site.</p>
 </div>
 <p>By completing the <a href="starting.html#starting">getting started</a> chapter, you should have a local Spark installation available, which we can use to initialize a local standalone Spark cluster. First, retrieve the <code>SPARK_HOME</code> directory by running <code>sparklyr::spark_home_dir()</code> from R and then, from a terminal or R, use <code>start-master.sh</code> and <code>start-slave.sh</code> as follows:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># Retrieve the Spark installation directory</span></a>
@@ -413,18 +411,14 @@ FIGURE 5.1: Spark Standalone Site.
 <a class="sourceLine" id="cb1-13" data-line-number="13"><span class="co"># Execute start-slave.sh to start a worker and register in master node</span></a>
 <a class="sourceLine" id="cb1-14" data-line-number="14"><span class="kw">system2</span>(start_slave, <span class="kw">paste0</span>(<span class="st">&quot;spark://&quot;</span>, <span class="kw">system2</span>(<span class="st">&quot;hostname&quot;</span>, <span class="dt">stdout =</span> <span class="ot">TRUE</span>), <span class="st">&quot;:7077&quot;</span>))</a></code></pre></div>
 <p>The previous command initialized the master node and a worker node, the master node interface can be accessed under <a href="http://localhost:8080">localhost:8080</a> and looks like the following:</p>
-<div class="figure" style="text-align: center"><span id="fig:spark-standalone-web-ui"></span>
-<img src="images/clusters-spark-standalone-web-ui.png" alt="Spark Standalone Web Interface." width="496" />
-<p class="caption">
-FIGURE 5.2: Spark Standalone Web Interface.
-</p>
+<div class="figure">
+<img src="images/clusters-spark-standalone-web-ui.png" alt="Spark Standalone Web Interface." />
+<p class="caption">Spark Standalone Web Interface.</p>
 </div>
 <p>Notice that there is one worker register in Spark standalone, you can follow the link to this worker node to see additional information:</p>
-<div class="figure" style="text-align: center"><span id="fig:spark-standalone-web-ui-worker"></span>
-<img src="images/clusters-spark-standalone-web-ui-worker.png" alt="Spark Standalone Worker Web Interface." width="496" />
-<p class="caption">
-FIGURE 5.3: Spark Standalone Worker Web Interface.
-</p>
+<div class="figure">
+<img src="images/clusters-spark-standalone-web-ui-worker.png" alt="Spark Standalone Worker Web Interface." />
+<p class="caption">Spark Standalone Worker Web Interface.</p>
 </div>
 <p>Once data analysis is complete, one can simply stop all the running nodes in this local cluster by running:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">stop_all &lt;-<span class="st"> </span><span class="kw">file.path</span>(spark_home, <span class="st">&quot;sbin&quot;</span>, <span class="st">&quot;stop-all.sh&quot;</span>)</a>
@@ -436,33 +430,27 @@ FIGURE 5.3: Spark Standalone Worker Web Interface.
 <h3><span class="header-section-number">5.2.2</span> Yarn</h3>
 <p>YARN for short, or Hadoop YARN, is the resource manager introduced in 2012 to the Hadoop project. As mentioned in in the <a href="#introduction">introduction</a> chapter, Spark was built initially to speed up computation over Hadoop; then, when Hadoop 2 was launched, it introduced YARN as a component to manage resources in the cluster, to this date, using Hadoop YARN with Apache Spark is still very common.</p>
 <p>YARN applications can be submitted in two modes: <strong>yarn-client</strong> and <strong>yarn-cluster</strong>. In yarn-cluster mode the driver is running remotely, while in yarn-client mode, the driver is on the machine that started the job, <code>sparklyr</code> supports both modes.</p>
-<div class="figure" style="text-align: center"><span id="fig:hadoop-yarn"></span>
-<img src="images/clusters-yarn.png" alt="Hadoop YARN Site" width="992" />
-<p class="caption">
-FIGURE 5.4: Hadoop YARN Site
-</p>
+<div class="figure">
+<img src="images/clusters-yarn.png" alt="Hadoop YARN Site." />
+<p class="caption">Hadoop YARN Site.</p>
 </div>
 <p>Further reading: <a href="https://spark.apache.org/docs/latest/running-on-yarn.html">Running Spark on YARN</a></p>
 </div>
 <div id="mesos" class="section level3">
 <h3><span class="header-section-number">5.2.3</span> Mesos</h3>
 <p>Apache Mesos is an open-source project to manage computer clusters. Mesos began as a research project in the UC Berkeley RAD Lab by then PhD students Benjamin Hindman, Andy Konwinski, and Matei Zaharia, as well as professor Ion Stoica. Mesos uses Linux <a href="https://en.wikipedia.org/wiki/Cgroups">Cgroups</a> to provide isolation for CPU, memory, I/O and file system.</p>
-<div class="figure" style="text-align: center"><span id="fig:mesos-spark"></span>
-<img src="images/clusters-mesos.png" alt="Mesos Landing Site" width="992" />
-<p class="caption">
-FIGURE 5.5: Mesos Landing Site
-</p>
+<div class="figure">
+<img src="images/clusters-mesos.png" alt="Mesos Landing Site." />
+<p class="caption">Mesos Landing Site.</p>
 </div>
 <p>Further reading: <a href="https://spark.apache.org/docs/latest/running-on-mesos.html">Running Spark on Mesos</a></p>
 </div>
 <div id="kubernetes" class="section level3">
 <h3><span class="header-section-number">5.2.4</span> Kubernetes</h3>
 <p>Kubernetes is an open-source container-orchestration system for automating deployment, scaling and management of containerized applications that was originally designed by Google and now maintained by the <a href="https://www.cncf.io/">Cloud Native Computing Foundation</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:kubernetes-spark"></span>
-<img src="images/clusters-kubernetes.png" alt="Kubernetes Landing Site." width="992" />
-<p class="caption">
-FIGURE 5.6: Kubernetes Landing Site.
-</p>
+<div class="figure">
+<img src="images/clusters-kubernetes.png" alt="Kubernetes Landing Site." />
+<p class="caption">Kubernetes Landing Site.</p>
 </div>
 <p>Further reading: <a href="https://spark.apache.org/docs/latest/running-on-kubernetes.html">Running Spark on Kubernetes</a></p>
 </div>
@@ -475,31 +463,25 @@ FIGURE 5.6: Kubernetes Landing Site.
 <h3><span class="header-section-number">5.3.1</span> Cloudera</h3>
 <p>Cloudera, Inc. is a United States-based software company that provides Apache Hadoop and Apache Spark-based software, support and services, and training to business customers.</p>
 <p>Cloudera’s hybrid open-source Apache Hadoop distribution, CDH (Cloudera Distribution Including Apache Hadoop), targets enterprise-class deployments of that technology. Cloudera says that more than 50% of its engineering output is donated upstream to the various Apache-licensed open source projects (Apache Hive, Apache Avro, Apache HBase, and so on) that combine to form the Apache Hadoop platform. Cloudera is also a sponsor of the Apache Software Foundation.</p>
-<div class="figure" style="text-align: center"><span id="fig:cloudera-spark"></span>
-<img src="images/clusters-cloudera.png" alt="Cloudera Landing Site." width="992" />
-<p class="caption">
-FIGURE 5.7: Cloudera Landing Site.
-</p>
+<div class="figure">
+<img src="images/clusters-cloudera.png" alt="Cloudera Landing Site." />
+<p class="caption">Cloudera Landing Site.</p>
 </div>
 </div>
 <div id="hortonworks" class="section level3">
 <h3><span class="header-section-number">5.3.2</span> Hortonworks</h3>
 <p>Hortonworks is a big data software company based in Santa Clara, California. The company develops, supports, and provides expertise on an expansive set of entirely open source software designed to manage data and processing for everything from IOT, to advanced analytics and machine learning. Hortonworks believes it is a data management company bridging the cloud and the datacenter.</p>
-<div class="figure" style="text-align: center"><span id="fig:hortonworks-spark"></span>
-<img src="images/clusters-hortonworks.png" alt="Hortonworks Landing Site." width="992" />
-<p class="caption">
-FIGURE 5.8: Hortonworks Landing Site.
-</p>
+<div class="figure">
+<img src="images/clusters-hortonworks.png" alt="Hortonworks Landing Site." />
+<p class="caption">Hortonworks Landing Site.</p>
 </div>
 </div>
 <div id="mapr" class="section level3">
 <h3><span class="header-section-number">5.3.3</span> MapR</h3>
 <p>MapR is a business software company headquartered in Santa Clara, California. MapR provides access to a variety of data sources from a single computer cluster, including big data workloads such as Apache Hadoop and Apache Spark, a distributed file system, a multi-model database management system, and event stream processing, combining analytics in real-time with operational applications. Its technology runs on both commodity hardware and public cloud computing services.</p>
-<div class="figure" style="text-align: center"><span id="fig:mapr-spark"></span>
-<img src="images/clusters-mapr.png" alt="MapR Landing Site." width="992" />
-<p class="caption">
-FIGURE 5.9: MapR Landing Site.
-</p>
+<div class="figure">
+<img src="images/clusters-mapr.png" alt="MapR Landing Site." />
+<p class="caption">MapR Landing Site.</p>
 </div>
 </div>
 </div>
@@ -511,51 +493,41 @@ FIGURE 5.9: MapR Landing Site.
 <div id="amazon" class="section level3">
 <h3><span class="header-section-number">5.4.1</span> Amazon</h3>
 <p>Amazon provides cloud services through <a href="https://aws.amazon.com/">Amazon Web Services</a>; more specifically, they provide an on-demand Spark cluster through <a href="https://aws.amazon.com/emr/">Amazon Elastic MapReduce</a> or EMR for short.</p>
-<div class="figure" style="text-align: center"><span id="fig:amazon-emr"></span>
-<img src="images/clusters-amazon-emr.png" alt="Amazon EMR Landing Site." width="992" />
-<p class="caption">
-FIGURE 5.10: Amazon EMR Landing Site.
-</p>
+<div class="figure">
+<img src="images/clusters-amazon-emr.png" alt="Amazon EMR Landing Site." />
+<p class="caption">Amazon EMR Landing Site.</p>
 </div>
 </div>
 <div id="databricks" class="section level3">
 <h3><span class="header-section-number">5.4.2</span> Databricks</h3>
 <p><a href="http://databricks.com">Databricks</a> is a company founded by the creators of Apache Spark, that aims to help clients with cloud-based big data processing using Spark. Databricks grew out of the <a href="https://amplab.cs.berkeley.edu/">AMPLab</a> project at University of California, Berkeley.</p>
-<div class="figure" style="text-align: center"><span id="fig:databricks"></span>
-<img src="images/clusters-databricks.png" alt="Databricks Landing Site." width="992" />
-<p class="caption">
-FIGURE 5.11: Databricks Landing Site.
-</p>
+<div class="figure">
+<img src="images/clusters-databricks.png" alt="Databricks Landing Site." />
+<p class="caption">Databricks Landing Site.</p>
 </div>
 </div>
 <div id="google" class="section level3">
 <h3><span class="header-section-number">5.4.3</span> Google</h3>
 <p>Google provides their on-demand computing services through their <a href="https://cloud.google.com/">Google Cloud</a>, on-demand Spark cluster are provided by <a href="https://cloud.google.com/dataproc/">Google Dataproc</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:google-dataproc"></span>
-<img src="images/clusters-dataproc.png" alt="Google Dataprox Landing Site." width="992" />
-<p class="caption">
-FIGURE 5.12: Google Dataprox Landing Site.
-</p>
+<div class="figure">
+<img src="images/clusters-dataproc.png" alt="Google Dataprox Landing Site." />
+<p class="caption">Google Dataprox Landing Site.</p>
 </div>
 </div>
 <div id="ibm" class="section level3">
 <h3><span class="header-section-number">5.4.4</span> IBM</h3>
 <p>IBM provides cloud services through <a href="https://www.ibm.com/cloud">IBM Cloud</a>, it supports several programming languages and services, including <a href="https://www.ibm.com/cloud/spark">Apache Spark</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:ibm"></span>
-<img src="images/clusters-ibm.png" alt="IBM Landing Site." width="992" />
-<p class="caption">
-FIGURE 5.13: IBM Landing Site.
-</p>
+<div class="figure">
+<img src="images/clusters-ibm.png" alt="IBM Landing Site." />
+<p class="caption">IBM Landing Site.</p>
 </div>
 </div>
 <div id="microsoft" class="section level3">
 <h3><span class="header-section-number">5.4.5</span> Microsoft</h3>
 <p>Microsoft provides cloud services through <a href="https://azure.microsoft.com/">Microsoft Azure</a> and Spark clusters through <a href="https://azure.microsoft.com/en-us/services/hdinsight/">Azure HDInsight</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:azure-hdinsight"></span>
-<img src="images/clusters-azure.png" alt="Azure HDInsight Landing Site."  />
-<p class="caption">
-FIGURE 5.14: Azure HDInsight Landing Site.
-</p>
+<div class="figure">
+<img src="images/clusters-azure.png" alt="Azure HDInsight Landing Site." />
+<p class="caption">Azure HDInsight Landing Site.</p>
 </div>
 </div>
 </div>
@@ -565,21 +537,17 @@ FIGURE 5.14: Azure HDInsight Landing Site.
 <div id="rstudio" class="section level3">
 <h3><span class="header-section-number">5.5.1</span> RStudio</h3>
 <p>RStudio’s open source and professional products, like: RStudio Server, <a href="https://www.rstudio.com/products/rstudio-server-pro/">RStudio Server Pro</a>, <a href="https://www.rstudio.com/products/shiny/">Shiny Server</a>, <a href="https://www.rstudio.com/products/shiny-server-pro/">Shiny Server Pro</a>, or <a href="https://www.rstudio.com/products/connect/">RStudio Connect</a>; can be installed within the cluster to support many R workflows, while <code>sparklyr</code> does not require any additional tools, they provide significant productivity gains worth considering.</p>
-<div class="figure" style="text-align: center"><span id="fig:rstudio-server"></span>
-<img src="images/clusters-rstudio-server.png" alt="RStudio Server" width="496" />
-<p class="caption">
-FIGURE 5.15: RStudio Server
-</p>
+<div class="figure">
+<img src="images/clusters-server.png" alt="RStudio Server." />
+<p class="caption">RStudio Server.</p>
 </div>
 </div>
 <div id="jupyter" class="section level3">
 <h3><span class="header-section-number">5.5.2</span> Jupyter</h3>
 <p>Project <a href="http://jupyter.org/">Jupyter</a> exists to develop open-source software, open-standards, and services for interactive computing across dozens of programming languages.</p>
-<div class="figure" style="text-align: center"><span id="fig:jupyter-project"></span>
-<img src="images/clusters-jupyter.png" alt="Project Jupyter" width="992" />
-<p class="caption">
-FIGURE 5.16: Project Jupyter
-</p>
+<div class="figure">
+<img src="images/clusters-jupyter.png" alt="Project Jupyter." />
+<p class="caption">Project Jupyter.</p>
 </div>
 <p>Their notebooks, provide support for various programming languages, including R. <code>sparklyr</code> can be used with Jupyter notebooks using the R Kernel.</p>
 </div>
@@ -587,11 +555,9 @@ FIGURE 5.16: Project Jupyter
 <h3><span class="header-section-number">5.5.3</span> Livy</h3>
 <p><a href="https://livy.incubator.apache.org/">Apache Livy</a> is an incubation project in Apache providing support to use Spark clusters remotely through a web interface. It is ideal to connect directly into the Spark cluster; however, there are times where connecting directly to the cluster is not feasible. When facing those constraints, one can consider installing Livy in their cluster and secure it properly to enable remote use over web protocols.</p>
 <p>However, there is a significant performance overhead from using Livy in <code>sparklyr</code> for experimentation, meaning that, executing many client comamnds over Livy has a significant overhead; however, running a few commands to generate complex analysis is usually performant since the performance overhead of starting computation can be insignificant compared to the actual cluster computation.</p>
-<div class="figure" style="text-align: center"><span id="fig:apache-livy"></span>
-<img src="images/clusters-apache-livy.png" alt="Apache Livy Landing Site." width="992" />
-<p class="caption">
-FIGURE 5.17: Apache Livy Landing Site.
-</p>
+<div class="figure">
+<img src="images/clusters-apache-livy.png" alt="Apache Livy Landing Site." />
+<p class="caption">Apache Livy Landing Site.</p>
 </div>
 <p>To help test Livy locally, <code>sparklyr</code> provides support to list, install, start and stop a local Livy instance by executing:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># List versions of Livy available to install</span></a>
