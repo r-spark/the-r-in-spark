@@ -7,6 +7,7 @@ chapters <- list(
   "preface",
   "intro",
   "starting",
+  "clusters",
   "appendix"
 )
 chapters_pattern <- paste(chapters, collapse = "|")
