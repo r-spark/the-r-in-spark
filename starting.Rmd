@@ -43,7 +43,7 @@ Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark
 
 ### Install RStudio {#starting-install-rstudio}
 
-While installing RStudio is not strictly required to work with `sparklyr` in R, it will make you much more productive and therefore, I would recommend you take the time to install RStudio from [rstudio.com/download](https://www.rstudio.com/download), then download and launch the installer for your platform: Windows, Macs or Linux.
+While installing RStudio is not strictly required to work with Spark with R, it will make you much more productive and therefore, I would recommend you take the time to install RStudio from [rstudio.com/download](https://www.rstudio.com/download), then download and launch the installer for your platform: Windows, Macs or Linux.
 
 ```{r rstudio-download, eval=FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='RStudio Downloads.'}
 knitr::include_graphics("images/starting-rstudio.png")
@@ -131,7 +131,7 @@ Threfore, to connect to this local cluster we simply run:
 sc <- spark_connect(master = "local")
 ```
 
-The `master` parameter helps `sparklyr` find which is the "main" machine from the Spark cluster, this machine is often call the driver node. While working with real clusters using many machines, most machines will be worker machines and one will be the master. Since we only have a local cluster with only one machine, we will default to use `"local"` for now.
+The `master` parameter identifies which is the "main" machine from the Spark cluster, this machine is often call the driver node. While working with real clusters using many machines, most machines will be worker machines and one will be the master. Since we only have a local cluster with only one machine, we will default to use `"local"` for now.
 
 ## Using Spark {#starting-sparklyr-hello-world}
 
@@ -157,13 +157,13 @@ spark_read_text(sc, "hello", "hello.txt")
 
 **Congrats!** You have successfully connected and loaded your first dataset into Spark.
 
-Let's explain what's going on in `spark_read_text()`. The first parameter, `sc`, gives the function a reference to the active Spark Connection that was earlier created with `spark_connect()`. The second parameter names this dataset in Spark. The third parameter specifies a path to the file to load into Spark. Now, `spark_read_text()` returns a reference to the dataset in Spark which R automatically prints. Whenever a Spark dataset is printed, `sparklyr` will **collect** some of the records and display them for you. In this particular case, that dataset contains just one row for the line: `Hello World!`.
+Let's explain what's going on in `spark_read_text()`. The first parameter, `sc`, gives the function a reference to the active Spark Connection that was earlier created with `spark_connect()`. The second parameter names this dataset in Spark. The third parameter specifies a path to the file to load into Spark. Now, `spark_read_text()` returns a reference to the dataset in Spark which R automatically prints. Whenever a Spark dataset is printed, Spark will **collect** some of the records and display them for you. In this particular case, that dataset contains just one row for the line: `Hello World!`.
 
 We will now use this simple example to present various useful tools in Spark we should get familiar with.
 
 ### Web Interface {#starting-spark-web-interface}
 
-Most of the Spark commands will get started from the R console; however, it is often the case that monitoring and analyzing execution is done through Spark's web interface. This interface is a web page provided by Spark which can be accessed from `sparklyr` by running:
+Most of the Spark commands will get started from the R console; however, it is often the case that monitoring and analyzing execution is done through Spark's web interface. This interface is a web page provided by Spark which can be accessed by running:
 
 ```{r eval=FALSE}
 spark_web(sc)
@@ -278,7 +278,7 @@ Additionally, an active connection provides the following custom actions:
 - **Spark UI**: Opens the Spark web interface, a shortcut to `spark_ui(sc)`.
 - **Log**: Opens the Spark web logs, a shortcut to `spark_log(sc)`.
 - **SQL**: Opens a new SQL query, see `DBI` and SQL support in the data [analysis](#analysis) chapter.
-- **Help**: Opens the `sparklyr` reference documentation in a new web browser window.
+- **Help**: Opens the reference documentation in a new web browser window.
 - **Disconnect**: Disconnects from Spark, a shortcut to `spark_disconnect(sc)`.
 
 The rest of this book will not cover any additional topics related to RStudio, whether you are using plain R from a terminal or the R console from RStudio, the code provided in this book executes in the same way across any R environment.
@@ -287,7 +287,7 @@ The rest of this book will not cover any additional topics related to RStudio, w
 
 While we've put significant effort to simplify the onboarding process, it is now a good time to give you additional resources that can help you troubleshoot particular issues while getting started and, in general, while working with Spark from R. We hope you will find the following resources helpful:
 
-- **Documentation**: This should be your entry point to learn more about sparklyr, the documentation is kept up to date with examples, reference functions and many more relevant resources, [spark.rstudio.com](https://spark.rstudio.com).
+- **Documentation**: This should be your entry point to learn more about Spark when using R, the documentation is kept up to date with examples, reference functions and many more relevant resources, [spark.rstudio.com](https://spark.rstudio.com).
 - **RStudio Community**: For general `sparklyr` questions, you can post then in the RStudio Community tagged as `sparklyr`, [community.rstudio.com/tags/sparklyr](https://community.rstudio.com/tags/sparklyr).
 - **Stack Overflow**: For general Spark questions, Stack Overflow is the good start, [stackoverflow.com/questions/tagged/apache-spark](https://stackoverflow.com/questions/tagged/apache-spark).
 - **Github**: If you believe something needs to get fixed, open a GitHub issue or send us a pull request, [github.com/rstudio/sparklyr](https://github.com/rstudio/sparklyr).
