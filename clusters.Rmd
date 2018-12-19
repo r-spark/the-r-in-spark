@@ -1,10 +1,8 @@
 # Clusters {#clusters}
 
-Previous chapters focused on using Spark over a single computing instance, your personal computer. In this chapter we will introduce techniques to run Spark over multiple computing instances, also known as a computing cluster, to analyze and model data at scale.
+Previous chapters focused on using Spark over a single computing instance, your personal computer. In this chapter we will introduce techniques to run Spark over multiple computing instances, also known as a computing cluster, to analyze and model data at scale. This chapter and subsequent ones will introduce and make use of concepts applicable to computing clusters; however, it's not required to use a computing cluster to follow code examples, using a local cluster is still reasonable. It's worth mentioning that while previous chapters focused on single computing instances, all the data analysis and modeling techniques can also be used in computing clusters.
 
-If you already have a Spark cluster in your organization, you could consider skipping to the next chapter, [connections](#connections), which will teach you how to connect to an existing cluster.
-
-If you don't have a cluster or are considering improvements to your existing infrastructure, this chapter will introduce the cluster trends, managers and providers available today.
+For those of you already have a Spark cluster in your organization, you could consider skipping to the next chapter, [connections](#connections), which will teach you how to connect to an existing cluster. Otherwise, if you don't have a cluster or are considering improvements to your existing infrastructure, this chapter will introduce the cluster trends, managers and providers available today.
 
 ## Overview {#clusters-overview}
 
@@ -108,7 +106,7 @@ system2(stop_all)
 
 A similar approach can be followed to configure a cluster by running each `start-slave.sh` command over each machine in the cluster.
 
-**Note:** When running on a Mac, you might hit `ssh: connect to host localhost port 22: Connection refused` and would require to manually turn off the workers using `system2("jps")` to list the running Java process and then, `system2("kill", c("-9", "<process id>"))` to stop the specific workers.
+**Note:** When running on a Mac, if you hit: `ssh: connect to host localhost port 22: Connection refused`, you will need to manually turn off the workers using `system2("jps")` to list the running Java process and then, `system2("kill", c("-9", "<process id>"))` to stop the specific workers.
 
 ### Yarn
 
@@ -129,7 +127,7 @@ knitr::include_graphics("images/clusters-yarn.png")
 
 Apache Mesos is an open-source project to manage computer clusters. Mesos began as a research project in the UC Berkeley RAD Lab by then PhD students Benjamin Hindman, Andy Konwinski, Matei Zaharia and Ion Stoica. Mesos uses Linux [Cgroups](https://en.wikipedia.org/wiki/Cgroups) to provide isolation for CPU, memory, I/O and file system.
 
-Mesos, like YARN, supports executing many cluster frameworks, including Spark. However, one advantage particular to Mesos is that, it allows custom schedulers implemented over each cluster framework rather than having a central scheduler that can't be optimized for each particular framework. This means that Spark can optimize how resources are allocated which makes it ideal for executing many types of Spark jobs, from very short ones to very lengthy ones; therefore, connecting to a Spark cluster running Mesos will be faster and resource utilization is likely to be more efficient.
+Mesos, like YARN, supports executing many cluster frameworks, including Spark. However, one advantage particular to Mesos is that, it allows cluster framework like Spark to implement custom schedulers instead of having to rely on a central scheduler that is not optimized for each particular framework. Spark uses a coarse-grined scheduler[@spark-mesos-run-modes] which does not take advantage of all the fine-grained capabilities of Mesos; however, other computing frameworks might make use of them.
 
 Mesos is also an Apache project with its documentaiton available under [mesos.apache.org](https://mesos.apache.org/), the "Running Spark on Mesos" guide from [spark.apache.org](https://spark.apache.org/docs/latest/running-on-mesos.html) is a great resource if you choose to use Mesos as your cluster manager.
 
@@ -159,14 +157,14 @@ One can use a cluster manager in on-premise clusters as described in the previou
 
 ### Cloudera
 
-Cloudera, Inc. is a United States-based software company that provides Apache Hadoop and Apache Spark-based software, support and services, and training to business customers.
+Cloudera, Inc. is a United States-based software company that provides Apache Hadoop and Apache Spark-based software, support and services, and training to business customers. Cloudera's hybrid open-source Apache Hadoop distribution, CDH (Cloudera Distribution Including Apache Hadoop), targets enterprise-class deployments of that technology. Cloudera says that more than 50% of its engineering output is donated upstream to the various Apache-licensed open source projects (Apache Hive, Apache Avro, Apache HBase, and so on) that combine to form the Apache Hadoop platform. Cloudera is also a sponsor of the Apache Software Foundation[@cloudera-wikipedia].
 
-Cloudera's hybrid open-source Apache Hadoop distribution, CDH (Cloudera Distribution Including Apache Hadoop), targets enterprise-class deployments of that technology. Cloudera says that more than 50% of its engineering output is donated upstream to the various Apache-licensed open source projects (Apache Hive, Apache Avro, Apache HBase, and so on) that combine to form the Apache Hadoop platform. Cloudera is also a sponsor of the Apache Software Foundation.
+Cloudera clusters make use of **parcels** which are, binary distributions containing the program files and metadata[@cloudera-parcel], Spark happens to be installed as a parcel in cloduera. It's beyond the scope of this book to present how to configure Cloudera clusters, resources and documentation can be found under [cloudera.com](https://www.cloudera.com/products/open-source/apache-hadoop/apache-spark.html).
 
 ```{r cloudera-spark, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Cloudera Landing Site.'}
 knitr::include_graphics("images/clusters-cloudera.png")
 ```
-![Cloudera Landing Site.](images/clusters-cloudera.png)
+![Cloudera's Spark Landing Site](images/clusters-cloudera.png)
 
 ### Hortonworks
 
