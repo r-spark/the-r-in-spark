@@ -65,11 +65,12 @@ system2(start_slave, paste0("spark://", system2("hostname", stdout = TRUE), ":70
 The previous command initialized the master node and a worker node, the master node interface can be accessed under [localhost:8080](http://localhost:8080) and looks like the following:
 
 ```{r eval=FALSE, echo=FALSE}
-Sys.sleep(10)
 invisible(webshot::webshot(
   "http://localhost:8080/",
   "images/clusters-spark-standalone-web-ui.png",
-  cliprect = "viewport"
+  cliprect = "viewport",
+  vheight = 744 * 0.7,
+  zoom = 2
 ))
 ```
 
@@ -84,10 +85,11 @@ Notice that there is one worker register in Spark standalone, you can follow the
 invisible(webshot::webshot(
   "http://localhost:8081/",
   "images/clusters-spark-standalone-web-ui-worker.png",
-  cliprect = "viewport"
+  cliprect = "viewport",
+  vheight = 744 * 0.4,
+  zoom = 2
 ))
 ```
-
 
 ```{r spark-standalone-web-ui-worker, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Spark Standalone Worker Web Interface.'}
 knitr::include_graphics("images/clusters-spark-standalone-web-ui-worker.png")
@@ -105,6 +107,8 @@ system2(stop_all)
 ```
 
 A similar approach can be followed to configure a cluster by running each `start-slave.sh` command over each machine in the cluster.
+
+**Note:** When running on a Mac, you might hit `ssh: connect to host localhost port 22: Connection refused` and would require to manually turn off the workers using `system2("jps")` to list the running Java process and then, `system2("kill", c("-9", "<process id>"))` to stop the specific workers.
 
 ### Yarn
 
