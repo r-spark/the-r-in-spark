@@ -1,8 +1,8 @@
 # Connections {#connections}
 
-The previous chapter, [Clusters], presented the major cluster computing paradigms, cluster managers and cluster providers; this section explains the internal components of a Spark cluster and the how to perform connections to any cluster running Apache Spark.
+The previous chapter, [Clusters](#clusters), presented the major cluster computing paradigms, cluster managers and cluster providers; this section explains the internal components of a Spark cluster and the how to perform connections to any cluster running Apache Spark.
 
-## Overview
+## Overview {#connections-overview}
 
 Before explaining how to connect to Spark clusters, it is worth discussing the components of a Spark cluster and how they interact, this is often known as the cluster architecture of Apache Spark.
 
@@ -26,9 +26,9 @@ connection_diagram <- function(name) {
 connection_diagram("06-connections-architecture.js")
 ```
 
-If you already have an Spark cluster in their organization, you should ask your cluster administrator to provide connection information for this cluster and read carefully their usage policies and constraints. A cluster is usually shared among many users so you want to be respectful of others time and resources while using a shared cluster environment. Your system administrator will describe if it's an **on-premise** vs **cloud** cluster, the **cluster manager** being used, supported **connections** and supported **tools**. You can use this information to jump directly to [Local], [Standalone], [Yarn], [Mesos], [Livy] or [Kubernetes] based on the information provided to you.
+If you already have an Spark cluster in their organization, you should ask your cluster administrator to provide connection information for this cluster and read carefully their usage policies and constraints. A cluster is usually shared among many users so you want to be respectful of others time and resources while using a shared cluster environment. Your system administrator will describe if it's an **on-premise** vs **cloud** cluster, the **cluster manager** being used, supported **connections** and supported **tools**. You can use this information to jump directly to [Local](#connections-local), [Standalone](#connections-standalone), [YARN](#connections-yarn), [Mesos](#connections-mesos), [Livy](#connections-livy) or [Kubernetes](#connections-kubernetes) based on the information provided to you.
 
-### Edge Nodes
+### Edge Nodes {#connections-edge-nodes}
 
 Before connecting to Apache Spark, you will first have to connect to the cluster. Usually, by connecting to an edge node within the cluster. An edge node, is a machine that can accessed from outside the cluster but which is also part of the cluster. There are two methods to connect to this edge instance:
 
@@ -49,7 +49,7 @@ connection_diagram <- function(name) {
 connection_diagram("06-connections-cluster-clients.js")
 ```
 
-### Spark Home
+### Spark Home {#connections-spark-home}
 
 It is important to mention that, while connecting to a Spark cluster, you will need to find out the correct `SPARK_HOME` path which contains the installation of Spark in the given instance. The `SPARK_HOME` path must be set as an environment variable before connecting or explicitly specified in `spark_connect()` using the `spark_home` parameter.
 
@@ -63,7 +63,7 @@ Where `cluster-master` is set to the correct cluster manager master for [Spark S
 
 ## Types
 
-### Local {#connection-local}
+### Local {#connections-local}
 
 When connecting to Spark in local mode, Spark starts as a single application simulating a cluster with a single node, this is not a proper computing cluster but is ideal to perform work offline and troubleshoot issues. A local connection to Spark is represented in the following diagram:
 
@@ -87,7 +87,7 @@ By default, `sparklyr`, will connect using as many CPU cores are available in yo
 sc <- spark_connect(master = "local[2]")
 ```
 
-### Standalone
+### Standalone {#connections-standalone}
 
 Connecting to a Spark Standalone cluster requires the location of the cluster manager's master instance, this location can be found in the cluster manager web interface as described in the [clusters-standalone](standalone cluster) section, you can find this location by looking for a URL starting with `spark://`.
 
@@ -103,11 +103,11 @@ In order to connect, use `master="spark://hostname:port"` in `spark_connect()` a
 sc <- spark_connect(master = "spark://hostname:port")
 ```
 
-### Yarn
+### Yarn {#connections-yarn}
 
 Hadoop YARN supports two connection modes: YARN Client and YARN Cluster. However, YARN Client mode is much more common that YARN Cluster since it's more efficient and easier to set up.
 
-#### Yarn Client
+#### Yarn Client {#connections-yarn-client}
 
 When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as follows:
 
@@ -123,7 +123,7 @@ sc <- spark_connect(master = "yarn-client")
 
 Once connected, you can use all techniques described in previous chapters using the `sc` connection; for instances, you can do [data analysis](analysis) or [modeling].
 
-#### Yarn Cluster
+#### Yarn Cluster {#connections-yarn-cluster}
 
 The main difference between YARN Cluster mode and YARN Client mode is that in YARN Cluster mode, the driver node is not required to be the node where R and sparklyr get started; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using YARN Cluster when the edge node has too many concurrent users, is lacking computing resources or where tools (like RStudio) need to be managed independently of other clsuter resources.
 
@@ -139,7 +139,7 @@ sc <- spark_connect(master = "yarn-cluster")
 
 This connection assumes that the node running `spark_connect()` is properly configured, meaning that, `yarn-site.xml` exists and the `YARN_CONF_DIR` environment variable is properly set. When using Hadoop as a file system, one would also need the `HADOOP_CONF_DIR` environment variable properly configured. This configuration is usually provided by your system administrator and is not something that you would have to manually configure.
 
-### Livy
+### Livy {#connections-livy}
 
 As opposed to other connection methods which require using an edge node in the cluster, [Livy](clusters-livy) Livy provides a **Web API** that makes the Spark cluster accessible from outside the cluster and neither requires a local installation in the client. Once connected through the Web API, the **Livy Service** starts the Spark context by requesting reosurces from the cluster manager and distributing work as usual.
 
@@ -158,7 +158,7 @@ sc <- spark_connect(master = "https://hostname:port/livy", method = "livy", conf
 
 Once connected through Livy, operations you can make use of an other `sparklyr` feature; however, Livy is not suitable for experimental data analysis, since executing commands have a significant delay; that said, while running long running computations, this overhead could be considered irrelevant. In general, it is preffered to avoid using Livy and work directly within an edge node in the cluster; if this is not feasible, using Livy could be a reasonable approach.
 
-### Mesos
+### Mesos {#connections-mesos}
 
 Similar to YARN, Mesos supports client mode and a cluster mode. However, `sparklyr` currently only supports client mode for Mesos.
 
@@ -172,7 +172,7 @@ Connecting requires the address to the Mesos master node, usually in the form of
 sc <- spark_connect(master = "mesos://host:port")
 ```
 
-### Kubernetes
+### Kubernetes {#connections-kubernetes}
 
 Kubernetes cluster do not support client modes similar to Mesos or YARN, instead, the connection model is similar to YARN Cluster, where the driver node is assigned by Kubernetes.
 
@@ -204,7 +204,7 @@ system2("kubectl", "cluster-info")
 
 One first step is to troubleshoot connections is to run in verbose to print directly to the console additional error messages:
 
-```{r}
+```{r eval=FALSE}
 sc <- spark_connect(master = "local", log = "console")
 ```
 
