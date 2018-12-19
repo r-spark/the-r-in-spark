@@ -44,6 +44,8 @@ for (file in files) {
     fixed <- c(fixed, line)
   }
 
+  fixed <- ascii_add_notes(fixed)
+
   writeLines(fixed, file)
 }
 
