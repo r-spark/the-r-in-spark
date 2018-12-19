@@ -49,7 +49,7 @@ ascii_add_notes <- function(lines) {
 
     note_type <- regmatches(replacement, regexec("Note|Tip|Warning", replacement))[[1]]
 
-    all_lines <- paste0(start, "[", toupper(note_type), "]\n===", gsub("\\*(Note|Tip|Warning):\\* +", "", replacement), "===\n", end)
+    all_lines <- paste0(start, "[", toupper(note_type), "]\n====", gsub("\\*(Note|Tip|Warning):\\* +", "", replacement), "====\n", end)
   }
 
   strsplit(all_lines, "\n")[[1]]
