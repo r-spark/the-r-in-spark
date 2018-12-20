@@ -204,14 +204,38 @@ One can also use a cloud provider to acquire bare computing resources and then, 
 
 The major providers of cloud computing infrastructure are: Amazon, Databricks, Google, IBM and Microsoft that this section will briefly introduce.
 
-### Amazon
+### Amazon {#clusters-amazon-emr}
 
-Amazon provides cloud services through [Amazon Web Services](https://aws.amazon.com/); more specifically, they provide an on-demand Spark cluster through [Amazon Elastic MapReduce](https://aws.amazon.com/emr/) or EMR for short.
+Amazon provides cloud services through [Amazon Web Services](https://aws.amazon.com/); more specifically, provides an on-demand Spark cluster through [Amazon Elastic MapReduce](https://aws.amazon.com/emr/) or EMR for short.
 
 ```{r amazon-emr, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Amazon EMR Landing Site.'}
 knitr::include_graphics("images/clusters-amazon-emr.png")
 ```
 ![Amazon EMR Landing Site.](images/clusters-amazon-emr.png)
+
+Using the [Amazon Command Line Interface](https://aws.amazon.com/cli/), you can launch a cluster with 3 nodes as follows:
+
+```{bash eval=FALSE}
+aws emr create-cluster --applications Name=Hadoop Name=Spark Name=Hive --release-label emr-5.8.0 --service-role EMR_DefaultRole --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.2xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.2xlarge --bootstrap-action Path=s3://aws-bigdata-blog/artifacts/aws-blog-emr-rstudio-sparklyr/rstudio_sparklyr_emr5.sh,Args=["--user-pw","<password>","--arrow"] --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole
+```
+
+You can then see the cluster launching, and eventually running, under the AWS portal:
+
+![Launching an Amazon EMR Cluster.](images/clusters-amazon-emr-launching.png)
+
+You can then navigate to the "Master Public DNS" under port 8787, for instance: http://ec2-12-34-567-890.us-west-1.compute.amazonaws.com:8787, and login with user `hadoop` and password `<password>`.
+
+To launch a cluster using the web interface, reffer to ["Running sparklyr from the AWS Big Data Blog"](https://aws.amazon.com/blogs/big-data/running-sparklyr-rstudios-r-interface-to-spark-on-amazon-emr/)[@amazon-emr-sparklyr-blog]. 
+
+Please remember to turn off your cluster to avoid unnecesary charges and use appropriate security restrictions when starting EMR clusters for sensitive data analysis.
+
+Regarding cost, the most up to date information can be found under [aws.amazon.com/emr/pricing](https://aws.amazon.com/emr/pricing/). As of this writting, these are some of the instance types available in the `us-west-1` region:
+
+| Instance   | CPUs | Memory | Storage | EC2 Price | EMR Price | Total         |
+|------------|------|--------|---------|-----------|-----------|---------------|
+| c1.medium  | 2    | 2GB    | 350GB   | $0.148/hr | $0.030/hr | $0.178 USD/hr |
+| m3.2xlarge | 8    | 30GB   | 160GB   | $0.616/hr | $0.140/hr | $0.756 USD/hr |
+| i2.8xlarge | 32   | 244GB  | 6400GB  | $7.502/hr | $0.270/hr | $7.772 USD/hr |
 
 ### Databricks
 
