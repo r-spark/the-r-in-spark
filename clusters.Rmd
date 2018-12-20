@@ -166,7 +166,7 @@ knitr::include_graphics("images/clusters-cloudera.png")
 ```
 ![Cloudera's Spark Landing Site](images/clusters-cloudera.png)
 
-`sparklyr` is certified with Cloudera[@cloudera-sparklyr-certification], meaning that, Cloudera's support is aware of `sparklyr` and can be more effective helping organizations that are using Spark and R, the following table summarizes the versions currently certified.
+When `sparklyr` launched, the Cloudera Engineering Blog published ["Introducing sparklyr, an R Interface for Apache Spark"](https://blog.cloudera.com/blog/2016/09/introducing-sparklyr-an-r-interface-for-apache-spark/)[@cloudera-engineering-blog], then later on, `sparklyr` got certified with Cloudera[@cloudera-sparklyr-certification]; meaning that, Cloudera's support is aware of `sparklyr` and can be more effective helping organizations that are using Spark and R, the following table summarizes the versions currently certified.
 
 | Cloudera Version | Product   | Version | Components  | Kerberos |
 |------------------|-----------|---------|-------------|----------|
@@ -213,7 +213,7 @@ knitr::include_graphics("images/clusters-amazon-emr.png")
 ```
 ![Amazon EMR Landing Site.](images/clusters-amazon-emr.png)
 
-Using the [Amazon Command Line Interface](https://aws.amazon.com/cli/), you can launch a cluster with 3 nodes as follows:
+Amazon Web Services (or AWS for short), published in their Big Data Blog: ["Running sparklyr on Amazon EMR"](https://aws.amazon.com/blogs/big-data/running-sparklyr-rstudios-r-interface-to-spark-on-amazon-emr/)[@amazon-emr-sparklyr-blog], this post introduced the launch of `sparklyr` and instructions to configure EMR clusters with `sparklyr`. For instance, using the [Amazon Command Line Interface](https://aws.amazon.com/cli/), you can launch a cluster with 3 nodes as follows:
 
 ```{bash eval=FALSE}
 aws emr create-cluster --applications Name=Hadoop Name=Spark Name=Hive --release-label emr-5.8.0 --service-role EMR_DefaultRole --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.2xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.2xlarge --bootstrap-action Path=s3://aws-bigdata-blog/artifacts/aws-blog-emr-rstudio-sparklyr/rstudio_sparklyr_emr5.sh,Args=["--user-pw","<password>","--arrow"] --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole
@@ -225,26 +225,42 @@ You can then see the cluster launching, and eventually running, under the AWS po
 
 You can then navigate to the "Master Public DNS" under port 8787, for instance: http://ec2-12-34-567-890.us-west-1.compute.amazonaws.com:8787, and login with user `hadoop` and password `<password>`.
 
-To launch a cluster using the web interface, reffer to ["Running sparklyr from the AWS Big Data Blog"](https://aws.amazon.com/blogs/big-data/running-sparklyr-rstudios-r-interface-to-spark-on-amazon-emr/)[@amazon-emr-sparklyr-blog]. 
+It is also possible to launch the EMR cluster using the web interface, the same introductory post contains additional details and walkthroughs specificically designed for EMR.
 
 Please remember to turn off your cluster to avoid unnecesary charges and use appropriate security restrictions when starting EMR clusters for sensitive data analysis.
 
-Regarding cost, the most up to date information can be found under [aws.amazon.com/emr/pricing](https://aws.amazon.com/emr/pricing/). As of this writting, these are some of the instance types available in the `us-west-1` region:
+Regarding cost, the most up to date information can be found under [aws.amazon.com/emr/pricing](https://aws.amazon.com/emr/pricing/). As of this writting, these are some of the instance types available in the `us-west-1` region, it is meant to provide a glimpse of the resources and costs associated with cloud processing. Notice that the "EMR price is in addition to the Amazon EC2 price (the price for the underlying servers)".
 
-| Instance   | CPUs | Memory | Storage | EC2 Price | EMR Price | Total         |
-|------------|------|--------|---------|-----------|-----------|---------------|
-| c1.medium  | 2    | 2GB    | 350GB   | $0.148/hr | $0.030/hr | $0.178 USD/hr |
-| m3.2xlarge | 8    | 30GB   | 160GB   | $0.616/hr | $0.140/hr | $0.756 USD/hr |
-| i2.8xlarge | 32   | 244GB  | 6400GB  | $7.502/hr | $0.270/hr | $7.772 USD/hr |
+| Instance   | CPUs | Memory | Storage | EC2 Price     | EMR Price     |
+|------------|------|--------|---------|---------------|---------------|
+| c1.medium  | 2    | 2GB    | 350GB   | $0.148 USD/hr | $0.030 USD/hr |
+| m3.2xlarge | 8    | 30GB   | 160GB   | $0.616 USD/hr | $0.140 USD/hr |
+| i2.8xlarge | 32   | 244GB  | 6400GB  | $7.502 USD/hr | $0.270 USD/hr |
 
 ### Databricks
 
-[Databricks](http://databricks.com) is a company founded by the creators of Apache Spark, that aims to help clients with cloud-based big data processing using Spark. Databricks grew out of the [AMPLab](https://amplab.cs.berkeley.edu/) project at University of California, Berkeley.
+[Databricks](http://databricks.com) is a company founded by the creators of Apache Spark, that aims to help clients with cloud-based big data processing using Spark. Databricks grew out of the [AMPLab](https://amplab.cs.berkeley.edu/) project at University of California, Berkeley[@databricks-wikipedia].
 
 ```{r databricks, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Databricks Landing Site.'}
 knitr::include_graphics("images/clusters-databricks.png")
 ```
 ![Databricks Landing Site.](images/clusters-databricks.png)
+
+Databricks provides enterprise-level cluster computing plans, while also providing a free/community tear to explore functionality and get familiar with their environment. The latest pricing information can be found under [databricks.com/product/pricing](https://databricks.com/product/pricing), as of this writting, available plans 
+
+| Plan           | Basic         | Data Engineering | Data Analytics |
+|----------------|---------------|------------------|----------------|
+| AWS Standard   | $0.07 USD/DBU | $0.20 USD/DBU    | $0.40 USD/DBU  |
+| Azure Standard |               | $0.20 USD/DBU    | $0.40 USD/DBU  |
+| Azure Premium  |               | $0.35 USD/DBU    | $0.55 USD/DBU  |
+
+Notice that pricing is based on cost of DBU/hr. From Databricks, "A Databricks Unit (DBU) is a unit of Apache Spark processing capability per hour. For a varied set of instances, DBUs are a more transparent way to view usage instead of the node-hour"[@databricks-dbu].
+
+Once a cluster is launched, R and `sparklyr` can be used from Databricks notebooks following the steps from the [Getting Started](#starting) chapter or, by installing [RStudio on Databricks](https://docs.databricks.com/spark/latest/sparkr/rstudio.html)[@databricks-rstudio].
+
+![Databricks community notebook running sparklyr.](images/clusters-databricks-sparklyr.png)
+
+Additional resources are available under the Databricks Engineering Blog post: ["Using sparklyr in Databricks"]( https://databricks.com/blog/2017/05/25/using-sparklyr-databricks.html)[@databricks-blog-sparklyr] and the ["Databricks Documentation for sparklyr"](https://docs.databricks.com/spark/latest/sparkr/sparklyr.html)[@databricks-documentation-sparklyr].
 
 ### Google
 
