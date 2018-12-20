@@ -233,7 +233,7 @@ Regarding cost, the most up to date information can be found under [aws.amazon.c
 
 | Instance   | CPUs | Memory | Storage | EC2 Price     | EMR Price     |
 |------------|------|--------|---------|---------------|---------------|
-| c1.medium  | 2    | 2GB    | 350GB   | $0.148 USD/hr | $0.030 USD/hr |
+| c1.medium  | 2    | 1.7GB  | 350GB   | $0.148 USD/hr | $0.030 USD/hr |
 | m3.2xlarge | 8    | 30GB   | 160GB   | $0.616 USD/hr | $0.140 USD/hr |
 | i2.8xlarge | 32   | 244GB  | 6400GB  | $7.502 USD/hr | $0.270 USD/hr |
 
@@ -246,7 +246,15 @@ knitr::include_graphics("images/clusters-databricks.png")
 ```
 ![Databricks Landing Site.](images/clusters-databricks.png)
 
-Databricks provides enterprise-level cluster computing plans, while also providing a free/community tear to explore functionality and get familiar with their environment. The latest pricing information can be found under [databricks.com/product/pricing](https://databricks.com/product/pricing), as of this writting, available plans 
+Databricks provides enterprise-level cluster computing plans, while also providing a free/community tear to explore functionality and get familiar with their environment. 
+
+Once a cluster is launched, R and `sparklyr` can be used from Databricks notebooks following the steps from the [Getting Started](#starting) chapter or, by installing [RStudio on Databricks](https://docs.databricks.com/spark/latest/sparkr/rstudio.html)[@databricks-rstudio].
+
+![Databricks community notebook running sparklyr.](images/clusters-databricks-sparklyr.png)
+
+Additional resources are available under the Databricks Engineering Blog post: ["Using sparklyr in Databricks"]( https://databricks.com/blog/2017/05/25/using-sparklyr-databricks.html)[@databricks-blog-sparklyr] and the ["Databricks Documentation for sparklyr"](https://docs.databricks.com/spark/latest/sparkr/sparklyr.html)[@databricks-documentation-sparklyr].
+
+The latest pricing information can be found under [databricks.com/product/pricing](https://databricks.com/product/pricing), as of this writting, available plans 
 
 | Plan           | Basic         | Data Engineering | Data Analytics |
 |----------------|---------------|------------------|----------------|
@@ -256,20 +264,35 @@ Databricks provides enterprise-level cluster computing plans, while also providi
 
 Notice that pricing is based on cost of DBU/hr. From Databricks, "A Databricks Unit (DBU) is a unit of Apache Spark processing capability per hour. For a varied set of instances, DBUs are a more transparent way to view usage instead of the node-hour"[@databricks-dbu].
 
-Once a cluster is launched, R and `sparklyr` can be used from Databricks notebooks following the steps from the [Getting Started](#starting) chapter or, by installing [RStudio on Databricks](https://docs.databricks.com/spark/latest/sparkr/rstudio.html)[@databricks-rstudio].
-
-![Databricks community notebook running sparklyr.](images/clusters-databricks-sparklyr.png)
-
-Additional resources are available under the Databricks Engineering Blog post: ["Using sparklyr in Databricks"]( https://databricks.com/blog/2017/05/25/using-sparklyr-databricks.html)[@databricks-blog-sparklyr] and the ["Databricks Documentation for sparklyr"](https://docs.databricks.com/spark/latest/sparkr/sparklyr.html)[@databricks-documentation-sparklyr].
-
 ### Google
 
-Google provides their on-demand computing services through their [Google Cloud](https://cloud.google.com/), on-demand Spark cluster are provided by [Google Dataproc](https://cloud.google.com/dataproc/).
+Google provides Gooble Cloud Dataproc as a cloud-based managed Spark and Hadoop service offered on Google Cloud Platform. Dataproc utilizes many Google Cloud Platform technologies such as Google Compute Engine and Google Cloud Storage to offer fully managed clusters running popular data processing frameworks such as Apache Hadoop and Apache Spark[@dataproc-wikipedia].
 
 ```{r google-dataproc, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Google Dataprox Landing Site.'}
 knitr::include_graphics("images/clusters-dataproc.png")
 ```
 ![Google Dataprox Landing Site.](images/clusters-dataproc.png)
+
+A cluster can be easily created from the Google Cloud console or the Google Cloud command line interface:
+
+![Launching a Dataprox cluster.](images/clusters-dataproc-launching.png)
+
+Once created, ports can be forwarded to allow you to access this cluster from your machine; for instance, by launching Chrome to make use of this proxy and securely connect to the Dataproc cluster. Configuring this connection looks as follows:
+
+```{bash eval=FALSE}
+gcloud compute ssh sparklyr-m --project=<project> --zone=<region> -- -D 1080 -N
+"<path to chrome>" --proxy-server="socks5://localhost:1080" --user-data-dir="/tmp/sparklyr-m" http://sparklyr-m:8088
+```
+
+There are various tutorials available under [cloud.google.com/dataproc/docs/tutorials](https://cloud.google.com/dataproc/docs/tutorials), including, a comprehensive tutorial to configure RStudio and `sparklyr`[@dataproc-rstudio].
+
+The latest pricing information can be found under [cloud.google.com/dataproc/pricing](https://cloud.google.com/dataproc/pricing). Notice that the cost is split between Compute Engine and a Dataproc Premium.
+
+| Instance       | CPUs | Memory | Compute Engine | Dataproc Premium |
+|----------------|------|--------|----------------|------------------|
+| n1-standard-1  | 1    | 3.75GB | $0.0475 USD/hr | $0.010 USD/hr    |
+| n1-standard-8  | 8    | 30GB   | $0.3800 USD/hr | $0.080 USD/hr    |
+| n1-standard-64 | 64   | 244GB  | $3.0400 USD/hr | $0.640 USD/hr    |
 
 ### IBM
 
@@ -291,7 +314,7 @@ knitr::include_graphics("images/clusters-azure.png")
 
 ## Tools
 
-While using only R and Spark can be sufficient for some clusters, it is common to install complementary tools in your cluster to improve: monitoring, sql analysis, workflow coordination, etc. with applications like [Ganglia](http://ganglia.info/), [Hue](http://gethue.com/) and [Oozie](https://oozie.apache.org) respectively. This section is not meant to cover all, but rather mention two that are relevant to R and `sparklyr`.
+While using only R and Spark can be sufficient for some clusters, it is common to install complementary tools in your cluster to improve: monitoring, sql analysis, workflow coordination, etc. with applications like [Ganglia](http://ganglia.info/), [Hue](http://gethue.com/) and [Oozie](https://oozie.apache.org) respectively. This section is not meant to cover all, but rather mention the ones that are commonly to use.
 
 ### RStudio
 
