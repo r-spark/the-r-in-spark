@@ -1,3 +1,7 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 # Distributed R {#distributed}
 
 While **this chatper has not been written.**, use [spark.rstudio.com/guides/distributed-r](http://spark.rstudio.com/guides/distributed-r/) to learn how to use R directly over each worker node.
@@ -6,7 +10,7 @@ While **this chatper has not been written.**, use [spark.rstudio.com/guides/dist
 
 ### Embarrassingly Parallel
 
-```{r eval=FALSE}
+```{r distributed-parallel}
 sdf_len(sc, total_executors, repartition = total_executors) %>%
   spark_apply(~ data.frame(pi = 3.1416), columns = c(pi = "character")) %>%
   summarize(mean = mean(pi))
@@ -18,7 +22,7 @@ sdf_len(sc, total_executors, repartition = total_executors) %>%
 
 ### Excplicit
 
-```{r eval=FALSE}
+```{r distributed-columns-explicit}
 iris_tbl <- spark_apply(
   I,
   columns = lapply(iris, class)
@@ -27,7 +31,7 @@ iris_tbl <- spark_apply(
 
 ## Grouping
 
-```{r eval=FALSE}
+```{r distributed-parallel-grouping}
 sdf_len(sc, 10, repartition = 1) %>%
   transmute(groups = floor(id / 2)) %>%
   spark_apply(~nrow(.x))
@@ -41,7 +45,7 @@ sdf_len(sc, 10, repartition = 1) %>%
 2      5
 ```
 
-```{r eval=FALSE}
+```{r distributed-grouping-repartition, eval=FALSE}
 sdf_len(sc, 10, repartition = 1) %>%
   transmute(groups = floor(id / 2)) %>%
   sdf_repartition(partition_by = "groups") %>%
@@ -57,7 +61,7 @@ sdf_len(sc, 10, repartition = 1) %>%
 4      1
 ```
 
-```{r eval=FALSE}
+```{r distributed-grouping-transmute}
 sdf_len(sc, 10, repartition = 1) %>%
   transmute(groups = floor(id / 2)) %>%
   sdf_repartition(partition_by = "groups") %>%
@@ -81,23 +85,23 @@ Notice that `spark_apply()` does not repartition data automatically, so optimizi
 
 ## Context
 
-```{r eval=F}
+```{r distributed-context}
 sdf_len(sc, 3, repartition = 3) %>%
   spark_apply(function(data, context) context, context = data.frame(something = c("foo", "bar")))
 ```
 ```
 # Source: spark<?> [?? x 1]
-      a
-* <dbl>
-1     1
-2     2
-3     3
-4     1
-5     2
-6     3
+  something
+* <chr>    
+1 foo      
+2 bar      
+3 foo      
+4 bar      
+5 foo      
+6 bar    
 ```
 
-```{r eval=F}
+```{r distributed-context-list}
 sdf_len(sc, 3, repartition = 3) %>%
   spark_apply(
     function(data, context) context$numbers * context$constant,
@@ -135,7 +139,7 @@ Whenever `spark_apply()` is executed, information regarding execution is written
 
 For instance, suppose that you don't know what the first column name of `df` is, we can write a custom log message executed from the worker nodes using `worker_log()` as follows:
 
-```{r eval=FALSE}
+```{r distributed-logs}
 sdf_len(sc, 1) %>% spark_apply(function(df) {
   worker_log("the first column in the dataframe is named ", names(df)[[1]])
   df
@@ -150,7 +154,7 @@ sdf_len(sc, 1) %>% spark_apply(function(df) {
 
 When running locally, we can filter the log entries for the worker as follows:
 
-```{r eval=FALSE}
+```{r distributed-logs-filter}
 spark_log(sc, filter = "sparklyr: RScript")
 ```
 
@@ -167,7 +171,7 @@ Notice that the logs show out custom log entry showing that `id` is the name of 
 
 This functionality is useful when troubleshooting errors, for instance, if we force an error using the `stop()` function:
 
-```{ eval=FALSE}
+```{r distributed-force-error}
 sdf_len(sc, 1) %>% spark_apply(function(df) {
   stop("force an error")
 })
@@ -182,7 +186,7 @@ You will get an error similar to,
 
 As suggested in the error, we can look in the worker logs for the specific errors as follows:
 
-```
+```{r distributed-force-error-log}
 spark_log(sc)
 ```
 
@@ -204,7 +208,7 @@ Notice that, spark_log(sc) only retrieves the worker logs when using local clust
 
 #### Worker Error
 
-```{r eval=FALSE}
+```{r distributed-worker-error}
 sdf_len(sc, 1) %>% spark_apply(function(df) {
     tryCatch({
         stop("an error")
@@ -218,7 +222,7 @@ sdf_len(sc, 1) %>% spark_apply(function(df) {
 
 If a particular partition fails, you can detect the broken partition by computing a digest, and then retrieving that particular partition as follows:
 
-```{r eval=FALSE}
+```{r distributed-worker-partitions}
 sdf_len(sc, 3) %>% spark_apply(function(x) {
     worker_log("processing ", digest::digest(x), " partition")
     # your code
@@ -235,7 +239,7 @@ When executing this in your cluster, you will have to look in the logs for the t
 
 Then you can use that digest to retrieve that specific data frame to R with something like:
 
-```{r eval=FALSE}
+```{r distributed-worker-partitions-collect}
 broken_partition <- sdf_len(sc, 3) %>% spark_apply(function(x) {
     if (identical(digest::digest(x), "f35b1c321df0162e3f914adfb70b5416")) x else x[0,]
 }) %>% collect()
@@ -245,9 +249,19 @@ WHich you can then run in R to troubleshoot further.
 
 #### Worker Debugger
 
-```{r eval=FALSE}
+```{r distributed-debugger}
+sdf_len(sc, 1) %>% spark_apply(function() {
   stop("Error!")
 }, debug = TRUE)
+```
+```
+Debugging spark_apply(), connect to worker debugging session as follows:
+  1. Find the workers <sessionid> and <port> in the worker logs, from RStudio click
+     'Log' under the connection, look for the last entry with contents:
+     'Session (<sessionid>) is waiting for sparklyr client to connect to port <port>'
+  2. From a new R session run:
+     debugonce(sparklyr:::spark_worker_main)
+     sparklyr:::spark_worker_main(<sessionid>, <port>)
 ```
 
 ## Clusters
