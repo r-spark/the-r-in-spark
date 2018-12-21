@@ -1,6 +1,7 @@
 \mainmatter
 
-```{r setup}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
 ```
 
 # Introduction {#intro}
@@ -15,7 +16,7 @@ Mathematician George Stibitz used the word **digital** to describe fast electric
 
 The world bank report on digital development provides an estimate of digital and analog information stored over the last decades[@data-revolution]. This report found out that digital information surpassed analog information around 2003, at that time, there were aboput 10M terabytes of digital information, which is roughly about 10M computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at [exponential rates](#appendix-storage-capacity):
 
-```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='World’s capacity to store information.', fig.align = 'center', eval=FALSE}
+```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='World’s capacity to store information.', fig.align = 'center'}
 library(tidyverse)
 read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
   gather(key = storage, value = capacity, analog, digital) %>%
@@ -40,7 +41,7 @@ One year later, in 2004, Google published a new paper describing how to perform 
 
 For example, we can use MapReduce to count words in two different text files. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files.
 
-```{r echo=FALSE, eval=FALSE, fig.cap='Simple MapReduce Example.'}
+```{r echo=FALSE, fig.cap='Simple MapReduce Example.'}
 nomnoml::nomnoml("
 #spacing: 80
 #orient: right
@@ -57,7 +58,7 @@ nomnoml::nomnoml("
 [Bob's Words]- Reduce[Word Counts]
 
 [Word Counts|I,2|like,2|apples,1|bananas,1]
-")
+", png = "images/intro-simple-map-reduce-example.png")
 ```
 ![Simple MapReduce Example.](images/intro-simple-map-reduce-example.png)
 
@@ -72,7 +73,7 @@ While Hadoop provided support to perform MapReduce operations over a distributed
 In 2009, **Apache Spark** starts as a research project at the UC Berkeley's AMPLab to improve over MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines and, by loading data in-memory which made operations much fasters than Hadoop's on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the [modeling](#modeling) chapter, allowed Spark to run 10x faster than Hadoop by making use of in-memory datasets[@zaharia2010spark].
 
 
-```{r eval=FALSE, echo=FALSE}
+```{r echo=FALSE}
 iterations <- c(1, 1:6 * 5)
 data.frame(
   iteration = rep(iterations, 2),
@@ -136,7 +137,7 @@ Some people refer to some of these benefits as [the four 'V's of big data](http:
 
 R is a computing language with it's inception dating back to Bell Laboratories. R was not created at Bell Labs, but it's predecesor, the S computing language was. [Rick Becker explained in useR 2016](https://blog.revolutionanalytics.com/2016/07/rick-becker-s-talk.html) that at that time in Bell Labs, computing was done by calling subroutines written in the Fortran language which, apparently, were not pleasant to deal with. The S computing language was designed as an interface language to solve particular problems without having to worry about other languages, Fortran at that time. The creator of S, [John Chambers](https://en.wikipedia.org/wiki/John_Chambers_(statistician)), describes how S was designed to provide an interface through the following diagram:
 
-```{r s-diagram, echo = FALSE, fig.cap = 'Interface language diagram by John Chambers - Rick Becker useR 2016.', fig.align = 'center', eval=FALSE}
+```{r s-diagram, echo = FALSE, fig.cap = 'Interface language diagram by John Chambers - Rick Becker useR 2016.', fig.align = 'center'}
 knitr::include_graphics("images/intro-s-algorithm-interface.png")
 ```
 ![Interface language diagram by John Chambers - Rick Becker useR 2016.](images/intro-s-algorithm-interface.png)
@@ -152,7 +153,7 @@ While working with data, I believe there are two strong arguments for using R:
 - The **R Language** was designed by statisticians for statisticians, meaning, this is one of the few successful languages designed for non-programmers; so learning R will probably feel more natural. Additionally, since the R language was designed to be an interface to other tools and languages, R allows you to focus more on modeling and less on peculiarities of computer science and engineering.
 - The **R Community** provides a rich package archive provided by CRAN ([The Comprehensive R Archive Network](https://cran.r-project.org/)) which allows you to install ready-to-use packages to perform many tasks, most notably, high-quality statistic models with many only available in R. In addition, the R community is a welcoming and active group of talented individuals motivated to help you succeed. Many packages provided by the R community make R, by far, the place to do statistical computing. To mention some of the popular packages: [dplyr](https://CRAN.R-project.org/package=dplyr) to manipulate data, [cluster](https://CRAN.R-project.org/package=cluster) to analyze clusters and [ggplot2](https://CRAN.R-project.org/package=ggplot2) to visualize data. We can quantify the [growth of the R community](#appendix-cran-downloads) by plotting daily downloads of R packages in CRAN.
 
-```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='Daily downloads of CRAN packages.', fig.align = 'center', eval=FALSE}
+```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='Daily downloads of CRAN packages.', fig.align = 'center'}
 downloads_csv <- "data/01-intro-r-cran-downloads.csv"
 if (!file.exists(downloads_csv)) {
   downloads <- cranlogs::cran_downloads(from = "2014-01-01", to = "2018-01-01")
