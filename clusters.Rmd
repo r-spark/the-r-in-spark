@@ -204,7 +204,7 @@ One can also use a cloud provider to acquire bare computing resources and then, 
 
 Some of the major providers of cloud computing infrastructure are: Amazon, Databricks, Google, IBM and Microsoft that this section will briefly introduce.
 
-**Note:** A subset of the available compute instances for each cloud provider is being presented; however, please be aware that hardware (CPU speed, hard drive speed, etc.) varies between vendors and is therefore, not an accurate comparison without running your workloads and considering other aspects beyond compute instance cost. 
+**Note:** A subset of the available compute instances for each cloud provider is being presented; however, please be aware that hardware (CPU speed, hard drive speed, etc.) varies between vendors and locations; therefore, this is not an accurate comparison, sintead, an accurate comparison would require running your particular workloads and considering other aspects beyond compute instance cost. 
 
 ### Amazon {#clusters-amazon-emr}
 
@@ -305,7 +305,7 @@ knitr::include_graphics("images/clusters-ibm.png")
 ```
 ![IBM Landing Site.](images/clusters-ibm.png)
 
-From within IBM Cloud, open Watson Studio and create a Data Science project, add a Spark cluster under the project settings and launch RStudio from the Launch IDE menu.
+From within IBM Cloud, open Watson Studio and create a Data Science project, add a Spark cluster under the project settings and launch RStudio from the Launch IDE menu. Please note that the provided version of `sparklyr` was `0.8.4` which is not the latest version released in CRAN.
 
 ![IBM Watson Studio using RStudio and sparklyr](images/clusters-ibm-sparklyr.png)
 
@@ -317,16 +317,26 @@ The most up to date pricing information is available under [ibm.com/cloud/pricin
 | C1.4x4x25         | 4    | 4GB    | 25GB    | $0.133 USD/hr |
 | C1.32x32x25       | 32   | 25GB   | 25GB    | $0.962 USD/hr |
 
-**Note**: As of December 2018, the provided version of `sparklyr` was `0.8.4` which is not the latest version released in CRAN.
-
 ### Microsoft
 
-Microsoft provides cloud services through [Microsoft Azure](https://azure.microsoft.com/) and Spark clusters through [Azure HDInsight](https://azure.microsoft.com/en-us/services/hdinsight/).
+Microsoft Azure is a cloud computing service created by Microsoft for building, testing, deploying, and managing applications and services through a global network of Microsoft-managed data centers. It provides software as a service (SaaS), platform as a service (PaaS) and infrastructure as a service (IaaS) and supports many different programming languages, tools and frameworks, including both Microsoft-specific and third-party software and systems[@azure-wikipedia].
 
 ```{r azure-hdinsight, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Azure HDInsight Landing Site.'}
 knitr::include_graphics("images/clusters-azure.png")
 ```
 ![Azure HDInsight Landing Site.](images/clusters-azure.png)
+
+From the Azure portal, the Azure HDInisight service provides support for on-demand Spark clusters. An HDInsight cluster with support for Spark and RStudio can be easily created by selecting the ML Services cluster type; however, the provided version of `sparklyr` and RStudio are not current. Therefore, rather than relying on the automatic configuration, it's strongly encouraged to manually install RStudio and `sparklyr`.
+
+![Creating an Azure HDInsight Spark Cluster](images/clusters-azure-mlservices.png)
+
+Up to date pricing for HDInsight is available under [azure.microsoft.com/en-us/pricing/details/hdinsight](https://azure.microsoft.com/en-us/pricing/details/hdinsight/).
+
+| Instance       | CPUs | Memory | Total Cost   |
+|----------------|------|--------|--------------|
+| D1 v2          | 1    | 3.5 GB | $0.074/hour  |
+| D4 v2          | 8    | 28 GB  | $0.59/hour   |
+| G5             | 64   | 448 GB | $9.298/hour  |
 
 ## Tools
 
@@ -343,20 +353,16 @@ knitr::include_graphics("images/clusters-rstudio-server.png")
 
 ### Jupyter
 
-Project [Jupyter](http://jupyter.org/) exists to develop open-source software, open-standards, and services for interactive computing across dozens of programming languages.
+Project [Jupyter](http://jupyter.org/) exists to develop open-source software, open-standards, and services for interactive computing across dozens of programming languages. A Jupyter notebook, provide support for various programming languages, including R. `sparklyr` can be used with Jupyter notebooks using the R Kernel.
 
 ```{r jupyter-project, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Project Jupyter.'}
 knitr::include_graphics("images/clusters-jupyter.png")
 ```
 ![Project Jupyter.](images/clusters-jupyter.png)
 
-Their notebooks, provide support for various programming languages, including R. `sparklyr` can be used with Jupyter notebooks using the R Kernel.
-
 ### Livy {#clusters-livy}
 
-[Apache Livy](https://livy.incubator.apache.org/) is an incubation project in Apache providing support to use Spark clusters remotely through a web interface. It is ideal to connect directly into the Spark cluster; however, there are times where connecting directly to the cluster is not feasible. When facing those constraints, one can consider installing Livy in their cluster and secure it properly to enable remote use over web protocols.
-
-However, there is a significant performance overhead from using Livy in `sparklyr` for experimentation, meaning that, executing many client comamnds over Livy has a significant overhead; however, running a few commands to generate complex analysis is usually performant since the performance overhead of starting computation can be insignificant compared to the actual cluster computation.
+[Apache Livy](https://livy.incubator.apache.org/) is an incubation project in Apache providing support to use Spark clusters remotely through a web interface. It is ideal to connect directly into the Spark cluster; however, there are times where connecting directly to the cluster is not feasible. When facing those constraints, one can consider installing Livy in their cluster and secure it properly to enable remote use over web protocols. However, there is a significant performance overhead from using Livy in `sparklyr`.
 
 ```{r apache-livy, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Apache Livy Landing Site.'}
 knitr::include_graphics("images/clusters-apache-livy.png")

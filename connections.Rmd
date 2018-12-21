@@ -198,14 +198,31 @@ If your computer is already configured to use a Kubernetes cluster, you can use 
 system2("kubectl", "cluster-info")
 ```
 
-### Databricks
+### Clusters
 
-Connections to Spark form Databricks requires the following custom connection method:
+Connections to Spark from Databricks requires the following custom connection method:
 
 ```{r eval=FALSE}
 library(sparklyr)
 sc <- spark_connect(method = "databricks")
 ```
+
+Similarily, connections to Spark when using IBM's Watson Studio require a custom connection method:
+
+```{r eval=FALSE}
+kernels <- load_spark_kernels()
+sc <- spark_connect(config = kernels[2])
+```
+
+Under Microsoft Azure HDInsights and when using ML Services (R Server), creating an `sparklyr` connection looks like the following:
+
+```{r eval=FALSE}
+library(RevoScaleR)
+cc <- rxSparkConnect(reset = TRUE, interop = "sparklyr")
+sc <- rxGetSparklyrConnection(cc)
+```
+
+In general, please reference your cloud provider documentation and their support channels if assistance is needed.
 
 ## Troubleshooting
 
