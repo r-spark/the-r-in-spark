@@ -15,7 +15,12 @@ chapters_pattern <- paste(chapters, collapse = "|")
 for (chapter_file in dir(pattern = paste0(chapters_pattern, ".Rmd"))) {
   chapter_name <- tools::file_path_sans_ext(basename(chapter_file))
 
-  knitr::knit(chapter_file, file.path("mds", paste(chapter_name, "md", sep = ".")))
+  withr::with_envvar(
+    list(ASCIITEXT_RENDERING = TRUE), {
+      knitr::knit(chapter_file, file.path("mds", paste(chapter_name, "md", sep = ".")))
+    }
+  )
+
   rmarkdown::pandoc_convert(
     input = normalizePath(paste0("mds/", chapter_name, ".md")),
     to = "asciidoc",

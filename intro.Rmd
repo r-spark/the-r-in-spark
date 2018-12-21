@@ -1,7 +1,8 @@
 \mainmatter
 
-```{r include=FALSE}
+```{r include=FALSE, eval=TRUE}
 knitr::opts_chunk$set(eval = FALSE)
+source("r/render.R")
 ```
 
 # Introduction {#intro}
@@ -41,10 +42,11 @@ One year later, in 2004, Google published a new paper describing how to perform 
 
 For example, we can use MapReduce to count words in two different text files. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files.
 
-```{r echo=FALSE, fig.cap='Simple MapReduce Example.'}
-nomnoml::nomnoml("
+```{r eval=TRUE, echo=FALSE, fig.cap='Simple MapReduce Example.'}
+render_nomnoml("
 #spacing: 80
-#orient: right
+#direction: right
+#zoom: 4
 [Alice's File|I like apples]
 [Bob's File|I like bananas]
 
@@ -58,9 +60,8 @@ nomnoml::nomnoml("
 [Bob's Words]- Reduce[Word Counts]
 
 [Word Counts|I,2|like,2|apples,1|bananas,1]
-", png = "images/intro-simple-map-reduce-example.png")
+", "images/intro-simple-map-reduce-example.png", "Simple MapReduce Example.")
 ```
-![Simple MapReduce Example.](images/intro-simple-map-reduce-example.png)
 
 Counting words is often the most basic MapReduce example, but it can be also used for much more sophisticated and interesting applications. For instance, MapReduce can be used to rank web pages in Google's **PageRank** algorithm, which assigns ranks to web pages based on the count of hyperlinks linking to a web page and the rank of the page linking to it.
 
