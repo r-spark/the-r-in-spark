@@ -1,3 +1,7 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 # Contributing {#contributing}
 
 There are many ways to contribute, from helping community members to opening GitHub issues, to providing new functionality for yourself, colleagues or the R and Spark community; this last chapter will focus on writting and sharing code that extends Spark in many useful and probably also, awesome, ways. Specifically, in this chapter you will learn what an extension is, when to build one, what tools are available, how to build an extension and when to consider contributing to `sparklyr` itself.
@@ -6,13 +10,13 @@ There are many ways to contribute, from helping community members to opening Git
 
 While working with R and therefore, while working with R and Spark, you will write R code. In fact, you have already written R code throught most of the previous chaters in this book. Writting code can be as simple as [loading data from a text file](#starting-sparklyr-hello-world) to writting [distributed R](distributed) code. But for the sake of the argument, lets consider one of the first lines of code presented in this book:
 
-```{r eval=FALSE}
+```{r contributing-read}
 spark_read_text(sc, "hello", "hello.txt")
 ```
 
 When thinking of contributing back, the most important question you can ask about the code above, but really, about any piece of code you write is: Would this code be useful to someone else? For the code above, the answer is probably no, it's just too generic and can be easiy found online; however, a more realistic example would be to tailor something the code above for something that you actually care about, perhaps:
 
-```{r eval=FALSE}
+```{r contributing-read-useful}
 spark_read_text(sc, "stuff-that-matters", "/secret/path/which/was/hard/to/figure/out/")
 ```
 
@@ -20,7 +24,7 @@ The code above is quite similar to the original one, but assuming that you work 
 
 One first attempt would be to wrap this into a file `useful.R` and then write a function over it, as in:
 
-```{r eval=FALSE}
+```{r contributing-useful-function}
 load_useful_data <- function() {
   spark_read_text(sc, "stuff-that-matters", "/secret/path/which/was/hard/to/figure/out/")
 }
@@ -46,7 +50,7 @@ Then we can wrap those extensions into an [R Package] or consider the functional
 
 R extensions make use of three functions in `sparklyr`: `invoke_new()`, `invoke_static()` and `invoke()`. For the most part, that's all you need to extend Spark's functionality in R.
 
-```{r eval=FALSE}
+```{r contributing-invoke}
 spark_context(sc) %>% 
   invoke("textFile", "my-file.txt", 1L) %>% 
   invoke("count")
@@ -58,7 +62,7 @@ spark_context(sc) %>%
 
 Changes in the scala sources require the Scala compilers to be installed. You can install the required compilers by running:
 
-```{r eval=FALSE}
+```{r contributing-download-scalac}
 library(sparklyr)
 download_scalac()
 ```
@@ -79,7 +83,7 @@ You can create an `sparklyr` extension with ease from RStudio. This feature requ
 
 We can trace all the calls made to `invoke()`, `invoke_new()` and `invoke_static()` using the `sparklyr.invoke.trace` and `sparklyr.invoke.trace.callstack` options as follows:
 
-```{r eval=FALSE}
+```{r contributing-trace}
 config <- spark_config()
 config$sparklyr.invoke.trace <- TRUE
 
@@ -94,7 +98,7 @@ First of all, it's worth mentioning that, `sparklyr` is just another R package; 
 
 Therefore, at a high level, `sparklyr` is composed of: R code and versioned Scala code:
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Sparklyr Package Architecture', fig.align = 'center'}
+```{r contributing-sparklyr, eval=TRUE,echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Sparklyr Package Architecture', fig.align = 'center'}
 nomnoml::nomnoml("
 #spacing: 15
 [sparklyr|
@@ -115,7 +119,7 @@ When connecting to Spark using `spark_connect()`, `sparklyr` submits the correct
 
 Once the backend is submitted to Spark, the frontend communicates to the backend using socket connections, expect for Livy connections where this happens over HTTP:
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Sparklyr Connection Architecture', fig.align = 'center'}
+```{r contributing-connection, eval=TRUE, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Sparklyr Connection Architecture', fig.align = 'center'}
 nomnoml::nomnoml("
 #spacing: 15
 [R|
