@@ -1,3 +1,7 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 # Clusters {#clusters}
 
 Previous chapters focused on using Spark over a single computing instance, your personal computer. In this chapter we will introduce techniques to run Spark over multiple computing instances, also known as a computing cluster, to analyze and model data at scale. This chapter and subsequent ones will introduce and make use of concepts applicable to computing clusters; however, it's not required to use a computing cluster to follow code examples, using a local cluster is still reasonable. It's worth mentioning that while previous chapters focused on single computing instances, all the data analysis and modeling techniques can also be used in computing clusters.
@@ -8,7 +12,7 @@ For those of you already have a Spark cluster in your organization, you could co
 
 There are three major trends in cluster computing worth discussing: **on-premise**, **cloud computing** and **kubernetes**. Framing these trends over time will help us understand how they came to be, what they are and what their future might be. The following chart takes data from Google trends and [plots these trends over time](#appendix-cluster-trends):
 
-```{r eval=FALSE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Google trends for on-premise (mainframe), cloud computing and kubernetes.'}
+```{r clusters-trends, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Google trends for on-premise (mainframe), cloud computing and kubernetes.'}
 library(dplyr)
 library(r2d3)
 
@@ -34,7 +38,7 @@ In order to run Spark within a computing cluster, one needs to run something cap
 
 In **Spark Standalone**, Spark uses itself as it's own cluster manager, this means that you can use Spark without installing additional software in your cluster. This can be useful if you are planning to use your cluster to only run Spark applications; if this cluster is not dedicated to Spark, a generic cluster manager like YARN, Mesos or Kubernetes would be more suitable. The landing page for Spark Standalone is available under [spark.apache.org](https://spark.apache.org/docs/latest/spark-standalone.html) and contains detailed information on configuring, launching, monitoring and enabling high-availability.
 
-```{r spark-standalone, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Spark Standalone Site.'}
+```{r clusters-spark-standalone, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Spark Standalone Site.'}
 knitr::include_graphics("images/clusters-spark-standalone.png")
 ```
 ![Spark Standalone Site.](images/clusters-spark-standalone.png)
@@ -43,7 +47,7 @@ However, since Spark Standalone is contained within a Spark installation; then, 
 
 First, retrieve the `SPARK_HOME` directory by running `spark_home_dir()` then, run `start-master.sh` and `start-slave.sh` as follows:
 
-```{r message=FALSE, eval=FALSE}
+```{r clusters-start, message=FALSE}
 # Retrieve the Spark installation directory
 spark_home <- spark_home_dir()
 
@@ -62,7 +66,7 @@ system2(start_slave, paste0("spark://", system2("hostname", stdout = TRUE), ":70
 
 The previous command initialized the master node and a worker node, the master node interface can be accessed under [localhost:8080](http://localhost:8080) and looks like the following:
 
-```{r eval=FALSE, echo=FALSE}
+```{r clusters-spark-standalone-web, echo=FALSE}
 invisible(webshot::webshot(
   "http://localhost:8080/",
   "images/clusters-spark-standalone-web-ui.png",
@@ -72,14 +76,14 @@ invisible(webshot::webshot(
 ))
 ```
 
-```{r spark-standalone-web-ui, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Spark Standalone Web Interface.'}
+```{r clusters-spark-standalone-web-ui, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Spark Standalone Web Interface.'}
 knitr::include_graphics("images/clusters-spark-standalone-web-ui.png")
 ```
 ![Spark Standalone Web Interface.](images/clusters-spark-standalone-web-ui.png)
 
 Notice that there is one worker register in Spark standalone, you can follow the link to this worker node to see additional information:
 
-```{r echo=FALSE, eval=FALSE}
+```{r clusters-spark-standalone-shot, echo=FALSE, eval=FALSE}
 invisible(webshot::webshot(
   "http://localhost:8081/",
   "images/clusters-spark-standalone-web-ui-worker.png",
@@ -88,15 +92,14 @@ invisible(webshot::webshot(
   zoom = 2
 ))
 ```
-
-```{r spark-standalone-web-ui-worker, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Spark Standalone Worker Web Interface.'}
+```{r clusters-spark-standalone-web-ui-worker, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Spark Standalone Worker Web Interface.'}
 knitr::include_graphics("images/clusters-spark-standalone-web-ui-worker.png")
 ```
 ![Spark Standalone Worker Web Interface.](images/clusters-spark-standalone-web-ui-worker.png)
 
 Once you are done performing computations in this cluster, you can simply stop all the running nodes in this local cluster by running:
 
-```{r message=FALSE, eval=FALSE}
+```{r clusters-stop, message=FALSE}
 # Build path to stop-all
 stop_all <- file.path(spark_home, "sbin", "stop-all.sh")
 
@@ -131,7 +134,7 @@ Mesos, like YARN, supports executing many cluster frameworks, including Spark. H
 
 Mesos is also an Apache project with its documentaiton available under [mesos.apache.org](https://mesos.apache.org/), the "Running Spark on Mesos" guide from [spark.apache.org](https://spark.apache.org/docs/latest/running-on-mesos.html) is a great resource if you choose to use Mesos as your cluster manager.
 
-```{r mesos-spark, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Mesos Landing Site.'}
+```{r clusters-mesos-spark, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Mesos Landing Site.'}
 knitr::include_graphics("images/clusters-mesos.png")
 ```
 ![Mesos Landing Site.](images/clusters-mesos.png)
@@ -144,7 +147,7 @@ Kubernetes can also execute many cluster frameworks, it's based on container ima
 
 More resources are available under [kubernetes.io](https://kubernetes.io/) and the "Running Spark on Kubernetes" guide from [spark.apache.org](https://spark.apache.org/docs/latest/running-on-kubernetes.html) it's another place to visit to dive deeper in this topic.
 
-```{r kubernetes-spark, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Kubernetes Landing Site.'}
+```{r clusters-kubernetes-spark, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Kubernetes Landing Site.'}
 knitr::include_graphics("images/clusters-kubernetes.png")
 ```
 ![Kubernetes Landing Site.](images/clusters-kubernetes.png)
@@ -161,7 +164,7 @@ Cloudera, Inc. is a United States-based software company that provides Apache Ha
 
 Cloudera clusters make use of **parcels** which are, binary distributions containing the program files and metadata[@cloudera-parcel], Spark happens to be installed as a parcel in cloduera. It's beyond the scope of this book to present how to configure Cloudera clusters, resources and documentation can be found under [cloudera.com](https://www.cloudera.com/products/open-source/apache-hadoop/apache-spark.html).
 
-```{r cloudera-spark, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Cloudera Landing Site.'}
+```{r clusters-cloudera-spark, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Cloudera Landing Site.'}
 knitr::include_graphics("images/clusters-cloudera.png")
 ```
 ![Cloudera's Spark Landing Site](images/clusters-cloudera.png)
@@ -180,7 +183,7 @@ Hortonworks is a big data software company based in Santa Clara, California. The
 
 Hortonworks partenered with Microsoft[@hortonworks-microsoft] to improve support in Microsoft Windows for Hadoop and Spark, this used to be a differentiation point; however, comparing Hortonworks and Cloudera is less relevant today since both companies are merging in 2019[@hortonworks-cloudera]. Additional resources to configure Spark under Hortonworks are available under [hortonworks.com](https://hortonworks.com/apache/spark/).
 
-```{r hortonworks-spark, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Hortonworks Landing Site.'}
+```{r clusters-hortonworks-spark, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Hortonworks Landing Site.'}
 knitr::include_graphics("images/clusters-hortonworks.png")
 ```
 ![Hortonworks Landing Site.](images/clusters-hortonworks.png)
@@ -189,7 +192,7 @@ knitr::include_graphics("images/clusters-hortonworks.png")
 
 MapR is a business software company headquartered in Santa Clara, California. MapR provides access to a variety of data sources from a single computer cluster, including big data workloads such as Apache Hadoop and Apache Spark, a distributed file system, a multi-model database management system, and event stream processing, combining analytics in real-time with operational applications. Its technology runs on both commodity hardware and public cloud computing services[@mapr-wikipedia].
 
-```{r mapr-spark, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='MapR Landing Site.'}
+```{r clusters-mapr-spark, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='MapR Landing Site.'}
 knitr::include_graphics("images/clusters-mapr.png")
 ```
 ![MapR Landing Site.](images/clusters-mapr.png)
@@ -210,7 +213,7 @@ Some of the major providers of cloud computing infrastructure are: Amazon, Datab
 
 Amazon provides cloud services through [Amazon Web Services](https://aws.amazon.com/); more specifically, provides an on-demand Spark cluster through [Amazon Elastic MapReduce](https://aws.amazon.com/emr/) or EMR for short.
 
-```{r amazon-emr, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Amazon EMR Landing Site.'}
+```{r clusters-amazon-emr, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Amazon EMR Landing Site.'}
 knitr::include_graphics("images/clusters-amazon-emr.png")
 ```
 ![Amazon EMR Landing Site.](images/clusters-amazon-emr.png)
@@ -243,7 +246,7 @@ Regarding cost, the most up to date information can be found under [aws.amazon.c
 
 [Databricks](http://databricks.com) is a company founded by the creators of Apache Spark, that aims to help clients with cloud-based big data processing using Spark. Databricks grew out of the [AMPLab](https://amplab.cs.berkeley.edu/) project at University of California, Berkeley[@databricks-wikipedia].
 
-```{r databricks, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Databricks Landing Site.'}
+```{r clusters-databricks, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Databricks Landing Site.'}
 knitr::include_graphics("images/clusters-databricks.png")
 ```
 ![Databricks Landing Site.](images/clusters-databricks.png)
@@ -270,7 +273,7 @@ Notice that pricing is based on cost of DBU/hr. From Databricks, "A Databricks U
 
 Google provides Gooble Cloud Dataproc as a cloud-based managed Spark and Hadoop service offered on Google Cloud Platform. Dataproc utilizes many Google Cloud Platform technologies such as Google Compute Engine and Google Cloud Storage to offer fully managed clusters running popular data processing frameworks such as Apache Hadoop and Apache Spark[@dataproc-wikipedia].
 
-```{r google-dataproc, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Google Dataprox Landing Site.'}
+```{r clusters-google-dataproc, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Google Dataprox Landing Site.'}
 knitr::include_graphics("images/clusters-dataproc.png")
 ```
 ![Google Dataprox Landing Site.](images/clusters-dataproc.png)
@@ -300,7 +303,7 @@ The latest pricing information can be found under [cloud.google.com/dataproc/pri
 
 IBM cloud computing is a set of cloud computing services for business offered by the information technology company IBM. IBM cloud includes infrastructure as a service (IaaS), software as a service (SaaS) and platform as a service (PaaS) offered through public, private and hybrid cloud delivery models, in addition to the components that make up those clouds[@ibm-wikipedia].
 
-```{r ibm, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='IBM Landing Site.'}
+```{r clusters-ibm, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='IBM Landing Site.'}
 knitr::include_graphics("images/clusters-ibm.png")
 ```
 ![IBM Landing Site.](images/clusters-ibm.png)
@@ -321,7 +324,7 @@ The most up to date pricing information is available under [ibm.com/cloud/pricin
 
 Microsoft Azure is a cloud computing service created by Microsoft for building, testing, deploying, and managing applications and services through a global network of Microsoft-managed data centers. It provides software as a service (SaaS), platform as a service (PaaS) and infrastructure as a service (IaaS) and supports many different programming languages, tools and frameworks, including both Microsoft-specific and third-party software and systems[@azure-wikipedia].
 
-```{r azure-hdinsight, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Azure HDInsight Landing Site.'}
+```{r clusters-azure-hdinsight, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Azure HDInsight Landing Site.'}
 knitr::include_graphics("images/clusters-azure.png")
 ```
 ![Azure HDInsight Landing Site.](images/clusters-azure.png)
@@ -346,7 +349,7 @@ While using only R and Spark can be sufficient for some clusters, it is common t
 
 RStudio's open source and professional products, like: RStudio Server, [RStudio Server Pro](https://www.rstudio.com/products/rstudio-server-pro/), [Shiny Server](https://www.rstudio.com/products/shiny/), [Shiny Server Pro](https://www.rstudio.com/products/shiny-server-pro/), or [RStudio Connect](https://www.rstudio.com/products/connect/); can be installed within the cluster to support many R workflows, while `sparklyr` does not require any additional tools, they provide significant productivity gains worth considering.
 
-```{r rstudio-server, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='RStudio Server.'}
+```{r clusters-rstudio-server, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='RStudio Server.'}
 knitr::include_graphics("images/clusters-rstudio-server.png")
 ```
 ![RStudio Server.](images/clusters-rstudio-server.png)
@@ -355,7 +358,7 @@ knitr::include_graphics("images/clusters-rstudio-server.png")
 
 Project [Jupyter](http://jupyter.org/) exists to develop open-source software, open-standards, and services for interactive computing across dozens of programming languages. A Jupyter notebook, provide support for various programming languages, including R. `sparklyr` can be used with Jupyter notebooks using the R Kernel.
 
-```{r jupyter-project, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Project Jupyter.'}
+```{r clusters-jupyter-project, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Project Jupyter.'}
 knitr::include_graphics("images/clusters-jupyter.png")
 ```
 ![Project Jupyter.](images/clusters-jupyter.png)
@@ -364,23 +367,24 @@ knitr::include_graphics("images/clusters-jupyter.png")
 
 [Apache Livy](https://livy.incubator.apache.org/) is an incubation project in Apache providing support to use Spark clusters remotely through a web interface. It is ideal to connect directly into the Spark cluster; however, there are times where connecting directly to the cluster is not feasible. When facing those constraints, one can consider installing Livy in their cluster and secure it properly to enable remote use over web protocols. However, there is a significant performance overhead from using Livy in `sparklyr`.
 
-```{r apache-livy, eval = FALSE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Apache Livy Landing Site.'}
+```{r clusters-apache-livy, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Apache Livy Landing Site.'}
 knitr::include_graphics("images/clusters-apache-livy.png")
 ```
 ![Apache Livy Landing Site.](images/clusters-apache-livy.png)
 
 To help test Livy locally, `sparklyr` provides support to list, install, start and stop a local Livy instance by executing:
 
-```{r echo=FALSE}
+```{r clusters-livy-header, echo=FALSE, eval=TRUE}
 library(sparklyr)
 ```
 
-```{r}
+```{r clusters-livy-available, eval=TRUE}
 # List versions of Livy available to install
 livy_available_versions()
 ```
 
-```{r eval=FALSE}
+
+```{r clusters-livy-install}
 # Install default Livy version
 livy_install()
 
