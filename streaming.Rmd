@@ -1,3 +1,7 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 # Streaming {#streaming}
 
 ## Overview
@@ -14,21 +18,21 @@ In order to use structured streams in `sparklyr`, one needs to define the **sour
 
 Since the transformation step is optional, the simplest stream we can define is to continuously process files, which would effectively copy text files between source and destination. We can define this copy-stream in `sparklyr` as follows:
 
-```{r echo=FALSE}
+```{r streaming-overview-prepare, echo=FALSE}
 unlink(c("source/", "destination/"), recursive = TRUE)
 dir.create("source")
 ```
-```{r}
+```{r streaming-overview-connect}
 library(sparklyr)
 sc <- spark_connect(master = "local")
 stream <- stream_read_text(sc, "source/") %>% stream_write_text("destination/")
 ```
 
 The streams starts running with `stream_write_*()`; once executed, the stream will monitor the `source` path and process data into the `destination/` path as it arrives. We can use `view_stream()` to track the **rows per second (rps)** being processed in the source, destination and their latest values over time:
-```{r eval=FALSE}
+```{r streaming-overview-view, eval=FALSE}
 stream_view(stream)
 ```
-```{r echo=FALSE, eval=FALSE}
+```{r streaming-overview-stats, echo=FALSE, eval=FALSE}
 stream_artificial_stats <- function(stream, path) {
   unlink(c("source/"), recursive = TRUE)
   dir.create("source")
@@ -48,7 +52,7 @@ stream_artificial_stats <- function(stream, path) {
 }
 stream_artificial_stats(stream, "data/11-streaming-overview.rds")
 ```
-```{r echo=FALSE, fig.align = 'center', out.width='100%', out.height='280pt', fig.cap='Viewing a Spark Stream with sparklyr'}
+```{r streaming-overview-render, eval=TRUE, echo=FALSE, fig.align = 'center', out.width='100%', out.height='280pt', fig.cap='Viewing a Spark Stream with sparklyr'}
 library(sparklyr)
 readRDS("data/11-streaming-overview.rds") %>% stream_render(stats = .)
 ```
@@ -57,27 +61,27 @@ Notice that the rows-per-second in the destination stream are higher than the ro
 
 Use `stream_stop()` to properly stop processing data from this stream:
 
-```{r eval=FALSE}
+```{r streaming-overview-stop, eval=FALSE}
 stream_stop(stream)
 ```
 
 In order to reproduce the above example, one needs to feed streaming data into the `source/` path. This was accomplished by running `stream_generate_test()` to produce a file every second containing lines of text that follow overlapping binomial distributions. In practice, you would connect to existing sources without having to generate data artificially. See `?stream_generate_test` for additional details and make sure the `later` package is installed.
 
-```{r eval=FALSE}
+```{r streaming-overview-test, eval=FALSE}
 stream_generate_test(paste("Row", 1:1000), "source/")
 ```
 
 For the subsequent examples, a stream with one hundred rows of text will be used:
 
-```{r}
+```{r streaming-overview-lines, }
 writeLines(paste("Row", 1:100), "source/rows.txt")
 ```
 
-## Transformations
+## Transformations {#streaming-treansform}
 
 Streams can be transformed using `dplyr`, SQL, pipelines or R code. We can use as many transformations as needed in the same way that Spark data frames can be transformed with `sparklyr`. The transformation source can be streams or data frames but the output is always a stream. If needed, one can always take a snapshot from the destination stream and save the output as a data frame, which is what `sparklyr` will do for you if a destination stream is not specified. Conceptually, this looks as follows:
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='280pt', fig.cap='Streams Transformation Diagram'}
+```{r streaming-treansform, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='280pt', fig.cap='Streams Transformation Diagram'}
 r2d3::r2d3(
   c(),
   file.path("images", "11-streaming-transformations.js"),
@@ -90,7 +94,7 @@ r2d3::r2d3(
 
 Using `dplyr`, we can process each row of the stream; for example, we can filter the stream to only the rows containing a number one:
 
-```{r}
+```{r streaming-treansform-dplyr}
 library(dplyr, warn.conflicts = FALSE)
 
 stream_read_text(sc, "source/") %>%
@@ -101,14 +105,14 @@ Since the destination was not specified, `sparklyr` creates a temporary memory s
 
 We can also aggregate data with `dplyr`,
 
-```{r}
+```{r streaming-treansform-read}
 stream_read_text(sc, "source/") %>%
   summarise(n = n())
 ```
 
 and even join across many concurrent streams:
 
-```{r}
+```{r streaming-treansform-join}
 left_join(
   stream_read_text(sc, "source/") %>% stream_watermark(),
   stream_read_text(sc, "source/") %>% stream_watermark() %>% mutate(random = rand()),
@@ -123,7 +127,7 @@ Spark pipelines can be used for scoring streams, but not to train over streaming
 
 To use a pipeline for scoring a stream, first train a Spark pipeline over a static dataset. Once trained, save the pipeline, then reload and score over a stream as follows:
 
-```{r eval=FALSE}
+```{r  streaming-treansform-pipelines, eval=FALSE}
 fitted_pipeline <- ml_load(sc, "iris-fitted/")
 
 stream_read_csv(sc, "iris-in") %>%
@@ -137,7 +141,7 @@ Arbitrary R code can also be used to transform a stream with the use of `spark_a
 
 The following example splits a stream of `Row #` line entries and adds jitter using R code:
 
-```{r}
+```{r streaming-spark-apply}
 stream_read_text(sc, "source/") %>%
   spark_apply(~ jitter(as.numeric(gsub("Row ", "", .x$text))))
 ```
@@ -148,7 +152,7 @@ Streams can be used with Shiny by making use of the `reactiveSpark()` to retriev
 
 The following Shiny application makes use of `reactiveSpark()` to view a Spark stream summarized with `dplyr`:
 
-```{r eval = FALSE}
+```{r streaming-shiny, eval = FALSE}
 library(shiny)
 library(sparklyr)
 library(dplyr)
@@ -176,7 +180,7 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server)
 ```
 
-```{r echo=FALSE, message=FALSE}
+```{r streaming-shiny-disconnect, echo=FALSE, message=FALSE}
 spark_disconnect(sc)
 
 unlink("source/", recursive = TRUE)
@@ -190,7 +194,6 @@ The following formats are available to read and write streaming data:
 | Format  | Read                | Write                |
 |---------|---------------------|----------------------|
 | CSV     | stream_read_csv     | stream_write_csv     |
-| JDBC    | stream_read_jdbc    | stream_write_jdbc    |
 | JSON    | stream_read_json    | stream_write_json    |
 | Kafka   | stream_read_kafka   | stream_write_kafka   |
 | ORC     | stream_read_orc     | stream_write_orc     |
