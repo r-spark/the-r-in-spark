@@ -1,3 +1,7 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 # Extensions {#extensions}
 
 While **this chatper has not been written.**, a few resources are available to help explore these topics until this chapter gets written.
@@ -6,7 +10,7 @@ While **this chatper has not been written.**, a few resources are available to h
 
 [rsparkling](https://github.com/h2oai/rsparkling) provies [H2O](https://www.h2o.ai/) support in Spark using `sparklyr`:
 
-```{r eval=FALSE, echo=FALSE}
+```{r extensions-rsparkling, echo=FALSE}
 library(rsparkling)
 library(sparklyr)
 library(h2o)
@@ -27,17 +31,17 @@ library(h2o)
 cars_h2o <- as_h2o_frame(sc, cars_tbl, strict_version_check = FALSE)
 h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = mtcars_h2o, lambda_search = TRUE)
 ```
-```{r echo=FALSE}
+```{r extensions-rsparkling-results, echo=FALSE}
 readRDS("data/09-extensions-h2o-glm.rds")
 ```
 
 See [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/).
 
-### Trpoubleshooting
+### Troubleshooting
 
 [Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility and simplicity, which happens to be used by Apache Spark while installing extensions. When connection fails while using `rsparkling`, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
 
-```{r eval=FALSE}
+```{r extensions-rsparkling-cache}
 unlink("~/.ivy2/cache", recursive = TRUE)
 ```
 
@@ -45,7 +49,7 @@ unlink("~/.ivy2/cache", recursive = TRUE)
 
 [GraphFrames](https://graphframes.github.io/) provides graph algorithms: PageRank, ShortestPaths, etc.
 
-```{r eval=FALSE, echo=FALSE}
+```{r extensions-graphframes, echo=FALSE}
 library(ggraph)
 library(igraph)
 library(graphframes)
@@ -68,7 +72,7 @@ model <- gf_graphframe(vertices_tbl, edges_tbl) %>%
 highschool_tbl %>% collect() %>%
   saveRDS("data/09-extensions-graphframes-highschool.rds")
 ```
-```{r eval=FALSE}
+```{r extensions-graphframes-code}
 gf_graphframe(vertices_tbl, edges_tbl) %>% gf_pagerank(reset_prob = 0.15, max_iter = 10L)
 ```
 ```
@@ -81,7 +85,7 @@ Edges:
   $ dst    <dbl> 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 65, 65, 65, 65, 65, 65, 6...
   $ weight <dbl> 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0...
 ```
-```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, fig.cap='Highschool ggraph dataset with pagerank highlighted.', fig.align='center'}
+```{r extensions-graphframes-chart, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, fig.cap='Highschool ggraph dataset with pagerank highlighted.', fig.align='center'}
 library(ggraph)
 library(igraph)
 highschool_rdf <- readRDS("data/09-extensions-graphframes-highschool.rds")
@@ -99,7 +103,7 @@ See also [spark.rstudio.com/graphframes](http://spark.rstudio.com/graphframes/).
 
 [Mleap](https://github.com/rstudio/mleap) enables Spark pipelines in production.
 
-```{r eval=FALSE}
+```{r extensions-mleap}
 # Create pipeline
 pipeline_model <- ml_pipeline(sc) %>%
   ft_binarizer("hp", "big_hp", threshold = 100) %>%
@@ -137,6 +141,6 @@ See also [spark.rstudio.com/guides/mleap](http://spark.rstudio.com/guides/mleap/
 
 ## Nested Data {#extensions-nested-data}
 
-```{r eval=FALSE}
+```{r extensions-nested}
 library(sparklyr.nested)
 ```
