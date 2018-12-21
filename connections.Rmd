@@ -1,3 +1,7 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 # Connections {#connections}
 
 The previous chapter, [Clusters](#clusters), presented the major cluster computing paradigms, cluster managers and cluster providers; this section explains the internal components of a Spark cluster and the how to perform connections to any cluster running Apache Spark.
@@ -12,7 +16,7 @@ In a Spark cluster, there are three types of compute instances that are relevant
 
 Strictly speaking, the driver node and worker nodes are just names assigned to machines with particular roles, while the actual computation in the driver node is performed by the **spark context**. The Spark context is a Spark component tasked with scheduling tasks, managing data and so on. In the worker nodes, the actual computation is performed under a **spark executor**, which is also a Spark component tasked with executing subtasks against a data partition.
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='220pt', fig.cap='Apache Spark Architecture'}
+```{r connections-architecture, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='220pt', fig.cap='Apache Spark Architecture'}
 
 connection_diagram <- function(name) {
   r2d3::r2d3(
@@ -35,7 +39,7 @@ Before connecting to Apache Spark, you will first have to connect to the cluster
 - **Terminal**: Using a [computer terminal](https://en.wikipedia.org/wiki/Computer_terminal) applicaiton, one can use a [secure shell](https://en.wikipedia.org/wiki/Secure_Shell) to establish a remote connection into the cluster, once you connect into the cluster, you can launch R and then use `sparklyr`.
 - **Web Browser**: While using `sparklyr` from a terminal is possible, it is usually more producty to install a **web server** in an edge node that provides more tools and functionality to run R with `sparklyr`. Most likely, you will want to consider using [RStudio Server](RStudio Server) rather than connecting from the terminal.
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='140pt', fig.cap='Using a Spark Cluster from an Edge Node'}
+```{r connections-edge-node, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='140pt', fig.cap='Using a Spark Cluster from an Edge Node'}
 
 connection_diagram <- function(name) {
   r2d3::r2d3(
@@ -55,7 +59,7 @@ It is important to mention that, while connecting to a Spark cluster, you will n
 
 For system administrators, we recommend you set `SPARK_HOME` for all the users in your cluster; however, if this is not set in your cluster you can also specify `SPARK_HOME` while using `spark_connect()` as follows:
 
-```{r eval=FALSE}
+```{r connections-spark-home}
 sc <- spark_connect(master = "cluster-master", spark_home = "local/path/to/spark")
 ```
 
@@ -67,7 +71,7 @@ Where `cluster-master` is set to the correct cluster manager master for [Spark S
 
 When connecting to Spark in local mode, Spark starts as a single application simulating a cluster with a single node, this is not a proper computing cluster but is ideal to perform work offline and troubleshoot issues. A local connection to Spark is represented in the following diagram:
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='160pt', fig.cap='Local Connection Diagram'}
+```{r connections-local, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='160pt', fig.cap='Local Connection Diagram'}
 connection_diagram("06-connections-local.js")
 ```
 
@@ -75,14 +79,14 @@ Notice that in the local connections diagram, there is no cluster manager nor wo
 
 To perform this local connection, we can connect with the following familiar code used in previous chapters:
 
-```{r eval=FALSE}
+```{r connections-local-connect}
 # Connect to local Spark instance
 sc <- spark_connect(master = "local")
 ```
 
 By default, `sparklyr`, will connect using as many CPU cores are available in your compute instance; however, this can be customized by connecting using `master="local[n]"`, where `n` is the desired number of cores to use. For example, we can connect using only 2 CPU cores as follows:
 
-```{r eval=FALSE}
+```{r connections-local-connect-cpus}
 # Connect to local Spark instance using 2 cores
 sc <- spark_connect(master = "local[2]")
 ```
@@ -93,13 +97,13 @@ Connecting to a Spark Standalone cluster requires the location of the cluster ma
 
 A connection in standalone mode starts from `sparklyr` launching `spark-submit` to submit the `sparklyr` application and creating the Spark Context, which requests executors to Spark's standalone cluster manager in the `master` location:
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Spark Standalone Connection Diagram'}
+```{r connections-standalone, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Spark Standalone Connection Diagram'}
 connection_diagram("06-connections-standalone.js")
 ```
 
 In order to connect, use `master="spark://hostname:port"` in `spark_connect()` as follows:
 
-```{r eval=FALSE}
+```{r connections-standalone-connect}
 sc <- spark_connect(master = "spark://hostname:port")
 ```
 
@@ -111,13 +115,13 @@ Hadoop YARN supports two connection modes: YARN Client and YARN Cluster. However
 
 When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as follows:
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='YARN Client Connection Diagram'}
+```{r connections-yarn, eval=TRUE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='YARN Client Connection Diagram'}
 connection_diagram("06-connections-yarn-client.js")
 ```
 
 To connect, one can simply run with `master = "yarn"` as follows:
 
-```{r eval=FALSE}
+```{r connections-yarn-connect}
 sc <- spark_connect(master = "yarn-client")
 ```
 
@@ -127,13 +131,13 @@ Once connected, you can use all techniques described in previous chapters using 
 
 The main difference between YARN Cluster mode and YARN Client mode is that in YARN Cluster mode, the driver node is not required to be the node where R and sparklyr get started; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using YARN Cluster when the edge node has too many concurrent users, is lacking computing resources or where tools (like RStudio) need to be managed independently of other clsuter resources.
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='YARN Cluster Connection Diagram'}
+```{r connections-yarn-cluster, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='YARN Cluster Connection Diagram'}
 connection_diagram("06-connections-yarn-cluster.js")
 ```
 
 To connect in YARN Cluster mode, we can simple run:
 
-```{r eval=FALSE}
+```{r connections-yarn-cluster-connect, eval=FALSE}
 sc <- spark_connect(master = "yarn-cluster")
 ```
 
@@ -143,13 +147,13 @@ This connection assumes that the node running `spark_connect()` is properly conf
 
 As opposed to other connection methods which require using an edge node in the cluster, [Livy](clusters-livy) Livy provides a **Web API** that makes the Spark cluster accessible from outside the cluster and neither requires a local installation in the client. Once connected through the Web API, the **Livy Service** starts the Spark context by requesting reosurces from the cluster manager and distributing work as usual.
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Livy Connection Diagram'}
+```{r connections-livy, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Livy Connection Diagram'}
 connection_diagram("06-connections-livy.js")
 ```
 
 Conencting through Livy requires the URL to the Livy service which should be similar to `https://hostname:port/livy`. Since remote connections are allowed, connections usually requires, at the very least, basic authentication:
 
-```{r eval=FALSE}
+```{r connections-livy-connect}
 sc <- spark_connect(master = "https://hostname:port/livy", method = "livy", config = livy_config(
   username="<username>",
   password="<password>"
@@ -162,13 +166,13 @@ Once connected through Livy, operations you can make use of an other `sparklyr` 
 
 Similar to YARN, Mesos supports client mode and a cluster mode. However, `sparklyr` currently only supports client mode for Mesos.
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Mesos Connection Diagram'}
+```{r connections-mesos, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Mesos Connection Diagram'}
 connection_diagram("06-connections-mesos.js")
 ```
 
 Connecting requires the address to the Mesos master node, usually in the form of `mesos://host:port` or `mesos://zk://host1:2181,host2:2181,host3:2181/mesos` for Mesos using ZooKeeper.
 
-```{r eval=FALSE}
+```{r connections-mesos-connect, eval=FALSE}
 sc <- spark_connect(master = "mesos://host:port")
 ```
 
@@ -176,13 +180,13 @@ sc <- spark_connect(master = "mesos://host:port")
 
 Kubernetes cluster do not support client modes similar to Mesos or YARN, instead, the connection model is similar to YARN Cluster, where the driver node is assigned by Kubernetes.
 
-```{r echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Kubernetes Connection Diagram'}
+```{r connections-kubernetes, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Kubernetes Connection Diagram'}
 connection_diagram("06-connections-kubernetes.js")
 ```
 
 Kubernetes support is scheduled to be added to `sparklyr` with [sparklyr/issues/1525](https://github.com/rstudio/sparklyr/issues/1525), please follow progress for this feature directly in github. Once Kubernetes becomes supported in `sparklyr`, connecting to Kubernetes will work as follows:
 
-```{r eval=FALSE}
+```{r connections-kubernetes-connect, eval=FALSE}
 sc <- spark_connect(
   master = "k8s://https://<apiserver-host>:<apiserver-port>"
   config = list(
@@ -194,7 +198,7 @@ sc <- spark_connect(
 
 If your computer is already configured to use a Kubernetes cluster, you can use the following commmand to find the `apiserver-host` and `apiserver-port`:
 
-```{r eval=FALSE}
+```{r connections-kubernetes-info}
 system2("kubectl", "cluster-info")
 ```
 
@@ -202,21 +206,21 @@ system2("kubectl", "cluster-info")
 
 Connections to Spark from Databricks requires the following custom connection method:
 
-```{r eval=FALSE}
+```{r connections-clusters-databricks}
 library(sparklyr)
 sc <- spark_connect(method = "databricks")
 ```
 
 Similarily, connections to Spark when using IBM's Watson Studio require a custom connection method:
 
-```{r eval=FALSE}
+```{r connections-clusters-ibm}
 kernels <- load_spark_kernels()
 sc <- spark_connect(config = kernels[2])
 ```
 
 Under Microsoft Azure HDInsights and when using ML Services (R Server), creating an `sparklyr` connection looks like the following:
 
-```{r eval=FALSE}
+```{r connections-clusters-azure}
 library(RevoScaleR)
 cc <- rxSparkConnect(reset = TRUE, interop = "sparklyr")
 sc <- rxGetSparklyrConnection(cc)
@@ -230,13 +234,13 @@ In general, please reference your cloud provider documentation and their support
 
 One first step is to troubleshoot connections is to run in verbose to print directly to the console additional error messages:
 
-```{r eval=FALSE}
+```{r connections-troubleshoot-logging}
 sc <- spark_connect(master = "local", log = "console")
 ```
 
 Verbose logging can also be enabled with the follwing option:
 
-```{r}
+```{r connections-troubleshoot-verbose}
 options(sparklyr.verbose = TRUE)
 ```
 
@@ -244,7 +248,7 @@ options(sparklyr.verbose = TRUE)
 
 If connections fail in `sparklyr`, first troubleshoot if this issue is specific to `sparklyr` or Spark in general. This can be accomplished by running an example `spark-submit` job and validating that no errors are thrown:
 
-```{r eval=FALSE}
+```{r connections-troubleshoot-spark-home}
 # Find the spark directory using an environment variable
 Sys.getenv("SPARK_HOME")
 
@@ -263,7 +267,7 @@ bin/spark-submit
 
 It is common to connect once, and only once, to Spark. However, you can also open multiple connections to Spark by connecting to different clusters or by specifying the `app_name` parameter, this can be helpful to compare Spark versions or validate you analysis before submitting to the cluster. The following example opens connections to Spark 1.6.3, 2.3.0 and Spark Standalone:
 
-```{r eval=FALSE}
+```{r connections-multiple}
 # Connect to local Spark 1.6.3
 sc_1_6_3 <- spark_connect(master = "local", version = "1.6.3")
 
@@ -276,7 +280,7 @@ sc_standalone <- spark_connect(master = "spark://host:port")
 
 Finally, we can disconnect from each connection:
 
-```{r eval=FALSE}
+```{r connections-multiple-disconnect}
 spark_disconnect(sc_1_6_3)
 spark_disconnect(sc_2_3_0)
 spark_disconnect(sc_standalone)
@@ -284,7 +288,7 @@ spark_disconnect(sc_standalone)
 
 Alternatevely, you can disconnect from all connections at once:
 
-```{r eval=FALSE}
+```{r connections-multiple-disconnect-all}
 spark_disconnect_all()
 ```
 
@@ -303,7 +307,7 @@ This 2-step initialization os performed by launching `sparklyr` through `spark-s
 
 First, [identify the Spark installation directory](troubleshoot-spark-submit). Second, identify the path to the correct `sparklyr*.jar`, you can find this path by running;
 
-```{r}
+```{r connections-manual-submit}
 dir(system.file("java", package = "sparklyr"), pattern = "sparklyr", full.names = T)
 ```
 
@@ -311,16 +315,16 @@ Make sure you identify the correct version that matches your Spark cluster, for 
 
 Third, from the terminal run:
 
-```{r echo=FALSE}
+```{r connections-manual-submit-prep, echo=FALSE}
 recent_jars <- dir(system.file("java", package = "sparklyr"), pattern = gsub("\\.[0-9]", "", paste("sparklyr", sparklyr::spark_default_version()$spark, sep = "-")), full.names = T)
 Sys.setenv(PATH_TO_SPARKLYR_JAR = recent_jars[[length(recent_jars)]])
 ```
 
-```{r echo=FALSE}
+```{r connections-manual-submit-env, echo=FALSE}
 Sys.setenv(SPARK_HOME = sparklyr::spark_home_dir())
 ```
 
-```{bash eval=FALSE}
+```{bash}
 $SPARK_HOME/bin/spark-submit --class sparklyr.Shell $PATH_TO_SPARKLYR_JAR 8880 12345
 ```
 
@@ -335,12 +339,12 @@ The parameter `8880` represents the default port to use in `sparklyr` while `123
 
 Then, from R, connect as follows, notice that there is a 60 seconds timeout, so you'll have to run the R command immediately after running the terminal command:
 
-```{r eval=FALSE}
+```{r connections-manual-submit-}
 library(sparklyr)
 sc <- spark_connect(master = "sparklyr://localhost:8880/12345", version = "2.3")
 ```
 
-```{r eval=FALSE, echo=FALSE}
+```{r  connections-manual-submit-disconnect, echo=FALSE}
 spark_disconnect_all()
 Sys.setenv(SPARK_HOME = "")
 ```
