@@ -17,7 +17,7 @@ Mathematician George Stibitz used the word **digital** to describe fast electric
 
 The world bank report on digital development provides an estimate of digital and analog information stored over the last decades[@data-revolution]. This report found out that digital information surpassed analog information around 2003, at that time, there were aboput 10M terabytes of digital information, which is roughly about 10M computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at [exponential rates](#appendix-storage-capacity):
 
-```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='World’s capacity to store information.', fig.align = 'center'}
+```{r intro-store-capacity-code, echo=FALSE}
 suppressMessages(library(tidyverse))
 read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
   gather(key = storage, value = capacity, analog, digital) %>%
@@ -34,7 +34,9 @@ read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
     theme(legend.position = "bottom") +
     ggsave("images/intro-world-store-capacity.png", width = 10, height = 6)
 ```
-![World’s capacity to store information.](images/intro-world-store-capacity.png)
+```{r intro-store-capacity-render, eval=TRUE, echo=FALSE, fig.cap='World’s capacity to store information.', fig.align = 'center'}
+render_image("images/intro-world-store-capacity.png", "World’s capacity to store information.")
+```
 
 With the ambition to provide tools capable of searching all this new digital information, many companies attempted to provide such functionality with what we know today as search engines, used when searching the web. Given the vast amount of digital information, managing information at this scale was a challenging problem. Search engines were unble to store all the web page information required to support web searches in a single computer. This meant that they had to split information across many machines, which was accomlished by splitting this data and storing it as many files across many machines. This approach became known as the Google File System from a research paper published in 2003 by Google[@google-file-system].
 
@@ -74,7 +76,7 @@ While Hadoop provided support to perform MapReduce operations over a distributed
 In 2009, **Apache Spark** starts as a research project at the UC Berkeley's AMPLab to improve over MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines and, by loading data in-memory which made operations much fasters than Hadoop's on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the [modeling](#modeling) chapter, allowed Spark to run 10x faster than Hadoop by making use of in-memory datasets[@zaharia2010spark].
 
 
-```{r echo=FALSE}
+```{r intro-spark-logistic-regression, echo=FALSE}
 iterations <- c(1, 1:6 * 5)
 data.frame(
   iteration = rep(iterations, 2),
@@ -86,7 +88,9 @@ data.frame(
   theme_light() +
   ggsave("images/intro-hadoop-spark-logistic-regression.png", width = 10, height = 4)
 ```
-![Logistic regression performance in Hadoop and Spark.](images/intro-hadoop-spark-logistic-regression.png)
+```{r intro-spark-logistic-regression-render, eval=TRUE, echo=FALSE, fig.cap='Logistic regression performance in Hadoop and Spark.'}
+render_image("images/intro-hadoop-spark-logistic-regression.png", "Logistic regression performance in Hadoop and Spark.")
+```
 
 While Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. For instance, Spark holds [records in large-scale sorting](http://sortbenchmark.org/), where data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU's cache to dramatically improve performance. For comparison, one can [sort 100TB of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23min using Spark](https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html), it's also the case that [Spark holds the record in the cloud sorting benchmark ](https://spark.apache.org/news/spark-wins-cloudsort-100tb-benchmark.html), which makes Spark the most cost effective solution for large-scale sorting.
 
@@ -138,10 +142,9 @@ Some people refer to some of these benefits as [the four 'V's of big data](http:
 
 R is a computing language with it's inception dating back to Bell Laboratories. R was not created at Bell Labs, but it's predecesor, the S computing language was. [Rick Becker explained in useR 2016](https://blog.revolutionanalytics.com/2016/07/rick-becker-s-talk.html) that at that time in Bell Labs, computing was done by calling subroutines written in the Fortran language which, apparently, were not pleasant to deal with. The S computing language was designed as an interface language to solve particular problems without having to worry about other languages, Fortran at that time. The creator of S, [John Chambers](https://en.wikipedia.org/wiki/John_Chambers_(statistician)), describes how S was designed to provide an interface through the following diagram:
 
-```{r s-diagram, echo = FALSE, fig.cap = 'Interface language diagram by John Chambers - Rick Becker useR 2016.', fig.align = 'center'}
-knitr::include_graphics("images/intro-s-algorithm-interface.png")
+```{r intro-r-diagram, eval=TRUE, echo=FALSE, fig.cap='Interface language diagram by John Chambers - Rick Becker useR 2016.', fig.align = 'center'}
+render_image("images/intro-s-algorithm-interface.png", "Interface language diagram by John Chambers - Rick Becker useR 2016.")
 ```
-![Interface language diagram by John Chambers - Rick Becker useR 2016.](images/intro-s-algorithm-interface.png)
 
 R is a modern and free implementation of S, specifically:
 
@@ -154,7 +157,7 @@ While working with data, I believe there are two strong arguments for using R:
 - The **R Language** was designed by statisticians for statisticians, meaning, this is one of the few successful languages designed for non-programmers; so learning R will probably feel more natural. Additionally, since the R language was designed to be an interface to other tools and languages, R allows you to focus more on modeling and less on peculiarities of computer science and engineering.
 - The **R Community** provides a rich package archive provided by CRAN ([The Comprehensive R Archive Network](https://cran.r-project.org/)) which allows you to install ready-to-use packages to perform many tasks, most notably, high-quality statistic models with many only available in R. In addition, the R community is a welcoming and active group of talented individuals motivated to help you succeed. Many packages provided by the R community make R, by far, the place to do statistical computing. To mention some of the popular packages: [dplyr](https://CRAN.R-project.org/package=dplyr) to manipulate data, [cluster](https://CRAN.R-project.org/package=cluster) to analyze clusters and [ggplot2](https://CRAN.R-project.org/package=ggplot2) to visualize data. We can quantify the [growth of the R community](#appendix-cran-downloads) by plotting daily downloads of R packages in CRAN.
 
-```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='Daily downloads of CRAN packages.', fig.align = 'center'}
+```{r intro-cran-downloads-code, echo=FALSE}
 downloads_csv <- "data/01-intro-r-cran-downloads.csv"
 if (!file.exists(downloads_csv)) {
   downloads <- cranlogs::cran_downloads(from = "2014-01-01", to = "2018-01-01")
@@ -171,7 +174,9 @@ ggplot(cran_downloads, aes(date, count / 10^6)) +
   theme_light() +
   ggsave("images/intro-daily-cran-downloads.png", width = 10, height = 6)
 ```
-![Daily downloads of CRAN packages.](images/intro-daily-cran-downloads.png)
+```{r intro-cran-downloads-render, eval=TRUE, echo=FALSE, fig.cap='Daily downloads of CRAN packages.', fig.align = 'center'}
+render_image("images/intro-daily-cran-downloads.png", "Daily downloads of CRAN packages.")
+```
 
 Aside from statistics, R is also used in many other fields, the following ones are particularily relevant to this book:
 

@@ -1,5 +1,6 @@
-```{r include=FALSE}
+```{r include=FALSE, eval=TRUE}
 knitr::opts_chunk$set(eval = FALSE)
+source("r/render.R")
 ```
 
 # Tuning {#tuning}
@@ -23,7 +24,7 @@ Spark performs distributed computation by: configuring, partitioning, executing,
 
 The following diagram shows an example on how a sorting **job** would conceptually work across a cluster of machines. First, Spark would **configure** the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the data is already partitioned, each worker node loads this implicit **partition**; for instance, `4,9,1` is loaded in the first worker node. Afterwards, a custom transformation is applied to each partition in each worker node, this is denoted by `f(x)` in the diagram below and is defined as a **stage** in Spark terminalogy. In this example, `f(x)` **executes** a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed. Once the execution completes, the result is **shuffled** to the right machine to finish the sorting operation across the entire dataset. Once the data is sorted across the cluster, the sorted results can be optionally **cached** in memory to avoid rerunning this computation multiple times. Finally, a small subset of the cached results is **serialized**, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.
 
-```{r tuning-overview, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Spark Sorting Overview'}
+```{r tuning-overview, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Spark Sorting Overview'}
 
 r2d3::r2d3(
   c(),
@@ -69,8 +70,8 @@ webshot::webshot(
 spark_disconnect(sc)
 ```
 
-```{r tuning-graph-render, echo=FALSE, fig.align = 'center', fig.cap='Spark Graph Visualization'}
-knitr::include_graphics("images/tuning-spark-graph-visualization.png")
+```{r tuning-graph-render, eval=TRUE, echo=FALSE, fig.align = 'center', fig.cap='Spark Graph Visualization.'}
+render_image("images/tuning-spark-graph-visualization.png", "Spark Graph Visualization.")
 ```
 
 ### Event Timeline {#tunning-event-timeline}
@@ -106,8 +107,8 @@ webshot::webshot(
 spark_disconnect(sc)
 ```
 
-```{r tuning-timeline-shot, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline'}
-knitr::include_graphics("images/tuning-spark-event-timeline.png")
+```{r tuning-timeline-shot, eval=TRUE, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline.'}
+render_image("images/tuning-spark-event-timeline.png", "Spark Event Timeline.")
 ```
 
 ## Configuring {#tunning-configuring}
@@ -307,8 +308,8 @@ invisible(webshot::webshot(
 ))
 ```
 
-```{r tunning-caching-rdd-shot, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Cached RDD in Spark Web Interface.'}
-knitr::include_graphics("images/tuning-cache-rdd-web.png")
+```{r tunning-caching-rdd-shot, eval=TRUE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Cached RDD in Spark Web Interface.'}
+render_image("images/tuning-cache-rdd-web.png", "Cached RDD in Spark Web Interface.")
 ```
 
 Data loaded in memory will be released when the R session terminates either explicitly or implicitly with a restart or disconnection; however, to free up resources, you can use `tbl_uncache()`:

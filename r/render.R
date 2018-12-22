@@ -7,3 +7,11 @@ render_nomnoml <- function(code, png, caption, styles = "") {
     nomnoml::nomnoml(paste0(styles, "\n", code))
   }
 }
+
+render_image <- function(image, caption) {
+  if (identical(Sys.getenv("ASCIITEXT_RENDERING"), "TRUE")) {
+    knitr::asis_output(paste0("![", caption, "](", image, ")"))
+  } else {
+    knitr::include_graphics(image)
+  }
+}

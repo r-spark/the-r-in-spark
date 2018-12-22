@@ -1,7 +1,6 @@
-```{r include=FALSE}
+```{r include=FALSE, eval=TRUE}
 knitr::opts_chunk$set(eval = FALSE)
-```
-```{r echo=FALSE, eval=TRUE}
+source("r/render.R")
 library(sparklyr)
 ```
 
@@ -32,19 +31,17 @@ Additionally, since Spark is build in the Scala programming language which is ru
 
 From [r-project.org](https://r-project.org/), download and launch the R installer for your platform, Windows, Macs or Linux available.
 
-```{r starting-r-download, echo=FALSE, fig.width=4, fig.align='center', fig.cap='The R Project for Statistical Computing.'}
-knitr::include_graphics("images/starting-download-r.png")
+```{r starting-r-download, eval=TRUE, echo=FALSE, fig.width=4, fig.align='center', fig.cap='The R Project for Statistical Computing.'}
+render_image("images/starting-download-r.png", "The R Project for Statistical Computing.")
 ```
-![The R Project for Statistical Computing.](images/starting-download-r.png)
 
 ### Install Java {#starting-install-java}
 
 From [java.com/download](https://java.com/download), download and launch the installer for your platform, Windows, Macs or Linux are also available.
 
-```{r starting-java-download, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Java Download.'}
-knitr::include_graphics("images/starting-download-java.png")
+```{r starting-java-download, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Java Download Page.'}
+render_image("images/starting-download-java.png", "Java Download Page.")
 ```
-![Java Download.](images/starting-download-java.png)
 
 Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java 8.
 
@@ -52,10 +49,9 @@ Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark
 
 While installing RStudio is not strictly required to work with Spark with R, it will make you much more productive and therefore, I would recommend you take the time to install RStudio from [rstudio.com/download](https://www.rstudio.com/download), then download and launch the installer for your platform: Windows, Macs or Linux.
 
-```{r starting-rstudio-download, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Downloads.'}
-knitr::include_graphics("images/starting-rstudio.png")
+```{r starting-rstudio-download, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Downloads Page.'}
+render_image("images/starting-rstudio.png", "RStudio Downloads Page.")
 ```
-![RStudio Downloads.](images/starting-rstudio.png)
 
 After launching RStudio, you can use RStudio's console panel to execute the code provided in this chapter.
 
@@ -76,11 +72,9 @@ devtools::install_github("rstudio/sparklyr")
 
 The `sparklyr` GitHub repository contains all the latest features,issues and project updates; it's the place where `sparklyr` is actevely developed and a resource that is helpful while troubleshooting issues.
 
-```{r starting-install-github, fig.width=4, fig.align='center', echo=FALSE, fig.cap='GitHub Repository for sparklyr.'}
-knitr::include_graphics("images/starting-sparklyr-github.png")
+```{r starting-install-github, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='GitHub Repository for sparklyr.'}
+render_image("images/starting-sparklyr-github.png", "GitHub Repository for sparklyr.")
 ```
-
-![The sparklyr GitHub code repository.](images/starting-sparklyr-github.png)
 
 ## Installing Spark {#starting-installing-spark}
 
@@ -184,10 +178,9 @@ invisible(webshot::webshot(
   zoom = 2
 ))
 ```
-```{r starting-spark-render, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Apache Spark Web Interface.'}
-knitr::include_graphics("images/starting-spark-web.png")
+```{r starting-spark-render, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Apache Spark Web Interface.'}
+render_image("images/starting-spark-web.png", "Apache Spark Web Interface.")
 ```
-![Apache Spark Web Interface.](images/starting-spark-web.png)
 
 As mentioned, printing the "hello" dataset collected a few records to be displayed in the R console. You can see in the Spark web interface that a job was started to collect this information back from Spark. You can also select the **storage** tab to see the "hello" dataset cached in-memory in Spark:
 
@@ -199,10 +192,9 @@ invisible(webshot::webshot(
   zoom = 2
 ))
 ```
-```{r starting-spark-web-storage-render, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Apache Spark Web Interface - Storage Tab.'}
-knitr::include_graphics("images/starting-spark-web-storage.png")
+```{r starting-spark-web-storage-render, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Apache Spark Web Interface - Storage Tab.'}
+render_image("images/starting-spark-web-storage.png", "Apache Spark Web Interface - Storage Tab.")
 ```
-![Apache Spark Web Interface - Storage Tab.](images/starting-spark-web-storage.png)
 
 The [caching](#tunning-caching) section in the [tunning](#tunning) chapter will cover this in detail, but as a start, it's worth noticing that this dataset is fully loaded into memory since the **fraction cached** is 100%, it is useful also to point out the **size in memory** column which tracks the total memory being used by this dataset.
 
@@ -258,26 +250,23 @@ If you are not familiar with RStudio, you will want to identify at least the fol
 - **Packages**: This pane allows you to install `sparklyr` with ease, check its version, navigate to the help contents, etc.
 - **Connections**: This pane allows you to connecto to Spark, manage your active connection and view the available datasets.
 
-```{r  starting-rstudio-overview, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Overview.'}
-knitr::include_graphics("images/starting-rstudio-overview.png")
+```{r starting-rstudio-overview, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Overview.'}
+render_image("images/starting-rstudio-overview.png", "RStudio Overview.")
 ```
-![RStudio Overview.](images/starting-rstudio-overview.png)
 
 To start a new connections to Spark, you can use `spark_connect()` from the R console or, alternatevely, use the **new connection** action from the **connections pane** and then, select the Spark connection.
 
 Once a Spark connection is selected, you can customize the versions and connect to Spark which will simply generate the right `spark_connect()` command and execute this in the R console for you:
 
-```{r starting-rstudio-new-connection, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio New Spark Connection.'}
-knitr::include_graphics("images/starting-rstudio-new-spark-connection.png")
+```{r starting-rstudio-new-connection, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio New Spark Connection.'}
+render_image("images/starting-rstudio-new-spark-connection.png", "RStudio New Spark Connection.")
 ```
-![RStudio New Spark Connection.](images/starting-rstudio-new-spark-connection.png)
 
 Once connected to Spark, either by using the R console or through RStudio's connections pane, RStudio will display your datasets available in the connections pane. This is a useful way to track your existing datasets and provides an easy way to explore each of them:
 
-```{r starting-rstudio-connections-pane, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Connections Pane.'}
-knitr::include_graphics("images/starting-rstudio-connections-pane.png")
+```{r starting-rstudio-connections-pane, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Connections Pane.'}
+render_image("images/starting-rstudio-connections-pane.png", "RStudio Connections Pane.")
 ```
-![RStudio Connections Pane.](images/starting-rstudio-connections-pane.png)
 
 Additionally, an active connection provides the following custom actions:
 
