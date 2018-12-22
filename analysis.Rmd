@@ -45,9 +45,9 @@ Given these definitions, it is actually very common for an R developer to encoun
 
 It is obvious that none of the three strategies are ideal, and this is more likely why an analyst will look into Spark as a way to scale the analysis.
 
-## Running R in Spark
+## Avoid running R inside Spark
 
-As it was personally, the first reaction is to try to run existing R code in a Spark cluster.  The thought is that somehow Spark will take the R code and packages and divide the job between all of the executors in parallel.  Unfortunately, that is not the case.  
+As it was personally, the usual first reaction is to try to run existing R code in a Spark cluster.  The thought is that somehow Spark will take the R code and packages and divide the job between all of the executors in parallel.  Unfortunately, that is not the case.  
 
 Yes, it is true that `sparklyr` offers a way to run R code inside Spark.  But that is reserved for a very specific use case: embarrassingly parallel jobs.  In other words, if the data to be analyzed needs to be first divided into segments, and then the R code is applied to each segment.  
 
@@ -87,7 +87,35 @@ nomnoml::nomnoml("
 
 The authors of this book recommend that this approach should only be considered by advanced R users and experienced Spark/Big Data engineers.  There are several infrastructure considerations that need to be taken into account when using this method in an enterprise cluster, please see the chapter [Distributed R](#distributed) for more information.
 
-## R as an interface to Spark
+## Use R as an interface to Spark
+
+Understanding and applying the concepts in this section are going to be key to a successful analysis using R and Spark. 
+
+First, lets mentally separate R the language, from R as an analysis engine.  In reality, R does not have a calculation engine, it actually depends on other languages to run these operations.  Under the covers, there are C++ and FORTRAN routines that R simply interfaces with in order to run a given calculation.  
+
+What drives data analysts to R, is the fact that all of the complicated lower level code is now behind easy to use and understand R language functions. 
+
+R is not limited to interacting with the languages mentioned above.  There are R packages that allow data analysts to directly interact languages such as python (`reticulate`) and D3 (`r2d3`), or interact indirectly with other languages, such as how the `shiny` package interfaces with JavaScript and HTML on behalf of the developer.
+
+Given this pattern, running R inside Spark, is akin to thinking in terms of running R code using the browser's HTML interpreter, it would not make much sense.  With `shiny`, R writes HTML and JavaScript code to allow the browser do what its good at.  
+
+A better approach then, is to let Spark do what its good at. Which is to be a escalable and parallel computation engine.  Spark goes beyond offering generic calculations. Out of the box, Spark includes libraries that actually can do a lot of what analysts usually do in R, but for large amounts of data. *Figure 3.4* paraphrases the four main capabilities available to data analysts in Spark.
+
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark capabilities', fig.align = 'center', eval = TRUE}
+nomnoml::nomnoml("
+#direction: down
+#fontSize: 18
+#padding: 30
+[Apache Spark |
+  [SQL Engine]
+  [Machine Learning]
+  [Graph analysis]
+  [Streaming]
+]
+")
+```
+
 
 
 
