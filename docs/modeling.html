@@ -616,37 +616,37 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="k-means-clustering" class="section level3">
 <h3><span class="header-section-number">4.3.1</span> K-Means Clustering</h3>
 <p>Here is an example to get you started with K-Means:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a>
-<a class="sourceLine" id="cb27-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb27-3" data-line-number="3"><span class="co"># Connect to Spark in local mode</span></a>
-<a class="sourceLine" id="cb27-4" data-line-number="4">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a>
-<a class="sourceLine" id="cb27-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb27-6" data-line-number="6"><span class="co"># Copy iris to Spark</span></a>
-<a class="sourceLine" id="cb27-7" data-line-number="7">iris_tbl &lt;-<span class="st"> </span><span class="kw">sdf_copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb27-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb27-9" data-line-number="9"><span class="co"># Run K-Means for Species using only Petal_Width and Petal_Length as features</span></a>
-<a class="sourceLine" id="cb27-10" data-line-number="10">iris_tbl <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb27-11" data-line-number="11"><span class="st">  </span><span class="kw">ml_kmeans</span>(<span class="dt">centers =</span> <span class="dv">3</span>, Species <span class="op">~</span><span class="st"> </span>Petal_Width <span class="op">+</span><span class="st"> </span>Petal_Length)</a></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb24-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb24-3" data-line-number="3"><span class="co"># Connect to Spark in local mode</span></a>
+<a class="sourceLine" id="cb24-4" data-line-number="4">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a>
+<a class="sourceLine" id="cb24-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb24-6" data-line-number="6"><span class="co"># Copy iris to Spark</span></a>
+<a class="sourceLine" id="cb24-7" data-line-number="7">iris_tbl &lt;-<span class="st"> </span><span class="kw">sdf_copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb24-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb24-9" data-line-number="9"><span class="co"># Run K-Means for Species using only Petal_Width and Petal_Length as features</span></a>
+<a class="sourceLine" id="cb24-10" data-line-number="10">iris_tbl <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb24-11" data-line-number="11"><span class="st">  </span><span class="kw">ml_kmeans</span>(<span class="dt">centers =</span> <span class="dv">3</span>, Species <span class="op">~</span><span class="st"> </span>Petal_Width <span class="op">+</span><span class="st"> </span>Petal_Length)</a></code></pre></div>
 </div>
 <div id="gaussian-mixture-clustering" class="section level3">
 <h3><span class="header-section-number">4.3.2</span> Gaussian Mixture Clustering</h3>
 <p>Alternatevely, we can also cluster using <a href="https://en.wikipedia.org/wiki/Mixture_model#Gaussian_mixture_model">Gaussian Mixture Models</a> (GMMs).</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1">predictions &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, fueleconomy<span class="op">::</span>vehicles) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb28-2" data-line-number="2"><span class="st">  </span><span class="kw">ml_gaussian_mixture</span>(<span class="op">~</span><span class="st"> </span>hwy <span class="op">+</span><span class="st"> </span>cty, <span class="dt">k =</span> <span class="dv">3</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb28-3" data-line-number="3"><span class="st">  </span><span class="kw">ml_predict</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>()</a>
-<a class="sourceLine" id="cb28-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb28-5" data-line-number="5">predictions <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb28-6" data-line-number="6"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(hwy, cty)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb28-7" data-line-number="7"><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(hwy, cty, <span class="dt">col =</span> <span class="kw">factor</span>(prediction)), <span class="dt">size =</span> <span class="dv">2</span>, <span class="dt">alpha =</span> <span class="fl">0.4</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb28-8" data-line-number="8"><span class="st">  </span><span class="kw">scale_color_discrete</span>(<span class="dt">name =</span> <span class="st">&quot;&quot;</span>, <span class="dt">labels =</span> <span class="kw">paste</span>(<span class="st">&quot;Cluster&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb28-9" data-line-number="9"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Highway&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;City&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme_light</span>()</a></code></pre></div>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" data-line-number="1">predictions &lt;-<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;data/03-gaussian-mixture-prediction.rds&quot;</span>)</a>
-<a class="sourceLine" id="cb29-2" data-line-number="2">predictions <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb29-3" data-line-number="3"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(hwy, cty)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb29-4" data-line-number="4"><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(hwy, cty, <span class="dt">col =</span> <span class="kw">factor</span>(prediction)), <span class="dt">size =</span> <span class="dv">2</span>, <span class="dt">alpha =</span> <span class="fl">0.4</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb29-5" data-line-number="5"><span class="st">  </span><span class="kw">scale_color_discrete</span>(<span class="dt">name =</span> <span class="st">&quot;&quot;</span>, <span class="dt">labels =</span> <span class="kw">paste</span>(<span class="st">&quot;Cluster&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb29-6" data-line-number="6"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Highway&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;City&quot;</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb29-7" data-line-number="7"><span class="st">  </span><span class="kw">theme_light</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" data-line-number="1">predictions &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, fueleconomy<span class="op">::</span>vehicles) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb25-2" data-line-number="2"><span class="st">  </span><span class="kw">ml_gaussian_mixture</span>(<span class="op">~</span><span class="st"> </span>hwy <span class="op">+</span><span class="st"> </span>cty, <span class="dt">k =</span> <span class="dv">3</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb25-3" data-line-number="3"><span class="st">  </span><span class="kw">ml_predict</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>()</a>
+<a class="sourceLine" id="cb25-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb25-5" data-line-number="5">predictions <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb25-6" data-line-number="6"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(hwy, cty)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb25-7" data-line-number="7"><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(hwy, cty, <span class="dt">col =</span> <span class="kw">factor</span>(prediction)), <span class="dt">size =</span> <span class="dv">2</span>, <span class="dt">alpha =</span> <span class="fl">0.4</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb25-8" data-line-number="8"><span class="st">  </span><span class="kw">scale_color_discrete</span>(<span class="dt">name =</span> <span class="st">&quot;&quot;</span>, <span class="dt">labels =</span> <span class="kw">paste</span>(<span class="st">&quot;Cluster&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb25-9" data-line-number="9"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Highway&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;City&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme_light</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1">predictions &lt;-<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;data/03-gaussian-mixture-prediction.rds&quot;</span>)</a>
+<a class="sourceLine" id="cb26-2" data-line-number="2">predictions <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb26-3" data-line-number="3"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(hwy, cty)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb26-4" data-line-number="4"><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(hwy, cty, <span class="dt">col =</span> <span class="kw">factor</span>(prediction)), <span class="dt">size =</span> <span class="dv">2</span>, <span class="dt">alpha =</span> <span class="fl">0.4</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb26-5" data-line-number="5"><span class="st">  </span><span class="kw">scale_color_discrete</span>(<span class="dt">name =</span> <span class="st">&quot;&quot;</span>, <span class="dt">labels =</span> <span class="kw">paste</span>(<span class="st">&quot;Cluster&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb26-6" data-line-number="6"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Highway&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;City&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb26-7" data-line-number="7"><span class="st">  </span><span class="kw">theme_light</span>()</a></code></pre></div>
 <div class="figure"><span id="fig:modeling-gmm-prediciton"></span>
 <img src="the-r-in-spark_files/figure-html/modeling-gmm-prediciton-1.png" alt="Fuel economy data for 1984-2015 from the US EPA" width="672" />
 <p class="caption">
@@ -658,26 +658,26 @@ FIGURE 4.1: Fuel economy data for 1984-2015 from the US EPA
 <div id="broom" class="section level2">
 <h2><span class="header-section-number">4.4</span> Broom</h2>
 <p>You can turn your <code>sparklyr</code> models into data frames using the <code>broom</code> package:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1">model &lt;-<span class="st"> </span>cars_tbl <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb30-2" data-line-number="2"><span class="st">  </span><span class="kw">ml_linear_regression</span>(mpg <span class="op">~</span><span class="st"> </span>wt <span class="op">+</span><span class="st"> </span>cyl)</a>
-<a class="sourceLine" id="cb30-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb30-4" data-line-number="4"><span class="co"># Turn a model object into a data frame</span></a>
-<a class="sourceLine" id="cb30-5" data-line-number="5">broom<span class="op">::</span><span class="kw">tidy</span>(model)</a></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" data-line-number="1">model &lt;-<span class="st"> </span>cars_tbl <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb27-2" data-line-number="2"><span class="st">  </span><span class="kw">ml_linear_regression</span>(mpg <span class="op">~</span><span class="st"> </span>wt <span class="op">+</span><span class="st"> </span>cyl)</a>
+<a class="sourceLine" id="cb27-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb27-4" data-line-number="4"><span class="co"># Turn a model object into a data frame</span></a>
+<a class="sourceLine" id="cb27-5" data-line-number="5">broom<span class="op">::</span><span class="kw">tidy</span>(model)</a></code></pre></div>
 <pre><code>## # A tibble: 3 x 5
 ##   term        estimate std.error statistic  p.value
 ##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
 ## 1 (Intercept)    39.7      1.71      23.1  0       
 ## 2 wt             -3.19     0.757     -4.22 0.000222
 ## 3 cyl            -1.51     0.415     -3.64 0.00106</code></pre>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1"><span class="co"># Construct a single row summary</span></a>
-<a class="sourceLine" id="cb32-2" data-line-number="2">broom<span class="op">::</span><span class="kw">glance</span>(model)</a></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" data-line-number="1"><span class="co"># Construct a single row summary</span></a>
+<a class="sourceLine" id="cb29-2" data-line-number="2">broom<span class="op">::</span><span class="kw">glance</span>(model)</a></code></pre></div>
 <pre><code>## # A tibble: 1 x 5
 ##   explained.varia… mean.absolute.e… mean.squared.er… r.squared
 ##              &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;     &lt;dbl&gt;
 ## 1             29.2             1.92             5.97     0.830
 ## # ... with 1 more variable: root.mean.squared.error &lt;dbl&gt;</code></pre>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1"><span class="co"># Augments each observation in the dataset with the model</span></a>
-<a class="sourceLine" id="cb34-2" data-line-number="2">broom<span class="op">::</span><span class="kw">augment</span>(model, cars_tbl)</a></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" data-line-number="1"><span class="co"># Augments each observation in the dataset with the model</span></a>
+<a class="sourceLine" id="cb31-2" data-line-number="2">broom<span class="op">::</span><span class="kw">augment</span>(model, cars_tbl)</a></code></pre></div>
 <pre><code>## # A tibble: 32 x 14
 ##    `_c0`   mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
 ##    &lt;chr&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;

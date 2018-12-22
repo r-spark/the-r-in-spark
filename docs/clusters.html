@@ -399,20 +399,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <p>However, since Spark Standalone is contained within a Spark installation; then, by completing the <a href="starting.html#starting">getting started</a> chapter, you have now a local Spark installation available that we can use to initialize a local Spark Standalone cluster in a single machine. In practice, you would want to start the worker nodes in different machines but, for simplicity, we will present the code to start a standalone cluster in a single machine.</p>
 <p>First, retrieve the <code>SPARK_HOME</code> directory by running <code>spark_home_dir()</code> then, run <code>start-master.sh</code> and <code>start-slave.sh</code> as follows:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1"><span class="co"># Retrieve the Spark installation directory</span></a>
-<a class="sourceLine" id="cb36-2" data-line-number="2">spark_home &lt;-<span class="st"> </span><span class="kw">spark_home_dir</span>()</a>
-<a class="sourceLine" id="cb36-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb36-4" data-line-number="4"><span class="co"># Build path to start-master.sh</span></a>
-<a class="sourceLine" id="cb36-5" data-line-number="5">start_master &lt;-<span class="st"> </span><span class="kw">file.path</span>(spark_home, <span class="st">&quot;sbin&quot;</span>, <span class="st">&quot;start-master.sh&quot;</span>)</a>
-<a class="sourceLine" id="cb36-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb36-7" data-line-number="7"><span class="co"># Execute start-master.sh to start the cluster manager master node</span></a>
-<a class="sourceLine" id="cb36-8" data-line-number="8"><span class="kw">system2</span>(start_master)</a>
-<a class="sourceLine" id="cb36-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb36-10" data-line-number="10"><span class="co"># Build path to start-slave</span></a>
-<a class="sourceLine" id="cb36-11" data-line-number="11">start_slave &lt;-<span class="st"> </span><span class="kw">file.path</span>(spark_home, <span class="st">&quot;sbin&quot;</span>, <span class="st">&quot;start-slave.sh&quot;</span>)</a>
-<a class="sourceLine" id="cb36-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb36-13" data-line-number="13"><span class="co"># Execute start-slave.sh to start a worker and register in master node</span></a>
-<a class="sourceLine" id="cb36-14" data-line-number="14"><span class="kw">system2</span>(start_slave, <span class="kw">paste0</span>(<span class="st">&quot;spark://&quot;</span>, <span class="kw">system2</span>(<span class="st">&quot;hostname&quot;</span>, <span class="dt">stdout =</span> <span class="ot">TRUE</span>), <span class="st">&quot;:7077&quot;</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" data-line-number="1"><span class="co"># Retrieve the Spark installation directory</span></a>
+<a class="sourceLine" id="cb33-2" data-line-number="2">spark_home &lt;-<span class="st"> </span><span class="kw">spark_home_dir</span>()</a>
+<a class="sourceLine" id="cb33-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb33-4" data-line-number="4"><span class="co"># Build path to start-master.sh</span></a>
+<a class="sourceLine" id="cb33-5" data-line-number="5">start_master &lt;-<span class="st"> </span><span class="kw">file.path</span>(spark_home, <span class="st">&quot;sbin&quot;</span>, <span class="st">&quot;start-master.sh&quot;</span>)</a>
+<a class="sourceLine" id="cb33-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb33-7" data-line-number="7"><span class="co"># Execute start-master.sh to start the cluster manager master node</span></a>
+<a class="sourceLine" id="cb33-8" data-line-number="8"><span class="kw">system2</span>(start_master)</a>
+<a class="sourceLine" id="cb33-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb33-10" data-line-number="10"><span class="co"># Build path to start-slave</span></a>
+<a class="sourceLine" id="cb33-11" data-line-number="11">start_slave &lt;-<span class="st"> </span><span class="kw">file.path</span>(spark_home, <span class="st">&quot;sbin&quot;</span>, <span class="st">&quot;start-slave.sh&quot;</span>)</a>
+<a class="sourceLine" id="cb33-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb33-13" data-line-number="13"><span class="co"># Execute start-slave.sh to start a worker and register in master node</span></a>
+<a class="sourceLine" id="cb33-14" data-line-number="14"><span class="kw">system2</span>(start_slave, <span class="kw">paste0</span>(<span class="st">&quot;spark://&quot;</span>, <span class="kw">system2</span>(<span class="st">&quot;hostname&quot;</span>, <span class="dt">stdout =</span> <span class="ot">TRUE</span>), <span class="st">&quot;:7077&quot;</span>))</a></code></pre></div>
 <p>The previous command initialized the master node and a worker node, the master node interface can be accessed under <a href="http://localhost:8080">localhost:8080</a> and looks like the following:</p>
 <div class="figure">
 <img src="images/clusters-spark-standalone-web-ui.png" alt="Spark Standalone Web Interface." />
@@ -424,11 +424,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p class="caption">Spark Standalone Worker Web Interface.</p>
 </div>
 <p>Once you are done performing computations in this cluster, you can simply stop all the running nodes in this local cluster by running:</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" data-line-number="1"><span class="co"># Build path to stop-all</span></a>
-<a class="sourceLine" id="cb37-2" data-line-number="2">stop_all &lt;-<span class="st"> </span><span class="kw">file.path</span>(spark_home, <span class="st">&quot;sbin&quot;</span>, <span class="st">&quot;stop-all.sh&quot;</span>)</a>
-<a class="sourceLine" id="cb37-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb37-4" data-line-number="4"><span class="co"># Execute stop-all.sh to stop the workers and master nodes</span></a>
-<a class="sourceLine" id="cb37-5" data-line-number="5"><span class="kw">system2</span>(stop_all)</a></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1"><span class="co"># Build path to stop-all</span></a>
+<a class="sourceLine" id="cb34-2" data-line-number="2">stop_all &lt;-<span class="st"> </span><span class="kw">file.path</span>(spark_home, <span class="st">&quot;sbin&quot;</span>, <span class="st">&quot;stop-all.sh&quot;</span>)</a>
+<a class="sourceLine" id="cb34-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb34-4" data-line-number="4"><span class="co"># Execute stop-all.sh to stop the workers and master nodes</span></a>
+<a class="sourceLine" id="cb34-5" data-line-number="5"><span class="kw">system2</span>(stop_all)</a></code></pre></div>
 <p>A similar approach can be followed to configure a cluster by running each <code>start-slave.sh</code> command over each machine in the cluster.</p>
 <p><strong>Note:</strong> When running on a Mac, if you hit: <code>ssh: connect to host localhost port 22: Connection refused</code>, you will need to manually turn off the workers using <code>system2(&quot;jps&quot;)</code> to list the running Java process and then, <code>system2(&quot;kill&quot;, c(&quot;-9&quot;, &quot;&lt;process id&gt;&quot;))</code> to stop the specific workers.</p>
 </div>
@@ -545,7 +545,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p class="caption">Amazon EMR Landing Site.</p>
 </div>
 <p>Amazon Web Services (or AWS for short), published in their Big Data Blog: <a href="https://aws.amazon.com/blogs/big-data/running-sparklyr-rstudios-r-interface-to-spark-on-amazon-emr/">“Running sparklyr on Amazon EMR”</a><span class="citation">(“AWS Blog” <a href="#ref-amazon-emr-sparklyr-blog">2016</a>)</span>, this post introduced the launch of <code>sparklyr</code> and instructions to configure EMR clusters with <code>sparklyr</code>. For instance, using the <a href="https://aws.amazon.com/cli/">Amazon Command Line Interface</a>, you can launch a cluster with 3 nodes as follows:</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb38-1" data-line-number="1"><span class="ex">aws</span> emr create-cluster --applications Name=Hadoop Name=Spark Name=Hive --release-label emr-5.8.0 --service-role EMR_DefaultRole --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.2xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.2xlarge --bootstrap-action Path=s3://aws-bigdata-blog/artifacts/aws-blog-emr-rstudio-sparklyr/rstudio_sparklyr_emr5.sh,Args=[<span class="st">&quot;--user-pw&quot;</span>,<span class="st">&quot;&lt;password&gt;&quot;</span>,<span class="st">&quot;--arrow&quot;</span>] --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole</a></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb35-1" data-line-number="1"><span class="ex">aws</span> emr create-cluster --applications Name=Hadoop Name=Spark Name=Hive --release-label emr-5.8.0 --service-role EMR_DefaultRole --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.2xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.2xlarge --bootstrap-action Path=s3://aws-bigdata-blog/artifacts/aws-blog-emr-rstudio-sparklyr/rstudio_sparklyr_emr5.sh,Args=[<span class="st">&quot;--user-pw&quot;</span>,<span class="st">&quot;&lt;password&gt;&quot;</span>,<span class="st">&quot;--arrow&quot;</span>] --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole</a></code></pre></div>
 <p>You can then see the cluster launching, and eventually running, under the AWS portal:</p>
 <div class="figure">
 <img src="images/clusters-amazon-emr-launching.png" alt="Launching an Amazon EMR Cluster." />
@@ -654,8 +654,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p class="caption">Launching a Dataprox cluster.</p>
 </div>
 <p>Once created, ports can be forwarded to allow you to access this cluster from your machine; for instance, by launching Chrome to make use of this proxy and securely connect to the Dataproc cluster. Configuring this connection looks as follows:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb39-1" data-line-number="1"><span class="ex">gcloud</span> compute ssh sparklyr-m --project=<span class="op">&lt;</span>project<span class="op">&gt;</span> --zone=<span class="op">&lt;</span>region<span class="op">&gt;</span> -- -D 1080 -N</a>
-<a class="sourceLine" id="cb39-2" data-line-number="2"><span class="st">&quot;&lt;path to chrome&gt;&quot;</span> <span class="ex">--proxy-server</span>=<span class="st">&quot;socks5://localhost:1080&quot;</span> --user-data-dir=<span class="st">&quot;/tmp/sparklyr-m&quot;</span> http://sparklyr-m:8088</a></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb36-1" data-line-number="1"><span class="ex">gcloud</span> compute ssh sparklyr-m --project=<span class="op">&lt;</span>project<span class="op">&gt;</span> --zone=<span class="op">&lt;</span>region<span class="op">&gt;</span> -- -D 1080 -N</a>
+<a class="sourceLine" id="cb36-2" data-line-number="2"><span class="st">&quot;&lt;path to chrome&gt;&quot;</span> <span class="ex">--proxy-server</span>=<span class="st">&quot;socks5://localhost:1080&quot;</span> --user-data-dir=<span class="st">&quot;/tmp/sparklyr-m&quot;</span> http://sparklyr-m:8088</a></code></pre></div>
 <p>There are various tutorials available under <a href="https://cloud.google.com/dataproc/docs/tutorials">cloud.google.com/dataproc/docs/tutorials</a>, including, a comprehensive tutorial to configure RStudio and <code>sparklyr</code><span class="citation">(“Dataproc Sparklyr” <a href="#ref-dataproc-rstudio">2018</a>)</span>.</p>
 <p>The latest pricing information can be found under <a href="https://cloud.google.com/dataproc/pricing">cloud.google.com/dataproc/pricing</a>. Notice that the cost is split between Compute Engine and a Dataproc Premium.</p>
 <table>
@@ -813,24 +813,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p class="caption">Apache Livy Landing Site.</p>
 </div>
 <p>To help test Livy locally, <code>sparklyr</code> provides support to list, install, start and stop a local Livy instance by executing:</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1"><span class="co"># List versions of Livy available to install</span></a>
-<a class="sourceLine" id="cb40-2" data-line-number="2"><span class="kw">livy_available_versions</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" data-line-number="1"><span class="co"># List versions of Livy available to install</span></a>
+<a class="sourceLine" id="cb37-2" data-line-number="2"><span class="kw">livy_available_versions</span>()</a></code></pre></div>
 <pre><code>##    livy
 ## 1 0.2.0
 ## 2 0.3.0
 ## 3 0.4.0
 ## 4 0.5.0</code></pre>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" data-line-number="1"><span class="co"># Install default Livy version</span></a>
-<a class="sourceLine" id="cb42-2" data-line-number="2"><span class="kw">livy_install</span>()</a>
-<a class="sourceLine" id="cb42-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb42-4" data-line-number="4"><span class="co"># List installed Livy services</span></a>
-<a class="sourceLine" id="cb42-5" data-line-number="5"><span class="kw">livy_installed_versions</span>()</a>
-<a class="sourceLine" id="cb42-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb42-7" data-line-number="7"><span class="co"># Start the Livy service</span></a>
-<a class="sourceLine" id="cb42-8" data-line-number="8"><span class="kw">livy_service_start</span>()</a>
-<a class="sourceLine" id="cb42-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb42-10" data-line-number="10"><span class="co"># Stops the Livy service</span></a>
-<a class="sourceLine" id="cb42-11" data-line-number="11"><span class="kw">livy_service_stop</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" data-line-number="1"><span class="co"># Install default Livy version</span></a>
+<a class="sourceLine" id="cb39-2" data-line-number="2"><span class="kw">livy_install</span>()</a>
+<a class="sourceLine" id="cb39-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb39-4" data-line-number="4"><span class="co"># List installed Livy services</span></a>
+<a class="sourceLine" id="cb39-5" data-line-number="5"><span class="kw">livy_installed_versions</span>()</a>
+<a class="sourceLine" id="cb39-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb39-7" data-line-number="7"><span class="co"># Start the Livy service</span></a>
+<a class="sourceLine" id="cb39-8" data-line-number="8"><span class="kw">livy_service_start</span>()</a>
+<a class="sourceLine" id="cb39-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb39-10" data-line-number="10"><span class="co"># Stops the Livy service</span></a>
+<a class="sourceLine" id="cb39-11" data-line-number="11"><span class="kw">livy_service_stop</span>()</a></code></pre></div>
 <p>The default address for this local Livy service is <a href="http://localhost:8998" class="uri">http://localhost:8998</a></p>
 </div>
 </div>
