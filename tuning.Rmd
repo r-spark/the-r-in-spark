@@ -12,7 +12,7 @@ library(sparklyr)
 
 ## Overview
 
-Spark performs distributed computation by: configuring cluster resources and partitioning, executing, shuffling, caching and serializing data across machines.
+Spark performs distributed computation by: configuring, partitioning, executing, shuffling, caching and serializing data, tasks and resources across multiple machines.
 
 - [**Configuring**](#tunning-configuring) requests the cluster manager for resources: total machines, memory, etc.
 - [**Partitioning**](#tunning-configuring) splits the data among various machines. Partitions can be either implicit or explicit.
@@ -27,9 +27,9 @@ The following diagram shows an example on how a sorting **job** would conceptual
 
 r2d3::r2d3(
   c(),
-  "images/08-tuning-spark-overview.js",
-  dependencies = "images/06-connections-diagram.js",
-  css = "images/08-tuning-spark-overview.css"
+  "images/tuning-spark-overview.js",
+  dependencies = "images/tuning-diagram.js",
+  css = "images/tuning-spark-overview.css"
 )
 ```
 
@@ -56,7 +56,7 @@ iris_df <- iris_tbl %>% arrange(Sepal_Width) %>% collect()
 
 webshot::webshot(
   "http://localhost:4040/stages/stage/?id=1&attempt=0",
-  file = "images/08-tuning-spark-graph-visualization.png",
+  file = "images/tuning-spark-graph-visualization.png",
   eval = "
   casper.waitForSelector(
     '#stage-dag-viz',
@@ -70,7 +70,7 @@ spark_disconnect(sc)
 ```
 
 ```{r tuning-graph-render, echo=FALSE, fig.align = 'center', fig.cap='Spark Graph Visualization'}
-knitr::include_graphics("images/08-tuning-spark-graph-visualization.png")
+knitr::include_graphics("images/tuning-spark-graph-visualization.png")
 ```
 
 ### Event Timeline {#tunning-event-timeline}
@@ -93,7 +93,7 @@ spark_connect(master = "local") %>%
 ```{r tuning-timeline-webshot, echo=FALSE}
 webshot::webshot(
   "http://localhost:4040/stages/stage/?id=1&attempt=0",
-  file = "images/08-tuning-spark-event-timeline.png",
+  file = "images/tuning-spark-event-timeline.png",
   eval = "
   casper.waitForSelector(
     '#task-assignment-timeline',
@@ -107,7 +107,7 @@ spark_disconnect(sc)
 ```
 
 ```{r tuning-timeline-shot, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline'}
-knitr::include_graphics("images/08-tuning-spark-event-timeline.png")
+knitr::include_graphics("images/tuning-spark-event-timeline.png")
 ```
 
 ## Configuring {#tunning-configuring}
@@ -302,13 +302,13 @@ You can inspect which tables are cached by navigating to the Spark UI using `spa
 ```{r tunning-caching-rdd, echo=FALSE}
 invisible(webshot::webshot(
   "http://localhost:4040/storage/rdd/?id=9",
-  "images/08-tuning-cache-rdd-web.png",
+  "images/tuning-cache-rdd-web.png",
   cliprect = "viewport"
 ))
 ```
 
 ```{r tunning-caching-rdd-shot, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Cached RDD in Spark Web Interface.'}
-knitr::include_graphics("images/08-tuning-cache-rdd-web.png")
+knitr::include_graphics("images/tuning-cache-rdd-web.png")
 ```
 
 Data loaded in memory will be released when the R session terminates either explicitly or implicitly with a restart or disconnection; however, to free up resources, you can use `tbl_uncache()`:
@@ -370,7 +370,7 @@ However, notice that Spark will borrow execution memory from storage and vicever
 
 Shuffling, is the operation that redistributes data across machines, it is usually an expensive operation and therefore, one we try to minimize. One can easily identify is significant time is being spent shuffling by looking at the [event timeline](#tunning-event-timeline). It is possible to reduce shuffling by reframing data analysis questions or hinting Spark appropriately.
 
-For instance, when joining dataframes that differ in size significantly, as in, one set being orders of magnitude smaller than the other one. You can consider using `sdf_broadcast()` to mark a dataframe as small enough for use in broadcast joins, meaning, it pushes one of the smaller dataframes to each of the worker nodes to reduce shuffling the bigger dataframe. One example for `sdf_broadcast()` follows:
+For instance, when joining data frames that differ in size significantly, as in, one set being orders of magnitude smaller than the other one. You can consider using `sdf_broadcast()` to mark a dataframe as small enough for use in broadcast joins, meaning, it pushes one of the smaller dataframes to each of the worker nodes to reduce shuffling the bigger dataframe. One example for `sdf_broadcast()` follows:
 
 ```{r tunning-shuffling-boardcast}
 sdf_len(sc, 10000) %>%

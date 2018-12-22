@@ -63,7 +63,7 @@ for (var i = 0; i < totalWorkers; i++) {
 
   children[children.length - 1] = {
     label: "f(x)",
-    width: blockWidth * 0.7 - 40,
+    width: blockWidth * 0.8 - 40,
     style: "block-data-children",
     position: 1
   };
