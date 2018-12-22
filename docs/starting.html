@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2018-12-21">
+<meta name="date" content="2018-12-22">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -179,8 +179,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="3" data-path="analysis.html"><a href="analysis.html"><i class="fa fa-check"></i><b>3</b> Analysis</a><ul>
 <li class="chapter" data-level="3.1" data-path="analysis.html"><a href="analysis.html#typical-analysis"><i class="fa fa-check"></i><b>3.1</b> Typical analysis</a></li>
 <li class="chapter" data-level="3.2" data-path="analysis.html"><a href="analysis.html#working-with-big-data"><i class="fa fa-check"></i><b>3.2</b> Working with Big Data</a></li>
-<li class="chapter" data-level="3.3" data-path="analysis.html"><a href="analysis.html#running-r-in-spark"><i class="fa fa-check"></i><b>3.3</b> Running R in Spark</a></li>
-<li class="chapter" data-level="3.4" data-path="analysis.html"><a href="analysis.html#r-as-an-interface-to-spark"><i class="fa fa-check"></i><b>3.4</b> R as an interface to Spark</a></li>
+<li class="chapter" data-level="3.3" data-path="analysis.html"><a href="analysis.html#avoid-running-r-inside-spark"><i class="fa fa-check"></i><b>3.3</b> Avoid running R inside Spark</a></li>
+<li class="chapter" data-level="3.4" data-path="analysis.html"><a href="analysis.html#use-r-as-an-interface-to-spark"><i class="fa fa-check"></i><b>3.4</b> Use R as an interface to Spark</a></li>
 <li class="chapter" data-level="3.5" data-path="analysis.html"><a href="analysis.html#cut-here"><i class="fa fa-check"></i><b>3.5</b> Cut here</a></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a><ul>
@@ -195,7 +195,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="5" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>5</b> Clusters</a><ul>
 <li class="chapter" data-level="5.1" data-path="clusters.html"><a href="clusters.html#clusters-overview"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
-<li class="chapter" data-level="5.2" data-path="clusters.html"><a href="clusters.html#managers"><i class="fa fa-check"></i><b>5.2</b> Managers</a><ul>
+<li class="chapter" data-level="5.2" data-path="clusters.html"><a href="clusters.html#clusters-manager"><i class="fa fa-check"></i><b>5.2</b> Managers</a><ul>
 <li class="chapter" data-level="5.2.1" data-path="clusters.html"><a href="clusters.html#clusters-standalone"><i class="fa fa-check"></i><b>5.2.1</b> Standalone</a></li>
 <li class="chapter" data-level="5.2.2" data-path="clusters.html"><a href="clusters.html#yarn"><i class="fa fa-check"></i><b>5.2.2</b> Yarn</a></li>
 <li class="chapter" data-level="5.2.3" data-path="clusters.html"><a href="clusters.html#mesos"><i class="fa fa-check"></i><b>5.2.3</b> Mesos</a></li>
@@ -245,7 +245,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="7" data-path="data.html"><a href="data.html"><i class="fa fa-check"></i><b>7</b> Data</a><ul>
 <li class="chapter" data-level="7.1" data-path="data.html"><a href="data.html#overview-1"><i class="fa fa-check"></i><b>7.1</b> Overview</a></li>
-<li class="chapter" data-level="7.2" data-path="data.html"><a href="data.html#dataframes"><i class="fa fa-check"></i><b>7.2</b> DataFrames</a><ul>
+<li class="chapter" data-level="7.2" data-path="data.html"><a href="data.html#data-frames"><i class="fa fa-check"></i><b>7.2</b> Data Frames</a><ul>
 <li class="chapter" data-level="7.2.1" data-path="data.html"><a href="data.html#data-sdf-functions"><i class="fa fa-check"></i><b>7.2.1</b> Functions</a></li>
 <li class="chapter" data-level="7.2.2" data-path="data.html"><a href="data.html#pivoting"><i class="fa fa-check"></i><b>7.2.2</b> Pivoting</a></li>
 </ul></li>
@@ -386,26 +386,32 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="starting-install-r" class="section level3">
 <h3><span class="header-section-number">2.1.1</span> Install R</h3>
 <p>From <a href="https://r-project.org/">r-project.org</a>, download and launch the R installer for your platform, Windows, Macs or Linux available.</p>
-<div class="figure">
-<img src="images/starting-download-r.png" alt="The R Project for Statistical Computing." />
-<p class="caption">The R Project for Statistical Computing.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-r-download"></span>
+<img src="images/starting-download-r.png" alt="The R Project for Statistical Computing." width="992" />
+<p class="caption">
+FIGURE 2.1: The R Project for Statistical Computing.
+</p>
 </div>
 </div>
 <div id="starting-install-java" class="section level3">
 <h3><span class="header-section-number">2.1.2</span> Install Java</h3>
 <p>From <a href="https://java.com/download">java.com/download</a>, download and launch the installer for your platform, Windows, Macs or Linux are also available.</p>
-<div class="figure">
-<img src="images/starting-download-java.png" alt="Java Download." />
-<p class="caption">Java Download.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-java-download"></span>
+<img src="images/starting-download-java.png" alt="Java Download Page." width="992" />
+<p class="caption">
+FIGURE 2.2: Java Download Page.
+</p>
 </div>
 <p>Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java 8.</p>
 </div>
 <div id="starting-install-rstudio" class="section level3">
 <h3><span class="header-section-number">2.1.3</span> Install RStudio</h3>
 <p>While installing RStudio is not strictly required to work with Spark with R, it will make you much more productive and therefore, I would recommend you take the time to install RStudio from <a href="https://www.rstudio.com/download">rstudio.com/download</a>, then download and launch the installer for your platform: Windows, Macs or Linux.</p>
-<div class="figure">
-<img src="images/starting-rstudio.png" alt="RStudio Downloads." />
-<p class="caption">RStudio Downloads.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-rstudio-download"></span>
+<img src="images/starting-rstudio.png" alt="RStudio Downloads Page." width="992" />
+<p class="caption">
+FIGURE 2.3: RStudio Downloads Page.
+</p>
 </div>
 <p>After launching RStudio, you can use RStudio’s console panel to execute the code provided in this chapter.</p>
 </div>
@@ -417,9 +423,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">install.packages</span>(<span class="st">&quot;devtools&quot;</span>)</a>
 <a class="sourceLine" id="cb4-2" data-line-number="2">devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;rstudio/sparklyr&quot;</span>)</a></code></pre></div>
 <p>The <code>sparklyr</code> GitHub repository contains all the latest features,issues and project updates; it’s the place where <code>sparklyr</code> is actevely developed and a resource that is helpful while troubleshooting issues.</p>
-<div class="figure">
-<img src="images/starting-sparklyr-github.png" alt="The sparklyr GitHub code repository." />
-<p class="caption">The sparklyr GitHub code repository.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-install-github"></span>
+<img src="images/starting-sparklyr-github.png" alt="GitHub Repository for sparklyr." width="1280" />
+<p class="caption">
+FIGURE 2.4: GitHub Repository for sparklyr.
+</p>
 </div>
 </div>
 </div>
@@ -483,14 +491,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h3><span class="header-section-number">2.4.1</span> Web Interface</h3>
 <p>Most of the Spark commands will get started from the R console; however, it is often the case that monitoring and analyzing execution is done through Spark’s web interface. This interface is a web page provided by Spark which can be accessed by running:</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">spark_web</span>(sc)</a></code></pre></div>
-<div class="figure">
-<img src="images/starting-spark-web.png" alt="Apache Spark Web Interface." />
-<p class="caption">Apache Spark Web Interface.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-spark-render"></span>
+<img src="images/starting-spark-web.png" alt="Apache Spark Web Interface." width="992" />
+<p class="caption">
+FIGURE 2.5: Apache Spark Web Interface.
+</p>
 </div>
 <p>As mentioned, printing the “hello” dataset collected a few records to be displayed in the R console. You can see in the Spark web interface that a job was started to collect this information back from Spark. You can also select the <strong>storage</strong> tab to see the “hello” dataset cached in-memory in Spark:</p>
-<div class="figure">
-<img src="images/starting-spark-web-storage.png" alt="Apache Spark Web Interface - Storage Tab." />
-<p class="caption">Apache Spark Web Interface - Storage Tab.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-spark-web-storage-render"></span>
+<img src="images/starting-spark-web-storage.png" alt="Apache Spark Web Interface - Storage Tab." width="992" />
+<p class="caption">
+FIGURE 2.6: Apache Spark Web Interface - Storage Tab.
+</p>
 </div>
 <p>The <a href="tuning.html#tunning-caching">caching</a> section in the <a href="#tunning">tunning</a> chapter will cover this in detail, but as a start, it’s worth noticing that this dataset is fully loaded into memory since the <strong>fraction cached</strong> is 100%, it is useful also to point out the <strong>size in memory</strong> column which tracks the total memory being used by this dataset.</p>
 </div>
@@ -528,20 +540,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><strong>Packages</strong>: This pane allows you to install <code>sparklyr</code> with ease, check its version, navigate to the help contents, etc.</li>
 <li><strong>Connections</strong>: This pane allows you to connecto to Spark, manage your active connection and view the available datasets.</li>
 </ul>
-<div class="figure">
-<img src="images/starting-rstudio-overview.png" alt="RStudio Overview." />
-<p class="caption">RStudio Overview.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-rstudio-overview"></span>
+<img src="images/starting-rstudio-overview.png" alt="RStudio Overview." width="1197" />
+<p class="caption">
+FIGURE 2.7: RStudio Overview.
+</p>
 </div>
 <p>To start a new connections to Spark, you can use <code>spark_connect()</code> from the R console or, alternatevely, use the <strong>new connection</strong> action from the <strong>connections pane</strong> and then, select the Spark connection.</p>
 <p>Once a Spark connection is selected, you can customize the versions and connect to Spark which will simply generate the right <code>spark_connect()</code> command and execute this in the R console for you:</p>
-<div class="figure">
-<img src="images/starting-rstudio-new-spark-connection.png" alt="RStudio New Spark Connection." />
-<p class="caption">RStudio New Spark Connection.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-rstudio-new-connection"></span>
+<img src="images/starting-rstudio-new-spark-connection.png" alt="RStudio New Spark Connection." width="583" />
+<p class="caption">
+FIGURE 2.8: RStudio New Spark Connection.
+</p>
 </div>
 <p>Once connected to Spark, either by using the R console or through RStudio’s connections pane, RStudio will display your datasets available in the connections pane. This is a useful way to track your existing datasets and provides an easy way to explore each of them:</p>
-<div class="figure">
-<img src="images/starting-rstudio-connections-pane.png" alt="RStudio Connections Pane." />
-<p class="caption">RStudio Connections Pane.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-rstudio-connections-pane"></span>
+<img src="images/starting-rstudio-connections-pane.png" alt="RStudio Connections Pane." width="506" />
+<p class="caption">
+FIGURE 2.9: RStudio Connections Pane.
+</p>
 </div>
 <p>Additionally, an active connection provides the following custom actions:</p>
 <ul>
