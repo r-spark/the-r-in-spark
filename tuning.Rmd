@@ -1,15 +1,13 @@
 ```{r include=FALSE, eval=TRUE}
 knitr::opts_chunk$set(eval = FALSE)
 source("r/render.R")
+library(sparklyr)
+library(dplyr)
 ```
 
 # Tuning {#tuning}
 
 Previous chapters focused on installing, using and connecting to Spark clusters, we've assumed so far that computation in a Spark cluster works efficiently. While this is true in many cases, it is often required to have some knowledge of how Spark works internally to perform tunning operations that will make computations run efficiently. Tunning is often required to run operations over datasets that make use of all resources in the Spark cluster. This chapter will explain how Spark works and provide details on how to tune its operations.
-
-```{r tuning-tuning, echo=FALSE}
-library(sparklyr)
-```
 
 ## Overview
 
@@ -24,7 +22,7 @@ Spark performs distributed computation by: configuring, partitioning, executing,
 
 The following diagram shows an example on how a sorting **job** would conceptually work across a cluster of machines. First, Spark would **configure** the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the data is already partitioned, each worker node loads this implicit **partition**; for instance, `4,9,1` is loaded in the first worker node. Afterwards, a custom transformation is applied to each partition in each worker node, this is denoted by `f(x)` in the diagram below and is defined as a **stage** in Spark terminalogy. In this example, `f(x)` **executes** a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed. Once the execution completes, the result is **shuffled** to the right machine to finish the sorting operation across the entire dataset. Once the data is sorted across the cluster, the sorted results can be optionally **cached** in memory to avoid rerunning this computation multiple times. Finally, a small subset of the cached results is **serialized**, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.
 
-```{r tuning-overview, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Spark Sorting Overview'}
+```{r tuning-overview, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Sorting Distributed Data with Apache Spark'}
 
 r2d3::r2d3(
   c(),
@@ -106,7 +104,6 @@ webshot::webshot(
 
 spark_disconnect(sc)
 ```
-
 ```{r tuning-timeline-shot, eval=TRUE, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline.'}
 render_image("images/tuning-spark-event-timeline.png", "Spark Event Timeline.")
 ```
@@ -176,7 +173,7 @@ You can list all the available `spark-submit` parameters by running:
 ```{r tuning-submit-code}
 spark_home_dir() %>% file.path("bin", "spark-submit") %>% system2()
 ```
-```{r tuning-submit-run, echo=FALSE, comment=''}
+```{r tuning-submit-run, eval=TRUE, echo=FALSE, comment=''}
 system2(file.path(spark_home_dir(), "bin", "spark-submit"), stdout = "stdout.txt", stderr = "stderr.txt")
 cat(paste(readLines("stderr.txt"), collapse = "\n"))
 ```
@@ -199,14 +196,17 @@ To list all the Spark settings available at runtime, we can run:
 ```{r tuning-runtime-config}
 spark_session_config(sc)
 ```
-```{r tuning-runtime-config-table}
+```{r tuning-runtime-config-table-code, echo=FALSE}
 sc <- spark_connect(master = "local")
 
 settings <- spark_session_config(sc)
 cleaned <- gsub("Frameworks/R.framework/Versions/3.5/Resources/library", "...", settings)
 cleaned <- gsub("javierluraschi", "...", cleaned)
 cleaned <- gsub("^file:", "", cleaned)
-knitr::kable(data.frame(name = names(settings), value = unlist(unname(cleaned))))
+saveRDS(data.frame(name = names(settings), value = unlist(unname(cleaned))), "data/tuning-runtime-config.rds")
+```
+```{r tuning-runtime-config-table, eval=TRUE}
+knitr::kable(readRDS("data/tuning-runtime-config.rds"))
 ```
 
 See also, [spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html).
@@ -215,10 +215,10 @@ See also, [spark.apache.org/docs/latest/configuration.html](https://spark.apache
 
 Appart from Spark settings, there are a few settings particular to sparklyr listed below. `sparklyr.connect.cores` is useful to set the CPU cores to use in local mode; the remaining ones are not used as much while tuning, but they can prove helpful while troubleshooting other issues.
 
-```{r tuning-settings-sparklyr, eval=F}
+```{r tuning-settings-sparklyr, eval=FALSE}
 spark_config_settings()
 ```
-```{r tuning-settings-sparklyr-code, echo=F}
+```{r tuning-settings-sparklyr-code, eval=TRUE, echo=FALSE}
 knitr::kable(spark_config_settings())
 ```
 
@@ -237,6 +237,9 @@ You can get the number of partitions a computation will require through `sdf_num
 ```{r tuning-partitioning-implicit}
 sdf_len(sc, 10) %>% sdf_num_partitions()
 ```
+```
+[1] 2
+```
 
 ### Explicit
 
@@ -247,39 +250,44 @@ Various [data](#data) functions, like `spark_read_csv()`, already support a `rep
 ```{r tuning-partitioning-explicit}
 sdf_len(sc, 10, repartition = 10) %>% sdf_num_partitions()
 ```
+```
+[1] 10
+```
 
-For datasets that are already repartitioned, we can also use `sdf_repartition`:
+For datasets that are already partitioned, we can also use `sdf_repartition`:
 
 ```{r tuning-partitioning-explicit-repartition}
 sdf_len(sc, 10, repartition = 10) %>% 
   sdf_repartition(4) %>%
   sdf_num_partitions()
 ```
-
-However, lets look at this with a practical example. Suppose that we want to sort a large dataset that does not even fit in memory, for simplicity, we will generate this dataset by generating 1 billion rows and appending a column of random values. A first attempt to sort this in Spark would be to run:
-
-```{r tuning-partitioning-explicit-billion}
-# Attempt to sort 20 GB dataset in disk with one billion entries
-sdf_len(sc, 10^9) %>%
-  mutate(x = rand()) %>%
-  arrange(x) %>%
-  spark_write_csv("billion.csv")
+```
+[1] 4
 ```
 
-However, since each partition needs to fit in memory in Spark, the code above will result in an `OutOfMemory` exception that shuts down Spark completely. Instead, we can explicitly partition the data into chunks that would fit in the default memory configureation by explicitly defining the total number of partitions to use with the `repartition` parameter set to 10,000 as follows:
+The number of partitions usually changes significantly the speed and resources being used; for instance, the following example calculates the mean over 10M rows with different partition sizes.
 
-```{r tuning-partitioning-explicit-billion-correct}
-library(sparklyr)
-library(dplyr)
-
-sc <- spark_connect(master = "local")
-
-# Sort 20 GB dataset in disk with one billion entries
-sdf_len(sc, 10^9, repartition = 10^4) %>%
-  mutate(x = rand()) %>%
-  arrange(x) %>%
-  spark_write_csv("billion.csv")
+```{r tuning-partitioning-explicit-code-run, echo=FALSE}
+microbenchmark::microbenchmark(
+    "1 Partition(s)" = sdf_len(sc, 10^7, repartition = 1) %>% summarise(mean(id)) %>% collect(),
+    "2 Partition(s)" = sdf_len(sc, 10^7, repartition = 2) %>% summarise(mean(id)) %>% collect(),
+    times = 10
+) %>% 
+  ggplot2::autoplot() %>%
+  ggplot2::ggsave("images/tuning-partition-explicit.png", ., width = 10, height = 6)
 ```
+```{r tuning-partitioning-explicit-code}
+microbenchmark::microbenchmark(
+    "1 Partition(s)" = sdf_len(sc, 10^7, repartition = 1) %>% summarise(mean(id)) %>% collect(),
+    "2 Partition(s)" = sdf_len(sc, 10^7, repartition = 2) %>% summarise(mean(id)) %>% collect(),
+    times = 10
+) %>% ggplot2::autoplot()
+```
+```{r tuning-partitioning-explicit-results, eval=TRUE, echo=FALSE, fig.cap='Computation speed when using explicit Spark partitions.', fig.align = 'center'}
+render_image("images/tuning-partition-explicit.png", "Computation speed when using explicit Spark partitions.")
+```
+
+The results show that sorting data with two partitions is almost twice as fast, this is the case since two CPUs can be used to execute this operation. However, it is not necessarily the case that higher-partitions produce faster computation; instead, partitioning data is particular to your computing cluster and the data analysis operations being performed.
 
 ## Caching {#tunning-caching}
 
