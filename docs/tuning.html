@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2018-12-22">
+<meta name="date" content="2018-12-26">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,11 +177,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.8" data-path="starting.html"><a href="starting.html#starting-recap"><i class="fa fa-check"></i><b>2.8</b> Recap</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="analysis.html"><a href="analysis.html"><i class="fa fa-check"></i><b>3</b> Analysis</a><ul>
-<li class="chapter" data-level="3.1" data-path="analysis.html"><a href="analysis.html#typical-analysis"><i class="fa fa-check"></i><b>3.1</b> Typical analysis</a></li>
-<li class="chapter" data-level="3.2" data-path="analysis.html"><a href="analysis.html#working-with-big-data"><i class="fa fa-check"></i><b>3.2</b> Working with Big Data</a></li>
-<li class="chapter" data-level="3.3" data-path="analysis.html"><a href="analysis.html#avoid-running-r-inside-spark"><i class="fa fa-check"></i><b>3.3</b> Avoid running R inside Spark</a></li>
-<li class="chapter" data-level="3.4" data-path="analysis.html"><a href="analysis.html#use-r-as-an-interface-to-spark"><i class="fa fa-check"></i><b>3.4</b> Use R as an interface to Spark</a></li>
-<li class="chapter" data-level="3.5" data-path="analysis.html"><a href="analysis.html#cut-here"><i class="fa fa-check"></i><b>3.5</b> Cut here</a></li>
+<li class="chapter" data-level="3.1" data-path="analysis.html"><a href="analysis.html#background"><i class="fa fa-check"></i><b>3.1</b> Background</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="analysis.html"><a href="analysis.html#working-with-big-data"><i class="fa fa-check"></i><b>3.1.1</b> Working with Big Data</a></li>
+<li class="chapter" data-level="3.1.2" data-path="analysis.html"><a href="analysis.html#avoid-running-r-inside-spark"><i class="fa fa-check"></i><b>3.1.2</b> Avoid running R inside Spark</a></li>
+<li class="chapter" data-level="3.1.3" data-path="analysis.html"><a href="analysis.html#r-under-the-hood"><i class="fa fa-check"></i><b>3.1.3</b> R, under the hood</a></li>
+<li class="chapter" data-level="3.1.4" data-path="analysis.html"><a href="analysis.html#use-r-as-an-interface-to-spark"><i class="fa fa-check"></i><b>3.1.4</b> Use R as an interface to Spark</a></li>
+<li class="chapter" data-level="3.1.5" data-path="analysis.html"><a href="analysis.html#using-sparklyr-for-analysis"><i class="fa fa-check"></i><b>3.1.5</b> Using <code>sparklyr</code> for analysis</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a><ul>
 <li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
@@ -387,10 +389,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul>
 <p>The following diagram shows an example on how a sorting <strong>job</strong> would conceptually work across a cluster of machines. First, Spark would <strong>configure</strong> the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the data is already partitioned, each worker node loads this implicit <strong>partition</strong>; for instance, <code>4,9,1</code> is loaded in the first worker node. Afterwards, a custom transformation is applied to each partition in each worker node, this is denoted by <code>f(x)</code> in the diagram below and is defined as a <strong>stage</strong> in Spark terminalogy. In this example, <code>f(x)</code> <strong>executes</strong> a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed. Once the execution completes, the result is <strong>shuffled</strong> to the right machine to finish the sorting operation across the entire dataset. Once the data is sorted across the cluster, the sorted results can be optionally <strong>cached</strong> in memory to avoid rerunning this computation multiple times. Finally, a small subset of the cached results is <strong>serialized</strong>, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.</p>
 <div class="figure" style="text-align: center"><span id="fig:tuning-overview"></span>
-<div id="htmlwidget-6f4423c74a5eaa2eeae3" style="width:100%;height:480px;" class="r2d3 html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6f4423c74a5eaa2eeae3">{"x":{"data":null,"type":"NULL","container":"svg","options":null,"script":"var d3Script = function(d3, r2d3, data, svg, width, height, options, theme, console) {\nthis.d3 = d3;\n/* R2D3 Source File:  images/tuning-diagram.js */\nsvg.append(\"svg:defs\").append(\"svg:marker\")\n  .attr(\"id\", \"circle\")\n  .attr(\"refX\", 6)\n  .attr(\"refY\", 6)\n  .attr(\"markerWidth\", 12)\n  .attr(\"markerHeight\", 12)\n  .attr(\"orient\", \"auto\")\n  .append(\"circle\")\n  .attr(\"cx\", \"6\")\n  .attr(\"cy\", \"6\")\n  .attr(\"r\", \"3\")\n  .attr(\"class\", \"block-link\")\n  .attr(\"stroke-width\", 1);\n\nfunction diagramRoot(maxWidth) {\n  if (!maxWidth) maxWidth = 500;\n\n  var scaleX = 1;\n  var scaleY = 1;\n  height = height - 20;\n\n  var newWidth = width > maxWidth ? maxWidth : width;\n  var translateX = width > newWidth ? (width - newWidth) / 2 : 0;\n  var translateY = 10;\n  width = newWidth;\n\n  svg\n    .attr(\"font-size\", Math.min(width, 500) / 600 + \"em\")\n    .attr(\"font-family\", \"sans-serif\");\n\n  var root = svg.append(\"g\")\n    .attr(\"transform\", \"translate(\" + translateX + \",\" + translateY + \")scale(\" + scaleX + \",\" + scaleY + \")\");\n\n  return root;\n}\n\nfunction drawBlock(parent, block) {\n  if (!block.x) block.x = 0;\n  if (!block.y) block.y = 0;\n  if (!block.width) block.width = blockWidth;\n  if (!block.height) block.height = blockHeight;\n  if (!block.color) block.color = \"black\";\n  if (!block.label) block.label = \"<label>\";\n  if (!block.style) block.style = \"block\";\n\n  var startX = block.x - block.width / 2;\n  var startY = block.y - block.height / 2;\n\n  parent.append(\"rect\")\n    .attr(\"x\", startX)\n    .attr(\"y\", startY)\n    .attr(\"width\", block.width)\n    .attr(\"height\", block.height)\n    .attr(\"class\", block.style);\n\n  var current = parent.append(\"text\")\n    .attr(\"x\", block.x)\n    .attr(\"y\", startY + 20)\n    .attr(\"fill\", \"black\")\n    .attr(\"text-anchor\", \"middle\")\n    .text(block.label);\n\n  if (block.childrens) {\n    for (var childIdx in block.childrens) {\n      var child = block.childrens[childIdx];\n\n      if (!child.width) child.width = block.width - 20;\n      if (!child.x) child.x = block.x;\n      if (child.position === undefined) child.position = childIdx;\n      if (child.style === undefined) child.style = \"block-children\";\n\n      var childBlock = {\n        x: child.x,\n        y: startY + 46 + child.position * 34,\n        width: child.width,\n        height: 30,\n        label: child.label,\n        style: child.style\n      };\n\n      drawBlock(parent, childBlock);\n    }\n  }\n\n  return block;\n}\n\nfunction linkBlocks(block1, block2, label) {\n  var block1right = block1.x + block1.width / 2;\n  var block2left = block2.x - block2.width / 2;\n  var block1bottom = block1.y + block1.height / 2;\n  var block2top = block2.y - block2.height / 2;\n\n  var horizontal = block1right < block2left;\n\n  root.append('line')\n    .attr(\"x1\", horizontal ? block1right : block1.x)\n    .attr(\"y1\", horizontal ? block1.y : block1bottom)\n    .attr(\"x2\", horizontal ? block2left : block2.x)\n    .attr(\"y2\", horizontal ? block2.y : block2top)\n  \t.attr(\"class\", \"block-link\")\n  \t.attr(\"stroke-width\", \"1\")\n  \t.attr(\"marker-start\", \"url(#circle)\")\n  \t.attr(\"marker-end\", \"url(#circle)\")\n  \t.attr(\"stroke-dasharray\", \"3,7\");\n\n  var labelFits = horizontal ?\n    Math.abs(block2left - block1right) > block1.width / 2 :\n    Math.abs(block2top - block1bottom) > 30;\n\n  if (label && labelFits) {\n    root.append('text')\n      .attr(\"dy\", (horizontal ? \"-\" : \"\") + \"0.4em\")\n      .attr(\"x\", block1right + (block2left - block1right) / 2)\n      .attr(\"y\", block1bottom + (block2top - block1bottom) / 2)\n      .attr(\"text-anchor\", \"middle\")\n      .attr(\"fill\", \"black\")\n      .text(label);\n  }\n}\nsvg = d3.select(svg.node());\n/* R2D3 Source File:  images/tuning-spark-overview.js */\n// !preview r2d3 dependencies=\"images/06-connections-diagram.js\", css=\"images/07-tuning-spark-overview.css\"\n//\n// r2d3: https://rstudio.github.io/r2d3\n//\n\nvar root = diagramRoot(600);\nvar blockWidth = width / 7.0;\n\nvar totalWorkers = 3;\nvar blockHeight = height / totalWorkers - 10;\n\nvar stages = [\n  [\n    [4, 9, 1],\n    [8, 2, 3],\n    [5, 7, 6]\n  ],\n  [\n    [1, 4, 9],\n    [2, 3, 8],\n    [5, 6, 7]\n  ],\n  [\n    [1, 2, 3],\n    [4, 5, 6],\n    [7, 8, 9]\n  ]\n];\n\nvar storageBlocks = new Array(totalWorkers);\nfor (var i = 0; i < totalWorkers; i++) {\n  var children = new Array(stages[0][i].length);\n  for (var j = 0; j < children.length; j++) {\n    children[j] = {\n      label: stages[0][i][j],\n      width: blockWidth - 40,\n      style: \"block-data-children\"\n    };\n  }\n\n  storageBlocks[i] = drawBlock(root, {\n    x: blockWidth / 2,\n    y: 5 + blockHeight / 2 + height / totalWorkers * i,\n    width: blockWidth * 0.8,\n    height: blockHeight,\n    label: \"Data\",\n    childrens: children,\n    style: \"block-data\"\n  });\n}\n\nvar stage1 = new Array(totalWorkers);\nfor (var i = 0; i < totalWorkers; i++) {\n  var children = new Array(stages[0][0].length + stages[1][0].length + 1);\n  for (var j = 0; j < stages[0][0].length; j++) {\n    children[j] = {\n      label: stages[0][i][j],\n      width: blockWidth - 40,\n      x: blockWidth * (2 - 1 / 2),\n      position: j\n    };\n  }\n\n  children[children.length - 1] = {\n    label: \"f(x)\",\n    width: blockWidth * 0.8 - 40,\n    style: \"block-data-children\",\n    position: 1\n  };\n\n  for (var j = 0; j < stages[1][0].length; j++) {\n    children[j + stages[0][0].length] = {\n      label: stages[1][i][j],\n      width: blockWidth - 40,\n      x: blockWidth * (2 + 1 / 2),\n      position: j\n    };\n  }\n\n  stage1[i] = drawBlock(root, {\n    x: blockWidth * (2),\n    y: 5 + blockHeight / 2 + height / totalWorkers * i,\n    width: blockWidth * 2,\n    height: blockHeight,\n    label: \"Worker\",\n    childrens: children\n  });\n}\n\nvar stage2 = new Array(totalWorkers);\nfor (var i = 0; i < totalWorkers; i++) {\n  var children = new Array(stages[2][i].length);\n  for (var j = 0; j < children.length; j++) {\n    children[j] = {\n      label: stages[2][i][j],\n      width: blockWidth - 40,\n      x: blockWidth * (7 - 1 / 2)\n    };\n  }\n\n  stage2[i] = drawBlock(root, {\n    x: blockWidth * (7 - 1/2),\n    y: 5 + blockHeight / 2 + height / totalWorkers * i,\n    width: blockWidth,\n    height: blockHeight,\n    label: \"Worker\",\n    childrens: children\n  });\n}\n\nfor (var i = 0; i < stage1.length; i++) {\n  for (var j = 0; j < stage2.length; j++) {\n    linkBlocks(stage1[i], stage2[j]);\n  }\n}\n};","style":"/* R2D3 Source File:  images/tuning-spark-overview.css */\n.block {\n  fill: white;\n  stroke: black;\n}\n\n.block-data {\n  fill: white;\n  stroke: black;\n}\n\n.block-children {\n  fill: white;\n  stroke: black;\n}\n\n.block-data-children {\n  fill: white;\n  stroke: black;\n}\n\n.block-link {\n  fill: white;\n  stroke: black;\n}","version":5,"theme":{"default":{"background":"#FFFFFF","foreground":"#000000"},"runtime":null},"useShadow":true},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-11f55befb7589399cc8e" style="width:100%;height:480px;" class="r2d3 html-widget"></div>
+<script type="application/json" data-for="htmlwidget-11f55befb7589399cc8e">{"x":{"data":null,"type":"NULL","container":"svg","options":null,"script":"var d3Script = function(d3, r2d3, data, svg, width, height, options, theme, console) {\nthis.d3 = d3;\n/* R2D3 Source File:  images/tuning-diagram.js */\nsvg.append(\"svg:defs\").append(\"svg:marker\")\n  .attr(\"id\", \"circle\")\n  .attr(\"refX\", 6)\n  .attr(\"refY\", 6)\n  .attr(\"markerWidth\", 12)\n  .attr(\"markerHeight\", 12)\n  .attr(\"orient\", \"auto\")\n  .append(\"circle\")\n  .attr(\"cx\", \"6\")\n  .attr(\"cy\", \"6\")\n  .attr(\"r\", \"3\")\n  .attr(\"class\", \"block-link\")\n  .attr(\"stroke-width\", 1);\n\nfunction diagramRoot(maxWidth) {\n  if (!maxWidth) maxWidth = 500;\n\n  var scaleX = 1;\n  var scaleY = 1;\n  height = height - 20;\n\n  var newWidth = width > maxWidth ? maxWidth : width;\n  var translateX = width > newWidth ? (width - newWidth) / 2 : 0;\n  var translateY = 10;\n  width = newWidth;\n\n  svg\n    .attr(\"font-size\", Math.min(width, 500) / 600 + \"em\")\n    .attr(\"font-family\", \"sans-serif\");\n\n  var root = svg.append(\"g\")\n    .attr(\"transform\", \"translate(\" + translateX + \",\" + translateY + \")scale(\" + scaleX + \",\" + scaleY + \")\");\n\n  return root;\n}\n\nfunction drawBlock(parent, block) {\n  if (!block.x) block.x = 0;\n  if (!block.y) block.y = 0;\n  if (!block.width) block.width = blockWidth;\n  if (!block.height) block.height = blockHeight;\n  if (!block.color) block.color = \"black\";\n  if (!block.label) block.label = \"<label>\";\n  if (!block.style) block.style = \"block\";\n\n  var startX = block.x - block.width / 2;\n  var startY = block.y - block.height / 2;\n\n  parent.append(\"rect\")\n    .attr(\"x\", startX)\n    .attr(\"y\", startY)\n    .attr(\"width\", block.width)\n    .attr(\"height\", block.height)\n    .attr(\"class\", block.style);\n\n  var current = parent.append(\"text\")\n    .attr(\"x\", block.x)\n    .attr(\"y\", startY + 20)\n    .attr(\"fill\", \"black\")\n    .attr(\"text-anchor\", \"middle\")\n    .text(block.label);\n\n  if (block.childrens) {\n    for (var childIdx in block.childrens) {\n      var child = block.childrens[childIdx];\n\n      if (!child.width) child.width = block.width - 20;\n      if (!child.x) child.x = block.x;\n      if (child.position === undefined) child.position = childIdx;\n      if (child.style === undefined) child.style = \"block-children\";\n\n      var childBlock = {\n        x: child.x,\n        y: startY + 46 + child.position * 34,\n        width: child.width,\n        height: 30,\n        label: child.label,\n        style: child.style\n      };\n\n      drawBlock(parent, childBlock);\n    }\n  }\n\n  return block;\n}\n\nfunction linkBlocks(block1, block2, label) {\n  var block1right = block1.x + block1.width / 2;\n  var block2left = block2.x - block2.width / 2;\n  var block1bottom = block1.y + block1.height / 2;\n  var block2top = block2.y - block2.height / 2;\n\n  var horizontal = block1right < block2left;\n\n  root.append('line')\n    .attr(\"x1\", horizontal ? block1right : block1.x)\n    .attr(\"y1\", horizontal ? block1.y : block1bottom)\n    .attr(\"x2\", horizontal ? block2left : block2.x)\n    .attr(\"y2\", horizontal ? block2.y : block2top)\n  \t.attr(\"class\", \"block-link\")\n  \t.attr(\"stroke-width\", \"1\")\n  \t.attr(\"marker-start\", \"url(#circle)\")\n  \t.attr(\"marker-end\", \"url(#circle)\")\n  \t.attr(\"stroke-dasharray\", \"3,7\");\n\n  var labelFits = horizontal ?\n    Math.abs(block2left - block1right) > block1.width / 2 :\n    Math.abs(block2top - block1bottom) > 30;\n\n  if (label && labelFits) {\n    root.append('text')\n      .attr(\"dy\", (horizontal ? \"-\" : \"\") + \"0.4em\")\n      .attr(\"x\", block1right + (block2left - block1right) / 2)\n      .attr(\"y\", block1bottom + (block2top - block1bottom) / 2)\n      .attr(\"text-anchor\", \"middle\")\n      .attr(\"fill\", \"black\")\n      .text(label);\n  }\n}\nsvg = d3.select(svg.node());\n/* R2D3 Source File:  images/tuning-spark-overview.js */\n// !preview r2d3 dependencies=\"images/06-connections-diagram.js\", css=\"images/07-tuning-spark-overview.css\"\n//\n// r2d3: https://rstudio.github.io/r2d3\n//\n\nvar root = diagramRoot(600);\nvar blockWidth = width / 7.0;\n\nvar totalWorkers = 3;\nvar blockHeight = height / totalWorkers - 10;\n\nvar stages = [\n  [\n    [4, 9, 1],\n    [8, 2, 3],\n    [5, 7, 6]\n  ],\n  [\n    [1, 4, 9],\n    [2, 3, 8],\n    [5, 6, 7]\n  ],\n  [\n    [1, 2, 3],\n    [4, 5, 6],\n    [7, 8, 9]\n  ]\n];\n\nvar storageBlocks = new Array(totalWorkers);\nfor (var i = 0; i < totalWorkers; i++) {\n  var children = new Array(stages[0][i].length);\n  for (var j = 0; j < children.length; j++) {\n    children[j] = {\n      label: stages[0][i][j],\n      width: blockWidth - 40,\n      style: \"block-data-children\"\n    };\n  }\n\n  storageBlocks[i] = drawBlock(root, {\n    x: blockWidth / 2,\n    y: 5 + blockHeight / 2 + height / totalWorkers * i,\n    width: blockWidth * 0.8,\n    height: blockHeight,\n    label: \"Data\",\n    childrens: children,\n    style: \"block-data\"\n  });\n}\n\nvar stage1 = new Array(totalWorkers);\nfor (var i = 0; i < totalWorkers; i++) {\n  var children = new Array(stages[0][0].length + stages[1][0].length + 1);\n  for (var j = 0; j < stages[0][0].length; j++) {\n    children[j] = {\n      label: stages[0][i][j],\n      width: blockWidth - 40,\n      x: blockWidth * (2 - 1 / 2),\n      position: j\n    };\n  }\n\n  children[children.length - 1] = {\n    label: \"f(x)\",\n    width: blockWidth * 0.8 - 40,\n    style: \"block-data-children\",\n    position: 1\n  };\n\n  for (var j = 0; j < stages[1][0].length; j++) {\n    children[j + stages[0][0].length] = {\n      label: stages[1][i][j],\n      width: blockWidth - 40,\n      x: blockWidth * (2 + 1 / 2),\n      position: j\n    };\n  }\n\n  stage1[i] = drawBlock(root, {\n    x: blockWidth * (2),\n    y: 5 + blockHeight / 2 + height / totalWorkers * i,\n    width: blockWidth * 2,\n    height: blockHeight,\n    label: \"Worker\",\n    childrens: children\n  });\n}\n\nvar stage2 = new Array(totalWorkers);\nfor (var i = 0; i < totalWorkers; i++) {\n  var children = new Array(stages[2][i].length);\n  for (var j = 0; j < children.length; j++) {\n    children[j] = {\n      label: stages[2][i][j],\n      width: blockWidth - 40,\n      x: blockWidth * (7 - 1 / 2)\n    };\n  }\n\n  stage2[i] = drawBlock(root, {\n    x: blockWidth * (7 - 1/2),\n    y: 5 + blockHeight / 2 + height / totalWorkers * i,\n    width: blockWidth,\n    height: blockHeight,\n    label: \"Worker\",\n    childrens: children\n  });\n}\n\nfor (var i = 0; i < stage1.length; i++) {\n  for (var j = 0; j < stage2.length; j++) {\n    linkBlocks(stage1[i], stage2[j]);\n  }\n}\n};","style":"/* R2D3 Source File:  images/tuning-spark-overview.css */\n.block {\n  fill: white;\n  stroke: black;\n}\n\n.block-data {\n  fill: white;\n  stroke: black;\n}\n\n.block-children {\n  fill: white;\n  stroke: black;\n}\n\n.block-data-children {\n  fill: white;\n  stroke: black;\n}\n\n.block-link {\n  fill: white;\n  stroke: black;\n}","version":5,"theme":{"default":{"background":"#FFFFFF","foreground":"#000000"},"runtime":null},"useShadow":true},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
-FIGURE 8.1: Spark Sorting Overview
+FIGURE 8.1: Sorting Distributed Data with Apache Spark
 </p>
 </div>
 <p>Notice that while the diagram above describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, these lower level operations are not exposed in <code>sparklyr</code>, instead, <code>sparklyr</code> makes those operations available through higher level commands provided by the data <a href="analysis.html#analysis">analysis</a> tools like <a href="streaming.html#streams-dplyr">dplyr</a> or [DBI], <a href="modeling.html#modeling">modeling</a> and by using many <a href="#using-extensions">community extensions</a>. For advanced use cases, one can always use the Spark’s Scala API through an <code>sparklyr</code> <a href="#r-extension">custom extensions</a> or run custom [distributed] R code.</p>
@@ -473,29 +475,357 @@ FIGURE 8.3: Spark Event Timeline.
 <p>Some settings must be specified when <code>spark-submit</code> (the terminal application that launches Spark) is run. For instance, since <code>spark-submit</code> launches driver node which runs as a Java instance, choosing how much memory is allocated needs to be specified as a parameter to <code>spark-submit</code>.</p>
 <p>You can list all the available <code>spark-submit</code> parameters by running:</p>
 <div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb86-1" data-line-number="1"><span class="kw">spark_home_dir</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">file.path</span>(<span class="st">&quot;bin&quot;</span>, <span class="st">&quot;spark-submit&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">system2</span>()</a></code></pre></div>
+<pre><code>Usage: spark-submit [options] &lt;app jar | python file | R file&gt; [app arguments]
+Usage: spark-submit --kill [submission ID] --master [spark://...]
+Usage: spark-submit --status [submission ID] --master [spark://...]
+Usage: spark-submit run-example [options] example-class [example args]
+
+Options:
+  --master MASTER_URL         spark://host:port, mesos://host:port, yarn,
+                              k8s://https://host:port, or local (Default: local[*]).
+  --deploy-mode DEPLOY_MODE   Whether to launch the driver program locally (&quot;client&quot;) or
+                              on one of the worker machines inside the cluster (&quot;cluster&quot;)
+                              (Default: client).
+  --class CLASS_NAME          Your application&#39;s main class (for Java / Scala apps).
+  --name NAME                 A name of your application.
+  --jars JARS                 Comma-separated list of jars to include on the driver
+                              and executor classpaths.
+  --packages                  Comma-separated list of maven coordinates of jars to include
+                              on the driver and executor classpaths. Will search the local
+                              maven repo, then maven central and any additional remote
+                              repositories given by --repositories. The format for the
+                              coordinates should be groupId:artifactId:version.
+  --exclude-packages          Comma-separated list of groupId:artifactId, to exclude while
+                              resolving the dependencies provided in --packages to avoid
+                              dependency conflicts.
+  --repositories              Comma-separated list of additional remote repositories to
+                              search for the maven coordinates given with --packages.
+  --py-files PY_FILES         Comma-separated list of .zip, .egg, or .py files to place
+                              on the PYTHONPATH for Python apps.
+  --files FILES               Comma-separated list of files to be placed in the working
+                              directory of each executor. File paths of these files
+                              in executors can be accessed via SparkFiles.get(fileName).
+
+  --conf PROP=VALUE           Arbitrary Spark configuration property.
+  --properties-file FILE      Path to a file from which to load extra properties. If not
+                              specified, this will look for conf/spark-defaults.conf.
+
+  --driver-memory MEM         Memory for driver (e.g. 1000M, 2G) (Default: 1024M).
+  --driver-java-options       Extra Java options to pass to the driver.
+  --driver-library-path       Extra library path entries to pass to the driver.
+  --driver-class-path         Extra class path entries to pass to the driver. Note that
+                              jars added with --jars are automatically included in the
+                              classpath.
+
+  --executor-memory MEM       Memory per executor (e.g. 1000M, 2G) (Default: 1G).
+
+  --proxy-user NAME           User to impersonate when submitting the application.
+                              This argument does not work with --principal / --keytab.
+
+  --help, -h                  Show this help message and exit.
+  --verbose, -v               Print additional debug output.
+  --version,                  Print the version of current Spark.
+
+ Cluster deploy mode only:
+  --driver-cores NUM          Number of cores used by the driver, only in cluster mode
+                              (Default: 1).
+
+ Spark standalone or Mesos with cluster deploy mode only:
+  --supervise                 If given, restarts the driver on failure.
+  --kill SUBMISSION_ID        If given, kills the driver specified.
+  --status SUBMISSION_ID      If given, requests the status of the driver specified.
+
+ Spark standalone and Mesos only:
+  --total-executor-cores NUM  Total cores for all executors.
+
+ Spark standalone and YARN only:
+  --executor-cores NUM        Number of cores per executor. (Default: 1 in YARN mode,
+                              or all available cores on the worker in standalone mode)
+
+ YARN-only:
+  --queue QUEUE_NAME          The YARN queue to submit to (Default: &quot;default&quot;).
+  --num-executors NUM         Number of executors to launch (Default: 2).
+                              If dynamic allocation is enabled, the initial number of
+                              executors will be at least NUM.
+  --archives ARCHIVES         Comma separated list of archives to be extracted into the
+                              working directory of each executor.
+  --principal PRINCIPAL       Principal to be used to login to KDC, while running on
+                              secure HDFS.
+  --keytab KEYTAB             The full path to the file that contains the keytab for the
+                              principal specified above. This keytab will be copied to
+                              the node running the Application Master via the Secure
+                              Distributed Cache, for renewing the login tickets and the
+                              delegation tokens periodically.
+      </code></pre>
 <p>Notice for instance the <code>--driver-memory</code> parameter, which we previously configured by setting:</p>
-<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb87-1" data-line-number="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
-<a class="sourceLine" id="cb87-2" data-line-number="2">config[<span class="st">&quot;sparklyr.shell.driver-memory&quot;</span>] &lt;-<span class="st"> &quot;2gb&quot;</span></a></code></pre></div>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb88-1" data-line-number="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
+<a class="sourceLine" id="cb88-2" data-line-number="2">config[<span class="st">&quot;sparklyr.shell.driver-memory&quot;</span>] &lt;-<span class="st"> &quot;2gb&quot;</span></a></code></pre></div>
 <p>In general, any <code>spark-submit</code> setting is configured through <code>sparklyr.shell.X</code> where <code>X</code> is the name of the <code>spark-submit</code> parameter without the <code>--</code> prefix.</p>
 </div>
 <div id="runtime-settings" class="section level3">
 <h3><span class="header-section-number">8.2.2</span> Runtime Settings</h3>
 <p>As mentioned, some <strong>Spark</strong> settings configure the session runtime. The runtime settings are a superset of the <a href="tuning.html#submit-settings">submit settings</a> since is usually helpfull to retrieve the current configuration even if a setting can’t be changed.</p>
 <p>To list all the Spark settings available at runtime, we can run:</p>
-<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb88-1" data-line-number="1"><span class="kw">spark_session_config</span>(sc)</a></code></pre></div>
-<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb89-1" data-line-number="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a>
-<a class="sourceLine" id="cb89-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb89-3" data-line-number="3">settings &lt;-<span class="st"> </span><span class="kw">spark_session_config</span>(sc)</a>
-<a class="sourceLine" id="cb89-4" data-line-number="4">cleaned &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="st">&quot;Frameworks/R.framework/Versions/3.5/Resources/library&quot;</span>, <span class="st">&quot;...&quot;</span>, settings)</a>
-<a class="sourceLine" id="cb89-5" data-line-number="5">cleaned &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="st">&quot;javierluraschi&quot;</span>, <span class="st">&quot;...&quot;</span>, cleaned)</a>
-<a class="sourceLine" id="cb89-6" data-line-number="6">cleaned &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="st">&quot;^file:&quot;</span>, <span class="st">&quot;&quot;</span>, cleaned)</a>
-<a class="sourceLine" id="cb89-7" data-line-number="7">knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">data.frame</span>(<span class="dt">name =</span> <span class="kw">names</span>(settings), <span class="dt">value =</span> <span class="kw">unlist</span>(<span class="kw">unname</span>(cleaned))))</a></code></pre></div>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb89-1" data-line-number="1"><span class="kw">spark_session_config</span>(sc)</a></code></pre></div>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb90-1" data-line-number="1">knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">readRDS</span>(<span class="st">&quot;data/tuning-runtime-config.rds&quot;</span>))</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">spark.master</td>
+<td align="left">local[4]</td>
+</tr>
+<tr class="even">
+<td align="left">spark.sql.shuffle.partitions</td>
+<td align="left">4</td>
+</tr>
+<tr class="odd">
+<td align="left">spark.driver.port</td>
+<td align="left">62314</td>
+</tr>
+<tr class="even">
+<td align="left">spark.submit.deployMode</td>
+<td align="left">client</td>
+</tr>
+<tr class="odd">
+<td align="left">spark.executor.id</td>
+<td align="left">driver</td>
+</tr>
+<tr class="even">
+<td align="left">spark.jars</td>
+<td align="left">/Library/…/sparklyr/java/sparklyr-2.3-2.11.jar</td>
+</tr>
+<tr class="odd">
+<td align="left">spark.app.id</td>
+<td align="left">local-1545518234395</td>
+</tr>
+<tr class="even">
+<td align="left">spark.env.SPARK_LOCAL_IP</td>
+<td align="left">127.0.0.1</td>
+</tr>
+<tr class="odd">
+<td align="left">spark.sql.catalogImplementation</td>
+<td align="left">hive</td>
+</tr>
+<tr class="even">
+<td align="left">spark.spark.port.maxRetries</td>
+<td align="left">128</td>
+</tr>
+<tr class="odd">
+<td align="left">spark.app.name</td>
+<td align="left">sparklyr</td>
+</tr>
+<tr class="even">
+<td align="left">spark.home</td>
+<td align="left">/Users/…/spark/spark-2.3.2-bin-hadoop2.7</td>
+</tr>
+<tr class="odd">
+<td align="left">spark.driver.host</td>
+<td align="left">localhost</td>
+</tr>
+</tbody>
+</table>
 <p>See also, <a href="https://spark.apache.org/docs/latest/configuration.html">spark.apache.org/docs/latest/configuration.html</a>.</p>
 </div>
 <div id="sparklyr-settings" class="section level3">
 <h3><span class="header-section-number">8.2.3</span> sparklyr Settings</h3>
 <p>Appart from Spark settings, there are a few settings particular to sparklyr listed below. <code>sparklyr.connect.cores</code> is useful to set the CPU cores to use in local mode; the remaining ones are not used as much while tuning, but they can prove helpful while troubleshooting other issues.</p>
-<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb90-1" data-line-number="1"><span class="kw">spark_config_settings</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb91-1" data-line-number="1"><span class="kw">spark_config_settings</span>()</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="left">description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">sparklyr.apply.packages</td>
+<td align="left">Configures default value for packages parameter in spark_apply().</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.apply.rlang</td>
+<td align="left">Experimental feature. Turns on improved serialization for spark_apply().</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.apply.schema.infer</td>
+<td align="left">Number of rows collected to infer schema when column types specified in spark_apply().</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.arrow</td>
+<td align="left">Use Apache Arrow to serialize data?</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.backend.interval</td>
+<td align="left">Total seconds sparklyr will check on a backend operation.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.backend.timeout</td>
+<td align="left">Total seconds before sparklyr will give up waiting for a backend operation to complete.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.connect.aftersubmit</td>
+<td align="left">R function to call after spark-submit executes.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.connect.app.jar</td>
+<td align="left">The path to the sparklyr jar used in spark_connect().</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.connect.cores.local</td>
+<td align="left">Number of cores to use in spark_connect(master = “local”), defaults to parallel::detectCores().</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.connect.csv.embedded</td>
+<td align="left">Regular expression to match against versions of Spark that require package extension to support CSVs.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.connect.csv.scala11</td>
+<td align="left">Use Scala 2.11 jars when using embedded CSV jars in Spark 1.6.X.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.connect.jars</td>
+<td align="left">Additional JARs to include while submitting application to Spark.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.connect.master</td>
+<td align="left">The cluster master as spark_connect() master parameter, notice that the ‘spark.master’ setting is usually preferred.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.connect.packages</td>
+<td align="left">Spark packages to include when connecting to Spark.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.connect.ondisconnect</td>
+<td align="left">R function to call after spark_disconnect().</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.connect.sparksubmit</td>
+<td align="left">Command executed instead of spark-submit when connecting.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.connect.timeout</td>
+<td align="left">Total seconds before giving up connecting to the sparklyr gateway while initializing.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.dplyr.period.splits</td>
+<td align="left">Should ‘dplyr’ split column names into database and table?</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.gateway.address</td>
+<td align="left">The address of the driver machine.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.gateway.config.retries</td>
+<td align="left">Number of retries to retrieve port and address from config, useful when using functions to query port or address in kubernetes.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.gateway.interval</td>
+<td align="left">Total of seconds sparkyr wil check on a gateway connection.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.gateway.port</td>
+<td align="left">The port the sparklyr gateway uses in the driver machine.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.gateway.remote</td>
+<td align="left">Should the sparklyr gateway allow remote connections? This is required in yarn cluster, etc.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.gateway.routing</td>
+<td align="left">Should the sparklyr gateway service route to other sessions? Consider disabling in kubernetes.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.gateway.service</td>
+<td align="left">Should the sparklyr gateway be run as a service without shutting down when the last connection disconnects?</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.gateway.timeout</td>
+<td align="left">Total seconds before giving up connecting to the sparklyr gateway after initialization.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.gateway.wait</td>
+<td align="left">Total seconds to wait before retrying to contact the sparklyr gateway.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.log.invoke</td>
+<td align="left">Should every call to invoke() be printed in the console? Can be set to ‘callstack’ to log callstack.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.log.console</td>
+<td align="left">Should driver logs be printed in the console?</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.progress</td>
+<td align="left">Should job progress be reported to RStudio?</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.progress.interval</td>
+<td align="left">Total of seconds to wait before attempting to retrieve job progress in Spark.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.sanitize.column.names</td>
+<td align="left">Should partially unsupported column names be cleaned up?</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.stream.collect.timeout</td>
+<td align="left">Total seconds before stopping collecting a stream sample in sdf_collect_stream().</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.stream.validate.timeout</td>
+<td align="left">Total seconds before stopping to check if stream has errors while being created.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.verbose</td>
+<td align="left">Use verbose logging across all sparklyr operations?</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.verbose.na</td>
+<td align="left">Use verbose logging when dealing with NAs?</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.verbose.sanitize</td>
+<td align="left">Use verbose logging while sanitizing columns and other objects?</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.worker.gateway.address</td>
+<td align="left">The address of the worker machine, most likely localhost.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.worker.gateway.port</td>
+<td align="left">The port the sparklyr gateway uses in the driver machine.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.yarn.cluster.accepted.timeout</td>
+<td align="left">Total seconds before giving up waiting for cluster resources in yarn cluster mode.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.yarn.cluster.hostaddress.timeout</td>
+<td align="left">Total seconds before giving up waiting for the cluster to assign a host address in yarn cluster mode.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.yarn.cluster.lookup.byname</td>
+<td align="left">Should the current user name be used to filter yarn cluster jobs while searching for submitted one?</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.yarn.cluster.lookup.prefix</td>
+<td align="left">Application name prefix used to filter yarn cluster jobs while searching for submitted one.</td>
+</tr>
+<tr class="even">
+<td align="left">sparklyr.yarn.cluster.lookup.username</td>
+<td align="left">The user name used to filter yarn cluster jobs while searching for submitted one.</td>
+</tr>
+<tr class="odd">
+<td align="left">sparklyr.yarn.cluster.start.timeout</td>
+<td align="left">Total seconds before giving up waiting for yarn cluster application to get registered.</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div id="tunning-partitioning" class="section level2">
@@ -506,34 +836,33 @@ FIGURE 8.3: Spark Event Timeline.
 <h3><span class="header-section-number">8.3.1</span> Implicit</h3>
 <p>There is always an implicit partition for each Spark computation. If your data is already spread across your cluster evenly, there is usually no need to tune this further.</p>
 <p>You can get the number of partitions a computation will require through <code>sdf_num_partitions()</code>:</p>
-<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb91-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, <span class="dv">10</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sdf_num_partitions</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb92-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, <span class="dv">10</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sdf_num_partitions</span>()</a></code></pre></div>
+<pre><code>[1] 2</code></pre>
 </div>
 <div id="explicit" class="section level3">
 <h3><span class="header-section-number">8.3.2</span> Explicit</h3>
 <p>There will be times when you have many more compute instances than data partitions, or much less compute instances than the number of partitions in your data. In both cases, it can help to <strong>repartition</strong> data to match your cluster resources.</p>
 <p>Various <a href="data.html#data">data</a> functions, like <code>spark_read_csv()</code>, already support a <code>repartition</code> parameter to requrest Spark to repartition data appropriately. For instance, we can create a sequence of 10 numbers partitioned by 10 as follows:</p>
-<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb92-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, <span class="dv">10</span>, <span class="dt">repartition =</span> <span class="dv">10</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sdf_num_partitions</span>()</a></code></pre></div>
-<p>For datasets that are already repartitioned, we can also use <code>sdf_repartition</code>:</p>
-<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb93-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, <span class="dv">10</span>, <span class="dt">repartition =</span> <span class="dv">10</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb93-2" data-line-number="2"><span class="st">  </span><span class="kw">sdf_repartition</span>(<span class="dv">4</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb93-3" data-line-number="3"><span class="st">  </span><span class="kw">sdf_num_partitions</span>()</a></code></pre></div>
-<p>However, lets look at this with a practical example. Suppose that we want to sort a large dataset that does not even fit in memory, for simplicity, we will generate this dataset by generating 1 billion rows and appending a column of random values. A first attempt to sort this in Spark would be to run:</p>
-<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb94-1" data-line-number="1"><span class="co"># Attempt to sort 20 GB dataset in disk with one billion entries</span></a>
-<a class="sourceLine" id="cb94-2" data-line-number="2"><span class="kw">sdf_len</span>(sc, <span class="dv">10</span><span class="op">^</span><span class="dv">9</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb94-3" data-line-number="3"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">x =</span> <span class="kw">rand</span>()) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb94-4" data-line-number="4"><span class="st">  </span><span class="kw">arrange</span>(x) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb94-5" data-line-number="5"><span class="st">  </span><span class="kw">spark_write_csv</span>(<span class="st">&quot;billion.csv&quot;</span>)</a></code></pre></div>
-<p>However, since each partition needs to fit in memory in Spark, the code above will result in an <code>OutOfMemory</code> exception that shuts down Spark completely. Instead, we can explicitly partition the data into chunks that would fit in the default memory configureation by explicitly defining the total number of partitions to use with the <code>repartition</code> parameter set to 10,000 as follows:</p>
-<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb95-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a>
-<a class="sourceLine" id="cb95-2" data-line-number="2"><span class="kw">library</span>(dplyr)</a>
-<a class="sourceLine" id="cb95-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb95-4" data-line-number="4">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a>
-<a class="sourceLine" id="cb95-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb95-6" data-line-number="6"><span class="co"># Sort 20 GB dataset in disk with one billion entries</span></a>
-<a class="sourceLine" id="cb95-7" data-line-number="7"><span class="kw">sdf_len</span>(sc, <span class="dv">10</span><span class="op">^</span><span class="dv">9</span>, <span class="dt">repartition =</span> <span class="dv">10</span><span class="op">^</span><span class="dv">4</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb95-8" data-line-number="8"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">x =</span> <span class="kw">rand</span>()) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb95-9" data-line-number="9"><span class="st">  </span><span class="kw">arrange</span>(x) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb95-10" data-line-number="10"><span class="st">  </span><span class="kw">spark_write_csv</span>(<span class="st">&quot;billion.csv&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb94-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, <span class="dv">10</span>, <span class="dt">repartition =</span> <span class="dv">10</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sdf_num_partitions</span>()</a></code></pre></div>
+<pre><code>[1] 10</code></pre>
+<p>For datasets that are already partitioned, we can also use <code>sdf_repartition</code>:</p>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb96-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, <span class="dv">10</span>, <span class="dt">repartition =</span> <span class="dv">10</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb96-2" data-line-number="2"><span class="st">  </span><span class="kw">sdf_repartition</span>(<span class="dv">4</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb96-3" data-line-number="3"><span class="st">  </span><span class="kw">sdf_num_partitions</span>()</a></code></pre></div>
+<pre><code>[1] 4</code></pre>
+<p>The number of partitions usually changes significantly the speed and resources being used; for instance, the following example calculates the mean over 10M rows with different partition sizes.</p>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb98-1" data-line-number="1">microbenchmark<span class="op">::</span><span class="kw">microbenchmark</span>(</a>
+<a class="sourceLine" id="cb98-2" data-line-number="2">    <span class="st">&quot;1 Partition(s)&quot;</span> =<span class="st"> </span><span class="kw">sdf_len</span>(sc, <span class="dv">10</span><span class="op">^</span><span class="dv">7</span>, <span class="dt">repartition =</span> <span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarise</span>(<span class="kw">mean</span>(id)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>(),</a>
+<a class="sourceLine" id="cb98-3" data-line-number="3">    <span class="st">&quot;2 Partition(s)&quot;</span> =<span class="st"> </span><span class="kw">sdf_len</span>(sc, <span class="dv">10</span><span class="op">^</span><span class="dv">7</span>, <span class="dt">repartition =</span> <span class="dv">2</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarise</span>(<span class="kw">mean</span>(id)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>(),</a>
+<a class="sourceLine" id="cb98-4" data-line-number="4">    <span class="dt">times =</span> <span class="dv">10</span></a>
+<a class="sourceLine" id="cb98-5" data-line-number="5">) <span class="op">%&gt;%</span><span class="st"> </span>ggplot2<span class="op">::</span><span class="kw">autoplot</span>()</a></code></pre></div>
+<div class="figure" style="text-align: center"><span id="fig:tuning-partitioning-explicit-results"></span>
+<img src="images/tuning-partition-explicit.png" alt="Computation speed when using explicit Spark partitions." width="1500" />
+<p class="caption">
+FIGURE 8.4: Computation speed when using explicit Spark partitions.
+</p>
+</div>
+<p>The results show that sorting data with two partitions is almost twice as fast, this is the case since two CPUs can be used to execute this operation. However, it is not necessarily the case that higher-partitions produce faster computation; instead, partitioning data is particular to your computing cluster and the data analysis operations being performed.</p>
 </div>
 </div>
 <div id="tunning-caching" class="section level2">
@@ -541,18 +870,18 @@ FIGURE 8.3: Spark Event Timeline.
 <p>From the <a href="Intro">introduction</a> chapter, we know that Spark was designed to be faster than it’s predecesors by using memory instead of disk to store data, this is formally known as an Spark <strong>RDD</strong> and stands for resilient distributed dataset. An RDD is resilient by duplicating copies of the same data across many machines, such that, if one machine fails other can complete the task. Resiliency is important in distributed systems since, while things will usually work in one machine, when running over thousands of machines the likelyhood of something failing is much higher; when a failure happens, it is prefferable be fault tolerant to avoid loosing the work of all the other machines. RDDs are fault tolerant by tracking data lineage information to rebuild lost data automatically on failure.</p>
 <p>In <code>sparklyr</code>, you can control when an RDD gets loaded or unloaded from memory using <code>tbl_cache()</code> and <code>tbl_uncache()</code>.</p>
 <p>Most sparklyr operations that retrieve a Spark data frame, cache the results in-memory, for instance, running <code>spark_read_parquet()</code> or <code>sdf_copy_to()</code> will provide a Spark dataframe that is already cached in-memory. As a Spark data frame, this object can be used in most sparklyr functions, including data analysis with dplyr or machine learning.</p>
-<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb96-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a>
-<a class="sourceLine" id="cb96-2" data-line-number="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a></code></pre></div>
-<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb97-1" data-line-number="1">iris_tbl &lt;-<span class="st"> </span><span class="kw">sdf_copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb99-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb99-2" data-line-number="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb100-1" data-line-number="1">iris_tbl &lt;-<span class="st"> </span><span class="kw">sdf_copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <p>You can inspect which tables are cached by navigating to the Spark UI using <code>spark_web(sc)</code>, opening the storage tab, and clicking on a given RDD:</p>
 <div class="figure" style="text-align: center"><span id="fig:tunning-caching-rdd-shot"></span>
 <img src="images/tuning-cache-rdd-web.png" alt="Cached RDD in Spark Web Interface." width="496" />
 <p class="caption">
-FIGURE 8.4: Cached RDD in Spark Web Interface.
+FIGURE 8.5: Cached RDD in Spark Web Interface.
 </p>
 </div>
 <p>Data loaded in memory will be released when the R session terminates either explicitly or implicitly with a restart or disconnection; however, to free up resources, you can use <code>tbl_uncache()</code>:</p>
-<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb98-1" data-line-number="1"><span class="kw">tbl_uncache</span>(sc, <span class="st">&quot;iris&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb101-1" data-line-number="1"><span class="kw">tbl_uncache</span>(sc, <span class="st">&quot;iris&quot;</span>)</a></code></pre></div>
 <div id="checkpointing" class="section level3">
 <h3><span class="header-section-number">8.4.1</span> Checkpointing</h3>
 <p>Checkpointing is a slightly different type of caching, while it also persists data it will, additionally, break the graph computation lineage. So for instance, if a cached partition is lost, it can be computed from the computation graph which is not possible while checkpointing since the source of computation is lost.</p>
@@ -570,21 +899,21 @@ FIGURE 8.4: Cached RDD in Spark Web Interface.
 <li><strong>Storage:</strong> Storage memory is used to cache RDDs, for instance, when using <code>tbl_cache()</code> in <code>sparklyr</code>.</li>
 </ul>
 <p>As part of tuning execution, you can consider tweaking the amount of memory allocated for <strong>user</strong>, <strong>execution</strong> and <strong>storage</strong> by creating a Spark connection with different values than the defaults provided in Spark:</p>
-<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb99-1" data-line-number="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
-<a class="sourceLine" id="cb99-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb99-3" data-line-number="3"><span class="co"># define memory available for storage and execution</span></a>
-<a class="sourceLine" id="cb99-4" data-line-number="4">config<span class="op">$</span>spark.memory.fraction &lt;-<span class="st"> </span><span class="fl">0.75</span></a>
-<a class="sourceLine" id="cb99-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb99-6" data-line-number="6"><span class="co"># define memory available for storage</span></a>
-<a class="sourceLine" id="cb99-7" data-line-number="7">config<span class="op">$</span>spark.memory.storageFraction &lt;-<span class="st"> </span><span class="fl">0.5</span></a></code></pre></div>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb102-1" data-line-number="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
+<a class="sourceLine" id="cb102-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb102-3" data-line-number="3"><span class="co"># define memory available for storage and execution</span></a>
+<a class="sourceLine" id="cb102-4" data-line-number="4">config<span class="op">$</span>spark.memory.fraction &lt;-<span class="st"> </span><span class="fl">0.75</span></a>
+<a class="sourceLine" id="cb102-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb102-6" data-line-number="6"><span class="co"># define memory available for storage</span></a>
+<a class="sourceLine" id="cb102-7" data-line-number="7">config<span class="op">$</span>spark.memory.storageFraction &lt;-<span class="st"> </span><span class="fl">0.5</span></a></code></pre></div>
 <p>For instance, if you want to use Spark to store large amounts of data in-memory with the purpuse of filtering and retrieving subsets quickly, you can expect Spark to use little execution or user memory; therefore, to maximize storage memory, one can tune Spark as follows:</p>
-<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb100-1" data-line-number="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
-<a class="sourceLine" id="cb100-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb100-3" data-line-number="3"><span class="co"># define memory available for storage and execution</span></a>
-<a class="sourceLine" id="cb100-4" data-line-number="4">config<span class="op">$</span>spark.memory.fraction &lt;-<span class="st"> </span><span class="fl">0.90</span></a>
-<a class="sourceLine" id="cb100-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb100-6" data-line-number="6"><span class="co"># define memory available for storage</span></a>
-<a class="sourceLine" id="cb100-7" data-line-number="7">config<span class="op">$</span>spark.memory.storageFraction &lt;-<span class="st"> </span><span class="fl">0.90</span></a></code></pre></div>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb103-1" data-line-number="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
+<a class="sourceLine" id="cb103-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb103-3" data-line-number="3"><span class="co"># define memory available for storage and execution</span></a>
+<a class="sourceLine" id="cb103-4" data-line-number="4">config<span class="op">$</span>spark.memory.fraction &lt;-<span class="st"> </span><span class="fl">0.90</span></a>
+<a class="sourceLine" id="cb103-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb103-6" data-line-number="6"><span class="co"># define memory available for storage</span></a>
+<a class="sourceLine" id="cb103-7" data-line-number="7">config<span class="op">$</span>spark.memory.storageFraction &lt;-<span class="st"> </span><span class="fl">0.90</span></a></code></pre></div>
 <p>However, notice that Spark will borrow execution memory from storage and viceversa if needed and if possible; therefore, in practice, there should be little need to tune the memory settings.</p>
 </div>
 </div>
@@ -592,23 +921,23 @@ FIGURE 8.4: Cached RDD in Spark Web Interface.
 <h2><span class="header-section-number">8.5</span> Shuffling</h2>
 <p>Shuffling, is the operation that redistributes data across machines, it is usually an expensive operation and therefore, one we try to minimize. One can easily identify is significant time is being spent shuffling by looking at the <a href="tuning.html#tunning-event-timeline">event timeline</a>. It is possible to reduce shuffling by reframing data analysis questions or hinting Spark appropriately.</p>
 <p>For instance, when joining data frames that differ in size significantly, as in, one set being orders of magnitude smaller than the other one. You can consider using <code>sdf_broadcast()</code> to mark a dataframe as small enough for use in broadcast joins, meaning, it pushes one of the smaller dataframes to each of the worker nodes to reduce shuffling the bigger dataframe. One example for <code>sdf_broadcast()</code> follows:</p>
-<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb101-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, <span class="dv">10000</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb101-2" data-line-number="2"><span class="st">    </span><span class="kw">sdf_broadcast</span>() <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb101-3" data-line-number="3"><span class="st">    </span><span class="kw">left_join</span>(<span class="kw">sdf_len</span>(sc, <span class="dv">100</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb104-1" data-line-number="1"><span class="kw">sdf_len</span>(sc, <span class="dv">10000</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb104-2" data-line-number="2"><span class="st">    </span><span class="kw">sdf_broadcast</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb104-3" data-line-number="3"><span class="st">    </span><span class="kw">left_join</span>(<span class="kw">sdf_len</span>(sc, <span class="dv">100</span>))</a></code></pre></div>
 </div>
 <div id="tunning-serialization" class="section level2">
 <h2><span class="header-section-number">8.6</span> Serialization</h2>
 <p>It is not that common to have to adjust serialization when tunning Spark; however, it is worth mentioning there are alternative serialization modules like the <a href="https://github.com/EsotericSoftware/kryo">Kryo Serializer</a> that can provide performance improvements over the default <a href="http://docs.oracle.com/javase/6/docs/api/java/io/Serializable.html">Java Serializer</a>.</p>
 <p>The Kryo Serializer can be enabled in <code>sparklyr</code> through:</p>
-<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb102-1" data-line-number="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
-<a class="sourceLine" id="cb102-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb102-3" data-line-number="3">config<span class="op">$</span>spark.serializer &lt;-<span class="st"> &quot;org.apache.spark.serializer.KryoSerializer&quot;</span></a>
-<a class="sourceLine" id="cb102-4" data-line-number="4">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> config)</a></code></pre></div>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb105-1" data-line-number="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
+<a class="sourceLine" id="cb105-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb105-3" data-line-number="3">config<span class="op">$</span>spark.serializer &lt;-<span class="st"> &quot;org.apache.spark.serializer.KryoSerializer&quot;</span></a>
+<a class="sourceLine" id="cb105-4" data-line-number="4">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> config)</a></code></pre></div>
 </div>
 <div id="recap-3" class="section level2">
 <h2><span class="header-section-number">8.7</span> Recap</h2>
 <p>This chapter provided a broad but also detailed overview to help you speed up and reduce resource consumption in Spark, it provided the foundations to understand bottlenecks and some common workarounds to known issues; however, fine-tunning Spark is a broad topic that would require many more chapters to cover extensively. Therefore, while troubleshooting Spark’s performance and scalability, searching the web and consulting online communities is often necessary to fine-tune your particular environment.</p>
-<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb103-1" data-line-number="1"><span class="kw">spark_disconnect</span>(sc)</a></code></pre></div>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb106-1" data-line-number="1"><span class="kw">spark_disconnect</span>(sc)</a></code></pre></div>
 
 </div>
 </div>

@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2018-12-22">
+<meta name="date" content="2018-12-26">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,11 +177,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.8" data-path="starting.html"><a href="starting.html#starting-recap"><i class="fa fa-check"></i><b>2.8</b> Recap</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="analysis.html"><a href="analysis.html"><i class="fa fa-check"></i><b>3</b> Analysis</a><ul>
-<li class="chapter" data-level="3.1" data-path="analysis.html"><a href="analysis.html#typical-analysis"><i class="fa fa-check"></i><b>3.1</b> Typical analysis</a></li>
-<li class="chapter" data-level="3.2" data-path="analysis.html"><a href="analysis.html#working-with-big-data"><i class="fa fa-check"></i><b>3.2</b> Working with Big Data</a></li>
-<li class="chapter" data-level="3.3" data-path="analysis.html"><a href="analysis.html#avoid-running-r-inside-spark"><i class="fa fa-check"></i><b>3.3</b> Avoid running R inside Spark</a></li>
-<li class="chapter" data-level="3.4" data-path="analysis.html"><a href="analysis.html#use-r-as-an-interface-to-spark"><i class="fa fa-check"></i><b>3.4</b> Use R as an interface to Spark</a></li>
-<li class="chapter" data-level="3.5" data-path="analysis.html"><a href="analysis.html#cut-here"><i class="fa fa-check"></i><b>3.5</b> Cut here</a></li>
+<li class="chapter" data-level="3.1" data-path="analysis.html"><a href="analysis.html#background"><i class="fa fa-check"></i><b>3.1</b> Background</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="analysis.html"><a href="analysis.html#working-with-big-data"><i class="fa fa-check"></i><b>3.1.1</b> Working with Big Data</a></li>
+<li class="chapter" data-level="3.1.2" data-path="analysis.html"><a href="analysis.html#avoid-running-r-inside-spark"><i class="fa fa-check"></i><b>3.1.2</b> Avoid running R inside Spark</a></li>
+<li class="chapter" data-level="3.1.3" data-path="analysis.html"><a href="analysis.html#r-under-the-hood"><i class="fa fa-check"></i><b>3.1.3</b> R, under the hood</a></li>
+<li class="chapter" data-level="3.1.4" data-path="analysis.html"><a href="analysis.html#use-r-as-an-interface-to-spark"><i class="fa fa-check"></i><b>3.1.4</b> Use R as an interface to Spark</a></li>
+<li class="chapter" data-level="3.1.5" data-path="analysis.html"><a href="analysis.html#using-sparklyr-for-analysis"><i class="fa fa-check"></i><b>3.1.5</b> Using <code>sparklyr</code> for analysis</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a><ul>
 <li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
@@ -389,8 +391,8 @@ FIGURE 1.1: World’s capacity to store information.
 <p>One year later, in 2004, Google published a new paper describing how to perform operations across the Google File System, this approach came to be known as <strong>MapReduce</strong><span class="citation">(Dean and Ghemawat <a href="#ref-google-map-reduce">2008</a>)</span>. As you would expect, there are two operations in MapReduce: Map and Reduce. The <strong>map operation</strong> provides an arbitrary way to transform each file into a new file, usually defined by arbitrary code that scans the file and outputs a different file. The <strong>reduce operation</strong> combines two files into a new one. These two operations are sufficient to process data at the scale of the data available in the web.</p>
 <p>For example, we can use MapReduce to count words in two different text files. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files.</p>
 <div class="figure"><span id="fig:unnamed-chunk-2"></span>
-<div id="htmlwidget-45d9f3dd924f0063f4d0" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-45d9f3dd924f0063f4d0">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n\n#spacing: 80\n#direction: right\n#zoom: 4\n[Alice's File|I like apples]\n[Bob's File|I like bananas]\n\n[Alice's File]-Map[Alice's Words]\n[Bob's File]-Map[Bob's Words]\n\n[Alice's Words|I,1|like,1|apples,1]\n[Bob's Words|I,1|like,1|bananas,1]\n\n[Alice's Words]- Reduce[Word Counts]\n[Bob's Words]- Reduce[Word Counts]\n\n[Word Counts|I,2|like,2|apples,1|bananas,1]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-3d3ae30e60b6452b592d" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3d3ae30e60b6452b592d">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n\n#spacing: 80\n#direction: right\n#zoom: 4\n[Alice's File|I like apples]\n[Bob's File|I like bananas]\n\n[Alice's File]-Map[Alice's Words]\n[Bob's File]-Map[Bob's Words]\n\n[Alice's Words|I,1|like,1|apples,1]\n[Bob's Words|I,1|like,1|bananas,1]\n\n[Alice's Words]- Reduce[Word Counts]\n[Bob's Words]- Reduce[Word Counts]\n\n[Word Counts|I,2|like,2|apples,1|bananas,1]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 1.2: Simple MapReduce Example.
 </p>
