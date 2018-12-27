@@ -7,7 +7,7 @@ source("r/render.R")
 
 # Tuning {#tuning}
 
-Previous chapters focused on installing, using and connecting to Spark clusters, we've assumed so far that computation in a Spark cluster works efficiently. While this is true in many cases, it is often required to have some knowledge of how Spark works internally to perform tunning operations that will make computations run efficiently. Tunning is often required to run operations over datasets that make use of all resources in the Spark cluster. This chapter will explain how Spark works and provide details on how to tune its operations.
+In previous chapters, we've assumed that computation within a Spark cluster works efficiently. While this is true in some cases, it is often required to have some knowledge of the operations Spark runs internally to fine tune configuration settings that will make computations run efficiently. This chapter will explain how Spark computes data over large datasets and provide details on how to tune its operations.
 
 ## Overview
 
@@ -112,59 +112,72 @@ render_image("images/tuning-spark-event-timeline.png", "Spark Event Timeline.")
 
 ## Configuring {#tunning-configuring}
 
-When tuning a Spark application, consider defining a configuration specification to describe the resources your application needs to successfully run at scale.
+When tuning a Spark application, the most common resources you would want to request are memory and cores, specifically:
 
-Some of the most obvious resources you would want to define are:
+- **Memory in Driver:** The amount of memory required in the driver node.
+- **Memory per Worker:** The amount of memory required in the worker nodes.
+- **Cores per Worker:** The number of CPUs to required in the worker nodes.
+- **Number of Workers:** The number of workers required for this session.
 
-- **Memory in Driver:** The amount of memory available in the driver node, it is convenient to have significantly more memory available in the driver than the worker nodes.
-- **Number of Workers:**. The number of workers required to be configured for this session.
-- **Memory per Worker:** The amount of memory available to the worker node.
+**Note:** It is recommended to request significantly more memory for the driver than the memory available over each worker node. In most cases, you will want to request one core per worker.
 
-In local mode, `spark_connect(master = "local")`; as mentioned in the [local connections](#connection-local) section, there are no workers; however, but we can set the driver settings through:
+In local mode, `spark_connect(master = "local")`; as mentioned in the [local connections](#connection-local) section, there are no workers, but we can set the driver memory and cores to use through:
 
 ```{r tuning-config-local}
 # Initialize configuration with defaults
 config <- spark_config()
 
-# Memory in Driver
+# Memory
 config["sparklyr.shell.driver-memory"] <- "2g"
 
-# Number of Workers
+# Cores
 config["sparklyr.connect.cores.local"] <- 2
 
 # Connect to local cluster with custom configuration
 sc <- spark_connect(master = "local", config = config)
 ```
 
-When Spark runs in Hadoop Yarn, `spark_connect(master = "yarn")`:
+When using the Spark Standalone and the Mesos cluster managers, all the available memory and cores are assigned by default; therefore, there is no additional configuration changes required, unless, you want to restrict resources to allow multiple users to share this cluster, in which case you can use `total-executor-cores` to restrict the total executors requested. The "Spark Standalone Mode" and "Running Spark on Mesos" guides provided additional information when sharing clusters.
 
-```{r tuning-config-yarn}
-# Initialize configuration with defaults
-config <- spark_config()
+When running under YARN Client, you would configure memory and cores as follows:
 
+
+```{r}
 # Memory in Driver
 config["sparklyr.shell.driver-memory"] <- "2g"
-
-# Total Workers
-config["sparklyr.shell.num-executors"] <- 3
-
-# Cores per Worker
-config["sparklyr.shell.executor-cores"] <- 4
 
 # Memory per Worker
 config["sparklyr.shell.executor-memory"] <- "2g"
 
-# Connect to Yarn with custom configuration
-sc <- spark_connect(master = "yarn", config = config)
+# Cores per Worker
+config["sparklyr.shell.executor-cores"] <- 1
+
+# Number of Workers
+config["sparklyr.shell.num-executors"] <- 3
 ```
 
-Notice that some of the settings are different between [clusters](#clusters), local and YARN in the examples above. Therefore, it is common to research online which settings your cluster managers expects.
+When using YARN in Cluster mode, `sparklyr.shell.driver-cores` can be used to configure total cores requested in the driver node, the "Running Spark on YARN" guide provides additional configiuration settings worth familiarizing with.
 
 There are a few types of configuration settings:
 
-- **Submit** settings are set while `sparklyr` is being submitted to Spark. For instance, they can configure the driver node.
-- **Runtime** settings configure Spark when the Spark session is created. For instance, to configure worker nodes settings.
-- **sparklyr** settings configure `sparklyr` behaviour. For instance,`sparklyr.verbose` controls how much diagnostics data is printed. 
+- **Connect** settings are set as parameters to `spark_connect()`, they are common settings used while connecting.
+- **Submit** settings are set while `sparklyr` is being submitted to Spark through `spark-submit`, some dependent on the cluster manager being used.
+- **Runtime** settings configure Spark when the Spark session is created, these settings are independent to the cluster manager and specific to Spark.
+- **sparklyr** settings configure `sparklyr` behaviour, these settings are independent to the cluster manager and particular to R.
+
+The following subsections present extensive lists of all the available settings, it is not required to fully understand them all while tuning Spark, but skimming through them could prove useful in the future while troubleshooting issues. You can also consider skipping the following settings subsections and use them instead as reference material as needed.
+
+### Connect Settings {#connect-settings}
+
+| name            | value                                                       |
+|-----------------|-------------------------------------------------------------|
+| master          | Spark cluster url to connect to. Use "local" to connect to a local instance of Spark installed via `spark_install()`. |
+| spark_home      | The path to a Spark installation. Defaults to the path provided by the SPARK_HOME environment variable. If SPARK_HOME is defined, it will be always be used unless the version parameter is specified to force the use of a locally installed version. |
+| method          | The method used to connect to Spark. Default connection method is "shell" to connect using spark-submit, use "livy" to perform remote connections using HTTP, or "databricks" when using a Databricks clusters.                |
+| app_name        | The application name to be used while running in the Spark cluster.                    |
+| version         | The version of Spark to use. Only applicable to "local" Spark connections.             |
+| hadoop_version  | The version of Hadoop to use. Only applicable to "local" Spark connections.            |
+| config          | Custom configuration for the generated Spark connection. See spark_config for details. |
 
 ### Submit Settings {#submit-settings}
 
@@ -175,19 +188,34 @@ You can list all the available `spark-submit` parameters by running:
 ```{r tuning-submit-code}
 spark_home_dir() %>% file.path("bin", "spark-submit") %>% system2()
 ```
-```{r tuning-submit-run, eval=TRUE, echo=FALSE, comment=''}
-system2(file.path(spark_home_dir(), "bin", "spark-submit"), stdout = "stdout.txt", stderr = "stderr.txt")
-cat(paste(readLines("stderr.txt"), collapse = "\n"))
-```
 
-Notice for instance the `--driver-memory` parameter, which we previously configured by setting:
+For readability, we've provided the output of this command in table format, replacing the `spark-submit` parameter with the appropriate `spark_config()` setting and removing the parameters that are not aplicable or already presented in this chapter:
 
-```{r tuning-submit-driver}
-config <- spark_config()
-config["sparklyr.shell.driver-memory"] <- "2gb"
-```
+| name                               | value                                                       |
+|------------------------------------|-------------------------------------------------------------|
+| sparklyr.shell.jars                | Specified as 'jars' parameter in 'spark_connect()'.         |
+| sparklyr.shell.packages            | Comma-separated list of maven coordinates of jars to include on the driver and executor classpaths. Will search the local maven repo, then maven central and any additional remote repositories given by 'sparklyr.shell.repositories'. The format for the coordinates should be groupId:artifactId:version. |
+| sparklyr.shell.exclude-packages    | Comma-separated list of groupId:artifactId, to exclude while resolving the dependencies provided in 'sparklyr.shell.packages' to avoid dependency conflicts. |
+| sparklyr.shell.repositories        | Comma-separated list of additional remote repositories to search for the maven coordinates given with 'sparklyr.shell.packages' |
+| sparklyr.shell.files               | Comma-separated list of files to be placed in the working directory of each executor. File paths of these files in executors can be accessed via SparkFiles.get(fileName). |
+| sparklyr.shell.conf                | Arbitrary Spark configuration property set as PROP=VALUE.   |
+| sparklyr.shell.properties-file     | Path to a file from which to load extra properties. If not specified, this will look for conf/spark-defaults.conf. |
+| sparklyr.shell.driver-java-options | Extra Java options to pass to the driver.                   |
+| sparklyr.shell.driver-library-path | Extra library path entries to pass to the driver.           |
+| sparklyr.shell.driver-class-path   | Extra class path entries to pass to the driver. Note that jars added with 'sparklyr.shell.jars' are automatically included in the classpath. |
+| sparklyr.shell.proxy-user          | User to impersonate when submitting the application. This argument does not work with 'sparklyr.shell.principal' / 'sparklyr.shell.keytab'. |
+| sparklyr.shell.verbose             | Print additional debug output.                              |
 
-In general, any `spark-submit` setting is configured through `sparklyr.shell.X` where `X` is the name of the `spark-submit` parameter without the `--` prefix.
+The remaining ones are specific to YARN,
+
+| name                                | value                                                                 |
+|-------------------------------------|-----------------------------------------------------------------------|
+| sparklyr.shell.queue                | The YARN queue to submit to (Default: "default").                     |
+| sparklyr.shell.archives             | Comma separated list of archives to be extracted into the working directory of each executor. |
+| sparklyr.shell.principal            | Principal to be used to login to KDC, while running on secure HDFS.   |
+| sparklyr.shell.keytab               | The full path to the file that contains the keytab for the principal specified above. This keytab will be copied to the node running the Application Master via the Secure Distributed Cache, for renewing the login tickets and the delegation tokens periodically. |
+
+In general, any `spark-submit` setting is configured through `sparklyr.shell.X`, where `X` is the name of the `spark-submit` parameter without the `--` prefix.
 
 ### Runtime Settings
 
@@ -232,7 +260,7 @@ By default, Spark will compute over each existing **implicit** partition since i
 
 ### Implicit
 
-There is always an implicit partition for each Spark computation. If your data is already spread across your cluster evenly, there is usually no need to tune this further.
+There is always an implicit partition for each computation that Spark will assign opn it's own. For instance, how your data is distributed in storage will match the default partitions Spark assigns.
 
 You can get the number of partitions a computation will require through `sdf_num_partitions()`:
 
@@ -242,6 +270,8 @@ sdf_len(sc, 10) %>% sdf_num_partitions()
 ```
 [1] 2
 ```
+
+While in most cases the default partitions works just fine, there are cases  where we you will need to be explicit on the partitions you choose.
 
 ### Explicit
 
@@ -404,8 +434,4 @@ sc <- spark_connect(master = "local", config = config)
 
 ## Recap
 
-This chapter provided a broad but also detailed overview to help you speed up and reduce resource consumption in Spark, it provided the foundations to understand bottlenecks and some common workarounds to known issues; however, fine-tunning Spark is a broad topic that would require many more chapters to cover extensively. Therefore, while troubleshooting Spark's performance and scalability, searching the web and consulting online communities is often necessary to fine-tune your particular environment.
-
-```{r tunning-disconnect, message=FALSE}
-spark_disconnect(sc)
-```
+This chapter provided a broad overview of Spark internals and a detailed configuration settings to help you speed up computation and enable high computation loads, it provided the foundations to understand bottlenecks and guidance on common configuration considerations; however, fine-tunning Spark is a broad topic that would require many more chapters to cover extensively. Therefore, while troubleshooting Spark's performance and scalability, searching the web and consulting online communities it is often necessary to fine-tune your particular environment.
