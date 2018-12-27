@@ -1,8 +1,8 @@
 ```{r include=FALSE, eval=TRUE}
 knitr::opts_chunk$set(eval = FALSE)
-source("r/render.R")
 library(sparklyr)
 library(dplyr)
+source("r/render.R")
 ```
 
 # Tuning {#tuning}
@@ -22,14 +22,16 @@ Spark performs distributed computation by: configuring, partitioning, executing,
 
 The following diagram shows an example on how a sorting **job** would conceptually work across a cluster of machines. First, Spark would **configure** the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the data is already partitioned, each worker node loads this implicit **partition**; for instance, `4,9,1` is loaded in the first worker node. Afterwards, a custom transformation is applied to each partition in each worker node, this is denoted by `f(x)` in the diagram below and is defined as a **stage** in Spark terminalogy. In this example, `f(x)` **executes** a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed. Once the execution completes, the result is **shuffled** to the right machine to finish the sorting operation across the entire dataset. Once the data is sorted across the cluster, the sorted results can be optionally **cached** in memory to avoid rerunning this computation multiple times. Finally, a small subset of the cached results is **serialized**, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.
 
-```{r tuning-overview, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', fig.cap='Sorting Distributed Data with Apache Spark'}
-
+```{r tuning-overview, echo=FALSE}
 r2d3::r2d3(
   c(),
   "images/tuning-spark-overview.js",
   dependencies = "images/tuning-diagram.js",
   css = "images/tuning-spark-overview.css"
 )
+```
+```{r tuning-overview-render, eval=TRUE, echo=FALSE, fig.cap='Sorting Distributed Data with Apache Spark.', fig.align='center'}
+render_image("images/tuning-spark-overview.png", "Sorting Distributed Data with Apache Spark.")
 ```
 
 Notice that while the diagram above describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, these lower level operations are not exposed in `sparklyr`, instead, `sparklyr` makes those operations available through higher level commands provided by the data [analysis] tools like [dplyr] or [DBI], [modeling] and by using many [community extensions](#using-extensions). For advanced use cases, one can always use the Spark's Scala API through an `sparklyr` [custom extensions](#r-extension) or run custom [distributed] R code. 
