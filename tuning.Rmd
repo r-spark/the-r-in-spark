@@ -221,7 +221,7 @@ In general, any `spark-submit` setting is configured through `sparklyr.shell.X`,
 
 As mentioned, some **Spark** settings configure the session runtime. The runtime settings are a superset of the [submit settings](#submit-settings) since is usually helpful to retrieve the current configuration even if a setting can't be changed.
 
-To list all the Spark settings available at runtime, we can run:
+To list the Spark settings set in your current Spark session, you can run:
 
 ```{r tuning-runtime-config}
 spark_session_config(sc)
@@ -239,7 +239,7 @@ saveRDS(data.frame(name = names(settings), value = unlist(unname(cleaned))), "da
 knitr::kable(readRDS("data/tuning-runtime-config.rds"))
 ```
 
-See also, [spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html).
+However, there are many more configuration settings available in Spark as described in the "Spark Configuration"[@tuning-spark-configuration] guide. It is not in the scope of this book to describe them all so, if possible, take some time to identify the ones that might be of interest to your paritcular use cases.
 
 ### sparklyr Settings
 
@@ -300,20 +300,26 @@ sdf_len(sc, 10, repartition = 10) %>%
 The number of partitions usually changes significantly the speed and resources being used; for instance, the following example calculates the mean over 10M rows with different partition sizes.
 
 ```{r tuning-partitioning-explicit-code-run, echo=FALSE}
-microbenchmark::microbenchmark(
+library(microbenchmark)
+library(ggplot2)
+
+partitions_plot <- microbenchmark(
     "1 Partition(s)" = sdf_len(sc, 10^7, repartition = 1) %>% summarise(mean(id)) %>% collect(),
     "2 Partition(s)" = sdf_len(sc, 10^7, repartition = 2) %>% summarise(mean(id)) %>% collect(),
     times = 10
 ) %>% 
-  ggplot2::autoplot() %>%
-  ggplot2::ggsave("images/tuning-partition-explicit.png", ., width = 10, height = 6)
+  autoplot() + theme_light()
+ggsave("images/tuning-partition-explicit.png", partitions_plot, width = 10, height = 6)
 ```
 ```{r tuning-partitioning-explicit-code}
-microbenchmark::microbenchmark(
+library(microbenchmark)
+library(ggplot2)
+
+microbenchmark(
     "1 Partition(s)" = sdf_len(sc, 10^7, repartition = 1) %>% summarise(mean(id)) %>% collect(),
     "2 Partition(s)" = sdf_len(sc, 10^7, repartition = 2) %>% summarise(mean(id)) %>% collect(),
     times = 10
-) %>% ggplot2::autoplot()
+) %>% autoplot() + theme_light() 
 ```
 ```{r tuning-partitioning-explicit-results, eval=TRUE, echo=FALSE, fig.cap='Computation speed when using explicit Spark partitions.', fig.align = 'center'}
 render_image("images/tuning-partition-explicit.png", "Computation speed when using explicit Spark partitions.")
@@ -431,6 +437,33 @@ config <- spark_config()
 config$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
 sc <- spark_connect(master = "local", config = config)
 ```
+
+## Configuration Files
+
+Configuring the `spark_config()` settings before connecting is the most common approach while tuning Spark. However, once the desired connection is known, you should consider switching to use a configuration file since it will remove the clutter in your connection code and also allow you to share the configuration settings across projects and coworkers.
+
+For instance, instead of connecting to Spark through:
+
+```{r}
+config <- spark_config()
+config["sparklyr.shell.driver-memory"] <- "2G"
+sc <- spark_connect(master = "local", config = config)
+```
+
+You can instead define a `config.yml`  with the desired settings. This file should be located in the current working directory or in parent directories. For example, you can create the following `config.yml` file to modify the default driver memory:
+
+```{yml}
+default:
+  sparklyr.shell.driver-memory: 2G
+```
+
+Then, connecting with the same configuration settings becomes much cleaner by using instead:
+
+```{r}
+sc <- spark_connect(master = "local")
+```
+
+You can also specify an alternate config file name or location by setting the `file` parameter in `spark_config()`. One additional benefit from using configuration files, is that a system administrator can change the default configuration file without modifying the original one and additional functionality provided by the `config` package, see [github.com/rstudio/config](https://github.com/rstudio/config).
 
 ## Recap
 
