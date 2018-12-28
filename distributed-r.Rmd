@@ -1,26 +1,154 @@
-```{r include=FALSE}
+```{r include=FALSE, eval=TRUE}
 knitr::opts_chunk$set(eval = FALSE)
+source("r/render.R")
+
+styles <- "
+#padding: 16
+#fontSize: 18
+#direction: right
+#lineWidth:2
+#leading:1
+#spacing: 20
+"
 ```
 
 # Distributed R {#distributed}
 
-While **this chatper has not been written.**, use [spark.rstudio.com/guides/distributed-r](http://spark.rstudio.com/guides/distributed-r/) to learn how to use R directly over each worker node.
+Previous chapters presented how to perform many operations in Spark, the previous [Extensions](#extensions) chapter, described how to use functionality provided not in Spark itself, but in extensions developed by the Spark community. In most cases, the combination of Spark and Spark extensions is more than enough to scale almost any computation. However, for those few cases where functionality is lacking, you can consider using `spark_apply()` to perform custom mapping operations using in R and R packages.
 
-## Use Cases
+## Overview
 
-### Embarrassingly Parallel
+The [Introduction](#intro) chapter introduced MapReduce as a technique capable of processing large scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The [Tuning](#tuning) chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually similar to:
 
-```{r distributed-parallel}
-sdf_len(sc, total_executors, repartition = total_executors) %>%
-  spark_apply(~ data.frame(pi = 3.1416), columns = c(pi = "character")) %>%
-  summarize(mean = mean(pi))
+```{r distributed-times-ten, echo=FALSE, eval=TRUE, fig.cap='Conceptual mapping operation when multiplying by ten.', out.width='580pt', out.height='220pt', fig.align='center'}
+render_nomnoml("
+[Data |
+  [1]
+  [2]
+  [3]
+]->[Worker |
+  [1] -> [f(x) = 10 * x]
+  [2] -> [f(x) = 10 * x]
+  [3] -> [f(x) = 10 * x]
+  [f(x) = 10 * x] -> [10]
+  [f(x) = 10 * x] -> [20]
+  [f(x) = 10 * x] -> [30]
+]", "images/distributed-times-ten.png", "Conceptual mapping operation when multiplying by ten.", styles)
 ```
+
+This chapter presents how to define custom `f(x)` mapping operations using `spark_apply()`; for the example above, `spark_apply()` provides support to define `x + 1` as follows:
+
+```{r distributed-increment-one-code}
+sdf_len(sc, 3) %>% spark_apply(~ 10 * .x)
+```
+```
+# Source: spark<?> [?? x 1]
+     id
+* <dbl>
+1     2
+2     3
+3     4
+```
+
+Notice that `~ 10 * .x` is plain R code executed across all worker nodes; the `~` character is defined in the `rlang` package and provides a compact definition of a function equivalent to `function(.x) 10 * .x` or what is also known as an anonymous function or lambda expression.
+
+Now, the first thing to notice is that `f(x)` takes an R data frame as input and must also produce an R data frame as output, conceptually this looks as follows:
+
+```{r distributed-spark-apply-input-output, echo=FALSE, eval=TRUE, fig.cap='Expected function signature in spark_apply() mappings.', out.width='580pt', out.height='120pt', fig.align='center'}
+render_nomnoml("
+[DataFrame]->[f(x)]
+[f(x)]->[DataFrame']
+", "images/distributed-spark-apply-input-output.png", "Expected function signature in spark_apply() mappings.", styles)
+```
+
+We can use the orginal MapReduce example from the [Introduction](#intro) chapter where, the map operations was defined to split sentences into words and then, the total unique words were counted as the reduce operation. We can compute this using knowledge from previous chapters as follows:
+
+```{r}
+sentences <- data_frame(text = c(
+  "I like apples",
+  "I like bananas"
+))
+
+sentences_tbl <- copy_to(sc, sentences)
+
+sentences_tbl %>%
+  ft_tokenizer("text", "words") %>%
+  transmute(word = explode(words)) %>%
+  group_by(word) %>%
+  summarise(count = count())
+```
+```
+# Source: spark<?> [?? x 2]
+  word    count
+* <chr>   <dbl>
+1 i           2
+2 apples      1
+3 like        2
+4 bananas     1
+```
+
+In this example, the operation that provides the mapping from text into words is a combination of `ft_tokenizer()` and `explode()`; however, if those operations were not available, we could use the `tidytext` R package to provide support spliting sentonces into words, this would look as follows without using Spark:
+
+```{r}
+tidytext::unnest_tokens(sentences, word, text)
+```
+```
+# A tibble: 6 x 1
+  word   
+  <chr>  
+1 i      
+2 like   
+3 apples 
+4 i      
+5 like   
+6 bananas
+```
+
+We can use `unnest_tokens()` as a custom mapping operation in Spark using `spark_apply()` as follows:
+
+```{r}
+sentences_tbl %>%
+  spark_apply(~tidytext::unnest_tokens(., word, text))
+```
+```
+# Source: spark<?> [?? x 1]
+  word   
+* <chr>  
+1 i      
+2 like   
+3 apples 
+4 i      
+5 like   
+6 bananas
+```
+
+Finally, we can reduce this dataset using `dplyr` to compute this original MapReduce word-count example using `dplyr` as follows:
+
+```{r}
+sentences_tbl %>%
+  spark_apply(~tidytext::unnest_tokens(., word, text)) %>%
+  group_by(word) %>%
+  summarise(count = count())
+```
+```
+# Source: spark<?> [?? x 2]
+  word    count
+* <chr>   <dbl>
+1 i           2
+2 apples      1
+3 like        2
+4 bananas     1
+```
+
+The rest of this chapter will explain in detail additional features, caveats, considerations and troubleshooting techniques required when defining custom mappings through `spark_apply()`
+
+**Warning:** The proffient R reader can be tempted to use this approach for all Spark operations since it enables using all the functionality from many familiar R packages; however, this is NOT the recommended use of `spark_apply()` since it introduces additional cognitive overhead to the reader, additional troubleshooting steps, performance degradation and, in general, additional complexity that should be avoided.
+
+## Partitions
 
 ## Columns
 
-### Inference
-
-### Excplicit
+Inference vs Excplicit
 
 ```{r distributed-columns-explicit}
 iris_tbl <- spark_apply(
