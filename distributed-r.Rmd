@@ -1,4 +1,5 @@
 ```{r include=FALSE, eval=TRUE}
+
 knitr::opts_chunk$set(eval = FALSE)
 source("r/render.R")
 
@@ -10,11 +11,13 @@ styles <- "
 #leading:1
 #spacing: 20
 "
+
+library(dplyr)
 ```
 
 # Distributed R {#distributed}
 
-Previous chapters presented how to perform many operations in Spark, the previous [Extensions](#extensions) chapter, described how to use functionality provided not in Spark itself, but in extensions developed by the Spark community. In most cases, the combination of Spark and Spark extensions is more than enough to scale almost any computation. However, for those few cases where functionality is lacking, you can consider using `spark_apply()` to perform custom mapping operations using in R and R packages.
+Previous chapters presented how to perform many operations in Spark, the previous [Extensions](#extensions) chapter, described how to use functionality provided not in Spark itself, but in extensions developed by Spark and R contributors. In most cases, the combination of Spark and extensions is more than enough to scale almost any computation. However, for those few cases where functionality is lacking, you can consider distributing R computations to worker nodes to leverage R and R packages.
 
 ## Overview
 
@@ -87,7 +90,7 @@ sentences_tbl %>%
 4 bananas     1
 ```
 
-In this example, the operation that provides the mapping from text into words is a combination of `ft_tokenizer()` and `explode()`; however, if those operations were not available, we could use the `tidytext` R package to provide support spliting sentonces into words, this would look as follows without using Spark:
+In this example, the operation that provides the mapping from text into words is a combination of `ft_tokenizer()` and `explode()`; however, if those operations were not available, we could use instead the `tidytext` R package to tokenize sentences into words, this would look as follows in R:
 
 ```{r}
 tidytext::unnest_tokens(sentences, word, text)
@@ -104,7 +107,7 @@ tidytext::unnest_tokens(sentences, word, text)
 6 bananas
 ```
 
-We can use `unnest_tokens()` as a custom mapping operation in Spark using `spark_apply()` as follows:
+To make use of `tidytext` in Spark, we would define a custom mapping operation using `spark_apply()` and `unnest_tokens()` as follows:
 
 ```{r}
 sentences_tbl %>%
@@ -140,9 +143,169 @@ sentences_tbl %>%
 4 bananas     1
 ```
 
-The rest of this chapter will explain in detail additional features, caveats, considerations and troubleshooting techniques required when defining custom mappings through `spark_apply()`
+The rest of this chapter will explain in detail use cases, features, caveats, considerations and troubleshooting techniques required when defining custom mappings through `spark_apply()`
 
 **Warning:** The proffient R reader can be tempted to use this approach for all Spark operations since it enables using all the functionality from many familiar R packages; however, this is NOT the recommended use of `spark_apply()` since it introduces additional cognitive overhead to the reader, additional troubleshooting steps, performance degradation and, in general, additional complexity that should be avoided.
+
+## Use Cases
+
+The overview `spark_apply()` examples were meant to help you understand how it works; this section will cover a few practical use case for `spark_apply()`, mostly, for parsing and loading custom file formats and modeling data over partitioned sets.
+
+### Custom Parsers
+
+While Spark and its various extensions provide support for many file formats: CSVs, JSON, Parquet, AVRO, etc. there are many more file formats that one might want to use at scale through `spark_apply()` and the right set of R packages available in CRAN. This section presents two use cases for parsing log and WARC files.
+
+#### Log Parser
+
+It is common to use Spark to analize log files, say for instance, logs that track download data from Amazon S3. To parse logs, the `webreadr` package can simplify this process by providing support to load logs stored as: Amzon S3, Squid and Common format. For instance, an S3 log looks as follows:
+
+```{r echo=FALSE}
+cat(paste(readLines(system.file("extdata/log.aws", package = "webreadr")), collapse = "\n"))
+```
+```
+#Version: 1.0
+#Fields: date time x-edge-location sc-bytes c-ip cs-method cs(Host) cs-uri-stem sc-status cs(Referer) cs(User-Agent) cs-uri-query cs(Cookie) x-edge-result-type x-edge-request-id x-host-header cs-protocol cs-bytes time-taken 
+2014-05-23	01:13:11	FRA2	182	192.0.2.10	GET	d111111abcdef8.cloudfront.net	/view/my/file.html	200	www.displaymyfiles.com	Mozilla/4.0%20(compatible;%20MSIE%205.0b1;%20Mac_PowerPC)	-	zip=98101	RefreshHit	MRVMF7KydIvxMWfJIglgwHQwZsbG2IhRJ07sn9AkKUFSHS9EXAMPLE==	d111111abcdef8.cloudfront.net	http	-	0.001
+```
+
+Which can be parsed easily with `read_aws()` as follows:
+
+```{r}
+aws_log <- system.file("extdata/log.aws", package = "webreadr")
+webreadr::read_aws(aws_log)
+```
+```
+# A tibble: 2 x 18
+  date                edge_location bytes_sent ip_address http_method host  path 
+  <dttm>              <chr>              <int> <chr>      <chr>       <chr> <chr>
+1 2014-05-23 01:13:11 FRA2                 182 192.0.2.10 GET         d111… /vie…
+2 2014-05-23 01:13:12 LAX1             2390282 192.0.2.2… GET         d111… /sou…
+# ... with 11 more variables: status_code <int>, referer <chr>, user_agent <chr>,
+#   query <chr>, cookie <chr>, result_type <chr>, request_id <chr>, host_header <chr>,
+#   protocol <chr>, bytes_received <chr>, time_elapsed <dbl>
+```
+
+We can make use of `read_aws()` as follows in Spark with `spark_apply()`:
+
+```{r}
+spark_read_text(sc, "logs", aws_log, overwrite = TRUE, whole = TRUE) %>%
+  spark_apply(~webreadr::read_aws(.x$contents))
+```
+```
+# Source: spark<?> [?? x 18]
+  date                edge_location bytes_sent ip_address http_method host  path 
+* <dttm>              <chr>              <int> <chr>      <chr>       <chr> <chr>
+1 2014-05-23 01:13:11 FRA2                 182 192.0.2.10 GET         d111… /vie…
+2 2014-05-23 01:13:12 LAX1             2390282 192.0.2.2… GET         d111… /sou…
+# ... with 11 more variables: status_code <int>, referer <chr>, user_agent <chr>,
+#   query <chr>, cookie <chr>, result_type <chr>, request_id <chr>,
+#   host_header <chr>, protocol <chr>, bytes_received <chr>, time_elapsed <dbl>
+```
+
+#### WARC Parser
+
+by parsing WARC (Web ARChive) file from the Common Crawl project.
+
+The Common Crawl project builds and maintains an open repository of web crawl data that can be accessed and analyzed by anyone. You can use their petabytes of data to analyzing the contents of the web without having to manually download each web page, which is a much more time consuming process.
+
+The challenge with WARC files is that multiple records are embedded within the same text file, conceptually, a WARC file looks as follows:
+
+```
+WARC/1.0
+<html>...</html>
+WARC/1.0
+<html>...</html>
+```
+
+We could read all those lines using `spark_read_text()`; however, they wouldn't be grouped by web page response which is required to analyze properly the contents. Using the `warc` package, we can easily parse these files in R running,
+
+```{r}
+warc_example <- system.file("samples/sample.warc.gz", package = "warc")
+as_tibble(warc::read_warc(warc_example))
+```
+```
+# A tibble: 17 x 1
+   content                                                                              
+   <fct>                                                                              
+ 1 "WARC/1.0\nWARC-Type: warcinfo\nWARC-Date: 2016-12-13T03:16:04Z\nWARC-Record-ID: <ur…
+ 2 "WARC/1.0\nWARC-Type: request\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record-ID: <urn…
+ 3 "WARC/1.0\nWARC-Type: response\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record-ID: <ur…
+ 4 "WARC/1.0\nWARC-Type: metadata\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record-ID: <ur…
+ 5 "WARC/1.0\nWARC-Type: request\nWARC-Date: 2016-12-11T14:08:53Z\nWARC-Record-ID: <urn…
+ ```
+
+The `warc` package also allows you to easily extract specific lines efficiently to, for instance, extract the language of each web page:
+
+```{r}
+warc::read_warc(warc_example, line_filter = "<meta http-equiv=\"Content-Language\"") %>%
+  transmute(language = gsub(".*content=\"|\".*", "", content)) %>%
+  group_by(language) %>%
+  summarise(count = n())
+```
+```
+# A tibble: 1 x 2
+  language count
+  <chr>    <int>
+1 ru-RU        5
+```
+
+Now, in order to use this in Spark we can simply run:
+
+```{r}
+paths <- readLines(system.file("samples/warc.paths", package = "warc"))
+paths_tbl <- copy_to(sc, paths, repartition = length(paths))
+
+paths_tbl %>%
+  head() %>%
+  spark_apply(function(entry) {
+    path <- sub("s3n://commoncrawl/", "https://commoncrawl.s3.amazonaws.com/", entry[1,])
+    download.file(url = path, destfile = temp_warc)
+    sparkwarc::spark_rcpp_read_warc(path, match_warc, match_line)
+  })
+```
+
+You can remove `head()` to process a quite large dataset of WARC files, 
+
+### Partitioned Modeling
+
+There are many modeling packages available in R that can also be run at scale by partitioning the data into manegable groups that do fit in the resources of a single machine. For instance, suppose that you have a 1TB dataset for sales data across multiple cities and you are tasked with creating sales predictions oever each city. Yopu can then considered partitioning the original dataset per city say, into 10GB of data per city, which can be managed by a single compute instance. For this kind of partitionable model task, you can also consider using `spark_apply()` by training each model over each city in parallel with access to all the packages available in R.
+
+For instance, we could run a linear regression over the `iris` dataset over each Species as follows:
+
+```{r}
+iris_tbl <- sdf_copy_to(sc, iris)
+
+iris_tbl %>%
+  spark_apply(nrow, group_by = "Species")
+```
+```
+## # Source:   table<sparklyr_tmp_378c1b8155f3> [?? x 2]
+## # Database: spark_connection
+##      Species Sepal_Length
+##        <chr>        <int>
+## 1 versicolor           50
+## 2  virginica           50
+## 3     setosa           50
+```
+
+```{r}
+iris_tbl %>%
+  spark_apply(
+    function(e) summary(lm(Petal_Length ~ Petal_Width, e))$r.squared,
+    names = "r.squared",
+    group_by = "Species")
+```
+```
+## # Source:   table<sparklyr_tmp_378c30e6155> [?? x 2]
+## # Database: spark_connection
+##      Species r.squared
+##        <chr>     <dbl>
+## 1 versicolor 0.6188467
+## 2  virginica 0.1037537
+## 3     setosa 0.1099785
+```
+
+These covers some of the common use cases for `spark_apply()`, but you are certainly welcome to find others that may fit your particular needs.
 
 ## Partitions
 
@@ -403,6 +566,6 @@ When using `spark_apply()`, R needs to be properly installed in each worker node
 
 ## Apache Arrow
 
-Apache Arrow is strongly adviced while working spark_apply().
+Apache Arrow is strongly adviced while working `spark_apply()`, it's available since Spark 2.3.0.
 
 ## Recap
