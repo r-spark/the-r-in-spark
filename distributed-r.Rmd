@@ -19,6 +19,8 @@ library(dplyr)
 
 Previous chapters presented how to perform many operations in Spark, the previous [Extensions](#extensions) chapter, described how to use functionality provided not in Spark itself, but in extensions developed by Spark and R contributors. In most cases, the combination of Spark and extensions is more than enough to scale almost any computation. However, for those few cases where functionality is lacking, you can consider distributing R computations to worker nodes to leverage R and R packages.
 
+**Warning:** As a proffient R user, you might be tempted to use this approach for all Spark operations; however, this is not the recommended use of `spark_apply()`. Previous chapters provided more efficient techiniques and tools to solve well known problems while `spark_apply()` introduces additional cognitive overhead to the reader, additional troubleshooting steps, performance degradation and, in general, additional complexity that should be avoided. Instead, `spark_apply()` is reserved to support use cases where previous tools and techniques fall short.
+
 ## Overview
 
 The [Introduction](#intro) chapter introduced MapReduce as a technique capable of processing large scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The [Tuning](#tuning) chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually similar to:
@@ -39,7 +41,7 @@ render_nomnoml("
 ]", "images/distributed-times-ten.png", "Conceptual mapping operation when multiplying by ten.", styles)
 ```
 
-This chapter presents how to define custom `f(x)` mapping operations using `spark_apply()`; for the example above, `spark_apply()` provides support to define `x + 1` as follows:
+This chapter presents how to define a custom `f(x)` mapping operations using `spark_apply()`; for the example above, `spark_apply()` provides support to define `10 * x` as follows:
 
 ```{r distributed-increment-one-code}
 sdf_len(sc, 3) %>% spark_apply(~ 10 * .x)
@@ -48,12 +50,12 @@ sdf_len(sc, 3) %>% spark_apply(~ 10 * .x)
 # Source: spark<?> [?? x 1]
      id
 * <dbl>
-1     2
-2     3
-3     4
+1    10
+2    20
+3    30
 ```
 
-Notice that `~ 10 * .x` is plain R code executed across all worker nodes; the `~` character is defined in the `rlang` package and provides a compact definition of a function equivalent to `function(.x) 10 * .x` or what is also known as an anonymous function or lambda expression.
+Notice that `~ 10 * .x` is plain R code executed across all worker nodes; the `~` operator is defined in the `rlang` package and provides a compact definition of a function equivalent to `function(.x) 10 * .x` or what is also known as an anonymous function or lambda expression.
 
 Now, the first thing to notice is that `f(x)` takes an R data frame as input and must also produce an R data frame as output, conceptually this looks as follows:
 
@@ -64,54 +66,13 @@ render_nomnoml("
 ", "images/distributed-spark-apply-input-output.png", "Expected function signature in spark_apply() mappings.", styles)
 ```
 
-We can use the orginal MapReduce example from the [Introduction](#intro) chapter where, the map operations was defined to split sentences into words and then, the total unique words were counted as the reduce operation. We can compute this using knowledge from previous chapters as follows:
+We can use the orginal MapReduce example from the [Introduction](#intro) chapter where, the map operations was defined to split sentences into words and then, the total unique words were counted as the reduce operation. In R, we could make use of the `unnest_tokens()` function in the `tidytext` R package, combining the functionality of `tidytext` with `spark_apply()` would allow us to tokenize those sentences into a table of words as follows:
 
 ```{r}
-sentences <- data_frame(text = c(
-  "I like apples",
-  "I like bananas"
-))
-
-sentences_tbl <- copy_to(sc, sentences)
+sentences_tbl <- copy_to(sc, data_frame(text = c("I like apples", "I like bananas")))
 
 sentences_tbl %>%
-  ft_tokenizer("text", "words") %>%
-  transmute(word = explode(words)) %>%
-  group_by(word) %>%
-  summarise(count = count())
-```
-```
-# Source: spark<?> [?? x 2]
-  word    count
-* <chr>   <dbl>
-1 i           2
-2 apples      1
-3 like        2
-4 bananas     1
-```
-
-In this example, the operation that provides the mapping from text into words is a combination of `ft_tokenizer()` and `explode()`; however, if those operations were not available, we could use instead the `tidytext` R package to tokenize sentences into words, this would look as follows in R:
-
-```{r}
-tidytext::unnest_tokens(sentences, word, text)
-```
-```
-# A tibble: 6 x 1
-  word   
-  <chr>  
-1 i      
-2 like   
-3 apples 
-4 i      
-5 like   
-6 bananas
-```
-
-To make use of `tidytext` in Spark, we would define a custom mapping operation using `spark_apply()` and `unnest_tokens()` as follows:
-
-```{r}
-sentences_tbl %>%
-  spark_apply(~tidytext::unnest_tokens(., word, text))
+  spark_apply(~tidytext::unnest_tokens(.x, word, text))
 ```
 ```
 # Source: spark<?> [?? x 1]
@@ -145,7 +106,7 @@ sentences_tbl %>%
 
 The rest of this chapter will explain in detail use cases, features, caveats, considerations and troubleshooting techniques required when defining custom mappings through `spark_apply()`
 
-**Warning:** The proffient R reader can be tempted to use this approach for all Spark operations since it enables using all the functionality from many familiar R packages; however, this is NOT the recommended use of `spark_apply()` since it introduces additional cognitive overhead to the reader, additional troubleshooting steps, performance degradation and, in general, additional complexity that should be avoided.
+**Note:** The previous sentence tokenizer example can be more efficiently implemented using concept from previous chapters, specifically using `sentences_tbl %>% ft_tokenizer("text", "words") %>% transmute(word = explode(words))`.
 
 ## Use Cases
 
@@ -255,12 +216,11 @@ Now, in order to use this in Spark we can simply run:
 paths <- readLines(system.file("samples/warc.paths", package = "warc"))
 paths_tbl <- copy_to(sc, paths, repartition = length(paths))
 
-paths_tbl %>%
-  head() %>%
+paths_tbl %>% head() %>%
   spark_apply(function(entry) {
     path <- sub("s3n://commoncrawl/", "https://commoncrawl.s3.amazonaws.com/", entry[1,])
     download.file(url = path, destfile = temp_warc)
-    sparkwarc::spark_rcpp_read_warc(path, match_warc, match_line)
+    warc::read_warc(path)
   })
 ```
 
@@ -309,25 +269,12 @@ These covers some of the common use cases for `spark_apply()`, but you are certa
 
 ## Partitions
 
-## Columns
+As mentioned in the Tuning chapter, Spark partitions data and operates across partitions; therefore, `spark_apply()` receives a data frame partition; for instance, consider the following code, should we expect the output to be the total number of rows since `nrow()` counts the total rows in a data frame?
 
-Inference vs Excplicit
-
-```{r distributed-columns-explicit}
-iris_tbl <- spark_apply(
-  I,
-  columns = lapply(iris, class)
-)
-```
-
-## Grouping
-
-```{r distributed-parallel-grouping}
-sdf_len(sc, 10, repartition = 1) %>%
-  transmute(groups = floor(id / 2)) %>%
+```{r}
+sdf_len(sc, 10) %>%
   spark_apply(~nrow(.x))
 ```
-
 ```
 # Source: spark<?> [?? x 1]
   result
@@ -336,43 +283,79 @@ sdf_len(sc, 10, repartition = 1) %>%
 2      5
 ```
 
-```{r distributed-grouping-repartition, eval=FALSE}
-sdf_len(sc, 10, repartition = 1) %>%
-  transmute(groups = floor(id / 2)) %>%
-  sdf_repartition(partition_by = "groups") %>%
-  spark_apply(~nrow(.x))
+In general the answer is no, we should not expect `spark_apply()` to operate over a single partition, from the example above, we can find that `sdf_len(sc, 10)` contains two partitions by running:
+
+```{r}
+sdf_len(sc, 10) %>% sdf_num_partitions()
+```
+```
+[1] 2
+```
+
+Which explains why counting rows through `nrow()` under `spark_apply()` retrieves two counts of five rows; instead of ten rows as the total. For this particular example, we could further aggregate these partitions by repartitioning and then adding up:
+
+```{r}
+sdf_len(sc, 10) %>%
+  spark_apply(~nrow(.x)) %>%
+  sdf_repartition(1) %>%
+  spark_apply(~sum(.x))
 ```
 ```
 # Source: spark<?> [?? x 1]
   result
 *  <int>
-1      4
-2      1
-3      4
-4      1
+1     10
 ```
 
-```{r distributed-grouping-transmute}
-sdf_len(sc, 10, repartition = 1) %>%
-  transmute(groups = floor(id / 2)) %>%
-  sdf_repartition(partition_by = "groups") %>%
+It was the intent of this section is to make the reader aware of partitions while using `spark_apply()`, the next section presents `group_by` as a way to control partitions. Without using grouping, `spark_apply()` is better use for mapping datasets row-by-row.
+
+## Grouping
+
+When using `spark_apply()`, we can request explicit partitions to work against. For instance, if we wanted to process numbers all numbers less than or equal than three in one partition and the remaining ones in a second partition, we could create this group as follows:
+
+```{r distributed-parallel-grouping}
+sdf_len(sc, 10) %>%
+  transmute(groups = id <= 3) %>%
   spark_apply(~nrow(.x), group_by = "groups")
 ```
 ```
 # Source: spark<?> [?? x 2]
   groups result
-*  <dbl>  <int>
-1      1      2
-2      2      2
-3      5      1
-4      3      2
-5      4      2
-6      0      1
+* <lgl>   <int>
+1 TRUE        3
+2 FALSE       7
 ```
 
-Notice that `spark_apply()` does not repartition data automatically, so optimizing how data is repartitioned mus be considered using `sdf_repartition()`.
+As mentioned under "Use Cases", we can use `group_by` to partition data into manageable datasets that can be used for modeling, one partition at a time.
 
-## Packages
+## Columns
+
+By default, `spark_apply()`, will inspect the data frame being produced to find out column names and types automatically, for example:
+
+```{r}
+sdf_len(sc, 1) %>% spark_apply(~ data.frame(numbers = 1, names = "abc"))
+```
+```
+# Source: spark<?> [?? x 2]
+  numbers names
+*   <dbl> <chr>
+1       1 abc 
+```
+
+However, this is inneficient since `spark_apply()` needs to run more than once, first to find columns and then to compute the actual desired values. Instead, the columns can be specified explicitly through the `columns` parameters by defining each name and type from the resulting data frame, for the example above:
+
+```{r distributed-columns-explicit}
+sdf_len(sc, 1) %>%
+  spark_apply(
+    ~ data.frame(numbers = 1, names = "abc"),
+    columns = list(numbers = "double", names = "character"))
+```
+```
+# Source: spark<?> [?? x 2]
+  numbers names
+*   <dbl> <chr>
+1       1 abc 
+```
 
 ## Context
 
@@ -417,14 +400,84 @@ sdf_len(sc, 3, repartition = 3) %>%
 9     50
 ```
 
-## Restrictions
+## Packages
 
+With `spark_apply()` you can use any R package inside Spark. For instance, you can use the broom package to create a tidy data frame from linear regression output.
 
-### Troubleshooting
+```{r}
+spark_apply(
+  iris_tbl,
+  function(e) broom::tidy(lm(Petal_Length ~ Petal_Width, e)),
+  names = c("term", "estimate", "std.error", "statistic", "p.value"),
+  group_by = "Species")
+```
+```
+## # Source:   table<sparklyr_tmp_378c5502500b> [?? x 6]
+## # Database: spark_connection
+##      Species        term  estimate std.error statistic      p.value
+##        <chr>       <chr>     <dbl>     <dbl>     <dbl>        <dbl>
+## 1 versicolor (Intercept) 1.7812754 0.2838234  6.276000 9.484134e-08
+## 2 versicolor Petal_Width 1.8693247 0.2117495  8.827999 1.271916e-11
+## 3  virginica (Intercept) 4.2406526 0.5612870  7.555230 1.041600e-09
+## 4  virginica Petal_Width 0.6472593 0.2745804  2.357267 2.253577e-02
+## 5     setosa (Intercept) 1.3275634 0.0599594 22.141037 7.676120e-27
+## 6     setosa Petal_Width 0.5464903 0.2243924  2.435422 1.863892e-02
+```
 
-There are a couple common troubleshooting techniquest in `spark_apply()` 
+The first time you call `spark_apply()` all of the contents in your local `.libPaths()`, which contains all R packages, will be copied into each Spark worker node. Packages will only be copied once and will persist as long as the connection remains open. It’s not uncommon for R libraries to be several gigabytes in size, so be prepared for a one-time tax while the R packages are copied over to your Spark cluster. You can disable package distribution by setting packages = FALSE.
 
-#### Worker Logs
+**Note:** R packages are not copied in local mode (master="local") because the packages already exist on the local system.
+
+## Requirements
+
+The R Runtime is expected to be pre-installed in the cluster for spark_apply to function. Failure to install the cluster will trigger a `Cannot run program, no such file or directory` error while attempting to use `spark_apply()`. Contact your cluster administrator to consider making the R runtime available throughout the entire cluster. If R is already installed, you can specify the installation path to use using the `spark.r.command` configuration setting, as in:
+
+```{r}
+config <- spark_config()
+config["spark.r.command"] <- "<path-to-r-version>"
+
+sc <- spark_connect(master = "local", config = config)
+sdf_len(sc, 10) %>% spark_apply(function(e) e)
+```
+
+A Homogeneous Cluster is required since the driver node distributes, and potentially compiles, packages to the workers. For instance, the driver and workers must have the same processor architecture, system libraries, etc.
+
+## Limitations
+
+### Functions
+
+The function passed to `spark_apply()` are serialized using `serialize()`, which is described as “a simple low-level interface for serializing to connections.”. One of the current limitations of serialize is that it wont serialize objects being referenced outside of it’s environment. For instance, the following function will error out since the closures references external_value:
+
+```{r}
+external_value <- 1
+spark_apply(iris_tbl, function(e) e + external_value)
+```
+
+### Livy
+
+Currently, Livy connections do not support distributing packages since the client machine where the libraries are precompiled might not have the same processor architecture, not operating systems that the cluster machines.
+
+### Grouping
+
+While performing computations over groups, spark_apply() will provide partitions over the selected column; however, this implies that each partition can fit into a worker node, if this is not the case an exception will be thrown. To perform operations over groups that exceed the resources of a single node, one can consider partitioning to smaller units or use dplyr::do which is currently optimized for large partitions.
+
+### Packages
+
+Since packages are copied only once for the duration of the spark_connect() connection, installing additional packages is not supported while the connection is active. Therefore, if a new package needs to be installed, spark_disconnect() the connection, modify packages and reconnect.
+
+## Troubleshooting
+
+When an error is detected, `spark_apply()` automatically reruns an retrieves errors from worker nodes to be easily presented to you; consider the following example:
+
+```{r}
+sdf_len(sc, 1) %>% spark_apply(function(df) {
+  stop("an error")
+})
+```
+
+There are a few other more advanced troubleshooting techniquest applicable to `spark_apply()`, the following sections present these techniques in-order; meaning, we should try to troubleshoot using worker logs first, followed by identifying partitioning errors and finally, attempting to debug a worker node.
+
+### Worker Logs
 
 Whenever `spark_apply()` is executed, information regarding execution is written over each worker node. You can use this log to write custom messages o help you diagnose and fine-tune your code.
 
@@ -497,19 +550,7 @@ This will show an entry containing the error and the callstack:
 
 Notice that, spark_log(sc) only retrieves the worker logs when using local clusters, when running in proper clusters with multiple machines, you will have to use the tools and user interface provided by the cluster manager to find these log entries.
 
-#### Worker Error
-
-```{r distributed-worker-error}
-sdf_len(sc, 1) %>% spark_apply(function(df) {
-    tryCatch({
-        stop("an error")
-    }, error = function(e) {
-        e$message
-    })
-})
-```
-
-#### Worker Partitions
+### Partition Errors
 
 If a particular partition fails, you can detect the broken partition by computing a digest, and then retrieving that particular partition as follows:
 
@@ -536,9 +577,9 @@ broken_partition <- sdf_len(sc, 3) %>% spark_apply(function(x) {
 }) %>% collect()
 ```
 
-WHich you can then run in R to troubleshoot further.
+Which you can then run in R to troubleshoot further.
 
-#### Worker Debugger
+### Debugging Workers
 
 ```{r distributed-debugger}
 sdf_len(sc, 1) %>% spark_apply(function() {
@@ -566,6 +607,16 @@ When using `spark_apply()`, R needs to be properly installed in each worker node
 
 ## Apache Arrow
 
-Apache Arrow is strongly adviced while working `spark_apply()`, it's available since Spark 2.3.0.
+Apache Arrow is strongly adviced while working `spark_apply()`, it's available since Spark 2.3.0 and requires system administrators to install the Apache Arrow runtime in every node.
+
+For instance, in Linux (Ubuntu), you will need to install this in your cluster as follows:
+
+```{bash}
+sudo yum install -y https://packages.red-data-tools.org/centos/red-data-tools-release-latest.noarch.rpm
+sudo sed -i 's/\$releasever/6/g' /etc/yum.repos.d/red-data-tools.repo
+sudo yum install -y --enablerepo=red-data-tools arrow-devel
+```
 
 ## Recap
+
+This chapter presented `spark_apply()` as an advanced technique to be used to fill gaps in functionility in Spark or its many extensions. It presented use cases to map data frames with R packages and group data into manaegable partitions. It detailed how partitions relate to `spark_apply()`, how to craete custom groups distribute contextual information across all nodes, troubleshoot problems and presented limitations, cluster configuration caveats and improved performance optimization using Apache Arrow.
