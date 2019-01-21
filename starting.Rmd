@@ -150,7 +150,7 @@ spark_web(sc)
 invisible(webshot::webshot(
   "http://localhost:4040/",
   "images/starting-spark-web.png",
-  cliprect = c(0, 0, 992, 600),
+  cliprect = c(0, 0, 992, 540),
   zoom = 2
 ))
 ```
@@ -164,7 +164,7 @@ As we mentioned, printing the "hello" dataset collected a few records to be disp
 invisible(webshot::webshot(
   "http://localhost:4040/storage/",
   "images/starting-spark-web-storage.png",
-  cliprect = c(0, 0, 992, 300),
+  cliprect = c(0, 0, 992, 260),
   zoom = 2
 ))
 ```
@@ -173,6 +173,35 @@ render_image("images/starting-spark-web-storage.png", "Apache Spark Web Interfac
 ```
 
 The [caching](#tunning-caching) section in the [tunning](#tunning) chapter will cover this in detail, but as a start, it's worth noticing that this dataset is fully loaded into memory since the **fraction cached** is 100%, is useful also to note the **size in memory** column, which tracks the total memory being used by this dataset.
+
+The executors tab provides a view of your cluster resources. For local connections, you will find only one compute instance active; however, in the [tunning](#tunning) you will learn how to request more compute resources. In fact, by default, Spark initializes a local connection using only 500MB of memory, which in practice means that only 384MB are available in Spark for reasons that the tunning chapter will describe and teach how to configure.
+
+```{r starting-spark-executors-web-shot, echo=FALSE}
+invisible(webshot::webshot(
+  "http://localhost:4040/executors/",
+  "images/starting-spark-web-executors.png",
+  cliprect = c(0, 0, 992, 700),
+  zoom = 2,
+  delay = 3
+))
+```
+```{r starting-spark-executors-render, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Apache Spark Web Interface - Executors Tab.'}
+render_image("images/starting-spark-web-executors.png", "Apache Spark Web Interface - Executors Tab.")
+```
+
+The last tab to mention is the environment tab which lists all the settings for this Spark application; yet again, the [tunning](#tunning) will introduce them in detail. As you will learn, most settings don't need to be configured explicitly, but in order to properly run at scale, you will have to become familiar with them, eventually.
+
+```{r starting-spark-environment-web-shot, echo=FALSE}
+invisible(webshot::webshot(
+  "http://localhost:4040/environment/",
+  "images/starting-spark-web-environment.png",
+  cliprect = c(0, 0, 992, 740),
+  zoom = 2
+))
+```
+```{r starting-spark-environment-render, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Apache Spark Web Interface - Environment Tab.'}
+render_image("images/starting-spark-web-environment.png", "Apache Spark Web Interface - Environment Tab.")
+```
 
 ### Logs {#starting-logs}
 
