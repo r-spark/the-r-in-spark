@@ -7,11 +7,15 @@ source("r/render.R")
 
 # Tuning {#tuning}
 
-In previous chapters, we've assumed that computation within a Spark cluster works efficiently. While this is true in some cases, it is often required to have some knowledge of the operations Spark runs internally to fine tune configuration settings that will make computations run efficiently. This chapter will explain how Spark computes data over large datasets and provide details on how to fine-tune its operations.
+In previous chapters we've assumed that computation within a Spark cluster works efficiently. While this is true in some cases, it is often required to have some knowledge of the operations Spark runs internally to fine tune configuration settings that will make computations run efficiently. This chapter will explain how Spark computes data over large datasets and provide details on how to fine-tune its operations.
+
+For instance, you will learn how to request more compute nodes and increase the amount of memory which, if you remember, defaults to only 500MB in local instances. You will learn how Spark unifies computation through partioning, shuffling and caching. As mentioned a few chapters back, this is the last chapter describing the internals of Spark; once you complete this chapter, it is our belief that you would have acquired intermediate Spark skills necessary to be productive at using Spark.
+
+In subsequent chapters: Extensions, Distributed R and Streaming; you will learn exciting techniques to deal with specific scaling problems. However, we must first understand how spark performs internal computations, what pieces we can control and why.
 
 ## Overview
 
-Spark performs distributed computation by: configuring, partitioning, executing, shuffling, caching and serializing data, tasks and resources across multiple machines.
+Spark performs distributed computation by: configuring, partitioning, executing, shuffling, caching and serializing data, tasks and resources across multiple machines:
 
 - [**Configuring**](#tuning-configuring) requests the cluster manager for resources: total machines, memory, etc.
 - [**Partitioning**](#tuning-configuring) splits the data among various machines. Partitions can be either implicit or explicit.
@@ -34,7 +38,7 @@ r2d3::r2d3(
 render_image("images/tuning-spark-overview.png", "Sorting Distributed Data with Apache Spark.")
 ```
 
-Notice that while the diagram above describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, these lower level operations are not exposed in `sparklyr`, instead, `sparklyr` makes those operations available through higher level commands provided by the data [analysis] tools like [dplyr] or [DBI], [modeling] and by using many [community extensions](#using-extensions). For advanced use cases, one can always use the Spark's Scala API through an `sparklyr` [custom extensions](#r-extension) or run custom [distributed] R code. 
+Notice that while the diagram above describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, these lower level operations are not exposed in `sparklyr`, instead, `sparklyr` makes those operations available through higher level commands provided by the data [analysis](#analysis) tools like `dplyr` or `DBI`, [modeling](#modeling) and by using many [community extensions](#using-extensions). For advanced use cases, one can always use the Spark's Scala API through an `sparklyr` [custom extensions](#r-extension) or run custom [distributed R](#distributed) code. 
 
 In order to effectively tune Spark computations, there are two tools that are useful to understand: the [**graph visualization**](#tuning-graph-visualization) and the [**event timeline**](#tuning-event-timeline). Both tools are accessible through the [Spark Web Interface](#starting-spark-web-interface) and then selecting a particular job and a particular state under this job.
 
@@ -109,6 +113,8 @@ spark_disconnect(sc)
 ```{r tuning-timeline-shot, eval=TRUE, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline.'}
 render_image("images/tuning-spark-event-timeline.png", "Spark Event Timeline.")
 ```
+
+Which shows that time is spent mostly on computing time, this means that, increasing compute nodes in the cluster should shorten the computation time. In contrast, for timelines heavy on read or write shuffling, requesting more compute nodes might not shorten time and might actualy makes everything slower. There is no concrete set of rules to follow; however, as you gain experience understanding this timeline over multiple operations -- you will develop insight as to how to properly optimize Spark operations.
 
 ## Configuring {#tuning-configuring}
 
@@ -468,3 +474,5 @@ You can also specify an alternate config file name or location by setting the `f
 ## Recap
 
 This chapter provided a broad overview of Spark internals and a detailed configuration settings to help you speed up computation and enable high computation loads, it provided the foundations to understand bottlenecks and guidance on common configuration considerations; however, fine-tuning Spark is a broad topic that would require many more chapters to cover extensively. Therefore, while troubleshooting Spark's performance and scalability, searching the web and consulting online communities it is often necessary to fine-tune your particular environment.
+
+The next chapter, [Extensions](#extensions), introduces the exciting world of `sparklyr` extensions. It's exciting since you might find out that the extensions can be much more relevant to your particular interests and needs. For instance, they can process nested data, perform graph analysis or use different modeling libraries like `rsparkling` from H20. Not only that, but the next few chapters introduce many advanced data analysis and modeling topics that are required to master large-scale computing in R.
