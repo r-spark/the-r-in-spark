@@ -6,6 +6,7 @@ if (!dir.exists("mds")) dir.create("mds")
 chapters <- list(
   "preface",
   "intro",
+  "starting",
   "clusters",
   "connections",
   "tuning",
