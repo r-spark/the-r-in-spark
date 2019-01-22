@@ -15,15 +15,17 @@ styles <- "
 
 # Connections {#connections}
 
-The previous chapter, [Clusters](#clusters), presented the major cluster computing paradigms, cluster managers and cluster providers; this section presents the internal components of a Spark cluster and the how to perform connections to any cluster running Apache Spark.
+The previous chapter, [Clusters](#clusters), presented the major cluster computing paradigms, cluster managers and cluster providers to help you choose the Spark cluster distribution and provider that best suits your needs. In contras, this chapter presents the internal components of a Spark cluster and the how to connect to any cluster running Apache Spark, including but not limitted to, any distribution and provided presented in the previous chapter.
+
+In addition, this chapter provides various troubleshooting connection techniques which I hope you won't need to use, but if you have to, you can use them as effective techniquest to resolve connectivity issues.
+
+While this chapter might feel a bit dry since, connecting and troubleshooting connections is definetely not the most fun part of large-scale data analysis, it is the first chapter that will introduce the components of a Spark cluster and how they interact, this is often known as the architecture of Apache Spark. This chapter, [Data](#data) and [Tunning](#tunning) chapter, will provide a detailed view of how Spark works, which will help you move towards becoming an intermediate Spark user that can go beyond analysis to dive into the realm of distributed computing, using Apache Spark.
 
 ## Overview {#connections-overview}
 
-Before explaining how to connect to Spark clusters, we will introduce the components of a Spark cluster and how they interact, this is often known as the architecture of Apache Spark.
+As you know from previous chapters, a cluster is a collection of machines that work together to perform a computation. However, in distributed systems and clusters literature, we often refer to each physical machine as a compute instance, compute node, instance or node. It is helpful to remind this while reading through this chapter and making use of external resources.
 
-First, lets go over a couple definitions. As you know from previous chapters, a cluster is a collection of machines to perform analysis beyond a single computer. However, in distributed systems and clusters literature, we often refer to each physical machine as a compute instance, compute node, or simply instance or node for short. It is helpful to remind this while reading through this chapter and making use of external resource.
-
-In a Spark cluster, there are three types of compute instances that are relevant to Spark: The **driver node**, the **worker nodes** and the **cluster manager**. A cluster manager is a service that allows Spark to be executed in the cluster as described in the previous [Cluster Managers](#clusters-manager) section. The **driver node** is tasked with delegating work to the worker nodes, but also for aggregating their results and controlling computation flow. For the most part, aggregation happens in the worker nodes; however, even after the nodes aggregate data, it is often the case that the driver node would have to collect the worker's results. Therefore, the driver node usually has at least, but often much more, compute resources (read RAM, CPU, Local Storage, etc.) than the worker node. The **worker nodes** execute compute tasks over partitioned data and communicate intermediate results to other workers or back to the driver node, worker nodes are also referred as **executors**.
+In a Spark cluster, there are three types of compute instances that are relevant to Spark: The **driver node**, the **worker nodes** and the **cluster manager**. A cluster manager is a service that allows Spark to be executed in the cluster as described in the previous chapter under the [cluster managers](#clusters-manager) section. The **driver node** is tasked with delegating work to the worker nodes, but also for aggregating their results and controlling computation flow. For the most part, aggregation happens in the worker nodes; however, even after the nodes aggregate data, it is often the case that the driver node would have to collect the worker's results. Therefore, the driver node usually has at least, but often much more, compute resources (memory, CPUs, local storage, etc.) than the worker node. The **worker nodes** execute compute tasks over partitioned data and communicate intermediate results to other workers or back to the driver node, worker nodes are also referred as **executors**.
 
 Strictly speaking, the driver node and worker nodes are just names assigned to machines with particular roles, while the actual computation in the driver node is performed by the **spark context**. The Spark context is a Spark component tasked with scheduling tasks, managing data and so on. In the worker nodes, the actual computation is performed under a **spark executor**, which is also a Spark component tasked with executing subtasks against a data partition.
 
@@ -37,13 +39,15 @@ render_nomnoml("
 ", "images/connections-spark-architecture.png", "Apache Spark Architecture.", styles)
 ```
 
-If you already have a Spark cluster in your organization, you should request from your cluster administrator the connection information to this cluster, read carefully their usage policies and follow their advice. Since a cluster may be shared among many users, you want to make sure to request only the compute resources you need, choosing resources will be detailed in the [Tunning](#tunning) chapter. Your system administrator will describe if it's an **on-premise** vs **cloud** cluster, the **cluster manager** being used, supported **connections** and supported **tools**. You can use this information to jump directly to [Local](#connections-local), [Standalone](#connections-standalone), [YARN](#connections-yarn), [Mesos](#connections-mesos), [Livy](#connections-livy) or [Kubernetes](#connections-kubernetes) based on the information provided to you.
+If you already have a Spark cluster in your organization, you should request from your cluster administrator the connection information to this cluster, read carefully their usage policies and follow their advice. Since a cluster may be shared among many users, you want to make sure you only request the compute resources you need, you will learn how to request resources in the [Tunning](#tunning) chapter. Your system administrator will describe if it's an **on-premise** vs **cloud** cluster, the **cluster manager** being used, supported **connections** and supported **tools**. You can use this information to jump directly to [Local](#connections-local), [Standalone](#connections-standalone), [YARN](#connections-yarn), [Mesos](#connections-mesos), [Livy](#connections-livy) or [Kubernetes](#connections-kubernetes) based on the information provided to you.
+
+**Note:** Once connected is performed with `spark_connect()`, you can use all techniques described in previous chapters using the `sc` connection; for instance, you can do [data analysis](#analysis) or [modeling](#modeling) with the same code previous chapters presented.
 
 ### Edge Nodes {#connections-spark-edge-nodes}
 
 Before connecting to Apache Spark, you will first have to connect to the cluster. Usually, by connecting to an edge node within the cluster. An edge node, is a machine that can accessed from outside the cluster but which is also part of the cluster. There are two methods to connect to this edge instance:
 
-- **Terminal**: Using a [computer terminal](https://en.wikipedia.org/wiki/Computer_terminal) application, one can use a [secure shell](https://en.wikipedia.org/wiki/Secure_Shell) to establish a remote connection into the cluster, once you connect into the cluster, you can launch R and then use `sparklyr`. However, using only a terminal is cumbersome for many tasks and is often only used while configuring or troubleshooting issues.
+- **Terminal**: Using a [computer terminal](https://en.wikipedia.org/wiki/Computer_terminal) application, one can use a [secure shell](https://en.wikipedia.org/wiki/Secure_Shell) to establish a remote connection into the cluster, once you connect into the cluster, you can launch R and then use `sparklyr`. However, a terminal can be cumbersome for some tasks, like exploratory data analysis, so it's often only used while configuring the cluster or troubleshooting issues.
 - **Web Browser**: While using `sparklyr` from a terminal is possible, it is usually more productive to install a **web server** in an edge node that provides access to run R with `sparklyr` from a web browser. Most likely, you will want to consider using [RStudio](RStudio Server) or Jupyter rather than connecting from the terminal.
 
 ```{r connections-spark-edge, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='200pt', fig.cap='Connecting to Sparks Edge Node'}
@@ -72,17 +76,14 @@ If your cluster provider or cluster administrator already provided `SPARK_HOME` 
 ```{r connection-spark-home-check}
 Sys.getenv("SPARK_HOME")
 ```
-```
-[1] ""
-```
 
 For system administrators, we recommend setting `SPARK_HOME` for all the users in your cluster; however, if this is not set in your cluster, you can also specify `SPARK_HOME` while using `spark_connect()` as follows:
 
 ```{r connections-spark-home}
-sc <- spark_connect(master = "cluster-master", spark_home = "local/path/to/spark")
+sc <- spark_connect(master = "<cluster-master>", spark_home = "local/path/to/spark")
 ```
 
-Where `cluster-master` is set to the correct cluster manager master for [Spark Standalone](Standalone), [YARN](Yarn), [Mesos], etc.
+Where `<cluster-master>` is set to the correct cluster manager master for [Spark Standalone](#connections-standalone), [YARN](#connections-yarn), [Mesos](#connections-mesos), [Kubernetes](#connections-kubernetes) or [Livy](#connections-livy).
 
 ## Local {#connections-local}
 
@@ -99,7 +100,7 @@ render_nomnoml("
 ]", "images/connections-spark-local.png", "Local Connection Diagram.", styles)
 ```
 
-Notice that in the local connections diagram, there is no cluster manager nor worker process since, in local mode, everything runs inside the driver application. It's also worth pointing out that `sparklyr` starts the Spark Context through `spark-submit`, a script available in every Spark installation to enable users to submit custom application to Spark which `sparklyr` makes use of to submit itself to Spark. For the curious reader, the [Contributing] chapter explains the internal processes that take place in `sparklyr` to submit this application and connect properly from R.
+Notice that in the local connections diagram, there is no cluster manager nor worker process since, in local mode, everything runs inside the driver application. It's also worth noting that `sparklyr` starts the Spark Context through `spark-submit`, a script available in every Spark installation to enable users to submit custom application to Spark which, `sparklyr` makes use of to submit itself to Spark. For the curious reader, the [Contributing] chapter explains the internal processes that takes place in `sparklyr` to submit this application and connect properly from R.
 
 To perform this local connection, we can connect with the following familiar code used in previous chapters:
 
@@ -108,7 +109,7 @@ To perform this local connection, we can connect with the following familiar cod
 sc <- spark_connect(master = "local")
 ```
 
-By default, `sparklyr`, will connect using as many CPU cores are available in your compute instance; however, this can be customized by connecting using `master="local[n]"`, where `n` is the desired number of cores to use. For example, we can connect using only 2 CPU cores as follows:
+By default, `sparklyr`, will connect using as many CPUs are available in your compute instance; however, this can be customized by connecting using `master="local[n]"`, where `n` is the desired number of cores to use. For example, we can connect using only 2 CPUs as follows:
 
 ```{r connections-local-connect-cpus}
 # Connect to local Spark instance using 2 cores
@@ -117,9 +118,9 @@ sc <- spark_connect(master = "local[2]")
 
 ## Standalone {#connections-standalone}
 
-Connecting to a Spark Standalone cluster requires the location of the cluster manager's master instance, this location can be found in the cluster manager web interface as described in the [clusters-standalone](standalone cluster) section, you can find this location by looking for a URL starting with `spark://`.
+Connecting to a Spark Standalone cluster requires the location of the cluster manager's master instance, this location can be found in the cluster manager web interface as described in the [Standalone Clusters](#clusters-standalone) section, you can find this location by looking for a URL starting with `spark://`.
 
-A connection in standalone mode starts from `sparklyr` launching `spark-submit` to submit the `sparklyr` application and creating the Spark Context, this requests executors from the Spark Standalone instance running under the `master` URL location:
+A connection in standalone mode starts from `sparklyr` which launches `spark-submit`, submits the `sparklyr` application and creates the Spark Context, which requests executors from the Spark Standalone instance running under the given `master` address.
 
 ```{r connections-standalone, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='200pt', fig.cap='Spark Standalone Connection Diagram'}
 render_nomnoml("
@@ -137,7 +138,7 @@ render_nomnoml("
 ", "images/connections-spark-standalone.png", "Spark Standalone Connection Diagram.", styles)
 ```
 
-In order to connect, use `master="spark://hostname:port"` in `spark_connect()` as follows:
+In order to connect, use `master = "spark://hostname:port"` in `spark_connect()` as follows:
 
 ```{r connections-standalone-connect}
 sc <- spark_connect(master = "spark://hostname:port")
@@ -173,11 +174,9 @@ To connect, one can simply run with `master = "yarn"` as follows:
 sc <- spark_connect(master = "yarn-client")
 ```
 
-Once connected, you can use all techniques described in previous chapters using the `sc` connection; for instances, you can do [data analysis](analysis) or [modeling].
-
 ### Yarn Cluster {#connections-yarn-cluster}
 
-The main difference between YARN Cluster mode and YARN Client mode is that in YARN Cluster mode, the driver node is not required to be the node where R and sparklyr get started; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using YARN Cluster when the edge node has too many concurrent users, is lacking computing resources or where tools (like RStudio) need to be managed independently of other cluster resources.
+The main difference between YARN Cluster mode and YARN Client mode is that in YARN Cluster mode, the driver node is not required to be the node where R and sparklyr were launched; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using YARN Cluster when the edge node has too many concurrent users, is lacking computing resources or where tools (like RStudio or Jupyter) need to be managed independently of other cluster resources.
 
 ```{r connections-yarn-cluster, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='240pt', fig.cap='YARN Cluster Connection Diagram'}
 render_nomnoml("
@@ -207,11 +206,11 @@ To connect in YARN Cluster mode, we can simple run:
 sc <- spark_connect(master = "yarn-cluster")
 ```
 
-This connection assumes that the node running `spark_connect()` is properly configured, meaning that, `yarn-site.xml` exists and the `YARN_CONF_DIR` environment variable is properly set. When using Hadoop as a file system, one would also need the `HADOOP_CONF_DIR` environment variable properly configured. This configuration is usually provided by your system administrator and is not something that you would have to manually configure.
+This connection assumes that the node running `spark_connect()` is properly configured, meaning that, `yarn-site.xml` exists and the `YARN_CONF_DIR` environment variable is properly set. When using Hadoop as a file system, you will also need the `HADOOP_CONF_DIR` environment variable properly configured. This configuration is usually provided by your system administrator and is not something that you would have to manually configure.
 
 ## Livy {#connections-livy}
 
-As opposed to other connection methods which require using an edge node in the cluster, [Livy](clusters-livy) Livy provides a **Web API** that makes the Spark cluster accessible from outside the cluster and neither requires a local installation in the client. Once connected through the Web API, the **Livy Service** starts the Spark context by requesting resources from the cluster manager and distributing work as usual.
+As opposed to other connection methods which require using an edge node in the cluster, [Livy](#clusters-livy) provides a **Web API** that makes the Spark cluster accessible from outside the cluster and does not require a Spark installation in the client. Once connected through the Web API, the **Livy Service** starts the Spark context by requesting resources from the cluster manager and distributing work as usual.
 
 ```{r connections-livy, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='240pt', fig.cap='Livy Connection Diagram'}
 render_nomnoml("
@@ -247,11 +246,11 @@ To try out Livy in your local machine, you can install and run a Livy service as
 sc <- spark_connect(master = "http://localhost:8998", method = "livy")
 ```
 
-Once connected through Livy, operations you can make use of an other `sparklyr` feature; however, Livy is not suitable for experimental data analysis, since executing commands have a significant delay; that said, while running long running computations, this overhead could be considered irrelevant. In general, it is preferred to avoid using Livy and work directly within an edge node in the cluster; if this is not feasible, using Livy could be a reasonable approach.
+Once connected through Livy, you can make use of any `sparklyr` feature; however, Livy is not suitable for exploratory data analysis since, executing commands has a significant performance cost; that said, while running long running computations, this overhead could be considered irrelevant. In general, it is preferred to avoid using Livy and work directly within an edge node in the cluster; when this is not feasible, using Livy could be a reasonable approach.
 
 ## Mesos {#connections-mesos}
 
-Similar to YARN, Mesos supports client mode and a cluster mode. However, `sparklyr` currently only supports client mode for Mesos.
+Similar to YARN, Mesos supports client mode and a cluster mode, `sparklyr` currently only supports client mode for Mesos.
 
 ```{r connections-mesos, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='Mesos Connection Diagram'}
 render_nomnoml("
@@ -320,21 +319,21 @@ system2("kubectl", "cluster-info")
 
 ## Cloud
 
-Connections to Spark from Databricks requires the following custom connection method:
+When working with cloud providers, there are a few connection differences. For instance, connecting from Databricks requires the following connection method:
 
 ```{r connections-clusters-databricks}
 library(sparklyr)
 sc <- spark_connect(method = "databricks")
 ```
 
-Similarly, connections to Spark when using IBM's Watson Studio require a custom connection method:
+Similarly, connections to Spark when using IBM's Watson Studio require you to connect as follows:
 
 ```{r connections-clusters-ibm}
 kernels <- load_spark_kernels()
 sc <- spark_connect(config = kernels[2])
 ```
 
-Under Microsoft Azure HDInsights and when using ML Services (R Server), creating an `sparklyr` connection looks like the following:
+Under Microsoft Azure HDInsights and when using ML Services (R Server), creating an `sparklyr` connection gets initialized through:
 
 ```{r connections-clusters-azure}
 library(RevoScaleR)
@@ -342,7 +341,7 @@ cc <- rxSparkConnect(reset = TRUE, interop = "sparklyr")
 sc <- rxGetSparklyrConnection(cc)
 ```
 
-In general, please reference your cloud provider documentation and their support channels if assistance is needed.
+Please reference your cloud provider documentation and their support channels if assistance is needed.
 
 ## Multiple
 
@@ -373,7 +372,9 @@ Alternatively, you can disconnect from all connections at once:
 spark_disconnect_all()
 ```
 
-## Troubleshooting
+## Troubleshooting {#connections-troubleshooting}
+
+Last but not least, we will introduce the following troubleshooting techniques for: **Logging**, **Spark Submit** and **Windows**. When in doubt of where to start, start with the Windows section when using Windows systems, followed by Logging and closing with Spark Submit.
 
 ### Logging
 
@@ -391,22 +392,36 @@ options(sparklyr.verbose = TRUE)
 
 ### Spark Submit {#troubleshoot-spark-submit}
 
-If connections fail in `sparklyr`, first troubleshoot if this issue is specific to `sparklyr` or Spark in general. This can be accomplished by running an example `spark-submit` job and validating that no errors are thrown:
+If connections fail in `sparklyr`, first troubleshoot if this issue is specific to `sparklyr` or Spark in general. This can be accomplished by running an example `spark-submit` job and validating that no errors are thrown.
 
 ```{r connections-troubleshoot-spark-home}
 # Find the spark directory using an environment variable
-Sys.getenv("SPARK_HOME")
+spark_home <- Sys.getenv("SPARK_HOME")
 
 # Or by getting the local spark installation
-sparklyr::spark_home_dir()
+spark_home <- sparklyr::spark_home_dir()
 ```
 
-From the terminal run:
+Then execute the sample compute Pi example by replacing `"local"` with the correct master parameter you are troubleshooting:
 
-```{bash eval=FALSE}
-cd path/to/spark/
-bin/spark-submit 
+```{r}
+# Launching a sample application to compute Pi
+system2(
+  file.path(spark_home, "bin", "spark-submit"),
+  c(
+    "--master", "local",
+    "--class", "org.apache.spark.examples.SparkPi",
+    file.path(spark_home, "examples", "jars", "spark-examples_2.11-2.4.0.jar"),
+    100)
+)
 ```
+```
+...
+Pi is roughly 3.1415503141550314
+...
+```
+
+If your Spark cluster is properly configured, you should see the message above; otherwise, you will need to investigate why your Spark cluster is not properly configured, which is beyond the scope of this book.
 
 #### Detailed
 
@@ -432,7 +447,7 @@ $SPARK_HOME/bin/spark-submit --class sparklyr.Shell $PATH_TO_SPARKLYR_JAR 8880 1
 ```
 
 ```
-18/06/11 12:13:53 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+18/06/11 12:13:53 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform...
 18/06/11 12:13:53 INFO sparklyr: Session (12345) is starting under 127.0.0.1 port 8880
 18/06/11 12:13:53 INFO sparklyr: Session (12345) found port 8880 is available
 18/06/11 12:13:53 INFO sparklyr: Gateway (12345) is waiting for sparklyr client to connect to port 8880
@@ -454,19 +469,19 @@ spark_disconnect_all()
 Sys.setenv(SPARK_HOME = "")
 ```
 
-If this second connection step fails, it usually means that there is a connectivity problem between R and the Driver node, you can try using a different connection port, for instance.
+If this second connection step fails, it usually means that there is a connectivity problem between R and the driver node, you can try using a different connection port, for instance.
 
 ### Windows
 
-Connecting from Windows is, in most cases, as straightforward as connecting from Linux or OS X; however, there are a few common connection issues you might hit t
+Connecting from Windows is, in most cases, as straightforward as connecting from Linux and OS X; however, there are a few common connection issues you should be aware of:
 
 - Firewalls and antivirus software might block ports for your connection. The default port used by `sparklyr` is `8880`, double check this port is not being blocked.
-- Long path names can cause issues in, specially, older Windows systems like Windows 7. When using these systems, try connecting with Spark installed with all folders using 8 characters or less.
+- Long path names can cause issues in, specially in older Windows systems like Windows 7. When using these systems, try connecting with Spark installed with all folders using at most 8 characters and no spaces in their names.
 
 ## Recap
 
 This chapter presented an overview of Spark's architecture, connection concepts and examples to connect in local mode, standalone, YARN, Mesos, Kubernetes and Livy. It also presented edge nodes and their role while connecting to Spark clusters. This should have provided you with enough information to successfully connect to any Apache Spark cluster.
 
-To troubleshoot connection problems, it is recommended to search for the connection problem in StackOverflow, the [sparklyr github issues](https://github.com/rstudio/sparklyr/issues) and, if needed, open a [new GitHub issue in sparklyr](https://github.com/rstudio/sparklyr/issues/new) to assist further.
+To troubleshoot connection problems beyond the techniques described in this chpater, it is recommended to search for the connection problem in StackOverflow, the [sparklyr github issues](https://github.com/rstudio/sparklyr/issues) and, if needed, open a [new GitHub issue in sparklyr](https://github.com/rstudio/sparklyr/issues/new) to assist further.
 
-In the next chapter, [Data](#data), you will learn how to read and write over multiple data sources, you will understand how Spark stores stores data as Spark DataFrames and how to transfer data into and out of Spark clusters.
+In the next chapter, [Data](#data), you will learn how to read and write over multiple data sources, you will understand how Spark makes use of Spark DataFrames and how to transfer data into and out of Spark clusters.
