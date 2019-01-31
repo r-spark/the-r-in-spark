@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>The R in Spark: Learning Apache Spark with R</title>
+  <meta name="description" content="A book to learn Apache Spark with R using the sparklyr R package.">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="The R in Spark: Learning Apache Spark with R" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="A book to learn Apache Spark with R using the sparklyr R package." />
+  <meta name="github-repo" content="javierluraschi/the-r-in-spark" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="The R in Spark: Learning Apache Spark with R" />
+  
+  <meta name="twitter:description" content="A book to learn Apache Spark with R using the sparklyr R package." />
+  
+
+
+
+<meta name="date" content="2019-01-18">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="preface.html">
+<link rel="next" href="analysis.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+<script src="libs/htmlwidgets-1.3/htmlwidgets.js"></script>
+<script src="libs/dagre-0.0.1/dagre.min.js"></script>
+<script src="libs/lodash-3.7.0/lodash.js"></script>
+<script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
+<script src="libs/nomnoml-binding-0.1.0/nomnoml.js"></script>
+<script src="libs/r2d3-render-0.1.0/r2d3-render.js"></script>
+<script src="libs/webcomponents-2.0.0/webcomponents.js"></script>
+<script src="libs/r2d3-binding-0.2.3/r2d3.js"></script>
+<script src="libs/d3v5-5.0.0/d3.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-119986300-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-119986300-1');
+</script>
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><strong><a href="./">Learning Apache Spark with R</a></strong></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Welcome</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html"><i class="fa fa-check"></i>Preface</a><ul>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#authors"><i class="fa fa-check"></i>Authors</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#formatting"><i class="fa fa-check"></i>Formatting</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#acknowledgments"><i class="fa fa-check"></i>Acknowledgments</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="introduction.html"><a href="introduction.html#intro-background"><i class="fa fa-check"></i><b>1.1</b> Background</a><ul>
+<li class="chapter" data-level="1.1.1" data-path="introduction.html"><a href="introduction.html#intro-hadoop"><i class="fa fa-check"></i><b>1.1.1</b> Hadoop</a></li>
+<li class="chapter" data-level="1.1.2" data-path="introduction.html"><a href="introduction.html#intro-spark"><i class="fa fa-check"></i><b>1.1.2</b> Spark</a></li>
+<li class="chapter" data-level="1.1.3" data-path="introduction.html"><a href="introduction.html#intro-r"><i class="fa fa-check"></i><b>1.1.3</b> R</a></li>
+<li class="chapter" data-level="1.1.4" data-path="introduction.html"><a href="introduction.html#intro-sparklyr"><i class="fa fa-check"></i><b>1.1.4</b> sparklyr</a></li>
+</ul></li>
+<li class="chapter" data-level="1.2" data-path="introduction.html"><a href="introduction.html#starting"><i class="fa fa-check"></i><b>1.2</b> Getting Started</a><ul>
+<li class="chapter" data-level="1.2.1" data-path="introduction.html"><a href="introduction.html#intro-prerequisites"><i class="fa fa-check"></i><b>1.2.1</b> Prerequisites</a></li>
+<li class="chapter" data-level="1.2.2" data-path="introduction.html"><a href="introduction.html#intro-install-sparklyr"><i class="fa fa-check"></i><b>1.2.2</b> Installing sparklyr</a></li>
+<li class="chapter" data-level="1.2.3" data-path="introduction.html"><a href="introduction.html#intro-installing-spark"><i class="fa fa-check"></i><b>1.2.3</b> Installing Spark</a></li>
+<li class="chapter" data-level="1.2.4" data-path="introduction.html"><a href="introduction.html#intro-connect-to-spark"><i class="fa fa-check"></i><b>1.2.4</b> Connecting to Spark</a></li>
+<li class="chapter" data-level="1.2.5" data-path="introduction.html"><a href="introduction.html#intro-sparklyr-hello-world"><i class="fa fa-check"></i><b>1.2.5</b> Using Spark</a></li>
+<li class="chapter" data-level="1.2.6" data-path="introduction.html"><a href="introduction.html#intro-disconnecting"><i class="fa fa-check"></i><b>1.2.6</b> Disconnecting</a></li>
+<li class="chapter" data-level="1.2.7" data-path="introduction.html"><a href="introduction.html#intro-using-spark-from-rstudio"><i class="fa fa-check"></i><b>1.2.7</b> Using RStudio</a></li>
+<li class="chapter" data-level="1.2.8" data-path="introduction.html"><a href="introduction.html#intro-resources"><i class="fa fa-check"></i><b>1.2.8</b> Resources</a></li>
+</ul></li>
+<li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#intro-recap"><i class="fa fa-check"></i><b>1.3</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="analysis.html"><a href="analysis.html"><i class="fa fa-check"></i><b>2</b> Analysis</a><ul>
+<li class="chapter" data-level="2.1" data-path="analysis.html"><a href="analysis.html#background"><i class="fa fa-check"></i><b>2.1</b> Background</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="analysis.html"><a href="analysis.html#working-with-big-data"><i class="fa fa-check"></i><b>2.1.1</b> Working with Big Data</a></li>
+<li class="chapter" data-level="2.1.2" data-path="analysis.html"><a href="analysis.html#avoid-running-r-inside-spark"><i class="fa fa-check"></i><b>2.1.2</b> Avoid running R inside Spark</a></li>
+<li class="chapter" data-level="2.1.3" data-path="analysis.html"><a href="analysis.html#r-under-the-hood"><i class="fa fa-check"></i><b>2.1.3</b> R, under the hood</a></li>
+<li class="chapter" data-level="2.1.4" data-path="analysis.html"><a href="analysis.html#use-r-as-an-interface-to-spark"><i class="fa fa-check"></i><b>2.1.4</b> Use R as an interface to Spark</a></li>
+<li class="chapter" data-level="2.1.5" data-path="analysis.html"><a href="analysis.html#using-sparklyr-for-analysis"><i class="fa fa-check"></i><b>2.1.5</b> Using <code>sparklyr</code> for analysis</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>3</b> Modeling</a><ul>
+<li class="chapter" data-level="3.1" data-path="modeling.html"><a href="modeling.html#overview"><i class="fa fa-check"></i><b>3.1</b> Overview</a></li>
+<li class="chapter" data-level="3.2" data-path="modeling.html"><a href="modeling.html#supervised"><i class="fa fa-check"></i><b>3.2</b> Supervised</a></li>
+<li class="chapter" data-level="3.3" data-path="modeling.html"><a href="modeling.html#unsupervised"><i class="fa fa-check"></i><b>3.3</b> Unsupervised</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="modeling.html"><a href="modeling.html#k-means-clustering"><i class="fa fa-check"></i><b>3.3.1</b> K-Means Clustering</a></li>
+<li class="chapter" data-level="3.3.2" data-path="modeling.html"><a href="modeling.html#gaussian-mixture-clustering"><i class="fa fa-check"></i><b>3.3.2</b> Gaussian Mixture Clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="modeling.html"><a href="modeling.html#broom"><i class="fa fa-check"></i><b>3.4</b> Broom</a></li>
+<li class="chapter" data-level="3.5" data-path="modeling.html"><a href="modeling.html#pipelines"><i class="fa fa-check"></i><b>3.5</b> Pipelines</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>4</b> Clusters</a><ul>
+<li class="chapter" data-level="4.1" data-path="clusters.html"><a href="clusters.html#clusters-overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
+<li class="chapter" data-level="4.2" data-path="clusters.html"><a href="clusters.html#clusters-manager"><i class="fa fa-check"></i><b>4.2</b> Managers</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="clusters.html"><a href="clusters.html#clusters-standalone"><i class="fa fa-check"></i><b>4.2.1</b> Standalone</a></li>
+<li class="chapter" data-level="4.2.2" data-path="clusters.html"><a href="clusters.html#yarn"><i class="fa fa-check"></i><b>4.2.2</b> Yarn</a></li>
+<li class="chapter" data-level="4.2.3" data-path="clusters.html"><a href="clusters.html#mesos"><i class="fa fa-check"></i><b>4.2.3</b> Mesos</a></li>
+<li class="chapter" data-level="4.2.4" data-path="clusters.html"><a href="clusters.html#kubernetes"><i class="fa fa-check"></i><b>4.2.4</b> Kubernetes</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="clusters.html"><a href="clusters.html#on-premise"><i class="fa fa-check"></i><b>4.3</b> On-Premise</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="clusters.html"><a href="clusters.html#cloudera"><i class="fa fa-check"></i><b>4.3.1</b> Cloudera</a></li>
+<li class="chapter" data-level="4.3.2" data-path="clusters.html"><a href="clusters.html#hortonworks"><i class="fa fa-check"></i><b>4.3.2</b> Hortonworks</a></li>
+<li class="chapter" data-level="4.3.3" data-path="clusters.html"><a href="clusters.html#mapr"><i class="fa fa-check"></i><b>4.3.3</b> MapR</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="clusters.html"><a href="clusters.html#cloud"><i class="fa fa-check"></i><b>4.4</b> Cloud</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="clusters.html"><a href="clusters.html#clusters-amazon-emr"><i class="fa fa-check"></i><b>4.4.1</b> Amazon</a></li>
+<li class="chapter" data-level="4.4.2" data-path="clusters.html"><a href="clusters.html#databricks"><i class="fa fa-check"></i><b>4.4.2</b> Databricks</a></li>
+<li class="chapter" data-level="4.4.3" data-path="clusters.html"><a href="clusters.html#google"><i class="fa fa-check"></i><b>4.4.3</b> Google</a></li>
+<li class="chapter" data-level="4.4.4" data-path="clusters.html"><a href="clusters.html#ibm"><i class="fa fa-check"></i><b>4.4.4</b> IBM</a></li>
+<li class="chapter" data-level="4.4.5" data-path="clusters.html"><a href="clusters.html#microsoft"><i class="fa fa-check"></i><b>4.4.5</b> Microsoft</a></li>
+</ul></li>
+<li class="chapter" data-level="4.5" data-path="clusters.html"><a href="clusters.html#tools"><i class="fa fa-check"></i><b>4.5</b> Tools</a><ul>
+<li class="chapter" data-level="4.5.1" data-path="clusters.html"><a href="clusters.html#rstudio"><i class="fa fa-check"></i><b>4.5.1</b> RStudio</a></li>
+<li class="chapter" data-level="4.5.2" data-path="clusters.html"><a href="clusters.html#jupyter"><i class="fa fa-check"></i><b>4.5.2</b> Jupyter</a></li>
+<li class="chapter" data-level="4.5.3" data-path="clusters.html"><a href="clusters.html#clusters-livy"><i class="fa fa-check"></i><b>4.5.3</b> Livy</a></li>
+</ul></li>
+<li class="chapter" data-level="4.6" data-path="clusters.html"><a href="clusters.html#recap"><i class="fa fa-check"></i><b>4.6</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="connections.html"><a href="connections.html"><i class="fa fa-check"></i><b>5</b> Connections</a><ul>
+<li class="chapter" data-level="5.1" data-path="connections.html"><a href="connections.html#connections-overview"><i class="fa fa-check"></i><b>5.1</b> Overview</a><ul>
+<li class="chapter" data-level="5.1.1" data-path="connections.html"><a href="connections.html#connections-spark-edge-nodes"><i class="fa fa-check"></i><b>5.1.1</b> Edge Nodes</a></li>
+<li class="chapter" data-level="5.1.2" data-path="connections.html"><a href="connections.html#connections-spark-home"><i class="fa fa-check"></i><b>5.1.2</b> Spark Home</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="connections.html"><a href="connections.html#connections-local"><i class="fa fa-check"></i><b>5.2</b> Local</a></li>
+<li class="chapter" data-level="5.3" data-path="connections.html"><a href="connections.html#connections-standalone"><i class="fa fa-check"></i><b>5.3</b> Standalone</a></li>
+<li class="chapter" data-level="5.4" data-path="connections.html"><a href="connections.html#connections-yarn"><i class="fa fa-check"></i><b>5.4</b> Yarn</a><ul>
+<li class="chapter" data-level="5.4.1" data-path="connections.html"><a href="connections.html#connections-yarn-client"><i class="fa fa-check"></i><b>5.4.1</b> Yarn Client</a></li>
+<li class="chapter" data-level="5.4.2" data-path="connections.html"><a href="connections.html#connections-yarn-cluster"><i class="fa fa-check"></i><b>5.4.2</b> Yarn Cluster</a></li>
+</ul></li>
+<li class="chapter" data-level="5.5" data-path="connections.html"><a href="connections.html#connections-livy"><i class="fa fa-check"></i><b>5.5</b> Livy</a></li>
+<li class="chapter" data-level="5.6" data-path="connections.html"><a href="connections.html#connections-mesos"><i class="fa fa-check"></i><b>5.6</b> Mesos</a></li>
+<li class="chapter" data-level="5.7" data-path="connections.html"><a href="connections.html#connections-kubernetes"><i class="fa fa-check"></i><b>5.7</b> Kubernetes</a></li>
+<li class="chapter" data-level="5.8" data-path="connections.html"><a href="connections.html#cloud-1"><i class="fa fa-check"></i><b>5.8</b> Cloud</a></li>
+<li class="chapter" data-level="5.9" data-path="connections.html"><a href="connections.html#multiple"><i class="fa fa-check"></i><b>5.9</b> Multiple</a></li>
+<li class="chapter" data-level="5.10" data-path="connections.html"><a href="connections.html#troubleshooting"><i class="fa fa-check"></i><b>5.10</b> Troubleshooting</a><ul>
+<li class="chapter" data-level="5.10.1" data-path="connections.html"><a href="connections.html#logging"><i class="fa fa-check"></i><b>5.10.1</b> Logging</a></li>
+<li class="chapter" data-level="5.10.2" data-path="connections.html"><a href="connections.html#troubleshoot-spark-submit"><i class="fa fa-check"></i><b>5.10.2</b> Spark Submit</a></li>
+<li class="chapter" data-level="5.10.3" data-path="connections.html"><a href="connections.html#windows"><i class="fa fa-check"></i><b>5.10.3</b> Windows</a></li>
+</ul></li>
+<li class="chapter" data-level="5.11" data-path="connections.html"><a href="connections.html#recap-1"><i class="fa fa-check"></i><b>5.11</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="data.html"><a href="data.html"><i class="fa fa-check"></i><b>6</b> Data</a><ul>
+<li class="chapter" data-level="6.1" data-path="data.html"><a href="data.html#overview-1"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
+<li class="chapter" data-level="6.2" data-path="data.html"><a href="data.html#data-frames"><i class="fa fa-check"></i><b>6.2</b> Data Frames</a><ul>
+<li class="chapter" data-level="6.2.1" data-path="data.html"><a href="data.html#data-sdf-functions"><i class="fa fa-check"></i><b>6.2.1</b> Functions</a></li>
+<li class="chapter" data-level="6.2.2" data-path="data.html"><a href="data.html#pivoting"><i class="fa fa-check"></i><b>6.2.2</b> Pivoting</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="data.html"><a href="data.html#formats"><i class="fa fa-check"></i><b>6.3</b> Formats</a></li>
+<li class="chapter" data-level="6.4" data-path="data.html"><a href="data.html#data-types"><i class="fa fa-check"></i><b>6.4</b> Data Types</a><ul>
+<li class="chapter" data-level="6.4.1" data-path="data.html"><a href="data.html#dates"><i class="fa fa-check"></i><b>6.4.1</b> Dates</a></li>
+</ul></li>
+<li class="chapter" data-level="6.5" data-path="data.html"><a href="data.html#sources"><i class="fa fa-check"></i><b>6.5</b> Sources</a><ul>
+<li class="chapter" data-level="6.5.1" data-path="data.html"><a href="data.html#amazon-s3"><i class="fa fa-check"></i><b>6.5.1</b> Amazon S3</a></li>
+<li class="chapter" data-level="6.5.2" data-path="data.html"><a href="data.html#azure-storage"><i class="fa fa-check"></i><b>6.5.2</b> Azure Storage</a></li>
+<li class="chapter" data-level="6.5.3" data-path="data.html"><a href="data.html#cassandra"><i class="fa fa-check"></i><b>6.5.3</b> Cassandra</a></li>
+<li class="chapter" data-level="6.5.4" data-path="data.html"><a href="data.html#databases"><i class="fa fa-check"></i><b>6.5.4</b> Databases</a></li>
+<li class="chapter" data-level="6.5.5" data-path="data.html"><a href="data.html#hbase"><i class="fa fa-check"></i><b>6.5.5</b> HBase</a></li>
+<li class="chapter" data-level="6.5.6" data-path="data.html"><a href="data.html#nested-data"><i class="fa fa-check"></i><b>6.5.6</b> Nested Data</a></li>
+</ul></li>
+<li class="chapter" data-level="6.6" data-path="data.html"><a href="data.html#troubleshooting-1"><i class="fa fa-check"></i><b>6.6</b> Troubleshooting</a><ul>
+<li class="chapter" data-level="6.6.1" data-path="data.html"><a href="data.html#troubleshoot-csvs"><i class="fa fa-check"></i><b>6.6.1</b> Troubleshoot CSVs</a></li>
+<li class="chapter" data-level="6.6.2" data-path="data.html"><a href="data.html#column-names"><i class="fa fa-check"></i><b>6.6.2</b> Column Names</a></li>
+</ul></li>
+<li class="chapter" data-level="6.7" data-path="data.html"><a href="data.html#recap-2"><i class="fa fa-check"></i><b>6.7</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="tuning.html"><a href="tuning.html"><i class="fa fa-check"></i><b>7</b> Tuning</a><ul>
+<li class="chapter" data-level="7.1" data-path="tuning.html"><a href="tuning.html#overview-2"><i class="fa fa-check"></i><b>7.1</b> Overview</a><ul>
+<li class="chapter" data-level="7.1.1" data-path="tuning.html"><a href="tuning.html#tuning-graph-visualization"><i class="fa fa-check"></i><b>7.1.1</b> Graph Visualization</a></li>
+<li class="chapter" data-level="7.1.2" data-path="tuning.html"><a href="tuning.html#tuning-event-timeline"><i class="fa fa-check"></i><b>7.1.2</b> Event Timeline</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="tuning.html"><a href="tuning.html#tuning-configuring"><i class="fa fa-check"></i><b>7.2</b> Configuring</a><ul>
+<li class="chapter" data-level="7.2.1" data-path="tuning.html"><a href="tuning.html#connect-settings"><i class="fa fa-check"></i><b>7.2.1</b> Connect Settings</a></li>
+<li class="chapter" data-level="7.2.2" data-path="tuning.html"><a href="tuning.html#submit-settings"><i class="fa fa-check"></i><b>7.2.2</b> Submit Settings</a></li>
+<li class="chapter" data-level="7.2.3" data-path="tuning.html"><a href="tuning.html#runtime-settings"><i class="fa fa-check"></i><b>7.2.3</b> Runtime Settings</a></li>
+<li class="chapter" data-level="7.2.4" data-path="tuning.html"><a href="tuning.html#sparklyr-settings"><i class="fa fa-check"></i><b>7.2.4</b> sparklyr Settings</a></li>
+</ul></li>
+<li class="chapter" data-level="7.3" data-path="tuning.html"><a href="tuning.html#tuning-partitioning"><i class="fa fa-check"></i><b>7.3</b> Partitioning</a><ul>
+<li class="chapter" data-level="7.3.1" data-path="tuning.html"><a href="tuning.html#implicit"><i class="fa fa-check"></i><b>7.3.1</b> Implicit</a></li>
+<li class="chapter" data-level="7.3.2" data-path="tuning.html"><a href="tuning.html#explicit"><i class="fa fa-check"></i><b>7.3.2</b> Explicit</a></li>
+</ul></li>
+<li class="chapter" data-level="7.4" data-path="tuning.html"><a href="tuning.html#tuning-caching"><i class="fa fa-check"></i><b>7.4</b> Caching</a><ul>
+<li class="chapter" data-level="7.4.1" data-path="tuning.html"><a href="tuning.html#checkpointing"><i class="fa fa-check"></i><b>7.4.1</b> Checkpointing</a></li>
+<li class="chapter" data-level="7.4.2" data-path="tuning.html"><a href="tuning.html#tuning-memory"><i class="fa fa-check"></i><b>7.4.2</b> Memory</a></li>
+</ul></li>
+<li class="chapter" data-level="7.5" data-path="tuning.html"><a href="tuning.html#tuning-shuffling"><i class="fa fa-check"></i><b>7.5</b> Shuffling</a></li>
+<li class="chapter" data-level="7.6" data-path="tuning.html"><a href="tuning.html#tuning-serialization"><i class="fa fa-check"></i><b>7.6</b> Serialization</a></li>
+<li class="chapter" data-level="7.7" data-path="tuning.html"><a href="tuning.html#configuration-files"><i class="fa fa-check"></i><b>7.7</b> Configuration Files</a></li>
+<li class="chapter" data-level="7.8" data-path="tuning.html"><a href="tuning.html#recap-3"><i class="fa fa-check"></i><b>7.8</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="extensions.html"><a href="extensions.html"><i class="fa fa-check"></i><b>8</b> Extensions</a><ul>
+<li class="chapter" data-level="8.1" data-path="extensions.html"><a href="extensions.html#rsparkling"><i class="fa fa-check"></i><b>8.1</b> RSparkling</a><ul>
+<li class="chapter" data-level="8.1.1" data-path="extensions.html"><a href="extensions.html#troubleshooting-2"><i class="fa fa-check"></i><b>8.1.1</b> Troubleshooting</a></li>
+</ul></li>
+<li class="chapter" data-level="8.2" data-path="extensions.html"><a href="extensions.html#graphframes"><i class="fa fa-check"></i><b>8.2</b> GraphFrames</a></li>
+<li class="chapter" data-level="8.3" data-path="extensions.html"><a href="extensions.html#mleap"><i class="fa fa-check"></i><b>8.3</b> Mleap</a></li>
+<li class="chapter" data-level="8.4" data-path="extensions.html"><a href="extensions.html#extensions-nested-data"><i class="fa fa-check"></i><b>8.4</b> Nested Data</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="distributed.html"><a href="distributed.html"><i class="fa fa-check"></i><b>9</b> Distributed R</a><ul>
+<li class="chapter" data-level="9.1" data-path="distributed.html"><a href="distributed.html#overview-3"><i class="fa fa-check"></i><b>9.1</b> Overview</a></li>
+<li class="chapter" data-level="9.2" data-path="distributed.html"><a href="distributed.html#use-cases"><i class="fa fa-check"></i><b>9.2</b> Use Cases</a><ul>
+<li class="chapter" data-level="9.2.1" data-path="distributed.html"><a href="distributed.html#custom-parsers"><i class="fa fa-check"></i><b>9.2.1</b> Custom Parsers</a></li>
+<li class="chapter" data-level="9.2.2" data-path="distributed.html"><a href="distributed.html#partitioned-modeling"><i class="fa fa-check"></i><b>9.2.2</b> Partitioned Modeling</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>9.3</b> Partitions</a></li>
+<li class="chapter" data-level="9.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>9.4</b> Grouping</a></li>
+<li class="chapter" data-level="9.5" data-path="distributed.html"><a href="distributed.html#columns"><i class="fa fa-check"></i><b>9.5</b> Columns</a></li>
+<li class="chapter" data-level="9.6" data-path="distributed.html"><a href="distributed.html#context"><i class="fa fa-check"></i><b>9.6</b> Context</a></li>
+<li class="chapter" data-level="9.7" data-path="distributed.html"><a href="distributed.html#packages"><i class="fa fa-check"></i><b>9.7</b> Packages</a></li>
+<li class="chapter" data-level="9.8" data-path="distributed.html"><a href="distributed.html#requirements"><i class="fa fa-check"></i><b>9.8</b> Requirements</a></li>
+<li class="chapter" data-level="9.9" data-path="distributed.html"><a href="distributed.html#limitations"><i class="fa fa-check"></i><b>9.9</b> Limitations</a><ul>
+<li class="chapter" data-level="9.9.1" data-path="distributed.html"><a href="distributed.html#functions"><i class="fa fa-check"></i><b>9.9.1</b> Functions</a></li>
+<li class="chapter" data-level="9.9.2" data-path="distributed.html"><a href="distributed.html#livy"><i class="fa fa-check"></i><b>9.9.2</b> Livy</a></li>
+<li class="chapter" data-level="9.9.3" data-path="distributed.html"><a href="distributed.html#grouping-1"><i class="fa fa-check"></i><b>9.9.3</b> Grouping</a></li>
+<li class="chapter" data-level="9.9.4" data-path="distributed.html"><a href="distributed.html#packages-1"><i class="fa fa-check"></i><b>9.9.4</b> Packages</a></li>
+</ul></li>
+<li class="chapter" data-level="9.10" data-path="distributed.html"><a href="distributed.html#troubleshooting-3"><i class="fa fa-check"></i><b>9.10</b> Troubleshooting</a><ul>
+<li class="chapter" data-level="9.10.1" data-path="distributed.html"><a href="distributed.html#worker-logs"><i class="fa fa-check"></i><b>9.10.1</b> Worker Logs</a></li>
+<li class="chapter" data-level="9.10.2" data-path="distributed.html"><a href="distributed.html#partition-errors"><i class="fa fa-check"></i><b>9.10.2</b> Partition Errors</a></li>
+<li class="chapter" data-level="9.10.3" data-path="distributed.html"><a href="distributed.html#debugging-workers"><i class="fa fa-check"></i><b>9.10.3</b> Debugging Workers</a></li>
+</ul></li>
+<li class="chapter" data-level="9.11" data-path="distributed.html"><a href="distributed.html#clusters-1"><i class="fa fa-check"></i><b>9.11</b> Clusters</a></li>
+<li class="chapter" data-level="9.12" data-path="distributed.html"><a href="distributed.html#apache-arrow"><i class="fa fa-check"></i><b>9.12</b> Apache Arrow</a></li>
+<li class="chapter" data-level="9.13" data-path="distributed.html"><a href="distributed.html#recap-4"><i class="fa fa-check"></i><b>9.13</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="streaming.html"><a href="streaming.html"><i class="fa fa-check"></i><b>10</b> Streaming</a><ul>
+<li class="chapter" data-level="10.1" data-path="streaming.html"><a href="streaming.html#overview-4"><i class="fa fa-check"></i><b>10.1</b> Overview</a></li>
+<li class="chapter" data-level="10.2" data-path="streaming.html"><a href="streaming.html#streaming-treansform"><i class="fa fa-check"></i><b>10.2</b> Transformations</a><ul>
+<li class="chapter" data-level="10.2.1" data-path="streaming.html"><a href="streaming.html#streams-dplyr"><i class="fa fa-check"></i><b>10.2.1</b> dplyr</a></li>
+<li class="chapter" data-level="10.2.2" data-path="streaming.html"><a href="streaming.html#streams-pipelines"><i class="fa fa-check"></i><b>10.2.2</b> Pipelines</a></li>
+<li class="chapter" data-level="10.2.3" data-path="streaming.html"><a href="streaming.html#streams-r"><i class="fa fa-check"></i><b>10.2.3</b> R Code</a></li>
+</ul></li>
+<li class="chapter" data-level="10.3" data-path="streaming.html"><a href="streaming.html#shiny"><i class="fa fa-check"></i><b>10.3</b> Shiny</a></li>
+<li class="chapter" data-level="10.4" data-path="streaming.html"><a href="streaming.html#formats-1"><i class="fa fa-check"></i><b>10.4</b> Formats</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="contributing.html"><a href="contributing.html"><i class="fa fa-check"></i><b>11</b> Contributing</a><ul>
+<li class="chapter" data-level="11.1" data-path="contributing.html"><a href="contributing.html#overview-5"><i class="fa fa-check"></i><b>11.1</b> Overview</a></li>
+<li class="chapter" data-level="11.2" data-path="contributing.html"><a href="contributing.html#contributing-r-extension"><i class="fa fa-check"></i><b>11.2</b> R Extensions</a></li>
+<li class="chapter" data-level="11.3" data-path="contributing.html"><a href="contributing.html#scala-extensions"><i class="fa fa-check"></i><b>11.3</b> Scala Extensions</a><ul>
+<li class="chapter" data-level="11.3.1" data-path="contributing.html"><a href="contributing.html#scala-extension-prereq"><i class="fa fa-check"></i><b>11.3.1</b> Prerequisites</a></li>
+</ul></li>
+<li class="chapter" data-level="11.4" data-path="contributing.html"><a href="contributing.html#spark-extensions"><i class="fa fa-check"></i><b>11.4</b> Spark Extensions</a></li>
+<li class="chapter" data-level="11.5" data-path="contributing.html"><a href="contributing.html#r-packages"><i class="fa fa-check"></i><b>11.5</b> R Packages</a><ul>
+<li class="chapter" data-level="11.5.1" data-path="contributing.html"><a href="contributing.html#rstudio-projects"><i class="fa fa-check"></i><b>11.5.1</b> RStudio Projects</a></li>
+<li class="chapter" data-level="11.5.2" data-path="contributing.html"><a href="contributing.html#troubleshooting-4"><i class="fa fa-check"></i><b>11.5.2</b> Troubleshooting</a></li>
+</ul></li>
+<li class="chapter" data-level="11.6" data-path="contributing.html"><a href="contributing.html#contributing-sparklyr"><i class="fa fa-check"></i><b>11.6</b> sparklyr</a><ul>
+<li class="chapter" data-level="11.6.1" data-path="contributing.html"><a href="contributing.html#compiling"><i class="fa fa-check"></i><b>11.6.1</b> Compiling</a></li>
+<li class="chapter" data-level="11.6.2" data-path="contributing.html"><a href="contributing.html#serialization"><i class="fa fa-check"></i><b>11.6.2</b> Serialization</a></li>
+<li class="chapter" data-level="11.6.3" data-path="contributing.html"><a href="contributing.html#invocations"><i class="fa fa-check"></i><b>11.6.3</b> Invocations</a></li>
+<li class="chapter" data-level="11.6.4" data-path="contributing.html"><a href="contributing.html#r-packages-1"><i class="fa fa-check"></i><b>11.6.4</b> R Packages</a></li>
+<li class="chapter" data-level="11.6.5" data-path="contributing.html"><a href="contributing.html#connections-1"><i class="fa fa-check"></i><b>11.6.5</b> Connections</a></li>
+<li class="chapter" data-level="11.6.6" data-path="contributing.html"><a href="contributing.html#distributed-r"><i class="fa fa-check"></i><b>11.6.6</b> Distributed R</a></li>
+</ul></li>
+<li class="chapter" data-level="11.7" data-path="contributing.html"><a href="contributing.html#recap-5"><i class="fa fa-check"></i><b>11.7</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i>Appendix</a><ul>
+<li class="chapter" data-level="11.8" data-path="appendix.html"><a href="appendix.html#appendix-prerequisites"><i class="fa fa-check"></i><b>11.8</b> Prerequisites</a><ul>
+<li class="chapter" data-level="11.8.1" data-path="appendix.html"><a href="appendix.html#appendix-install-r"><i class="fa fa-check"></i><b>11.8.1</b> Installing R</a></li>
+<li class="chapter" data-level="11.8.2" data-path="appendix.html"><a href="appendix.html#appendix-install-java"><i class="fa fa-check"></i><b>11.8.2</b> Installing Java</a></li>
+<li class="chapter" data-level="11.8.3" data-path="appendix.html"><a href="appendix.html#appendix-install-rstudio"><i class="fa fa-check"></i><b>11.8.3</b> Installing RStudio</a></li>
+<li class="chapter" data-level="11.8.4" data-path="appendix.html"><a href="appendix.html#appendix-using-rstudio"><i class="fa fa-check"></i><b>11.8.4</b> Using RStudio</a></li>
+</ul></li>
+<li class="chapter" data-level="11.9" data-path="appendix.html"><a href="appendix.html#diagrams"><i class="fa fa-check"></i><b>11.9</b> Diagrams</a><ul>
+<li class="chapter" data-level="11.9.1" data-path="appendix.html"><a href="appendix.html#appendix-storage-capacity"><i class="fa fa-check"></i><b>11.9.1</b> Worlds Store Capacity</a></li>
+<li class="chapter" data-level="11.9.2" data-path="appendix.html"><a href="appendix.html#appendix-cran-downloads"><i class="fa fa-check"></i><b>11.9.2</b> Daily downloads of CRAN packages</a></li>
+<li class="chapter" data-level="11.9.3" data-path="appendix.html"><a href="appendix.html#appendix-cluster-trends"><i class="fa fa-check"></i><b>11.9.3</b> Google trends for mainframes, cloud computing and kubernetes</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>12</b> References</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">The R in Spark: Learning Apache Spark with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="introduction" class="section level1">
+<h1><span class="header-section-number">Chapter 1</span> Introduction</h1>
+<p>With information growing at exponential rates, it’s no surprise that historians are referring to this period of history as the Information Age. The increasing speed at which data is being collected has created new opportunities and is certainly staged to create even more. This chapter presents the tools that have been used to solve large scale data challenges and introduces Apache Spark as a leading tool that is democratizing our ability to process data at large scale. We will then introduce the R computing language, which was specifically designed to simplify data analysis. It is then natural to ask what the outcome would be from combining the ease of use provided by R, with the compute power available through Apache Spark. This will lead us to introduce sparklyr, a project merging R and Spark into a powerful tool that is easily accessible to all.</p>
+<p>We will then present the prerequisites, tools and steps you will need to have Spark and R working in your computer with ease. You will learn how to install Spark, initialize Spark, introduce you to common operations and help you get your very first data processing task done. It is the goal of this chapter to help anyone grasp the concepts and tools required to start tackling large scale data challenges which, until recently, were only accessible to very few organizations.</p>
+<p>After this chapter, you will then move on into learning how to analyze large scale data, followed by building models capable of predicting trends and discover information hidden in vasts amounts of information. At which point, you will have the tools required to perform data analysis and modeling at scale. Subsequent chapters will help you move away from your local computer into computing clusters required to solve many real world problems. The last chapters will present additional topics, like real time data processing and graph analysis, which you will need to truly master the art of analyzing data at any scale. The last chapter of this book will give you tools and inspiration to consider contributing back to this project and many others.</p>
+<p>We hope this is a journey you will enjoy, that will help you solve problems in your professional career and with our efforts combined, nudge the world into taking better decisions that can benefit us all.</p>
+<div id="intro-background" class="section level2">
+<h2><span class="header-section-number">1.1</span> Background</h2>
+<p>As humans, we have been storing, retrieving, manipulating, and communicating information since the Sumerians in Mesopotamia developed writing in about 3000 BC. Based on the storage and processing technologies employed, it is possible to distinguish four distinct phases of development: pre-mechanical (3000 BC – 1450 AD), mechanical (1450–1840), electromechanical (1840–1940), and electronic (1940–present)<span class="citation">(Laudon, Traver, and Laudon <a href="#ref-intro-information-technology">1996</a>)</span>.</p>
+<p>Mathematician George Stibitz used the word <strong>digital</strong> to describe fast electric pulses back in 1942<span class="citation">(Ceruzzi <a href="#ref-intro-computing-concise-history">2012</a>)</span> and, to this day, we describe information stored electronically as digital information. In contrast, <strong>analog</strong> information represents everything we have stored by any non-electronic means such as hand written notes, books, newspapers, and so on<span class="citation">(Webster <a href="#ref-intro-webster2006merriam">2006</a>)</span>.</p>
+<p>The world bank report on digital development provides an estimate of digital and analog information stored over the last decades<span class="citation">(Group <a href="#ref-intro-data-revolution">2016</a>)</span>. This report noted that digital information surpassed analog information around 2003. At that time, there were aboput 10 million terabytes of digital information, which is roughly about 10 million computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at <a href="appendix.html#appendix-storage-capacity">exponential rates</a>:</p>
+<div class="figure" style="text-align: center"><span id="fig:intro-store-capacity-render"></span>
+<img src="images/intro-world-store-capacity.png" alt="World’s capacity to store information." width="1500" />
+<p class="caption">
+FIGURE 1.1: World’s capacity to store information.
+</p>
+</div>
+<p>With the ambition to provide tools capable of searching all this new digital information, many companies attempted to provide such functionality with what we know today as search engines, used when searching the web. Given the vast amount of digital information, managing information at this scale was a challenging problem. Search engines were unble to store all the web page information required to support web searches in a single computer. This meant that they had to split information into several files and store them across many machines. This approach became known as the Google File System, a research paper published in 2003 by Google<span class="citation">(Ghemawat, Gobioff, and Leung <a href="#ref-intro-google-file-system">2003</a>)</span>.</p>
+<div id="intro-hadoop" class="section level3">
+<h3><span class="header-section-number">1.1.1</span> Hadoop</h3>
+<p>One year later, Google published a new paper describing how to perform operations across the Google File System, this approach came to be known as <strong>MapReduce</strong><span class="citation">(Dean and Ghemawat <a href="#ref-intro-google-map-reduce">2008</a>)</span>. As you would expect, there are two operations in MapReduce: Map and Reduce. The <strong>map operation</strong> provides an arbitrary way to transform each file into a new file, while the <strong>reduce operation</strong> combines two files. Both operations require custom computer code, but the MapReduce framework takes care of automatically executing them across many computers at once. These two operations are sufficient to process all the data available in the web, while also providing enough flexibility to extract meaningful information from it.</p>
+<p>For example, we can use MapReduce to count words in two different text files. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files.</p>
+<div class="figure"><span id="fig:unnamed-chunk-3"></span>
+<div id="htmlwidget-96152095615e0e60fbad" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-96152095615e0e60fbad">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n\n#spacing: 80\n#direction: right\n#zoom: 4\n[Alice's File|I like apples]\n[Bob's File|I like bananas]\n\n[Alice's File]-Map[Alice's Words]\n[Bob's File]-Map[Bob's Words]\n\n[Alice's Words|I,1|like,1|apples,1]\n[Bob's Words|I,1|like,1|bananas,1]\n\n[Alice's Words]- Reduce[Word Counts]\n[Bob's Words]- Reduce[Word Counts]\n\n[Word Counts|I,2|like,2|apples,1|bananas,1]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+FIGURE 1.2: Simple MapReduce Example.
+</p>
+</div>
+<p>Counting words is often the most basic MapReduce example, but it can be also used for much more sophisticated and interesting applications. For instance, MapReduce can be used to rank web pages in Google’s <strong>PageRank</strong> algorithm, which assigns ranks to web pages based on the count of hyperlinks linking to a web page and the rank of the page linking to it.</p>
+<p>After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as <strong>Hadoop</strong> with the Google File System implemented as the Hadoop File System, or <strong>HDFS</strong> for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations which enabled them to make use of MapReduce beyond web data processing.</p>
+<p>While Hadoop provided support to perform MapReduce operations over a distributed file system, it still required MapReduce operations to be written with code every time a data analysis was run. To improve over this tedious process, the <strong>Hive</strong> project released in 2008 by Facebook, brought Structured Query Language (<strong>SQL</strong>) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each MapReduce operation; instead, one could write generic data analysis statements in SQL that are much easier to understand and write.</p>
+</div>
+<div id="intro-spark" class="section level3">
+<h3><span class="header-section-number">1.1.2</span> Spark</h3>
+<p>In 2009, <strong>Apache Spark</strong> began as a research project at the UC Berkeley’s AMPLab to improve on MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines, and by loading data in-memory making operations much fasters than Hadoop’s on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the <a href="modeling.html#modeling">modeling</a> chapter, allowed Spark to run 10 times faster than Hadoop by making use of in-memory datasets<span class="citation">(Zaharia et al. <a href="#ref-intro-zaharia2010spark">2010</a>)</span>.</p>
+<div class="figure"><span id="fig:intro-spark-logistic-regression-render"></span>
+<img src="images/intro-hadoop-spark-logistic-regression.png" alt="Logistic regression performance in Hadoop and Spark." width="1500" />
+<p class="caption">
+FIGURE 1.3: Logistic regression performance in Hadoop and Spark.
+</p>
+</div>
+<p>While Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. For instance, Spark holds <a href="http://sortbenchmark.org/">records in large-scale sorting</a>, where data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU’s cache to dramatically improve performance. For comparison, one can <a href="https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html">sort 100 terabytes of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23 minutes using Spark</a>, it’s also the case that <a href="https://spark.apache.org/news/spark-wins-cloudsort-100tb-benchmark.html">Spark holds the record in the cloud sorting benchmark</a>, which makes Spark the most cost effective solution for large-scale sorting.</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Hadoop Record</th>
+<th>Spark Record</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Data Size</td>
+<td>102.5 TB</td>
+<td>100 TB</td>
+</tr>
+<tr class="even">
+<td>Elapsed Time</td>
+<td>72 mins</td>
+<td>23 mins</td>
+</tr>
+<tr class="odd">
+<td>Nodes</td>
+<td>2100</td>
+<td>206</td>
+</tr>
+<tr class="even">
+<td>Cores</td>
+<td>50400</td>
+<td>6592</td>
+</tr>
+<tr class="odd">
+<td>Disk</td>
+<td>3150 GB/s</td>
+<td>618 GB/s</td>
+</tr>
+<tr class="even">
+<td>Network</td>
+<td>10Gbps</td>
+<td>10Gbps</td>
+</tr>
+<tr class="odd">
+<td>Sort rate</td>
+<td>1.42 TB/min</td>
+<td>4.27 TB/min</td>
+</tr>
+<tr class="even">
+<td>Sort rate / node</td>
+<td>0.67 GB/min</td>
+<td>20.7 GB/min</td>
+</tr>
+</tbody>
+</table>
+<p>In 2010, Spark was released as an open source project and then donated to the Apache Software Foundation in 2013. Spark is licensed under the <a href="https://en.wikipedia.org/wiki/Apache_License">Apache 2.0</a>, which allows you to freely use, modify, and distribute it. In 2015, Spark reaches more than 1000 contributors, making it one of the most active projects in the Apache Software Foundation.</p>
+<p>This gives an overview of how Spark came to be, which we can now use to formally introduce Apache Spark as follows:</p>
+<blockquote>
+<p>“Apache Spark is a fast and general engine for large-scale data processing.”</p>
+<p>— <a href="http://spark.apache.org/">spark.apache.org</a></p>
+</blockquote>
+<p>To help us understand this definition of Apache Spark, we will break it down as follows:</p>
+<ul>
+<li><strong>Data Processing</strong>: Data processing is the collection and manipulation of items of data to produce meaningful information<span class="citation">(French <a href="#ref-intro-data-processing">1996</a>)</span>.</li>
+<li><strong>General</strong>: Spark optimizes and executes parallel generic code, as in, there are no restrictions as to what type of code one can write in Spark.</li>
+<li><strong>Large-Scale</strong>: One can interpret this as <strong>cluster</strong>-scale, as in, a set of connected computers working together to accomplish specific goals.</li>
+<li><strong>Fast</strong>: Spark is much faster than its predecessor by making efficient use of memory, network and CPUs to speed data processing algorithms in computing cluster.</li>
+</ul>
+<p>Since Spark is <em>general</em>, you can use Spark to solve many problems, from calculating averages to approximating the value of Pi, <a href="https://mapr.com/blog/churn-prediction-sparkml/">predicting customer churn</a>, <a href="https://academic.oup.com/gigascience/article/7/8/giy098/5067872">aligning protein sequences</a> or analyzing <a href="https://db-blog.web.cern.ch/blog/luca-canali/2017-08-apache-spark-and-cern-open-data-example">high energy physics at CERN</a>.</p>
+<p>Describing Spark as <em>large</em> <em>scale</em> implies that a good use case for Spark is tackling problems that can be solved with multiple machines. For instance, when data does not fit in a single disk driver or does not fit into memory, Spark is a good candidate to consider.</p>
+<p>Since Spark is <em>fast</em>, it is worth considering for problems that may not be large-scale, but where using multiple processors could speed up computation. For instance, sorting large datasets or CPU intensive models could also bennefit from running in Spark.</p>
+<p>Therefore, Spark is good at tackling large-scale data processing problems, this usually known as <strong>big data</strong> (<a href="https://en.wikipedia.org/wiki/big_data">data sets that are more voluminous and complex that traditional ones</a>), but also is good at tackling large-scale computation problems, known as <strong>big compute</strong> (<a href="https://www.nimbix.net/glossary/big-compute/">tools and approaches using a large amount of CPU and memory resources in a coordinated way</a>).</p>
+<p>Big data and big compute problems are usually easy to spot – if the data does not fit into a single machine, you might have a big data problem; if the data fits into a single machine but a process over the data takes days, weeks or even months to compute, you might have a big compute problem.</p>
+<p>However, there is also a third problem space where neither data nor compute are necessarily large-scale and yet, there are significant benefits to using Spark. For this third problem space, there are a few use cases this breaks to:</p>
+<ul>
+<li><p><strong>Velocity</strong>: Suppose you have a dataset of 10 gigabytes in size and a process that takes 30 minutes to run over this data – this is by no means big-compute nor big data. However, if you happen to be researching ways to improve the accuracy of your models, reducing the runtime down to 3 minutes is a significant improvement, which can lead to significant advances and productivity gains by increasing the velocity at which you can analyze data. Alternatevely, you might need to process data faster, for stock trading for instance, while 3 minutes could seem as fast enough; it can be way too slow for realtime data processing, where you might need to process data in a few seconds – or even down to a few milliseconds.</p></li>
+<li><p><strong>Variety</strong>: You could also have an efficient process to collect data from many sources into a single location, usually a database, this process could be already running efficiently and close to realtime. Such processes are known at ETL (Extract-Transform-Load); data is extracted from multiple sources, transformed to the required format and loaded in a single data store. While this has worked for years, the tradeoff from this approach is that adding a new data source is expensive. Since the system is centralized and tightly controlled, making changes could cause the entire process to halt; therefore, adding new data source usually takes too long to be implemented. Instead, one can store all data its natural format and process it as needed using cluster computing, this architecture is currently known as a <a href="https://en.wikipedia.org/wiki/Data_lake">data lake</a>. In addition, storing data in its raw format allows you to process a variety of new file formats like images, audio and video; without having to figure out how to fit them into conventional structured storage systems.</p></li>
+<li><p><strong>Veracity</strong>: Asserts that data can vary greatly in quality which might require special analysis methods to improve its accuracy. For instance, suppose you have a table of cities with values like San Francisco, Seattle and Boston, what happens when data contains a misspelled entry like “Bston”? In a relational database, this invalid entry might get dropped; however, dropping values is not necessarily the best approach in all cases, you might want to correct this field by making use of geocodes, cross referencing data sources or attempting a best-effort match. Therefore, understanding the veracity of the original data source and what accuracy your particular analysis needs, can get yield a better outcome in many cases.</p></li>
+</ul>
+<p>If we include “Volume” as a synonym for big data, you get the mnemonics people refer as <a href="http://www.theserverside.com/feature/Handling-the-four-Vs-of-big-data-volume-velocity-variety-and-veracity">the four ’V’s of big data</a>; others have gone as far as expending this to <a href="https://en.wikipedia.org/wiki/Big_data">five</a> or even as <a href="https://tdwi.org/articles/2017/02/08/10-vs-of-big-data.aspx">the 10 Vs of Big Data</a>. Mnemonics aside, cluster computing is being used today in more innovative ways and and is not uncommon to see organizations experimenting with new workflows and a variety of tasks that were traditionally uncommon for cluster computing. Much of the hype attributed to big data falls into this space where, strictly speaking, one is not handling big data but there are still beneffits from using tools designed for big data and big compute. Our hope is that this book will help you understand the opportunities and limitations of cluster computing, and specifically, the opportunities and limitations from using Apache Spark with R.</p>
+</div>
+<div id="intro-r" class="section level3">
+<h3><span class="header-section-number">1.1.3</span> R</h3>
+<p>The R computing language has its origins in the S language, created at Bell Laboratories. R was not created at Bell Labs, but its predecesor, the S computing language was. <a href="https://blog.revolutionanalytics.com/2016/07/rick-becker-s-talk.html">Rick Becker explained in useR 2016</a> that at that time in Bell Labs, computing was done by calling subroutines written in the Fortran language which, apparently, were not pleasant to deal with. The S computing language was designed as an interface language to solve particular problems without having to worry about other languages, such as Fortran. The creator of S, <a href="https://en.wikipedia.org/wiki/John_Chambers_(statistician)">John Chambers</a>, describes how S was designed to provide an interface that simplifies data processing through the following diagram:</p>
+<div class="figure" style="text-align: center"><span id="fig:intro-r-diagram"></span>
+<img src="images/intro-s-algorithm-interface.png" alt="Interface language diagram by John Chambers - Rick Becker useR 2016." width="800" />
+<p class="caption">
+FIGURE 1.4: Interface language diagram by John Chambers - Rick Becker useR 2016.
+</p>
+</div>
+<p>R is a modern and free implementation of S, specifically:</p>
+<blockquote>
+<p>R is a programming language and free software environment for statistical computing and graphics.</p>
+<p>— <a href="https://www.r-project.org/">The R Project for Statistical Computing</a></p>
+</blockquote>
+<p>While working with data, I believe there are two strong arguments for using R:</p>
+<ul>
+<li>The <strong>R Language</strong> was designed by statisticians for statisticians, meaning, this is one of the few successful languages designed for non-programmers; so learning R will probably feel more natural. Additionally, since the R language was designed to be an interface to other tools and languages, R allows you to focus more on modeling and less on peculiarities of computer science and engineering.</li>
+<li>The <strong>R Community</strong> provides a rich package archive provided by CRAN (<a href="https://cran.r-project.org/">The Comprehensive R Archive Network</a>) which allows you to install ready-to-use packages to perform many tasks; most notably, high-quality data manipulation, visualizations and statistic models, many of which are only available in R. In addition, the R community is a welcoming and active group of talented individuals motivated to help you succeed. Many packages provided by the R community make R, by far, the best option for statistical computing. Some of the most downloaded R packages include: <a href="https://CRAN.R-project.org/package=dplyr">dplyr</a> to manipulate data, <a href="https://CRAN.R-project.org/package=cluster">cluster</a> to analyze clusters and <a href="https://CRAN.R-project.org/package=ggplot2">ggplot2</a> to visualize data. We can quantify the <a href="appendix.html#appendix-cran-downloads">growth of the R community</a> by plotting daily downloads of R packages in CRAN.</li>
+</ul>
+<div class="figure" style="text-align: center"><span id="fig:intro-cran-downloads-render"></span>
+<img src="images/intro-daily-cran-downloads.png" alt="Daily downloads of CRAN packages." width="1500" />
+<p class="caption">
+FIGURE 1.5: Daily downloads of CRAN packages.
+</p>
+</div>
+<p>Aside from statistics, R is also used in many other fields. The following ones are particularily relevant to this book:</p>
+<ul>
+<li><strong>Data Science</strong>: Data science is based on knowledge and practices from statistics and computer science that turns raw data into understanding<span class="citation">(Wickham and Grolemund <a href="#ref-intro-r-for-data-science">2016</a>)</span> by using data analysis and modeling techniques. Statistical methods provide a solid foundation to understand the world and perform predictions, while the automation provided by computing methods allows us to simplify statistical analysis and make it much more accessible. Some have advocated that statistics should be renamed data science<span class="citation">(Wu <a href="#ref-intro-statisticsisdatascience">1997</a>)</span>; however, data science goes beyond statistics by also incorporating advances in computing<span class="citation">(Cleveland <a href="#ref-intro-datascienceindependent">2001</a>)</span>. This book presents analysis and modeling techniques common in statistics, but applied to large datasets which requires incorporating advances in distributed computing.</li>
+<li><strong>Machine Learning</strong>: Machine learning uses practices from statistics and computer science; however, it is heavily focused on automation and prediction. For instance, the term “machine learning” was coined by Arthur Samuel while automating a computer program to play checkers<span class="citation">(Samuel <a href="#ref-intro-samuel1959some">1959</a>)</span>. While we could perform data science on particular games, we rather need to automate the entire process. Therefore, this falls in the realm of machine learning, not data science. Machine learning makes it possible for many users to take advantage of statistical methods without being aware of the statistical methods that are being used. One of the first important applications of machine learning was to filter spam emails; in this case, it’s just not feasible to perform data analysis and modeling over each email account; therefore, machine learning automates the entire process of finding spam and filtering it out without having to involve users at all. This book will present the methods to transition data science workflows into fully-automated machine learning methods through, for instance, providing support to build and export Spark pipelines that can be easily reused in automated environments.</li>
+<li><strong>Deep Learning</strong>: Deep learning builds on knowledge of statistics, data science and machine learning to define models vaguely inspired on biological nervous systems. Deep learning models evolved from neural network models after the vanishing-gradient-problem was resolved by training one layer at a time<span class="citation">(Hinton, Osindero, and Teh <a href="#ref-intro-hinton2006fast">2006</a>)</span> and have proven useful in image and speech recognition tasks. For instance, when using voice assistants like Siri, Alexa, Cortana or Google, the model performing the audio to text conversion is most likely to be based on deep learning models. While GPUs (Graphic Processing Units) have been successfully used to train deep learning models<span class="citation">(Krizhevsky, Sutskever, and Hinton <a href="#ref-intro-krizhevsky2012imagenet">2012</a>)</span>; some datasets can not be processed in a single GPU. It is also the case that deep learning models require huge amounts of data, which needs to be preprocessed across many machines before they can be fed into a single GPU for training. This book won’t make any direct references to deep learning models; however, the methods presented in this book can be used to prepare data for deep learning and, in the years to come, using deep learning with large scale computing will become a common practice. In fact, recent versions of Spark have already introduced execution models optimized for training deep learning in Spark.</li>
+</ul>
+<p>While working in any of the previous fields, you will be faced with increasingly large datasets or increasingly complex computations that are slow to execute or at times, even impossible to process in a single computer. However, it is important to understand that Spark does not need to be the answer to all our computations problems; instead, when faced with computing challenges in R, the following techniques can be as effective:</p>
+<ul>
+<li><strong>Sampling:</strong> A first approach to try is reduce the amount of data being handled, through sampling. However, data must be sampled properly by applying sound statistical principles. For instance, selecting the top results is not sufficient in sorted datasets; with simple random sampling, there might be underrepresented groups, which we could overcome with stratified sampling, which in turn adds complexity to properly select categories. It is out of the scope of this book to teach how to properly perform statistical sampling, but many online resources and literature is available on this subject.</li>
+<li><strong>Profiling:</strong> One can try to understand why a computation is slow and make the necessary improvements. A profiler, is a tool capable of inspecting code execution to help identify bottlenecks. In R, the R profiler, the <code>profvis</code> R package<span class="citation">(“Profvis” <a href="#ref-intro-profvis">2018</a>)</span> and RStudio profiler feature<span class="citation">(“RStudio Profiler” <a href="#ref-intro-rstudio-profiler">2018</a>)</span>, allow you to easily to retrieve and visualize a profile; however, it’s not always trivial to optimize.</li>
+<li><strong>Scaling Up:</strong> Speeding up computation is usually possible by buying faster or more capable hardware, say, increasing your machine memory, hard drive or procuring a machine with many more CPUs, this approach is known as “scaling up”. However, there are usually hard limits as to how much a single computer can scale up and even with significant CPUs, one needs to find frameworks that parallelize computation efficiently.</li>
+<li><strong>Scaling Out:</strong> Finally, we can consider spreading computation and storage across multiple machines; this approach provides the highest degree of scalability since one can potentially use an arbitrary number of machines to perform a computation, this approach is commonly known as “scaling out”. However, spreading computation effectively across many machines is a complex endeavour, specially without using specialized tools and frameworks like Apache Spark.</li>
+</ul>
+<p>This last point brings us closer to the purpose of this book, which is to bring the power of distributed computing systems provided by Apache Spark, to solve meaningful computation problems in Data Science and related fields, using R.</p>
+</div>
+<div id="intro-sparklyr" class="section level3">
+<h3><span class="header-section-number">1.1.4</span> sparklyr</h3>
+<p>When you think of the computation power that Spark provides and the ease of use of the R language, it is natural to want them to work together through – seamlessly. This is also what the R community expected, an R package that would provide an interface to Spark that was, easy to use, compatible with other R packages and, available in CRAN; with this goal, we started developing <code>sparklyr</code>. The first version, <a href="https://blog.rstudio.com/2016/09/27/sparklyr-r-interface-for-apache-spark/">sparklyr 0.4</a>, was released during the <em>useR! 2016</em> conference, this first version included support for <code>dplyr</code>, <code>DBI</code>, modeling with <code>MLlib</code> and an extensible API that enabled extensions like <a href="https://www.h2o.ai/">H2O</a>’s <a href="https://github.com/h2oai/rsparkling/">rsparkling</a> package. Since then, many new features and improvements have been made available through <a href="https://blog.rstudio.com/2017/01/24/sparklyr-0-5/">sparklyr 0.5</a>, <a href="https://blog.rstudio.com/2017/07/31/sparklyr-0-6/">0.6</a>, <a href="https://blog.rstudio.com/2018/01/29/sparklyr-0-7/">0.7</a>, <a href="https://blog.rstudio.com/2018/05/14/sparklyr-0-8/">0.8</a> and <a href="https://blog.rstudio.com/2018/10/01/sparklyr-0-9/">0.9</a>.</p>
+<p>Officially, <code>sparklyr</code> is an R interface for Apache Spark. It’s available in CRAN and works like any other CRAN package, meaning that: it’s agnostic to Spark versions, it’s easy to install, it serves the R community, it embraces other packages and practices from the R community and so on. It’s hosted in GitHub under <a href="https://github.com/rstudio/sparklyr">github.com/rstudio/sparklyr</a> and licensed under Apache 2.0 which is allows you to clone, modify and <a href="contributing.html#contributing">contribute back</a> to this project.</p>
+<p>While thinking of who and why should use <code>sparklyr</code>, the following roles come to mind:</p>
+<ul>
+<li><strong>New Users</strong>: For new users, <code>sparklyr</code> provides the easiest way to get started with Spark. Our hope is that the early chapters of this book will get you up running with ease and set you up for long term success.</li>
+<li><strong>Data Scientists</strong>: For data scientists that already use and love R, <code>sparklyr</code> integrates with many other R practices and packages like <code>dplyr</code>, <code>magrittr</code>, <code>broom</code>, <code>DBI</code>, <code>tibble</code> and many others that will make you feel at home while working with Spark. For those new to R and Spark, the combination of high-level workflows available in <code>sparklyr</code> and low-level extensibility mechanisms make it a productive environment to match the needs and skills of every data scientist.</li>
+<li><strong>Expert Users</strong>: For those users that are already immersed in Spark and can write code natively in Scala, consider making your libraries available as an <code>sparklyr</code> <a href="contributing.html#contributing-r-extension">custom extension</a> to the R community, a diverse and skilled community that can put your contributions to good use while moving <a href="https://en.wikipedia.org/wiki/Open_science">open science</a> forward.</li>
+</ul>
+<p>This book is titled “The R in Spark” as a way to describe and teach that area of overlap between Spark and R. <code>sparklyr</code> is the R package that materializes this overlap of communities, expectations, future directions, packages, and package extensions as well. Naming this book <code>sparklyr</code> or “Introduction to sparklyr” would have left behind a much more exciting opportunity – an opportunity to present this book as an intersection of the R and Spark communities. Both are solving very similar problems with a set of different skills and backgrounds; therefore, it is my hope that <code>sparklyr</code> can be a fertile ground for innovation, a welcoming place to newcomers, a productive place for experienced data scientists and an open community where cluster computing and modeling can come together.</p>
+</div>
+</div>
+<div id="starting" class="section level2">
+<h2><span class="header-section-number">1.2</span> Getting Started</h2>
+<p>From R, getting started with Spark using <code>sparklyr</code> and a local cluster is as easy as running:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">spark_install</span>()</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a></code></pre></div>
+<p>To make sure we can all run the code above and understand it, this section will walk you through the prerequisites, installing <code>sparklyr</code> and Spark, connecting to a local Spark cluster and briefly explaining how to use Spark.</p>
+<p>However, if a Spark cluster and R environment have been made available to you, you do not need to install the <a href="introduction.html#intro-prerequisites">prerequisites</a> nor <a href="introduction.html#intro-installing-spark">install Spark</a> yourself. Instead, you should ask for the Spark <code>master</code> parameter and connect as follows; this parameter will be formally introduced under the <a href="clusters.html#clusters">clusters</a> and <a href="connections.html#connections">connections</a> chapters.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;&lt;cluster-master&gt;&quot;</span>)</a></code></pre></div>
+<div id="intro-prerequisites" class="section level3">
+<h3><span class="header-section-number">1.2.1</span> Prerequisites</h3>
+<p>R can run in many platforms and environments; therfore, whether you use Windows, Mac or Linux, the first step is to install R from the <a href="https://r-project.org/">r-project.org</a>, detailed instructions are provided in the <a href="appendix.html#appendix-install-r">Installing R</a> appendix.</p>
+<p>Most people use programming languages with tools to make them more productive; for R, RStudio would be such tool. Strictly speaking, RStudio is an Integrated Development Environment (or IDE), which also happens to support many platforms and environments. We strongly recommend you get RStudio installed if you haven’t done so already, see details under the <a href="appendix.html#appendix-install-rstudio">Installing RStudio</a> appendix.</p>
+<p>Additionally, since Spark is built in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java 8 in your system. It is likely that your system already has Java installed, but you should still check the version and update if needed as described in the <a href="appendix.html#appendix-install-java">Installing Java</a> appendix.</p>
+</div>
+<div id="intro-install-sparklyr" class="section level3">
+<h3><span class="header-section-number">1.2.2</span> Installing sparklyr</h3>
+<p>As many other R packages, <code>sparkylr</code> is available to be installed from <a href="https://CRAN.R-project.org/package=sparklyr">CRAN</a> and can be easily installed as follows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">install.packages</span>(<span class="st">&quot;sparklyr&quot;</span>)</a></code></pre></div>
+<p>The CRAN release of <code>sparklyr</code> contains the most stable version and it’s the recommended version to use; however, to try out features being developed in <code>sparklyr</code>, you can install directly from GitHub using the <code>devtools</code> package. First, install the <code>devtools</code> package and then install <code>sparklyr</code> as follows:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">install.packages</span>(<span class="st">&quot;devtools&quot;</span>)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;rstudio/sparklyr&quot;</span>)</a></code></pre></div>
+<p>The <code>sparklyr</code> GitHub repository contains all the latest features,issues and project updates; it’s the place where <code>sparklyr</code> is actevely developed and a resource that is helpful while troubleshooting issues.</p>
+<div class="figure" style="text-align: center"><span id="fig:intro-install-github"></span>
+<img src="images/intro-sparklyr-github.png" alt="GitHub Repository for sparklyr." width="1280" />
+<p class="caption">
+FIGURE 1.6: GitHub Repository for sparklyr.
+</p>
+</div>
+</div>
+<div id="intro-installing-spark" class="section level3">
+<h3><span class="header-section-number">1.2.3</span> Installing Spark</h3>
+<p>Start by loading <code>sparklyr</code>,</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">library</span>(sparklyr)</a></code></pre></div>
+<p>This will makes all <code>sparklyr</code> functions available in R, which is really helpful; otherwise, we would have to run each <code>sparklyr</code> command prefixed with <code>sparklyr::</code>.</p>
+<p>As mentioned, Spark can be easily installed by running <code>spark_install()</code>; this will install the latest version of Spark locally in your computer, go ahead and run <code>spark_install()</code>. Notice that this command requires internet connectivity to download Spark.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">spark_install</span>()</a></code></pre></div>
+<p>All the versions of Spark that are available for installation can be displayed with <code>spark_available_versions()</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">spark_available_versions</span>()</a></code></pre></div>
+<pre><code>##    spark
+## 1  1.6.3
+## 2  1.6.2
+## 3  1.6.1
+## 4  1.6.0
+## 5  2.0.0
+## 6  2.0.1
+## 7  2.0.2
+## 8  2.1.0
+## 9  2.1.1
+## 10 2.2.0
+## 11 2.2.1
+## 12 2.3.0
+## 13 2.3.1
+## 14 2.3.2
+## 15 2.4.0</code></pre>
+<p>A specific version can be installed using the Spark version and, optionally, by also specifying the Hadoop version. For instance, to install Spark 1.6.3, we would run:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">spark_install</span>(<span class="dt">version =</span> <span class="st">&quot;1.6.3&quot;</span>)</a></code></pre></div>
+<p>You can also check which versions are installed by running:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">spark_installed_versions</span>()</a></code></pre></div>
+<pre><code>  spark hadoop                              dir
+7 2.3.1    2.7 /spark/spark-2.3.1-bin-hadoop2.7</code></pre>
+<p>The path where Spark is installed is referenced as Spark’s home, which is defined in R code and system configuration settings with the <code>SPARK_HOME</code> identifier. When using a local Spark cluster installed with <code>sparklyr</code>, this path is already known and no additional configuration needs to take place.</p>
+<p>Finally, in order to uninstall an specific version of Spark you can run <code>spark_uninstall()</code> by specifying the Spark and Hadoop versions, for instance:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">spark_uninstall</span>(<span class="dt">version =</span> <span class="st">&quot;2.3.1&quot;</span>, <span class="dt">hadoop =</span> <span class="st">&quot;2.7&quot;</span>)</a></code></pre></div>
+</div>
+<div id="intro-connect-to-spark" class="section level3">
+<h3><span class="header-section-number">1.2.4</span> Connecting to Spark</h3>
+<p>It’s important to mention that, so far, we’ve only installed a local Spark cluster. A local cluster is really helpful to get started, test code and troubleshoot with ease. Further chapters will explain where to find, install and connect to real Spark clusters with many machines, but for the first few chapters, we will focus on using local clusters.</p>
+<p>To connect to this local cluster we simply run:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a></code></pre></div>
+<p>The <code>master</code> parameter identifies which is the “main” machine from the Spark cluster; this machine is often called the driver node. While working with real clusters using many machines, most machines will be worker machines and one will be the master. Since we only have a local cluster with only one machine, we will default to use <code>&quot;local&quot;</code> for now.</p>
+</div>
+<div id="intro-sparklyr-hello-world" class="section level3">
+<h3><span class="header-section-number">1.2.5</span> Using Spark</h3>
+<p>Now that you are connected, we can run a few simple commands. For instance, let’s start by loading some data into Apache Spark.</p>
+<p>To accomplish this, lets first create a text file by running:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">write</span>(<span class="st">&quot;Hello World!&quot;</span>, <span class="st">&quot;hello.txt&quot;</span>)</a></code></pre></div>
+<p>We can now read this text file back from Spark by running:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;hello&quot;</span>, <span class="st">&quot;hello.txt&quot;</span>)</a></code></pre></div>
+<pre><code>## # Source: spark&lt;hello&gt; [?? x 1]
+##   line        
+## * &lt;chr&gt;       
+## 1 Hello World!</code></pre>
+<p><strong>Congrats!</strong> You have successfully connected and loaded your first dataset into Spark.</p>
+<p>We’ll explain what’s going on in <code>spark_read_text()</code>. The first parameter, <code>sc</code>, gives the function a reference to the active Spark Connection that was earlier created with <code>spark_connect()</code>. The second parameter names this dataset in Spark. The third parameter specifies a path to the file to load into Spark. Now, <code>spark_read_text()</code> returns a reference to the dataset in Spark which R automatically prints. Whenever a Spark dataset is printed, Spark will <strong>collect</strong> some of the records and display them for you. In this particular case, that dataset contains just one row for the line: <code>Hello World!</code>.</p>
+<p>We will now use this simple example to present various useful tools in Spark we should get familiar with.</p>
+<div id="intro-spark-web-interface" class="section level4">
+<h4><span class="header-section-number">1.2.5.1</span> Web Interface</h4>
+<p>Most of the Spark commands are executed from the R console; however, monitoring and analyzing execution is done through Spark’s web interface. This interface is a web page provided by Spark which can be accessed by running:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">spark_web</span>(sc)</a></code></pre></div>
+<div class="figure" style="text-align: center"><span id="fig:intro-spark-render"></span>
+<img src="images/intro-spark-web.png" alt="Apache Spark Web Interface." width="992" />
+<p class="caption">
+FIGURE 1.7: Apache Spark Web Interface.
+</p>
+</div>
+<p>As we mentioned, printing the “hello” dataset collected a few records to be displayed in the R console. You can see in the Spark web interface that a job was started to collect this information back from Spark. You can also select the <strong>storage</strong> tab to see the “hello” dataset cached in-memory in Spark:</p>
+<div class="figure" style="text-align: center"><span id="fig:intro-spark-web-storage-render"></span>
+<img src="images/intro-spark-web-storage.png" alt="Apache Spark Web Interface - Storage Tab." width="992" />
+<p class="caption">
+FIGURE 1.8: Apache Spark Web Interface - Storage Tab.
+</p>
+</div>
+<p>The <a href="#tunning-caching">caching</a> section in the <a href="#tunning">tunning</a> chapter will cover this in detail, but as a start, it’s worth noticing that this dataset is fully loaded into memory since the <strong>fraction cached</strong> is 100%, is useful also to note the <strong>size in memory</strong> column, which tracks the total memory being used by this dataset.</p>
+</div>
+<div id="intro-logs" class="section level4">
+<h4><span class="header-section-number">1.2.5.2</span> Logs</h4>
+<p>Another common tool in Spark that you should familiarize with are the Spark logs. A log is just a text file where Spark will append information relevant to the execution of tasks in the cluster. For local clusters, we can retrieve all the logs by running:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="kw">spark_log</span>(sc, <span class="dt">n =</span> <span class="dv">5</span>)</a></code></pre></div>
+<pre><code>18/10/09 19:41:46 INFO Executor: Finished task 0.0 in stage 5.0 (TID 5)...
+18/10/09 19:41:46 INFO TaskSetManager: Finished task 0.0 in stage 5.0...
+18/10/09 19:41:46 INFO TaskSchedulerImpl: Removed TaskSet 5.0, whose...
+18/10/09 19:41:46 INFO DAGScheduler: ResultStage 5 (collect at utils...
+18/10/09 19:41:46 INFO DAGScheduler: Job 3 finished: collect at utils...</code></pre>
+<p>Or we can retrieve specific log entries containing, say <code>sparklyr</code>, by using the <code>filter</code> parameter as follows:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1"><span class="kw">spark_log</span>(sc, <span class="dt">filter =</span> <span class="st">&quot;sparklyr&quot;</span>, <span class="dt">n =</span> <span class="dv">5</span>)</a></code></pre></div>
+<pre><code>## 18/10/09 18:53:23 INFO SparkContext: Submitted application: sparklyr
+## 18/10/09 18:53:23 INFO SparkContext: Added JAR...
+## 18/10/09 18:53:27 INFO Executor: Fetching spark://localhost:52930/...
+## 18/10/09 18:53:27 INFO Utils: Fetching spark://localhost:52930/...
+## 18/10/09 18:53:27 INFO Executor: Adding file:/private/var/folders/...</code></pre>
+<p>You won’t need to read logs or filter them while using Spark, except in cases where you need to troubleshoot a failed computation; in those cases, logs are an invaluable resource to have at hand and therefore; worth introducing early on.</p>
+</div>
+</div>
+<div id="intro-disconnecting" class="section level3">
+<h3><span class="header-section-number">1.2.6</span> Disconnecting</h3>
+<p>For local clusters (really, any cluster) once you are done processing data you should disconnect by running:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1"><span class="kw">spark_disconnect</span>(sc)</a></code></pre></div>
+<p>This will terminate the connection to the cluster as well as the cluster tasks . If multiple Spark connections are active, or if the conneciton instance <code>sc</code> is no longer available, you can also disconnect all your Spark connections by running:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="kw">spark_disconnect_all</span>()</a></code></pre></div>
+<p>Notice that exiting R, RStudio or restarting your R session will also cause the Spark connection to terminate, which in turn terminates the Spark cluster and cached data that is not explicitly persisted.</p>
+</div>
+<div id="intro-using-spark-from-rstudio" class="section level3">
+<h3><span class="header-section-number">1.2.7</span> Using RStudio</h3>
+<p>Since it’s very common to use RStudio with R, <code>sparklyr</code> provides RStudio extensions to help simplify your workflows and increase your productivity while using Spark in RStudio. If you are not familiar with RStudio, take a quick look at the <a href="appendix.html#appendix-using-rstudio">Using RStudio</a> appendix section. Otherwise, there are a couple extensions worth highlighting.</p>
+<p>First, instead of starging a new connections using <code>spark_connect()</code> from RStudio’s R console, you can use the <strong>new connection</strong> action from the <strong>connections pane</strong> and then, select the Spark connection. You can then customize the versions and connect to Spark which will simply generate the right <code>spark_connect()</code> command and execute this in the R console for you.</p>
+<div class="figure" style="text-align: center"><span id="fig:intro-rstudio-new-connection"></span>
+<img src="images/intro-rstudio-new-spark-connection.png" alt="RStudio New Spark Connection." width="583" />
+<p class="caption">
+FIGURE 1.9: RStudio New Spark Connection.
+</p>
+</div>
+<p>Second, once connected to Spark, either by using the R console or through RStudio’s connections pane, RStudio will display your datasets available in the connections pane. This is a useful way to track your existing datasets and provides an easy way to explore each of them.</p>
+<div class="figure" style="text-align: center"><span id="fig:intro-rstudio-connections-pane"></span>
+<img src="images/intro-rstudio-connections-pane.png" alt="RStudio Connections Pane." width="506" />
+<p class="caption">
+FIGURE 1.10: RStudio Connections Pane.
+</p>
+</div>
+<p>Additionally, an active connection provides the following custom actions:</p>
+<ul>
+<li><strong>Spark UI</strong>: Opens the Spark web interface, a shortcut to <code>spark_ui(sc)</code>.</li>
+<li><strong>Log</strong>: Opens the Spark web logs, a shortcut to <code>spark_log(sc)</code>.</li>
+<li><strong>SQL</strong>: Opens a new SQL query, see <code>DBI</code> and SQL support in the data <a href="analysis.html#analysis">analysis</a> chapter.</li>
+<li><strong>Help</strong>: Opens the reference documentation in a new web browser window.</li>
+<li><strong>Disconnect</strong>: Disconnects from Spark, a shortcut to <code>spark_disconnect(sc)</code>.</li>
+</ul>
+<p>The rest of this book will use plain R code, it is up to you to execute this code in the R console, RStudio, Jupyter Notebooks or any other tool that support executing R code since, the code provided in this book executes in any R environment.</p>
+</div>
+<div id="intro-resources" class="section level3">
+<h3><span class="header-section-number">1.2.8</span> Resources</h3>
+<p>While we’ve put significant effort into simplifying the onboarding process, there are many additional resources that can help you troubleshoot particular issues while getting started and, in general, introduce you to the broader Spark and R communities to help you get specific answers, discuss topics and get connected with many users actevely using Spark with R.</p>
+<ul>
+<li><strong>Documentation</strong>: This should be your first stop to learn more about Spark when using R. The documentation is kept up to date with examples, reference functions and many more relevant resources, <a href="https://spark.rstudio.com">spark.rstudio.com</a>.</li>
+<li><strong>Blog</strong>: To keep up to date with major <code>sparklyr</code> announcements, you can follow the RStudio blog, <a href="https://blog.rstudio.com/tags/sparklyr">blog.rstudio.com/tags/sparklyr</a>.</li>
+<li><strong>Community</strong>: For general <code>sparklyr</code> questions, you can post then in the RStudio Community tagged as <code>sparklyr</code>, <a href="https://community.rstudio.com/tags/sparklyr">community.rstudio.com/tags/sparklyr</a>.</li>
+<li><strong>Stack Overflow</strong>: For general Spark questions, Stack Overflow is a great resource, <a href="https://stackoverflow.com/questions/tagged/apache-spark">stackoverflow.com/questions/tagged/apache-spark</a>; there are also many topics specifically about <code>sparklyr</code>, <a href="https://stackoverflow.com/questions/tagged/sparklyr">stackoverflow.com/questions/tagged/sparklyr</a>.</li>
+<li><strong>Github</strong>: If you believe something needs to be fixed, open a GitHub issue or send us a pull request, <a href="https://github.com/rstudio/sparklyr">github.com/rstudio/sparklyr</a>.</li>
+<li><strong>Gitter</strong>: For urgent issues, or to keep in touch, you can chat with us in Gitter, <a href="https://gitter.im/rstudio/sparklyr">gitter.im/rstudio/sparklyr</a>.</li>
+</ul>
+</div>
+</div>
+<div id="intro-recap" class="section level2">
+<h2><span class="header-section-number">1.3</span> Recap</h2>
+<p>This chapter presented Spark as a modern and powerful computing platform, R as an easy-to-use computing language with solid foundations in statistical methods and, <code>sparklyr</code> as a project bridging both technologies and communities together. You learned about the prerequisites required to work with Spark, how to connect to Spark using <code>spark_connect()</code>, install a local cluster using <code>spark_install()</code>, load a simple dataset, launch the web interface and display logs using <code>spark_web(sc)</code> and <code>spark_log(sc)</code> respectively, disconnect from RStudio using <code>spark_disconnect()</code> and we closed this chapter presenting the RStudio extensions <code>sparklyr</code> provides.</p>
+<p>It is my hope that this chapter will help anyone interested in learning cluster computing using Spark and R getting started, ready to experiment on your own and ready to tackle actual data analysis and modeling problems which, the next two chapters will introduce you. The next chapter, analysis, will present data analysis as the process to inspect, clean, and transform data with the goal of discovering useful information. Modeling can be considered part of data analysis; however, it deserves it’s own chapter to truly understand and take advantage of the modeling functionality available in Spark. In a world where the total amount of information is growing exponentailly, learning how to perform data analysis and modeling at scale, will help you tackle the problems and opportunities humanity is facing today.</p>
+
+</div>
+</div>
+<h3> References</h3>
+<div id="refs" class="references">
+<div id="ref-intro-information-technology">
+<p>Laudon, Kenneth C, Carol Guercio Traver, and Jane P Laudon. 1996. “Information Technology and Systems.” <em>Cambridge, MA: Course Technology</em>.</p>
+</div>
+<div id="ref-intro-computing-concise-history">
+<p>Ceruzzi, Paul E. 2012. <em>Computing: A Concise History</em>. MIT Press.</p>
+</div>
+<div id="ref-intro-webster2006merriam">
+<p>Webster, Merriam. 2006. “Merriam-Webster Online Dictionary.” <em>Webster, Merriam</em>.</p>
+</div>
+<div id="ref-intro-data-revolution">
+<p>Group, World Bank. 2016. <em>The Data Revolution</em>. World Bank Publications.</p>
+</div>
+<div id="ref-intro-google-file-system">
+<p>Ghemawat, Sanjay, Howard Gobioff, and Shun-Tak Leung. 2003. “The Google File System.” In <em>Proceedings of the Nineteenth Acm Symposium on Operating Systems Principles</em>. New York, NY, USA: ACM.</p>
+</div>
+<div id="ref-intro-google-map-reduce">
+<p>Dean, Jeffrey, and Sanjay Ghemawat. 2008. “MapReduce: Simplified Data Processing on Large Clusters.” <em>Commun. ACM</em> 51 (1). New York, NY, USA: ACM: 107–13.</p>
+</div>
+<div id="ref-intro-zaharia2010spark">
+<p>Zaharia, Matei, Mosharaf Chowdhury, Michael J Franklin, Scott Shenker, and Ion Stoica. 2010. “Spark: Cluster Computing with Working Sets.” <em>HotCloud</em> 10 (10-10): 95.</p>
+</div>
+<div id="ref-intro-data-processing">
+<p>French, Carl. 1996. <em>Data Processing and Information Technology</em>. Cengage Learning Business Press.</p>
+</div>
+<div id="ref-intro-r-for-data-science">
+<p>Wickham, Hadley, and Garrett Grolemund. 2016. <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. O’Reilly Media, Inc.</p>
+</div>
+<div id="ref-intro-statisticsisdatascience">
+<p>Wu, C.F. Jeff. 1997. “Statistics = Data Science?”</p>
+</div>
+<div id="ref-intro-datascienceindependent">
+<p>Cleveland, William S. 2001. “Data Science: An Action Plan for Expanding the Technical Areas of the Field of Statistics?”</p>
+</div>
+<div id="ref-intro-samuel1959some">
+<p>Samuel, Arthur L. 1959. “Some Studies in Machine Learning Using the Game of Checkers.” <em>IBM Journal of Research and Development</em> 3 (3). IBM: 210–29.</p>
+</div>
+<div id="ref-intro-hinton2006fast">
+<p>Hinton, Geoffrey E, Simon Osindero, and Yee-Whye Teh. 2006. “A Fast Learning Algorithm for Deep Belief Nets.” <em>Neural Computation</em> 18 (7). MIT Press: 1527–54.</p>
+</div>
+<div id="ref-intro-krizhevsky2012imagenet">
+<p>Krizhevsky, Alex, Ilya Sutskever, and Geoffrey E Hinton. 2012. “Imagenet Classification with Deep Convolutional Neural Networks.” In <em>Advances in Neural Information Processing Systems</em>, 1097–1105.</p>
+</div>
+<div id="ref-intro-profvis">
+<p>“Profvis.” 2018. <a href="https://rstudio.github.io/profvis/">https://rstudio.github.io/profvis/</a>.</p>
+</div>
+<div id="ref-intro-rstudio-profiler">
+<p>“RStudio Profiler.” 2018. <a href="https://support.rstudio.com/hc/en-us/articles/218221837-Profiling-with-RStudio">https://support.rstudio.com/hc/en-us/articles/218221837-Profiling-with-RStudio</a>.</p>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="preface.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="analysis.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
