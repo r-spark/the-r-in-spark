@@ -10,6 +10,7 @@ chapters <- list(
   "clusters",
   "connections",
   "tuning",
+  "distributed",
   "appendix"
 )
 chapters_pattern <- paste(chapters, collapse = "|")
