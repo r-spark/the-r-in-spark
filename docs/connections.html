@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2019-01-21">
+<meta name="date" content="2019-01-31">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -182,6 +182,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="3.1.4" data-path="analysis.html"><a href="analysis.html#use-r-as-an-interface-to-spark"><i class="fa fa-check"></i><b>3.1.4</b> Use R as an interface to Spark</a></li>
 <li class="chapter" data-level="3.1.5" data-path="analysis.html"><a href="analysis.html#using-sparklyr-for-analysis"><i class="fa fa-check"></i><b>3.1.5</b> Using <code>sparklyr</code> for analysis</a></li>
 </ul></li>
+<li class="chapter" data-level="3.2" data-path="analysis.html"><a href="analysis.html#basics"><i class="fa fa-check"></i><b>3.2</b> Basics</a></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a><ul>
 <li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
@@ -399,8 +400,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>In a Spark cluster, there are three types of compute instances that are relevant to Spark: The <strong>driver node</strong>, the <strong>worker nodes</strong> and the <strong>cluster manager</strong>. A cluster manager is a service that allows Spark to be executed in the cluster as described in the previous chapter under the <a href="clusters.html#clusters-manager">cluster managers</a> section. The <strong>driver node</strong> is tasked with delegating work to the worker nodes, but also for aggregating their results and controlling computation flow. For the most part, aggregation happens in the worker nodes; however, even after the nodes aggregate data, it is often the case that the driver node would have to collect the worker’s results. Therefore, the driver node usually has at least, but often much more, compute resources (memory, CPUs, local storage, etc.) than the worker node. The <strong>worker nodes</strong> execute compute tasks over partitioned data and communicate intermediate results to other workers or back to the driver node, worker nodes are also referred as <strong>executors</strong>.</p>
 <p>Strictly speaking, the driver node and worker nodes are just names assigned to machines with particular roles, while the actual computation in the driver node is performed by the <strong>spark context</strong>. The Spark context is a Spark component tasked with scheduling tasks, managing data and so on. In the worker nodes, the actual computation is performed under a <strong>spark executor</strong>, which is also a Spark component tasked with executing subtasks against a data partition.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-architecture"></span>
-<div id="htmlwidget-a4910d43f75086f043ee" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-a4910d43f75086f043ee">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver | [Spark Context]] \n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-bcc7303078b6c84fedc8" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-bcc7303078b6c84fedc8">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver | [Spark Context]] \n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.1: Apache Spark Architecture
 </p>
@@ -415,8 +416,8 @@ FIGURE 6.1: Apache Spark Architecture
 <li><strong>Web Browser</strong>: While using <code>sparklyr</code> from a terminal is possible, it is usually more productive to install a <strong>web server</strong> in an edge node that provides access to run R with <code>sparklyr</code> from a web browser. Most likely, you will want to consider using <a href="RStudio%20Server">RStudio</a> or Jupyter rather than connecting from the terminal.</li>
 </ul>
 <div class="figure" style="text-align: center"><span id="fig:connections-spark-edge"></span>
-<div id="htmlwidget-b59abd62a585eacddd42" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b59abd62a585eacddd42">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client|\n  [Terminal]\n  [Web Browser |\n    [RStudio]\n    [Jupyter]\n  ]\n]-[<hidden> Secure Shell / HTTP]\n\n[Secure Shell / HTTP]-[Edge|\n  [Secure Shell Server] - [R]\n  [RStudio Server] - [R]\n  [Jupyter Server] - [R]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-c8472040a4101b17dcfb" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-c8472040a4101b17dcfb">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client|\n  [Terminal]\n  [Web Browser |\n    [RStudio]\n    [Jupyter]\n  ]\n]-[<hidden> Secure Shell / HTTP]\n\n[Secure Shell / HTTP]-[Edge|\n  [Secure Shell Server] - [R]\n  [RStudio Server] - [R]\n  [Jupyter Server] - [R]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.2: Connecting to Sparks Edge Node
 </p>
@@ -426,9 +427,9 @@ FIGURE 6.2: Connecting to Sparks Edge Node
 <h3><span class="header-section-number">6.1.2</span> Spark Home</h3>
 <p>It is important to mention that, while connecting to a Spark cluster, you will need to find out the correct <code>SPARK_HOME</code> path which contains the installation of Spark in the given instance. The <code>SPARK_HOME</code> path must be specified by your system administrator as an environment variable or by yourself explicitly specified in <code>spark_connect()</code> using the <code>spark_home</code> parameter.</p>
 <p>If your cluster provider or cluster administrator already provided <code>SPARK_HOME</code> for you, the following code should return a path instead of an empty string.</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1"><span class="kw">Sys.getenv</span>(<span class="st">&quot;SPARK_HOME&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb49-1" title="1"><span class="kw">Sys.getenv</span>(<span class="st">&quot;SPARK_HOME&quot;</span>)</a></code></pre></div>
 <p>For system administrators, we recommend setting <code>SPARK_HOME</code> for all the users in your cluster; however, if this is not set in your cluster, you can also specify <code>SPARK_HOME</code> while using <code>spark_connect()</code> as follows:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;&lt;cluster-master&gt;&quot;</span>, <span class="dt">spark_home =</span> <span class="st">&quot;local/path/to/spark&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;&lt;cluster-master&gt;&quot;</span>, <span class="dt">spark_home =</span> <span class="st">&quot;local/path/to/spark&quot;</span>)</a></code></pre></div>
 <p>Where <code>&lt;cluster-master&gt;</code> is set to the correct cluster manager master for <a href="connections.html#connections-standalone">Spark Standalone</a>, <a href="connections.html#connections-yarn">YARN</a>, <a href="connections.html#connections-mesos">Mesos</a>, <a href="connections.html#connections-kubernetes">Kubernetes</a> or <a href="connections.html#connections-livy">Livy</a>.</p>
 </div>
 </div>
@@ -436,33 +437,33 @@ FIGURE 6.2: Connecting to Sparks Edge Node
 <h2><span class="header-section-number">6.2</span> Local</h2>
 <p>When connecting to Spark in local mode, Spark starts as a single application simulating a cluster with a single node, this is not a proper computing cluster but is ideal to perform work offline and troubleshoot issues. A local connection to Spark is represented in the following diagram:</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-local"></span>
-<div id="htmlwidget-a1ca5e788af0bfa7132d" style="width:100%;height:160pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-a1ca5e788af0bfa7132d">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver|\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n  [Spark Executor]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-355417c9ad5c723f8255" style="width:100%;height:160pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-355417c9ad5c723f8255">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver|\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n  [Spark Executor]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.3: Local Connection Diagram
 </p>
 </div>
 <p>Notice that in the local connections diagram, there is no cluster manager nor worker process since, in local mode, everything runs inside the driver application. It’s also worth noting that <code>sparklyr</code> starts the Spark Context through <code>spark-submit</code>, a script available in every Spark installation to enable users to submit custom application to Spark which, <code>sparklyr</code> makes use of to submit itself to Spark. For the curious reader, the <a href="contributing.html#contributing">Contributing</a> chapter explains the internal processes that takes place in <code>sparklyr</code> to submit this application and connect properly from R.</p>
 <p>To perform this local connection, we can connect with the following familiar code used in previous chapters:</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" title="1"><span class="co"># Connect to local Spark instance</span></a>
-<a class="sourceLine" id="cb44-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" title="1"><span class="co"># Connect to local Spark instance</span></a>
+<a class="sourceLine" id="cb51-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a></code></pre></div>
 <p>By default, <code>sparklyr</code>, will connect using as many CPUs are available in your compute instance; however, this can be customized by connecting using <code>master="local[n]"</code>, where <code>n</code> is the desired number of cores to use. For example, we can connect using only 2 CPUs as follows:</p>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" title="1"><span class="co"># Connect to local Spark instance using 2 cores</span></a>
-<a class="sourceLine" id="cb45-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local[2]&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" title="1"><span class="co"># Connect to local Spark instance using 2 cores</span></a>
+<a class="sourceLine" id="cb52-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local[2]&quot;</span>)</a></code></pre></div>
 </div>
 <div id="connections-standalone" class="section level2">
 <h2><span class="header-section-number">6.3</span> Standalone</h2>
 <p>Connecting to a Spark Standalone cluster requires the location of the cluster manager’s master instance, this location can be found in the cluster manager web interface as described in the <a href="clusters.html#clusters-standalone">Standalone Clusters</a> section, you can find this location by looking for a URL starting with <code>spark://</code>.</p>
 <p>A connection in standalone mode starts from <code>sparklyr</code> which launches <code>spark-submit</code>, submits the <code>sparklyr</code> application and creates the Spark Context, which requests executors from the Spark Standalone instance running under the given <code>master</code> address.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-standalone"></span>
-<div id="htmlwidget-55837547569340404684" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-55837547569340404684">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Spark Standalone]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-60a0d53b3c3e9d182f96" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-60a0d53b3c3e9d182f96">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Spark Standalone]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.4: Spark Standalone Connection Diagram
 </p>
 </div>
 <p>In order to connect, use <code>master = "spark://hostname:port"</code> in <code>spark_connect()</code> as follows:</p>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;spark://hostname:port&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;spark://hostname:port&quot;</span>)</a></code></pre></div>
 </div>
 <div id="connections-yarn" class="section level2">
 <h2><span class="header-section-number">6.4</span> Yarn</h2>
@@ -471,27 +472,27 @@ FIGURE 6.4: Spark Standalone Connection Diagram
 <h3><span class="header-section-number">6.4.1</span> Yarn Client</h3>
 <p>When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as follows:</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-yarn"></span>
-<div id="htmlwidget-097d6f53f49018aae04b" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-097d6f53f49018aae04b">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Yarn]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-55330a4276c06b75f195" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-55330a4276c06b75f195">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Yarn]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.5: YARN Client Connection Diagram
 </p>
 </div>
 <p>To connect, one can simply run with <code>master = "yarn"</code> as follows:</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;yarn-client&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb54-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;yarn-client&quot;</span>)</a></code></pre></div>
 </div>
 <div id="connections-yarn-cluster" class="section level3">
 <h3><span class="header-section-number">6.4.2</span> Yarn Cluster</h3>
 <p>The main difference between YARN Cluster mode and YARN Client mode is that in YARN Cluster mode, the driver node is not required to be the node where R and sparklyr were launched; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using YARN Cluster when the edge node has too many concurrent users, is lacking computing resources or where tools (like RStudio or Jupyter) need to be managed independently of other cluster resources.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-yarn-cluster"></span>
-<div id="htmlwidget-285668e9fdb2ddb21771" style="width:100%;height:240pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-285668e9fdb2ddb21771">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n  [spark-submit]\n]\n[Client]-[Cluster Manager]\n[Client]-[Driver |\n  [sparklyr]\n  [Spark Context]\n] \n[Cluster Manager |\n  [Yarn]\n]\n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-f4420e46797562cedbcc" style="width:100%;height:240pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-f4420e46797562cedbcc">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n  [spark-submit]\n]\n[Client]-[Cluster Manager]\n[Client]-[Driver |\n  [sparklyr]\n  [Spark Context]\n] \n[Cluster Manager |\n  [Yarn]\n]\n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.6: YARN Cluster Connection Diagram
 </p>
 </div>
 <p>To connect in YARN Cluster mode, we can simple run:</p>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;yarn-cluster&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;yarn-cluster&quot;</span>)</a></code></pre></div>
 <p>This connection assumes that the node running <code>spark_connect()</code> is properly configured, meaning that, <code>yarn-site.xml</code> exists and the <code>YARN_CONF_DIR</code> environment variable is properly set. When using Hadoop as a file system, you will also need the <code>HADOOP_CONF_DIR</code> environment variable properly configured. This configuration is usually provided by your system administrator and is not something that you would have to manually configure.</p>
 </div>
 </div>
@@ -499,86 +500,86 @@ FIGURE 6.6: YARN Cluster Connection Diagram
 <h2><span class="header-section-number">6.5</span> Livy</h2>
 <p>As opposed to other connection methods which require using an edge node in the cluster, <a href="clusters.html#clusters-livy">Livy</a> provides a <strong>Web API</strong> that makes the Spark cluster accessible from outside the cluster and does not require a Spark installation in the client. Once connected through the Web API, the <strong>Livy Service</strong> starts the Spark context by requesting resources from the cluster manager and distributing work as usual.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-livy"></span>
-<div id="htmlwidget-1ee671f422292e072e2d" style="width:100%;height:240pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1ee671f422292e072e2d">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n]\n[Client]-[<hidden> Web API]\n[Web API]-[Driver |\n  [Livy Service]\n  [Spark Context]\n] \n[Cluster Manager]\n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-92b7c5f592ab07d9ad99" style="width:100%;height:240pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-92b7c5f592ab07d9ad99">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n]\n[Client]-[<hidden> Web API]\n[Web API]-[Driver |\n  [Livy Service]\n  [Spark Context]\n] \n[Cluster Manager]\n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.7: Livy Connection Diagram
 </p>
 </div>
 <p>Connecting through Livy requires the URL to the Livy service which should be similar to <code>https://hostname:port/livy</code>. Since remote connections are allowed, connections usually requires, at the very least, basic authentication:</p>
-<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb49-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;https://hostname:port/livy&quot;</span>, <span class="dt">method =</span> <span class="st">&quot;livy&quot;</span>, <span class="dt">config =</span> <span class="kw">livy_config</span>(</a>
-<a class="sourceLine" id="cb49-2" title="2">  <span class="dt">username=</span><span class="st">&quot;&lt;username&gt;&quot;</span>,</a>
-<a class="sourceLine" id="cb49-3" title="3">  <span class="dt">password=</span><span class="st">&quot;&lt;password&gt;&quot;</span></a>
-<a class="sourceLine" id="cb49-4" title="4">))</a></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb56-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;https://hostname:port/livy&quot;</span>, <span class="dt">method =</span> <span class="st">&quot;livy&quot;</span>, <span class="dt">config =</span> <span class="kw">livy_config</span>(</a>
+<a class="sourceLine" id="cb56-2" title="2">  <span class="dt">username=</span><span class="st">&quot;&lt;username&gt;&quot;</span>,</a>
+<a class="sourceLine" id="cb56-3" title="3">  <span class="dt">password=</span><span class="st">&quot;&lt;password&gt;&quot;</span></a>
+<a class="sourceLine" id="cb56-4" title="4">))</a></code></pre></div>
 <p>To try out Livy in your local machine, you can install and run a Livy service as described under the <a href="clusters.html#clusters-livy">Livy Clusters</a> section and then, connect as follows:</p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;http://localhost:8998&quot;</span>, <span class="dt">method =</span> <span class="st">&quot;livy&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;http://localhost:8998&quot;</span>, <span class="dt">method =</span> <span class="st">&quot;livy&quot;</span>)</a></code></pre></div>
 <p>Once connected through Livy, you can make use of any <code>sparklyr</code> feature; however, Livy is not suitable for exploratory data analysis since, executing commands has a significant performance cost; that said, while running long running computations, this overhead could be considered irrelevant. In general, it is preferred to avoid using Livy and work directly within an edge node in the cluster; when this is not feasible, using Livy could be a reasonable approach.</p>
 </div>
 <div id="connections-mesos" class="section level2">
 <h2><span class="header-section-number">6.6</span> Mesos</h2>
 <p>Similar to YARN, Mesos supports client mode and a cluster mode, <code>sparklyr</code> currently only supports client mode for Mesos.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-mesos"></span>
-<div id="htmlwidget-131980a4b51eeb045892" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-131980a4b51eeb045892">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Mesos]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-7a65efc3bb2c48f4cddb" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7a65efc3bb2c48f4cddb">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Mesos]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.8: Mesos Connection Diagram
 </p>
 </div>
 <p>Connecting requires the address to the Mesos master node, usually in the form of <code>mesos://host:port</code> or <code>mesos://zk://host1:2181,host2:2181,host3:2181/mesos</code> for Mesos using ZooKeeper.</p>
-<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;mesos://host:port&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb58-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;mesos://host:port&quot;</span>)</a></code></pre></div>
 </div>
 <div id="connections-kubernetes" class="section level2">
 <h2><span class="header-section-number">6.7</span> Kubernetes</h2>
 <p>Kubernetes cluster do not support client modes similar to Mesos or YARN, instead, the connection model is similar to YARN Cluster, where the driver node is assigned by Kubernetes.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-kubernetes"></span>
-<div id="htmlwidget-d884fece38469e3797cb" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-d884fece38469e3797cb">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n  [spark-submit]\n]\n[Client]-[Cluster Manager]\n[Client]-[Driver]\n[Driver |\n  [sparklyr]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Kubernetes]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-66433c1258c907a76d61" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-66433c1258c907a76d61">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n  [spark-submit]\n]\n[Client]-[Cluster Manager]\n[Client]-[Driver]\n[Driver |\n  [sparklyr]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Kubernetes]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.9: Kubernetes Connection Diagram
 </p>
 </div>
 <p>Kubernetes support is scheduled to be added to <code>sparklyr</code> with <a href="https://github.com/rstudio/sparklyr/issues/1525">sparklyr/issues/1525</a>, please follow progress for this feature directly in github. Once Kubernetes becomes supported in <code>sparklyr</code>, connecting to Kubernetes will work as follows:</p>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(</a>
-<a class="sourceLine" id="cb52-2" title="2">  <span class="dt">master =</span> <span class="st">&quot;k8s://https://&lt;apiserver-host&gt;:&lt;apiserver-port&gt;&quot;</span></a>
-<a class="sourceLine" id="cb52-3" title="3">  <span class="dt">config =</span> <span class="kw">list</span>(</a>
-<a class="sourceLine" id="cb52-4" title="4">    <span class="dt">spark.executor.instances =</span> <span class="dv">2</span>,</a>
-<a class="sourceLine" id="cb52-5" title="5">    <span class="dt">spark.kubernetes.container.image =</span> <span class="st">&quot;spark-image&quot;</span></a>
-<a class="sourceLine" id="cb52-6" title="6">  )</a>
-<a class="sourceLine" id="cb52-7" title="7">)</a></code></pre></div>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(</a>
+<a class="sourceLine" id="cb59-2" title="2">  <span class="dt">master =</span> <span class="st">&quot;k8s://https://&lt;apiserver-host&gt;:&lt;apiserver-port&gt;&quot;</span></a>
+<a class="sourceLine" id="cb59-3" title="3">  <span class="dt">config =</span> <span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb59-4" title="4">    <span class="dt">spark.executor.instances =</span> <span class="dv">2</span>,</a>
+<a class="sourceLine" id="cb59-5" title="5">    <span class="dt">spark.kubernetes.container.image =</span> <span class="st">&quot;spark-image&quot;</span></a>
+<a class="sourceLine" id="cb59-6" title="6">  )</a>
+<a class="sourceLine" id="cb59-7" title="7">)</a></code></pre></div>
 <p>If your computer is already configured to use a Kubernetes cluster, you can use the following command to find the <code>apiserver-host</code> and <code>apiserver-port</code>:</p>
-<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" title="1"><span class="kw">system2</span>(<span class="st">&quot;kubectl&quot;</span>, <span class="st">&quot;cluster-info&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" title="1"><span class="kw">system2</span>(<span class="st">&quot;kubectl&quot;</span>, <span class="st">&quot;cluster-info&quot;</span>)</a></code></pre></div>
 </div>
 <div id="cloud-1" class="section level2">
 <h2><span class="header-section-number">6.8</span> Cloud</h2>
 <p>When working with cloud providers, there are a few connection differences. For instance, connecting from Databricks requires the following connection method:</p>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb54-1" title="1"><span class="kw">library</span>(sparklyr)</a>
-<a class="sourceLine" id="cb54-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">method =</span> <span class="st">&quot;databricks&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" title="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb61-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">method =</span> <span class="st">&quot;databricks&quot;</span>)</a></code></pre></div>
 <p>Similarly, connections to Spark when using IBM’s Watson Studio require you to connect as follows:</p>
-<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1">kernels &lt;-<span class="st"> </span><span class="kw">load_spark_kernels</span>()</a>
-<a class="sourceLine" id="cb55-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">config =</span> kernels[<span class="dv">2</span>])</a></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb62-1" title="1">kernels &lt;-<span class="st"> </span><span class="kw">load_spark_kernels</span>()</a>
+<a class="sourceLine" id="cb62-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">config =</span> kernels[<span class="dv">2</span>])</a></code></pre></div>
 <p>Under Microsoft Azure HDInsights and when using ML Services (R Server), creating an <code>sparklyr</code> connection gets initialized through:</p>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb56-1" title="1"><span class="kw">library</span>(RevoScaleR)</a>
-<a class="sourceLine" id="cb56-2" title="2">cc &lt;-<span class="st"> </span><span class="kw">rxSparkConnect</span>(<span class="dt">reset =</span> <span class="ot">TRUE</span>, <span class="dt">interop =</span> <span class="st">&quot;sparklyr&quot;</span>)</a>
-<a class="sourceLine" id="cb56-3" title="3">sc &lt;-<span class="st"> </span><span class="kw">rxGetSparklyrConnection</span>(cc)</a></code></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" title="1"><span class="kw">library</span>(RevoScaleR)</a>
+<a class="sourceLine" id="cb63-2" title="2">cc &lt;-<span class="st"> </span><span class="kw">rxSparkConnect</span>(<span class="dt">reset =</span> <span class="ot">TRUE</span>, <span class="dt">interop =</span> <span class="st">&quot;sparklyr&quot;</span>)</a>
+<a class="sourceLine" id="cb63-3" title="3">sc &lt;-<span class="st"> </span><span class="kw">rxGetSparklyrConnection</span>(cc)</a></code></pre></div>
 <p>Please reference your cloud provider documentation and their support channels if assistance is needed.</p>
 </div>
 <div id="multiple" class="section level2">
 <h2><span class="header-section-number">6.9</span> Multiple</h2>
 <p>It is common to connect once, and only once, to Spark. However, you can also open multiple connections to Spark by connecting to different clusters or by specifying the <code>app_name</code> parameter, this can be helpful to compare Spark versions or validate you analysis before submitting to the cluster. The following example opens connections to Spark 1.6.3, 2.3.0 and Spark Standalone:</p>
-<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" title="1"><span class="co"># Connect to local Spark 1.6.3</span></a>
-<a class="sourceLine" id="cb57-2" title="2">sc_<span class="dv">1</span>_<span class="dv">6</span>_<span class="dv">3</span> &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;1.6.3&quot;</span>)</a>
-<a class="sourceLine" id="cb57-3" title="3"></a>
-<a class="sourceLine" id="cb57-4" title="4"><span class="co"># Connect to local Spark 2.3.0</span></a>
-<a class="sourceLine" id="cb57-5" title="5">sc_<span class="dv">2</span>_<span class="dv">3</span>_<span class="dv">0</span> &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3.0&quot;</span>, <span class="dt">appName =</span> <span class="st">&quot;Spark23&quot;</span>)</a>
-<a class="sourceLine" id="cb57-6" title="6"></a>
-<a class="sourceLine" id="cb57-7" title="7"><span class="co"># Connect to local Spark Standalone</span></a>
-<a class="sourceLine" id="cb57-8" title="8">sc_standalone &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;spark://host:port&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb64-1" title="1"><span class="co"># Connect to local Spark 1.6.3</span></a>
+<a class="sourceLine" id="cb64-2" title="2">sc_<span class="dv">1</span>_<span class="dv">6</span>_<span class="dv">3</span> &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;1.6.3&quot;</span>)</a>
+<a class="sourceLine" id="cb64-3" title="3"></a>
+<a class="sourceLine" id="cb64-4" title="4"><span class="co"># Connect to local Spark 2.3.0</span></a>
+<a class="sourceLine" id="cb64-5" title="5">sc_<span class="dv">2</span>_<span class="dv">3</span>_<span class="dv">0</span> &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3.0&quot;</span>, <span class="dt">appName =</span> <span class="st">&quot;Spark23&quot;</span>)</a>
+<a class="sourceLine" id="cb64-6" title="6"></a>
+<a class="sourceLine" id="cb64-7" title="7"><span class="co"># Connect to local Spark Standalone</span></a>
+<a class="sourceLine" id="cb64-8" title="8">sc_standalone &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;spark://host:port&quot;</span>)</a></code></pre></div>
 <p>Finally, we can disconnect from each connection:</p>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb58-1" title="1"><span class="kw">spark_disconnect</span>(sc_<span class="dv">1</span>_<span class="dv">6</span>_<span class="dv">3</span>)</a>
-<a class="sourceLine" id="cb58-2" title="2"><span class="kw">spark_disconnect</span>(sc_<span class="dv">2</span>_<span class="dv">3</span>_<span class="dv">0</span>)</a>
-<a class="sourceLine" id="cb58-3" title="3"><span class="kw">spark_disconnect</span>(sc_standalone)</a></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" title="1"><span class="kw">spark_disconnect</span>(sc_<span class="dv">1</span>_<span class="dv">6</span>_<span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb65-2" title="2"><span class="kw">spark_disconnect</span>(sc_<span class="dv">2</span>_<span class="dv">3</span>_<span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb65-3" title="3"><span class="kw">spark_disconnect</span>(sc_standalone)</a></code></pre></div>
 <p>Alternatively, you can disconnect from all connections at once:</p>
-<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" title="1"><span class="kw">spark_disconnect_all</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb66-1" title="1"><span class="kw">spark_disconnect_all</span>()</a></code></pre></div>
 </div>
 <div id="connections-troubleshooting" class="section level2">
 <h2><span class="header-section-number">6.10</span> Troubleshooting</h2>
@@ -586,28 +587,28 @@ FIGURE 6.9: Kubernetes Connection Diagram
 <div id="logging" class="section level3">
 <h3><span class="header-section-number">6.10.1</span> Logging</h3>
 <p>One first step is to troubleshoot connections is to run in verbose to print directly to the console additional error messages:</p>
-<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">log =</span> <span class="st">&quot;console&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">log =</span> <span class="st">&quot;console&quot;</span>)</a></code></pre></div>
 <p>Verbose logging can also be enabled with the following option:</p>
-<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" title="1"><span class="kw">options</span>(<span class="dt">sparklyr.verbose =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" title="1"><span class="kw">options</span>(<span class="dt">sparklyr.verbose =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 </div>
 <div id="troubleshoot-spark-submit" class="section level3">
 <h3><span class="header-section-number">6.10.2</span> Spark Submit</h3>
 <p>If connections fail in <code>sparklyr</code>, first troubleshoot if this issue is specific to <code>sparklyr</code> or Spark in general. This can be accomplished by running an example <code>spark-submit</code> job and validating that no errors are thrown.</p>
-<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb62-1" title="1"><span class="co"># Find the spark directory using an environment variable</span></a>
-<a class="sourceLine" id="cb62-2" title="2">spark_home &lt;-<span class="st"> </span><span class="kw">Sys.getenv</span>(<span class="st">&quot;SPARK_HOME&quot;</span>)</a>
-<a class="sourceLine" id="cb62-3" title="3"></a>
-<a class="sourceLine" id="cb62-4" title="4"><span class="co"># Or by getting the local spark installation</span></a>
-<a class="sourceLine" id="cb62-5" title="5">spark_home &lt;-<span class="st"> </span>sparklyr<span class="op">::</span><span class="kw">spark_home_dir</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb69-1" title="1"><span class="co"># Find the spark directory using an environment variable</span></a>
+<a class="sourceLine" id="cb69-2" title="2">spark_home &lt;-<span class="st"> </span><span class="kw">Sys.getenv</span>(<span class="st">&quot;SPARK_HOME&quot;</span>)</a>
+<a class="sourceLine" id="cb69-3" title="3"></a>
+<a class="sourceLine" id="cb69-4" title="4"><span class="co"># Or by getting the local spark installation</span></a>
+<a class="sourceLine" id="cb69-5" title="5">spark_home &lt;-<span class="st"> </span>sparklyr<span class="op">::</span><span class="kw">spark_home_dir</span>()</a></code></pre></div>
 <p>Then execute the sample compute Pi example by replacing <code>"local"</code> with the correct master parameter you are troubleshooting:</p>
-<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" title="1"><span class="co"># Launching a sample application to compute Pi</span></a>
-<a class="sourceLine" id="cb63-2" title="2"><span class="kw">system2</span>(</a>
-<a class="sourceLine" id="cb63-3" title="3">  <span class="kw">file.path</span>(spark_home, <span class="st">&quot;bin&quot;</span>, <span class="st">&quot;spark-submit&quot;</span>),</a>
-<a class="sourceLine" id="cb63-4" title="4">  <span class="kw">c</span>(</a>
-<a class="sourceLine" id="cb63-5" title="5">    <span class="st">&quot;--master&quot;</span>, <span class="st">&quot;local&quot;</span>,</a>
-<a class="sourceLine" id="cb63-6" title="6">    <span class="st">&quot;--class&quot;</span>, <span class="st">&quot;org.apache.spark.examples.SparkPi&quot;</span>,</a>
-<a class="sourceLine" id="cb63-7" title="7">    <span class="kw">file.path</span>(spark_home, <span class="st">&quot;examples&quot;</span>, <span class="st">&quot;jars&quot;</span>, <span class="st">&quot;spark-examples_2.11-2.4.0.jar&quot;</span>),</a>
-<a class="sourceLine" id="cb63-8" title="8">    <span class="dv">100</span>)</a>
-<a class="sourceLine" id="cb63-9" title="9">)</a></code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb70-1" title="1"><span class="co"># Launching a sample application to compute Pi</span></a>
+<a class="sourceLine" id="cb70-2" title="2"><span class="kw">system2</span>(</a>
+<a class="sourceLine" id="cb70-3" title="3">  <span class="kw">file.path</span>(spark_home, <span class="st">&quot;bin&quot;</span>, <span class="st">&quot;spark-submit&quot;</span>),</a>
+<a class="sourceLine" id="cb70-4" title="4">  <span class="kw">c</span>(</a>
+<a class="sourceLine" id="cb70-5" title="5">    <span class="st">&quot;--master&quot;</span>, <span class="st">&quot;local&quot;</span>,</a>
+<a class="sourceLine" id="cb70-6" title="6">    <span class="st">&quot;--class&quot;</span>, <span class="st">&quot;org.apache.spark.examples.SparkPi&quot;</span>,</a>
+<a class="sourceLine" id="cb70-7" title="7">    <span class="kw">file.path</span>(spark_home, <span class="st">&quot;examples&quot;</span>, <span class="st">&quot;jars&quot;</span>, <span class="st">&quot;spark-examples_2.11-2.4.0.jar&quot;</span>),</a>
+<a class="sourceLine" id="cb70-8" title="8">    <span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb70-9" title="9">)</a></code></pre></div>
 <pre><code>...
 Pi is roughly 3.1415503141550314
 ...</code></pre>
@@ -616,19 +617,18 @@ Pi is roughly 3.1415503141550314
 <h4><span class="header-section-number">6.10.2.1</span> Detailed</h4>
 <p>To troubleshoot the connection process in detail, you can manually replicate the two-step connection process, which is often very helpful to diagnose connection issues. Connecting to Spark is performed in two steps; first, <code>spark-submit</code> is triggered from R which submits the application to Spark, second, R connects to the running Spark application.</p>
 <p>First, <a href="troubleshoot-spark-submit">identify the Spark installation directory</a> and the path to the correct <code>sparklyr*.jar</code> by running:</p>
-<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" title="1"><span class="kw">dir</span>(<span class="kw">system.file</span>(<span class="st">&quot;java&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;sparklyr&quot;</span>), <span class="dt">pattern =</span> <span class="st">&quot;sparklyr&quot;</span>, <span class="dt">full.names =</span> T)</a></code></pre></div>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb72-1" title="1"><span class="kw">dir</span>(<span class="kw">system.file</span>(<span class="st">&quot;java&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;sparklyr&quot;</span>), <span class="dt">pattern =</span> <span class="st">&quot;sparklyr&quot;</span>, <span class="dt">full.names =</span> T)</a></code></pre></div>
 <p>Make sure you identify the correct version that matches your Spark cluster, for instance <code>sparklyr-2.1-2.11.jar</code> for Spark 2.1.</p>
 <p>Then, from the terminal, run:</p>
-<div class="sourceCode" id="cb66"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb66-1" title="1"><span class="va">$SPARK_HOME</span><span class="ex">/bin/spark-submit</span> --class sparklyr.Shell <span class="va">$PATH_TO_SPARKLYR_JAR</span> 8880 12345</a></code></pre></div>
-<pre><code>18/06/11 12:13:53 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform...
-18/06/11 12:13:53 INFO sparklyr: Session (12345) is starting under 127.0.0.1 port 8880
-18/06/11 12:13:53 INFO sparklyr: Session (12345) found port 8880 is available
-18/06/11 12:13:53 INFO sparklyr: Gateway (12345) is waiting for sparklyr client to connect to port 8880</code></pre>
+<div class="sourceCode" id="cb73"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb73-1" title="1"><span class="va">$SPARK_HOME</span><span class="ex">/bin/spark-submit</span> --class sparklyr.Shell <span class="va">$PATH_TO_SPARKLYR_JAR</span> 8880 12345</a></code></pre></div>
+<pre><code>18/06/11 12:13:53 INFO sparklyr: Session (12345) found port 8880 is available
+18/06/11 12:13:53 INFO sparklyr: Gateway (12345) is waiting for sparklyr client
+                                 to connect to port 8880</code></pre>
 <p>The parameter <code>8880</code> represents the default port to use in <code>sparklyr</code> while <code>12345</code> is the session number, this is a cryptographically secure number generated by <code>sparklyr</code>, but for troubleshooting purposes can be as simple as <code>12345</code>.</p>
 <p>If this first connection step fails, it means that the cluster can’t accept the application. This usually means that there are not enough resources, there are permission restrictions, etc.</p>
 <p>The second step is to connect from R as follows, notice that there is a 60 seconds timeout, so you’ll have to run the R command after running the terminal command, if needed, this timeout can be configured as described in the <a href="#tunning">Tunning</a> chapter.</p>
-<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" title="1"><span class="kw">library</span>(sparklyr)</a>
-<a class="sourceLine" id="cb68-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;sparklyr://localhost:8880/12345&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb75-1" title="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb75-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;sparklyr://localhost:8880/12345&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)</a></code></pre></div>
 <p>If this second connection step fails, it usually means that there is a connectivity problem between R and the driver node, you can try using a different connection port, for instance.</p>
 </div>
 </div>
