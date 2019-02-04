@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2019-01-31">
+<meta name="date" content="2019-02-04">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -305,6 +305,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="10.2" data-path="distributed.html"><a href="distributed.html#use-cases"><i class="fa fa-check"></i><b>10.2</b> Use Cases</a><ul>
 <li class="chapter" data-level="10.2.1" data-path="distributed.html"><a href="distributed.html#custom-parsers"><i class="fa fa-check"></i><b>10.2.1</b> Custom Parsers</a></li>
 <li class="chapter" data-level="10.2.2" data-path="distributed.html"><a href="distributed.html#partitioned-modeling"><i class="fa fa-check"></i><b>10.2.2</b> Partitioned Modeling</a></li>
+<li class="chapter" data-level="10.2.3" data-path="distributed.html"><a href="distributed.html#grid-search"><i class="fa fa-check"></i><b>10.2.3</b> Grid Search</a></li>
 </ul></li>
 <li class="chapter" data-level="10.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>10.3</b> Partitions</a></li>
 <li class="chapter" data-level="10.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>10.4</b> Grouping</a></li>
@@ -399,7 +400,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">1.1</span> Background</h2>
 <p>As humans, we have been storing, retrieving, manipulating, and communicating information since the Sumerians in Mesopotamia developed writing in about 3000 BC. Based on the storage and processing technologies employed, it is possible to distinguish four distinct phases of development: pre-mechanical (3000 BC – 1450 AD), mechanical (1450–1840), electromechanical (1840–1940), and electronic (1940–present)<span class="citation">(Laudon, Traver, and Laudon <a href="#ref-intro-information-technology">1996</a>)</span>.</p>
 <p>Mathematician George Stibitz used the word <strong>digital</strong> to describe fast electric pulses back in 1942<span class="citation">(Ceruzzi <a href="#ref-intro-computing-concise-history">2012</a>)</span> and, to this day, we describe information stored electronically as digital information. In contrast, <strong>analog</strong> information represents everything we have stored by any non-electronic means such as hand written notes, books, newspapers, and so on<span class="citation">(Webster <a href="#ref-intro-webster2006merriam">2006</a>)</span>.</p>
-<p>The world bank report on digital development provides an estimate of digital and analog information stored over the last decades<span class="citation">(Group <a href="#ref-intro-data-revolution">2016</a>)</span>. This report noted that digital information surpassed analog information around 2003. At that time, there were aboput 10 million terabytes of digital information, which is roughly about 10 million computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at <a href="appendix.html#appendix-storage-capacity">exponential rates</a>:</p>
+<p>The world bank report on digital development provides an estimate of digital and analog information stored over the last decades<span class="citation">(Group <a href="#ref-intro-data-revolution">2016</a>)</span>. This report noted that digital information surpassed analog information around 2003. At that time, there were aboput 10 million terabytes of digital information, which is roughly about 10 million computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at <a href="appendix.html#appendix-storage-capacity">exponential rates</a>. Figure <a href="intro.html#fig:intro-store-capacity-render">1.1</a> shows the findings of this report, notice that every other year, world information has grown tenfold.</p>
 <div class="figure" style="text-align: center"><span id="fig:intro-store-capacity-render"></span>
 <img src="images/intro-world-store-capacity.png" alt="World’s capacity to store information." width="1500" />
 <p class="caption">
@@ -413,8 +414,8 @@ FIGURE 1.1: World’s capacity to store information.
 <p>One year later, Google published a new paper describing how to perform operations across the Google File System, this approach came to be known as <strong>MapReduce</strong><span class="citation">(Dean and Ghemawat <a href="#ref-intro-google-map-reduce">2008</a>)</span>. As you would expect, there are two operations in MapReduce: Map and Reduce. The <strong>map operation</strong> provides an arbitrary way to transform each file into a new file, while the <strong>reduce operation</strong> combines two files. Both operations require custom computer code, but the MapReduce framework takes care of automatically executing them across many computers at once. These two operations are sufficient to process all the data available in the web, while also providing enough flexibility to extract meaningful information from it.</p>
 <p>For example, we can use MapReduce to count words in two different text files. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files.</p>
 <div class="figure"><span id="fig:unnamed-chunk-3"></span>
-<div id="htmlwidget-47d32fe6bbb619f5c8c9" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-47d32fe6bbb619f5c8c9">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n\n#spacing: 80\n#direction: right\n#zoom: 4\n[Alice's File|I like apples]\n[Bob's File|I like bananas]\n\n[Alice's File]-Map[Alice's Words]\n[Bob's File]-Map[Bob's Words]\n\n[Alice's Words|I,1|like,1|apples,1]\n[Bob's Words|I,1|like,1|bananas,1]\n\n[Alice's Words]- Reduce[Word Counts]\n[Bob's Words]- Reduce[Word Counts]\n\n[Word Counts|I,2|like,2|apples,1|bananas,1]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-8a6702991b1f704194b5" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-8a6702991b1f704194b5">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n\n#spacing: 80\n#direction: right\n#zoom: 4\n[Alice's File|I like apples]\n[Bob's File|I like bananas]\n\n[Alice's File]-Map[Alice's Words]\n[Bob's File]-Map[Bob's Words]\n\n[Alice's Words|I,1|like,1|apples,1]\n[Bob's Words|I,1|like,1|bananas,1]\n\n[Alice's Words]- Reduce[Word Counts]\n[Bob's Words]- Reduce[Word Counts]\n\n[Word Counts|I,2|like,2|apples,1|bananas,1]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 1.2: Simple MapReduce Example.
 </p>
