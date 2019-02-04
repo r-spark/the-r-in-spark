@@ -267,6 +267,66 @@ iris_tbl %>%
 
 These covers some of the common use cases for `spark_apply()`, but you are certainly welcome to find others that may fit your particular needs.
 
+### Grid Search
+
+Many R packages provide models that make require defining multiple input parameters, when the value of the input parameters is not known, we can use grid search across a distributed cluster of machines to find the optimal parameter combination. For example, we can define a grid of parameters to optimize decision tree models as follows:
+
+```{r}
+grid <- list(minsplit = c(2, 5, 10), maxdepth = c(1, 3, 8)) %>%
+  purrr:::cross_df() %>%
+  sdf_copy_to(sc, ., repartition = 9)
+grid
+```
+```
+# Source: spark<sparklyr_1064056dd37da> [?? x 2]
+  minsplit maxdepth
+     <dbl>    <dbl>
+1        2        1
+2        5        1
+3       10        1
+4        2        3
+5        5        3
+6       10        3
+7        2        8
+8        5        8
+9       10        8
+```
+
+The grid dataset was copied with `repartition = 9` to ensure that each partition is contained in one machine since the grid has also nine rows. Now, assuming that the original data set fits in every machine, like `mtcars`, we can distribute this dataset to many machines and perform parameter search to find the model that best fits this data.
+
+```{r}
+spark_apply(
+  grid,
+  function(grid, cars) {
+    model <- rpart::rpart(
+      am ~ hp + mpg,
+      data = cars,
+      control = rpart::rpart.control(minsplit = grid$minsplit, maxdepth = grid$maxdepth)
+    )
+    dplyr::mutate(
+      grid,
+      accuracy = mean(round(predict(model, dplyr::select(cars, -am))) == cars$am)
+    )
+  },
+  context = mtcars)
+```
+```
+# Source: spark<?> [?? x 3]
+  minsplit maxdepth accuracy
+     <dbl>    <dbl>    <dbl>
+1        2        1    0.812
+2        5        1    0.812
+3       10        1    0.812
+4        2        3    0.938
+5        5        3    0.938
+6       10        3    0.812
+7        2        8    1    
+8        5        8    0.938
+9       10        8    0.812
+```
+
+For this particular model, `minsplit = 2` and `maxdepth = 8` produces the most accurate results; now you can use these parameters to properly train models.
+
 ## Partitions
 
 As mentioned in the Tuning chapter, Spark partitions data and operates across partitions; therefore, `spark_apply()` receives a data frame partition; for instance, consider the following code, should we expect the output to be the total number of rows since `nrow()` counts the total rows in a data frame?
