@@ -49,6 +49,7 @@ for (file in files) {
   for (line in lines) {
     line <- ascii_add_footnotes(line, books_bib)
     line <- ascii_add_image_captions(line)
+    line <- ascii_add_figure_references(line)
     fixed <- c(fixed, line)
   }
 

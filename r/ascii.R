@@ -54,3 +54,14 @@ ascii_add_notes <- function(lines) {
 
   strsplit(all_lines, "\n")[[1]]
 }
+
+ascii_add_figure_references <- function(line) {
+  if (grepl("Figure @ref\\(fig:.*", line)) {
+    parts <- regmatches(line, regexec("Figure @ref\\(fig:([^\\)]+)", line))[[1]]
+    image_reference <- gsub("\n", " ", parts[2])
+
+    line <- gsub("Figure @ref\\(fig:([^\\)]+)\\)", paste0("<<", image_reference, ">>"), line)
+  }
+
+  line
+}
