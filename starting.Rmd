@@ -4,6 +4,7 @@
 knitr::opts_chunk$set(eval = FALSE)
 source("r/render.R")
 library(sparklyr)
+library(ggplot2)
 ```
 
 # Getting Started {#starting}
@@ -42,14 +43,17 @@ install.packages("sparklyr")
 The CRAN release of `sparklyr` contains the most stable version and it's the recommended version to use; however, to try out features being developed in `sparklyr`, you can install directly from GitHub using the `devtools` package. First, install the `devtools` package and then install `sparklyr` as follows:
 
 ```{r starting-install-sparklyr-devel, eval=FALSE}
-install.packages("devtools")
-devtools::install_github("rstudio/sparklyr")
+install.packages("remotes")
+remotes::install_github("rstudio/sparklyr")
 ```
 
-The `sparklyr` GitHub repository contains all the latest features,issues and project updates; it's the place where `sparklyr` is actevely developed and a resource that is helpful while troubleshooting issues.
+The examples in this book assume you are using the latest version of `sparklyr`, you can verify your version is as new as the one we are using by running:
 
-```{r starting-install-github, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='GitHub Repository for sparklyr.'}
-render_image("images/starting-sparklyr-github.png", "GitHub Repository for sparklyr.")
+```{r}
+packageVersion("sparklyr")
+```
+```
+[1] ‘1.0.0’
 ```
 
 ## Installing Spark {#starting-installing-spark}
@@ -62,7 +66,7 @@ library(sparklyr)
 
 This will makes all `sparklyr` functions available in R, which is really helpful; otherwise, we would have to run each `sparklyr` command prefixed with `sparklyr::`.
 
-As mentioned, Spark can be easily installed by running `spark_install()`; this will install the latest version of Spark locally in your computer, go ahead and run `spark_install()`. Notice that this command requires internet connectivity to download Spark.
+Spark can be easily installed by running `spark_install()`; this will install the latest version of Spark locally in your computer, go ahead and run `spark_install()`. Notice that this command requires internet connectivity to download Spark.
 
 ```{r starting-install-spark}
 spark_install()
@@ -77,7 +81,7 @@ spark_available_versions()
 A specific version can be installed using the Spark version and, optionally, by also specifying the Hadoop version. For instance, to install Spark 1.6.3, we would run:
 
 ```{r starting-install-install-version}
-spark_install(version = "1.6.3")
+spark_install(version = "1.6")
 ```
 
 You can also check which versions are installed by running:
@@ -95,7 +99,7 @@ The path where Spark is installed is referenced as Spark's home, which is define
 Finally, in order to uninstall an specific version of Spark you can run `spark_uninstall()` by specifying the Spark and Hadoop versions, for instance:
 
 ```{r starting-install-uninstall}
-spark_uninstall(version = "2.3.1", hadoop = "2.7")
+spark_uninstall(version = "1.6.3", hadoop = "2.6")
 ```
 
 **Note:** The default installation paths are `~/spark` for OS X and Linux and, `%LOCALAPPDATA%/spark` for Windows. To customize the installation path you can run `options(spark.install.dir = "<installation-path>")` before `spark_install()` and `spark_connect()`.
@@ -112,35 +116,41 @@ sc <- spark_connect(master = "local")
 
 The `master` parameter identifies which is the "main" machine from the Spark cluster; this machine is often called the driver node. While working with real clusters using many machines, most machines will be worker machines and one will be the master. Since we only have a local cluster with only one machine, we will default to use `"local"` for now.
 
-If connection fails, the [Connections](#connections) chapter contains a [troubleshooting](#connections-troubleshooting) section which can help you resolve your connection issue.
+If connection fails, the [connections](#connections) chapter contains a [troubleshooting](#connections-troubleshooting) section which can help you resolve your connection issue.
 
 ## Using Spark {#starting-sparklyr-hello-world}
 
-Now that you are connected, we can run a few simple commands. For instance, let's start by loading some data into Apache Spark.
-
-To accomplish this, lets first create a text file by running:
+Now that you are connected, we can run a few simple commands. For instance, let's start by copying the `mtcars` dataset into Apache Spark using `copy_to()`.
 
 ```{r starting-hello-write}
-write("Hello World!", "hello.txt")
+cars <- copy_to(sc, mtcars)
 ```
 
-We can now read this text file back from Spark by running:
+The data was copied into Spark but we can access it from R using the `cars` reference. To print it's contents we can simply type `cars`.
 
 ```{r starting-hello-read}
-spark_read_text(sc, "hello", "hello.txt")
+cars
 ```
 ```
-## # Source: spark<hello> [?? x 1]
-##   line        
-## * <chr>       
-## 1 Hello World!
+# Source: spark<mtcars> [?? x 11]
+     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+ 1  21       6  160    110  3.9   2.62  16.5     0     1     4     4
+ 2  21       6  160    110  3.9   2.88  17.0     0     1     4     4
+ 3  22.8     4  108     93  3.85  2.32  18.6     1     1     4     1
+ 4  21.4     6  258    110  3.08  3.22  19.4     1     0     3     1
+ 5  18.7     8  360    175  3.15  3.44  17.0     0     0     3     2
+ 6  18.1     6  225    105  2.76  3.46  20.2     1     0     3     1
+ 7  14.3     8  360    245  3.21  3.57  15.8     0     0     3     4
+ 8  24.4     4  147.    62  3.69  3.19  20       1     0     4     2
+ 9  22.8     4  141.    95  3.92  3.15  22.9     1     0     4     2
+10  19.2     6  168.   123  3.92  3.44  18.3     1     0     4     4
+# … with more rows
 ```
 
 **Congrats!** You have successfully connected and loaded your first dataset into Spark.
 
-We'll explain what's going on in `spark_read_text()`. The first parameter, `sc`, gives the function a reference to the active Spark Connection that was earlier created with `spark_connect()`. The second parameter names this dataset in Spark. The third parameter specifies a path to the file to load into Spark. Now, `spark_read_text()` returns a reference to the dataset in Spark which R automatically prints. Whenever a Spark dataset is printed, Spark will **collect** some of the records and display them for you. In this particular case, that dataset contains just one row for the line: `Hello World!`.
-
-We will now use this simple example to present various useful tools in Spark we should get familiar with.
+Let's explain what's going on in `copy_to()`. The first parameter, `sc`, gives the function a reference to the active Spark Connection that was earlier created with `spark_connect()`. The second parameter specifies a dataset to load into Spark. Now, `copy_to()` returns a reference to the dataset in Spark which R automatically prints. Whenever a Spark dataset is printed, Spark will **collect** some of the records and display them for you. In this particular case, that dataset contains only a few rows describing automobile models and some of their specifications like Horse Power and expected Miles per Gallon.
 
 ### Web Interface {#starting-spark-web-interface}
 
@@ -207,9 +217,231 @@ invisible(webshot::webshot(
 render_image("images/starting-spark-web-environment.png", "Apache Spark Web Interface - Environment Tab.")
 ```
 
+### Analysis {#starting-analysis}
+
+When using Spark from R to analyze data, you can use SQL (Structured Query Language) or `dplyr` (a grammar of data manipulation). SQL can be used through the `DBI` package; for instance, to count how many records are available in our `cars` dataset we can run:
+
+```{r}
+library(DBI)
+dbGetQuery(sc, "SELECT count(*) FROM mtcars")
+```
+```
+  count(1)
+1       32
+```
+
+When using `dplyr`, you write less code and it's often much easier to write than SQL; which is why we won't make use SQL in this book; however, if you are profficient in SQL, this is a viable option to you. For instance, counting records in `dplyr` is more compact and easier to understand.
+
+```{r}
+library(dplyr)
+count(cars)
+```
+```
+# Source: spark<?> [?? x 1]
+      n
+  <dbl>
+1    32
+```
+
+In general, we usually start by analysing data in Spark with `dplyr`, followed by sampling rows and selecting a subset of the available columns, the last step is to collect data from Spark to perform further data processing in R, like data visualization. Let's perform a very simple data analysis example by selecting, sampling and plotting the `cars` dataset in Spark:
+
+```{r}
+select(cars, hp, mpg) %>%
+  sample_n(100) %>%
+  collect() %>%
+  plot()
+```
+```{r echo=FALSE}
+select(cars, hp, mpg) %>%
+  sample_n(100) %>%
+  collect() %>%
+  ggplot() +
+    geom_point(ggplot2::aes(hp, mpg)) +
+    theme_light() +
+    ggsave("images/starting-cars-hp-vs-mpg.png", width = 10, height = 6)
+```
+```{r starting-cars-hp-vs-mpg, eval=TRUE, echo=FALSE, fig.cap='Horse Power vs Miles per Gallon from Motor Trend Car Road Tests.', fig.align = 'center'}
+render_image("images/starting-cars-hp-vs-mpg.png", "World’s capacity to store information.")
+```
+
+The plot shows that as we increase the horse power in a vehicle, their fuel efficiency measured in miles per gallon gets reduced. While this is insightful, it's hard to predict numerically how increased horse power would affect fuel effiency, modeling can help us overcome this.
+
+### Modeling {#starting-modeling}
+
+While data analysis can take you quite far when understanding data, building a mathematical model that describes and generalizes the dataset is quite powerful. In the [introduction](#intro) chapter you learned that the fields of machine learning and data science make use of mathematical models to perform predictions and find additional insights.
+
+For instance, we can use a linear model to approximate the relationship between fuel efficiency and horse power:
+
+```{r}
+model <- ml_linear_regression(cars, mpg ~ hp)
+```
+
+This model can now be used to predict values that are not in the original datset. For instance, we can add entries for cars with horse power beyond 250 and also visualize the predicted values.
+
+```{r}
+model %>%
+  ml_predict(copy_to(sc, data.frame(hp = 250 + 10 * 1:10))) %>%
+  transmute(hp = hp, mpg = prediction) %>%
+  full_join(select(cars, hp, mpg)) %>%
+  collect() %>%
+  plot()
+```
+```{r echo=FALSE}
+model %>%
+  ml_predict(copy_to(sc, data.frame(hp = 250 + 10 * 1:10))) %>%
+  transmute(hp = hp, mpg = prediction, predicted = "yes") %>%
+  full_join(transmute(cars, hp = hp, mpg = mpg, predicted = "no")) %>%
+  collect() %>%
+  ggplot() +
+    geom_point(ggplot2::aes(hp, mpg, color = predicted)) +
+    theme_light() +
+    scale_color_grey(start = 0.6, end = 0.2) +
+    ggsave("images/starting-cars-hp-vs-mpg-prediction.png", width = 10, height = 6)
+```
+```{r starting-cars-hp-vs-mpg-prediction, eval=TRUE, echo=FALSE, fig.cap='Horse Power vs Miles per Gallon with Linear Predictions.', fig.align = 'center'}
+render_image("images/starting-cars-hp-vs-mpg-prediction.png", "World’s capacity to store information.")
+```
+
+In addition, we can refine our insights using the `broom` package to retrive additional statistics from our model that can help us asses it's quality.
+
+```{r}
+broom::glance(model)
+```
+```
+# A tibble: 1 x 5
+  explained.varia… mean.absolute.e… mean.squared.er… r.squared
+             <dbl>            <dbl>            <dbl>     <dbl>
+1             21.2             2.91             14.0     0.602
+# … with 1 more variable: root.mean.squared.error <dbl>
+```
+
+While the previous example lacks many of the appropriate techniques you should use while modeling, it's also a simple example to briefly introduce the modeling capabilities of Spark. All the Spark models, techniques and best practices will be properly introduced in the [modeling](#modeling) chapter.
+
+### Data {#starting-data}
+
+For simplicity, we copied the `mtcars` dataset into Spark; however, data is usually not copied into Spark. Instead, data is read from existing data sources in a variety of formats like plain text, CSV, JSON, JDBC and many more which, the [data](#data) chapter will introduce in detail. For instance, we can export our `cars` dataset as a CSV file:
+
+```{r}
+spark_write_csv(cars, "cars.csv")
+```
+
+In practice, we would read an existing dataset from a distributed storage system like HDFS, but we can also read back from the local file system:
+
+```{r}
+cars <- spark_read_csv(sc, "cars.csv")
+```
+
+### Extensions {#starting-extensions}
+
+In the same way that R is known for it's vibrant community of package authors, at a smaller scale, many extensions for Spark and R have been written and are available to you. The [extensions](#extensions) chapter will introduce many interesting ones to perform advanced modeling, graph analysis, preprocess datasets for deep learning, etc.
+
+For instance, the `sparkly.nested` extension is an R package that extends `sparklyr` to help you manage values that contain nested information. A common use case arises while dealing with JSON files which contain nested lists that require preprocessing before doing meaningful data analysis. To use this extension, we have to first install it as follows:
+
+```{r}
+install.packages("sparklyr.nested")
+```
+
+Then we can use this extension to group all the horse power data points over the number of cylinders:
+
+```{r}
+sparklyr.nested::sdf_nest(cars, hp) %>%
+  group_by(cyl) %>%
+  summarize(data = collect_list(data))
+```
+```
+# Source: spark<?> [?? x 2]
+    cyl data       
+  <int> <list>     
+1     6 <list [7]> 
+2     4 <list [11]>
+3     8 <list [14]>
+```
+
+While nesting data makes it harder to read, it is a requirement while dealing with nested data formats like JSON using the `spark_read_json()` and `spark_write_json()` functions.
+
+### Distributed R {#starting-distributed-r}
+
+For those few cases where a particular functionality is not available in Spark and no extension has been developed, you can consider distributing your own R code across the Spark cluster. This is a powerful tools but comes with additional complexity that you should only use as a last resort option.
+
+Suppose that we need to randomize our dataset using a well-known technique like R's `jitter` function; in this case, we can apply jitter across the dataset by running custom R code:
+
+```{r}
+cars %>% spark_apply(~sapply(.x, jitter))
+```
+```
+# Source: spark<?> [?? x 11]
+     mpg   cyl  disp    hp  drat    wt  qsec     vs       am  gear  carb
+   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>  <dbl>    <dbl> <dbl> <dbl>
+ 1  21.0  6.09  160. 110.   3.90  2.62  16.5 -0.138  0.950    3.93 3.92 
+ 2  21.0  5.76  160. 110.   3.90  2.87  17.0  0.154  1.13     3.91 4.01 
+ 3  22.8  4.22  108.  93.0  3.85  2.32  18.6  1.00   0.851    3.99 1.03 
+ 4  21.4  5.70  258. 110.   3.08  3.22  19.4  1.04   0.0536   2.93 1.18 
+ 5  18.7  8.00  360. 175.   3.15  3.44  17.0  0.182 -0.0256   2.86 2.08 
+ 6  18.1  5.66  225. 105.   2.76  3.46  20.2  1.02  -0.00437  3.10 0.996
+ 7  14.3  7.92  360. 245.   3.21  3.57  15.8  0.148  0.166    3.12 4.06 
+ 8  24.4  4.21  147.  62.1  3.69  3.19  20.0  1.10  -0.192    4.12 2.16 
+ 9  22.8  3.83  141.  94.8  3.92  3.15  22.9  0.936 -0.0637   3.82 2.14 
+10  19.2  6.18  168. 123.   3.92  3.44  18.3  1.04  -0.102    4.00 4.16 
+# … with more rows
+```
+
+If you are a profficient R users, it can be quite tempting to use `spark_apply()` for everything, but please, don't! `spark_apply()` was designed for advanced use cases where Spark falls short; instead, you will learn how to do proper data analysis and modeling without having to distribute custom R code across your cluster.
+
+### Streaming {#starting-streaming}
+
+While processing large static datasets is the most typical use case for Spark, processing dynamic datasets in realtime is also possible and for some applications, a requirement. You can think of a streaming dataset as a static data source with new data arriving continously, like stock market quotes. Streaming data is usually read from Kafka (an open-source stream-processing software platform) or from distributed storage that receives new data continuously.
+
+To try out streaming, lets first  create an `input/` folder with some data that we will use as the input for this stream:
+
+```{r}
+dir.create("input")
+write.csv(mtcars, "input/cars_1.csv", row.names = F)
+```
+
+Then we will define a stream that processes incoming data from the `input/` folder, performs a custom transformation in R and, pushes the output into an `output/` folder
+
+```{r}
+stream_read_csv(sc, "input/") %>%
+  spark_apply(~sapply(.x, jitter)) %>%
+  stream_write_csv("output/")
+```
+```
+Stream: 720aac2a-d4aa-4e6c-828d-325d8b017fdb
+Status: Waiting for next trigger
+Active: TRUE
+```
+
+As soon as the stream of realtime data starts, the `input/` folder is processed and turned into a set of new files under the `output/` folder containing the new transformed files. Since the input contained only one file, the output folder will also contain a single file resulting from applying the custom `spark_apply()` transformation.
+
+```{r}
+dir("output", pattern = ".csv")
+```
+```
+[1] "part-00000-eece04d8-7cfa-4231-b61e-f1aef8edeb97-c000.csv"
+```
+
+Up to this point, this resembles static data processing; however, we can keep adding files to the `input/` location and Spark will parallelize and process data automatically. Let's add one more file and validate that it's automatically processed.
+
+```{r}
+# Write more data into the stream source
+write.csv(mtcars, "input/cars_2.csv", row.names = F)
+
+# Wait for the input stream to be processed
+Sys.sleep(1)
+
+# Check the contents of the stream destination
+dir("output", pattern = ".csv")
+```
+```
+[1] "part-00000-2d8e5c07-a2eb-449d-a535-8a19c671477d-c000.csv"
+[2] "part-00000-eece04d8-7cfa-4231-b61e-f1aef8edeb97-c000.csv"
+```
+
+You can use `dplyr`, SQL, Spark models or distributed R to analyze streams in realtime, we will properly introduce you to all the interesting transformations you can perform to analyze realtime data during the [streaming](#streaming) chapter.
+
 ### Logs {#starting-logs}
 
-Another common tool in Spark that you should familiarize with are the Spark logs. A log is just a text file where Spark will append information relevant to the execution of tasks in the cluster. For local clusters, we can retrieve all the logs by running:
+Logging is definetely less interesting that realtime data processing; however, it's a tool you should be familiar with. A log is just a text file where Spark will append information relevant to the execution of tasks in the cluster. For local clusters, we can retrieve all the recent log by running:
 
 ```{r starting-logs}
 spark_log(sc)
@@ -235,7 +467,7 @@ spark_log(sc, filter = "sparklyr")
 ## 18/10/09 18:53:27 INFO Executor: Adding file:/private/var/folders/...
 ```
 
-You won't need to read logs or filter them while using Spark, except in cases where you need to troubleshoot a failed computation; in those cases, logs are an invaluable resource to have at hand and therefore; worth introducing early on.
+Most of the time, you won't need to worry about Spark logs, except in cases where you need to troubleshoot a failed computation; in those cases, logs are an invaluable resource to be aware of, now you know.
 
 ## Disconnecting {#starting-disconnecting}
 
@@ -271,7 +503,7 @@ render_image("images/starting-rstudio-connections-pane.png", "RStudio Connection
 
 Additionally, an active connection provides the following custom actions:
 
-- **Spark UI**: Opens the Spark web interface, a shortcut to `spark_ui(sc)`.
+- **Spark**: Opens the Spark web interface, a shortcut to `spark_ui(sc)`.
 - **Log**: Opens the Spark web logs, a shortcut to `spark_log(sc)`.
 - **SQL**: Opens a new SQL query, see `DBI` and SQL support in the data [analysis](#analysis) chapter.
 - **Help**: Opens the reference documentation in a new web browser window.
