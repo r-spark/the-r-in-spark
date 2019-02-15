@@ -677,6 +677,59 @@ sudo sed -i 's/\$releasever/6/g' /etc/yum.repos.d/red-data-tools.repo
 sudo yum install -y --enablerepo=red-data-tools arrow-devel
 ```
 
+To use Apache Arrow with `sparklyr` you need to install the `arrow` package:
+
+```{r}
+devtools::install_github("apache/arrow", subdir = "r", ref = "apache-arrow-0.12.0")
+```
+
+Once installed, to enable Arrow simply include the library:
+
+```{r}
+library(arrow)
+```
+
+You can validate that significant performance improvements become available by measuring time of `spark_apply()` operations.
+
+```{r}
+system.time(sdf_len(sc, 10^5) %>% spark_apply(nrow))
+```
+
+Thebn you can dettach `arrow` and rerun this task.
+
+```{r}
+detach("package:arrow", unload = TRUE)
+system.time(sdf_len(sc, 10^5) %>% spark_apply(nrow))
+```
+
+Notice the performance degradation when not using `arrow`, to enable it again, run `library(arrow)`.
+
+Most functionality in `arrow` simply works on the background improving performance and data serialization; however, there is one setting you should be aware of. The `spark.sql.execution.arrow.maxRecordsPerBatch` configuiration settings specified the default size of each arrow data transfer. It's shared with other Spark components and defaults to 10,000 rows. Compare the results from the following two operation when using and not using `arrow()`.
+
+```{r}
+detach("package:arrow", unload = TRUE)
+sdf_len(sc, 10^6) %>% spark_apply(nrow)
+```
+
+Now using `arrow`,
+
+```{r}
+library(arrow)
+sdf_len(sc, 10^6) %>% spark_apply(nrow)
+```
+
+You might need to tweak this number based on how much data your system can handle, making it smaller for large dataset or bigger for operations that require records to be processed together. You can specify an unlimitted batch size by setting `spark.sql.execution.arrow.maxRecordsPerBatch` to zero.
+
+```{r}
+spark_disconnect(sc)
+
+config <- spark_config()
+config$spark.sql.execution.arrow.maxRecordsPerBatch <- 0
+
+sc <- spark_connect(master = "local")
+sdf_len(sc, 10^6) %>% spark_apply(nrow)
+```
+
 ## Recap
 
 This chapter presented `spark_apply()` as an advanced technique to be used to fill gaps in functionility in Spark or its many extensions. It presented use cases to map data frames with R packages and group data into manaegable partitions. It detailed how partitions relate to `spark_apply()`, how to craete custom groups distribute contextual information across all nodes, troubleshoot problems and presented limitations, cluster configuration caveats and improved performance optimization using Apache Arrow.
