@@ -16,7 +16,7 @@ You will then move on into learning how to analyze large scale data, followed by
 
 We hope this is a journey you will enjoy, that will help you solve problems in your professional career and with our efforts combined, nudge the world into taking better decisions that can benefit us all.
 
-## Background {#intro-background}
+## Information {#intro-background}
 
 As humans, we have been storing, retrieving, manipulating, and communicating information since the Sumerians in Mesopotamia developed writing in about 3000 BC. Based on the storage and processing technologies employed, it is possible to distinguish four distinct phases of development: pre-mechanical (3000 BC – 1450 AD), mechanical (1450–1840), electromechanical (1840–1940), and electronic (1940–present)[@intro-information-technology].
 
@@ -29,19 +29,26 @@ suppressMessages(library(tidyverse))
 read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
   gather(key = storage, value = capacity, analog, digital) %>%
   mutate(year = X1, terabytes = capacity / 10^12) %>%
-  ggplot(aes(x = year, y = terabytes, group = storage)) +
+  ggplot(aes(x = year, y = terabytes, group = storage, color = storage)) +
+    plot_style() +
+    labs(title = "World's Information Growth",
+         subtitle = "Storage capacity per year in terabytes") +
+    scale_color_grey(start = 0.6, end = 0.2) +
     geom_line(aes(linetype = storage)) +
-    geom_point(aes(shape = storage)) +
+    geom_point(aes(shape = storage)) + 
+    geom_hline(yintercept = 0, size = 2, colour = "#333333") +
     scale_y_log10(
-      breaks = scales::trans_breaks("log10", function(x) 10^x),
-      labels = scales::trans_format("log10", scales::math_format(10^.x))
+      limits = c(5 * 10^3, 10^10),
+      breaks = c(10^4, 10^5, 10^6, 10^7, 10^8, 10^9, 10^10),
+      labels = c("10K", "100K","1M", "10M", "100M", "1B", "10B")
     ) +
-    scale_y_log10(name="World's Information (terabytes)") +
-    theme_light() +
-    theme(legend.position = "bottom") +
-    ggsave("images/intro-world-store-capacity.png", width = 10, height = 6)
+    scale_x_continuous(limits = c(1985, 2015),
+                       breaks = seq(1985, 2015, by = 5),
+                       labels = seq(1985, 2015, by = 5)) +
+    theme(legend.position = "right") +
+    ggsave("images/intro-world-store-capacity.png", width = 10, height = 5)
 ```
-```{r intro-store-capacity-render, eval=TRUE, echo=FALSE, fig.cap='World’s capacity to store information.', fig.align = 'center'}
+```{r intro-store-capacity-render, eval=TRUE, echo=FALSE, fig.cap="World's storage capacity per year in terabytes.", fig.align = 'center'}
 render_image("images/intro-world-store-capacity.png", "World’s capacity to store information.")
 ```
 
@@ -89,13 +96,23 @@ In 2009, **Apache Spark** began as a research project at the UC Berkeley's AMPLa
 iterations <- c(1, 1:6 * 5)
 data.frame(
   iteration = rep(iterations, 2),
-  cluster = c(rep("hadoop", length(iterations)), rep("spark", length(iterations))),
+  cluster = c(rep("Hadoop", length(iterations)), rep("Spark", length(iterations))),
   seconds = c(iterations * 127, 174 + (iterations - 1) * 6)) %>%
-  ggplot(aes(x=iteration, y=seconds, fill=cluster)) +
-  geom_bar(stat="identity", position=position_dodge()) +
-  labs(x = "Number of Iterations", y = "Running Time (s)") +
-  theme_light() +
-  ggsave("images/intro-hadoop-spark-logistic-regression.png", width = 10, height = 4)
+  ggplot(aes(x = iteration, y = seconds, fill = cluster)) +
+    plot_style() +
+    labs(title = "Hadoop vs Spark",
+         subtitle = "Logistic regression execution time") +
+    scale_color_grey(start = 0.6, end = 0.2) +
+    geom_bar(stat = "identity", position = position_dodge()) +
+    labs(y = "seconds") +
+    geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+    theme(panel.grid.major.x = element_line(color = "#ebebeb"), 
+          panel.grid.major.y = element_line(color = "#cbcbcb")) +
+    scale_x_continuous(name = "iterations",
+                       limits = c(-1, 32),
+                       breaks = c(1, 5, 10, 15, 20, 25, 30),
+                       labels = c(1, 5, 10, 15, 20, 25, 30)) +
+    ggsave("images/intro-hadoop-spark-logistic-regression.png", width = 10, height = 5)
 ```
 ```{r intro-spark-logistic-regression-render, eval=TRUE, echo=FALSE, fig.cap='Logistic regression performance in Hadoop and Spark.'}
 render_image("images/intro-hadoop-spark-logistic-regression.png", "Logistic regression performance in Hadoop and Spark.")
@@ -177,12 +194,23 @@ if (!file.exists(downloads_csv)) {
 
 cran_downloads <- readr::read_csv(downloads_csv)
 
-ggplot(cran_downloads, aes(date, count / 10^6)) + 
+str_to_date <- function(x) lapply(x, function(y) as.Date(paste0(y, "-01-01"), origin = "1960-10-01"))
+ggplot(cran_downloads, aes(date, count)) + 
+  plot_style() +
+  labs(title = "CRAN Packages",
+       subtitle = "Total daily downloads over time") +
   geom_point(colour="black", pch = 21, size = 1) +
   scale_x_date() +
-  xlab("Year") +
-  ylab("Daily Downloads (millions)") +
-  theme_light() +
+  xlab("year") +
+  ylab("downloads") +
+  scale_x_date(date_breaks = "1 year",
+               labels = function(x) substring(x, 1, 4)) +
+  scale_y_continuous(
+      limits = c(0, 3.5 * 10^6),
+      breaks = c(0.5 * 10^6, 10^6, 1.5 * 10^6, 2 * 10^6, 2.5 * 10^6, 3 * 10^6, 3.5 * 10^6),
+      labels = c("", "1M", "", "2M", "", "3M", "")
+    ) +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
   ggsave("images/intro-daily-cran-downloads.png", width = 10, height = 6)
 ```
 ```{r intro-cran-downloads-render, eval=TRUE, echo=FALSE, fig.cap='Daily downloads of CRAN packages.', fig.align = 'center'}

@@ -256,9 +256,16 @@ select(cars, hp, mpg) %>%
   sample_n(100) %>%
   collect() %>%
   ggplot() +
-    geom_point(ggplot2::aes(hp, mpg)) +
-    theme_light() +
-    ggsave("images/starting-cars-hp-vs-mpg.png", width = 10, height = 6)
+    geom_point(aes(hp, mpg), size = 2.5, color = "#555555") +
+    plot_style() +
+    labs(title = "Vehicle Efficiency", subtitle = "Miles per gallon vs horse power") +
+    geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+    scale_x_continuous(name = "Horse Power",
+                       limits = c(50, 360),
+                       breaks = seq(50, 400, by = 50),
+                       labels = c("50","100", "150", "200", "250", "300", "350", "400")) +
+    scale_y_continuous(name = "Miles per Galon") +
+    ggsave("images/starting-cars-hp-vs-mpg.png", width = 10, height = 5)
 ```
 ```{r starting-cars-hp-vs-mpg, eval=TRUE, echo=FALSE, fig.cap='Horse Power vs Miles per Gallon from Motor Trend Car Road Tests.', fig.align = 'center'}
 render_image("images/starting-cars-hp-vs-mpg.png", "World’s capacity to store information.")
@@ -289,14 +296,21 @@ model %>%
 ```{r echo=FALSE}
 model %>%
   ml_predict(copy_to(sc, data.frame(hp = 250 + 10 * 1:10))) %>%
-  transmute(hp = hp, mpg = prediction, predicted = "yes") %>%
-  full_join(transmute(cars, hp = hp, mpg = mpg, predicted = "no")) %>%
+  transmute(hp = hp, mpg = prediction, label = "Predicted") %>%
+  full_join(transmute(cars, hp = hp, mpg = mpg, label = "Original")) %>%
   collect() %>%
   ggplot() +
-    geom_point(ggplot2::aes(hp, mpg, color = predicted)) +
-    theme_light() +
+    geom_point(aes(hp, mpg, color = label), size = 2.5) +
     scale_color_grey(start = 0.6, end = 0.2) +
-    ggsave("images/starting-cars-hp-vs-mpg-prediction.png", width = 10, height = 6)
+    plot_style() +
+    labs(title = "Vehicle Efficiency", subtitle = "Miles per gallon vs horse power with predictions") +
+    geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+    scale_x_continuous(name = "Horse Power",
+                       limits = c(50, 360),
+                       breaks = seq(50, 350, by = 50),
+                       labels = c("50","100", "150", "200", "250", "300", "350")) +
+    scale_y_continuous(name = "Miles per Galon") +
+    ggsave("images/starting-cars-hp-vs-mpg-prediction.png", width = 10, height = 5)
 ```
 ```{r starting-cars-hp-vs-mpg-prediction, eval=TRUE, echo=FALSE, fig.cap='Horse Power vs Miles per Gallon with Linear Predictions.', fig.align = 'center'}
 render_image("images/starting-cars-hp-vs-mpg-prediction.png", "World’s capacity to store information.")
