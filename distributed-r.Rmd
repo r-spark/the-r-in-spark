@@ -19,7 +19,7 @@ library(dplyr)
 
 In previous chapters you learned how to perform data analysis and modeling in local Spark instances and proper Spark clusters, the previous [Extensions](#extensions) chapter, described how to use functionality provided not in extensions developed by Spark and R contributors. In most cases, the combination of Spark functionality and extensions is more than enough to perform almost any computation. However, for those few cases where functionality is lacking in Spark and their extensions, you can consider distributing R computations to worker nodes yourself and to leverage any R packages.
 
-**Warning:** If you are already a familiar R user, you might be tempted to use this approach for all Spark operations; however, this is not the recommended use of `spark_apply()`. Previous chapters provided more efficient techiniques and tools to solve well known problems, in contrast, `spark_apply()` introduces additional cognitive overhead, additional troubleshooting steps, performance tradeoofs and, in general, additional complexity that should be avoided. Not to say that `spark_apply()` should never used; but instead, `spark_apply()` is reserved to support use cases where previous tools and techniques fall short.
+If you are already a familiar R user, you might be tempted to use this approach for all Spark operations; however, this is not the recommended use of `spark_apply()`. Previous chapters provided more efficient techiniques and tools to solve well known problems, in contrast, `spark_apply()` introduces additional cognitive overhead, additional troubleshooting steps, performance tradeoofs and, in general, additional complexity that should be avoided. Not to say that `spark_apply()` should never used; but instead, `spark_apply()` is reserved to support use cases where previous tools and techniques fall short.
 
 ## Overview
 
@@ -110,7 +110,11 @@ The rest of this chapter will explain in detail use cases, features, caveats, co
 
 ## Use Cases
 
-The overview `spark_apply()` examples were meant to help you understand how it works; this section will cover a few practical use case for `spark_apply()`, mostly, for parsing and loading custom file formats and modeling data over partitioned sets.
+The overview `spark_apply()` examples were meant to help you understand how it works; this section will cover a few practical use case for `spark_apply()`:
+
+- **Parsing**: When a file format is not natevely supported in Spark or it's extensions, you can consider using R code to implement a distributed **custom parser** using R packages.
+- **Modeling**: When data fits into a single machine you can make use of **grid search** to optimize their parameters in parallel, in cases where the data can be partitioned to create several models over subsets of the data you can use **partitioned modeling** in R to compute models across partitions.
+- **Interoperating**: When large data needs to be evaluated by external systems you can use R to interoperate with those external systems. For instance, to process a large image dataset using deep learning models, you can consider calling an specialized **web API** like Google's Vision API, Amazon's Rekognition API, etc.
 
 ### Custom Parsers
 
@@ -326,6 +330,42 @@ spark_apply(
 ```
 
 For this particular model, `minsplit = 2` and `maxdepth = 8` produces the most accurate results; now you can use these parameters to properly train models.
+
+### Web APIs
+
+The following example makes use of the `googleAuthR` package to authenticate to Google Cloud, the `RoogleVision` package to perform labeling over the Google Vision API, and `spark_apply()` to interoperate between Spark and this deep learning service by calling thi API a distributed dataset. If you want to run the following example you will need to disconnect first from Spark and download your `cloudml.json` from the Google developer portal.
+
+```{r}
+sc <- spark_connect(
+  master = "local",
+  config = list(sparklyr.shell.files = "cloudml.json"))
+
+images <- copy_to(sc, data.frame(
+  image = "http://pbs.twimg.com/media/DwzcM88XgAINkg-.jpg"
+))
+
+spark_apply(images, function(df) {
+  googleAuthR::gar_auth_service(
+    scope = "https://www.googleapis.com/auth/cloud-platform",
+    json_file = "cloudml.json")
+  
+  RoogleVision::getGoogleVisionResponse(
+    df$image,
+    download = FALSE)
+})
+```
+```
+# Source: spark<?> [?? x 4]
+  mid       description score topicality
+  <chr>     <chr>       <dbl>      <dbl>
+1 /m/04rky  Mammal      0.973      0.973
+2 /m/0bt9lr Dog         0.958      0.958
+3 /m/01z5f  Canidae     0.956      0.956
+4 /m/0kpmf  Dog breed   0.909      0.909
+5 /m/05mqq3 Snout       0.891      0.891
+```
+
+*Note:** In order to successfully run a large distirbuted computation over a Web API, the Web API would have to be able to scale to support the load from all the Spark executors. One can trust that major service providers are likely to support all the request incoming from your cluster. However, when calling internal Web APIs, make sure the API can handle the load. Also, when using third-party services, consider the cost of calling their API across all the executors in your cluster to avoid potentially expensive and unexpected charges.
 
 ## Partitions
 
@@ -732,4 +772,4 @@ sdf_len(sc, 10^6) %>% spark_apply(nrow)
 
 ## Recap
 
-This chapter presented `spark_apply()` as an advanced technique to be used to fill gaps in functionility in Spark or its many extensions. It presented use cases to map data frames with R packages and group data into manaegable partitions. It detailed how partitions relate to `spark_apply()`, how to craete custom groups distribute contextual information across all nodes, troubleshoot problems and presented limitations, cluster configuration caveats and improved performance optimization using Apache Arrow.
+This chapter presented `spark_apply()` as an advanced technique to be used to fill gaps in functionality in Spark or its many extensions. It presented use cases to map data frames with R packages and group data into manaegable partitions. It detailed how partitions relate to `spark_apply()`, how to craete custom groups distribute contextual information across all nodes, troubleshoot problems and presented limitations, cluster configuration caveats and improved performance optimization using Apache Arrow.
