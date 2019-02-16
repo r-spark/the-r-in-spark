@@ -234,19 +234,27 @@ render_nomnoml("
 Connecting through Livy requires the URL to the Livy service which should be similar to `https://hostname:port/livy`. Since remote connections are allowed, connections usually requires, at the very least, basic authentication:
 
 ```{r connections-livy-connect}
-sc <- spark_connect(master = "https://hostname:port/livy", method = "livy", config = livy_config(
-  username="<username>",
-  password="<password>"
-))
+sc <- spark_connect(
+  master = "https://hostname:port/livy",
+  method = "livy", config = livy_config(
+    spark_version = "2.4.0",
+    username = "<username>",
+    password = "<password>"
+  ))
 ```
 
 To try out Livy in your local machine, you can install and run a Livy service as described under the [Livy Clusters](#clusters-livy) section and then, connect as follows:
 
 ```{r}
-sc <- spark_connect(master = "http://localhost:8998", method = "livy")
+sc <- spark_connect(
+  master = "http://localhost:8998",
+  method = "livy",
+  config = livy_config(spark_version = "2.4.0"))
 ```
 
 Once connected through Livy, you can make use of any `sparklyr` feature; however, Livy is not suitable for exploratory data analysis since, executing commands has a significant performance cost; that said, while running long running computations, this overhead could be considered irrelevant. In general, it is preferred to avoid using Livy and work directly within an edge node in the cluster; when this is not feasible, using Livy could be a reasonable approach.
+
+*Note:* Specifying the Spark version through the `spark_version` parameter is optional; however, when the version is specified, performance is significantly improved by deploying precompiled Java binaries compatible with the given version. Therefore, it is a best practice to specify the Spark version when connecting to Spark using Livy.
 
 ## Mesos {#connections-mesos}
 
