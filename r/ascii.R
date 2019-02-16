@@ -21,13 +21,22 @@ ascii_add_footnotes <- function(line, books_bib) {
 
 ascii_add_image_captions <- function(line) {
   if (grepl("^image:images.*", line)) {
-    parts <- regmatches(line, regexec("^image:images[^\\[]+\\[([^\\]+)\\].*", line))[[1]]
-    image_caption <- gsub("\n", " ", parts[2])
+    parts <- regmatches(line, regexec("^image:images([^\\[]+)\\[([^\\]+)\\].*", line))[[1]]
+    image_caption_raw <- gsub("\n", " ", parts[3])
+    image_caption_parts <- strsplit(image_caption_raw, "\\|\\|")
+    image_caption <- image_caption_parts[[1]][1]
+    image_label <- image_caption_parts[[1]][2]
 
     line <- paste0(
-      "[[", gsub("[^a-zA-Z]+", "_", image_caption), "]]\n",
+      "[[", image_label, "]]\n",
       ".", image_caption, "\n",
-      gsub("image:images", "image::images", line)
+      paste0(
+        "image::images",
+        parts[2],
+        "[",
+        image_caption,
+        "]"
+      )
     )
   }
 
