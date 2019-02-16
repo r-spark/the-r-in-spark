@@ -10,7 +10,7 @@ chapters <- list(
   "clusters",
   "connections",
   "tuning",
-  "distributed",
+  "distributed-r",
   "appendix"
 )
 chapters_pattern <- paste(chapters, collapse = "|")
@@ -27,7 +27,7 @@ for (chapter_file in dir(pattern = paste0(chapters_pattern, ".Rmd"))) {
   rmarkdown::pandoc_convert(
     input = normalizePath(paste0("mds/", chapter_name, ".md")),
     to = "asciidoc",
-    options = c("--columns=120"),
+    options = c("--columns=180"),
     output = file.path("../ascii", paste0(chapter_name, ".asciidoc"))
   )
 
