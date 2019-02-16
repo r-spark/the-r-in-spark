@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2019-02-04">
+<meta name="date" content="2019-02-12">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -401,8 +401,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>In a Spark cluster, there are three types of compute instances that are relevant to Spark: The <strong>driver node</strong>, the <strong>worker nodes</strong> and the <strong>cluster manager</strong>. A cluster manager is a service that allows Spark to be executed in the cluster as described in the previous chapter under the <a href="clusters.html#clusters-manager">cluster managers</a> section. The <strong>driver node</strong> is tasked with delegating work to the worker nodes, but also for aggregating their results and controlling computation flow. For the most part, aggregation happens in the worker nodes; however, even after the nodes aggregate data, it is often the case that the driver node would have to collect the worker’s results. Therefore, the driver node usually has at least, but often much more, compute resources (memory, CPUs, local storage, etc.) than the worker node. The <strong>worker nodes</strong> execute compute tasks over partitioned data and communicate intermediate results to other workers or back to the driver node, worker nodes are also referred as <strong>executors</strong>.</p>
 <p>Strictly speaking, the driver node and worker nodes are just names assigned to machines with particular roles, while the actual computation in the driver node is performed by the <strong>spark context</strong>. The Spark context is a Spark component tasked with scheduling tasks, managing data and so on. In the worker nodes, the actual computation is performed under a <strong>spark executor</strong>, which is also a Spark component tasked with executing subtasks against a data partition.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-architecture"></span>
-<div id="htmlwidget-d6f9e82a60f9fb3c1ad0" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-d6f9e82a60f9fb3c1ad0">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver | [Spark Context]] \n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-20fd57e735c76c10603d" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-20fd57e735c76c10603d">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver | [Spark Context]] \n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.1: Apache Spark Architecture
 </p>
@@ -417,8 +417,8 @@ FIGURE 6.1: Apache Spark Architecture
 <li><strong>Web Browser</strong>: While using <code>sparklyr</code> from a terminal is possible, it is usually more productive to install a <strong>web server</strong> in an edge node that provides access to run R with <code>sparklyr</code> from a web browser. Most likely, you will want to consider using <a href="RStudio%20Server">RStudio</a> or Jupyter rather than connecting from the terminal.</li>
 </ul>
 <div class="figure" style="text-align: center"><span id="fig:connections-spark-edge"></span>
-<div id="htmlwidget-084ec14d64e6832a58fe" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-084ec14d64e6832a58fe">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client|\n  [Terminal]\n  [Web Browser |\n    [RStudio]\n    [Jupyter]\n  ]\n]-[<hidden> Secure Shell / HTTP]\n\n[Secure Shell / HTTP]-[Edge|\n  [Secure Shell Server] - [R]\n  [RStudio Server] - [R]\n  [Jupyter Server] - [R]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-ab970a873d6e893d0ff6" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ab970a873d6e893d0ff6">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client|\n  [Terminal]\n  [Web Browser |\n    [RStudio]\n    [Jupyter]\n  ]\n]-[<hidden> Secure Shell / HTTP]\n\n[Secure Shell / HTTP]-[Edge|\n  [Secure Shell Server] - [R]\n  [RStudio Server] - [R]\n  [Jupyter Server] - [R]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.2: Connecting to Sparks Edge Node
 </p>
@@ -438,8 +438,8 @@ FIGURE 6.2: Connecting to Sparks Edge Node
 <h2><span class="header-section-number">6.2</span> Local</h2>
 <p>When connecting to Spark in local mode, Spark starts as a single application simulating a cluster with a single node, this is not a proper computing cluster but is ideal to perform work offline and troubleshoot issues. A local connection to Spark is represented in the following diagram:</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-local"></span>
-<div id="htmlwidget-32eae95afa4d3342af69" style="width:100%;height:160pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-32eae95afa4d3342af69">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver|\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n  [Spark Executor]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-3be42ad87cc57d55c2e0" style="width:100%;height:160pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3be42ad87cc57d55c2e0">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver|\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n  [Spark Executor]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.3: Local Connection Diagram
 </p>
@@ -457,8 +457,8 @@ FIGURE 6.3: Local Connection Diagram
 <p>Connecting to a Spark Standalone cluster requires the location of the cluster manager’s master instance, this location can be found in the cluster manager web interface as described in the <a href="clusters.html#clusters-standalone">Standalone Clusters</a> section, you can find this location by looking for a URL starting with <code>spark://</code>.</p>
 <p>A connection in standalone mode starts from <code>sparklyr</code> which launches <code>spark-submit</code>, submits the <code>sparklyr</code> application and creates the Spark Context, which requests executors from the Spark Standalone instance running under the given <code>master</code> address.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-standalone"></span>
-<div id="htmlwidget-eee71394de919447fe51" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-eee71394de919447fe51">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Spark Standalone]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-6027ba2a83c2f4a6c555" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6027ba2a83c2f4a6c555">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Spark Standalone]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.4: Spark Standalone Connection Diagram
 </p>
@@ -473,8 +473,8 @@ FIGURE 6.4: Spark Standalone Connection Diagram
 <h3><span class="header-section-number">6.4.1</span> Yarn Client</h3>
 <p>When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as follows:</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-yarn"></span>
-<div id="htmlwidget-ff2547721d2f9baec5a7" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-ff2547721d2f9baec5a7">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Yarn]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-6d76941fff518a17ada3" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6d76941fff518a17ada3">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Yarn]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.5: YARN Client Connection Diagram
 </p>
@@ -486,8 +486,8 @@ FIGURE 6.5: YARN Client Connection Diagram
 <h3><span class="header-section-number">6.4.2</span> Yarn Cluster</h3>
 <p>The main difference between YARN Cluster mode and YARN Client mode is that in YARN Cluster mode, the driver node is not required to be the node where R and sparklyr were launched; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using YARN Cluster when the edge node has too many concurrent users, is lacking computing resources or where tools (like RStudio or Jupyter) need to be managed independently of other cluster resources.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-yarn-cluster"></span>
-<div id="htmlwidget-b735f19feef38ab0ea47" style="width:100%;height:240pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b735f19feef38ab0ea47">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n  [spark-submit]\n]\n[Client]-[Cluster Manager]\n[Client]-[Driver |\n  [sparklyr]\n  [Spark Context]\n] \n[Cluster Manager |\n  [Yarn]\n]\n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-95286f466e15132aabf4" style="width:100%;height:240pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-95286f466e15132aabf4">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n  [spark-submit]\n]\n[Client]-[Cluster Manager]\n[Client]-[Driver |\n  [sparklyr]\n  [Spark Context]\n] \n[Cluster Manager |\n  [Yarn]\n]\n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.6: YARN Cluster Connection Diagram
 </p>
@@ -501,8 +501,8 @@ FIGURE 6.6: YARN Cluster Connection Diagram
 <h2><span class="header-section-number">6.5</span> Livy</h2>
 <p>As opposed to other connection methods which require using an edge node in the cluster, <a href="clusters.html#clusters-livy">Livy</a> provides a <strong>Web API</strong> that makes the Spark cluster accessible from outside the cluster and does not require a Spark installation in the client. Once connected through the Web API, the <strong>Livy Service</strong> starts the Spark context by requesting resources from the cluster manager and distributing work as usual.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-livy"></span>
-<div id="htmlwidget-71cfc00eeabceacdfad9" style="width:100%;height:240pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-71cfc00eeabceacdfad9">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n]\n[Client]-[<hidden> Web API]\n[Web API]-[Driver |\n  [Livy Service]\n  [Spark Context]\n] \n[Cluster Manager]\n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-a08d6a4350078b005c53" style="width:100%;height:240pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-a08d6a4350078b005c53">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n]\n[Client]-[<hidden> Web API]\n[Web API]-[Driver |\n  [Livy Service]\n  [Spark Context]\n] \n[Cluster Manager]\n[Driver]-[Cluster Manager]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.7: Livy Connection Diagram
 </p>
@@ -520,8 +520,8 @@ FIGURE 6.7: Livy Connection Diagram
 <h2><span class="header-section-number">6.6</span> Mesos</h2>
 <p>Similar to YARN, Mesos supports client mode and a cluster mode, <code>sparklyr</code> currently only supports client mode for Mesos.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-mesos"></span>
-<div id="htmlwidget-5afbcc8ce92f7b18261f" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-5afbcc8ce92f7b18261f">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Mesos]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-cd447d62686f8ec2f731" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-cd447d62686f8ec2f731">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Driver |\n  [R]\n  [sparklyr]\n  [spark-submit]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Mesos]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.8: Mesos Connection Diagram
 </p>
@@ -533,8 +533,8 @@ FIGURE 6.8: Mesos Connection Diagram
 <h2><span class="header-section-number">6.7</span> Kubernetes</h2>
 <p>Kubernetes cluster do not support client modes similar to Mesos or YARN, instead, the connection model is similar to YARN Cluster, where the driver node is assigned by Kubernetes.</p>
 <div class="figure" style="text-align: center"><span id="fig:connections-kubernetes"></span>
-<div id="htmlwidget-0ed95ccfe4f509996636" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-0ed95ccfe4f509996636">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n  [spark-submit]\n]\n[Client]-[Cluster Manager]\n[Client]-[Driver]\n[Driver |\n  [sparklyr]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Kubernetes]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-41ed62da4814ac244230" style="width:100%;height:250pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-41ed62da4814ac244230">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n#.hidden: visual=hidden\n\n\n[Client |\n  [R]\n  [sparklyr]\n  [spark-submit]\n]\n[Client]-[Cluster Manager]\n[Client]-[Driver]\n[Driver |\n  [sparklyr]\n  [Spark Context]\n] \n[Driver]-[Cluster Manager |\n  [Kubernetes]]\n[Cluster Manager]-[Worker (1) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (2) | [Spark Executor(s)]]\n[Cluster Manager]-[Worker (3) | [Spark Executor(s)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 6.9: Kubernetes Connection Diagram
 </p>
