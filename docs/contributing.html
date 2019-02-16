@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2019-02-12">
+<meta name="date" content="2019-02-15">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -153,7 +153,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#acknowledgments"><i class="fa fa-check"></i>Acknowledgments</a></li>
 </ul></li>
 <li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
-<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#intro-background"><i class="fa fa-check"></i><b>1.1</b> Background</a></li>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#intro-background"><i class="fa fa-check"></i><b>1.1</b> Information</a></li>
 <li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#intro-hadoop"><i class="fa fa-check"></i><b>1.2</b> Hadoop</a></li>
 <li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#intro-spark"><i class="fa fa-check"></i><b>1.3</b> Spark</a></li>
 <li class="chapter" data-level="1.4" data-path="intro.html"><a href="intro.html#intro-r"><i class="fa fa-check"></i><b>1.4</b> R</a></li>
@@ -167,7 +167,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.4" data-path="starting.html"><a href="starting.html#starting-connect-to-spark"><i class="fa fa-check"></i><b>2.4</b> Connecting to Spark</a></li>
 <li class="chapter" data-level="2.5" data-path="starting.html"><a href="starting.html#starting-sparklyr-hello-world"><i class="fa fa-check"></i><b>2.5</b> Using Spark</a><ul>
 <li class="chapter" data-level="2.5.1" data-path="starting.html"><a href="starting.html#starting-spark-web-interface"><i class="fa fa-check"></i><b>2.5.1</b> Web Interface</a></li>
-<li class="chapter" data-level="2.5.2" data-path="starting.html"><a href="starting.html#starting-logs"><i class="fa fa-check"></i><b>2.5.2</b> Logs</a></li>
+<li class="chapter" data-level="2.5.2" data-path="starting.html"><a href="starting.html#starting-analysis"><i class="fa fa-check"></i><b>2.5.2</b> Analysis</a></li>
+<li class="chapter" data-level="2.5.3" data-path="starting.html"><a href="starting.html#starting-modeling"><i class="fa fa-check"></i><b>2.5.3</b> Modeling</a></li>
+<li class="chapter" data-level="2.5.4" data-path="starting.html"><a href="starting.html#starting-data"><i class="fa fa-check"></i><b>2.5.4</b> Data</a></li>
+<li class="chapter" data-level="2.5.5" data-path="starting.html"><a href="starting.html#starting-extensions"><i class="fa fa-check"></i><b>2.5.5</b> Extensions</a></li>
+<li class="chapter" data-level="2.5.6" data-path="starting.html"><a href="starting.html#starting-distributed-r"><i class="fa fa-check"></i><b>2.5.6</b> Distributed R</a></li>
+<li class="chapter" data-level="2.5.7" data-path="starting.html"><a href="starting.html#starting-streaming"><i class="fa fa-check"></i><b>2.5.7</b> Streaming</a></li>
+<li class="chapter" data-level="2.5.8" data-path="starting.html"><a href="starting.html#starting-logs"><i class="fa fa-check"></i><b>2.5.8</b> Logs</a></li>
 </ul></li>
 <li class="chapter" data-level="2.6" data-path="starting.html"><a href="starting.html#starting-disconnecting"><i class="fa fa-check"></i><b>2.6</b> Disconnecting</a></li>
 <li class="chapter" data-level="2.7" data-path="starting.html"><a href="starting.html#starting-using-spark-from-rstudio"><i class="fa fa-check"></i><b>2.7</b> Using RStudio</a></li>
@@ -396,14 +402,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="overview-5" class="section level2">
 <h2><span class="header-section-number">12.1</span> Overview</h2>
 <p>While working with R and therefore, while working with R and Spark, you will write R code. In fact, you have already written R code throught most of the previous chaters in this book. Writting code can be as simple as <a href="starting.html#starting-sparklyr-hello-world">loading data from a text file</a> to writting <a href="distributed">distributed R</a> code. But for the sake of the argument, lets consider one of the first lines of code presented in this book:</p>
-<div class="sourceCode" id="cb195"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb195-1" title="1"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;hello&quot;</span>, <span class="st">&quot;hello.txt&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb227"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb227-1" title="1"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;hello&quot;</span>, <span class="st">&quot;hello.txt&quot;</span>)</a></code></pre></div>
 <p>When thinking of contributing back, the most important question you can ask about the code above, but really, about any piece of code you write is: Would this code be useful to someone else? For the code above, the answer is probably no, it’s just too generic and can be easiy found online; however, a more realistic example would be to tailor something the code above for something that you actually care about, perhaps:</p>
-<div class="sourceCode" id="cb196"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb196-1" title="1"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;stuff-that-matters&quot;</span>, <span class="st">&quot;/secret/path/which/was/hard/to/figure/out/&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb228"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb228-1" title="1"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;stuff-that-matters&quot;</span>, <span class="st">&quot;/secret/path/which/was/hard/to/figure/out/&quot;</span>)</a></code></pre></div>
 <p>The code above is quite similar to the original one, but assuming that you work with colleages, the answer to: Would this code be useful to someone else? Is now completely different: Yes, most likely! Which is surprising since this means that not all useful code needs to be very advanced or complicated; however, for it to be useful to others, it does need to be packaged, presented and shared in a usable format.</p>
 <p>One first attempt would be to wrap this into a file <code>useful.R</code> and then write a function over it, as in:</p>
-<div class="sourceCode" id="cb197"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb197-1" title="1">load_useful_data &lt;-<span class="st"> </span><span class="cf">function</span>() {</a>
-<a class="sourceLine" id="cb197-2" title="2">  <span class="kw">spark_read_text</span>(sc, <span class="st">&quot;stuff-that-matters&quot;</span>, <span class="st">&quot;/secret/path/which/was/hard/to/figure/out/&quot;</span>)</a>
-<a class="sourceLine" id="cb197-3" title="3">}</a></code></pre></div>
+<div class="sourceCode" id="cb229"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb229-1" title="1">load_useful_data &lt;-<span class="st"> </span><span class="cf">function</span>() {</a>
+<a class="sourceLine" id="cb229-2" title="2">  <span class="kw">spark_read_text</span>(sc, <span class="st">&quot;stuff-that-matters&quot;</span>, <span class="st">&quot;/secret/path/which/was/hard/to/figure/out/&quot;</span>)</a>
+<a class="sourceLine" id="cb229-3" title="3">}</a></code></pre></div>
 <p>Which is an improvement but it would require users to manually share this file over and over. Fortunately, this is a problem already solved in R quite well through <strong>R Packages</strong>.</p>
 <p>An <strong>R package</strong> contains R code packaged in a format installable using the <code>install.packages()</code> function. <code>sparklyr</code> is an R package, but there are many other packages available in R and you can also create your own packages. For those of you new to creating R packages, I would encourage reading Hadley Wickam’s book on packages: <a href="@wickham2015r">R Packages: Organize, Test, Document, and Share Your Code</a>. Creating an R package allows you to easily share your functions with others by sharing the package file in your organization.</p>
 <p>Once a package is created, there are many ways to share this with colleagues or the world. For instance, for packages meant to be private, you can consider using <a href="https://cran.r-project.org/web/packages/drat/vignettes/WhyDrat.html">Drat</a> or products like <a href="https://www.rstudio.com/products/package-manager/">RStudio Package Manager</a>. R packages meant for public consumption are made available to the R community in <a href="https://cran.r-project.org/"><strong>CRAN</strong></a>, which stands for the Comprehensive R Archive Network.</p>
@@ -419,17 +425,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="contributing-r-extension" class="section level2">
 <h2><span class="header-section-number">12.2</span> R Extensions</h2>
 <p>R extensions make use of three functions in <code>sparklyr</code>: <code>invoke_new()</code>, <code>invoke_static()</code> and <code>invoke()</code>. For the most part, that’s all you need to extend Spark’s functionality in R.</p>
-<div class="sourceCode" id="cb198"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb198-1" title="1"><span class="kw">spark_context</span>(sc) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb198-2" title="2"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;textFile&quot;</span>, <span class="st">&quot;my-file.txt&quot;</span>, 1L) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb198-3" title="3"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;count&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb230"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb230-1" title="1"><span class="kw">spark_context</span>(sc) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb230-2" title="2"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;textFile&quot;</span>, <span class="st">&quot;my-file.txt&quot;</span>, 1L) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb230-3" title="3"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;count&quot;</span>)</a></code></pre></div>
 </div>
 <div id="scala-extensions" class="section level2">
 <h2><span class="header-section-number">12.3</span> Scala Extensions</h2>
 <div id="scala-extension-prereq" class="section level3">
 <h3><span class="header-section-number">12.3.1</span> Prerequisites</h3>
 <p>Changes in the scala sources require the Scala compilers to be installed. You can install the required compilers by running:</p>
-<div class="sourceCode" id="cb199"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb199-1" title="1"><span class="kw">library</span>(sparklyr)</a>
-<a class="sourceLine" id="cb199-2" title="2"><span class="kw">download_scalac</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb231"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb231-1" title="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb231-2" title="2"><span class="kw">download_scalac</span>()</a></code></pre></div>
 <p>Which will download the correct compilers from <a href="https://www.scala-lang.org">https://www.scala-lang.org/</a>.</p>
 </div>
 </div>
@@ -446,10 +452,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="troubleshooting-3" class="section level3">
 <h3><span class="header-section-number">12.5.2</span> Troubleshooting</h3>
 <p>We can trace all the calls made to <code>invoke()</code>, <code>invoke_new()</code> and <code>invoke_static()</code> using the <code>sparklyr.invoke.trace</code> and <code>sparklyr.invoke.trace.callstack</code> options as follows:</p>
-<div class="sourceCode" id="cb200"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb200-1" title="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
-<a class="sourceLine" id="cb200-2" title="2">config<span class="op">$</span>sparklyr.invoke.trace &lt;-<span class="st"> </span><span class="ot">TRUE</span></a>
-<a class="sourceLine" id="cb200-3" title="3"></a>
-<a class="sourceLine" id="cb200-4" title="4"><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> config)</a></code></pre></div>
+<div class="sourceCode" id="cb232"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb232-1" title="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
+<a class="sourceLine" id="cb232-2" title="2">config<span class="op">$</span>sparklyr.invoke.trace &lt;-<span class="st"> </span><span class="ot">TRUE</span></a>
+<a class="sourceLine" id="cb232-3" title="3"></a>
+<a class="sourceLine" id="cb232-4" title="4"><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> config)</a></code></pre></div>
 </div>
 </div>
 <div id="contributing-sparklyr" class="section level2">
@@ -458,8 +464,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><a href="https://cran.r-project.org/">CRAN</a>, which stands for the Comprehensive R Archive Network, provides a repository of packages that can be easily installable and which are carefully reviewed before they are made available. You can read more about the release process under <a href="http://r-pkgs.had.co.nz/release.html">releasing a package</a> and Hadley Wickam’s book on packages: <a href="@wickham2015r">R Packages: Organize, Test, Document, and Share Your Code</a>. CRAN users are always encouraged to install the latest version of a package, which means that <code>sparklyr</code> also needs to support multiple versions of Spark.</p>
 <p>Therefore, at a high level, <code>sparklyr</code> is composed of: R code and versioned Scala code:</p>
 <div class="figure" style="text-align: center"><span id="fig:contributing-sparklyr"></span>
-<div id="htmlwidget-b5bcd16b6f62e4ab55d6" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b5bcd16b6f62e4ab55d6">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[sparklyr|\n  [R Code]\n  [Scala Code|\n    [Spark 1.6.x]\n    [Spark 2.x.0]\n  ]\n]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-eae0c44bd18e657663c1" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-eae0c44bd18e657663c1">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[sparklyr|\n  [R Code]\n  [Scala Code|\n    [Spark 1.6.x]\n    [Spark 2.x.0]\n  ]\n]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.1: Sparklyr Package Architecture
 </p>
@@ -469,8 +475,8 @@ FIGURE 12.1: Sparklyr Package Architecture
 <p>When connecting to Spark using <code>spark_connect()</code>, <code>sparklyr</code> submits the correct version of the <code>sparklyr</code> JAR to Spark which then Spark executes. We will refer to this submitted application as the <strong>sparklyr backend</strong> and the R code as the <strong>sparklyr frontend</strong>. <a href="https://en.wikipedia.org/wiki/Front_and_back_ends">Fontend and backend</a> are common software engineer concepts related to separating the user interface, the R console in this case, with the data layer, Spark data proessing in this context. For most <a href="contributing.html#connections-1">connections</a>, the backend is usually submitted by <code>sparklyr</code> to Spark using <code>spark-submit</code>, which is a command line tool well-known in Spark; however, for others connections, like Livy, the backend is submitted through Livy’s HTTP interface.</p>
 <p>Once the backend is submitted to Spark, the frontend communicates to the backend using socket connections, expect for Livy connections where this happens over HTTP:</p>
 <div class="figure" style="text-align: center"><span id="fig:contributing-connection"></span>
-<div id="htmlwidget-f3df92a9b94f0b1597f1" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-f3df92a9b94f0b1597f1">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[R|\n  [sparklyr|\n    [frontend]\n  ]\n]\n[Spark|\n  [sparklyr|\n    [backend]\n  ]\n]\n#.hidden: visual=hidden\n[<hidden> Socket / HTTP Connection]\n[R]-[Socket / HTTP Connection]\n[Socket / HTTP Connection]-[Spark]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-39588d625c4880422806" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-39588d625c4880422806">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[R|\n  [sparklyr|\n    [frontend]\n  ]\n]\n[Spark|\n  [sparklyr|\n    [backend]\n  ]\n]\n#.hidden: visual=hidden\n[<hidden> Socket / HTTP Connection]\n[R]-[Socket / HTTP Connection]\n[Socket / HTTP Connection]-[Spark]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.2: Sparklyr Connection Architecture
 </p>
