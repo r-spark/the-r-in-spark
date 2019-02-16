@@ -1,7 +1,7 @@
 
 ascii_add_footnotes <- function(line, books_bib) {
-  if (grepl("\\[@[a-zA-Z\\-]+\\]", line)) {
-    parts <- regmatches(line, regexec("(.*)\\[@([a-zA-Z\\-]+)\\](.*)", line))[[1]]
+  if (grepl("\\[@[a-zA-Z0-9\\-]+\\]", line)) {
+    parts <- regmatches(line, regexec("(.*)\\[@([a-zA-Z0-9\\-]+)\\](.*)", line))[[1]]
     book_name <- parts[3]
 
     line <- paste(
