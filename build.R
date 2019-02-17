@@ -1,3 +1,4 @@
+source("r/utils.R")
 source("r/ascii.R")
 
 if (!dir.exists("ascii")) dir.create("ascii")
@@ -42,20 +43,51 @@ for (chapter_file in dir(pattern = paste0(chapters_pattern, ".Rmd"))) {
 files <- normalizePath(dir("ascii", full.names = T, pattern = chapters_pattern))
 books_bib <- bibtex::read.bib("book.bib")
 
+transformations <- list(
+  "\\[@([a-zA-Z0-9\\-]+)\\]" = ascii_add_footnotes,
+  "\nimage:images([^\\[]+)\\[([^\\]]+)\\]" = ascii_add_image_captions,
+  "\n\\*(Note|Tip|Warning):\\* " = ascii_add_notes,
+  "Figure[ \n]+@ref\\(fig:([^\\)]+)\\)" = ascii_add_figure_references
+)
+
 for (file in files) {
   lines <- readLines(file)
+  all_lines <- paste(lines, collapse = "\n")
 
-  fixed <- c()
-  for (line in lines) {
-    line <- ascii_add_footnotes(line, books_bib)
-    line <- ascii_add_image_captions(line)
-    line <- ascii_add_figure_references(line)
-    fixed <- c(fixed, line)
+  for (regval in names(transformations)) {
+    rem_lines <- all_lines
+    fixed_lines <- c()
+
+    while (grepl(regval, rem_lines, perl = TRUE)) {
+      r <- regexec(regval, rem_lines, perl = TRUE)
+      groups <- regmatches(rem_lines, r)[[1]]
+
+      start_idx <- r[[1]][1]
+      end_idx <- start_idx + nchar(groups[1])
+      previous_str <- substr(rem_lines, 1, start_idx - 1)
+
+      rem_lines <- substr(rem_lines, end_idx, nchar(rem_lines))
+      result <- transformations[[regval]](groups[-1], books_bib, rem_lines)
+
+      if (is.list(result)) {
+        replacement <- result$replacement
+        rem_lines <- substr(rem_lines, result$end_idx, nchar(rem_lines))
+      }
+      else {
+        replacement <- result
+      }
+
+      fixed_lines <- c(
+        fixed_lines,
+        previous_str,
+        replacement
+      )
+    }
+
+    all_lines <- paste(c(fixed_lines, rem_lines), collapse = "")
   }
 
-  fixed <- ascii_add_notes(fixed)
-
-  writeLines(fixed, file)
+  writeLines(all_lines, file)
 }
 
 ascii_files <- normalizePath(dir("ascii", chapters_pattern, full.names = T))
