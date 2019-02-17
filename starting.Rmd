@@ -154,7 +154,7 @@ Let's explain what's going on in `copy_to()`. The first parameter, `sc`, gives t
 
 ### Web Interface {#starting-spark-web-interface}
 
-Most of the Spark commands are executed from the R console; however, monitoring and analyzing execution is done through Spark's web interface, see Figure \@ref(starting-spark-web). This interface is a web application provided by Spark which can be accessed by running:
+Most of the Spark commands are executed from the R console; however, monitoring and analyzing execution is done through Spark's web interface, see Figure \@ref(fig:starting-spark-web). This interface is a web application provided by Spark which can be accessed by running:
 
 ```{r starting-spark-web-code}
 spark_web(sc)
@@ -172,7 +172,7 @@ invisible(webshot::webshot(
 render_image("images/starting-spark-web.png", "Apache Spark Web Interface.")
 ```
 
-Printing the `cars` dataset collected a few records to be displayed in the R console. You can see in the Spark web interface that a job was started to collect this information back from Spark. You can also select the **storage** tab to see the "mtcars" dataset cached in-memory in Spark, Figure \@ref(starting-spark-web-storage).
+Printing the `cars` dataset collected a few records to be displayed in the R console. You can see in the Spark web interface that a job was started to collect this information back from Spark. You can also select the **storage** tab to see the "mtcars" dataset cached in-memory in Spark, Figure \@ref(fig:starting-spark-web-storage).
 
 ```{r starting-spark-web-storage-shot, echo=FALSE}
 invisible(webshot::webshot(
@@ -188,7 +188,7 @@ render_image("images/starting-spark-web-storage.png", "Apache Spark Web Interfac
 
 Notice that this dataset is fully loaded into memory since the **fraction cached** is 100%, you can know exactly how much memory this dataset is using through the **size in memory** column.
 
-The executors tab, Figure \@ref(starting-spark-executors), provides a view of your cluster resources. For local connections, you will find only one compute instance active with only 500MB of memory allocated to Spark and 384MB available for computation. The [tunning](#tunning) chapter you will learn how request more compute instances, resources and learn how memory is allocated.
+The executors tab, Figure \@ref(fig:starting-spark-executors), provides a view of your cluster resources. For local connections, you will find only one compute instance active with only 500MB of memory allocated to Spark and 384MB available for computation. The [tunning](#tunning) chapter you will learn how request more compute instances, resources and learn how memory is allocated.
 
 ```{r starting-spark-executors-web-shot, echo=FALSE}
 invisible(webshot::webshot(
@@ -203,7 +203,7 @@ invisible(webshot::webshot(
 render_image("images/starting-spark-web-executors.png", "Apache Spark Web Interface - Executors Tab.")
 ```
 
-The last tab to explore is the environment tab, Figure \@ref(starting-spark-environment), this tab lists all the settings for this Spark application which the [tunning](#tunning) will also introduce them in detail. As you will learn, most settings don't need to be configured explicitly, but in order to properly run at scale, you will have to become familiar with some of them, eventually.
+The last tab to explore is the environment tab, Figure \@ref(fig:starting-spark-environment), this tab lists all the settings for this Spark application which the [tunning](#tunning) will also introduce them in detail. As you will learn, most settings don't need to be configured explicitly, but in order to properly run at scale, you will have to become familiar with some of them, eventually.
 
 ```{r starting-spark-environment-shot, echo=FALSE}
 invisible(webshot::webshot(
@@ -271,7 +271,7 @@ select(cars, hp, mpg) %>%
 render_image("images/starting-cars-hp-vs-mpg.png", "Horse Power vs Miles per Gallon.")
 ```
 
-The plot in Figure \@ref(starting-cars-hp-vs-mpgt), shows that as we increase the horse power in a vehicle, their fuel efficiency measured in miles per gallon gets reduced. While this is insightful, it's hard to predict numerically how increased horse power would affect fuel effiency, modeling can help us overcome this.
+The plot in Figure \@ref(fig:starting-cars-hp-vs-mpg), shows that as we increase the horse power in a vehicle, their fuel efficiency measured in miles per gallon gets reduced. While this is insightful, it's hard to predict numerically how increased horse power would affect fuel effiency, modeling can help us overcome this.
 
 ### Modeling {#starting-modeling}
 
@@ -283,7 +283,7 @@ For instance, we can use a linear model to approximate the relationship between 
 model <- ml_linear_regression(cars, mpg ~ hp)
 ```
 
-This model can now be used to predict values that are not in the original datset. For instance, we can add entries for cars with horse power beyond 250 and also visualize the predicted values as shown in Figure \@ref(starting-cars-hp-vs-mpg-prediction).
+This model can now be used to predict values that are not in the original datset. For instance, we can add entries for cars with horse power beyond 250 and also visualize the predicted values as shown in Figure \@ref(fig:starting-cars-hp-vs-mpg-prediction).
 
 ```{r}
 model %>%
@@ -503,13 +503,13 @@ Notice that exiting R, RStudio or restarting your R session will also cause the 
 
 Since it's very common to use RStudio with R, `sparklyr` provides RStudio extensions to help simplify your workflows and increase your productivity while using Spark in RStudio. If you are not familiar with RStudio, take a quick look at the [Using RStudio](#appendix-using-rstudio) appendix section. Otherwise, there are a couple extensions worth highlighting.
 
-First, instead of starging a new connections using `spark_connect()` from RStudio's R console, you can use the **new connection** action from the **connections pane** and then, select the Spark connection which will open the dialog shown in Figure \@ref(starting-rstudio-new-connection). You can then customize the versions and connect to Spark which will simply generate the right `spark_connect()` command and execute this in the R console for you.
+First, instead of starging a new connections using `spark_connect()` from RStudio's R console, you can use the **new connection** action from the **connections pane** and then, select the Spark connection which will open the dialog shown in Figure \@ref(fig:starting-rstudio-new-connection). You can then customize the versions and connect to Spark which will simply generate the right `spark_connect()` command and execute this in the R console for you.
 
 ```{r starting-rstudio-new-connection, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio New Spark Connection.'}
 render_image("images/starting-rstudio-new-spark-connection.png", "RStudio New Spark Connection.")
 ```
 
-Second, once connected to Spark, either by using the R console or through RStudio's connections pane, RStudio will display your datasets available in the connections pane, see Figure \@ref(starting-rstudio-connections-pane). This is a useful way to track your existing datasets and provides an easy way to explore each of them.
+Second, once connected to Spark, either by using the R console or through RStudio's connections pane, RStudio will display your datasets available in the connections pane, see Figure \@ref(fig:starting-rstudio-connections-pane). This is a useful way to track your existing datasets and provides an easy way to explore each of them.
 
 ```{r starting-rstudio-connections-pane, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Connections Pane.'}
 render_image("images/starting-rstudio-connections-pane.png", "RStudio Connections Pane.")
