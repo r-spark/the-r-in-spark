@@ -21,13 +21,15 @@ In addition, this chapter provides various troubleshooting connection techniques
 
 While this chapter might feel a bit dry since, connecting and troubleshooting connections is definetely not the most fun part of large-scale data analysis, it is the first chapter that will introduce the components of a Spark cluster and how they interact, this is often known as the architecture of Apache Spark. This chapter, [Data](#data) and [Tunning](#tunning) chapter, will provide a detailed view of how Spark works, which will help you move towards becoming an intermediate Spark user that can go beyond analysis to dive into the realm of distributed computing, using Apache Spark.
 
+**Note:** As you know from previous chapters, a cluster is a collection of machines that work together to perform a computation. However, in distributed systems and clusters literature, we often refer to each physical machine as a compute instance, compute node, instance or node. It is helpful to remind this while reading through this chapter and making use of external resources.
+
 ## Overview {#connections-overview}
 
-As you know from previous chapters, a cluster is a collection of machines that work together to perform a computation. However, in distributed systems and clusters literature, we often refer to each physical machine as a compute instance, compute node, instance or node. It is helpful to remind this while reading through this chapter and making use of external resources.
-
-In a Spark cluster, there are three types of compute instances that are relevant to Spark: The **driver node**, the **worker nodes** and the **cluster manager**. A cluster manager is a service that allows Spark to be executed in the cluster as described in the previous chapter under the [cluster managers](#clusters-manager) section. The **driver node** is tasked with delegating work to the worker nodes, but also for aggregating their results and controlling computation flow. For the most part, aggregation happens in the worker nodes; however, even after the nodes aggregate data, it is often the case that the driver node would have to collect the worker's results. Therefore, the driver node usually has at least, but often much more, compute resources (memory, CPUs, local storage, etc.) than the worker node. The **worker nodes** execute compute tasks over partitioned data and communicate intermediate results to other workers or back to the driver node, worker nodes are also referred as **executors**.
+The overall connection architecture for a Spark cluster is composed of three type of compute instances: The **driver node**, the **worker nodes** and the **cluster manager**. A cluster manager is a service that allows Spark to be executed in the cluster as described in the previous chapter under the [cluster managers](#clusters-manager) section. The **driver node** is tasked with delegating work to the worker nodes, but also for aggregating their results and controlling computation flow. For the most part, aggregation happens in the worker nodes; however, even after the nodes aggregate data, it is often the case that the driver node would have to collect the worker's results. Therefore, the driver node usually has at least, but often much more, compute resources (memory, CPUs, local storage, etc.) than the worker node. The **worker nodes** execute compute tasks over partitioned data and communicate intermediate results to other workers or back to the driver node, worker nodes are also referred as **executors**.
 
 Strictly speaking, the driver node and worker nodes are just names assigned to machines with particular roles, while the actual computation in the driver node is performed by the **spark context**. The Spark context is a Spark component tasked with scheduling tasks, managing data and so on. In the worker nodes, the actual computation is performed under a **spark executor**, which is also a Spark component tasked with executing subtasks against a data partition.
+
+We can illustrate this concepts in Figure \@ref(fig:connections-architecture), where the driver node orchestrates worker's work through the cluster manager.
 
 ```{r connections-architecture, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='Apache Spark Architecture', out.width='100%', out.height='200pt'}
 render_nomnoml("
@@ -45,10 +47,12 @@ If you already have a Spark cluster in your organization, you should request fro
 
 ### Edge Nodes {#connections-spark-edge-nodes}
 
-Before connecting to Apache Spark, you will first have to connect to the cluster. Usually, by connecting to an edge node within the cluster. An edge node, is a machine that can accessed from outside the cluster but which is also part of the cluster. There are two methods to connect to this edge instance:
+Before connecting to Apache Spark, you will first have to connect to the cluster. Usually, by connecting to an edge node within the cluster. An edge node, is a machine that you can access from outside the cluster but which is also part of the cluster. There are two methods to connect to this edge instance:
 
 - **Terminal**: Using a [computer terminal](https://en.wikipedia.org/wiki/Computer_terminal) application, one can use a [secure shell](https://en.wikipedia.org/wiki/Secure_Shell) to establish a remote connection into the cluster, once you connect into the cluster, you can launch R and then use `sparklyr`. However, a terminal can be cumbersome for some tasks, like exploratory data analysis, so it's often only used while configuring the cluster or troubleshooting issues.
 - **Web Browser**: While using `sparklyr` from a terminal is possible, it is usually more productive to install a **web server** in an edge node that provides access to run R with `sparklyr` from a web browser. Most likely, you will want to consider using [RStudio](RStudio Server) or Jupyter rather than connecting from the terminal.
+
+Figure \@ref(fig:connections-spark-edge) explains these concepts visually. The left block is usually your web browser, the right block is the edge node, client and edge node communicate over HTTP when using a web browser or SSH when using the terminal.
 
 ```{r connections-spark-edge, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='200pt', fig.cap='Connecting to Sparks Edge Node'}
 render_nomnoml("
@@ -87,7 +91,7 @@ Where `<cluster-master>` is set to the correct cluster manager master for [Spark
 
 ## Local {#connections-local}
 
-When connecting to Spark in local mode, Spark starts as a single application simulating a cluster with a single node, this is not a proper computing cluster but is ideal to perform work offline and troubleshoot issues. A local connection to Spark is represented in the following diagram:
+When connecting to Spark in local mode, Spark starts as a single application simulating a cluster with a single node, this is not a proper computing cluster but it's ideal to perform work offline and while troubleshooting issues. A local connection to Spark is represented in Figure \@ref(fig:connections-local).
 
 ```{r connections-local, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='160pt', fig.cap='Local Connection Diagram'}
 render_nomnoml("
@@ -120,7 +124,9 @@ sc <- spark_connect(master = "local[2]")
 
 Connecting to a Spark Standalone cluster requires the location of the cluster manager's master instance, this location can be found in the cluster manager web interface as described in the [Standalone Clusters](#clusters-standalone) section, you can find this location by looking for a URL starting with `spark://`.
 
-A connection in standalone mode starts from `sparklyr` which launches `spark-submit`, submits the `sparklyr` application and creates the Spark Context, which requests executors from the Spark Standalone instance running under the given `master` address.
+A connection in standalone mode starts from `sparklyr` which launches `spark-submit`, which then submits the `sparklyr` application and creates the Spark Context, which requests executors from the Spark Standalone instance running under the given `master` address.
+
+Visually, this is described in Figure \@ref(fig:connections-standalone), which is quite similar to the overall connection architecture from Figure \@ref(fig:connections-architecture) but, with additional details that are particular to standalone clusters and `sparklyr`.
 
 ```{r connections-standalone, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='200pt', fig.cap='Spark Standalone Connection Diagram'}
 render_nomnoml("
@@ -150,7 +156,7 @@ Hadoop YARN supports two connection modes: YARN Client and YARN Cluster. However
 
 ### Yarn Client {#connections-yarn-client}
 
-When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as follows:
+When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as shown in Figure \@ref(fig:connections-yarn).
 
 ```{r connections-yarn, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='YARN Client Connection Diagram'}
 render_nomnoml("
@@ -174,9 +180,13 @@ To connect, one can simply run with `master = "yarn"` as follows:
 sc <- spark_connect(master = "yarn-client")
 ```
 
+Behind the scenes, when running YARN in client mode, the cluster manager will do what you would expect a cluster manager would do; it will allocate resources from the cluster and assign them to your Spark application, which the Spark Context will manage for you. The important piece to notice in Figure \@ref(fig:connections-yarn) is that, the Spark Context resides in the same machine where you run R code, this is different when running YARN in cluster mode.
+
 ### Yarn Cluster {#connections-yarn-cluster}
 
-The main difference between YARN Cluster mode and YARN Client mode is that in YARN Cluster mode, the driver node is not required to be the node where R and sparklyr were launched; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using YARN Cluster when the edge node has too many concurrent users, is lacking computing resources or where tools (like RStudio or Jupyter) need to be managed independently of other cluster resources.
+The main difference between YARN in cluster mode and running YARN in client mode is that, in cluster mode, the driver node is not required to be the node where R and sparklyr were launched; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using cluster mode when the edge node has too many concurrent users, when is lacking computing resources or where tools (like RStudio or Jupyter) need to be managed independently of other cluster resources.
+
+Figure \@ref(fig:connections-yarn-cluster) shows how the different components become decoupled when running in cluster mode. Notice there is still a line connecting the client with the cluster manager since, first of all, resources still need to be allocated from the cluster manager; however, once allocated, the client communicates directly with the driver node which will then communicate with the worker nodes. From this diagram, you might think that cluster mode looks much more complicated than the client mode diagram -- this would be a correct assesment; therefore, it's best to avoid cluster mode when possible due to additional configuration overhead that is best to avoid, if possible.
 
 ```{r connections-yarn-cluster, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='240pt', fig.cap='YARN Cluster Connection Diagram'}
 render_nomnoml("
@@ -206,7 +216,7 @@ To connect in YARN Cluster mode, we can simple run:
 sc <- spark_connect(master = "yarn-cluster")
 ```
 
-This connection assumes that the node running `spark_connect()` is properly configured, meaning that, `yarn-site.xml` exists and the `YARN_CONF_DIR` environment variable is properly set. When using Hadoop as a file system, you will also need the `HADOOP_CONF_DIR` environment variable properly configured. This configuration is usually provided by your system administrator and is not something that you would have to manually configure.
+Cluster mode assumes that the node running `spark_connect()` is properly configured, meaning that, `yarn-site.xml` exists and the `YARN_CONF_DIR` environment variable is properly set. When using Hadoop as a file system, you will also need the `HADOOP_CONF_DIR` environment variable properly configured. In addition, you would need to have proper network connectivity between the client and the driver node, not just with sufficient bandwidth but also making sure both machines are reachable and no intermediate. This configuration is usually provided by your system administrator and is not something that you would have to manually configure.
 
 ## Livy {#connections-livy}
 
@@ -332,6 +342,16 @@ When working with cloud providers, there are a few connection differences. For i
 ```{r connections-clusters-databricks}
 library(sparklyr)
 sc <- spark_connect(method = "databricks")
+```
+
+Connecting to EMR works fine through `sc <- spark_connect(master = "yarn")`; however, to properly configure `spark_web()` and RStudio's connection pane you can connect instead by configuring the proxy yourself, `domain` would have to be set to your driver node domain, usually something like `http://ec2-12-345-678-9.us-west-2.compute.amazonaws.com`.
+
+```{r connections-amazon-emr}
+sc <- spark_connect(master = "yarn", config = list(
+  sparklyr.web.spark = ~paste0(domain, ":20888/proxy/", 
+                               invoke(spark_context(sc), "applicationId")),
+  sparklyr.web.yarn = paste0(domain, ":8088")
+))
 ```
 
 Similarly, connections to Spark when using IBM's Watson Studio require you to connect as follows:
