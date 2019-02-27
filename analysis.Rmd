@@ -197,6 +197,81 @@ cars %>%
 
 ## Visualize
 
+Visualizing data is a of vital importance to the success of data analysis.  It helps us, as humans, to gain insights by allowing us to derive patterns from data. 
+
+R excels at data visualizations, and its capabilities for creating plots is extended by the many R packages that focus on this analysis step.   Unfortunately, the vast majority of R functions that create plots depend on the data already being in local memory within R, so they fail when using a remote table inside Spark. 
+
+### Stages of a plot
+
+It is possible to create visualizations in R from data source from Spark. To understand how to do this, let's first break down how computer programs build plots:
+
+```{r echo=FALSE, out.width='100%', out.height='100pt', fig.cap='Stages of a plot', fig.align = 'center', eval = TRUE}
+nomnoml::nomnoml("
+#direction: right
+#edgeMargin: 4
+#padding: 25
+#fontSize: 18
+
+[Raw data] -> [Transformed Data]
+[Transformed Data] -> [Map data to coordinates]
+[Map data to coordinates] -> [Draw plot]
+")
+```
+
+For example, to create a bar plot in R, we simply call a function:
+
+```{r, eval = TRUE, out.width='500pt', out.height='400pt', fig.cap='Plotting inside R', fig.align = 'center', eval = TRUE}
+ggplot(aes(as.factor(cyl), mpg), data = mtcars) + geom_col()
+```
+
+In this case, the `mtcars` raw data was **automatically** transformed into three discreete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn, see *figure 3.8*. As R users, all of the stages of building the plot are conveniently abstracted for us.
+
+```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='R plotting function', fig.align = 'center', eval = TRUE}
+nomnoml::nomnoml("
+#direction: right
+#edgeMargin: 4
+#padding: 25
+#fontSize: 18
+
+[R |
+  [mtcars] -> [Total mpg for each cyl]
+  [Total mpg for each cyl] -> [x = cyl, y = mpg]
+  [x = cyl, y = mpg] -> [Draw plot]
+]
+")
+```
+
+### Transform remote, plot locally
+
+The key to building plots based on a large data set inside Spark is to separate the data transformation from the mapping and drawing of the plot.   
+
+```{r}
+car_group <- cars %>%
+  group_by(cyl) %>%
+  summarise(mpg = sum(mpg, na.rm = TRUE)) %>%
+  collect()
+
+car_group
+```
+
+```
+## # A tibble: 3 x 2
+##     cyl   mpg
+##   <dbl> <dbl>
+## 1     6  138.
+## 2     4  293.
+## 3     8  211.
+```
+
+```{r}
+ggplot(aes(as.factor(cyl), mpg), data = car_group) + geom_col()
+```
+
+```{r, eval = TRUE, out.width='500pt', out.height='400pt', fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+render_image("images/analysis-visualizations-1.png")
+```
+
+
 ## Model
 
 ## Communicate
