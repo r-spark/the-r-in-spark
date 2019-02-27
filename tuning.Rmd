@@ -9,9 +9,9 @@ source("r/render.R")
 
 In previous chapters we've assumed that computation within a Spark cluster works efficiently. While this is true in some cases, it is often required to have some knowledge of the operations Spark runs internally to fine tune configuration settings that will make computations run efficiently. This chapter will explain how Spark computes data over large datasets and provide details on how to fine-tune its operations.
 
-For instance, you will learn how to request more compute nodes and increase the amount of memory which, if you remember, defaults to only 500MB in local instances. You will learn how Spark unifies computation through partioning, shuffling and caching. As mentioned a few chapters back, this is the last chapter describing the internals of Spark; once you complete this chapter, it is our belief that you would have acquired intermediate Spark skills necessary to be productive at using Spark.
+For instance, you will learn how to request more compute nodes and increase the amount of memory which, if you remember, defaults to only 2GB in local instances. You will learn how Spark unifies computation through partioning, shuffling and caching. As mentioned a few chapters back, this is the last chapter describing the internals of Spark; once you complete this chapter, it is our belief that you would have acquired intermediate Spark skills necessary to be productive at using Spark.
 
-In subsequent chapters: Extensions, Distributed R and Streaming; you will learn exciting techniques to deal with specific scaling problems. However, we must first understand how spark performs internal computations, what pieces we can control and why.
+In subsequent chapters: Extensions, Distributed R and Streaming; you will learn exciting techniques to deal with specific modeling, scaling and computation problems. However, we must first understand how spark performs internal computations, what pieces we can control and why.
 
 ## Overview
 
@@ -24,9 +24,9 @@ Spark performs distributed computation by: configuring, partitioning, executing,
 - [**Caching**](#tuning-configuring) preserves data in-memory across different computation cycles.
 - [**Serializing**](#tuning-serializing) transforms data partitions or data collection to be sent over the network to other workers or back to the driver node.
 
-The following diagram shows an example on how a sorting **job** would conceptually work across a cluster of machines. First, Spark would **configure** the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the data is already partitioned, each worker node loads this implicit **partition**; for instance, `4,9,1` is loaded in the first worker node. Afterwards, a custom transformation is applied to each partition in each worker node, this is denoted by `f(x)` in the diagram below and is defined as a **stage** in Spark terminology. In this example, `f(x)` **executes** a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed. Once the execution completes, the result is **shuffled** to the right machine to finish the sorting operation across the entire dataset. Once the data is sorted across the cluster, the sorted results can be optionally **cached** in memory to avoid rerunning this computation multiple times. Finally, a small subset of the cached results is **serialized**, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.
+The diagram in Figure \@ref(fig:tuning-overview) shows an example on how a sorting **job** would conceptually work across a cluster of machines. First, Spark would **configure** the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the data is already partitioned, each worker node loads this implicit **partition**; for instance, `4,9,1` is loaded in the first worker node. Afterwards, a custom transformation is applied to each partition in each worker node, this is denoted by `f(x)` in the diagram below and is defined as a **stage** in Spark terminology. In this example, `f(x)` **executes** a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed. Once the execution completes, the result is **shuffled** to the right machine to finish the sorting operation across the entire dataset. Once the data is sorted across the cluster, the sorted results can be optionally **cached** in memory to avoid rerunning this computation multiple times. Finally, a small subset of the cached results is **serialized**, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.
 
-```{r tuning-overview, echo=FALSE}
+```{r tuning-overview-code, echo=FALSE}
 r2d3::r2d3(
   c(),
   "images/tuning-spark-overview.js",
@@ -34,22 +34,29 @@ r2d3::r2d3(
   css = "images/tuning-spark-overview.css"
 )
 ```
-```{r tuning-overview-render, eval=TRUE, echo=FALSE, fig.cap='Sorting Distributed Data with Apache Spark.', fig.align='center'}
+```{r tuning-overview, eval=TRUE, echo=FALSE, fig.cap='Sorting Distributed Data with Apache Spark.', fig.align='center'}
 render_image("images/tuning-spark-overview.png", "Sorting Distributed Data with Apache Spark.")
 ```
 
-Notice that while the diagram above describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, these lower level operations are not exposed in `sparklyr`, instead, `sparklyr` makes those operations available through higher level commands provided by the data [analysis](#analysis) tools like `dplyr` or `DBI`, [modeling](#modeling) and by using many [community extensions](#using-extensions). For advanced use cases, one can always use the Spark's Scala API through an `sparklyr` [custom extensions](#r-extension) or run custom [distributed R](#distributed) code. 
+Notice that while Figure \@ref(fig:tuning-overview) describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, most of these lower level operations are not exposed in `sparklyr`, instead, `sparklyr` makes those operations available through higher level commands provided by data [analysis](#analysis) tools like `dplyr` or `DBI`, [modeling](#modeling) and by using many [extensions](#extensions). For those few cases where you might need to implement lowe-level operations, you can always use the Spark's Scala API through an `sparklyr` [extensions](#extension) or run custom [distributed R](#distributed) code.
 
-In order to effectively tune Spark computations, there are two tools that are useful to understand: the [**graph visualization**](#tuning-graph-visualization) and the [**event timeline**](#tuning-event-timeline). Both tools are accessible through the [Spark Web Interface](#starting-spark-web-interface) and then selecting a particular job and a particular state under this job.
+In order to effectively tune Spark, we will start by getting familiar with the [**graph visualization**](#tuning-graph-visualization) and the [**event timeline**](#tuning-event-timeline). Both are accessible through the [Spark Web Interface](#starting-spark-web-interface) by selecting a particular job and a particular state under this job.
 
 ### Graph Visualization {#tuning-graph-visualization}
 
-This **graph visualization** is found under each stage by expanding "DAG Visualization". DAG stands for Directed Acyclic Graph, since all computations in Spark move computation forward without repeating previous steps, this helps Spark optimize computations effectively.
+You can find a **graph visualization** under each Spark stage by expanding "DAG Visualization". DAG stands for Directed Acyclic Graph, which means that all computations in Spark move computation forward without repeating previous steps, this helps Spark optimize computations effectively. What you will see in this visualization is a breakdown of the operations that Spark had to perform (or is performing if the stage is still active) to execute your computation. 
 
-What you will see in this visualization is a breakdown of the operations that Spark had to perform (or is performing if the stage is still active) to execute your computation. It's hard to understand what they mean the first time you see them, but as you execute more Spark jobs, this graph will become more familiar and will help you identify unexpected steps to investigate further.
+For instance, lets first sort a dataset using `dplyr::arrange()` and then take a look at the resulting graph from Figure \@ref(fig:tuning-graph-render). Notice that there are no arrows pointing back to previous steps, since Spark makes use of acyclic graphs; then, take a look at the individual steps comprised of mostly mapping operations. It's hard to understand what they mean the first time you see them, but as you execute more Spark jobs, this graph will become more familiar and will help you identify unexpected steps to investigate further.
 
-The following graph represents the stage from ordering a dataset:
+```{r tuning-graph-code, echo=FALSE}
+library(sparklyr)
+library(dplyr)
 
+sc <- spark_connect(master = "local")
+```
+```{r tuning-graph-connect}
+copy_to(sc, iris) %>% arrange(Sepal_Width)
+```
 ```{r tuning-graph, echo=FALSE}
 library(sparklyr)
 library(dplyr)
@@ -73,29 +80,26 @@ webshot::webshot(
 
 spark_disconnect(sc)
 ```
-
-```{r tuning-graph-render, eval=TRUE, echo=FALSE, fig.align = 'center', fig.cap='Spark Graph Visualization.'}
+```{r tuning-graph-render, eval=TRUE, echo=FALSE, fig.align = 'center', fig.cap='Spark graph visualization.'}
 render_image("images/tuning-spark-graph-visualization.png", "Spark Graph Visualization.")
 ```
 
 ### Event Timeline {#tuning-event-timeline}
 
-The **event timeline** is one of the best ways to optimize your Spark jobs is to use the Spark's [web interface](#starting-spark-web-interface), it's also available for each Spark stage and gives you a great summary of how Spark is spending computation cycles. In general, you want to see a lot of CPU usage since the other tasks can be considered overhead. You also want to see one event lane per CPU allocated from the cluster to your job so ensure you are fully utilizing your Spark cluster.
+The **event timeline** is also available for each Spark stage in the Spark's [web interface](#starting-spark-web-interface), this timeline gives you a great summary of how Spark is spending computation cycles. In general, you want to see this timeline consisting of mostly CPU usage since other tasks can be considered overhead.
 
-Lets the take a look at the event timeline for the ordering a data frame by a given column using three partitions:
+Lets sort again a dataset, but this time, we will skip the graph visualization and look instead at the event timeline from Figure \@ref(fig:tuning-timeline-simple).
 
 ```{r tuning-timeline-header, echo=FALSE}
 library(sparklyr)
 library(dplyr)
-```
 
-```{r tuning-timeline-connect}
-spark_connect(master = "local") %>%
-  copy_to(iris, repartition = 3) %>%
-  arrange(Sepal_Width)
+sc <- spark_connect(master = "local")
 ```
-
-```{r tuning-timeline-webshot, echo=FALSE}
+```{r tuning-timeline-sort}
+copy_to(sc, iris, overwrite = T) %>% arrange(Sepal_Width)
+```
+```{r tuning-timeline-simple-webshot, echo=FALSE}
 webshot::webshot(
   "http://localhost:4040/stages/stage/?id=1&attempt=0",
   file = "images/tuning-spark-event-timeline.png",
@@ -106,15 +110,37 @@ webshot::webshot(
       this.click('.expand-task-assignment-timeline');
     }
   );",
+  selector = c(".legend-area", ".table-bordered")
+  )
+```
+```{r tuning-timeline-simple, eval=TRUE, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline.'}
+render_image("images/tuning-spark-event-timeline.png", "Spark event timeline.")
+```
+
+Notice that a single executor is being used, for machines and clusters with multiple CPUs, you should rather expect computation to be parallelized. You can explicitly repartition data as will be explained in the [partitioning](#tunning-partitioning) section, but for now, let's just copy again the dataset using two partitions and explore the event timeline of this operation.
+
+```{r tuning-timeline-sort-repartition}
+copy_to(sc, iris, repartition = 2, overwrite = T) %>% arrange(Sepal_Width)
+```
+
+```{r tuning-timeline-webshot, echo=FALSE}
+webshot::webshot(
+  "http://localhost:4040/stages/stage/?id=8&attempt=0",
+  file = "images/tuning-spark-event-timeline-repartition.png",
+  eval = "
+  casper.waitForSelector(
+    '#task-assignment-timeline',
+    function() {
+      this.click('.expand-task-assignment-timeline');
+    }
+  );",
   selector = c(".legend-area", "#task-summary-table"))
-
-spark_disconnect(sc)
 ```
-```{r tuning-timeline-shot, eval=TRUE, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline.'}
-render_image("images/tuning-spark-event-timeline.png", "Spark Event Timeline.")
+```{r tuning-timeline-repartition, eval=TRUE, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline with .'}
+render_image("images/tuning-spark-event-timeline-repartition.png", "Spark event timeline with repartitions.")
 ```
 
-Which shows that time is spent mostly on computing time, this means that, increasing compute nodes in the cluster should shorten the computation time. In contrast, for timelines heavy on read or write shuffling, requesting more compute nodes might not shorten time and might actualy makes everything slower. There is no concrete set of rules to follow; however, as you gain experience understanding this timeline over multiple operations -- you will develop insight as to how to properly optimize Spark operations.
+Figure \@ref(fig:tuning-timeline-repartition) now shows two execution lanes with most time spent under "Executor Computing Time", this means that this particular operation is making better use of our compute resources. When working with clusters, requesting more compute nodes from your cluster should shorten computation time. In contrast, for timelines heavy on read or write shuffling, requesting more compute nodes might not shorten time and might actualy makes everything slower. There is no concrete set of rules to follow; however, as you gain experience understanding this timeline over multiple operations -- you will develop insight as to how to properly optimize Spark operations.
 
 ## Configuring {#tuning-configuring}
 
