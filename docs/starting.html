@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2019-02-15">
+<meta name="date" content="2019-02-26">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -312,6 +312,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="10.2.1" data-path="distributed.html"><a href="distributed.html#custom-parsers"><i class="fa fa-check"></i><b>10.2.1</b> Custom Parsers</a></li>
 <li class="chapter" data-level="10.2.2" data-path="distributed.html"><a href="distributed.html#partitioned-modeling"><i class="fa fa-check"></i><b>10.2.2</b> Partitioned Modeling</a></li>
 <li class="chapter" data-level="10.2.3" data-path="distributed.html"><a href="distributed.html#grid-search"><i class="fa fa-check"></i><b>10.2.3</b> Grid Search</a></li>
+<li class="chapter" data-level="10.2.4" data-path="distributed.html"><a href="distributed.html#web-apis"><i class="fa fa-check"></i><b>10.2.4</b> Web APIs</a></li>
 </ul></li>
 <li class="chapter" data-level="10.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>10.3</b> Partitions</a></li>
 <li class="chapter" data-level="10.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>10.4</b> Grouping</a></li>
@@ -480,31 +481,31 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Let’s explain what’s going on in <code>copy_to()</code>. The first parameter, <code>sc</code>, gives the function a reference to the active Spark Connection that was earlier created with <code>spark_connect()</code>. The second parameter specifies a dataset to load into Spark. Now, <code>copy_to()</code> returns a reference to the dataset in Spark which R automatically prints. Whenever a Spark dataset is printed, Spark will <strong>collect</strong> some of the records and display them for you. In this particular case, that dataset contains only a few rows describing automobile models and some of their specifications like Horse Power and expected Miles per Gallon.</p>
 <div id="starting-spark-web-interface" class="section level3">
 <h3><span class="header-section-number">2.5.1</span> Web Interface</h3>
-<p>Most of the Spark commands are executed from the R console; however, monitoring and analyzing execution is done through Spark’s web interface. This interface is a web page provided by Spark which can be accessed by running:</p>
+<p>Most of the Spark commands are executed from the R console; however, monitoring and analyzing execution is done through Spark’s web interface, see Figure <a href="starting.html#fig:starting-spark-web">2.1</a>. This interface is a web application provided by Spark which can be accessed by running:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"><span class="kw">spark_web</span>(sc)</a></code></pre></div>
-<div class="figure" style="text-align: center"><span id="fig:starting-spark-render"></span>
+<div class="figure" style="text-align: center"><span id="fig:starting-spark-web"></span>
 <img src="images/starting-spark-web.png" alt="Apache Spark Web Interface." width="992" />
 <p class="caption">
 FIGURE 2.1: Apache Spark Web Interface.
 </p>
 </div>
-<p>As we mentioned, printing the “hello” dataset collected a few records to be displayed in the R console. You can see in the Spark web interface that a job was started to collect this information back from Spark. You can also select the <strong>storage</strong> tab to see the “hello” dataset cached in-memory in Spark:</p>
-<div class="figure" style="text-align: center"><span id="fig:starting-spark-web-storage-render"></span>
+<p>Printing the <code>cars</code> dataset collected a few records to be displayed in the R console. You can see in the Spark web interface that a job was started to collect this information back from Spark. You can also select the <strong>storage</strong> tab to see the “mtcars” dataset cached in-memory in Spark, Figure <a href="starting.html#fig:starting-spark-web-storage">2.2</a>.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-spark-web-storage"></span>
 <img src="images/starting-spark-web-storage.png" alt="Apache Spark Web Interface - Storage Tab." width="992" />
 <p class="caption">
 FIGURE 2.2: Apache Spark Web Interface - Storage Tab.
 </p>
 </div>
-<p>The <a href="#tunning-caching">caching</a> section in the <a href="#tunning">tunning</a> chapter will cover this in detail, but as a start, it’s worth noticing that this dataset is fully loaded into memory since the <strong>fraction cached</strong> is 100%, is useful also to note the <strong>size in memory</strong> column, which tracks the total memory being used by this dataset.</p>
-<p>The executors tab provides a view of your cluster resources. For local connections, you will find only one compute instance active; however, in the <a href="#tunning">tunning</a> you will learn how to request more compute resources. In fact, by default, Spark initializes a local connection using only 500MB of memory, which in practice means that only 384MB are available in Spark for reasons that the tunning chapter will describe and teach how to configure.</p>
-<div class="figure" style="text-align: center"><span id="fig:starting-spark-executors-render"></span>
+<p>Notice that this dataset is fully loaded into memory since the <strong>fraction cached</strong> is 100%, you can know exactly how much memory this dataset is using through the <strong>size in memory</strong> column.</p>
+<p>The executors tab, Figure <a href="starting.html#fig:starting-spark-executors">2.3</a>, provides a view of your cluster resources. For local connections, you will find only one compute instance active with only 2GB of memory allocated to Spark and 384MB available for computation. The <a href="#tunning">tunning</a> chapter you will learn how request more compute instances, resources and learn how memory is allocated.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-spark-executors"></span>
 <img src="images/starting-spark-web-executors.png" alt="Apache Spark Web Interface - Executors Tab." width="992" />
 <p class="caption">
 FIGURE 2.3: Apache Spark Web Interface - Executors Tab.
 </p>
 </div>
-<p>The last tab to mention is the environment tab which lists all the settings for this Spark application; yet again, the <a href="#tunning">tunning</a> will introduce them in detail. As you will learn, most settings don’t need to be configured explicitly, but in order to properly run at scale, you will have to become familiar with them, eventually.</p>
-<div class="figure" style="text-align: center"><span id="fig:starting-spark-environment-render"></span>
+<p>The last tab to explore is the environment tab, Figure <a href="starting.html#fig:starting-spark-environment">2.4</a>, this tab lists all the settings for this Spark application which the <a href="#tunning">tunning</a> will also introduce them in detail. As you will learn, most settings don’t need to be configured explicitly, but in order to properly run at scale, you will have to become familiar with some of them, eventually.</p>
+<div class="figure" style="text-align: center"><span id="fig:starting-spark-environment"></span>
 <img src="images/starting-spark-web-environment.png" alt="Apache Spark Web Interface - Environment Tab." width="992" />
 <p class="caption">
 FIGURE 2.4: Apache Spark Web Interface - Environment Tab.
@@ -536,14 +537,14 @@ FIGURE 2.4: Apache Spark Web Interface - Environment Tab.
 FIGURE 2.5: Horse Power vs Miles per Gallon.
 </p>
 </div>
-<p>The plot shows that as we increase the horse power in a vehicle, their fuel efficiency measured in miles per gallon gets reduced. While this is insightful, it’s hard to predict numerically how increased horse power would affect fuel effiency, modeling can help us overcome this.</p>
+<p>The plot in Figure <a href="starting.html#fig:starting-cars-hp-vs-mpg">2.5</a>, shows that as we increase the horse power in a vehicle, their fuel efficiency measured in miles per gallon gets reduced. While this is insightful, it’s hard to predict numerically how increased horse power would affect fuel effiency, modeling can help us overcome this.</p>
 </div>
 <div id="starting-modeling" class="section level3">
 <h3><span class="header-section-number">2.5.3</span> Modeling</h3>
 <p>While data analysis can take you quite far when understanding data, building a mathematical model that describes and generalizes the dataset is quite powerful. In the <a href="intro.html#intro">introduction</a> chapter you learned that the fields of machine learning and data science make use of mathematical models to perform predictions and find additional insights.</p>
 <p>For instance, we can use a linear model to approximate the relationship between fuel efficiency and horse power:</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1">model &lt;-<span class="st"> </span><span class="kw">ml_linear_regression</span>(cars, mpg <span class="op">~</span><span class="st"> </span>hp)</a></code></pre></div>
-<p>This model can now be used to predict values that are not in the original datset. For instance, we can add entries for cars with horse power beyond 250 and also visualize the predicted values.</p>
+<p>This model can now be used to predict values that are not in the original datset. For instance, we can add entries for cars with horse power beyond 250 and also visualize the predicted values as shown in Figure <a href="starting.html#fig:starting-cars-hp-vs-mpg-prediction">2.6</a>.</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1">model <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb27-2" title="2"><span class="st">  </span><span class="kw">ml_predict</span>(<span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">hp =</span> <span class="dv">250</span> <span class="op">+</span><span class="st"> </span><span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">10</span>))) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb27-3" title="3"><span class="st">  </span><span class="kw">transmute</span>(<span class="dt">hp =</span> hp, <span class="dt">mpg =</span> prediction) <span class="op">%&gt;%</span></a>
@@ -669,16 +670,16 @@ Active: TRUE</code></pre>
 <div id="starting-using-spark-from-rstudio" class="section level2">
 <h2><span class="header-section-number">2.7</span> Using RStudio</h2>
 <p>Since it’s very common to use RStudio with R, <code>sparklyr</code> provides RStudio extensions to help simplify your workflows and increase your productivity while using Spark in RStudio. If you are not familiar with RStudio, take a quick look at the <a href="appendix.html#appendix-using-rstudio">Using RStudio</a> appendix section. Otherwise, there are a couple extensions worth highlighting.</p>
-<p>First, instead of starging a new connections using <code>spark_connect()</code> from RStudio’s R console, you can use the <strong>new connection</strong> action from the <strong>connections pane</strong> and then, select the Spark connection. You can then customize the versions and connect to Spark which will simply generate the right <code>spark_connect()</code> command and execute this in the R console for you.</p>
+<p>First, instead of starging a new connections using <code>spark_connect()</code> from RStudio’s R console, you can use the <strong>new connection</strong> action from the <strong>connections pane</strong> and then, select the Spark connection which will open the dialog shown in Figure <a href="starting.html#fig:starting-rstudio-new-connection">2.7</a>. You can then customize the versions and connect to Spark which will simply generate the right <code>spark_connect()</code> command and execute this in the R console for you.</p>
 <div class="figure" style="text-align: center"><span id="fig:starting-rstudio-new-connection"></span>
 <img src="images/starting-rstudio-new-spark-connection.png" alt="RStudio New Spark Connection." width="583" />
 <p class="caption">
 FIGURE 2.7: RStudio New Spark Connection.
 </p>
 </div>
-<p>Second, once connected to Spark, either by using the R console or through RStudio’s connections pane, RStudio will display your datasets available in the connections pane. This is a useful way to track your existing datasets and provides an easy way to explore each of them.</p>
+<p>Second, once connected to Spark, either by using the R console or through RStudio’s connections pane, RStudio will display your datasets available in the connections pane, see Figure <a href="starting.html#fig:starting-rstudio-connections-pane">2.8</a>. This is a useful way to track your existing datasets and provides an easy way to explore each of them.</p>
 <div class="figure" style="text-align: center"><span id="fig:starting-rstudio-connections-pane"></span>
-<img src="images/starting-rstudio-connections-pane.png" alt="RStudio Connections Pane." width="506" />
+<img src="images/starting-rstudio-connections-pane.png" alt="RStudio Connections Pane." width="574" />
 <p class="caption">
 FIGURE 2.8: RStudio Connections Pane.
 </p>

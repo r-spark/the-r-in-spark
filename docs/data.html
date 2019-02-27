@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2019-02-15">
+<meta name="date" content="2019-02-26">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -312,6 +312,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="10.2.1" data-path="distributed.html"><a href="distributed.html#custom-parsers"><i class="fa fa-check"></i><b>10.2.1</b> Custom Parsers</a></li>
 <li class="chapter" data-level="10.2.2" data-path="distributed.html"><a href="distributed.html#partitioned-modeling"><i class="fa fa-check"></i><b>10.2.2</b> Partitioned Modeling</a></li>
 <li class="chapter" data-level="10.2.3" data-path="distributed.html"><a href="distributed.html#grid-search"><i class="fa fa-check"></i><b>10.2.3</b> Grid Search</a></li>
+<li class="chapter" data-level="10.2.4" data-path="distributed.html"><a href="distributed.html#web-apis"><i class="fa fa-check"></i><b>10.2.4</b> Web APIs</a></li>
 </ul></li>
 <li class="chapter" data-level="10.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>10.3</b> Partitions</a></li>
 <li class="chapter" data-level="10.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>10.4</b> Grouping</a></li>
@@ -418,11 +419,11 @@ sdf_schema()
 </div>
 <div id="pivoting" class="section level3">
 <h3><span class="header-section-number">7.2.2</span> Pivoting</h3>
-<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb103-1" title="1">sensors &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
-<a class="sourceLine" id="cb103-2" title="2">  <span class="dt">sensor =</span> <span class="kw">c</span>(<span class="st">&quot;sensor1&quot;</span>, <span class="st">&quot;sensor1&quot;</span>, <span class="st">&quot;sensor1&quot;</span>, <span class="st">&quot;sensor2&quot;</span>, <span class="st">&quot;sensor2&quot;</span>, <span class="st">&quot;sensor2&quot;</span>),</a>
-<a class="sourceLine" id="cb103-3" title="3">  <span class="dt">time =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</a>
-<a class="sourceLine" id="cb103-4" title="4">  <span class="dt">metric =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>)</a>
-<a class="sourceLine" id="cb103-5" title="5">)</a></code></pre></div>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb104-1" title="1">sensors &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb104-2" title="2">  <span class="dt">sensor =</span> <span class="kw">c</span>(<span class="st">&quot;sensor1&quot;</span>, <span class="st">&quot;sensor1&quot;</span>, <span class="st">&quot;sensor1&quot;</span>, <span class="st">&quot;sensor2&quot;</span>, <span class="st">&quot;sensor2&quot;</span>, <span class="st">&quot;sensor2&quot;</span>),</a>
+<a class="sourceLine" id="cb104-3" title="3">  <span class="dt">time =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</a>
+<a class="sourceLine" id="cb104-4" title="4">  <span class="dt">metric =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>)</a>
+<a class="sourceLine" id="cb104-5" title="5">)</a></code></pre></div>
 <pre><code>   sensor time metric
 1 sensor1    1      1
 2 sensor1    2      2
@@ -430,8 +431,8 @@ sdf_schema()
 4 sensor2    1     10
 5 sensor2    2     20
 6 sensor2    3     30</code></pre>
-<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb105-1" title="1">sensors_tbl &lt;-<span class="st"> </span><span class="kw">sdf_copy_to</span>(sc, sensors, <span class="dt">overwrite =</span> T)</a>
-<a class="sourceLine" id="cb105-2" title="2">sensors_tbl <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sdf_pivot</span>(time <span class="op">~</span><span class="st"> </span>sensor, <span class="dt">fun.aggregate =</span> <span class="kw">c</span>(<span class="st">&quot;avg&quot;</span>, <span class="st">&quot;metric&quot;</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb106-1" title="1">sensors_tbl &lt;-<span class="st"> </span><span class="kw">sdf_copy_to</span>(sc, sensors, <span class="dt">overwrite =</span> T)</a>
+<a class="sourceLine" id="cb106-2" title="2">sensors_tbl <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sdf_pivot</span>(time <span class="op">~</span><span class="st"> </span>sensor, <span class="dt">fun.aggregate =</span> <span class="kw">c</span>(<span class="st">&quot;avg&quot;</span>, <span class="st">&quot;metric&quot;</span>))</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [?? x 3]
    time sensor1 sensor2
 * &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
@@ -457,10 +458,10 @@ spark_read_text()</code></pre>
 <div id="dates" class="section level3">
 <h3><span class="header-section-number">7.4.1</span> Dates</h3>
 <p>Note: Some Spark date/time functions make timezone assumtions, for instance, the following code makes use of <code>to_date()</code> which assumes the timestamp will be given in the local time zone. This is not to discourage use of date/time functions, but to be aware of time zones to be handled with care.</p>
-<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb108-1" title="1"><span class="kw">sdf_len</span>(sc, <span class="dv">1</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb108-2" title="2"><span class="st">  </span><span class="kw">transmute</span>(</a>
-<a class="sourceLine" id="cb108-3" title="3">    <span class="dt">date =</span> <span class="kw">timestamp</span>(<span class="dv">1419126103</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">from_utc_timestamp</span>(<span class="st">&#39;UTC&#39;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">to_date</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as.character</span>()</a>
-<a class="sourceLine" id="cb108-4" title="4">  )</a></code></pre></div>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb109-1" title="1"><span class="kw">sdf_len</span>(sc, <span class="dv">1</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb109-2" title="2"><span class="st">  </span><span class="kw">transmute</span>(</a>
+<a class="sourceLine" id="cb109-3" title="3">    <span class="dt">date =</span> <span class="kw">timestamp</span>(<span class="dv">1419126103</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">from_utc_timestamp</span>(<span class="st">&#39;UTC&#39;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">to_date</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as.character</span>()</a>
+<a class="sourceLine" id="cb109-4" title="4">  )</a></code></pre></div>
 </div>
 </div>
 <div id="sources" class="section level2">
@@ -482,9 +483,9 @@ spark_read_text()</code></pre>
 <div id="switching" class="section level4">
 <h4><span class="header-section-number">7.5.4.1</span> Switching</h4>
 <p>You can query multiple databases registered in Spark using the <code>.</code> syntax, as in:</p>
-<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb109-1" title="1">DBI<span class="op">::</span><span class="kw">dbSendQuery</span>(<span class="st">&quot;SELECT * FROM databasename.table&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb110-1" title="1">DBI<span class="op">::</span><span class="kw">dbSendQuery</span>(<span class="st">&quot;SELECT * FROM databasename.table&quot;</span>)</a></code></pre></div>
 <p>However, if you preffer to switch to a particular database and make it the default, you can run:</p>
-<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb110-1" title="1"><span class="kw">tbl_change_db</span>(sc, “db_name”)</a></code></pre></div>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb111-1" title="1"><span class="kw">tbl_change_db</span>(sc, “db_name”)</a></code></pre></div>
 <p>which an alias over <code>DBI::dbGetQuery(sc, "use db_name”)</code>.</p>
 </div>
 <div id="schemas" class="section level4">
@@ -504,19 +505,19 @@ spark_read_text()</code></pre>
 <h2><span class="header-section-number">7.6</span> Troubleshooting</h2>
 <div id="troubleshoot-csvs" class="section level3">
 <h3><span class="header-section-number">7.6.1</span> Troubleshoot CSVs</h3>
-<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb112-1" title="1"><span class="kw">writeLines</span>(<span class="kw">c</span>(<span class="st">&quot;bad&quot;</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="st">&quot;broken&quot;</span>), <span class="st">&quot;tmp/bad.csv&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb113-1" title="1"><span class="kw">writeLines</span>(<span class="kw">c</span>(<span class="st">&quot;bad&quot;</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="st">&quot;broken&quot;</span>), <span class="st">&quot;tmp/bad.csv&quot;</span>)</a></code></pre></div>
 <p>There are a couple modes that can help troubleshoot parsing issues:
 - <strong>PERMISSIVE</strong>: <code>NULL</code>s are inserted for missing tokens.
 - <strong>DROPMALFORMED</strong>: Drops lines which are malformed.
 - <strong>FAILFAST</strong>: Aborts if encounters any malformed line.</p>
 <p>Which can be used as follows:</p>
-<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb113-1" title="1"><span class="kw">spark_read_csv</span>(</a>
-<a class="sourceLine" id="cb113-2" title="2">  sc,</a>
-<a class="sourceLine" id="cb113-3" title="3">  <span class="st">&quot;bad&quot;</span>,</a>
-<a class="sourceLine" id="cb113-4" title="4">  <span class="st">&quot;tmp/bad.csv&quot;</span>,</a>
-<a class="sourceLine" id="cb113-5" title="5">  <span class="dt">columns =</span> <span class="kw">list</span>(<span class="dt">foo =</span> <span class="st">&quot;integer&quot;</span>),</a>
-<a class="sourceLine" id="cb113-6" title="6">  <span class="dt">infer_schema =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb113-7" title="7">  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">mode =</span> <span class="st">&quot;DROPMALFORMED&quot;</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb114-1" title="1"><span class="kw">spark_read_csv</span>(</a>
+<a class="sourceLine" id="cb114-2" title="2">  sc,</a>
+<a class="sourceLine" id="cb114-3" title="3">  <span class="st">&quot;bad&quot;</span>,</a>
+<a class="sourceLine" id="cb114-4" title="4">  <span class="st">&quot;tmp/bad.csv&quot;</span>,</a>
+<a class="sourceLine" id="cb114-5" title="5">  <span class="dt">columns =</span> <span class="kw">list</span>(<span class="dt">foo =</span> <span class="st">&quot;integer&quot;</span>),</a>
+<a class="sourceLine" id="cb114-6" title="6">  <span class="dt">infer_schema =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb114-7" title="7">  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">mode =</span> <span class="st">&quot;DROPMALFORMED&quot;</span>))</a></code></pre></div>
 <pre><code># Source:   table&lt;bad&gt; [?? x 1]
 # Database: spark_connection
     foo
@@ -525,14 +526,14 @@ spark_read_text()</code></pre>
 2     2
 3     3</code></pre>
 <p>In Spark 2.X, there is also a secret column <code>_corrupt_record</code> that can be used to output those incorrect records:</p>
-<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb115-1" title="1"><span class="kw">spark_read_csv</span>(</a>
-<a class="sourceLine" id="cb115-2" title="2">  sc,</a>
-<a class="sourceLine" id="cb115-3" title="3">  <span class="st">&quot;decimals&quot;</span>,</a>
-<a class="sourceLine" id="cb115-4" title="4">  <span class="st">&quot;tmp/bad.csv&quot;</span>,</a>
-<a class="sourceLine" id="cb115-5" title="5">  <span class="dt">columns =</span> <span class="kw">list</span>(<span class="dt">foo =</span> <span class="st">&quot;integer&quot;</span>, <span class="st">&quot;_corrupt_record&quot;</span> =<span class="st"> &quot;character&quot;</span>),</a>
-<a class="sourceLine" id="cb115-6" title="6">  <span class="dt">infer_schema =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb115-7" title="7">  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">mode =</span> <span class="st">&quot;PERMISIVE&quot;</span>)</a>
-<a class="sourceLine" id="cb115-8" title="8">)</a></code></pre></div>
+<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb116-1" title="1"><span class="kw">spark_read_csv</span>(</a>
+<a class="sourceLine" id="cb116-2" title="2">  sc,</a>
+<a class="sourceLine" id="cb116-3" title="3">  <span class="st">&quot;decimals&quot;</span>,</a>
+<a class="sourceLine" id="cb116-4" title="4">  <span class="st">&quot;tmp/bad.csv&quot;</span>,</a>
+<a class="sourceLine" id="cb116-5" title="5">  <span class="dt">columns =</span> <span class="kw">list</span>(<span class="dt">foo =</span> <span class="st">&quot;integer&quot;</span>, <span class="st">&quot;_corrupt_record&quot;</span> =<span class="st"> &quot;character&quot;</span>),</a>
+<a class="sourceLine" id="cb116-6" title="6">  <span class="dt">infer_schema =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb116-7" title="7">  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">mode =</span> <span class="st">&quot;PERMISIVE&quot;</span>)</a>
+<a class="sourceLine" id="cb116-8" title="8">)</a></code></pre></div>
 <pre><code># Source:   table&lt;decimals&gt; [?? x 2]
 # Database: spark_connection
     foo `_corrupt_record`   
@@ -546,8 +547,8 @@ spark_read_text()</code></pre>
 <div id="column-names" class="section level3">
 <h3><span class="header-section-number">7.6.2</span> Column Names</h3>
 <p>By default, <code>sparklyr</code> sanitizes column names by translating characters like <code>.</code> to <code>_</code>, this was required in Spark 1.6.X to avoid couple nuances in Spark. However, to disable this functionality, you can run the following code:</p>
-<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb117-1" title="1"><span class="kw">options</span>(<span class="dt">sparklyr.sanitize.column.names =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb117-2" title="2">dplyr<span class="op">::</span><span class="kw">copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb118-1" title="1"><span class="kw">options</span>(<span class="dt">sparklyr.sanitize.column.names =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb118-2" title="2">dplyr<span class="op">::</span><span class="kw">copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <pre><code># Source:   table&lt;iris&gt; [?? x 5]
 # Database: spark_connection
    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
