@@ -4,8 +4,208 @@ knitr::opts_chunk$set(eval = FALSE)
 
 # Analysis {#analysis}
 
+## Introduction
 
-## Background
+Previous chapters focused on introducing Spark, R and helping you get started with the tools you need throughout this book. In this chapter you will learn how to do data analysis in Spark from R. Data analysis may become the most common task you will do when working with Spark. This chapter will serve as a foundation to later chapters because concepts from this chapter will apply to properly prepare data when doing modeling, graph processing, streaming and other related topics that might not be strictly considered data analysis.
+
+For those who are new to R, this might be a good time to consider complementing this chapter with [R for Data Science](https://r4ds.had.co.nz/) and other online resources to learn R. This chapter will try to briefly introduce all the concepts it presents, but it would take an entire book to detail all the concepts used when doing data analysis in R.
+
+### Searching for insights
+
+In a data analysis project, the main goal is to search for insights that can be derived from the data.  It is the results of the data transformations identified during the data analysis phase that can later be formalized into artifacts such as dashboard or model pipelines. The output of the data transformations could be models, aggregations or visualizations. Most data analysis projects follow a set of steps outlined in *Figure 3.1*. 
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='General steps of a data analysis', fig.align = 'center', eval = TRUE}
+nomnoml::nomnoml("
+#direction: right
+#edgeMargin: 4
+#padding: 25
+#fontSize: 18
+
+[Import] -> [Understand]
+[Understand |
+  [Wrangle] -> [Visualize] 
+  [Visualize] -> [Model]
+  [Model] -> [Wrangle]
+]
+[Understand] -> [Communicate]
+")
+```
+
+### R as an interface to Spark
+
+For data analysis, the ideal approach  is to let Spark do what its good at. It excels at being a parallel computation engine that works at a large scale.  Spark goes beyond offering generic calculations. Out of the box, Spark includes libraries that actually can do a lot of what analysts usually do in R, but for large amounts of data. *Figure 3.2* paraphrases the four main capabilities available to data analysts in Spark.
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark capabilities', fig.align = 'center', eval = TRUE}
+nomnoml::nomnoml("
+#direction: down
+#fontSize: 18
+#padding: 30
+[Apache Spark |
+  [SQL Engine]
+  [Machine Learning]
+  [Graph analysis]
+  [Streaming]
+]
+")
+```
+
+Thanks to Spark's libraries, most of the Data Science project steps can be completed inside Spark.  For example, selecting, transforming and modeling can all be done by Spark.  The idea is to use R to tell Spark what data operations to run (import, tidy, transform, model), and then focus on only bringing back into R the results of the operation.  
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R as an interface for Spark', fig.align = 'center', eval = TRUE}
+nomnoml::nomnoml("
+#direction: right
+#padding: 40
+#spacing: 140
+#arrowSize:0.2
+#.tag: visual=none
+[<tag>R]Collect results->Push compute[Big;Data]
+[Big;Data]->[R]
+")
+```
+
+The `sparklyr` package focuses on implementing the principle mentioned in the previous section.  Most of its functions are mainly wrappers on top of Spark API calls.
+
+The idea is take advantage of Spark's analysis components instead of R's.  For example, if the analyst needs to fit a Linear Regression model, instead of using the familiar `lm()` function, for data available via Spark, the analyst would use the `ml_linear_regression()` function.  The R function will actually run Scala code that runs the Spark's API model.  
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R as an interface for Spark', fig.align = 'center', eval = TRUE}
+nomnoml::nomnoml("
+[R code |
+	[ml_linear_regression() |
+    	[Wraps Scala code |
+        	var lr = new LinearRegression()
+            var lrModel = lr.fit(training)
+        ]
+    ]
+] 
+")
+```
+
+For more common data manipulation tasks, `sparklyr` provides a back-end for `dplyr`.  This means that already familiar `dplyr` verbs can be used in R, and then `sparklyr` and `dplyr` will translate those actions into Spark SQL statements, see *figure 3.8*.
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='dplyr-to-SQL translation', fig.align = 'center', eval = TRUE}
+nomnoml::nomnoml("
+[R code |
+	[filter(y == 1) |
+    	[Wraps Spark SQL |
+        	... WHERE y = 1 ...
+        ]
+    ]
+] 
+")
+```
+
+## Import
+
+The **local** master will be used for the exercises to allow you as the reader to replicate the code in your laptop. Please, make sure to already have `sparklyr` and a local copy of Spark installed, by using the utility that comes with the package.  For more information on how to do that please see the Local section in the [Connections](conections/#connections-local) chapter.
+
+First, load the `sparklyr` and `dplyr` packages, and open a new **local** connection.
+```{r}
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local")
+```
+
+To aid in conceptualizing where the data is being process, please open the Spark UI of the session the was just created. Keep that tab open in the browser so it is easy to switch back and forth R and the Spark UI.  This is not something that would happen in an everyday analysis, switching between both is just to become familiar with the process.
+
+```{r}
+spark_web(sc)
+```
+
+### Data source
+
+Most commonly at an enterprise, Spark sessions are created on top of Hadoop clusters, so data would already be available to be accessed directly by Spark, via either a Hive table, or through the Hadoop File System (HDFS). 
+
+Because of a **local** master session is being used in this section.  The session itself does not have any data.  So the next step is to prime the session with data, in this case `mtcars`. The `copy_to()` command from `dplyr` can be used for that.
+
+```{r}
+cars <- copy_to(sc, mtcars, "mtcars_remote")
+```
+
+This operation transfered the data into Spark, under a variable called "mtcars_remote".  That name only exists within Spark and not R.  R recognizes the newly uploaded data as `cars`.  In other words, the data is not in R, `cars` is just a pointer that tells `sparklyr` what object inside the Spark session contains the data we are requested.
+
+```{r}
+cars
+```
+```
+## # Source: spark<mtcars_remote> [?? x 11]
+##      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##    <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+##  1  21       6  160    110  3.9   2.62  16.5     0     1     4     4
+##  2  21       6  160    110  3.9   2.88  17.0     0     1     4     4
+##  3  22.8     4  108     93  3.85  2.32  18.6     1     1     4     1
+##  4  21.4     6  258    110  3.08  3.22  19.4     1     0     3     1
+##  5  18.7     8  360    175  3.15  3.44  17.0     0     0     3     2
+##  6  18.1     6  225    105  2.76  3.46  20.2     1     0     3     1
+##  7  14.3     8  360    245  3.21  3.57  15.8     0     0     3     4
+##  8  24.4     4  147.    62  3.69  3.19  20       1     0     4     2
+##  9  22.8     4  141.    95  3.92  3.15  22.9     1     0     4     2
+## 10  19.2     6  168.   123  3.92  3.44  18.3     1     0     4     4
+## # ... with more rows
+```
+
+The output in the R console indicates that it is not a `tibble` or data frame object, it is a remote Spark source.  Because it is a rectangular table, and thanks to the `dplyr` back end provided by `sparklyr`, it can be treated as a local data frame when using `dplyr` verbs.  
+
+## Wrangle
+
+The transformations will occurr not in R, but inside Spark, and then Spark will return the results.
+
+```{r}
+cars %>%
+  group_by(am) %>%
+  summarise(mpg_mean = mean(mpg, na.rm = TRUE))
+```
+```
+## # Source: spark<?> [?? x 2]
+##      am mpg_mean
+##   <dbl>    <dbl>
+## 1     0     17.1
+## 2     1     24.4
+```
+
+Using the `show_query()` command, it is possible to peer into the SQL statement that `sparklyr` and `dplyr` created and sent to Spark.
+
+```{r}
+cars %>%
+  group_by(am) %>%
+  summarise(mpg_mean = mean(mpg, na.rm = TRUE)) %>%
+  show_query()
+```
+```
+## <SQL>
+## SELECT `am`, AVG(`mpg`) AS `mpg_mean`
+## FROM `mtcars_remote`
+## GROUP BY `am`
+```
+As it is evident, it will not be necessary to have to see the resulting query everytime, `dplyr` verbs are being used, but it is a very handy function that helps in familiarizing us with how the translations work.  As the analysis matures, there may be a need to share with non-R users the needed transformations, and at that time the resulting SQL query can be shared which will reduce the friction of implementing a solution, because there is no need to re-code or convert the analysis into some other language.
+
+```{r}
+cars %>%
+  group_by(am) %>%
+  summarise(
+    wt_mean = mean(wt, na.rm = TRUE),
+    mpg_mean = mean(mpg, na.rm = TRUE)
+  )
+```
+```
+## # Source: spark<?> [?? x 3]
+##      am wt_mean mpg_mean
+##   <dbl>   <dbl>    <dbl>
+## 1     0    3.77     17.1
+## 2     1    2.41     24.4
+```
+
+## Visualize
+
+## Model
+
+## Communicate
+
+
+
+## Later review
+
+### Background
 
 Understanding and applying the concepts in this section are going to be key to a successful analysis using R and Spark. It provides the background information about why the methods used in later sections should be applied in practice. Please keep in mind that this chapter focuses on interactive analysis, not Production pipelines.  The line between the two are sometimes blurred, because often there is an expectation for the analyst to use the insights gathered from the Data Science project, and implement a solution that is to be used in Production, such as Shiny application, or a Model Pipeline.  
 
@@ -113,152 +313,3 @@ What drives data analysts to R, is the fact that all of the complicated lower le
 R is not limited to interacting with the languages mentioned above.  There are R packages that allow data analysts to directly interact languages such as python (`reticulate`) and D3 (`r2d3`), or interact indirectly with other languages, such as how the `shiny` package interfaces with JavaScript and HTML on behalf of the developer.
 
 Given this pattern, running R inside Spark, is akin to thinking in terms of running R code using the browser's HTML interpreter, it would not make much sense.  With `shiny`, R writes HTML and JavaScript code to allow the browser do what its good at.  
-
-### Use R as an interface to Spark
-
-The ideal approach is to let Spark do what its good at. Which is to be a escalable and parallel computation engine.  Spark goes beyond offering generic calculations. Out of the box, Spark includes libraries that actually can do a lot of what analysts usually do in R, but for large amounts of data. *Figure 3.4* paraphrases the four main capabilities available to data analysts in Spark.
-
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark capabilities', fig.align = 'center', eval = TRUE}
-nomnoml::nomnoml("
-#direction: down
-#fontSize: 18
-#padding: 30
-[Apache Spark |
-  [SQL Engine]
-  [Machine Learning]
-  [Graph analysis]
-  [Streaming]
-]
-")
-```
-
-Thanks to Spark's libraries, most of the Data Science project steps can be completed inside Spark.  For example, selecting, transforming and modeling can all be done by Spark.  The idea is to use R to tell Spark what data operations to run (import, tidy, transform, model), and then focus on only bringing back into R the results of the operation.  
-
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R as an interface for Spark', fig.align = 'center', eval = TRUE}
-nomnoml::nomnoml("
-#direction: right
-#padding: 40
-#spacing: 140
-#arrowSize:0.2
-#.tag: visual=none
-[<tag>R]Collect results->Push compute[Big;Data]
-[Big;Data]->[R]
-")
-```
-
-### Using `sparklyr` for analysis
-
-The `sparklyr` package focuses on implementing the principle mentioned in the previous section.  Most of its functions are mainly wrappers on top of Spark API calls.
-
-The idea is take advantage of Spark's analysis components instead of R's.  For example, if the analyst needs to fit a Linear Regression model, instead of using the familiar `lm()` function, for data available via Spark, the analyst would use `sparklyr::ml_linear_regression()`.  The R function will actually run Scala code that runs the Spark's API model.  
-
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R as an interface for Spark', fig.align = 'center', eval = TRUE}
-nomnoml::nomnoml("
-[R code |
-	[sparklyr::ml_linear_regression() |
-    	[Wraps Scala code |
-        	var lr = new LinearRegression()
-            var lrModel = lr.fit(training)
-        ]
-    ]
-] 
-")
-```
-
-For more common data manipulation tasks, `sparklyr` provides a back-end for `dplyr`.  This means that already familiar `dplyr` verbs can be used in R, and then `sparklyr` and `dplyr` will translate those actions into Spark SQL statements, see *figure 3.8*.
-
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='dplyr-to-SQL translation', fig.align = 'center', eval = TRUE}
-nomnoml::nomnoml("
-[R code |
-	[dplyr::filter(y == 1) |
-    	[Wraps Spark SQL |
-        	... WHERE y = 1 ...
-        ]
-    ]
-] 
-")
-```
-
-
-## Basics
-
-The **local** master will be used for the exercises to allow you as a reader to replicate the code in your laptop. Make sure to already have installed `sparklyr` and a local copy of Spark, using the utility that comes with the package.  For more information on how to do that please see the Local section in the [Connections])(conections/#connections-local) chapter.
-
-First, load the `sparklyr` and `dplyr` packages, and open a new **local** connection.
-```{r}
-library(sparklyr)
-library(dplyr)
-
-sc <- spark_connect(master = "local")
-```
-
-To aid in conceptualizing where the data is being process, please open the Spark UI of the session the was just created. Keep that tab open in the browser so it is easy to switch back and forth R and the Spark UI.  This is not something that would happen in an everyday analysis, switching between both is just to become familiar with the process.
-
-```{r}
-spark_web(sc)
-```
-
-Most commonly at an enterprise, Spark sessions are created on top of Hadoop clusters, so data would already be available to be accessed directly by Spark, via either a Hive table, or through the Hadoop File System (HDFS). 
-
-Because of a **local** master session is being used in this section.  The session itself does not have any data.  So the next step is to prime the session with data, in this case `mtcars`. The `copy_to()` command from `dplyr` can be used for that.
-
-```{r}
-spark_mtcars <- copy_to(sc, mtcars, "mtcars_remote")
-```
-
-This operation transfered the data into Spark, under a variable called "mtcars_remote".  That name only exists within Spark and not R.  R recognizes the newly uploaded data as `spark_mtcars`.  In other words, the data is not in R, `spark_mtcars` is just a pointer that tells `sparklyr` what object inside the Spark session contains the data we are requested.
-
-```{r}
-spark_mtcars
-```
-#> # Source: spark<mtcars_remote> [?? x 11]
-#>      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
-#>    <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
-#>  1  21       6  160    110  3.9   2.62  16.5     0     1     4     4
-#>  2  21       6  160    110  3.9   2.88  17.0     0     1     4     4
-#>  3  22.8     4  108     93  3.85  2.32  18.6     1     1     4     1
-#>  4  21.4     6  258    110  3.08  3.22  19.4     1     0     3     1
-#>  5  18.7     8  360    175  3.15  3.44  17.0     0     0     3     2
-#>  6  18.1     6  225    105  2.76  3.46  20.2     1     0     3     1
-#>  7  14.3     8  360    245  3.21  3.57  15.8     0     0     3     4
-#>  8  24.4     4  147.    62  3.69  3.19  20       1     0     4     2
-#>  9  22.8     4  141.    95  3.92  3.15  22.9     1     0     4     2
-#> 10  19.2     6  168.   123  3.92  3.44  18.3     1     0     4     4
-#> # ... with more rows
-
-The output in the R console indicates that it is not a `tibble` or data frame object, it is a remote Spark source.  Because it is a rectangular table, and thanks to the `dplyr` back end provided by `sparklyr`, it can be treated as a local data frame when using `dplyr` verbs.  The transformations will occurr not in R, but inside Spark, and then Spark will return the results.
-
-```{r}
-spark_mtcars %>%
-  group_by(am) %>%
-  summarise(mpg_mean = mean(mpg, na.rm = TRUE))
-```
-#> # Source: spark<?> [?? x 2]
-#>      am mpg_mean
-#>   <dbl>    <dbl>
-#> 1     0     17.1
-#> 2     1     24.4
-
-Using the `show_query()` command, it is possible to peer into the SQL statement that `sparklyr` and `dplyr` created and sent to Spark.
-
-```{r}
-spark_mtcars %>%
-  group_by(am) %>%
-  summarise(mpg_mean = mean(mpg, na.rm = TRUE)) %>%
-  show_query()
-```
-#> <SQL>
-#> SELECT `am`, AVG(`mpg`) AS `mpg_mean`
-#> FROM `mtcars_remote`
-#> GROUP BY `am`
-
-As it is evident, it will not be necessary to have to see the resulting query everytime, `dplyr` verbs are being used, but it is a very handy function that helps in familiarizing us with how the translations work.  As the analysis matures, there may be a need to share with non-R users the needed transformations, and at that time the resulting SQL query can be shared which will reduce the friction of implementing a solution, because there is no need to re-code or convert the analysis into some other language.
-
-```{r}
-spark_mtcars %>%
-  group_by(am) %>%
-  summarise(
-    wt_mean = mean(wt, na.rm = TRUE),
-    mpg_mean = mean(mpg, na.rm = TRUE)
-  )
-```
