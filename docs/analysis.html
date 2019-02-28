@@ -419,8 +419,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h3><span class="header-section-number">3.1.1</span> Searching for insights</h3>
 <p>In a data analysis project, the main goal is to search for insights that can be derived from the data. It is the results of the data transformations identified during the data analysis phase that can later be formalized into artifacts such as dashboard or model pipelines. The output of the data transformations could be models, aggregations or visualizations. Most data analysis projects follow a set of steps outlined in <em>Figure 3.1</em>.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-22"></span>
-<div id="htmlwidget-f3a29cd08193dcd32252" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-f3a29cd08193dcd32252">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[Import] -> [Understand]\n[Understand |\n  [Wrangle] -> [Visualize] \n  [Visualize] -> [Model]\n  [Model] -> [Wrangle]\n]\n[Understand] -> [Communicate]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-3a64b7f79dd723fce652" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3a64b7f79dd723fce652">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[Import] -> [Understand]\n[Understand |\n  [Wrangle] -> [Visualize] \n  [Visualize] -> [Model]\n  [Model] -> [Wrangle]\n]\n[Understand] -> [Communicate]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.1: General steps of a data analysis
 </p>
@@ -430,16 +430,16 @@ FIGURE 3.1: General steps of a data analysis
 <h3><span class="header-section-number">3.1.2</span> R as an interface to Spark</h3>
 <p>For data analysis, the ideal approach is to let Spark do what its good at. It excels at being a parallel computation engine that works at a large scale. Spark goes beyond offering generic calculations. Out of the box, Spark includes libraries that actually can do a lot of what analysts usually do in R, but for large amounts of data. <em>Figure 3.2</em> paraphrases the four main capabilities available to data analysts in Spark.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-23"></span>
-<div id="htmlwidget-0523781e6c5be9091bf2" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-0523781e6c5be9091bf2">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: down\n#fontSize: 18\n#padding: 30\n[Apache Spark |\n  [SQL Engine]\n  [Machine Learning]\n  [Graph analysis]\n  [Streaming]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-db9602134d079087866e" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-db9602134d079087866e">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: down\n#fontSize: 18\n#padding: 30\n[Apache Spark |\n  [SQL Engine]\n  [Machine Learning]\n  [Graph analysis]\n  [Streaming]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.2: Spark capabilities
 </p>
 </div>
 <p>Thanks to Spark’s libraries, most of the Data Science project steps can be completed inside Spark. For example, selecting, transforming and modeling can all be done by Spark. The idea is to use R to tell Spark what data operations to run (import, tidy, transform, model), and then focus on only bringing back into R the results of the operation.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-24"></span>
-<div id="htmlwidget-574007518eccae35c69d" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-574007518eccae35c69d">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#padding: 40\n#spacing: 140\n#arrowSize:0.2\n#.tag: visual=none\n[<tag>R]Collect results->Push compute[Big;Data]\n[Big;Data]->[R]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-89f9f9648d89d2165d79" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-89f9f9648d89d2165d79">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#padding: 40\n#spacing: 140\n#arrowSize:0.2\n#.tag: visual=none\n[<tag>R]Collect results->Push compute[Big;Data]\n[Big;Data]->[R]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.3: R as an interface for Spark
 </p>
@@ -447,16 +447,16 @@ FIGURE 3.3: R as an interface for Spark
 <p>The <code>sparklyr</code> package focuses on implementing the principle mentioned in the previous section. Most of its functions are mainly wrappers on top of Spark API calls.</p>
 <p>The idea is take advantage of Spark’s analysis components instead of R’s. For example, if the analyst needs to fit a Linear Regression model, instead of using the familiar <code>lm()</code> function, for data available via Spark, the analyst would use the <code>ml_linear_regression()</code> function. The R function will actually run Scala code that runs the Spark’s API model.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-25"></span>
-<div id="htmlwidget-7134788faa38b70af42e" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7134788faa38b70af42e">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n[R code |\n\t[ml_linear_regression() |\n    \t[Wraps Scala code |\n        \tvar lr = new LinearRegression()\n            var lrModel = lr.fit(training)\n        ]\n    ]\n] \n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-9e150ac5fab672653f6e" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9e150ac5fab672653f6e">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n[R code |\n\t[ml_linear_regression() |\n    \t[Wraps Scala code |\n        \tvar lr = new LinearRegression()\n            var lrModel = lr.fit(training)\n        ]\n    ]\n] \n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.4: R as an interface for Spark
 </p>
 </div>
 <p>For more common data manipulation tasks, <code>sparklyr</code> provides a back-end for <code>dplyr</code>. This means that already familiar <code>dplyr</code> verbs can be used in R, and then <code>sparklyr</code> and <code>dplyr</code> will translate those actions into Spark SQL statements, see <em>figure 3.8</em>.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-26"></span>
-<div id="htmlwidget-6cd9c32f130a403a8133" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6cd9c32f130a403a8133">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n[R code |\n\t[filter(y == 1) |\n    \t[Wraps Spark SQL |\n        \t... WHERE y = 1 ...\n        ]\n    ]\n] \n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-d971f4db40e71af9b2bd" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d971f4db40e71af9b2bd">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n[R code |\n\t[filter(y == 1) |\n    \t[Wraps Spark SQL |\n        \t... WHERE y = 1 ...\n        ]\n    ]\n] \n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.5: dplyr-to-SQL translation
 </p>
@@ -538,8 +538,8 @@ FIGURE 3.5: dplyr-to-SQL translation
 <h3><span class="header-section-number">3.4.1</span> Stages of a plot</h3>
 <p>It is possible to create visualizations in R from data source from Spark. To understand how to do this, let’s first break down how computer programs build plots:</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-34"></span>
-<div id="htmlwidget-5eb5a7a662d41df9af8d" style="width:100%;height:100pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-5eb5a7a662d41df9af8d">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[Raw data] -> [Transformed Data]\n[Transformed Data] -> [Map data to coordinates]\n[Map data to coordinates] -> [Draw plot]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-3f860077b612c6ac1249" style="width:100%;height:100pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3f860077b612c6ac1249">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[Raw data] -> [Transformed Data]\n[Transformed Data] -> [Map data to coordinates]\n[Map data to coordinates] -> [Draw plot]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.6: Stages of a plot
 </p>
@@ -554,8 +554,8 @@ FIGURE 3.7: Plotting inside R
 </div>
 <p>In this case, the <code>mtcars</code> raw data was <strong>automatically</strong> transformed into three discreete aggregated numbers, then each result was mapped into an <code>x</code> and <code>y</code> plane, and then the plot was drawn, see <em>figure 3.8</em>. As R users, all of the stages of building the plot are conveniently abstracted for us.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-36"></span>
-<div id="htmlwidget-8a9303cf1a7fd4ae05ce" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-8a9303cf1a7fd4ae05ce">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[R |\n  [mtcars] -> [Total mpg for each cyl]\n  [Total mpg for each cyl] -> [x = cyl, y = mpg]\n  [x = cyl, y = mpg] -> [Draw plot]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-416ec5261a2e83e79cf7" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-416ec5261a2e83e79cf7">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[R |\n  [mtcars] -> [Total mpg for each cyl]\n  [Total mpg for each cyl] -> [x = cyl, y = mpg]\n  [x = cyl, y = mpg] -> [Draw plot]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.8: R plotting function
 </p>
@@ -598,8 +598,8 @@ FIGURE 3.9: Plot from Spark
 <p>Understanding and applying the concepts in this section are going to be key to a successful analysis using R and Spark. It provides the background information about why the methods used in later sections should be applied in practice. Please keep in mind that this chapter focuses on interactive analysis, not Production pipelines. The line between the two are sometimes blurred, because often there is an expectation for the analyst to use the insights gathered from the Data Science project, and implement a solution that is to be used in Production, such as Shiny application, or a Model Pipeline.</p>
 <p>As illustrated in <em>Figure 3.1</em>, a typical Data Science project is made up of multiple steps. Because its capabilities, every single step for most analyses can be completed inside R.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-40"></span>
-<div id="htmlwidget-7f5d14ba1537c053df80" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7f5d14ba1537c053df80">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[R |\n  [Import] -> [Tidy]\n  [Tidy] -> [Understand |\n      [Transform] -> [Visualize] \n      [Visualize] -> [Model]\n      [Model] -> [Transform]\n  ] \n  [Understand] -> [Share]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-8d765d145328bfc8b5aa" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-8d765d145328bfc8b5aa">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[R |\n  [Import] -> [Tidy]\n  [Tidy] -> [Understand |\n      [Transform] -> [Visualize] \n      [Visualize] -> [Model]\n      [Model] -> [Transform]\n  ] \n  [Understand] -> [Share]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.10: Typical Data Science Project
 </p>
@@ -610,8 +610,8 @@ FIGURE 3.10: Typical Data Science Project
 <h3><span class="header-section-number">3.7.2</span> Working with Big Data</h3>
 <p>R developers are used to a very specific cadence: Import the data into R, and analyze the data in-memory. But what happens when dealing with Big Data?</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-41"></span>
-<div id="htmlwidget-bbf2bf0c1fc16449b6a3" style="width:80%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-bbf2bf0c1fc16449b6a3">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#spacing: 100\n#arrowSize: 0.3\n#leading: 5\n#padding: 30\n#fontSize: 15\n#.tag: visual=none\n[Big Data] -> Import[<tag>R]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-b87b6cefd7739a6ecf3d" style="width:80%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b87b6cefd7739a6ecf3d">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: right\n#spacing: 100\n#arrowSize: 0.3\n#leading: 5\n#padding: 30\n#fontSize: 15\n#.tag: visual=none\n[Big Data] -> Import[<tag>R]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.11: Working with Big Data
 </p>
@@ -631,16 +631,16 @@ FIGURE 3.11: Working with Big Data
 <p>Yes, it is true that <code>sparklyr</code> offers a way to run R code inside Spark. But that is reserved for a very specific use case: embarrassingly parallel jobs. In other words, if the data to be analyzed needs to be first divided into segments, and then the R code is applied to each segment.</p>
 <p>This is not due to anything lacking on <code>sparklyr</code>, or Spark for that matter. It boils down to how Spark divides its operations. When running R code, Spark can run one segment per Spark Executor. In the example on <em>Figure 3.2</em>, the data is split by the company’s customer data, and then a model is fitted for each customer.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-42"></span>
-<div id="htmlwidget-4dd2a7d55a3ccf372eed" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-4dd2a7d55a3ccf372eed">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: down\n#padding: 20\n#fontSize: 18\n#edgeMargin: 10\n[Spark |\n\t[Executor 1 | [R| Model for customer A]] \n  [Executor 2 | [R| Model for customer B]] \n  [Executor 3 | [R| Model for customer C]] \n] \n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-4cb2fd9b42275a00af5b" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4cb2fd9b42275a00af5b">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: down\n#padding: 20\n#fontSize: 18\n#edgeMargin: 10\n[Spark |\n\t[Executor 1 | [R| Model for customer A]] \n  [Executor 2 | [R| Model for customer B]] \n  [Executor 3 | [R| Model for customer C]] \n] \n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.12: Works for embarassing parallel jobs
 </p>
 </div>
 <p>The ability to split a job into multiple executors is a core strength of Spark. It allows the job to run faster because theoretically, each executor has its own discrete amount of machine resources it can use to complete its assigned part of the job. This means that if the data is not split, or segmented, then the entire R job will run on a single executor, and thus only using that executor’s limited resources will be used. Additionally, the job will take much longer to complete, if it completes at all, because the are no other executors helping to complete the job in parallel, see <em>Figure 3.3</em>.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-43"></span>
-<div id="htmlwidget-c3646d2d2c8c8651867b" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-c3646d2d2c8c8651867b">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: down\n#padding: 20\n#fontSize: 18\n#edgeMargin: 10\n[Spark |\n\t[Executor 1 | [R | Entire;model]]\n  [Executor 2 | [Nothing]] \n  [Executor 3 | [Nothing]] \n] \n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-5b5363dd8be75b975248" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5b5363dd8be75b975248">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#direction: down\n#padding: 20\n#fontSize: 18\n#edgeMargin: 10\n[Spark |\n\t[Executor 1 | [R | Entire;model]]\n  [Executor 2 | [Nothing]] \n  [Executor 3 | [Nothing]] \n] \n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.13: Running a single large job
 </p>

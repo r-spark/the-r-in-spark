@@ -417,8 +417,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">10.1</span> Overview</h2>
 <p>The <a href="intro.html#intro">Introduction</a> chapter introduced MapReduce as a technique capable of processing large scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The <a href="tuning.html#tuning">Tuning</a> chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually similar to:</p>
 <div class="figure" style="text-align: center"><span id="fig:distributed-times-ten"></span>
-<div id="htmlwidget-e06a54dcdcba5a434abe" style="width:580pt;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-e06a54dcdcba5a434abe">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n\n\n[Data |\n  [1]\n  [2]\n  [3]\n]->[Worker |\n  [1] -> [f(x) = 10 * x]\n  [2] -> [f(x) = 10 * x]\n  [3] -> [f(x) = 10 * x]\n  [f(x) = 10 * x] -> [10]\n  [f(x) = 10 * x] -> [20]\n  [f(x) = 10 * x] -> [30]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-9edb61d4108b4717c055" style="width:580pt;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9edb61d4108b4717c055">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n\n\n[Data |\n  [1]\n  [2]\n  [3]\n]->[Worker |\n  [1] -> [f(x) = 10 * x]\n  [2] -> [f(x) = 10 * x]\n  [3] -> [f(x) = 10 * x]\n  [f(x) = 10 * x] -> [10]\n  [f(x) = 10 * x] -> [20]\n  [f(x) = 10 * x] -> [30]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 10.1: Conceptual mapping operation when multiplying by ten.
 </p>
@@ -434,8 +434,8 @@ FIGURE 10.1: Conceptual mapping operation when multiplying by ten.
 <p>Notice that <code>~ 10 * .x</code> is plain R code executed across all worker nodes; the <code>~</code> operator is defined in the <code>rlang</code> package and provides a compact definition of a function equivalent to <code>function(.x) 10 * .x</code> or what is also known as an anonymous function or lambda expression.</p>
 <p>Now, the first thing to notice is that <code>f(x)</code> takes an R data frame as input and must also produce an R data frame as output, conceptually this looks as follows:</p>
 <div class="figure" style="text-align: center"><span id="fig:distributed-spark-apply-input-output"></span>
-<div id="htmlwidget-96e0177b2ff987153f5e" style="width:580pt;height:120pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-96e0177b2ff987153f5e">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n\n\n[DataFrame]->[f(x)]\n[f(x)]->[DataFrame']\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-fa3294aea88319ab0ee8" style="width:580pt;height:120pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-fa3294aea88319ab0ee8">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#padding: 16\n#fontSize: 18\n#direction: right\n#lineWidth:2\n#leading:1\n#spacing: 20\n\n\n[DataFrame]->[f(x)]\n[f(x)]->[DataFrame']\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 10.2: Expected function signature in spark_apply() mappings.
 </p>

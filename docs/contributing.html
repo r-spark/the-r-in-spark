@@ -477,8 +477,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><a href="https://cran.r-project.org/">CRAN</a>, which stands for the Comprehensive R Archive Network, provides a repository of packages that can be easily installable and which are carefully reviewed before they are made available. You can read more about the release process under <a href="http://r-pkgs.had.co.nz/release.html">releasing a package</a> and Hadley Wickam’s book on packages: <a href="@wickham2015r">R Packages: Organize, Test, Document, and Share Your Code</a>. CRAN users are always encouraged to install the latest version of a package, which means that <code>sparklyr</code> also needs to support multiple versions of Spark.</p>
 <p>Therefore, at a high level, <code>sparklyr</code> is composed of: R code and versioned Scala code:</p>
 <div class="figure" style="text-align: center"><span id="fig:contributing-sparklyr"></span>
-<div id="htmlwidget-c5566b235757bd7fc72d" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-c5566b235757bd7fc72d">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[sparklyr|\n  [R Code]\n  [Scala Code|\n    [Spark 1.6.x]\n    [Spark 2.x.0]\n  ]\n]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-620583ae1523168d3a41" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-620583ae1523168d3a41">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[sparklyr|\n  [R Code]\n  [Scala Code|\n    [Spark 1.6.x]\n    [Spark 2.x.0]\n  ]\n]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.1: Sparklyr Package Architecture
 </p>
@@ -488,8 +488,8 @@ FIGURE 12.1: Sparklyr Package Architecture
 <p>When connecting to Spark using <code>spark_connect()</code>, <code>sparklyr</code> submits the correct version of the <code>sparklyr</code> JAR to Spark which then Spark executes. We will refer to this submitted application as the <strong>sparklyr backend</strong> and the R code as the <strong>sparklyr frontend</strong>. <a href="https://en.wikipedia.org/wiki/Front_and_back_ends">Fontend and backend</a> are common software engineer concepts related to separating the user interface, the R console in this case, with the data layer, Spark data proessing in this context. For most <a href="contributing.html#connections-1">connections</a>, the backend is usually submitted by <code>sparklyr</code> to Spark using <code>spark-submit</code>, which is a command line tool well-known in Spark; however, for others connections, like Livy, the backend is submitted through Livy’s HTTP interface.</p>
 <p>Once the backend is submitted to Spark, the frontend communicates to the backend using socket connections, expect for Livy connections where this happens over HTTP:</p>
 <div class="figure" style="text-align: center"><span id="fig:contributing-connection"></span>
-<div id="htmlwidget-6cc60b31a72a6f2c7d24" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6cc60b31a72a6f2c7d24">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[R|\n  [sparklyr|\n    [frontend]\n  ]\n]\n[Spark|\n  [sparklyr|\n    [backend]\n  ]\n]\n#.hidden: visual=hidden\n[<hidden> Socket / HTTP Connection]\n[R]-[Socket / HTTP Connection]\n[Socket / HTTP Connection]-[Spark]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-ab5d352daca3b713c21d" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ab5d352daca3b713c21d">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[R|\n  [sparklyr|\n    [frontend]\n  ]\n]\n[Spark|\n  [sparklyr|\n    [backend]\n  ]\n]\n#.hidden: visual=hidden\n[<hidden> Socket / HTTP Connection]\n[R]-[Socket / HTTP Connection]\n[Socket / HTTP Connection]-[Spark]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.2: Sparklyr Connection Architecture
 </p>
