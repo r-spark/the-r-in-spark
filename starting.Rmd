@@ -377,25 +377,25 @@ While nesting data makes it harder to read, it is a requirement while dealing wi
 
 For those few cases where a particular functionality is not available in Spark and no extension has been developed, you can consider distributing your own R code across the Spark cluster. This is a powerful tools but comes with additional complexity that you should only use as a last resort option.
 
-Suppose that we need to randomize our dataset using a well-known technique like R's `jitter` function; in this case, we can apply jitter across the dataset by running custom R code:
+Suppose that we need to round all the values across all the columns in our dataset, one approach would be running custom R code making use of R's `round()` function:
 
 ```{r}
-cars %>% spark_apply(~sapply(.x, jitter))
+cars %>% spark_apply(~round(.x))
 ```
 ```
 # Source: spark<?> [?? x 11]
-     mpg   cyl  disp    hp  drat    wt  qsec     vs       am  gear  carb
-   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>  <dbl>    <dbl> <dbl> <dbl>
- 1  21.0  6.09  160. 110.   3.90  2.62  16.5 -0.138  0.950    3.93 3.92 
- 2  21.0  5.76  160. 110.   3.90  2.87  17.0  0.154  1.13     3.91 4.01 
- 3  22.8  4.22  108.  93.0  3.85  2.32  18.6  1.00   0.851    3.99 1.03 
- 4  21.4  5.70  258. 110.   3.08  3.22  19.4  1.04   0.0536   2.93 1.18 
- 5  18.7  8.00  360. 175.   3.15  3.44  17.0  0.182 -0.0256   2.86 2.08 
- 6  18.1  5.66  225. 105.   2.76  3.46  20.2  1.02  -0.00437  3.10 0.996
- 7  14.3  7.92  360. 245.   3.21  3.57  15.8  0.148  0.166    3.12 4.06 
- 8  24.4  4.21  147.  62.1  3.69  3.19  20.0  1.10  -0.192    4.12 2.16 
- 9  22.8  3.83  141.  94.8  3.92  3.15  22.9  0.936 -0.0637   3.82 2.14 
-10  19.2  6.18  168. 123.   3.92  3.44  18.3  1.04  -0.102    4.00 4.16 
+     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+ 1    21     6   160   110     4     3    16     0     1     4     4
+ 2    21     6   160   110     4     3    17     0     1     4     4
+ 3    23     4   108    93     4     2    19     1     1     4     1
+ 4    21     6   258   110     3     3    19     1     0     3     1
+ 5    19     8   360   175     3     3    17     0     0     3     2
+ 6    18     6   225   105     3     3    20     1     0     3     1
+ 7    14     8   360   245     3     4    16     0     0     3     4
+ 8    24     4   147    62     4     3    20     1     0     4     2
+ 9    23     4   141    95     4     3    23     1     0     4     2
+10    19     6   168   123     4     3    18     1     0     4     4
 # … with more rows
 ```
 
