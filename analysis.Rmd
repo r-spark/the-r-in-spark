@@ -8,7 +8,7 @@ knitr::opts_chunk$set(eval = FALSE)
 
 Previous chapters focused on introducing Spark, R and helping you get started with the tools you need throughout this book. In this chapter you will learn how to do data analysis in Spark from R. Data analysis may become the most common task you will do when working with Spark. This chapter will serve as a foundation to later chapters because concepts from this chapter will apply to properly prepare data when doing modeling, graph processing, streaming and other related topics that might not be strictly considered data analysis.
 
-For those who are new to R, this might be a good time to consider complementing this chapter with [R for Data Science](https://r4ds.had.co.nz/) and other online resources to learn R. This chapter will try to briefly introduce all the concepts it presents, but it would take an entire book to detail all the concepts used when doing data analysis in R.
+For those who are new to R, this might be a good time to consider complementing this chapter with [R for Data Science](https://r4ds.had.co.nz/) and other online resources to learn R. This chapter will try to briefly introduce all the concepts it presents.
 
 ### Searching for insights
 
@@ -122,7 +122,7 @@ Because of a **local** master session is being used in this section.  The sessio
 cars <- copy_to(sc, mtcars, "mtcars_remote")
 ```
 
-This operation transfered the data into Spark, under a variable called "mtcars_remote".  That name only exists within Spark and not R.  R recognizes the newly uploaded data as `cars`.  In other words, the data is not in R, `cars` is just a pointer that tells `sparklyr` what object inside the Spark session contains the data we are requested.
+This operation transferred the data into Spark, under a variable called "mtcars_remote".  That name only exists within Spark and not R.  R recognizes the newly uploaded data as `cars`.  In other words, the data is not in R, `cars` is just a pointer that tells `sparklyr` what object inside the Spark session contains the data we are requested.
 
 ```{r}
 cars
@@ -148,7 +148,7 @@ The output in the R console indicates that it is not a `tibble` or data frame ob
 
 ## Wrangle
 
-The transformations will occurr not in R, but inside Spark, and then Spark will return the results.
+The transformations will occur not in R, but inside Spark, and then Spark will return the results.
 
 ```{r}
 cars %>%
@@ -177,7 +177,7 @@ cars %>%
 ## FROM `mtcars_remote`
 ## GROUP BY `am`
 ```
-As it is evident, it will not be necessary to have to see the resulting query everytime, `dplyr` verbs are being used, but it is a very handy function that helps in familiarizing us with how the translations work.  As the analysis matures, there may be a need to share with non-R users the needed transformations, and at that time the resulting SQL query can be shared which will reduce the friction of implementing a solution, because there is no need to re-code or convert the analysis into some other language.
+As it is evident, it will not be necessary to have to see the resulting query every time, `dplyr` verbs are being used, but it is a very handy function that helps in familiarizing us with how the translations work.  As the analysis matures, there may be a need to share with non-R users the needed transformations, and at that time the resulting SQL query can be shared which will reduce the friction of implementing a solution, because there is no need to re-code or convert the analysis into some other language.
 
 ```{r}
 cars %>%
@@ -197,7 +197,7 @@ cars %>%
 
 ## Visualize
 
-Visualizing data is a of vital importance to the success of data analysis.  It helps us, as humans, to gain insights by allowing us to derive patterns from data. 
+Visualizing data is a of vital importance to the success of data analysis.  It helps us, as humans, to derive patterns from data.
 
 R excels at data visualizations, and its capabilities for creating plots is extended by the many R packages that focus on this analysis step.   Unfortunately, the vast majority of R functions that create plots depend on the data already being in local memory within R, so they fail when using a remote table inside Spark. 
 
@@ -224,7 +224,7 @@ For example, to create a bar plot in R, we simply call a function:
 ggplot(aes(as.factor(cyl), mpg), data = mtcars) + geom_col()
 ```
 
-In this case, the `mtcars` raw data was **automatically** transformed into three discreete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn, see *figure 3.8*. As R users, all of the stages of building the plot are conveniently abstracted for us.
+In this case, the `mtcars` raw data was **automatically** transformed into three discrete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn, see *figure 3.8*. As R users, all of the stages of building the plot are conveniently abstracted for us.
 
 ```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='R plotting function', fig.align = 'center', eval = TRUE}
 nomnoml::nomnoml("
@@ -243,7 +243,26 @@ nomnoml::nomnoml("
 
 ### Transform remote, plot locally
 
-The key to building plots based on a large data set inside Spark is to separate the data transformation from the mapping and drawing of the plot.   
+In essence, the approach for visualizing is the same as in wrangling.  Push the computation to Spark, and then collect the results in R for plotting.  The heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, the plot that will be used is a simple column plot, as oppossed to a histogram plot, because there is no need for R to re-calculate the bins.
+
+
+```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark & R', fig.align = 'center', eval = TRUE}
+nomnoml::nomnoml("
+#direction: right
+#edgeMargin: 4
+#padding: 25
+#fontSize: 18
+[Spark |
+  [Raw data] -> [Transformed Data]
+]
+[R |
+  [Map to coordinates] -> [Draw plot]
+]
+[Spark] -> [R]
+")
+```
+
+There are a couple of key steps when codifying this approach.  The first is to ensure that the transformation operations happen inside Spark, in the example below, `group_by()` and `summarise()` will run as SQL inside the Spark session.  The second is to bring the results back into R after the data has been transformed. The commands to use for that are `pull()` or `collect()`.  Make sure to also run these two steps in that order, becuase if `collect()` is run first, then all R will try to ingest the entire data set from Spark, which depending on the size of the data, will slow down or may even bring down your system.
 
 ```{r}
 car_group <- cars %>%
@@ -263,6 +282,8 @@ car_group
 ## 3     8  211.
 ```
 
+In the example, now that the data has been pre-aggregated and collected into R, only three records are passed to the plotting function.
+
 ```{r}
 ggplot(aes(as.factor(cyl), mpg), data = car_group) + geom_col()
 ```
@@ -271,6 +292,22 @@ ggplot(aes(as.factor(cyl), mpg), data = car_group) + geom_col()
 render_image("images/analysis-visualizations-1.png")
 ```
 
+Thanks to the interoperability of the `tidyverse` packages, the entire operation can be written in a single piped code segment:
+
+```{r}
+cars %>%
+  group_by(cyl) %>%
+  summarise(mpg = sum(mpg, na.rm = TRUE)) %>%
+  collect() %>%
+  ggplot(aes(as.factor(cyl), mpg)) + 
+  geom_col()
+```
+
+```{r, eval = TRUE, out.width='500pt', out.height='400pt', fig.align = 'center', echo = FALSE}
+render_image("images/analysis-visualizations-1.png")
+```
+
+Most visualizations can be easily produced using this approach.  There are others kinds of visualizations that may require more work, such as Histograms and box plots
 
 ## Model
 
