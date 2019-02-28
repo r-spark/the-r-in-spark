@@ -217,7 +217,13 @@ render_image("images/clusters-amazon-emr.png", "Amazon EMR Landing Site.")
 Detailed instructions on using R with Amazon EMR was published under Amazon's Big Data Blog: ["Running sparklyr on Amazon EMR"](https://aws.amazon.com/blogs/big-data/running-sparklyr-rstudios-r-interface-to-spark-on-amazon-emr/)[@clusters-amazon-emr-sparklyr-blog], this post introduced the launch of `sparklyr` and instructions to configure EMR clusters with `sparklyr`. For instance, it suggests you can use the [Amazon Command Line Interface](https://aws.amazon.com/cli/) to launch a cluster with three nodes as follows:
 
 ```{bash eval=FALSE}
-aws emr create-cluster --applications Name=Hadoop Name=Spark Name=Hive --release-label emr-5.8.0 --service-role EMR_DefaultRole --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.2xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.2xlarge --bootstrap-action Path=s3://aws-bigdata-blog/artifacts/aws-blog-emr-rstudio-sparklyr/rstudio_sparklyr_emr5.sh,Args=["--user-pw", "<password>", "--rstudio", "--arrow"] --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole
+aws emr create-cluster --applications Name=Hadoop Name=Spark Name=Hive \
+  --release-label emr-5.8.0 --service-role EMR_DefaultRole --instance-groups \
+  InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.2xlarge \
+  InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.2xlarge \ 
+  --bootstrap-action Path=s3://aws-bigdata-blog/artifacts/aws-blog-emr-\
+rstudio-sparklyr/rstudio_sparklyr_emr5.sh,Args=["--user-pw", "<password>", \
+  "--rstudio", "--arrow"] --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole
 ```
 
 You can then see the cluster launching, and eventually running under the AWS portal, see Figure \@ref(fig:clusters-amazon-emr-launching).
@@ -287,8 +293,9 @@ render_image("images/clusters-dataproc-launching.png", "Launching a Dataproc clu
 Once created, ports can be forwarded to allow you to access this cluster from your machine; for instance, by launching Chrome to make use of this proxy and securely connect to the Dataproc cluster. Configuring this connection looks as follows:
 
 ```{bash eval=FALSE}
-gcloud compute ssh sparklyr-m --project=<project> --zone=<region> -- -D 1080 -N
-"<path to chrome>" --proxy-server="socks5://localhost:1080" --user-data-dir="/tmp/sparklyr-m" http://sparklyr-m:8088
+gcloud compute ssh sparklyr-m --project=<project> --zone=<region> -- -D 1080 \
+  -N "<path to chrome>" --proxy-server="socks5://localhost:1080" \
+  --user-data-dir="/tmp/sparklyr-m" http://sparklyr-m:8088
 ```
 
 There are various tutorials available under [cloud.google.com/dataproc/docs/tutorials](https://cloud.google.com/dataproc/docs/tutorials), including, a comprehensive tutorial to configure RStudio and `sparklyr`[@clusters-dataproc-rstudio].
@@ -416,6 +423,6 @@ livy_service_stop()
 
 This chapter explained the history and tradeoffs of on-premise, cloud computing and presented Kubernetes as a promising framework to provide flexibility across on-premise and cloud providers. It also introduced cluster managers (Spark Standalone, YARN, Mesos and Kubernetes) as the software needed to run Spark as a cluster application. This chapter briefly mentioned on-premise cluster providers like Cloudera, Hortonworks and MapR as well as the major cloud providers: Amazon, Google and Microsoft.
 
-While this chapter provided a solid foundation to understand current cluster computing trends,  tools and providers useful to perform data science at scale; it did not provide a comprehensive framework to decide which cluster technologies to choose. Instead, use this chapter as an overview and a starting point to reach out to additional resources to complement your understanding the cluster stack that best fits your organization needs.
+While this chapter provided a solid foundation to understand current cluster computing trends,  tools and providers useful to perform data science at scale; it did not provide a comprehensive framework to decide which cluster technologies to choose. Instead, use this chapter as an overview and a starting point to reach out to additional resources to help you find the cluster stack that best fits your organization needs.
 
 The next chapter, [connections](#connections), will focus on understanding how to connect to existing clusters; therefore, it assumes a Spark cluster like the ones presented in this chapter, is already available to you.

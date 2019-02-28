@@ -91,9 +91,9 @@ Where `<cluster-master>` is set to the correct cluster manager master for [Spark
 
 ## Local {#connections-local}
 
-When connecting to Spark in local mode, Spark starts as a single application simulating a cluster with a single node, this is not a proper computing cluster but it's ideal to perform work offline and while troubleshooting issues. A local connection to Spark is represented in Figure \@ref(fig:connections-local).
+When connecting to Spark in local mode, Spark starts as a single application simulating a cluster with a single node, this is not a proper computing cluster but it's ideal to perform work offline and while troubleshooting issues. A local connection to Spark is represented in Figure \@ref(fig:connections-local-diagram).
 
-```{r connections-local, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='160pt', fig.cap='Local Connection Diagram'}
+```{r connections-local-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='160pt', fig.cap='Local Connection Diagram'}
 render_nomnoml("
 [Driver|
   [R]
@@ -156,9 +156,9 @@ Hadoop YARN supports two connection modes: YARN Client and YARN Cluster. However
 
 ### Yarn Client {#connections-yarn-client}
 
-When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as shown in Figure \@ref(fig:connections-yarn).
+When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as shown in Figure \@ref(fig:connections-yarn-client-diagram).
 
-```{r connections-yarn, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='YARN Client Connection Diagram'}
+```{r connections-yarn-client-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='YARN Client Connection Diagram'}
 render_nomnoml("
 [Driver |
   [R]
@@ -186,9 +186,9 @@ Behind the scenes, when running YARN in client mode, the cluster manager will do
 
 The main difference between YARN in cluster mode and running YARN in client mode is that, in cluster mode, the driver node is not required to be the node where R and sparklyr were launched; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using cluster mode when the edge node has too many concurrent users, when is lacking computing resources or where tools (like RStudio or Jupyter) need to be managed independently of other cluster resources.
 
-Figure \@ref(fig:connections-yarn-cluster) shows how the different components become decoupled when running in cluster mode. Notice there is still a line connecting the client with the cluster manager since, first of all, resources still need to be allocated from the cluster manager; however, once allocated, the client communicates directly with the driver node which will then communicate with the worker nodes. From this diagram, you might think that cluster mode looks much more complicated than the client mode diagram -- this would be a correct assesment; therefore, it's best to avoid cluster mode when possible due to additional configuration overhead that is best to avoid, if possible.
+Figure \@ref(fig:connections-yarn-cluster-diagram) shows how the different components become decoupled when running in cluster mode. Notice there is still a line connecting the client with the cluster manager since, first of all, resources still need to be allocated from the cluster manager; however, once allocated, the client communicates directly with the driver node which will then communicate with the worker nodes. From this diagram, you might think that cluster mode looks much more complicated than the client mode diagram -- this would be a correct assesment; therefore, it's best to avoid cluster mode when possible due to additional configuration overhead that is best to avoid, if possible.
 
-```{r connections-yarn-cluster, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='240pt', fig.cap='YARN Cluster Connection Diagram'}
+```{r connections-yarn-cluster-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='240pt', fig.cap='YARN Cluster Connection Diagram'}
 render_nomnoml("
 [Client |
   [R]
@@ -220,9 +220,9 @@ Cluster mode assumes that the node running `spark_connect()` is properly configu
 
 ## Livy {#connections-livy}
 
-As opposed to other connection methods which require using an edge node in the cluster, [Livy](#clusters-livy) provides a **Web API** that makes the Spark cluster accessible from outside the cluster and does not require a Spark installation in the client. Once connected through the Web API, the **Livy Service** starts the Spark context by requesting resources from the cluster manager and distributing work as usual.
+As opposed to other connection methods which require using an edge node in the cluster, [Livy](#clusters-livy) provides a **Web API** that makes the Spark cluster accessible from outside the cluster and does not require a Spark installation in the client. Once connected through the Web API, the **Livy Service** starts the Spark context by requesting resources from the cluster manager and distributing work as usual. Figure \@ref(fig:connections-livy-diagram) illustrates a Livy connection, notice that the client connects remotely to the driver through a web API.
 
-```{r connections-livy, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='240pt', fig.cap='Livy Connection Diagram'}
+```{r connections-livy-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='240pt', fig.cap='Livy Connection Diagram'}
 render_nomnoml("
 [Client |
   [R]
@@ -259,7 +259,7 @@ To try out Livy in your local machine, you can install and run a Livy service as
 sc <- spark_connect(
   master = "http://localhost:8998",
   method = "livy",
-  config = livy_config(spark_version = "2.4.0"))
+  version = "2.4.0")
 ```
 
 Once connected through Livy, you can make use of any `sparklyr` feature; however, Livy is not suitable for exploratory data analysis since, executing commands has a significant performance cost; that said, while running long running computations, this overhead could be considered irrelevant. In general, it is preferred to avoid using Livy and work directly within an edge node in the cluster; when this is not feasible, using Livy could be a reasonable approach.
@@ -268,9 +268,9 @@ Once connected through Livy, you can make use of any `sparklyr` feature; however
 
 ## Mesos {#connections-mesos}
 
-Similar to YARN, Mesos supports client mode and a cluster mode, `sparklyr` currently only supports client mode for Mesos.
+Similar to YARN, Mesos supports client mode and a cluster mode; however, `sparklyr` currently only supports client mode under Mesos. Therefore, the diagram from Figure \@ref(fig:connections-mesos-diagram), is equivalent to YARN Client's diagram with only the cluster manager changed from YARN to Mesos.
 
-```{r connections-mesos, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='Mesos Connection Diagram'}
+```{r connections-mesos-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='Mesos Connection Diagram'}
 render_nomnoml("
 [Driver |
   [R]
@@ -294,9 +294,9 @@ sc <- spark_connect(master = "mesos://host:port")
 
 ## Kubernetes {#connections-kubernetes}
 
-Kubernetes cluster do not support client modes similar to Mesos or YARN, instead, the connection model is similar to YARN Cluster, where the driver node is assigned by Kubernetes.
+Kubernetes cluster do not support client modes similar to Mesos or YARN; instead, the connection model is similar to YARN Cluster, where the driver node is assigned by Kubernetes. This is illustrated in Figure \@ref(fig:connections-kubernetes-diagram).
 
-```{r connections-kubernetes, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='Kubernetes Connection Diagram'}
+```{r connections-kubernetes-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='Kubernetes Connection Diagram'}
 render_nomnoml("
 [Client |
   [R]
@@ -337,31 +337,27 @@ system2("kubectl", "cluster-info")
 
 ## Cloud
 
-When working with cloud providers, there are a few connection differences. For instance, connecting from Databricks requires the following connection method:
+When working with cloud providers, there are a few connection differences. For instance, connecting from **Databricks** requires the following connection method:
 
 ```{r connections-clusters-databricks}
 library(sparklyr)
 sc <- spark_connect(method = "databricks")
 ```
 
-Connecting to EMR works fine through `sc <- spark_connect(master = "yarn")`; however, to properly configure `spark_web()` and RStudio's connection pane you can connect instead by configuring the proxy yourself, `domain` would have to be set to your driver node domain, usually something like `http://ec2-12-345-678-9.us-west-2.compute.amazonaws.com`.
+Since Amazon **EMR** makes use of YARN, you can connect using `master = "yarn"`:
 
-```{r connections-amazon-emr}
-sc <- spark_connect(master = "yarn", config = list(
-  sparklyr.web.spark = ~paste0(domain, ":20888/proxy/", 
-                               invoke(spark_context(sc), "applicationId")),
-  sparklyr.web.yarn = paste0(domain, ":8088")
-))
+```{r connections-clusters-emr}
+sc <- spark_connect(master = "yarn")
 ```
 
-Similarly, connections to Spark when using IBM's Watson Studio require you to connect as follows:
+Connections to Spark when using IBM's **Watson Studio** requires you to retrieve a configuration object through a `load_spark_kernels()` function IBM provides:
 
 ```{r connections-clusters-ibm}
 kernels <- load_spark_kernels()
 sc <- spark_connect(config = kernels[2])
 ```
 
-Under Microsoft Azure HDInsights and when using ML Services (R Server), creating an `sparklyr` connection gets initialized through:
+Under Microsoft Azure **HDInsights** and when using ML Services (R Server), creating an `sparklyr` connection gets initialized through:
 
 ```{r connections-clusters-azure}
 library(RevoScaleR)
@@ -370,6 +366,22 @@ sc <- rxGetSparklyrConnection(cc)
 ```
 
 Please reference your cloud provider documentation and their support channels if assistance is needed.
+
+## Tools
+
+When connecting to a Spark Cluster using tools like Jupyter and RStudio, you can run the same connection parameters presented in this chapater. However, since many cloud providers make use of a web proxy to secure Spark's web interface, in order to use `spark_web()` or the RStudio connections pane extension, you will need to properly configure the `sparklyr.web.spark` setting which you would then pass to `spark_config()` through the `config` parameter.
+
+For instance, when using Amazon **EMR**, you can configure `sparklyr.web.spark` and `sparklyr.web.yarn` by dinamically retrieving the YARN application and building the EMR proxy URL:
+
+```{r connections-amazon-emr}
+domain <- "http://ec2-12-345-678-9.us-west-2.compute.amazonaws.com"
+config <- spark_config()
+config$sparklyr.web.spark <- ~paste0(
+  domain, ":20888/proxy/", invoke(spark_context(sc), "applicationId"))
+config$sparklyr.web.yarn <- paste0(domain, ":8088")
+
+sc <- spark_connect(master = "yarn", config = config)
+```
 
 ## Multiple
 
