@@ -8,7 +8,7 @@ knitr::opts_chunk$set(eval = FALSE)
 
 Previous chapters focused on introducing Spark, R and helping you get started with the tools you need throughout this book. In this chapter you will learn how to do data analysis in Spark from R. Data analysis may become the most common task you will do when working with Spark. This chapter will serve as a foundation to later chapters because concepts from this chapter will apply to properly prepare data when doing modeling, graph processing, streaming and other related topics that might not be strictly considered data analysis.
 
-For those who are new to R, this might be a good time to consider complementing this chapter with [R for Data Science](https://r4ds.had.co.nz/) and other online resources to learn R. This chapter will try to briefly introduce all the concepts it presents.
+For those who are new to R, this might be a good time to consider complementing this chapter with R for Data Science [@intro-r-for-data-science] and other online resources to learn R. This chapter will try to briefly introduce all the concepts it presents.
 
 ### Searching for insights
 
@@ -49,7 +49,7 @@ nomnoml::nomnoml("
 ")
 ```
 
-Thanks to Spark's libraries, most of the Data Science project steps can be completed inside Spark.  For example, selecting, transforming and modeling can all be done by Spark.  The idea is to use R to tell Spark what data operations to run (import, tidy, transform, model), and then focus on only bringing back into R the results of the operation.  
+Thanks to Spark's libraries, most of the Data Science project steps can be completed inside Spark.  For example, selecting, transforming and modeling can all be done by Spark.  The idea is to use R to tell Spark what data operations to run (import, wrangle, model), and then focus on only bringing back into R the results of the operation.  
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R as an interface for Spark', fig.align = 'center', eval = TRUE}
 nomnoml::nomnoml("
@@ -58,8 +58,8 @@ nomnoml::nomnoml("
 #spacing: 140
 #arrowSize:0.2
 #.tag: visual=none
-[<tag>R]Collect results->Push compute[Big;Data]
-[Big;Data]->[R]
+[<tag>R]Collect results->Push compute[Spark]
+[Spark]->[R]
 ")
 ```
 
@@ -94,68 +94,60 @@ nomnoml::nomnoml("
 ")
 ```
 
-## Import
 
-The **local** master will be used for the exercises to allow you as the reader to replicate the code in your laptop. Please, make sure to already have `sparklyr` and a local copy of Spark installed, by using the utility that comes with the package.  For more information on how to do that please see the Local section in the [Connections](conections/#connections-local) chapter.
+## Exercise
+
+In order to practice as you learn, the rest of this chapter's code will use a single exercise that runs in the **local** Spark master, this allows the code to be replicated in your laptop. Please, make sure to already have `sparklyr` and a local copy of Spark installed. The installation of Spark can be done by using the utility that comes with the package.  For more information on how to do that please see the Local section in the [Connections](conections/#connections-local) chapter.
 
 First, load the `sparklyr` and `dplyr` packages, and open a new **local** connection.
 ```{r}
 library(sparklyr)
-library(dplyr)
-
 sc <- spark_connect(master = "local")
 ```
 
-To aid in conceptualizing where the data is being process, please open the Spark UI of the session the was just created. Keep that tab open in the browser so it is easy to switch back and forth R and the Spark UI.  This is not something that would happen in an everyday analysis, switching between both is just to become familiar with the process.
 
-```{r}
-spark_web(sc)
+
+## Import / Access
+
+The step of importing data is to be approached differently when using Spark with R, as oppose to R alone.  When used alone, importing data means that R will read files and import the information into memory  But when used with Spark, it is important to only focus in importing results into R.  The data is either imported or accessed by Spark. This way, the actual analysis takes place inside the Spark session. 
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Import Data to Spark not R', fig.align = 'center', eval = TRUE}
+nomnoml::nomnoml("
+#direction: right
+#padding: 40
+#spacing: 140
+#arrowSize:0.2
+#.tag: visual=none
+[<tag>R]Collect results->Push compute[Spark]
+[Spark]->[R]
+[Spark]<-Import/Access[Data;Source]
+")
 ```
 
-### Data source
+An example of accessing versus importing is found in an enterprise environment.  More likely, Spark sessions are created on top of Hadoop clusters, so data would already be available to be accessed directly by Spark via either a Hive table, or through the Hadoop File System (HDFS). 
 
-Most commonly at an enterprise, Spark sessions are created on top of Hadoop clusters, so data would already be available to be accessed directly by Spark, via either a Hive table, or through the Hadoop File System (HDFS). 
+The decision of having Spark either access the data source or to import data into memory is mostly a decisions based on speed and performance.  That will be covered in the [Tuning](tuning) chapter.
 
-Because of a **local** master session is being used in this section.  The session itself does not have any data.  So the next step is to prime the session with data, in this case `mtcars`. The `copy_to()` command from `dplyr` can be used for that.
+The exercise's Spark session does not have any data.  So the next step is to prime the session with data, in this case `mtcars`. The `copy_to()` command from `dplyr` can be used for that. The mechanics of this operation is explained in the [Getting Started](starting.html#starting-sparklyr-hello-world) chapter. 
 
 ```{r}
+library(dplyr)
 cars <- copy_to(sc, mtcars, "mtcars_remote")
 ```
 
-This operation transferred the data into Spark, under a variable called "mtcars_remote".  That name only exists within Spark and not R.  R recognizes the newly uploaded data as `cars`.  In other words, the data is not in R, `cars` is just a pointer that tells `sparklyr` what object inside the Spark session contains the data we are requested.
-
-```{r}
-cars
-```
-```
-## # Source: spark<mtcars_remote> [?? x 11]
-##      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
-##    <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
-##  1  21       6  160    110  3.9   2.62  16.5     0     1     4     4
-##  2  21       6  160    110  3.9   2.88  17.0     0     1     4     4
-##  3  22.8     4  108     93  3.85  2.32  18.6     1     1     4     1
-##  4  21.4     6  258    110  3.08  3.22  19.4     1     0     3     1
-##  5  18.7     8  360    175  3.15  3.44  17.0     0     0     3     2
-##  6  18.1     6  225    105  2.76  3.46  20.2     1     0     3     1
-##  7  14.3     8  360    245  3.21  3.57  15.8     0     0     3     4
-##  8  24.4     4  147.    62  3.69  3.19  20       1     0     4     2
-##  9  22.8     4  141.    95  3.92  3.15  22.9     1     0     4     2
-## 10  19.2     6  168.   123  3.92  3.44  18.3     1     0     4     4
-## # ... with more rows
-```
-
-The output in the R console indicates that it is not a `tibble` or data frame object, it is a remote Spark source.  Because it is a rectangular table, and thanks to the `dplyr` back end provided by `sparklyr`, it can be treated as a local data frame when using `dplyr` verbs.  
+In a enterprise setting, `copy_to()` should only be used to transfer small tables from R, such as a look up value table.
 
 ## Wrangle
 
-The transformations will occur not in R, but inside Spark, and then Spark will return the results.
+The goal is to keep is much of the data transformations in R code as possible. To accomplish that, instead of writing SQL statements to perform data exploration, it is better to take advantage of `sparklyr`'s `dplyr` back end interface.  
+
+In the R environment, *cars* can be treated as if it is a local data frame, so `dplyr` verbs can be used, and in a piped fashion.
 
 ```{r}
 cars %>%
   group_by(am) %>%
   summarise(mpg_mean = mean(mpg, na.rm = TRUE))
 ```
-```
+```r
 ## # Source: spark<?> [?? x 2]
 ##      am mpg_mean
 ##   <dbl>    <dbl>
@@ -163,7 +155,7 @@ cars %>%
 ## 2     1     24.4
 ```
 
-Using the `show_query()` command, it is possible to peer into the SQL statement that `sparklyr` and `dplyr` created and sent to Spark.
+Instead of importing the *mtcars_remote* data set from Spark, and then performing the aggregation, `dplyr` converts the verbs into SQL statements that are then sent to Spark.  The `show_query()` command makes it possible to peer into the SQL statement that `sparklyr` and `dplyr` created and sent to Spark.
 
 ```{r}
 cars %>%
@@ -171,13 +163,13 @@ cars %>%
   summarise(mpg_mean = mean(mpg, na.rm = TRUE)) %>%
   show_query()
 ```
-```
+```r
 ## <SQL>
 ## SELECT `am`, AVG(`mpg`) AS `mpg_mean`
 ## FROM `mtcars_remote`
 ## GROUP BY `am`
 ```
-As it is evident, it will not be necessary to have to see the resulting query every time, `dplyr` verbs are being used, but it is a very handy function that helps in familiarizing us with how the translations work.  As the analysis matures, there may be a need to share with non-R users the needed transformations, and at that time the resulting SQL query can be shared which will reduce the friction of implementing a solution, because there is no need to re-code or convert the analysis into some other language.
+As it is evident, it will not be necessary to have to see the resulting query every time `dplyr` verbs are being used. The focus can remain on obtaining insights from the data, as opposed to figuring out how to express a given set of transformation in SQL.
 
 ```{r}
 cars %>%
@@ -187,13 +179,15 @@ cars %>%
     mpg_mean = mean(mpg, na.rm = TRUE)
   )
 ```
-```
+```r
 ## # Source: spark<?> [?? x 3]
 ##      am wt_mean mpg_mean
 ##   <dbl>   <dbl>    <dbl>
 ## 1     0    3.77     17.1
 ## 2     1    2.41     24.4
 ```
+
+Most of the data transformation made available by `dplyr` to work with local data frames are also available to use with a Spark connection.  This means that a general approach to learning `dplyr` can be taken in order to gain more proficiency with data exploration and preparation with Spark.  The chapter on Data Transformation in the R for Data Science [@intro-r-for-data-science] book should be a great help with this.  If proficiency with `dplyr` is not an issue for the reader, please take some time to experiment with different `dplyr` functions against the *cars* table.
 
 ## Visualize
 
@@ -243,7 +237,7 @@ nomnoml::nomnoml("
 
 ### Transform remote, plot locally
 
-In essence, the approach for visualizing is the same as in wrangling.  Push the computation to Spark, and then collect the results in R for plotting.  The heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, the plot that will be used is a simple column plot, as oppossed to a histogram plot, because there is no need for R to re-calculate the bins.
+In essence, the approach for visualizing is the same as in wrangling.  Push the computation to Spark, and then collect the results in R for plotting.  The heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, the plot that will be used is a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins.
 
 
 ```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark & R', fig.align = 'center', eval = TRUE}
@@ -262,7 +256,7 @@ nomnoml::nomnoml("
 ")
 ```
 
-There are a couple of key steps when codifying this approach.  The first is to ensure that the transformation operations happen inside Spark, in the example below, `group_by()` and `summarise()` will run as SQL inside the Spark session.  The second is to bring the results back into R after the data has been transformed. The commands to use for that are `pull()` or `collect()`.  Make sure to also run these two steps in that order, becuase if `collect()` is run first, then all R will try to ingest the entire data set from Spark, which depending on the size of the data, will slow down or may even bring down your system.
+There are a couple of key steps when codifying this approach.  The first is to ensure that the transformation operations happen inside Spark, in the example below, `group_by()` and `summarise()` will run as SQL inside the Spark session.  The second is to bring the results back into R after the data has been transformed. The commands to use for that are `pull()` or `collect()`.  Make sure to also run these two steps in that order, because if `collect()` is run first, then all R will try to ingest the entire data set from Spark, which depending on the size of the data, will slow down or may even bring down your system.
 
 ```{r}
 car_group <- cars %>%
@@ -310,6 +304,48 @@ render_image("images/analysis-visualizations-1.png")
 Most visualizations can be easily produced using this approach.  There are others kinds of visualizations that may require more work, such as Histograms and box plots
 
 ## Model
+
+### Correlations
+
+A very common exercise is to run correlation calculations of the variables among the data.  The Spark API contains an internal function that runs the correlations inside Spark, and returns the results as a `data.frame`.
+
+```{r}
+mc <- ml_corr(cars) %>%
+  as_tibble()
+
+mc
+```
+
+```
+## # A tibble: 11 x 11
+##       mpg    cyl   disp     hp    drat     wt    qsec
+##     <dbl>  <dbl>  <dbl>  <dbl>   <dbl>  <dbl>   <dbl>
+##  1  1     -0.852 -0.848 -0.776  0.681  -0.868  0.419 
+##  2 -0.852  1      0.902  0.832 -0.700   0.782 -0.591 
+##  3 -0.848  0.902  1      0.791 -0.710   0.888 -0.434 
+##  4 -0.776  0.832  0.791  1     -0.449   0.659 -0.708 
+##  5  0.681 -0.700 -0.710 -0.449  1      -0.712  0.0912
+##  6 -0.868  0.782  0.888  0.659 -0.712   1     -0.175 
+##  7  0.419 -0.591 -0.434 -0.708  0.0912 -0.175  1     
+##  8  0.664 -0.811 -0.710 -0.723  0.440  -0.555  0.745 
+##  9  0.600 -0.523 -0.591 -0.243  0.713  -0.692 -0.230 
+## 10  0.480 -0.493 -0.556 -0.126  0.700  -0.583 -0.213 
+## 11 -0.551  0.527  0.395  0.750 -0.0908  0.428 -0.656 
+# ... with 4 more variables: vs <dbl>, am <dbl>,
+#   gear <dbl>, carb <dbl>
+```
+
+
+```{r}
+mc %>%
+  mutate(var2 = colnames(mc)) %>%
+  gather(key = "var1", value = "cor", - var2) %>%
+  mutate(cor = ifelse(var1 == var2, NA, cor)) %>%
+  ggplot() +
+  geom_tile(aes(x = var1, y = var2, fill = cor)) +
+  scale_fill_gradient2(low = "#E69F00", mid = "white", high = "#56B4E9")
+```
+
 
 ## Communicate
 
