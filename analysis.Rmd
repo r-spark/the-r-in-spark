@@ -134,9 +134,11 @@ library(dplyr)
 cars <- copy_to(sc, mtcars, "mtcars_remote")
 ```
 
-In a enterprise setting, `copy_to()` should only be used to transfer small tables from R, such as a look up value table.
+In an enterprise setting, `copy_to()` should only be used to transfer small tables from R, such as a look up value table.
 
 ## Wrangle
+
+### Transformations using `dplyr`
 
 The goal is to keep is much of the data transformations in R code as possible. To accomplish that, instead of writing SQL statements to perform data exploration, it is better to take advantage of `sparklyr`'s `dplyr` back end interface.  
 
@@ -147,7 +149,7 @@ cars %>%
   group_by(am) %>%
   summarise(mpg_mean = mean(mpg, na.rm = TRUE))
 ```
-```r
+```
 ## # Source: spark<?> [?? x 2]
 ##      am mpg_mean
 ##   <dbl>    <dbl>
@@ -163,7 +165,7 @@ cars %>%
   summarise(mpg_mean = mean(mpg, na.rm = TRUE)) %>%
   show_query()
 ```
-```r
+```
 ## <SQL>
 ## SELECT `am`, AVG(`mpg`) AS `mpg_mean`
 ## FROM `mtcars_remote`
@@ -179,7 +181,7 @@ cars %>%
     mpg_mean = mean(mpg, na.rm = TRUE)
   )
 ```
-```r
+```
 ## # Source: spark<?> [?? x 3]
 ##      am wt_mean mpg_mean
 ##   <dbl>   <dbl>    <dbl>
@@ -188,6 +190,101 @@ cars %>%
 ```
 
 Most of the data transformation made available by `dplyr` to work with local data frames are also available to use with a Spark connection.  This means that a general approach to learning `dplyr` can be taken in order to gain more proficiency with data exploration and preparation with Spark.  The chapter on Data Transformation in the R for Data Science [@intro-r-for-data-science] book should be a great help with this.  If proficiency with `dplyr` is not an issue for the reader, please take some time to experiment with different `dplyr` functions against the *cars* table.
+
+### Correlations
+
+A very common exploration technique is to calculate and visualize correlations.  The Spark API provides an internal function that calculates correlations across the entire data set.  The results are then returned to R as a `data.frame` object. 
+
+```{r}
+ml_corr(cars) %>%
+  as_tibble()
+```
+
+```
+## # A tibble: 11 x 11
+##       mpg    cyl   disp     hp    drat     wt    qsec
+##     <dbl>  <dbl>  <dbl>  <dbl>   <dbl>  <dbl>   <dbl>
+##  1  1     -0.852 -0.848 -0.776  0.681  -0.868  0.419 
+##  2 -0.852  1      0.902  0.832 -0.700   0.782 -0.591 
+##  3 -0.848  0.902  1      0.791 -0.710   0.888 -0.434 
+##  4 -0.776  0.832  0.791  1     -0.449   0.659 -0.708 
+##  5  0.681 -0.700 -0.710 -0.449  1      -0.712  0.0912
+##  6 -0.868  0.782  0.888  0.659 -0.712   1     -0.175 
+##  7  0.419 -0.591 -0.434 -0.708  0.0912 -0.175  1     
+##  8  0.664 -0.811 -0.710 -0.723  0.440  -0.555  0.745 
+##  9  0.600 -0.523 -0.591 -0.243  0.713  -0.692 -0.230 
+## 10  0.480 -0.493 -0.556 -0.126  0.700  -0.583 -0.213 
+## 11 -0.551  0.527  0.395  0.750 -0.0908  0.428 -0.656 
+## # ... with 4 more variables: vs <dbl>, am <dbl>,
+## #   gear <dbl>, carb <dbl>
+```
+
+The `corrr` R package specializes in correlations.  It contains friendly functions to prepare and visualize the results.  Included inside the package is a back-end for `sparklyr` table objects, so it will not return an error if a non local table is passed to it.  In the background, the `correlate()` function runs `ml_corr()`, so there is no need to collect any data into R prior running the command.
+
+```{r}
+library(corrr)
+
+cars %>%
+  correlate(use = "pairwise.complete.obs", method = "pearson") 
+```
+
+```
+## # A tibble: 11 x 12
+##    rowname     mpg     cyl    disp      hp     drat      wt
+##    <chr>     <dbl>   <dbl>   <dbl>   <dbl>    <dbl>   <dbl>
+##  1 mpg      NA      -0.852  -0.848  -0.776   0.681   -0.868
+##  2 cyl      -0.852  NA       0.902   0.832  -0.700    0.782
+##  3 disp     -0.848   0.902  NA       0.791  -0.710    0.888
+##  4 hp       -0.776   0.832   0.791  NA      -0.449    0.659
+##  5 drat      0.681  -0.700  -0.710  -0.449  NA       -0.712
+##  6 wt       -0.868   0.782   0.888   0.659  -0.712   NA    
+##  7 qsec      0.419  -0.591  -0.434  -0.708   0.0912  -0.175
+##  8 vs        0.664  -0.811  -0.710  -0.723   0.440   -0.555
+##  9 am        0.600  -0.523  -0.591  -0.243   0.713   -0.692
+## 10 gear      0.480  -0.493  -0.556  -0.126   0.700   -0.583
+## 11 carb     -0.551   0.527   0.395   0.750  -0.0908   0.428
+## # ... with 5 more variables: qsec <dbl>, vs <dbl>,
+## #   am <dbl>, gear <dbl>, carb <dbl>
+```
+
+The `correlate()` function returns a local R object that `corrr` recognizes. This way, it is easy to perform more functions on top of the results. In this case, the `shave()` command turns all of the duplicated results into `NA`'s
+
+```{r}
+cars %>%
+  correlate(use = "pairwise.complete.obs", method = "pearson") %>%
+  shave()
+```
+
+```
+## # A tibble: 11 x 12
+##    rowname     mpg     cyl    disp      hp     drat      wt
+##    <chr>     <dbl>   <dbl>   <dbl>   <dbl>    <dbl>   <dbl>
+##  1 mpg      NA      NA      NA      NA      NA       NA    
+##  2 cyl      -0.852  NA      NA      NA      NA       NA    
+##  3 disp     -0.848   0.902  NA      NA      NA       NA    
+##  4 hp       -0.776   0.832   0.791  NA      NA       NA    
+##  5 drat      0.681  -0.700  -0.710  -0.449  NA       NA    
+##  6 wt       -0.868   0.782   0.888   0.659  -0.712   NA    
+##  7 qsec      0.419  -0.591  -0.434  -0.708   0.0912  -0.175
+##  8 vs        0.664  -0.811  -0.710  -0.723   0.440   -0.555
+##  9 am        0.600  -0.523  -0.591  -0.243   0.713   -0.692
+## 10 gear      0.480  -0.493  -0.556  -0.126   0.700   -0.583
+## 11 carb     -0.551   0.527   0.395   0.750  -0.0908   0.428
+## # ... with 5 more variables: qsec <dbl>, vs <dbl>,
+## #   am <dbl>, gear <dbl>, carb <dbl>
+```
+Finally, the results can be easily visualized using `rplot()`.  This function returns a `ggplot` object.
+
+```{r}
+cars %>%
+  correlate(use = "pairwise.complete.obs", method = "pearson") %>%
+  shave() %>%
+  rplot()
+```
+
+```{r, eval = TRUE, out.width='500pt', out.height='400pt', fig.align = 'center', echo = FALSE}
+render_image("images/analysis-wrangling-1.png")
+```
 
 ## Visualize
 
@@ -304,47 +401,6 @@ render_image("images/analysis-visualizations-1.png")
 Most visualizations can be easily produced using this approach.  There are others kinds of visualizations that may require more work, such as Histograms and box plots
 
 ## Model
-
-### Correlations
-
-A very common exercise is to run correlation calculations of the variables among the data.  The Spark API contains an internal function that runs the correlations inside Spark, and returns the results as a `data.frame`.
-
-```{r}
-mc <- ml_corr(cars) %>%
-  as_tibble()
-
-mc
-```
-
-```
-## # A tibble: 11 x 11
-##       mpg    cyl   disp     hp    drat     wt    qsec
-##     <dbl>  <dbl>  <dbl>  <dbl>   <dbl>  <dbl>   <dbl>
-##  1  1     -0.852 -0.848 -0.776  0.681  -0.868  0.419 
-##  2 -0.852  1      0.902  0.832 -0.700   0.782 -0.591 
-##  3 -0.848  0.902  1      0.791 -0.710   0.888 -0.434 
-##  4 -0.776  0.832  0.791  1     -0.449   0.659 -0.708 
-##  5  0.681 -0.700 -0.710 -0.449  1      -0.712  0.0912
-##  6 -0.868  0.782  0.888  0.659 -0.712   1     -0.175 
-##  7  0.419 -0.591 -0.434 -0.708  0.0912 -0.175  1     
-##  8  0.664 -0.811 -0.710 -0.723  0.440  -0.555  0.745 
-##  9  0.600 -0.523 -0.591 -0.243  0.713  -0.692 -0.230 
-## 10  0.480 -0.493 -0.556 -0.126  0.700  -0.583 -0.213 
-## 11 -0.551  0.527  0.395  0.750 -0.0908  0.428 -0.656 
-# ... with 4 more variables: vs <dbl>, am <dbl>,
-#   gear <dbl>, carb <dbl>
-```
-
-
-```{r}
-mc %>%
-  mutate(var2 = colnames(mc)) %>%
-  gather(key = "var1", value = "cor", - var2) %>%
-  mutate(cor = ifelse(var1 == var2, NA, cor)) %>%
-  ggplot() +
-  geom_tile(aes(x = var1, y = var2, fill = cor)) +
-  scale_fill_gradient2(low = "#E69F00", mid = "white", high = "#56B4E9")
-```
 
 
 ## Communicate
