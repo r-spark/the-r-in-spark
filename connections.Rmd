@@ -126,9 +126,9 @@ Connecting to a Spark Standalone cluster requires the location of the cluster ma
 
 A connection in standalone mode starts from `sparklyr` which launches `spark-submit`, which then submits the `sparklyr` application and creates the Spark Context, which requests executors from the Spark Standalone instance running under the given `master` address.
 
-Visually, this is described in Figure \@ref(fig:connections-standalone), which is quite similar to the overall connection architecture from Figure \@ref(fig:connections-architecture) but, with additional details that are particular to standalone clusters and `sparklyr`.
+Visually, this is described in Figure \@ref(fig:connections-standalone-diagram), which is quite similar to the overall connection architecture from Figure \@ref(fig:connections-architecture) but, with additional details that are particular to standalone clusters and `sparklyr`.
 
-```{r connections-standalone, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='200pt', fig.cap='Spark Standalone Connection Diagram'}
+```{r connections-standalone-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='200pt', fig.cap='Spark Standalone Connection Diagram'}
 render_nomnoml("
 [Driver |
   [R]
@@ -340,7 +340,6 @@ system2("kubectl", "cluster-info")
 When working with cloud providers, there are a few connection differences. For instance, connecting from **Databricks** requires the following connection method:
 
 ```{r connections-clusters-databricks}
-library(sparklyr)
 sc <- spark_connect(method = "databricks")
 ```
 
