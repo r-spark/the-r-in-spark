@@ -17,13 +17,13 @@ library(dplyr)
 
 # Distributed R {#distributed}
 
-In previous chapters you learned how to perform data analysis and modeling in local Spark instances and proper Spark clusters, the previous [Extensions](#extensions) chapter, described how to use functionality provided not in extensions developed by Spark and R contributors. In most cases, the combination of Spark functionality and extensions is more than enough to perform almost any computation. However, for those few cases where functionality is lacking in Spark and their extensions, you can consider distributing R computations to worker nodes yourself and to leverage any R packages.
+In previous chapters you learned how to perform data analysis and modeling in local Spark instances and proper Spark clusters, the previous [Extensions](#extensions) chapter, described how to make use of additional functionality provided by the Spark and R communities at large. In most cases, the combination of Spark functionality and extensions is more than enough to perform almost any computation. However, for those cases where functionality is lacking in Spark and their extensions, you can consider distributing R computations to worker nodes yourself while leveraging any existing R package.
 
 If you are already a familiar R user, you might be tempted to use this approach for all Spark operations; however, this is not the recommended use of `spark_apply()`. Previous chapters provided more efficient techiniques and tools to solve well known problems, in contrast, `spark_apply()` introduces additional cognitive overhead, additional troubleshooting steps, performance trade-offs and, in general, additional complexity that should be avoided. Not to say that `spark_apply()` should never used; but instead, `spark_apply()` is reserved to support use cases where previous tools and techniques fall short.
 
 ## Overview
 
-The [Introduction](#intro) chapter introduced MapReduce as a technique capable of processing large scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The [Tuning](#tuning) chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually similar to:
+The [Introduction](#intro) chapter introduced MapReduce as a technique capable of processing large scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The [Tuning](#tuning) chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually, this is illustrated in Figure \@ref(fig:distributed-times-ten).
 
 ```{r distributed-times-ten, echo=FALSE, eval=TRUE, fig.cap='Conceptual mapping operation when multiplying by ten.', out.width='580pt', out.height='220pt', fig.align='center'}
 render_nomnoml("
@@ -41,7 +41,7 @@ render_nomnoml("
 ]", "images/distributed-times-ten.png", "Conceptual mapping operation when multiplying by ten.", styles)
 ```
 
-This chapter presents how to define a custom `f(x)` mapping operations using `spark_apply()`; for the example above, `spark_apply()` provides support to define `10 * x` as follows:
+This chapter presents how to define a custom `f(x)` mapping operations using `spark_apply()`; for the previous example, `spark_apply()` provides support to define `10 * x` as follows:
 
 ```{r distributed-increment-one-code}
 sdf_len(sc, 3) %>% spark_apply(~ 10 * .x)
@@ -55,9 +55,9 @@ sdf_len(sc, 3) %>% spark_apply(~ 10 * .x)
 3    30
 ```
 
-Notice that `~ 10 * .x` is plain R code executed across all worker nodes; the `~` operator is defined in the `rlang` package and provides a compact definition of a function equivalent to `function(.x) 10 * .x` or what is also known as an anonymous function or lambda expression.
+Notice that `~ 10 * .x` is plain R code executed across all worker nodes; the `~` operator is defined in the `rlang` package and provides a compact definition of a function equivalent to `function(.x) 10 * .x` -- this compact form is also known as an anonymous function or lambda expression.
 
-Now, the first thing to notice is that `f(x)` takes an R data frame as input and must also produce an R data frame as output, conceptually this looks as follows:
+Now, the first thing to notice is that `f(x)` takes an R data frame as input and must also produce an R data frame as output, conceptually illustrated in Figure \@ref(fig:distributed-spark-apply-input-output).
 
 ```{r distributed-spark-apply-input-output, echo=FALSE, eval=TRUE, fig.cap='Expected function signature in spark_apply() mappings.', out.width='580pt', out.height='120pt', fig.align='center'}
 render_nomnoml("
