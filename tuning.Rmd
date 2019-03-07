@@ -34,8 +34,8 @@ r2d3::r2d3(
   css = "images/tuning-spark-overview.css"
 )
 ```
-```{r tuning-overview, eval=TRUE, echo=FALSE, fig.cap='Sorting Distributed Data with Apache Spark.', fig.align='center'}
-render_image("images/tuning-spark-overview.png", "Sorting Distributed Data with Apache Spark.")
+```{r tuning-overview, eval=TRUE, echo=FALSE, fig.cap='Sorting Distributed Data with Apache Spark', fig.align='center'}
+render_image("images/tuning-spark-overview.png", "Sorting Distributed Data with Apache Spark")
 ```
 
 Notice that while Figure \@ref(fig:tuning-overview) describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, most of these lower level operations are not exposed in `sparklyr`, instead, `sparklyr` makes those operations available through higher level commands provided by data [analysis](#analysis) tools like `dplyr` or `DBI`, [modeling](#modeling) and by using many [extensions](#extensions). For those few cases where you might need to implement lowe-level operations, you can always use the Spark's Scala API through an `sparklyr` [extensions](#extension) or run custom [distributed R](#distributed) code.
@@ -80,8 +80,8 @@ webshot::webshot(
 
 spark_disconnect(sc)
 ```
-```{r tuning-graph-render, eval=TRUE, echo=FALSE, fig.align = 'center', fig.cap='Spark graph visualization.'}
-render_image("images/tuning-spark-graph-visualization.png", "Spark Graph Visualization.")
+```{r tuning-graph-render, eval=TRUE, echo=FALSE, fig.align = 'center', fig.cap='Spark graph visualization'}
+render_image("images/tuning-spark-graph-visualization.png", "Spark Graph Visualization")
 ```
 
 ### Event Timeline {#tuning-event-timeline}
@@ -113,8 +113,8 @@ webshot::webshot(
   selector = c(".legend-area", ".table-bordered")
   )
 ```
-```{r tuning-timeline-simple, eval=TRUE, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline.'}
-render_image("images/tuning-spark-event-timeline.png", "Spark event timeline.")
+```{r tuning-timeline-simple, eval=TRUE, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline'}
+render_image("images/tuning-spark-event-timeline.png", "Spark event timeline")
 ```
 
 Notice that a single executor is being used, for machines and clusters with multiple CPUs, you should rather expect computation to be parallelized. You can explicitly repartition data as will be explained in the [partitioning](#tunning-partitioning) section, but for now, let's just copy again the dataset using two partitions and explore the event timeline of this operation.
@@ -136,8 +136,8 @@ webshot::webshot(
   );",
   selector = c(".legend-area", "#task-summary-table"))
 ```
-```{r tuning-timeline-repartition, eval=TRUE, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline with .'}
-render_image("images/tuning-spark-event-timeline-repartition.png", "Spark event timeline with repartitions.")
+```{r tuning-timeline-repartition, eval=TRUE, echo=FALSE, fig.align='center', out.width='90%', fig.cap='Spark Event Timeline with '}
+render_image("images/tuning-spark-event-timeline-repartition.png", "Spark event timeline with repartitions")
 ```
 
 Figure \@ref(fig:tuning-timeline-repartition) now shows two execution lanes with most time spent under "Executor Computing Time", this means that this particular operation is making better use of our compute resources. When working with clusters, requesting more compute nodes from your cluster should shorten computation time. In contrast, for timelines heavy on read or write shuffling, requesting more compute nodes might not shorten time and might actualy makes everything slower. There is no concrete set of rules to follow; however, as you gain experience understanding this timeline over multiple operations -- you will develop insight as to how to properly optimize Spark operations.
@@ -357,8 +357,8 @@ microbenchmark(
     times = 10
 ) %>% autoplot() + theme_light() 
 ```
-```{r tuning-partitioning-explicit-results, eval=TRUE, echo=FALSE, fig.cap='Computation speed when using explicit Spark partitions.', fig.align = 'center'}
-render_image("images/tuning-partition-explicit.png", "Computation speed when using explicit Spark partitions.")
+```{r tuning-partitioning-explicit-results, eval=TRUE, echo=FALSE, fig.cap='Computation speed when using explicit Spark partitions', fig.align = 'center'}
+render_image("images/tuning-partition-explicit.png", "Computation speed when using explicit Spark partitions")
 ```
 
 The results show that sorting data with two partitions is almost twice as fast, this is the case since two CPUs can be used to execute this operation. However, it is not necessarily the case that higher-partitions produce faster computation; instead, partitioning data is particular to your computing cluster and the data analysis operations being performed.
@@ -390,8 +390,8 @@ invisible(webshot::webshot(
 ))
 ```
 
-```{r tuning-caching-rdd-shot, eval=TRUE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Cached RDD in Spark Web Interface.'}
-render_image("images/tuning-cache-rdd-web.png", "Cached RDD in Spark Web Interface.")
+```{r tuning-caching-rdd-shot, eval=TRUE, fig.width = 4, fig.align = 'center', echo=FALSE, fig.cap='Cached RDD in Spark Web Interface'}
+render_image("images/tuning-cache-rdd-web.png", "Cached RDD in Spark Web Interface")
 ```
 
 Data loaded in memory will be released when the R session terminates either explicitly or implicitly with a restart or disconnection; however, to free up resources, you can use `tbl_uncache()`:

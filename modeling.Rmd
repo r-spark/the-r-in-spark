@@ -160,8 +160,8 @@ okc_train %>%
   dbplot_histogram(age)
 ```
 
-```{r age-histogram, eval=TRUE, echo=FALSE, fig.cap='Distribution of age.', fig.align = 'center'}
-render_image("images/modeling-okc-histogram-age.png", "Distribution of age.")
+```{r age-histogram, eval=TRUE, echo=FALSE, fig.cap='Distribution of age', fig.align = 'center'}
+render_image("images/modeling-okc-histogram-age.png", "Distribution of age")
 ```
 
 A common EDA exercise is to look at the relationship between the response and the individual predictors. For example, we can explore the `religion` variable:
@@ -215,8 +215,8 @@ p <- prop_data %>%
 ggsave("images/modeling-okc-prop.png", plot = p, device = "png", width = 10, height = 5)
 ```
 
-```{r religion-prop, echo = FALSE, eval = TRUE, fig.cap='Proportion of individuals not working by religion.', fig.align = 'center'}
-render_image("images/modeling-okc-prop.png", "Proportion of individuals not working by religion.")
+```{r religion-prop, echo = FALSE, eval = TRUE, fig.cap='Proportion of individuals not working by religion', fig.align = 'center'}
+render_image("images/modeling-okc-prop.png", "Proportion of individuals not working by religion")
 ```
 
 Next, we take a look at the relationship between a couple of predictors: alcohol use and drug use. We would expect there to be some correlation between them. You can compute a contingency table via `sdf_crosstab()`:
@@ -276,8 +276,8 @@ p <- contingency_tbl %>%
 ggsave("images/modeling-okc-mosaic.png", plot = p, width = 5, height = 5)
 ```
 
-```{r mosaic, echo = FALSE, eval = TRUE, fig.cap='Mosaic plot of drug and alcohol use.', fig.align = 'center'}
-render_image("images/modeling-okc-mosaic.png", "Mosaic plot of drug and alcohol use.")
+```{r mosaic, echo = FALSE, eval = TRUE, fig.cap='Mosaic plot of drug and alcohol use', fig.align = 'center'}
+render_image("images/modeling-okc-mosaic.png", "Mosaic plot of drug and alcohol use")
 ```
 
 To further explore the relationship between this two variables, we can perform correspondence analysis using the FactoMineR package and visualize the results.
@@ -332,9 +332,9 @@ p <- ggplot(ca_coord, aes(x = `Dim 1`, y = `Dim 2`, col = Variable)) +
 ggsave("images/modeling-okc-correspondence-analysis.png", plot = p, width = 5, height = 5)
 ```
 
-```{r ca-pcs, echo = FALSE, eval = TRUE, fig.cap='Correspondence analysis principal coordinates for drugs and alcohol use.', fig.align = 'center'}
+```{r ca-pcs, echo = FALSE, eval = TRUE, fig.cap='Correspondence analysis principal coordinates for drugs and alcohol use', fig.align = 'center'}
 render_image("images/modeling-okc-correspondence-analysis.png", 
-             "Correspondence analysis principal coordinates for drugs and alcohol use.")
+             "Correspondence analysis principal coordinates for drugs and alcohol use")
 ```
 
 Correspondence analysis transforms the factors into variables called *principal coordinates*, which correspond to the axes in the plot and represent how much information in the contingency table they contain. We can, for example, interpret the proximity of "drinking often" and "using drugs very often" as indicating association.
@@ -417,7 +417,7 @@ okc_train %>%
   dbplot_histogram(essay_length, bins = 50)
 ```
 
-```{r essay-length-distribution, echo = FALSE, eval = TRUE, fig.cap='Distribution of essay length.', fig.align = 'center'}
+```{r essay-length-distribution, echo = FALSE, eval = TRUE, fig.cap='Distribution of essay length', fig.align = 'center'}
 render_image("images/modeling-okc-histogram-essay-length.png", "Distribution of essay length")
 ```
 
@@ -519,8 +519,8 @@ p <- ggplot(roc, aes(x = FPR, y = TPR)) +
 ggsave("images/modeling-okc-roc1.png", plot = p, device = "png", width = 5, height = 5)
 ```
 
-```{r roc1, echo = FALSE, eval = TRUE, fig.cap='ROC curve for the logistic regression model.', fig.align = 'center'}
-render_image("images/modeling-okc-roc1.png", "ROC curve for the logistic regression model.")
+```{r roc1, echo = FALSE, eval = TRUE, fig.cap='ROC curve for the logistic regression model', fig.align = 'center'}
+render_image("images/modeling-okc-roc1.png", "ROC curve for the logistic regression model")
 ```
 
 Recall that the ROC curve plots the true positive rate (sensitivity) against the false positive rate (1 - specificity) for varying values of the classification threshold. In practice, the business problem helps to determine where on the curve one sets the threshold for classification. The AUC is a summary measure for determining the quality of a model, and we can compute it by calling the `area_under_roc()` function.
@@ -573,8 +573,8 @@ p <- cv_roc %>%
 ggsave("images/modeling-okc-roc2.png", plot = p, device = "png", width = 8, height = 5)
 ```
 
-```{r roc2, echo = FALSE, eval = TRUE, fig.cap='Cross-validated ROC curves for the logistic regression model.', fig.align = 'center'}
-render_image("images/modeling-okc-roc2.png", "Cross-validated ROC curves for the logistic regression model.")
+```{r roc2, echo = FALSE, eval = TRUE, fig.cap='Cross-validated ROC curves for the logistic regression model', fig.align = 'center'}
+render_image("images/modeling-okc-roc2.png", "Cross-validated ROC curves for the logistic regression model")
 ```
 
 and we can obtain the average AUC metric:
@@ -629,8 +629,8 @@ p <- tidy_glr %>%
 ggsave("images/modeling-okc-glr-coefs.png", plot = p, width = 10, height = 5)
 ```
 
-```{r glr-coefs, eval=TRUE, echo=FALSE, fig.cap='Coefficient estimates with 95% confidence intervals.', fig.align = 'center'}
-render_image("images/modeling-okc-glr-coefs.png", "Coefficient estimates with 95% confidence intervals.")
+```{r glr-coefs, eval=TRUE, echo=FALSE, fig.cap='Coefficient estimates with 95% confidence intervals', fig.align = 'center'}
+render_image("images/modeling-okc-glr-coefs.png", "Coefficient estimates with 95% confidence intervals")
 ```
 
 **Note:**  Both `ml_logistic_regression()` and `ml_linear_regression()` support elastic net regularization [@zou2005regularization] through the `reg_param` and `elastic_net_param` parameters. `reg_param` corresponds to $lambda$ whereas `elastic_net_param` correspond to $alpha$. `ml_generalized_linear_regression()` supports only `reg_param`.
