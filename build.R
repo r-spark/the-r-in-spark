@@ -8,6 +8,7 @@ chapters <- list(
   "preface",
   "intro",
   "starting",
+  "analysis",
   "modeling",
   "clusters",
   "connections",
