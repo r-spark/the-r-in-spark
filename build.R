@@ -49,7 +49,8 @@ transformations <- list(
   "\\[@([a-zA-Z0-9\\-]+)\\]" = ascii_add_footnotes,
   "\nimage:images([^\\[]+)\\[([^\\]]+)\\]" = ascii_add_image_captions,
   "\n\\*(Note|Tip|Warning):\\* " = ascii_add_notes,
-  "Figure[ \n]+@ref\\(fig:([^\\)]+)\\)" = ascii_add_figure_references
+  "Figure[ \n]+@ref\\(fig:([^\\)]+)\\)" = ascii_add_figure_references,
+  "=== Later review" = ascii_remove_later
 )
 
 for (file in files) {
