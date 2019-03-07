@@ -44,3 +44,10 @@ ascii_add_notes <- function(groups, books_bib, remaining) {
 ascii_add_figure_references <- function(groups, books_bib, remaining) {
   paste0("<<", groups[1], ">>")
 }
+
+ascii_remove_later <- function(groups, books_bib, remaining) {
+  list(
+    replacement = "",
+    end_idx = nchar(remaining) + 1
+  )
+}
