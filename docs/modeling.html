@@ -432,17 +432,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <blockquote>
 <p>Predict whether someone is actively working, i.e. not retired, a student, or unemployed.</p>
 </blockquote>
-<p><strong>Note</strong>: The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the ML algorithm. For example, you may want to use the ranger package instead of <code>ml_random_forest_classifier()</code>.</p>
+<p><strong>Note:</strong> The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the ML algorithm. For example, you may want to use the ranger package instead of <code>ml_random_forest_classifier()</code>.</p>
 </div>
 <div id="exploratory-data-analysis-eda" class="section level2">
 <h2><span class="header-section-number">4.2</span> Exploratory Data Analysis (EDA)</h2>
 <p>We’ll first read in the data, assuming <code>profiles.csv</code> is in the <code>data/</code> folder.</p>
-<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb83-1" title="1">okc &lt;-<span class="st"> </span><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data/profiles.csv&quot;</span>, <span class="dt">escape =</span> <span class="st">&quot;</span><span class="ch">\&quot;</span><span class="st">&quot;</span>, <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">multiline =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb83-2" title="2"><span class="st">  </span><span class="kw">mutate</span>(</a>
-<a class="sourceLine" id="cb83-3" title="3">    <span class="dt">height =</span> <span class="kw">as.numeric</span>(height),</a>
-<a class="sourceLine" id="cb83-4" title="4">    <span class="dt">income =</span> <span class="kw">ifelse</span>(income <span class="op">==</span><span class="st"> &quot;-1&quot;</span>, <span class="ot">NA</span>, <span class="kw">as.numeric</span>(income))</a>
-<a class="sourceLine" id="cb83-5" title="5">  ) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb83-6" title="6"><span class="st">  </span><span class="kw">mutate_if</span>(is.character, <span class="kw">list</span>(<span class="op">~</span><span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(.), <span class="st">&quot;missing&quot;</span>, .)))</a></code></pre></div>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb83-1" title="1">okc &lt;-<span class="st"> </span><span class="kw">spark_read_csv</span>(</a>
+<a class="sourceLine" id="cb83-2" title="2">  sc, </a>
+<a class="sourceLine" id="cb83-3" title="3">  <span class="st">&quot;data/profiles.csv&quot;</span>, </a>
+<a class="sourceLine" id="cb83-4" title="4">  <span class="dt">escape =</span> <span class="st">&quot;</span><span class="ch">\&quot;</span><span class="st">&quot;</span>, </a>
+<a class="sourceLine" id="cb83-5" title="5">  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">multiline =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb83-6" title="6">) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb83-7" title="7"><span class="st">  </span><span class="kw">mutate</span>(</a>
+<a class="sourceLine" id="cb83-8" title="8">    <span class="dt">height =</span> <span class="kw">as.numeric</span>(height),</a>
+<a class="sourceLine" id="cb83-9" title="9">    <span class="dt">income =</span> <span class="kw">ifelse</span>(income <span class="op">==</span><span class="st"> &quot;-1&quot;</span>, <span class="ot">NA</span>, <span class="kw">as.numeric</span>(income))</a>
+<a class="sourceLine" id="cb83-10" title="10">  ) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb83-11" title="11"><span class="st">  </span><span class="kw">mutate_if</span>(is.character, <span class="kw">list</span>(<span class="op">~</span><span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(.), <span class="st">&quot;missing&quot;</span>, .)))</a></code></pre></div>
 <p>Note that we specify <code>escape = "\""</code> and <code>options = list(multiline = TRUE)</code> here to accommodate for embedded quote characters and newlines in the essay fields. We also convert the <code>height</code> and <code>income</code> columns to numeric types, and recode missing values in the string columns.</p>
 <p>We can take a quick look at the data with <code>glimpse()</code>:</p>
 <div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb84-1" title="1"><span class="kw">glimpse</span>(okc)</a></code></pre></div>
@@ -511,7 +516,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Like we saw in the Analysis chapter, we can also utilize the dbplot package to plot distributions of these variables:</p>
 <div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb92-1" title="1">okc_train <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb92-2" title="2"><span class="st">  </span><span class="kw">dbplot_histogram</span>(age)</a></code></pre></div>
-<p><img src="images/modeling-okc-histogram-age.png" width="1050" /></p>
+<div class="figure" style="text-align: center"><span id="fig:age-histogram"></span>
+<img src="images/modeling-okc-histogram-age.png" alt="Distribution of age." width="1500" />
+<p class="caption">
+FIGURE 4.1: Distribution of age.
+</p>
+</div>
 <p>A common EDA exercise is to look at the relationship between the response and the individual predictors. For example, we can explore the <code>religion</code> variable:</p>
 <div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb93-1" title="1">prop_data &lt;-<span class="st"> </span>okc_train <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb93-2" title="2"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">religion =</span> <span class="kw">regexp_extract</span>(religion, <span class="st">&quot;^</span><span class="ch">\\\\</span><span class="st">w+&quot;</span>, <span class="dv">0</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
@@ -540,7 +550,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb94-12" title="12"><span class="co">##  9 buddhism      1562 0.0883 0.00721</span></a>
 <a class="sourceLine" id="cb94-13" title="13"><span class="co">## 10 catholicism   3833 0.0931 0.00469</span></a></code></pre></div>
 <p>Note that <code>prop_data</code> is a small data frame that has been collected into memory in our R session, we can take advantage of ggplot2 to create an informative visualization.</p>
-<p><img src="the-r-in-spark_files/figure-html/unnamed-chunk-68-1.png" width="672" /></p>
+<div class="figure" style="text-align: center"><span id="fig:religion-prop"></span>
+<img src="images/modeling-okc-prop.png" alt="Proportion of individuals not working by religion." width="1500" />
+<p class="caption">
+FIGURE 4.2: Proportion of individuals not working by religion.
+</p>
+</div>
 <p>Next, we take a look at the relationship between a couple of predictors: alcohol use and drug use. We would expect there to be some correlation between them. You can compute a contingency table via <code>sdf_crosstab()</code>:</p>
 <div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb95-1" title="1">contingency_tbl &lt;-<span class="st"> </span>okc_train <span class="op">%&gt;%</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb95-2" title="2"><span class="st">  </span><span class="kw">sdf_crosstab</span>(<span class="st">&quot;drinks&quot;</span>, <span class="st">&quot;drugs&quot;</span>) <span class="op">%&gt;%</span></a>
@@ -558,10 +573,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb96-9" title="9"><span class="co">## 6 missing         1114  1229     9        65</span></a>
 <a class="sourceLine" id="cb96-10" title="10"><span class="co">## 7 rarely           630  3637    40       436</span></a></code></pre></div>
 <p>We can visualize this contingency table using a mosaic plot.</p>
-<p><img src="the-r-in-spark_files/figure-html/unnamed-chunk-71-1.png" width="672" /></p>
+<div class="figure" style="text-align: center"><span id="fig:mosaic"></span>
+<img src="images/modeling-okc-mosaic.png" alt="Mosaic plot of drug and alcohol use." width="750" />
+<p class="caption">
+FIGURE 4.3: Mosaic plot of drug and alcohol use.
+</p>
+</div>
 <p>To further explore the relationship between this two variables, we can perform correspondence analysis using the FactoMineR package and visualize the results.</p>
 <pre><code>## Warning: Removed 2 rows containing missing values (geom_text).</code></pre>
-<p><img src="the-r-in-spark_files/figure-html/unnamed-chunk-72-1.png" width="672" /></p>
+<div class="figure" style="text-align: center"><span id="fig:ca-pcs"></span>
+<img src="images/modeling-okc-correspondence-analysis.png" alt="Correspondence analysis principal coordinates for drugs and alcohol use." width="750" />
+<p class="caption">
+FIGURE 4.4: Correspondence analysis principal coordinates for drugs and alcohol use.
+</p>
+</div>
 <p>Correspondence analysis transforms the factors into variables called <em>principal coordinates</em>, which correspond to the axes in the plot and represent how much information in the contingency table they contain. We can, for example, interpret the proximity of “drinking often” and “using drugs very often” as indicating association.</p>
 </div>
 <div id="feature-engineering" class="section level2">
@@ -613,6 +638,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb102-4" title="4">  )</a>
 <a class="sourceLine" id="cb102-5" title="5">okc_train <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb102-6" title="6"><span class="st">  </span><span class="kw">dbplot_histogram</span>(essay_length, <span class="dt">bins =</span> <span class="dv">50</span>)</a></code></pre></div>
+<div class="figure" style="text-align: center"><span id="fig:essay-length-distribution"></span>
+<img src="images/modeling-okc-histogram-essay-length.png" alt="Distribution of essay length." width="1500" />
+<p class="caption">
+FIGURE 4.5: Distribution of essay length.
+</p>
+</div>
 </div>
 <div id="model-building" class="section level2">
 <h2><span class="header-section-number">4.4</span> Model Building</h2>
@@ -668,11 +699,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  - weighted_recall() 
 ##  - weighted_true_positive_rate() </code></pre>
 <p>We can plot the ROC curve by collecting the output of <code>validation_summary$roc()</code> and using ggplot2:</p>
-<p><img src="the-r-in-spark_files/figure-html/unnamed-chunk-84-1.png" width="672" /></p>
+<div class="figure" style="text-align: center"><span id="fig:roc1"></span>
+<img src="images/modeling-okc-roc1.png" alt="ROC curve for the logistic regression model." width="750" />
+<p class="caption">
+FIGURE 4.6: ROC curve for the logistic regression model.
+</p>
+</div>
 <p>Recall that the ROC curve plots the true positive rate (sensitivity) against the false positive rate (1 - specificity) for varying values of the classification threshold. In practice, the business problem helps to determine where on the curve one sets the threshold for classification. The AUC is a summary measure for determining the quality of a model, and we can compute it by calling the <code>area_under_roc()</code> function.</p>
 <div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb110-1" title="1">validation_summary<span class="op">$</span><span class="kw">area_under_roc</span>()</a></code></pre></div>
 <div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb111-1" title="1"><span class="co">## [1] 0.7872754</span></a></code></pre></div>
-<p><strong>Note</strong>: Spark only provides evaluation methods for generalized linear models (including linear models and logistic regression.) For other algorithms, you can use the evaluator functions (e.g. <code>ml_binary_classification_evaluator()</code> on the prediction data frame) or compute your own metrics.</p>
+<p><strong>Note:</strong> Spark only provides evaluation methods for generalized linear models (including linear models and logistic regression.) For other algorithms, you can use the evaluator functions (e.g. <code>ml_binary_classification_evaluator()</code> on the prediction data frame) or compute your own metrics.</p>
 <p>Now, we can easily repeat the logic we have above and apply it to each train/validation split:</p>
 <div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb112-1" title="1">cv_results &lt;-<span class="st"> </span><span class="kw">map_df</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="cf">function</span>(v) {</a>
 <a class="sourceLine" id="cb112-2" title="2">  train_set &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, vfolds[<span class="kw">setdiff</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, v)])</a>
@@ -690,7 +726,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb112-14" title="14">  )</a>
 <a class="sourceLine" id="cb112-15" title="15">})</a></code></pre></div>
 <p>This gives us 10 ROC curves:</p>
-<p><img src="the-r-in-spark_files/figure-html/unnamed-chunk-88-1.png" width="672" /></p>
+<div class="figure" style="text-align: center"><span id="fig:roc2"></span>
+<img src="images/modeling-okc-roc2.png" alt="Cross-validated ROC curves for the logistic regression model." width="1200" />
+<p class="caption">
+FIGURE 4.7: Cross-validated ROC curves for the logistic regression model.
+</p>
+</div>
 <p>and we can obtain the average AUC metric:</p>
 <div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb113-1" title="1"><span class="kw">mean</span>(cv_results<span class="op">$</span>auc)</a></code></pre></div>
 <div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb114-1" title="1"><span class="co">## [1] 0.7703891</span></a></code></pre></div>
@@ -721,8 +762,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 12 drugs_sometimes   -0.201     0.158         -1.27  2.03e- 1
 ## 13 essay_length       0.0000355 0.00000827     4.29  1.75e- 5</code></pre>
 <p>We can extract the coefficient estimates into a tidy data frame, which we can then process further, for example, to create a coefficient plot.</p>
-<p><img src="the-r-in-spark_files/figure-html/unnamed-chunk-93-1.png" width="672" /></p>
-<p><strong>Note</strong>: Both <code>ml_logistic_regression()</code> and <code>ml_linear_regression()</code> support elastic net regularization <span class="citation">(Zou and Hastie <a href="#ref-zou2005regularization">2005</a>)</span> through the <code>reg_param</code> and <code>elastic_net_param</code> parameters. <code>reg_param</code> corresponds to <span class="math inline">\(lambda\)</span> whereas <code>elastic_net_param</code> correspond to <span class="math inline">\(alpha\)</span>. <code>ml_generalized_linear_regression()</code> supports only <code>reg_param</code>.</p>
+<div class="figure" style="text-align: center"><span id="fig:glr-coefs"></span>
+<img src="images/modeling-okc-glr-coefs.png" alt="Coefficient estimates with 95% confidence intervals." width="1500" />
+<p class="caption">
+FIGURE 4.8: Coefficient estimates with 95% confidence intervals.
+</p>
+</div>
+<p><strong>Note:</strong> Both <code>ml_logistic_regression()</code> and <code>ml_linear_regression()</code> support elastic net regularization <span class="citation">(Zou and Hastie <a href="#ref-zou2005regularization">2005</a>)</span> through the <code>reg_param</code> and <code>elastic_net_param</code> parameters. <code>reg_param</code> corresponds to <span class="math inline">\(lambda\)</span> whereas <code>elastic_net_param</code> correspond to <span class="math inline">\(alpha\)</span>. <code>ml_generalized_linear_regression()</code> supports only <code>reg_param</code>.</p>
 </div>
 </div>
 <div id="more-machine-learning-algorithms" class="section level2">
