@@ -1,11 +1,11 @@
 render_nomnoml <- function(code, png, caption, styles = "") {
-  if (identical(Sys.getenv("ASCIITEXT_RENDERING"), "TRUE")) {
-    nomnoml::nomnoml(paste0(styles, "\n", code), png = png)
-    png_resized <- resize_image_if_needed(png)
+  nomnoml::nomnoml(paste0(styles, "\n", code), png = png)
+  png_resized <- resize_image_if_needed(png)
 
+  if (identical(Sys.getenv("ASCIITEXT_RENDERING"), "TRUE")) {
     knitr::asis_output(paste0("![", caption, "||", knitr::opts_current$get()$label, "](", png_resized, ")"))
   } else {
-    nomnoml::nomnoml(paste0(styles, "\n", code))
+    knitr::include_graphics(png_resized)
   }
 }
 
@@ -43,13 +43,14 @@ resize_image_if_needed <- function(image) {
 }
 
 render_image <- function(image, caption) {
+  image_resized <- resize_image_if_needed(image)
+
   if (identical(Sys.getenv("ASCIITEXT_RENDERING"), "TRUE")) {
-    image_resized <- resize_image_if_needed(image)
     knitr::asis_output(
       paste0("![", caption, "||", knitr::opts_current$get()$label, "](", image_resized, ")")
     )
   } else {
-    knitr::include_graphics(image)
+    knitr::include_graphics(image_resized)
   }
 }
 

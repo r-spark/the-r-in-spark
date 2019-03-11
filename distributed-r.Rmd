@@ -59,11 +59,11 @@ Notice that `~ 10 * .x` is plain R code executed across all worker nodes; the `~
 
 Now, the first thing to notice is that `f(x)` takes an R data frame as input and must also produce an R data frame as output, conceptually illustrated in Figure \@ref(fig:distributed-spark-apply-input-output).
 
-```{r distributed-spark-apply-input-output, echo=FALSE, eval=TRUE, fig.cap='Expected function signature in spark_apply() mappings', out.width='580pt', out.height='120pt', fig.align='center'}
+```{r distributed-spark-apply-input-output, echo=FALSE, eval=TRUE, fig.cap='Expected function signature in spark_apply() mappings', fig.align='center'}
 render_nomnoml("
 [DataFrame]->[f(x)]
 [f(x)]->[DataFrame']
-", "images/distributed-r-spark-apply-input-output.png", "Expected function signature in spark_apply() mappings", styles)
+", "images/distributed-r-spark-apply-input-output.png", "Expected Function Signature in spark_apply() Mappings", styles)
 ```
 
 We can use the orginal MapReduce example from the [Introduction](#intro) chapter where, the map operations was defined to split sentences into words and then, the total unique words were counted as the reduce operation. In R, we could make use of the `unnest_tokens()` function in the `tidytext` R package, combining the functionality of `tidytext` with `spark_apply()` would allow us to tokenize those sentences into a table of words as follows:

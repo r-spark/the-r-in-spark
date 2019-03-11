@@ -29,7 +29,7 @@ Strictly speaking, the driver node and worker nodes are just names assigned to m
 
 We can illustrate this concepts in Figure \@ref(fig:connections-architecture), where the driver node orchestrates worker's work through the cluster manager.
 
-```{r connections-architecture, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='Apache Spark Architecture', out.width='100%', out.height='200pt'}
+```{r connections-architecture, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='Apache Spark Architecture'}
 render_nomnoml("
 [Driver | [Spark Context]] 
 [Driver]-[Cluster Manager]
@@ -54,7 +54,7 @@ Therefore, before connecting to Apache Spark, it is likely you will first have t
 
 Figure \@ref(fig:connections-spark-edge) explains these concepts visually. The left block is usually your web browser, the right block is the edge node, client and edge node communicate over HTTP when using a web browser or SSH when using the terminal.
 
-```{r connections-spark-edge, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='200pt', fig.cap='Connecting to Sparks Edge Node'}
+```{r connections-spark-edge, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='Connecting to Sparks Edge Node'}
 render_nomnoml("
 [Client|
   [Terminal]
@@ -93,7 +93,7 @@ Where `<cluster-master>` is set to the correct cluster manager master for [Spark
 
 When connecting to Spark in local mode, Spark starts a single process which runs most of the cluster components like the Spark context and a single executor. This is ideal to learn Spark, work offline, troubleshoot issues or to test code before you run it over a large compute cluster. A local connection to Spark is represented in Figure \@ref(fig:connections-local-diagram).
 
-```{r connections-local-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='160pt', fig.cap='Local Connection Diagram'}
+```{r connections-local-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='Local Connection Diagram'}
 render_nomnoml("
 [Driver|
   [R]
@@ -121,7 +121,7 @@ A connection in standalone mode starts from `sparklyr`, which launches `spark-su
 
 Visually, this is described in Figure \@ref(fig:connections-standalone-diagram), which is quite similar to the overall connection architecture from Figure \@ref(fig:connections-architecture) but, with additional details that are particular to standalone clusters and `sparklyr`.
 
-```{r connections-standalone-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='200pt', fig.cap='Spark Standalone Connection Diagram'}
+```{r connections-standalone-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='Spark Standalone Connection Diagram'}
 render_nomnoml("
 [Driver |
   [R]
@@ -151,7 +151,7 @@ Hadoop YARN is the cluster manager from the Hadoop project, it's the most common
 
 When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as shown in Figure \@ref(fig:connections-yarn-client-diagram).
 
-```{r connections-yarn-client-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='YARN Client Connection Diagram'}
+```{r connections-yarn-client-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='YARN Client Connection Diagram'}
 render_nomnoml("
 [Driver |
   [R]
@@ -181,7 +181,7 @@ The main difference between YARN in cluster mode and running YARN in client mode
 
 Figure \@ref(fig:connections-yarn-cluster-diagram) shows how the different components become decoupled when running in cluster mode. Notice there is still a line connecting the client with the cluster manager since, first of all, resources still need to be allocated from the cluster manager; however, once allocated, the client communicates directly with the driver node which will then communicate with the worker nodes. From this diagram, you might think that cluster mode looks much more complicated than the client mode diagram -- this would be a correct assesment; therefore, it's best to avoid cluster mode when possible due to additional configuration overhead that is best to avoid, if possible.
 
-```{r connections-yarn-cluster-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='240pt', fig.cap='YARN Cluster Connection Diagram'}
+```{r connections-yarn-cluster-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='YARN Cluster Connection Diagram'}
 render_nomnoml("
 [Client |
   [R]
@@ -214,7 +214,7 @@ Cluster mode assumes that the node running `spark_connect()` is properly configu
 
 As opposed to other connection methods which require using an edge node in the cluster, [Livy](#clusters-livy) provides a **Web API** that makes the Spark cluster accessible from outside the cluster and does not require a Spark installation in the client. Once connected through the Web API, the **Livy Service** starts the Spark context by requesting resources from the cluster manager and distributing work as usual. Figure \@ref(fig:connections-livy-diagram) illustrates a Livy connection, notice that the client connects remotely to the driver through a web API.
 
-```{r connections-livy-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='240pt', fig.cap='Livy Connection Diagram'}
+```{r connections-livy-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='Livy Connection Diagram'}
 render_nomnoml("
 [Client |
   [R]
@@ -262,7 +262,7 @@ Once connected through Livy, you can make use of any `sparklyr` feature; however
 
 Similar to YARN, Mesos supports client mode and a cluster mode; however -- `sparklyr` currently only supports client mode under Mesos. Therefore, the diagram from Figure \@ref(fig:connections-mesos-diagram), is equivalent to YARN Client's diagram with only the cluster manager changed from YARN to Mesos.
 
-```{r connections-mesos-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='Mesos Connection Diagram'}
+```{r connections-mesos-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='Mesos Connection Diagram'}
 render_nomnoml("
 [Driver |
   [R]
@@ -288,7 +288,7 @@ sc <- spark_connect(master = "mesos://host:port")
 
 Kubernetes cluster do not support client modes like Mesos or YARN; instead, the connection model is similar to YARN Cluster, where the driver node is assigned by Kubernetes. This is illustrated in Figure \@ref(fig:connections-kubernetes-diagram).
 
-```{r connections-kubernetes-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', out.width='100%', out.height='250pt', fig.cap='Kubernetes Connection Diagram'}
+```{r connections-kubernetes-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='Kubernetes Connection Diagram'}
 render_nomnoml("
 [Client |
   [R]
