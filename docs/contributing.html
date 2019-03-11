@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2019-03-08">
+<meta name="date" content="2019-03-10">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -48,14 +48,14 @@
 
 
 <script src="libs/htmlwidgets-1.3/htmlwidgets.js"></script>
-<script src="libs/dagre-0.0.1/dagre.min.js"></script>
-<script src="libs/lodash-3.7.0/lodash.js"></script>
-<script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
-<script src="libs/nomnoml-binding-0.1.0/nomnoml.js"></script>
 <script src="libs/r2d3-render-0.1.0/r2d3-render.js"></script>
 <script src="libs/webcomponents-2.0.0/webcomponents.js"></script>
 <script src="libs/r2d3-binding-0.2.3/r2d3.js"></script>
 <script src="libs/d3v5-5.0.0/d3.min.js"></script>
+<script src="libs/dagre-0.0.1/dagre.min.js"></script>
+<script src="libs/lodash-3.7.0/lodash.js"></script>
+<script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
+<script src="libs/nomnoml-binding-0.1.0/nomnoml.js"></script>
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119986300-1"></script>
 <script>
@@ -294,8 +294,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="8" data-path="tuning.html"><a href="tuning.html"><i class="fa fa-check"></i><b>8</b> Tuning</a><ul>
 <li class="chapter" data-level="8.1" data-path="tuning.html"><a href="tuning.html#overview-1"><i class="fa fa-check"></i><b>8.1</b> Overview</a><ul>
-<li class="chapter" data-level="8.1.1" data-path="tuning.html"><a href="tuning.html#tuning-graph-visualization"><i class="fa fa-check"></i><b>8.1.1</b> Graph Visualization</a></li>
-<li class="chapter" data-level="8.1.2" data-path="tuning.html"><a href="tuning.html#tuning-event-timeline"><i class="fa fa-check"></i><b>8.1.2</b> Event Timeline</a></li>
+<li class="chapter" data-level="8.1.1" data-path="tuning.html"><a href="tuning.html#tuning-graph-visualization"><i class="fa fa-check"></i><b>8.1.1</b> Graph</a></li>
+<li class="chapter" data-level="8.1.2" data-path="tuning.html"><a href="tuning.html#tuning-event-timeline"><i class="fa fa-check"></i><b>8.1.2</b> Timeline</a></li>
 </ul></li>
 <li class="chapter" data-level="8.2" data-path="tuning.html"><a href="tuning.html#tuning-configuring"><i class="fa fa-check"></i><b>8.2</b> Configuring</a><ul>
 <li class="chapter" data-level="8.2.1" data-path="tuning.html"><a href="tuning.html#connect-settings"><i class="fa fa-check"></i><b>8.2.1</b> Connect Settings</a></li>
@@ -483,8 +483,8 @@ config<span class="op">$</span>sparklyr.invoke.trace &lt;-<span class="st"> </sp
 <p><a href="https://cran.r-project.org/">CRAN</a>, which stands for the Comprehensive R Archive Network, provides a repository of packages that can be easily installable and which are carefully reviewed before they are made available. You can read more about the release process under <a href="http://r-pkgs.had.co.nz/release.html">releasing a package</a> and Hadley Wickam’s book on packages: <a href="@wickham2015r">R Packages: Organize, Test, Document, and Share Your Code</a>. CRAN users are always encouraged to install the latest version of a package, which means that <code>sparklyr</code> also needs to support multiple versions of Spark.</p>
 <p>Therefore, at a high level, <code>sparklyr</code> is composed of: R code and versioned Scala code:</p>
 <div class="figure" style="text-align: center"><span id="fig:contributing-sparklyr"></span>
-<div id="htmlwidget-7bd8e76320aa3b3cc7c1" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7bd8e76320aa3b3cc7c1">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[sparklyr|\n  [R Code]\n  [Scala Code|\n    [Spark 1.6.x]\n    [Spark 2.x.0]\n  ]\n]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-dbecd35af5cd5413b772" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-dbecd35af5cd5413b772">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[sparklyr|\n  [R Code]\n  [Scala Code|\n    [Spark 1.6.x]\n    [Spark 2.x.0]\n  ]\n]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.1: Sparklyr Package Architecture
 </p>
@@ -494,8 +494,8 @@ FIGURE 12.1: Sparklyr Package Architecture
 <p>When connecting to Spark using <code>spark_connect()</code>, <code>sparklyr</code> submits the correct version of the <code>sparklyr</code> JAR to Spark which then Spark executes. We will refer to this submitted application as the <strong>sparklyr backend</strong> and the R code as the <strong>sparklyr frontend</strong>. <a href="https://en.wikipedia.org/wiki/Front_and_back_ends">Fontend and backend</a> are common software engineer concepts related to separating the user interface, the R console in this case, with the data layer, Spark data proessing in this context. For most <a href="contributing.html#connections-1">connections</a>, the backend is usually submitted by <code>sparklyr</code> to Spark using <code>spark-submit</code>, which is a command line tool well-known in Spark; however, for others connections, like Livy, the backend is submitted through Livy’s HTTP interface.</p>
 <p>Once the backend is submitted to Spark, the frontend communicates to the backend using socket connections, expect for Livy connections where this happens over HTTP:</p>
 <div class="figure" style="text-align: center"><span id="fig:contributing-connection"></span>
-<div id="htmlwidget-0493807aed566b80e655" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-0493807aed566b80e655">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[R|\n  [sparklyr|\n    [frontend]\n  ]\n]\n[Spark|\n  [sparklyr|\n    [backend]\n  ]\n]\n#.hidden: visual=hidden\n[<hidden> Socket / HTTP Connection]\n[R]-[Socket / HTTP Connection]\n[Socket / HTTP Connection]-[Spark]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-aa854ae6511e3d701e4b" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-aa854ae6511e3d701e4b">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n   \n#spacing: 15\n[R|\n  [sparklyr|\n    [frontend]\n  ]\n]\n[Spark|\n  [sparklyr|\n    [backend]\n  ]\n]\n#.hidden: visual=hidden\n[<hidden> Socket / HTTP Connection]\n[R]-[Socket / HTTP Connection]\n[Socket / HTTP Connection]-[Spark]\n","className":null,"svg":true},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.2: Sparklyr Connection Architecture
 </p>

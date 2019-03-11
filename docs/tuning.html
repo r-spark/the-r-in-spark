@@ -24,7 +24,7 @@
 
 
 
-<meta name="date" content="2019-03-08">
+<meta name="date" content="2019-03-10">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -48,14 +48,14 @@
 
 
 <script src="libs/htmlwidgets-1.3/htmlwidgets.js"></script>
-<script src="libs/dagre-0.0.1/dagre.min.js"></script>
-<script src="libs/lodash-3.7.0/lodash.js"></script>
-<script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
-<script src="libs/nomnoml-binding-0.1.0/nomnoml.js"></script>
 <script src="libs/r2d3-render-0.1.0/r2d3-render.js"></script>
 <script src="libs/webcomponents-2.0.0/webcomponents.js"></script>
 <script src="libs/r2d3-binding-0.2.3/r2d3.js"></script>
 <script src="libs/d3v5-5.0.0/d3.min.js"></script>
+<script src="libs/dagre-0.0.1/dagre.min.js"></script>
+<script src="libs/lodash-3.7.0/lodash.js"></script>
+<script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
+<script src="libs/nomnoml-binding-0.1.0/nomnoml.js"></script>
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119986300-1"></script>
 <script>
@@ -294,8 +294,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="8" data-path="tuning.html"><a href="tuning.html"><i class="fa fa-check"></i><b>8</b> Tuning</a><ul>
 <li class="chapter" data-level="8.1" data-path="tuning.html"><a href="tuning.html#overview-1"><i class="fa fa-check"></i><b>8.1</b> Overview</a><ul>
-<li class="chapter" data-level="8.1.1" data-path="tuning.html"><a href="tuning.html#tuning-graph-visualization"><i class="fa fa-check"></i><b>8.1.1</b> Graph Visualization</a></li>
-<li class="chapter" data-level="8.1.2" data-path="tuning.html"><a href="tuning.html#tuning-event-timeline"><i class="fa fa-check"></i><b>8.1.2</b> Event Timeline</a></li>
+<li class="chapter" data-level="8.1.1" data-path="tuning.html"><a href="tuning.html#tuning-graph-visualization"><i class="fa fa-check"></i><b>8.1.1</b> Graph</a></li>
+<li class="chapter" data-level="8.1.2" data-path="tuning.html"><a href="tuning.html#tuning-event-timeline"><i class="fa fa-check"></i><b>8.1.2</b> Timeline</a></li>
 </ul></li>
 <li class="chapter" data-level="8.2" data-path="tuning.html"><a href="tuning.html#tuning-configuring"><i class="fa fa-check"></i><b>8.2</b> Configuring</a><ul>
 <li class="chapter" data-level="8.2.1" data-path="tuning.html"><a href="tuning.html#connect-settings"><i class="fa fa-check"></i><b>8.2.1</b> Connect Settings</a></li>
@@ -417,61 +417,81 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="tuning" class="section level1">
 <h1><span class="header-section-number">Chapter 8</span> Tuning</h1>
-<p>In previous chapters we’ve assumed that computation within a Spark cluster works efficiently. While this is true in some cases, it is often required to have some knowledge of the operations Spark runs internally to fine tune configuration settings that will make computations run efficiently. This chapter will explain how Spark computes data over large datasets and provide details on how to fine-tune its operations.</p>
-<p>For instance, you will learn how to request more compute nodes and increase the amount of memory which, if you remember, defaults to only 2GB in local instances. You will learn how Spark unifies computation through partioning, shuffling and caching. As mentioned a few chapters back, this is the last chapter describing the internals of Spark; once you complete this chapter, it is our belief that you would have acquired intermediate Spark skills necessary to be productive at using Spark.</p>
-<p>In subsequent chapters: Extensions, Distributed R and Streaming; you will learn exciting techniques to deal with specific modeling, scaling and computation problems. However, we must first understand how spark performs internal computations, what pieces we can control and why.</p>
+<p>In previous chapters we’ve assumed that computation within a Spark cluster works efficiently. While this is true in some cases, it is often necessary to have some knowledge of the operations Spark runs internally to fine tune configuration settings that will make computations run efficiently. This chapter will explain how Spark computes data over large datasets and provide details on how to fine-tune its operations.</p>
+<p>For instance, you will learn how to request more compute nodes and increase the amount of memory which, if you remember from the <a href="starting.html#starting">Getting Started</a> chapter, defaults to only 2GB in local instances. You will learn how Spark unifies computation through partioning, shuffling and caching. As mentioned a few chapters back, this is the last chapter describing the internals of Spark; once you complete this chapter, we believe that you will have the intermediate Spark skills necessary to be productive at using Spark.</p>
+<p>In subsequent chapters, Extensions, Distributed R and Streaming, you will learn exciting techniques to deal with specific modeling, scaling and computation problems. However, we must first understand how spark performs internal computations, what pieces we can control, and why.</p>
 <div id="overview-1" class="section level2">
 <h2><span class="header-section-number">8.1</span> Overview</h2>
-<p>Spark performs distributed computation by: configuring, partitioning, executing, shuffling, caching and serializing data, tasks and resources across multiple machines:</p>
+<p>Spark performs distributed computation by configuring, partitioning, executing, shuffling, caching and serializing data, tasks and resources across multiple machines:</p>
 <ul>
 <li><a href="tuning.html#tuning-configuring"><strong>Configuring</strong></a> requests the cluster manager for resources: total machines, memory, etc.</li>
 <li><a href="tuning.html#tuning-configuring"><strong>Partitioning</strong></a> splits the data among various machines. Partitions can be either implicit or explicit.</li>
 <li><a href="tuning.html#tuning-configuring"><strong>Executing</strong></a> means running an arbitrary transformation over each partition.</li>
-<li><a href="tuning.html#tuning-configuring"><strong>Shuffling</strong></a> redistributes data when data to the correct machine.</li>
+<li><a href="tuning.html#tuning-configuring"><strong>Shuffling</strong></a> redistributes data to the correct machine.</li>
 <li><a href="tuning.html#tuning-configuring"><strong>Caching</strong></a> preserves data in-memory across different computation cycles.</li>
-<li><a href="#tuning-serializing"><strong>Serializing</strong></a> transforms data partitions or data collection to be sent over the network to other workers or back to the driver node.</li>
+<li><a href="#tuning-serializing"><strong>Serializing</strong></a> transforms data to be sent over the network to other workers or back to the driver node.</li>
 </ul>
-<p>The diagram in Figure <a href="tuning.html#fig:tuning-overview">8.1</a> shows an example on how a sorting <strong>job</strong> would conceptually work across a cluster of machines. First, Spark would <strong>configure</strong> the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the data is already partitioned, each worker node loads this implicit <strong>partition</strong>; for instance, <code>4,9,1</code> is loaded in the first worker node. Afterwards, a custom transformation is applied to each partition in each worker node, this is denoted by <code>f(x)</code> in the diagram below and is defined as a <strong>stage</strong> in Spark terminology. In this example, <code>f(x)</code> <strong>executes</strong> a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed. Once the execution completes, the result is <strong>shuffled</strong> to the right machine to finish the sorting operation across the entire dataset. Once the data is sorted across the cluster, the sorted results can be optionally <strong>cached</strong> in memory to avoid rerunning this computation multiple times. Finally, a small subset of the cached results is <strong>serialized</strong>, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.</p>
+<p>To illustrate each concept, we will create three partitions with unordered integers and then sort them with <code>arrange()</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">data &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, 
+  <span class="kw">data.frame</span>(<span class="dt">id =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">9</span>, <span class="dv">1</span>, <span class="dv">8</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">6</span>)),
+  <span class="dt">repartition =</span> <span class="dv">3</span>)
+
+data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(id) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>()</code></pre>
+<p>The diagram in Figure <a href="tuning.html#fig:tuning-overview">8.1</a> shows how this sorting <strong>job</strong> would conceptually work across a cluster of machines. First, Spark would <strong>configure</strong> the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the <strong>data</strong> is already partitioned, each worker node loads this implicit <strong>partition</strong>; for instance, <code>4,9,1</code> is loaded in the first worker node. Afterwards, a <em>task</em> is distributed to each worker to apply a transformation to each data partition in each worker node, this task is denoted by <code>f(x)</code>. In this example, <code>f(x)</code> <strong>executes</strong> a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed.</p>
+<p>The result is then <strong>shuffled</strong> to the correct machine to finish the sorting operation across the entire dataset, this completes a stage. A <strong>stage</strong> is a set of operations that Spark can execute without shuffling data between machines. Once the data is sorted across the cluster, the sorted results can be optionally <strong>cached</strong> in memory to avoid rerunning this computation multiple times.</p>
+<p>Finally, a small subset of the results is <strong>serialized</strong>, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.</p>
 <div class="figure" style="text-align: center"><span id="fig:tuning-overview"></span>
-<img src="images/tuning-spark-overview.png" alt="Sorting Distributed Data with Apache Spark" width="707" />
+<img src="images/tuning-spark-overview-resized.png" alt="Sorting Distributed Data with Apache Spark" width="1500" />
 <p class="caption">
 FIGURE 8.1: Sorting Distributed Data with Apache Spark
 </p>
 </div>
-<p>Notice that while Figure <a href="tuning.html#fig:tuning-overview">8.1</a> describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, most of these lower level operations are not exposed in <code>sparklyr</code>, instead, <code>sparklyr</code> makes those operations available through higher level commands provided by data <a href="analysis.html#analysis">analysis</a> tools like <code>dplyr</code> or <code>DBI</code>, <a href="modeling.html#modeling">modeling</a> and by using many <a href="extensions.html#extensions">extensions</a>. For those few cases where you might need to implement lowe-level operations, you can always use the Spark’s Scala API through an <code>sparklyr</code> <a href="#extension">extensions</a> or run custom <a href="distributed.html#distributed">distributed R</a> code.</p>
-<p>In order to effectively tune Spark, we will start by getting familiar with the <a href="tuning.html#tuning-graph-visualization"><strong>graph visualization</strong></a> and the <a href="tuning.html#tuning-event-timeline"><strong>event timeline</strong></a>. Both are accessible through the <a href="starting.html#starting-spark-web-interface">Spark Web Interface</a> by selecting a particular job and a particular state under this job.</p>
+<p>Notice that while Figure <a href="tuning.html#fig:tuning-overview">8.1</a> describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, most of these lower level operations are not exposed in <code>sparklyr</code>; instead, <code>sparklyr</code> makes those operations available through higher level commands provided by data <a href="analysis.html#analysis">analysis</a> tools like <code>dplyr</code> or <code>DBI</code>, <a href="modeling.html#modeling">modeling</a>, and by using many <a href="extensions.html#extensions">extensions</a>. For those few cases where you might need to implement lowe-level operations, you can always use the Spark’s Scala API through an <code>sparklyr</code> <a href="#extension">extensions</a> or run custom <a href="distributed.html#distributed">distributed R</a> code.</p>
+<p>In order to effectively tune Spark, we will start by getting familiar with Spark’s computation <a href="tuning.html#tuning-graph-visualization"><strong>graph</strong></a> and Spark’s event <a href="tuning.html#tuning-event-timeline"><strong>timeline</strong></a>. Both are accessible through <a href="starting.html#starting-spark-web-interface">Spark’s web interface</a>.</p>
 <div id="tuning-graph-visualization" class="section level3">
-<h3><span class="header-section-number">8.1.1</span> Graph Visualization</h3>
-<p>You can find a <strong>graph visualization</strong> under each Spark stage by expanding “DAG Visualization”. DAG stands for Directed Acyclic Graph, which means that all computations in Spark move computation forward without repeating previous steps, this helps Spark optimize computations effectively. What you will see in this visualization is a breakdown of the operations that Spark had to perform (or is performing if the stage is still active) to execute your computation.</p>
-<p>For instance, lets first sort a dataset using <code>dplyr::arrange()</code> and then take a look at the resulting graph from Figure <a href="tuning.html#fig:tuning-graph-render">8.2</a>. Notice that there are no arrows pointing back to previous steps, since Spark makes use of acyclic graphs; then, take a look at the individual steps comprised of mostly mapping operations. It’s hard to understand what they mean the first time you see them, but as you execute more Spark jobs, this graph will become more familiar and will help you identify unexpected steps to investigate further.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">copy_to</span>(sc, iris) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(Sepal_Width)</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:tuning-graph-render"></span>
-<img src="images/tuning-spark-graph-visualization.png" alt="Spark graph visualization" width="981" />
+<h3><span class="header-section-number">8.1.1</span> Graph</h3>
+<p>Spark describes all computation steps using a Directed Acyclic Graph (DAG), which means that all computations in Spark move computation forward without repeating previous steps, this helps Spark optimize computations effectively.</p>
+<p>The best way to understand Spark’s computation graph for a given operation, sorting for our example, is to open the last <strong>completed query</strong> under the <strong>SQL</strong> tab in <a href="starting.html#starting-spark-web-interface">Spark’s web interface</a>. Figure <a href="tuning.html#fig:tuning-graph-sql-render">8.2</a> show the resulting graph for this sorting operation, this graph contains the following operations:</p>
+<ul>
+<li><strong>WholeStageCodegen:</strong> This block describes that the operations it contains were used to generate computer code that was efficiently translated to <strong>byte code</strong>. There is usually a small cost associated with translating operations into byte code, but this is a small cost to pay since then the operations can be execute much faster from Spark. In general, you can ignore this blog and focus on the blocks that it contains.</li>
+<li><strong>InMemoryTableScan:</strong> This means that the original dataset <code>data</code> was stored in-memory and traversed row-by-row once.</li>
+<li><strong>Exchange:</strong> Partitions were exchanged, read shuffled, across executors in your cluster.</li>
+<li><strong>Sort:</strong> Once the records arrived at the right executor, they were sorted in this final stage.</li>
+</ul>
+<div class="figure" style="text-align: center"><span id="fig:tuning-graph-sql-render"></span>
+<img src="images/tuning-spark-graph-visualization-sql.png" alt="Spark Graph for a Sorting Query" width="1427" />
 <p class="caption">
-FIGURE 8.2: Spark graph visualization
+FIGURE 8.2: Spark Graph for a Sorting Query
 </p>
 </div>
+<p>From the query details, you can then open the last Spark job to arrive to the job details page, you can then expand “DAG Visualization” to visualize a graph similar to Figure <a href="tuning.html#fig:tuning-graph-render">8.3</a>. This graph shows a few additional details and the stages in this job. Notice that there are no arrows pointing back to previous steps, since Spark makes use of acyclic graphs.</p>
+<div class="figure" style="text-align: center"><span id="fig:tuning-graph-render"></span>
+<img src="images/tuning-spark-graph-visualization-resized.png" alt="Spark Graph for a Sorting Job" width="1500" />
+<p class="caption">
+FIGURE 8.3: Spark Graph for a Sorting Job
+</p>
+</div>
+<p>Next, we will dive into a Spark stage and explore its event timeline.</p>
 </div>
 <div id="tuning-event-timeline" class="section level3">
-<h3><span class="header-section-number">8.1.2</span> Event Timeline</h3>
-<p>The <strong>event timeline</strong> is also available for each Spark stage in the Spark’s <a href="starting.html#starting-spark-web-interface">web interface</a>, this timeline gives you a great summary of how Spark is spending computation cycles. In general, you want to see this timeline consisting of mostly CPU usage since other tasks can be considered overhead.</p>
-<p>Lets sort again a dataset, but this time, we will skip the graph visualization and look instead at the event timeline from Figure <a href="tuning.html#fig:tuning-timeline-simple">8.3</a>.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">copy_to</span>(sc, iris, <span class="dt">overwrite =</span> T) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(Sepal_Width)</code></pre>
+<h3><span class="header-section-number">8.1.2</span> Timeline</h3>
+<p>The <strong>event timeline</strong> is a great summary of how Spark is spending computation cycles over each stage. Ideally, you want to see this timeline consisting of mostly CPU usage since other tasks can be considered overhead. You also want to see Spark using all the CPUs across all the cluster nodes available to you.</p>
+<p>Select the first stage in the current job and expand the “Event Timeline”, you should see a timeline similar to Figure <a href="tuning.html#fig:tuning-timeline-simple">8.4</a>. Notice that we explicitly requested three partitions, which is represented by three lanes in this visualization.</p>
 <div class="figure" style="text-align: center"><span id="fig:tuning-timeline-simple"></span>
-<img src="images/tuning-spark-event-timeline.png" alt="Spark Event Timeline" width="90%" />
+<img src="images/tuning-spark-event-timeline.png" alt="Spark Event Timeline" width="1410" />
 <p class="caption">
-FIGURE 8.3: Spark Event Timeline
+FIGURE 8.4: Spark Event Timeline
 </p>
 </div>
-<p>Notice that a single executor is being used, for machines and clusters with multiple CPUs, you should rather expect computation to be parallelized. You can explicitly repartition data as will be explained in the <a href="#tunning-partitioning">partitioning</a> section, but for now, let’s just copy again the dataset using two partitions and explore the event timeline of this operation.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">copy_to</span>(sc, iris, <span class="dt">repartition =</span> <span class="dv">2</span>, <span class="dt">overwrite =</span> T) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(Sepal_Width)</code></pre>
+<p>Since our machine is equiped with four CPUs, we can parallelize this computation even further by explicitly repartition data using <code>sdf_repartition()</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sdf_repartition</span>(<span class="dv">4</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(id) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>()</code></pre>
 <div class="figure" style="text-align: center"><span id="fig:tuning-timeline-repartition"></span>
-<img src="images/tuning-spark-event-timeline-repartition.png" alt="Spark Event Timeline with " width="90%" />
+<img src="images/tuning-spark-event-timeline-repartition.png" alt="Spark Event Timeline with Additional Partitions" width="1413" />
 <p class="caption">
-FIGURE 8.4: Spark Event Timeline with
+FIGURE 8.5: Spark Event Timeline with Additional Partitions
 </p>
 </div>
-<p>Figure <a href="tuning.html#fig:tuning-timeline-repartition">8.4</a> now shows two execution lanes with most time spent under “Executor Computing Time”, this means that this particular operation is making better use of our compute resources. When working with clusters, requesting more compute nodes from your cluster should shorten computation time. In contrast, for timelines heavy on read or write shuffling, requesting more compute nodes might not shorten time and might actualy makes everything slower. There is no concrete set of rules to follow; however, as you gain experience understanding this timeline over multiple operations – you will develop insight as to how to properly optimize Spark operations.</p>
+<p>Figure <a href="tuning.html#fig:tuning-timeline-repartition">8.5</a> now shows four execution lanes with most time spent under “Executor Computing Time”, which shows us that this particular operation is making better use of our compute resources. When working with clusters, requesting more compute nodes from your cluster should shorten computation time. In contrast, for timelines that show significant time spent shuffling, requesting more compute nodes might not shorten time and might actualy makes everything slower. There is no concrete set of rules to follow to optimize a stage; however, as you gain experience understanding this timeline over multiple operations – you will develop insights as to how to properly optimize Spark operations.</p>
 </div>
 </div>
 <div id="tuning-configuring" class="section level2">
@@ -484,7 +504,7 @@ FIGURE 8.4: Spark Event Timeline with
 <li><strong>Number of Workers:</strong> The number of workers required for this session.</li>
 </ul>
 <p><strong>Note:</strong> It is recommended to request significantly more memory for the driver than the memory available over each worker node. In most cases, you will want to request one core per worker.</p>
-<p>In local mode, <code>spark_connect(master = "local")</code>; as mentioned in the <a href="#connection-local">local connections</a> section, there are no workers, but we can set the driver memory and cores to use through:</p>
+<p>In local mode there are no workers, but we can still configure memory and cores to use through:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Initialize configuration with defaults</span>
 config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()
 
@@ -496,7 +516,7 @@ config[<span class="st">&quot;sparklyr.connect.cores.local&quot;</span>] &lt;-<s
 
 <span class="co"># Connect to local cluster with custom configuration</span>
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> config)</code></pre>
-<p>When using the Spark Standalone and the Mesos cluster managers, all the available memory and cores are assigned by default; therefore, there is no additional configuration changes required, unless, you want to restrict resources to allow multiple users to share this cluster, in which case you can use <code>total-executor-cores</code> to restrict the total executors requested. The “Spark Standalone”<span class="citation">(“Spark Standalone Mode” <a href="#ref-tuning-spark-standalone">2018</a>)</span> and “Spark on Mesos”<span class="citation">(“Running Spark on Mesos” <a href="#ref-tuning-spark-on-mesos">2018</a>)</span> guides provided additional information when sharing clusters.</p>
+<p>When using the Spark Standalone and the Mesos cluster managers, all the available memory and cores are assigned by default; therefore, there are no additional configuration changes required, unless, you want to restrict resources to allow multiple users to share this cluster. In this case you can use <code>total-executor-cores</code> to restrict the total executors requested. The “Spark Standalone”<span class="citation">(“Spark Standalone Mode” <a href="#ref-tuning-spark-standalone">2018</a>)</span> and “Spark on Mesos”<span class="citation">(“Running Spark on Mesos” <a href="#ref-tuning-spark-on-mesos">2018</a>)</span> guides provided additional information when sharing clusters.</p>
 <p>When running under YARN Client, you would configure memory and cores as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Memory in Driver</span>
 config[<span class="st">&quot;sparklyr.shell.driver-memory&quot;</span>] &lt;-<span class="st"> &quot;2g&quot;</span>
@@ -509,7 +529,7 @@ config[<span class="st">&quot;sparklyr.shell.executor-cores&quot;</span>] &lt;-<
 
 <span class="co"># Number of Workers</span>
 config[<span class="st">&quot;sparklyr.shell.num-executors&quot;</span>] &lt;-<span class="st"> </span><span class="dv">3</span></code></pre>
-<p>When using YARN in Cluster mode, <code>sparklyr.shell.driver-cores</code> can be used to configure total cores requested in the driver node, the “Spark on YARN”<span class="citation">(“Running Spark on Yarn” <a href="#ref-tuning-spark-on-yarn">2018</a>)</span> guide provides additional configuration settings worth familiarizing with.</p>
+<p>When using YARN in Cluster mode, <code>sparklyr.shell.driver-cores</code> can be used to configure total cores requested in the driver node. The “Spark on YARN”<span class="citation">(“Running Spark on Yarn” <a href="#ref-tuning-spark-on-yarn">2018</a>)</span> guide provides additional configuration settings worth familiarizing yourself with.</p>
 <p>There are a few types of configuration settings:</p>
 <ul>
 <li><strong>Connect</strong> settings are set as parameters to <code>spark_connect()</code>, they are common settings used while connecting.</li>
@@ -517,9 +537,10 @@ config[<span class="st">&quot;sparklyr.shell.num-executors&quot;</span>] &lt;-<s
 <li><strong>Runtime</strong> settings configure Spark when the Spark session is created, these settings are independent to the cluster manager and specific to Spark.</li>
 <li><strong>sparklyr</strong> settings configure <code>sparklyr</code> behaviour, these settings are independent to the cluster manager and particular to R.</li>
 </ul>
-<p>The following subsections present extensive lists of all the available settings, it is not required to fully understand them all while tuning Spark, but skimming through them could prove useful in the future while troubleshooting issues. You can also consider skipping the following settings subsections and use them instead as reference material as needed.</p>
+<p>The following subsections present extensive lists of all the available settings. It is not required to fully understand them all while tuning Spark, but skimming through them could prove useful in the future while troubleshooting issues. You can also consider skipping the following settings subsections and use them instead as reference material as needed.</p>
 <div id="connect-settings" class="section level3">
 <h3><span class="header-section-number">8.2.1</span> Connect Settings</h3>
+<p>The following parameters can be used with <code>spark_connect()</code>, they configure high-level settings that define the connection method, Spark’s intallation path and the version of Spark to use.</p>
 <table>
 <colgroup>
 <col width="21%" />
@@ -553,15 +574,12 @@ config[<span class="st">&quot;sparklyr.shell.num-executors&quot;</span>] &lt;-<s
 <td>The version of Spark to use. Only applicable to “local” Spark connections.</td>
 </tr>
 <tr class="even">
-<td>hadoop_version</td>
-<td>The version of Hadoop to use. Only applicable to “local” Spark connections.</td>
-</tr>
-<tr class="odd">
 <td>config</td>
 <td>Custom configuration for the generated Spark connection. See spark_config for details.</td>
 </tr>
 </tbody>
 </table>
+<p>You can configure additional settings by specifying a list in the <code>config</code> parameter, we will now learn what those settings can be.</p>
 </div>
 <div id="submit-settings" class="section level3">
 <h3><span class="header-section-number">8.2.2</span> Submit Settings</h3>
@@ -631,7 +649,7 @@ config[<span class="st">&quot;sparklyr.shell.num-executors&quot;</span>] &lt;-<s
 </tr>
 </tbody>
 </table>
-<p>The remaining ones are specific to YARN,</p>
+<p>The remaining settings are specific to YARN:</p>
 <table>
 <colgroup>
 <col width="34%" />
@@ -963,12 +981,13 @@ config[<span class="st">&quot;sparklyr.shell.num-executors&quot;</span>] &lt;-<s
 </div>
 <div id="tuning-partitioning" class="section level2">
 <h2><span class="header-section-number">8.3</span> Partitioning</h2>
-<p>As mentioned in the <a href="intro.html#intro-background">introduction</a> chapter, MapReduce and Spark were designed with the purpose of performing computations against data stored across many machines, the subset of the data available for computation over each compute instance is known as a <strong>partition</strong>.</p>
+<p>As mentioned in the <a href="intro.html#intro-background">introduction</a> chapter, MapReduce and Spark were designed with the purpose of performing computations against data stored across many machines. The subset of the data available for computation over each compute instance is known as a <strong>partition</strong>.</p>
 <p>By default, Spark will compute over each existing <strong>implicit</strong> partition since it’s more effective to run computations were the data is already located. However, there are cases where you will want to set an <strong>explicit</strong> partition to help Spark use more efficient use of your cluster resources.</p>
 <div id="implicit" class="section level3">
 <h3><span class="header-section-number">8.3.1</span> Implicit</h3>
-<p>There is always an implicit partition for each computation that Spark will assign on its own. For instance, how your data is distributed in storage will match the default partitions Spark assigns.</p>
-<p>You can get the number of partitions a computation will require through <code>sdf_num_partitions()</code>:</p>
+<p>You learned in the <a href="data.html#data">Data</a> chapter that Spark can read data stored in many formats and different storage systems; however, since shuffling data is an expensive operations, Spark executes tasks reusing the partitions in the storage system. Therefore, these partitions are implicit to Spark since they are already well defined and expensive to rearrange.</p>
+<p>There is always an implicit partition for every computation in Spark defined by the distributed storage system, by creating a dataset or by copying datasets into Spark.</p>
+<p>You can explore the number of partitions a computation will require through <code>sdf_num_partitions()</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sdf_len</span>(sc, <span class="dv">10</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sdf_num_partitions</span>()</code></pre>
 <pre><code>[1] 2</code></pre>
 <p>While in most cases the default partitions works just fine, there are cases where we you will need to be explicit on the partitions you choose.</p>
@@ -984,7 +1003,7 @@ config[<span class="st">&quot;sparklyr.shell.num-executors&quot;</span>] &lt;-<s
 <span class="st">  </span><span class="kw">sdf_repartition</span>(<span class="dv">4</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">sdf_num_partitions</span>()</code></pre>
 <pre><code>[1] 4</code></pre>
-<p>The number of partitions usually changes significantly the speed and resources being used; for instance, the following example calculates the mean over 10M rows with different partition sizes.</p>
+<p>The number of partitions usually significantly changes the speed and resources being used; for instance, the following example calculates the mean over 10M rows with different partition sizes.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(microbenchmark)
 <span class="kw">library</span>(ggplot2)
 
@@ -998,42 +1017,42 @@ config[<span class="st">&quot;sparklyr.shell.num-executors&quot;</span>] &lt;-<s
 <div class="figure" style="text-align: center"><span id="fig:tuning-partitioning-explicit-results"></span>
 <img src="images/tuning-partition-explicit.png" alt="Computation speed when using explicit Spark partitions" width="1500" />
 <p class="caption">
-FIGURE 8.5: Computation speed when using explicit Spark partitions
+FIGURE 8.6: Computation speed when using explicit Spark partitions
 </p>
 </div>
-<p>The results show that sorting data with two partitions is almost twice as fast, this is the case since two CPUs can be used to execute this operation. However, it is not necessarily the case that higher-partitions produce faster computation; instead, partitioning data is particular to your computing cluster and the data analysis operations being performed.</p>
+<p>The results show that sorting data with two partitions is almost twice as fast; this is the case since two CPUs can be used to execute this operation. However, it is not necessarily the case that higher-partitions produce faster computation; instead, partitioning data is particular to your computing cluster and the data analysis operations being performed.</p>
 </div>
 </div>
 <div id="tuning-caching" class="section level2">
 <h2><span class="header-section-number">8.4</span> Caching</h2>
-<p>From the <a href="Intro">introduction</a> chapter, we know that Spark was designed to be faster than its predecessors by using memory instead of disk to store data, this is formally known as an Spark <strong>RDD</strong> and stands for resilient distributed dataset. An RDD is resilient by duplicating copies of the same data across many machines, such that, if one machine fails other can complete the task. Resiliency is important in distributed systems since, while things will usually work in one machine, when running over thousands of machines the likelihood of something failing is much higher; when a failure happens, it is preferable be fault tolerant to avoid losing the work of all the other machines. RDDs are fault tolerant by tracking data lineage information to rebuild lost data automatically on failure.</p>
+<p>Recall from the <a href="Intro">introduction</a> that Spark was designed to be faster than its predecessors by using memory instead of disk to store data. This is formally known as a Spark <strong>RDD</strong> and stands for resilient distributed dataset. An RDD distributes copies of the same data across many machines, such that, if one machine fails other can complete the task – hence the resilient name. Resiliency is important in distributed systems since, while things will usually work in one machine, when running over thousands of machines the likelihood of something failing is much higher. When a failure happens, it is preferable to be fault tolerant to avoid losing the work of all the other machines. RDDs accomplish this by tracking data lineage information to rebuild lost data automatically on failure.</p>
 <p>In <code>sparklyr</code>, you can control when an RDD gets loaded or unloaded from memory using <code>tbl_cache()</code> and <code>tbl_uncache()</code>.</p>
-<p>Most sparklyr operations that retrieve a Spark DataFrame, cache the results in-memory, for instance, running <code>spark_read_parquet()</code> or <code>sdf_copy_to()</code> will provide a Spark DataFrame that is already cached in-memory. As a Spark DataFrame, this object can be used in most <code>sparklyr</code> functions, including data analysis with dplyr or machine learning.</p>
+<p>Most sparklyr operations that retrieve a Spark DataFrame, cache the results in-memory. For instance, running <code>spark_read_parquet()</code> or <code>sdf_copy_to()</code> will provide a Spark DataFrame that is already cached in-memory. As a Spark DataFrame, this object can be used in most <code>sparklyr</code> functions, including data analysis with dplyr or machine learning.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">iris_tbl &lt;-<span class="st"> </span><span class="kw">sdf_copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</code></pre>
 <p>You can inspect which tables are cached by navigating to the Spark UI using <code>spark_web(sc)</code>, opening the storage tab, and clicking on a given RDD:</p>
 <div class="figure" style="text-align: center"><span id="fig:tuning-caching-rdd-shot"></span>
-<img src="images/tuning-cache-rdd-web.png" alt="Cached RDD in Spark Web Interface" width="494" />
+<img src="images/tuning-cache-rdd-web-resized.png" alt="Cached RDD in Spark Web Interface" width="1500" />
 <p class="caption">
-FIGURE 8.6: Cached RDD in Spark Web Interface
+FIGURE 8.7: Cached RDD in Spark Web Interface
 </p>
 </div>
 <p>Data loaded in memory will be released when the R session terminates either explicitly or implicitly with a restart or disconnection; however, to free up resources, you can use <code>tbl_uncache()</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tbl_uncache</span>(sc, <span class="st">&quot;iris&quot;</span>)</code></pre>
 <div id="checkpointing" class="section level3">
 <h3><span class="header-section-number">8.4.1</span> Checkpointing</h3>
-<p>Checkpointing is a slightly different type of caching, while it also persists data it will, additionally, break the graph computation lineage. So for instance, if a cached partition is lost, it can be computed from the computation graph which is not possible while checkpointing since the source of computation is lost.</p>
-<p>When performing expensive computation graphs, it can make sense to checkpoint to persist and break the computation lineage, this to help Spark reduce graph computation resources; otherwise, Spark might try to over-optimize a computation graph that is really not useful to optimize.</p>
+<p>Checkpointing is a slightly different type of caching; while it also persists data it will, additionally, break the graph computation lineage. For example, if a cached partition is lost, it can be computed from the computation graph which is not possible while checkpointing since the source of computation is lost.</p>
+<p>When performing expensive computation graphs, it can make sense to checkpoint to persist and break the computation lineage in order to help Spark reduce graph computation resources; otherwise, Spark might try to over-optimize a computation graph that is really not useful to optimize.</p>
 <p>You can checkpoint explicitly by saving to CSV, Parquet, etc. files. Or let Spark checkpoint this for you using <code>sdf_checkpoint()</code> in <code>sparklyr</code> as follows.</p>
-<p>Notice that checkpointing truncates the computation lineage graph which can speed up performance if the same intermediate result is used multiple times.</p>
+<p>Notice that checkpointing truncates the computation lineage graph, which can speed up performance if the same intermediate result is used multiple times.</p>
 </div>
 <div id="tuning-memory" class="section level3">
 <h3><span class="header-section-number">8.4.2</span> Memory</h3>
-<p>Memory in Spark is categorized into: reserved, user, execution or storage:</p>
+<p>Memory in Spark is categorized into reserved, user, execution or storage:</p>
 <ul>
 <li><strong>Reserved:</strong> Reserved memory is the memory required by Spark to function and therefore, is overhead that is required and should not be configured. This value defaults to 300MB.</li>
-<li><strong>User:</strong> User memory is the memory used to execute custom code, <code>sparklyr</code> only makes use of this memory indirectly when executing <code>dplyr</code> expressions or modeling a dataset.</li>
+<li><strong>User:</strong> User memory is the memory used to execute custom code. <code>sparklyr</code> only makes use of this memory indirectly when executing <code>dplyr</code> expressions or modeling a dataset.</li>
 <li><strong>Execution:</strong> Execution memory is used to execute code by Spark, mostly, to process the results from the partition and perform shuffling.</li>
 <li><strong>Storage:</strong> Storage memory is used to cache RDDs, for instance, when using <code>tbl_cache()</code> in <code>sparklyr</code>.</li>
 </ul>
@@ -1045,7 +1064,7 @@ config<span class="op">$</span>spark.memory.fraction &lt;-<span class="st"> </sp
 
 <span class="co"># define memory available for storage</span>
 config<span class="op">$</span>spark.memory.storageFraction &lt;-<span class="st"> </span><span class="fl">0.5</span></code></pre>
-<p>For instance, if you want to use Spark to store large amounts of data in-memory with the purpose of filtering and retrieving subsets quickly, you can expect Spark to use little execution or user memory; therefore, to maximize storage memory, one can tune Spark as follows:</p>
+<p>For instance, if you want to use Spark to store large amounts of data in-memory with the purpose of filtering and retrieving subsets quickly, you can expect Spark to use little execution or user memory. Therefore, to maximize storage memory, one can tune Spark as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()
 
 <span class="co"># define memory available for storage and execution</span>
@@ -1058,14 +1077,15 @@ config<span class="op">$</span>spark.memory.storageFraction &lt;-<span class="st
 </div>
 <div id="tuning-shuffling" class="section level2">
 <h2><span class="header-section-number">8.5</span> Shuffling</h2>
-<p>Shuffling, is the operation that redistributes data across machines, it is usually an expensive operation and therefore, one we try to minimize. One can easily identify is significant time is being spent shuffling by looking at the <a href="tuning.html#tuning-event-timeline">event timeline</a>. It is possible to reduce shuffling by reframing data analysis questions or hinting Spark appropriately.</p>
-<p>For instance, when joining data frames that differ in size significantly, as in, one set being orders of magnitude smaller than the other one. You can consider using <code>sdf_broadcast()</code> to mark a data frame as small enough for use in broadcast joins, meaning, it pushes one of the smaller data frames to each of the worker nodes to reduce shuffling the bigger dataframe. One example for <code>sdf_broadcast()</code> follows:</p>
+<p>Shuffling, is the operation that redistributes data across machines; it is usually an expensive operation and therefore, one we try to minimize. One can easily identify if significant time is being spent shuffling by looking at the <a href="tuning.html#tuning-event-timeline">event timeline</a>. It is possible to reduce shuffling by reframing data analysis questions or hinting Spark appropriately.</p>
+<p>This would be relevant, for instance, when joining data frames that differ in size significantly, as in, one set being orders of magnitude smaller than the other one. You can consider using <code>sdf_broadcast()</code> to mark a data frame as small enough for use in broadcast joins, meaning, it pushes one of the smaller data frames to each of the worker nodes to reduce shuffling the bigger dataframe. One example for <code>sdf_broadcast()</code> follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sdf_len</span>(sc, <span class="dv">10000</span>) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">sdf_broadcast</span>() <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">left_join</span>(<span class="kw">sdf_len</span>(sc, <span class="dv">100</span>))</code></pre>
 </div>
 <div id="tuning-serialization" class="section level2">
 <h2><span class="header-section-number">8.6</span> Serialization</h2>
+<p>Serialization is the process of translating data and tasks into a format that can be transmitted between machines and reconstructed on the receiving end.</p>
 <p>It is not that common to have to adjust serialization when tuning Spark; however, it is worth mentioning there are alternative serialization modules like the <a href="https://github.com/EsotericSoftware/kryo">Kryo Serializer</a> that can provide performance improvements over the default <a href="http://docs.oracle.com/javase/6/docs/api/java/io/Serializable.html">Java Serializer</a>.</p>
 <p>The Kryo Serializer can be enabled in <code>sparklyr</code> through:</p>
 <pre class="sourceCode r"><code class="sourceCode r">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()
@@ -1089,8 +1109,8 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 </div>
 <div id="recap-3" class="section level2">
 <h2><span class="header-section-number">8.8</span> Recap</h2>
-<p>This chapter provided a broad overview of Spark internals and a detailed configuration settings to help you speed up computation and enable high computation loads, it provided the foundations to understand bottlenecks and guidance on common configuration considerations; however, fine-tuning Spark is a broad topic that would require many more chapters to cover extensively. Therefore, while troubleshooting Spark’s performance and scalability, searching the web and consulting online communities it is often necessary to fine-tune your particular environment.</p>
-<p>The next chapter, <a href="extensions.html#extensions">Extensions</a>, introduces the exciting world of <code>sparklyr</code> extensions. It’s exciting since you might find out that the extensions can be much more relevant to your particular interests and needs. For instance, they can process nested data, perform graph analysis or use different modeling libraries like <code>rsparkling</code> from H20. Not only that, but the next few chapters introduce many advanced data analysis and modeling topics that are required to master large-scale computing in R.</p>
+<p>This chapter provided a broad overview of Spark internals and a detailed configuration settings to help you speed up computation and enable high computation loads. It provided the foundations to understand bottlenecks and guidance on common configuration considerations; however, fine-tuning Spark is a broad topic that would require many more chapters to cover extensively. Therefore, while troubleshooting Spark’s performance and scalability, searching the web and consulting online communities it is often necessary to fine-tune your particular environment.</p>
+<p>The next chapter, <a href="extensions.html#extensions">Extensions</a>, introduces the ecosystem of Spark extensions available in R. Most extensions are highly-specialized, but they will prove to be extremly useful in specific cases and readers with particular needs. For instance, they can process nested data, perform graph analysis or use different modeling libraries like <code>rsparkling</code> from H20. Not only that, but the next few chapters introduce many advanced data analysis and modeling topics that are required to master large-scale computing in R.</p>
 
 </div>
 </div>
