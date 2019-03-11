@@ -26,17 +26,15 @@ resize_image_if_needed <- function(image) {
     image_resized <- image
   }
   else {
-    if (!file.exists(image_resized)) {
-      output <- grDevices::png(image_resized, width = max_width, height = max_height)
-      graphics::plot.new()
-      graphics::par(mar=c(0,0,0,0))
-      graphics::plot.window(c(0, max_width), c(0, max_height), xaxs = "i", yaxs = "i")
-      usr <- graphics::par("usr")
+    output <- grDevices::png(image_resized, width = max_width, height = max_height)
+    graphics::plot.new()
+    graphics::par(mar=c(0,0,0,0))
+    graphics::plot.window(c(0, max_width), c(0, max_height), xaxs = "i", yaxs = "i")
+    usr <- graphics::par("usr")
 
-      tar_width <- ratio * max_height
-      graphics::rasterImage(original, usr[1] + (max_width - tar_width) / 2, usr[3], usr[2] - (max_width - tar_width) / 2, usr[4])
-      grDevices::dev.off()
-    }
+    tar_width <- ratio * max_height
+    graphics::rasterImage(original, usr[1] + (max_width - tar_width) / 2, usr[3], usr[2] - (max_width - tar_width) / 2, usr[4])
+    grDevices::dev.off()
   }
 
   image_resized
