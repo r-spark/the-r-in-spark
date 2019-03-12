@@ -1,6 +1,8 @@
 ```{r include=FALSE, eval=TRUE}
 knitr::opts_chunk$set(eval = FALSE)
 source("r/render.R")
+source("r/plots.R")
+library(ggplot2)
 ```
 
 # Clusters {#clusters}
@@ -15,11 +17,22 @@ There are three major trends in cluster computing worth discussing: **On-Premise
 
 ```{r clusters-trends-code, echo=FALSE}
 library(dplyr)
-library(r2d3)
 
-read.csv("data/clusters-trends.csv") %>%
-  mutate(month = as.Date(paste(month, "-01", sep = ""))) %>%
-  r2d3(script="images/clusters-trends.js")
+read.csv("data/clusters-trends.csv", skip = 2) %>%
+  mutate(year = as.Date(paste(Month, "-01", sep = ""))) %>%
+    mutate(`On-Premise` = `mainframe...Worldwide.`,
+           Cloud = `cloud.computing...Worldwide.`,
+           Kubernetes = `kubernetes...Worldwide.`) %>%
+    tidyr::gather(`On-Premise`, Cloud, Kubernetes, key = "trend", value = "popularity") %>%
+    ggplot(aes(x=year, y=popularity, group=trend)) +
+      plot_style() +
+      geom_line(aes(linetype = trend, color = trend)) +
+      scale_x_date(date_breaks = "2 year", date_labels = "%Y") +
+      labs(title = "Cluster Computing Trends",
+           subtitle = "Search popularity for mainframe (on-premise), cloud computing and kubernetes ") +
+      scale_color_grey(start = 0.6, end = 0.2) +
+      geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+      ggsave("images/clusters-trends.png", width = 10, height = 5)
 ```
 ```{r clusters-trends, eval=TRUE, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Google trends for on-premise (mainframe), cloud computing and Kubernetes'}
 render_image("images/clusters-trends.png", "Google trends for on-premise (mainframe), cloud computing and Kubernetes")

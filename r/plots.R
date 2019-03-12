@@ -31,8 +31,8 @@ plot_style <- function() {
     axis.line = ggplot2::element_blank(),
 
     panel.grid.minor = ggplot2::element_blank(),
-    panel.grid.major.y = ggplot2::element_line(color = "#ebebeb"),
-    panel.grid.major.x = ggplot2::element_line(color = "#cbcbcb"),
+    panel.grid.major.y = ggplot2::element_line(color = "#eeeeee"),
+    panel.grid.major.x = ggplot2::element_line(color = "#ebebeb"),
 
     panel.background = ggplot2::element_blank(),
 

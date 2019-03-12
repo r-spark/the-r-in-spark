@@ -88,10 +88,27 @@ ggplot(cran_downloads, aes(date, count)) +
 
 ### Google trends for mainframes, cloud computing and kubernetes {#appendix-cluster-trends}
 
+Data downloaded from [https://trends.google.com/trends/explore?date=all&q=cloud%20computing,mainframe,kubernetes](https://trends.google.com/trends/explore?date=all&q=cloud%20computing,mainframe,kubernetes).
+
 ```{r eval=FALSE}
 library(r2d3)
 
-read.csv("data/05-cluster-trends.csv") %>%
-  mutate(month = as.Date(paste(month, "-01", sep = ""))) %>%
-  r2d3(script="images/05-clusters-trends.js")
+lines <- readLines("data/clusters-trends.csv")
+lines <- gsub("<1", 0, lines)
+writeLines(lines, "data/clusters-trends.csv")
+
+read.csv("data/clusters-trends.csv", skip = 2) %>%
+  mutate(year = as.Date(paste(Month, "-01", sep = ""))) %>%
+    mutate(`On-Premise` = `mainframe...Worldwide.`,
+           Cloud = `cloud.computing...Worldwide.`,
+           Kubernetes = `kubernetes...Worldwide.`) %>%
+    tidyr::gather(`On-Premise`, Cloud, Kubernetes, key = "trend", value = "popularity") %>%
+    ggplot(aes(x=year, y=popularity, group=trend)) +
+      plot_style() +
+      geom_line(aes(linetype = trend, color = trend)) +
+      scale_x_date(date_breaks = "2 year", date_labels = "%Y") +
+      labs(title = "Cluster Computing Trends",
+           subtitle = "Search popularity for mainframe (on-premise), cloud computing and kubernetes ") +
+      scale_color_grey(start = 0.6, end = 0.2) +
+      geom_hline(yintercept = 0, size = 1, colour = "#333333")
 ```
