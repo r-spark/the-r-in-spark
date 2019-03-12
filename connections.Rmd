@@ -284,6 +284,18 @@ Connecting requires the address to the Mesos master node, usually in the form of
 sc <- spark_connect(master = "mesos://host:port")
 ```
 
+The `MESOS_NATIVE_JAVA_LIBRARY` environment variable needs to be set by your system administrator, or manually set when running mesos on your local machine. For instance, in OS X, you can install and initialize Mesos from a terminal, followed by manually setting the mesos library and connecting with `spark_connect()`:
+
+```{bash}
+brew install mesos
+/usr/local/Cellar/mesos/1.6.1/sbin/mesos-master --registry=in_memory --ip=127.0.0.1
+MESOS_WORK_DIR=. /usr/local/Cellar/mesos/1.6.1/sbin/mesos-slave --master=127.0.0.1:5050
+```
+```{r}
+Sys.setenv(MESOS_NATIVE_JAVA_LIBRARY = "/usr/local/Cellar/mesos/1.6.1/lib/libmesos.dylib")
+sc <- spark_connect(master = "mesos://localhost:5050", spark_home = spark_home_dir())
+```
+
 ## Kubernetes {#connections-kubernetes}
 
 Kubernetes cluster do not support client modes like Mesos or YARN; instead, the connection model is similar to YARN Cluster, where the driver node is assigned by Kubernetes. This is illustrated in Figure \@ref(fig:connections-kubernetes-diagram).
