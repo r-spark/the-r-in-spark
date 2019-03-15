@@ -157,7 +157,7 @@ Since YARN is the cluster manager from the Hadoop project, the main documentatio
 
 Apache Mesos is an open-source project to manage computer clusters. Mesos began as a research project in the UC Berkeley RAD Lab and makes use of Linux [Cgroups](https://en.wikipedia.org/wiki/Cgroups) to provide isolation for CPU, memory, I/O and file system access.
 
-Mesos, like YARN, supports executing many cluster frameworks, including Spark. However, one advantage particular to Mesos is that, it allows cluster framework like Spark to implement custom task schedulers. An scheduler is the component that coordinates in a cluster which applications get execution time and which resources are assign to them. Spark uses a coarse-grained scheduler[@clusters-spark-mesos-run-modes] which schedules resources for the duration of the application; however, other frameworks might use Mesos' fine-grained scheduler, which can increase the overall efficiency in the cluster by scheduling tasks in shorter intervals allowing them to share resources between them.
+Mesos, like YARN, supports executing many cluster frameworks, including Spark. However, one advantage particular to Mesos is that, it allows cluster framework like Spark to implement custom task schedulers. An scheduler is the component that coordinates in a cluster which applications get execution time and which resources are assign to them. Spark uses a coarse-grained scheduler [@clusters-spark-mesos-run-modes] which schedules resources for the duration of the application; however, other frameworks might use Mesos' fine-grained scheduler, which can increase the overall efficiency in the cluster by scheduling tasks in shorter intervals allowing them to share resources between them.
 
 Mesos provides a web interface to manage your running applications, resources, and so on. After connecting to Spark from R, your application will be registered like any other application running in Mesos, Figure \@ref(fig:clusters-mesos-webui) shows a successful connection to Spark from R.
 
@@ -171,9 +171,9 @@ Mesos is an Apache project with its documentation available under [mesos.apache.
 
 One can use a cluster manager in on-premise clusters as described in the previous section; however, many organizations choose to partner with companies providing additional management software, services and resources to help manage applications in their cluster; including, but not limited to, Apache Spark. Some of the on-premise cluster providers include: **Cloudera**, **Hortonworks** and **MapR** to mention a few which we will be briefly introduce next. 
 
-**Cloudera**, Inc. is a United States-based software company that provides Apache Hadoop and Apache Spark-based software, support and services, and training to business customers. Cloudera's hybrid open-source Apache Hadoop distribution, CDH (Cloudera Distribution Including Apache Hadoop), targets enterprise-class deployments of that technology. Cloudera donates more than 50% of its engineering output to the various Apache-licensed open source projects (Apache Hive, Apache Avro, Apache HBase, and so on) that combine to form the Apache Hadoop platform. Cloudera is also a sponsor of the Apache Software Foundation[@clusters-cloudera-wikipedia].
+**Cloudera**, Inc. is a United States-based software company that provides Apache Hadoop and Apache Spark-based software, support and services, and training to business customers. Cloudera's hybrid open-source Apache Hadoop distribution, CDH (Cloudera Distribution Including Apache Hadoop), targets enterprise-class deployments of that technology. Cloudera donates more than 50% of its engineering output to the various Apache-licensed open source projects (Apache Hive, Apache Avro, Apache HBase, and so on) that combine to form the Apache Hadoop platform. Cloudera is also a sponsor of the Apache Software Foundation [@clusters-cloudera-wikipedia].
 
-Cloudera clusters make use of **parcels**, which are binary distributions containing program files and metadata[@clusters-cloudera-parcel], Spark happens to be installed as a parcel in Cloudera. It's beyond the scope of this book to present how to configure Cloudera clusters, resources and documentation can be found under [cloudera.com](https://www.cloudera.com/products/open-source/apache-hadoop/apache-spark.html), and ["Introducing sparklyr, an R Interface for Apache Spark"](https://blog.cloudera.com/blog/2016/09/introducing-sparklyr-an-r-interface-for-apache-spark/)[@clusters-cloudera-engineering-blog] under Cloudera's Engineering Blog.
+Cloudera clusters make use of **parcels**, which are binary distributions containing program files and metadata [@clusters-cloudera-parcel], Spark happens to be installed as a parcel in Cloudera. It's beyond the scope of this book to present how to configure Cloudera clusters, resources and documentation can be found under [cloudera.com](https://www.cloudera.com/products/open-source/apache-hadoop/apache-spark.html), and ["Introducing sparklyr, an R Interface for Apache Spark"](https://blog.cloudera.com/blog/2016/09/introducing-sparklyr-an-r-interface-for-apache-spark/) [@clusters-cloudera-engineering-blog] under Cloudera's Engineering Blog.
 
 Cloudera provides the Cloudera Manager web interface to manage resource, services, parcels, diagnostics, etc. Figure \@ref(fig:lusters-cloudera-manager-spark) shows a Spark parcel running in Cloduera Manager which you can later use to connect from R.
 
@@ -181,7 +181,7 @@ Cloudera provides the Cloudera Manager web interface to manage resource, service
 render_image("images/clusters-cloudera-manager.png", "Cloudera Manager running Spark parcel")
 ```
 
-`sparklyr` is certified with Cloudera[@clusters-cloudera-sparklyr-certification]; meaning that, Cloudera's support is aware of `sparklyr` and can be effective helping organizations that are using Spark and R, the following table summarizes the versions currently certified.
+`sparklyr` is certified with Cloudera [@clusters-cloudera-sparklyr-certification]; meaning that, Cloudera's support is aware of `sparklyr` and can be effective helping organizations that are using Spark and R, the following table summarizes the versions currently certified.
 
 | Cloudera Version | Product   | Version | Components  | Kerberos |
 |------------------|-----------|---------|-------------|----------|
@@ -189,11 +189,11 @@ render_image("images/clusters-cloudera-manager.png", "Cloudera Manager running S
 | CDH5.9           | sparklyr  | 0.6     | HDFS, Spark | Yes      |
 | CDH5.9           | sparklyr  | 0.7     | HDFS, Spark | Yes      |
 
-**Hortonworks** is a big data software company based in Santa Clara, California. The company develops, supports, and provides expertise on an expansive set of entirely open source software designed to manage data and processing for everything from IOT, to advanced analytics and machine learning. Hortonworks believes it is a data management company bridging the cloud and the datacenter[@clusters-hortonworks-wikipedia].
+**Hortonworks** is a big data software company based in Santa Clara, California. The company develops, supports, and provides expertise on an expansive set of entirely open source software designed to manage data and processing for everything from IOT, to advanced analytics and machine learning. Hortonworks believes it is a data management company bridging the cloud and the datacenter [@clusters-hortonworks-wikipedia].
 
-Hortonworks partnered with Microsoft[@clusters-hortonworks-microsoft] to improve support in Microsoft Windows for Hadoop and Spark, this used to be a differentiation point; however, comparing Hortonworks and Cloudera is less relevant today since both companies are merging in 2019[@clusters-hortonworks-cloudera]. While the companies are merging, support for the Cloudera and Hortonworks Spark distributions are still available. Additional resources to configure Spark under Hortonworks are available under [hortonworks.com](https://hortonworks.com/apache/spark/).
+Hortonworks partnered with Microsoft [@clusters-hortonworks-microsoft] to improve support in Microsoft Windows for Hadoop and Spark, this used to be a differentiation point; however, comparing Hortonworks and Cloudera is less relevant today since both companies are merging in 2019 [@clusters-hortonworks-cloudera]. While the companies are merging, support for the Cloudera and Hortonworks Spark distributions are still available. Additional resources to configure Spark under Hortonworks are available under [hortonworks.com](https://hortonworks.com/apache/spark/).
 
-**MapR** is a business software company headquartered in Santa Clara, California. MapR provides access to a variety of data sources from a single computer cluster, including big data workloads such as Apache Hadoop and Apache Spark, a distributed file system, a multi-model database management system, and event stream processing, combining analytics in real-time with operational applications. Its technology runs on both commodity hardware and public cloud computing services[@clusters-mapr-wikipedia].
+**MapR** is a business software company headquartered in Santa Clara, California. MapR provides access to a variety of data sources from a single computer cluster, including big data workloads such as Apache Hadoop and Apache Spark, a distributed file system, a multi-model database management system, and event stream processing, combining analytics in real-time with operational applications. Its technology runs on both commodity hardware and public cloud computing services [@clusters-mapr-wikipedia].
 
 ## Cloud
 
@@ -215,7 +215,7 @@ Some of the major providers of cloud computing infrastructure are: Amazon, Datab
 
 Amazon provides cloud services through [Amazon Web Services](https://aws.amazon.com/)(Amazon AWS); more specifically, provides an on-demand Spark cluster through [Amazon Elastic MapReduce](https://aws.amazon.com/emr/) or EMR for short,
 
-Detailed instructions on using R with Amazon EMR was published under Amazon's Big Data Blog: ["Running sparklyr on Amazon EMR"](https://aws.amazon.com/blogs/big-data/running-sparklyr-rstudios-r-interface-to-spark-on-amazon-emr/)[@clusters-amazon-emr-sparklyr-blog], this post introduced the launch of `sparklyr` and instructions to configure EMR clusters with `sparklyr`. For instance, it suggests you can use the [Amazon Command Line Interface](https://aws.amazon.com/cli/) to launch a cluster with three nodes as follows:
+Detailed instructions on using R with Amazon EMR was published under Amazon's Big Data Blog: ["Running sparklyr on Amazon EMR"](https://aws.amazon.com/blogs/big-data/running-sparklyr-rstudios-r-interface-to-spark-on-amazon-emr/) [@clusters-amazon-emr-sparklyr-blog], this post introduced the launch of `sparklyr` and instructions to configure EMR clusters with `sparklyr`. For instance, it suggests you can use the [Amazon Command Line Interface](https://aws.amazon.com/cli/) to launch a cluster with three nodes as follows:
 
 ```{bash eval=FALSE}
 aws emr create-cluster --applications Name=Hadoop Name=Spark Name=Hive \
@@ -251,17 +251,17 @@ Regarding cost, the most up to date information can be found under [aws.amazon.c
 
 ### Databricks
 
-[Databricks](http://databricks.com) is a company founded by the creators of Apache Spark, that aims to help clients with cloud-based big data processing using Spark. Databricks grew out of the [AMPLab](https://amplab.cs.berkeley.edu/) project at University of California, Berkeley[@clusters-databricks-wikipedia].
+[Databricks](http://databricks.com) is a company founded by the creators of Apache Spark, that aims to help clients with cloud-based big data processing using Spark. Databricks grew out of the [AMPLab](https://amplab.cs.berkeley.edu/) project at University of California, Berkeley [@clusters-databricks-wikipedia].
 
 Databricks provides enterprise-level cluster computing plans, while also providing a free/community tear to explore functionality and get familiar with their environment. 
 
-Once a cluster is launched, R and `sparklyr` can be used from Databricks notebooks following the steps from the [Getting Started](#starting) chapter or, by installing [RStudio on Databricks](https://docs.databricks.com/spark/latest/sparkr/rstudio.html)[@clusters-databricks-rstudio]. Figure \@ref(fig:clusters-databricks-notebook) shows a Databricks notebook using Spark through `sparkylr`.
+Once a cluster is launched, R and `sparklyr` can be used from Databricks notebooks following the steps from the [Getting Started](#starting) chapter or, by installing [RStudio on Databricks](https://docs.databricks.com/spark/latest/sparkr/rstudio.html) [@clusters-databricks-rstudio]. Figure \@ref(fig:clusters-databricks-notebook) shows a Databricks notebook using Spark through `sparkylr`.
 
 ```{r clusters-databricks-notebook, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Databricks community notebook running sparklyr'}
 render_image("images/clusters-databricks-sparklyr.png", "Databricks community notebook running sparklyr")
 ```
 
-Additional resources are available under the Databricks Engineering Blog post: ["Using sparklyr in Databricks"]( https://databricks.com/blog/2017/05/25/using-sparklyr-databricks.html)[@clusters-databricks-blog-sparklyr] and the ["Databricks Documentation for sparklyr"](https://docs.databricks.com/spark/latest/sparkr/sparklyr.html)[@clusters-databricks-documentation-sparklyr].
+Additional resources are available under the Databricks Engineering Blog post: ["Using sparklyr in Databricks"]( https://databricks.com/blog/2017/05/25/using-sparklyr-databricks.html) [@clusters-databricks-blog-sparklyr] and the ["Databricks Documentation for sparklyr"](https://docs.databricks.com/spark/latest/sparkr/sparklyr.html) [@clusters-databricks-documentation-sparklyr].
 
 The latest pricing information can be found under [databricks.com/product/pricing](https://databricks.com/product/pricing), as of this writing, available plans 
 
@@ -271,11 +271,11 @@ The latest pricing information can be found under [databricks.com/product/pricin
 | Azure Standard |               | $0.20 USD/DBU    | $0.40 USD/DBU  |
 | Azure Premium  |               | $0.35 USD/DBU    | $0.55 USD/DBU  |
 
-Notice that pricing is based on cost of DBU/hr. From Databricks, "A Databricks Unit (DBU) is a unit of Apache Spark processing capability per hour. For a varied set of instances, DBUs are a more transparent way to view usage instead of the node-hour"[@clusters-databricks-dbu].
+Notice that pricing is based on cost of DBU/hr. From Databricks, "A Databricks Unit (DBU) is a unit of Apache Spark processing capability per hour. For a varied set of instances, DBUs are a more transparent way to view usage instead of the node-hour" [@clusters-databricks-dbu].
 
 ### Google
 
-Google provides Gooble Cloud Dataproc as a cloud-based managed Spark and Hadoop service offered on Google Cloud Platform. Dataproc utilizes many Google Cloud Platform technologies such as Google Compute Engine and Google Cloud Storage to offer fully managed clusters running popular data processing frameworks such as Apache Hadoop and Apache Spark[@clusters-dataproc-wikipedia].
+Google provides Gooble Cloud Dataproc as a cloud-based managed Spark and Hadoop service offered on Google Cloud Platform. Dataproc utilizes many Google Cloud Platform technologies such as Google Compute Engine and Google Cloud Storage to offer fully managed clusters running popular data processing frameworks such as Apache Hadoop and Apache Spark [@clusters-dataproc-wikipedia].
 
 A cluster can be easily created from the Google Cloud console or the Google Cloud command line interface as illustrated in Figure \@ref(fig:clusters-google-dataproc-launch).
 
@@ -291,7 +291,7 @@ gcloud compute ssh sparklyr-m --project=<project> --zone=<region> -- -D 1080 \
   --user-data-dir="/tmp/sparklyr-m" http://sparklyr-m:8088
 ```
 
-There are various tutorials available under [cloud.google.com/dataproc/docs/tutorials](https://cloud.google.com/dataproc/docs/tutorials), including, a comprehensive tutorial to configure RStudio and `sparklyr`[@clusters-dataproc-rstudio].
+There are various tutorials available under [cloud.google.com/dataproc/docs/tutorials](https://cloud.google.com/dataproc/docs/tutorials), including, a comprehensive tutorial to configure RStudio and `sparklyr` [@clusters-dataproc-rstudio].
 
 The latest pricing information can be found under [cloud.google.com/dataproc/pricing](https://cloud.google.com/dataproc/pricing). Notice that the cost is split between Compute Engine and a Dataproc Premium.
 
@@ -303,7 +303,7 @@ The latest pricing information can be found under [cloud.google.com/dataproc/pri
 
 ### IBM
 
-IBM cloud computing is a set of cloud computing services for business offered by the information technology company IBM. IBM cloud includes infrastructure as a service (IaaS), software as a service (SaaS) and platform as a service (PaaS) offered through public, private and hybrid cloud delivery models, in addition to the components that make up those clouds[@clusters-ibm-wikipedia].
+IBM cloud computing is a set of cloud computing services for business offered by the information technology company IBM. IBM cloud includes infrastructure as a service (IaaS), software as a service (SaaS) and platform as a service (PaaS) offered through public, private and hybrid cloud delivery models, in addition to the components that make up those clouds [@clusters-ibm-wikipedia].
 
 From within IBM Cloud, open Watson Studio and create a Data Science project, add a Spark cluster under the project settings and launch RStudio from the Launch IDE menu. Please note that, as of this writting, the provided version of `sparklyr` was not the latest version available in CRAN, since `sparklyr` was modified to run under the IBM Cloud. In any case, please follos IBMs documentation as an authoritative reference to run R and Spark on the IBM Cloud and particularily, on how to upgrade `sparklyr` appropiately. Figure \@ref(fig:clusters-ibm-portal) captures IBM's Cloud portal launching a Spark cluster.
 
@@ -321,7 +321,7 @@ The most up to date pricing information is available under [ibm.com/cloud/pricin
 
 ### Microsoft
 
-Microsoft Azure is a cloud computing service created by Microsoft for building, testing, deploying, and managing applications and services through a global network of Microsoft-managed data centers. It provides software as a service (SaaS), platform as a service (PaaS) and infrastructure as a service (IaaS) and supports many different programming languages, tools and frameworks, including both Microsoft-specific and third-party software and systems[@clusters-azure-wikipedia].
+Microsoft Azure is a cloud computing service created by Microsoft for building, testing, deploying, and managing applications and services through a global network of Microsoft-managed data centers. It provides software as a service (SaaS), platform as a service (PaaS) and infrastructure as a service (IaaS) and supports many different programming languages, tools and frameworks, including both Microsoft-specific and third-party software and systems [@clusters-azure-wikipedia].
 
 From the Azure portal, the Azure HDInsight service provides support for on-demand Spark clusters. An HDInsight cluster with support for Spark and RStudio can be easily created by selecting the ML Services cluster type. Please note that the provided version of `sparklyr` might not be the latest version available in CRAN since the default package repo seems to be initialized using an MRAN (Microsoft R Application Network) snapshot, not directly from CRAN. Figure \@ref(fig:clusters-azure-hdinsight-mlservices) shows the Azure portal launching an Spark cluster with support for R.
 
