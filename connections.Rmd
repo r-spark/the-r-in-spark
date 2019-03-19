@@ -370,6 +370,46 @@ sc <- rxGetSparklyrConnection(cc)
 
 Please reference your cloud provider documentation and their support channels if assistance is needed.
 
+## Batches
+
+Most of the time, `sparklyr` used interactively; as in, you explicitly connect with `spark_connect()` and then execute commands to analyze and model large-scale data. However, you can also automate processes by scheduling Spark jobs that use `sparklyr`. Spark does not provide tools to schedule data processing tasks; so instead, you would use other workflow management tools. This can be useful useful to transform data, prepare a model and score data overnight or to make use of Spark by other systems.
+
+As an example, you can create a file named `batch.R` with contents:
+
+```{r}
+library(sparklyr)
+
+sc <- spark_connect(master = "local")
+
+sdf_len(sc, 10) %>% spark_write_csv("batch.csv")
+
+spark_disconnect(sc)
+```
+
+You can then submit this application to Spark in batch mode using `spark_submit()`, the `master` parameter should be set to the appropriately.
+
+```{r}
+spark_submit(master = "local", "batch.R")
+```
+
+You can also invoke `spark-submit` from the shell directly through:
+
+```bash
+/spark-home-path/spark-submit write-ten-batch.R --class sparklyr.Shell '/spark-jars-path/sparklyr-2.3-2.11.jar' --batch
+```
+
+You can use the following R code to get the correct paths:
+
+```{r}
+# Retrieve spark-home-path
+spark_home_dir()
+
+# Retrive spark-jars-path
+system.file("java", package = "sparklyr")
+```
+
+You can customize your script by passing additional command line arguments to `spark-submit` and then reading them back in R using `commandArgs()`
+
 ## Tools
 
 When connecting to a Spark Cluster using tools like Jupyter and RStudio, you can run the same connection parameters presented in this chapater. However, since many cloud providers make use of a web proxy to secure Spark's web interface, in order to use `spark_web()` or the RStudio connections pane extension, you will need to properly configure the `sparklyr.web.spark` setting which you would then pass to `spark_config()` through the `config` parameter.
