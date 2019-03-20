@@ -748,6 +748,27 @@ This will show an entry containing the error and the callstack:
 
 Notice that, spark_log(sc) only retrieves the worker logs when using local clusters, when running in proper clusters with multiple machines, you will have to use the tools and user interface provided by the cluster manager to find these log entries.
 
+### Partition Timeouts
+
+When running with several hundred executors, it becomes more likely that some tasks will hang indefinetely. You might be in this situation if most of the tasks in your job complete successfully, but a handful of them are still running and do not fail nor succeed.
+
+Suppose that we need to calculate the size of many web pages, we could use `spark_apply()` with something similar to:
+
+```{r}
+sdf_len(sc, 3, repartition = 3) %>%
+  spark_apply(~ download.file("https://google.com", "index.html") + file.size("index.html"))
+```
+
+Some web pages might not exist or take too long to download. In which case, most tasks will succeed, but a few will hang. To prevent a few tasks from blocking all computations, you can use the `spark.speculation` Spark setting. When this setting is enabled, once 75% of all tasks succeed, Spark will look for tasks taking longer than the median task execution time and retry this tasks. You can use the `spark.speculation.multiplier` setting to configure the time multiplier used to consider a task slow.
+
+Therefore, for the previous example, you can consider configuring Spark to retry tasks that take two times longer than the median as follows:
+
+```{r}
+config <- spark_config()
+config["spark.speculation"] <- TRUE
+config["spark.speculation.multiplier"] <- 4
+```
+
 ### Partition Errors
 
 If a particular partition fails, you can detect the broken partition by computing a digest, and then retrieving that particular partition as follows:
