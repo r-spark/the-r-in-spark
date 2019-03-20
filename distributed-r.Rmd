@@ -621,17 +621,13 @@ external_value <- 1
 spark_apply(iris_tbl, function(e) e + external_value)
 ```
 
-For complex computations with multiple dependent functions:
+As a workarounds to this limitation, you can add the functions your clousure needs into the `context` followed by assigning the functions into the global environment:
 
 ```{r}
 func_a <- function() 40
 func_b <- function() func_a() + 1
 func_c <- function() func_b() + 1
-```
 
-You can add the functions your clousure needs into the `context` followed by assigning the functions into the global environment as follows:
-
-```{r}
 sdf_len(sc, 1) %>% spark_apply(function(df, context) {
   for (name in names(context)) assign(name, context[[name]], envir = .GlobalEnv)
   func_c()
