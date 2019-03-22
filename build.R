@@ -46,7 +46,7 @@ files <- normalizePath(dir("ascii", full.names = T, pattern = chapters_pattern))
 books_bib <- bibtex::read.bib("book.bib")
 
 transformations <- list(
-  "\\[@([a-zA-Z0-9\\-]+)\\]" = ascii_add_footnotes,
+  " ?\\[@([a-zA-Z0-9\\-]+)\\]" = ascii_add_footnotes,
   "\nimage:images([^\\[]+)\\[([^\\]]+)\\]" = ascii_add_image_captions,
   "\n\\*(Note|Tip|Warning):\\* " = ascii_add_notes,
   "Figure[ \n]+@ref\\(fig:([^\\)]+)\\)" = ascii_add_figure_references,
