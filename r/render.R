@@ -1,8 +1,14 @@
-render_nomnoml <- function(code, png, caption, styles = "") {
+render_nomnoml <- function(code, png, caption = NULL, styles = "") {
   nomnoml::nomnoml(paste0(styles, "\n", code), png = png)
   png_resized <- resize_image_if_needed(png)
 
   if (identical(Sys.getenv("ASCIITEXT_RENDERING"), "TRUE")) {
+    if (is.null(caption)) {
+      caption <- knitr::opts_current$get()[["fig.cap"]]
+      if (nchar(ascharacter(caption)) == 0)
+        caption <- "CAPTION IS MISSING!"
+    }
+
     knitr::asis_output(paste0("![", caption, "||", knitr::opts_current$get()$label, "](", png_resized, ")"))
   } else {
     knitr::include_graphics(png_resized)
@@ -40,10 +46,16 @@ resize_image_if_needed <- function(image) {
   image_resized
 }
 
-render_image <- function(image, caption) {
+render_image <- function(image, caption = NULL) {
   image_resized <- resize_image_if_needed(image)
 
   if (identical(Sys.getenv("ASCIITEXT_RENDERING"), "TRUE")) {
+    if (is.null(caption)) {
+      caption <- knitr::opts_current$get()$caption
+      if (nchar(ascharacter(caption)) == 0)
+        caption <- "CAPTION IS MISSING!"
+    }
+
     knitr::asis_output(
       paste0("![", caption, "||", knitr::opts_current$get()$label, "](", image_resized, ")")
     )
