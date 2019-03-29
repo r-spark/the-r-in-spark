@@ -5,7 +5,7 @@ render_nomnoml <- function(code, png, caption = NULL, styles = "") {
   if (identical(Sys.getenv("ASCIITEXT_RENDERING"), "TRUE")) {
     if (is.null(caption)) {
       caption <- knitr::opts_current$get()[["fig.cap"]]
-      if (nchar(ascharacter(caption)) == 0)
+      if (nchar(as.character(caption)) == 0)
         caption <- "CAPTION IS MISSING!"
     }
 
