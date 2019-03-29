@@ -51,8 +51,8 @@ render_image <- function(image, caption = NULL) {
 
   if (identical(Sys.getenv("ASCIITEXT_RENDERING"), "TRUE")) {
     if (is.null(caption)) {
-      caption <- knitr::opts_current$get()$caption
-      if (nchar(ascharacter(caption)) == 0)
+      caption <- knitr::opts_current$get()[["fig.cap"]]
+      if (nchar(as.character(caption)) == 0)
         caption <- "CAPTION IS MISSING!"
     }
 
