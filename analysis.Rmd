@@ -8,7 +8,7 @@ Previous chapters focused on introducing Spark, R and helping you get started wi
 
 For those who are new to R, this might be a good time to consider complementing this chapter with R for Data Science [@intro-r-for-data-science] and other online resources to learn R. This chapter will try to briefly introduce all the concepts it presents.
 
-## Gaining undestanding
+## Gaining understanding
 
 In a data analysis project, the main goal is to gain understanding of what the data is trying to "tell us".  The result of the data transformations, identified during the data analysis phase, that can later be formalized into artifacts, such as dashboard or model pipelines. The output of the data transformations could be models, aggregations or visualizations. Most data analysis projects follow a set of steps outlined in *Figure 3.1*. 
 
@@ -29,7 +29,7 @@ nomnoml::nomnoml("
 ")
 ```
 
-As the diagram illustrates, the data is **imported** into our analysis sytem, then **wrangled** by trying different data transformations, such as aggregations, and then **visualized** to help us percive relationships and trends. In order to get deeper insight, one or multiple statistical **models** can be fitted against sample data. This will help in finding out if the patterns hold true when new data is applied to them.  And lastly, the results are **communicated** with stakeholders. 
+As the diagram illustrates, the data is **imported** into our analysis stem, then **wrangled** by trying different data transformations, such as aggregations, and then **visualized** to help us perceive relationships and trends. In order to get deeper insight, one or multiple statistical **models** can be fitted against sample data. This will help in finding out if the patterns hold true when new data is applied to them.  And lastly, the results are **communicated** with stakeholders. 
 
 ### R as an interface to Spark
 
@@ -80,7 +80,7 @@ nomnoml::nomnoml("
 ")
 ```
 
-For more common data manipulation tasks, `sparklyr` provides a back-end for `dplyr`.  This means that already familiar `dplyr` verbs can be used in R, and then `sparklyr` and `dplyr` will translate those actions into Spark SQL statements, see *figure 3.8*.
+For more common data manipulation tasks, `sparklyr` provides a back-end for `dplyr`.  This means that already familiar `dplyr` verbs can be used in R, and then `sparklyr` and `dplyr` will translate those actions into Spark SQL statements, see *figure 3.5*.
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='dplyr writes SQL', fig.align = 'center', eval = TRUE}
 nomnoml::nomnoml("
@@ -103,7 +103,6 @@ First, load the `sparklyr` and `dplyr` packages, and open a new **local** connec
 library(sparklyr)
 sc <- spark_connect(master = "local")
 ```
-
 
 
 ## Import / Access
@@ -141,7 +140,7 @@ The data is now accessible to Spark and R. Transformations can now be applied to
 
 Wrangling data involves cleaning the data, and then explore it.  The idea is to take the original data source of data and apply transformation to it.  A data **transformation** can be interpreted as **changes** we perform to the data in order to understand it.  An example of an transformation is an aggregation.  The result of aggregating a variable is structuraly differtent from the original data set.  The initial dataset had 32 rows and 10 columns, the result of the aggregation will be a single row and column. 
 
-The main goal is to write the data transformations using R syntax as much as possible. To accomplish this, instead of writing Spark SQL statements for data exploration, it is better to take advantage of `sparklyr`'s `dplyr` back-end interface.  
+The main goal is to write the data transformations using R syntax as much as possible. This saves us from the cognitive cost of having to switch between multiple computer languages to accomplish a single task. In this case, it is better to take advantage of `sparklyr`'s `dplyr` back-end interface, instead of writing Spark SQL statements for data exploration,  
 
 In the R environment, *cars* can be treated as if it is a local data frame, so `dplyr` verbs can be used, and in a piped fashion.
 
@@ -190,7 +189,7 @@ cars %>%
 ## 2     1    2.41     24.4
 ```
 
-Most of the data transformation made available by `dplyr` to work with local data frames are also available to use with a Spark connection.  This means that a general approach to learning `dplyr` can be taken in order to gain more proficiency with data exploration and preparation with Spark.  The chapter on Data Transformation in the R for Data Science [@intro-r-for-data-science] book should be a great help with this.  If proficiency with `dplyr` is not an issue for the reader, please take some time to experiment with different `dplyr` functions against the *cars* table.
+Most of the data transformation made available by `dplyr` to work with local data frames are also available to use with a Spark connection.  This means that a general approach to learning `dplyr` can be taken in order to gain more proficiency with data exploration and preparation with Spark.  The chapter on Data Transformation in the R for Data Science [@intro-r-for-data-science] book should be a great help with this.  If proficiency with `dplyr` is not an issue for you, then please take some time to experiment with different `dplyr` functions against the *cars* table.
 
 ### Correlations
 
@@ -288,6 +287,7 @@ render_image("images/analysis-wrangling-1.png")
 ```
 
 
+It is much easier to see which relationships are positive or negative, as well as significant.  The power of a visualizing data is in how much easier it makes it for us to understand results.  The next section will expand on this step of the process.
 
 ## Visualize
 
@@ -542,17 +542,17 @@ cars %>%
 
 ### Scatter plots
 
-Scatter plots are incredibly useful because of their multiple applications.  Very commonly, they are used to compare the relationship between two contionus variables.  The problems that arise when trying to use this visualization with a large amount of data are:
+Scatter plots are incredibly useful because of their multiple applications.  Very commonly, they are used to compare the relationship between two continuous variables.  The problems that arise when trying to use this visualization with a large amount of data are:
 
 - Performance problems - Too many single dots have to be calculated and drawn.
 
 - Perception problems - It becomes hard to see the true amount of dots in a single area.
 
-No amount of "pushing the computation" to Spark will help with this problem becuase the data has to be plotted in individual dots.  
+No amount of "pushing the computation" to Spark will help with this problem because the data has to be plotted in individual dots.  
 
-The best alternative is to find a plot type that represents the x/y relationship and concentration in a way that it is easy to percieve and to "physically" plot.  The *raster* plot may be the best answer.  It returns a grid of x/y positions and the results of a given aggregation usually represented by the collor of the square.  
+The best alternative is to find a plot type that represents the x/y relationship and concentration in a way that it is easy to perceive and to "physically" plot.  The *raster* plot may be the best answer.  It returns a grid of x/y positions and the results of a given aggregation usually represented by the color of the square.  
 
-The `dbplot` package provides funcitonality that helps with this kind of plotting.  The first one is `dbplot_raster()`.  It is the way to quickly run a visualization of this kind.
+The `dbplot` package provides functionality that helps with this kind of plotting.  The first one is `dbplot_raster()`.  It is the way to quickly run a visualization of this kind.
 
 ```{r}
 cars %>%
