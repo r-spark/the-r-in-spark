@@ -569,6 +569,118 @@ cars %>%
 
 ## Model
 
+During the analysis project the focus is to go through as many data transformations and models as necessary to find the answer to the question being asked.  An ideal data analysis framework enables the user to quickly and easily complete each iteration.
+Once a model is selected, and the findings presented to the stakeholders, is that the project can transition from one of analysis to one of deployment. The [Modeling](modeling) chapter will dive deeper into how to prepare and run models.  The focus of this section will be how to properly and easily transition from the wrangling step to the modeling phase and vice-versa.
+
+There are some steps needed for Spark to run even the most simple models.  The modeling functions in `sparklyr` already cover those steps in order to make them easier to use.  Consider the following example:
+
+```{r}
+m1 <- cars %>% 
+  mutate(cyl = paste0("cyl_", cyl)) %>%
+  ml_linear_regression(wt ~ .)
+
+summary(m1)
+```
+
+```
+## Deviance Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.36805 -0.18275 -0.01221  0.11616  0.56768 
+## 
+## Coefficients:
+##  (Intercept)          mpg  cyl_cyl_8.0  cyl_cyl_4.0         disp 
+## -0.241536145 -0.046030695  0.085662905  0.193862495  0.006621045 
+##           hp         drat         qsec           vs           am 
+## -0.004654348 -0.126435269  0.189135280  0.017628206  0.037101380 
+##         gear         carb 
+## -0.081473252  0.281287273 
+```
+
+The *cyl* field is converted into a character variable, and then the `ml_linear_regression()` function is applied to the resulting data set.  This is a very straight forward thing to do inside R, but it is not in Spark.  Firstly, Spark does not run models without a Spark PipelineModel, and secondly, it does not create Dummy Variables by default. The `ml_linear_regression()` already encases all of the needed Scala code to complete those steps and run the Pipeline model, which is then returned looking as a standard fitted model in R. This fact enhances de idea that combining Spark with R, via `sparklyr`, provides a really nice analysis framework.
+
+At this point it is very easy to experiment with different formulas, as shows in the code below:
+
+```{r}
+m2 <- cars %>%
+  ml_linear_regression(wt ~ mpg)
+
+summary(m2)
+```
+
+```
+## Deviance Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.6516 -0.3490 -0.1381  0.3190  1.3684 
+## 
+## Coefficients:
+## (Intercept)         mpg 
+##    6.047255   -0.140862 
+## 
+## R-Squared: 0.7528
+## Root Mean Squared Error: 0.4788
+```
+
+Additionally, it is also very easy to try out other kinds of models:
+
+```{r}
+m3 <- cars %>%
+  ml_generalized_linear_regression(am ~ .)
+
+summary(m3)
+```
+
+```
+## Deviance Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.46909 -0.16762 -0.00578  0.18601  0.35635 
+## 
+## Coefficients:
+##   (Intercept)           mpg           cyl          disp            hp          drat            wt          qsec 
+##  1.6345144901  0.0264792061 -0.1207285158 -0.0005715857  0.0010378347  0.0952244996  0.0172804532 -0.1125888981 
+##            vs          gear          carb 
+## -0.2087047973  0.1952457664 -0.0180502642 
+## 
+## (Dispersion paramter for gaussian family taken to be 0.0737941)
+## 
+##    Null  deviance: 7.71875 on 31 degress of freedom
+## Residual deviance: 1.54968 on 21 degrees of freedom
+## AIC: 17.926
+```
+
+### Cache model data
+
+The examples in this chapter are built using a very small data set.  In real-life scenarios, where large amounts of data are used, running models based on data that first needs to be transformed become a heavy toll on the Spark session if multiple experiments are being run.  That is why it is a good idea to save the results of the transformations as a new table in Spark memory, before running models.
+
+The `compute()` command can take the end of a `dplyr` piped command set and save the results to Spark memory.
+
+```{r}
+cached_cars <- cars %>% 
+  mutate(cyl = paste0("cyl_", cyl)) %>%
+  compute("cached_cars")
+```
+
+```{r}
+cached_cars %>%
+  ml_linear_regression(mpg ~ .) %>%
+  summary()
+```
+```
+## Deviance Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -3.47339 -1.37936 -0.06554  1.05105  4.39057 
+## 
+## Coefficients:
+## (Intercept) cyl_cyl_8.0 cyl_cyl_4.0        disp          hp        drat          wt        qsec          vs          am 
+## 16.15953652  3.29774653  1.66030673  0.01391241 -0.04612835  0.02635025 -3.80624757  0.64695710  1.74738689  2.61726546 
+##        gear        carb 
+##  0.76402917  0.50935118 
+## 
+## R-Squared: 0.8816
+## Root Mean Squared Error: 2.041
+```
+
 
 ## Communicate
 
+
+### Analysis versus Production work
