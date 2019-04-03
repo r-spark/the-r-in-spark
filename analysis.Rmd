@@ -6,13 +6,15 @@ library(ggplot2)
 
 # Analysis {#analysis}
 
-Previous chapters focused on introducing Spark, R and helping you get started with the tools you need throughout this book. In this chapter you will learn how to do data analysis in Spark from R. Data analysis may become the most common task you will do when working with Spark. This chapter will serve as a foundation to later chapters because concepts from this chapter will apply to properly prepare data when doing modeling, graph processing, streaming and other related topics that might not be strictly considered data analysis.
+Previous chapters focused on introducing Spark and R. They also focused on helping you get started with the tools you need throughout this book. In this chapter, you will learn how to perform data analysis in Spark from R. 
 
-For those who are new to R, this might be a good time to consider complementing this chapter with R for Data Science [@intro-r-for-data-science] and other online resources to learn R. This chapter will try to briefly introduce all the concepts it presents.
+Data analysis will likely become the most common task when working with Spark. This chapter will serve as a foundation to later chapters. The concepts from this chapter will apply to properly prepare data when doing modeling, graph processing, streaming and other related topics, that might not be strictly considered data analysis.
 
-## Gaining understanding
+The `sparklyr` package implements data analysis principles of R and specifically a subset of R packages called the `tidyverse`.  If you are new to R, Data Science, or the `tidyverse`, it is recommended to read the book *R for Data Science* [@intro-r-for-data-science]. This chapter will try to briefly introduce all the concepts it presents.
 
-In a data analysis project, the main goal is to gain understanding of what the data is trying to "tell us".  The result of the data transformations, identified during the data analysis phase, that can later be formalized into artifacts, such as dashboard or model pipelines. The output of the data transformations could be models, aggregations or visualizations. Most data analysis projects follow a set of steps outlined in *Figure 3.1*. 
+## Search for an answer
+
+In a data analysis project, the main goal is to gain understanding of what the data is trying to "tell us". The hope is that the data provides an answer to a specific question. The question is typically poised by stakeholders of the analysis. Most data analysis projects follow a set of steps outlined in *Figure 3.1*. 
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='General steps of a data analysis', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -33,7 +35,9 @@ render_nomnoml("
 
 As the diagram illustrates, the data is **imported** into our analysis stem, then **wrangled** by trying different data transformations, such as aggregations, and then **visualized** to help us perceive relationships and trends. In order to get deeper insight, one or multiple statistical **models** can be fitted against sample data. This will help in finding out if the patterns hold true when new data is applied to them.  And lastly, the results are **communicated** with stakeholders. 
 
-### R as an interface to Spark
+Commonly, in R all of the steps are performed in local memory.  But that approach has to change when the analysis adds the use of Spark.  The next section will introduce the main concept of how to best integrate R and Spark for data analysis.
+
+## R as an interface to Spark
 
 For data analysis, the ideal approach  is to let Spark do what its good at. It excels at being a parallel computation engine that works at a large scale.  Spark goes beyond offering generic calculations. Out of the box, Spark includes libraries that actually can do a lot of what analysts usually do in R, but for large amounts of data. *Figure 3.2* paraphrases the four main capabilities available to data analysts in Spark.
 
@@ -96,6 +100,8 @@ render_nomnoml("
 ", "images/analysis-dplyr-sql-translation.png")
 ```
 
+An example of a practical implementation of this concept will be covered in the following sections.
+
 ## Exercise
 
 In order to practice as you learn, the rest of this chapter's code will use a single exercise that runs in the **local** Spark master, this allows the code to be replicated in your laptop. Please, make sure to already have `sparklyr` and a local copy of Spark installed. The installation of Spark can be done by using the utility that comes with the package.  For more information on how to do that please see the Local section in the [Connections](conections/#connections-local) chapter.
@@ -106,6 +112,7 @@ library(sparklyr)
 sc <- spark_connect(master = "local")
 ```
 
+The environment is ready to be used.  The next step is to add data that we can analyze. 
 
 ## Import / Access
 
@@ -284,7 +291,7 @@ cars %>%
   rplot()
 ```
 
-```{r, eval = TRUE, out.width='800pt', out.height='400pt', fig.align = 'center', echo = FALSE}
+```{r, eval = TRUE, out.width='800pt', out.height='400pt', fig.align = 'center', fig.cap = 'Using rplot() to visualize correlations', echo = FALSE}
 render_image("images/analysis-wrangling-1.png")
 ```
 
@@ -340,7 +347,7 @@ render_nomnoml("
 In essence, the approach for visualizing is the same as in wrangling.  Push the computation to Spark, and then collect the results in R for plotting.  The heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, the plot that will be used is a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins.
 
 
-```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark & R', fig.align = 'center', eval = TRUE}
+```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark and R', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -633,10 +640,10 @@ cars %>%
 ## -0.46909 -0.16762 -0.00578  0.18601  0.35635 
 ## 
 ## Coefficients:
-##   (Intercept)           mpg           cyl          disp            hp          drat            wt          qsec 
-##  1.6345144901  0.0264792061 -0.1207285158 -0.0005715857  0.0010378347  0.0952244996  0.0172804532 -0.1125888981 
-##            vs          gear          carb 
-## -0.2087047973  0.1952457664 -0.0180502642 
+##   (Intercept)           mpg           cyl          disp            hp          drat
+##  1.6345144901  0.0264792061 -0.1207285158 -0.0005715857  0.0010378347  0.0952244996
+##            wt          qsec            vs          gear          carb 
+##  0.0172804532 -0.1125888981 -0.2087047973  0.1952457664 -0.0180502642 
 ## 
 ## (Dispersion paramter for gaussian family taken to be 0.0737941)
 ## 
@@ -668,10 +675,10 @@ cached_cars %>%
 ## -3.47339 -1.37936 -0.06554  1.05105  4.39057 
 ## 
 ## Coefficients:
-## (Intercept) cyl_cyl_8.0 cyl_cyl_4.0        disp          hp        drat          wt        qsec          vs          am 
-## 16.15953652  3.29774653  1.66030673  0.01391241 -0.04612835  0.02635025 -3.80624757  0.64695710  1.74738689  2.61726546 
-##        gear        carb 
-##  0.76402917  0.50935118 
+## (Intercept) cyl_cyl_8.0 cyl_cyl_4.0        disp          hp        drat
+## 16.15953652  3.29774653  1.66030673  0.01391241 -0.04612835  0.02635025
+##           wt        qsec          vs          am       gear        carb 
+##  -3.80624757  0.64695710  1.74738689  2.61726546 0.76402917  0.50935118  
 ## 
 ## R-Squared: 0.8816
 ## Root Mean Squared Error: 2.041
@@ -712,7 +719,4 @@ e.g: Identify risk factors and build scores|
 
 ### Using R Markdown documents
 
-R markdown documents allow weave narrative text and code together.  The amount of output formats provides a very compelling reason to learn and use R Markdowe.  The output formats available include: HTML, PDF, PowerPoint, MS Word, presentation slides, websites and books. Most of these outputs are available in the core R packages of R Markdown: `knitr` and `rmarkdown`.  Other output formats are made available by companion R packages. For example, the package `xaringan` adds the ability to create great looking presentation decks.  This book was written using R Markdown thanks to an extension provided by the `bookdown` package.  The best resource to delve deeper into R Markdown is the official book [@r-markdown-the-definite-guide].
-
-
-
+R markdown documents allow weave narrative text and code together.  The amount of output formats provides a very compelling reason to learn and use R Markdown.  The output formats available include: HTML, PDF, PowerPoint, MS Word, presentation slides, websites and books. Most of these outputs are available in the core R packages of R Markdown: `knitr` and `rmarkdown`.  Other output formats are made available by companion R packages. For example, the package `xaringan` adds the ability to create great looking presentation decks.  This book was written using R Markdown thanks to an extension provided by the `bookdown` package.  The best resource to delve deeper into R Markdown is the official book [@r-markdown-the-definite-guide].
