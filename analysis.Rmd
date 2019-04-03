@@ -720,3 +720,133 @@ e.g: Identify risk factors and build scores|
 ### Using R Markdown documents
 
 R markdown documents allow weave narrative text and code together.  The amount of output formats provides a very compelling reason to learn and use R Markdown.  The output formats available include: HTML, PDF, PowerPoint, MS Word, presentation slides, websites and books. Most of these outputs are available in the core R packages of R Markdown: `knitr` and `rmarkdown`.  Other output formats are made available by companion R packages. For example, the package `xaringan` adds the ability to create great looking presentation decks.  This book was written using R Markdown thanks to an extension provided by the `bookdown` package.  The best resource to delve deeper into R Markdown is the official book [@r-markdown-the-definite-guide].
+
+For purposes of the book, and as an introduction to R Markdown, this section will review three output formats:
+
+- R Notebook
+
+- R Markdown document
+
+- `xaringan` presentation
+
+The following figure displays when in the analysis process you should consider using them.
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R Markdown output formats', fig.align = 'center', eval = TRUE}
+render_nomnoml("
+#direction: right
+#padding: 10
+#fontSize: 14
+#leading: 2
+[Import - Wrangle - 
+Model - Visualize | 
+- R Notebook
+] -> [Communicate |
+- R Markdown document
+- xaringan presentation
+]
+", "images/analysis-outputs.png")
+```
+
+### Reporting results
+
+Creating a new R Markdown document is easy.  You need a YAML header, called Front Matter, at the top.  After that, sections of code, called code chunks, can be interlaced with the narratives.  The following example shows how easy it is to create a fully reproducible report.  The narrative, code and, most importantly, the output of the code is recorded inside the resulting HTML file.  You can copy and paste this following code in a file. Save the file with a `.Rmd` extension, and choose whatever name you would like.  
+
+````markdown
+---
+title: "mtcars analysis"
+output: html_document
+---
+`r ''````{r, setup, include = FALSE}
+library(sparklyr)
+conf <- spark_config()
+conf$`sparklyr.cores.local` <- 4
+conf$`sparklyr.shell.driver-memory` <- "1G"
+conf$spark.memory.fraction <- 0.9
+```
+
+## Setup Spark environment
+A local Spark environment is setup and the `mtcars` data set preloaded
+`r ''````{r}
+sc <- spark_connect(master = "local", config = conf)
+cars <- copy_to(sc, mtcars, "mtcars_remote")
+cars
+```
+
+## Visualize
+A histogram was run over the `mpg` data
+`r ''````{r}
+library(dbplot)
+cars %>%
+  dbplot_histogram(mpg, binwidth = 3)
+```
+
+## Model
+The selected model was a simple linear regression that uses the weight as the predictor of MPG
+`r ''````{r}
+cars %>%
+  ml_linear_regression(wt ~ mpg) %>%
+  summary()
+```
+`r ''````{r, include = FALSE}
+spark_disconnect(sc)
+```
+````
+If using the RStudio IDE, click on the **Knit** button at the top of the document to run it. The HTML output should look like this:
+
+```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
+render_image("images/analysis-rmarkdown.png")
+```
+
+This report can now be sent to stakeholders.  The stakeholders will not need Spark or even R to be able to read the report.  All of the needed output from your Spark session was captured in the HTML document.
+
+### Presentation decks
+
+Switching from an HTML output, to a PowerPoint output is as easy as changing a single option.  In the top front matter, change the `output` option to `powerpoint_presentation`.
+
+```
+output: powerpoint_presentation
+```
+The result will be a PowerPoint presentation with all of the same information that was displayed in the HTML report.  There will be a need to edit the PowerPoint template or the output of the code chunks.  This minimal example show how easy it is to go from one format to another.
+
+Another option is to use the `xaringan` package to create the presentation.  It creates a self contained HTML presentation.  This may be a better option when not everyone in the organization has PowerPoint.  Converting the original R Markdown report to a `xaringan` deck is easy.  A tripple dash needs to be added to indicate where a new slide begins.  In the example, the tripple dashes are inserted above each new major header.
+
+````markdown
+---
+title: "mtcars analysis"
+output: xaringan::moon_reader
+---
+`r ''````{r, setup, include = FALSE}
+library(sparklyr)
+conf <- spark_config()
+conf$`sparklyr.cores.local` <- 4
+conf$`sparklyr.shell.driver-memory` <- "1G"
+conf$spark.memory.fraction <- 0.9
+```
+
+## Setup Spark environment
+A local Spark environment is setup and the `mtcars` dataset preloaded
+`r ''````{r}
+sc <- spark_connect(master = "local", config = conf)
+cars <- copy_to(sc, mtcars, "mtcars_remote")
+cars
+```
+---
+## Visualize
+A histogram was run over the `mpg` data
+`r ''````{r, fig.height = 6}
+library(dbplot)
+cars %>%
+  dbplot_histogram(mpg, binwidth = 3)
+```
+`r ''````{r, include = FALSE}
+spark_disconnect(sc)
+```
+````
+Here is what the first full slide should look like:
+
+```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
+render_image("images/analysis-xaringan.png")
+```
+
+
+
