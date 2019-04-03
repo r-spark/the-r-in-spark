@@ -252,38 +252,36 @@ For instance, suppose that you have a 1TB dataset for sales data across multiple
 As a simple example of partitoned modeling, we can run a linear regression using the `iris` dataset partiotioned by Species:
 
 ```{r}
-iris_tbl <- sdf_copy_to(sc, iris)
+iris <- copy_to(sc, datasets::iris)
 
-iris_tbl %>%
+iris %>%
   spark_apply(nrow, group_by = "Species")
 ```
 ```
-## # Source:   table<sparklyr_tmp_378c1b8155f3> [?? x 2]
-## # Database: spark_connection
-##      Species Sepal_Length
-##        <chr>        <int>
-## 1 versicolor           50
-## 2  virginica           50
-## 3     setosa           50
+# Source: spark<?> [?? x 2]
+  Species    result
+  <chr>       <int>
+1 versicolor     50
+2 virginica      50
+3 setosa         50
 ```
 
 Then you can run a linear regression over each species using `spark_apply()`:
 
 ```{r}
-iris_tbl %>%
+iris %>%
   spark_apply(
     function(e) summary(lm(Petal_Length ~ Petal_Width, e))$r.squared,
     names = "r.squared",
     group_by = "Species")
 ```
 ```
-## # Source:   table<sparklyr_tmp_378c30e6155> [?? x 2]
-## # Database: spark_connection
-##      Species r.squared
-##        <chr>     <dbl>
-## 1 versicolor 0.6188467
-## 2  virginica 0.1037537
-## 3     setosa 0.1099785
+# Source: spark<?> [?? x 2]
+  Species    r.squared
+  <chr>          <dbl>
+1 versicolor     0.619
+2 virginica      0.104
+3 setosa         0.110
 ```
 
 As you can see from the `r.squared` results and intuitevely in Figure \@ref(fig:distributed-r-modeling-species), the linear model for versicolor better fits to the regression line.
@@ -335,7 +333,7 @@ grid <- list(minsplit = c(2, 5, 10), maxdepth = c(1, 3, 8)) %>%
 grid
 ```
 ```
-# Source: spark<sparklyr_1064056dd37da> [?? x 2]
+# Source: spark<?> [?? x 2]
   minsplit maxdepth
      <dbl>    <dbl>
 1        2        1
@@ -501,7 +499,8 @@ The takeaway from this section is to always consider partitions when dealing wit
 By default, `spark_apply()`, will inspect the data frame being produced to find out column names and types automatically, for example:
 
 ```{r}
-sdf_len(sc, 1) %>% spark_apply(~ data.frame(numbers = 1, names = "abc"))
+sdf_len(sc, 1) %>%
+  spark_apply(~ data.frame(numbers = 1, names = "abc"))
 ```
 ```
 # Source: spark<?> [?? x 2]
@@ -594,7 +593,7 @@ The following example defines a `f(x) = m * x + b` function and runs `m = 10` an
 ```{r distributed-context-list}
 sdf_len(sc, 4) %>%
   spark_apply(
-    ~.y$m * x + .y$b,
+    ~.y$m * .x + .y$b,
     context = list(b = 2, m = 10)
   )
 ```
@@ -624,7 +623,7 @@ The function passed to `spark_apply()` is serialized using `serialize()`, which 
 
 ```{r}
 external_value <- 1
-spark_apply(iris_tbl, function(e) e + external_value)
+spark_apply(iris, function(e) e + external_value)
 ```
 
 As a workarounds to this limitation, you can add the functions your clousure needs into the `context` followed by assigning the functions into the global environment:
@@ -660,22 +659,21 @@ With `spark_apply()` you can use any R package inside Spark. For instance, you c
 
 ```{r}
 spark_apply(
-  iris_tbl,
+  iris,
   function(e) broom::tidy(lm(Petal_Length ~ Petal_Width, e)),
   names = c("term", "estimate", "std.error", "statistic", "p.value"),
   group_by = "Species")
 ```
 ```
-## # Source:   table<sparklyr_tmp_378c5502500b> [?? x 6]
-## # Database: spark_connection
-##      Species        term  estimate std.error statistic      p.value
-##        <chr>       <chr>     <dbl>     <dbl>     <dbl>        <dbl>
-## 1 versicolor (Intercept) 1.7812754 0.2838234  6.276000 9.484134e-08
-## 2 versicolor Petal_Width 1.8693247 0.2117495  8.827999 1.271916e-11
-## 3  virginica (Intercept) 4.2406526 0.5612870  7.555230 1.041600e-09
-## 4  virginica Petal_Width 0.6472593 0.2745804  2.357267 2.253577e-02
-## 5     setosa (Intercept) 1.3275634 0.0599594 22.141037 7.676120e-27
-## 6     setosa Petal_Width 0.5464903 0.2243924  2.435422 1.863892e-02
+# Source: spark<?> [?? x 6]
+  Species    term        estimate std.error statistic  p.value
+  <chr>      <chr>          <dbl>     <dbl>     <dbl>    <dbl>
+1 versicolor (Intercept)    1.78     0.284       6.28 9.48e- 8
+2 versicolor Petal_Width    1.87     0.212       8.83 1.27e-11
+3 virginica  (Intercept)    4.24     0.561       7.56 1.04e- 9
+4 virginica  Petal_Width    0.647    0.275       2.36 2.25e- 2
+5 setosa     (Intercept)    1.33     0.0600     22.1  7.68e-27
+6 setosa     Petal_Width    0.546    0.224       2.44 1.86e- 2
 ```
 
 The first time you call `spark_apply()` all of the contents in your local `.libPaths()`, which contains all R packages, will be copied into each Spark worker node. Packages will only be copied once and will persist as long as the connection remains open. It’s not uncommon for R libraries to be several gigabytes in size, so be prepared for a one-time tax while the R packages are copied over to your Spark cluster. You can disable package distribution by setting `packages = FALSE`.
@@ -783,46 +781,66 @@ devtools::install_github("apache/arrow", subdir = "r", ref = "apache-arrow-0.12.
 Before we use `arrow`, we will take a measurement to validate 
 
 ```{r}
-system.time(sdf_len(sc, 10^5) %>% spark_apply(nrow))
+system.time(
+  sdf_len(sc, 10^4) %>% spark_apply(nrow) %>% collect()
+)
+```
+```
+   user  system elapsed 
+  0.240   0.020   7.957
 ```
 
-Once installed, to enable Arrow simply include the library:
-Then you can dettach `arrow` and rerun this task.
+In our particular system, processing 10K rows takes about 8 seconds. To enable Arrow, simply include the library and use `spark_apply()` as usual. Lets measure how long it takes `spark_apply()` to process 1M rows:
 
 ```{r}
 library(arrow)
-system.time(sdf_len(sc, 10^5) %>% spark_apply(nrow))
+system.time(
+  sdf_len(sc, 10^6) %>% spark_apply(nrow) %>% collect()
+)
+```
+```
+   user  system elapsed 
+  0.317   0.021   3.922
 ```
 
-Notice the performance degradation when not using `arrow`, run `library(arrow)` to reneable Arrow.
+In our system, Arrow can process 100X more data in half the time, just 4 seconds.
 
-Most functionality in `arrow` simply works on the background improving performance and data serialization; however, there is one setting you should be aware of. The `spark.sql.execution.arrow.maxRecordsPerBatch` configuiration settings specified the default size of each arrow data transfer. It's shared with other Spark components and defaults to 10,000 rows. Compare the results from the following two operation when using and not using `arrow()`.
-
-```{r}
-detach("package:arrow", unload = TRUE)
-sdf_len(sc, 10^6) %>% spark_apply(nrow)
-```
-
-Now using `arrow`,
+Most functionality in `arrow` simply works on the background improving performance and data serialization; however, there is one setting you should be aware of. The `spark.sql.execution.arrow.maxRecordsPerBatch` configuiration settings specifies the default size of each arrow data transfer. It's shared with other Spark components and defaults to 10,000 rows. 
 
 ```{r}
 library(arrow)
-sdf_len(sc, 10^6) %>% spark_apply(nrow)
+sdf_len(sc, 2 * 10^4) %>% spark_apply(nrow)
+```
+```
+# Source: spark<?> [?? x 1]
+  result
+   <int>
+1  10000
+2  10000
 ```
 
-You might need to adjust this number based on how much data your system can handle, making it smaller for large dataset or bigger for operations that require records to be processed together. You can specify an unlimitted batch size by setting `spark.sql.execution.arrow.maxRecordsPerBatch` to zero.
+You might need to adjust this number based on how much data your system can handle, making it smaller for large dataset or bigger for operations that require records to be processed together. We can change this setting to 5K rows and verify the partitions change appropriately:
 
 ```{r}
 spark_disconnect(sc)
 
 config <- spark_config()
-config$spark.sql.execution.arrow.maxRecordsPerBatch <- 0
+config$spark.sql.execution.arrow.maxRecordsPerBatch <- 5 * 10^3
 
-sc <- spark_connect(master = "local")
-sdf_len(sc, 10^6) %>% spark_apply(nrow)
+sc <- spark_connect(master = "local", config = config)
+sdf_len(sc, 2 * 10^4) %>% spark_apply(nrow)
+```
+```
+# Source: spark<?> [?? x 1]
+  result
+   <int>
+1   5000
+2   5000
+3   5000
+4   5000
 ```
 
-So far we've covered: use cases, main operations and cluster requirements. The next and last section will teach you troubleshooting techniques useful when distributing R code.
+So far we've presented use cases, main operations and cluster requirements. The next and last section will teach you troubleshooting techniques useful when distributing R code.
 
 ## Troubleshooting
 
