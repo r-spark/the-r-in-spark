@@ -687,22 +687,32 @@ The communication artifacts that will be covered are those that R can create, an
 
 ### Analysis versus Production work
 
-The main "deliverable" of data analysis project is the answer to a question. The answer is encased in one or several data transformations, visualizations or models. Putting the transformations, visualizations or models into an automated process that delivers continuous insights should be considered a Production project.  Analysis and Production should be considered as separate projects. Specifically to R, Production projects would involve creating a `shiny` app that folks in the organization depend on, and is used on a daily basis.  Another example of an Production artifact, is a scheduled R script reads and updates the data store with new scores. Another important distinction is from the Information Technology perspective.  The nature of the analysis project is experimental, the resulting code does not need to be tested or promoted as is to a Production system.  In contrast, the Production project needs to pass the usual Software Development Lifecyle (SDLC) requirements before it is ready to be placed as part of the supported reports or applications withing the organization.
+The main "deliverable" of data analysis project is the answer to a question. The answer is encased in one or several data transformations, visualizations or models. Putting the transformations, visualizations or models into an automated process that delivers continuous insights should be considered a Production project.  Analysis and Production should be considered as separate projects. Specifically to R, Production projects would involve creating a `shiny` app that folks in the organization depend on, and is used on a daily basis.  Another example of an Production artifact, is a scheduled R script reads and updates the data store with new scores. 
 
-### Using RMarkdown
+From the Information Technology perspective.  The nature of the analysis project is experimental, the resulting code does not need to be tested or promoted as is to a Production system.  In contrast, the Production project needs to pass the usual Software Development Lifecyle (SDLC) requirements before it is ready to be placed as part of the supported reports or applications withing the organization.
 
+```{r echo=FALSE, fig.cap='Analysis vs Production projects', fig.align = 'center', eval = TRUE}
+render_nomnoml("
+#direction: right
+#edgeMargin: 2
+#padding: 10
+#fontSize: 12
 
+[Analysis project | 
+e.g: Identify risk factors and build scores|
+	[Analyze] -> [Communicate]
+    ] -> [Production project | 
+    e.g.: Score customers on a daily basis |
+    	[Develop R script] -> [Test script]
+        [Test script] -> [Approve to run on a daily basis]
+        ] 
+[Production project] -> [Production]
+", "images/analysis-program.png")
+```
 
+### Using R Markdown documents
 
-
-
-
-
-
-
-
-
-
+R markdown documents allow weave narrative text and code together.  The amount of output formats provides a very compelling reason to learn and use R Markdowe.  The output formats available include: HTML, PDF, PowerPoint, MS Word, presentation slides, websites and books. Most of these outputs are available in the core R packages of R Markdown: `knitr` and `rmarkdown`.  Other output formats are made available by companion R packages. For example, the package `xaringan` adds the ability to create great looking presentation decks.  This book was written using R Markdown thanks to an extension provided by the `bookdown` package.  The best resource to delve deeper into R Markdown is the official book [@r-markdown-the-definite-guide].
 
 
 
