@@ -136,11 +136,11 @@ cars <- copy_to(sc, mtcars, "mtcars_remote")
 
 **Note:** In an enterprise setting, `copy_to()` should only be used to transfer small tables from R, such as a look up value table.
 
-The data is now accessible to Spark and R. Transformations can now be applied to the data.  The next section will cover how to wragle data by running transformations inside Spark. 
+The data is now accessible to Spark and R. Transformations can now be applied to the data.  The next section will cover how to wrangle data by running transformations inside Spark. 
 
 ## Wrangle
 
-Wrangling data involves cleaning the data, and then explore it.  The idea is to take the original data source of data and apply transformation to it.  A data **transformation** can be interpreted as **changes** we perform to the data in order to understand it.  An example of an transformation is an aggregation.  The result of aggregating a variable is structuraly differtent from the original data set.  The initial dataset had 32 rows and 10 columns, the result of the aggregation will be a single row and column. 
+Wrangling data involves cleaning the data, and then explore it.  The idea is to take the original data source of data and apply transformation to it.  A data **transformation** can be interpreted as **changes** we perform to the data in order to understand it.  An example of an transformation is an aggregation.  The result of aggregating a variable is structurally different from the original data set.  The initial data set had 32 rows and 10 columns, the result of the aggregation will be a single row and column. 
 
 The main goal is to write the data transformations using R syntax as much as possible. This saves us from the cognitive cost of having to switch between multiple computer languages to accomplish a single task. In this case, it is better to take advantage of `sparklyr`'s `dplyr` back-end interface, instead of writing Spark SQL statements for data exploration,  
 
@@ -293,7 +293,7 @@ It is much easier to see which relationships are positive or negative, as well a
 
 ## Visualize
 
-Visualizations are fundamentally a human task.  They are a vital tool to help us find patterns from data.  It is easier for us to identify outliers in a data set of 1,000 observations when plotted then when reading them from a list.
+Visualizations are fundamentally a human task.  They are a vital tool to help us find patterns from data.  It is easier for us to identify outliers in a data set of 1,000 observations when plotted in a graph, as opposed to reading them from a list.
 
 R is great at data visualizations. Its capabilities for creating plots is extended by the many R packages that focus on this analysis step.   Unfortunately, the vast majority of R functions that create plots depend on the data already being in local memory within R, so they fail when using a remote table inside Spark. 
 
@@ -569,17 +569,17 @@ cars %>%
 
 ## Model
 
-During the analysis project the focus is to go through as many data transformations and models as necessary to find the answer to the question being asked.  An ideal data analysis framework enables the user to quickly and easily complete each iteration.
-Once a model is selected, and the findings presented to the stakeholders, is that the project can transition from one of analysis to one of deployment. The [Modeling](modeling) chapter will dive deeper into how to prepare and run models.  The focus of this section will be how to properly and easily transition from the wrangling step to the modeling phase and vice-versa.
+The analysis project focuses on going through as many transformations and models to find the answer.  The ideal data analysis framework enables the user to quickly and easily complete each iteration. The transition from an analysis to a deployment project occurs after the model is selected, and findings are presented to the stakeholders. The [Modeling](modeling) chapter will dive deeper into how to prepare and run models.  The focus of this section will be how to properly and easily transition from the wrangling to modeling.
 
-There are some steps needed for Spark to run even the most simple models.  The modeling functions in `sparklyr` already cover those steps in order to make them easier to use.  Consider the following example:
+### Models during analysis
+
+There are some steps needed for Spark to run even the most simple models.  The modeling functions in `sparklyr` already cover those steps in order to make them easier to use.  Transitioning from data wrangling to model prototyping is as easy as piping the transformed code right into the a `sparklyr` modeling function. Consider the following example:
 
 ```{r}
-m1 <- cars %>% 
+cars %>% 
   mutate(cyl = paste0("cyl_", cyl)) %>%
-  ml_linear_regression(wt ~ .)
-
-summary(m1)
+  ml_linear_regression(wt ~ .) %>%
+  summary()
 ```
 
 ```
@@ -596,15 +596,14 @@ summary(m1)
 ## -0.081473252  0.281287273 
 ```
 
-The *cyl* field is converted into a character variable, and then the `ml_linear_regression()` function is applied to the resulting data set.  This is a very straight forward thing to do inside R, but it is not in Spark.  Firstly, Spark does not run models without a Spark PipelineModel, and secondly, it does not create Dummy Variables by default. The `ml_linear_regression()` already encases all of the needed Scala code to complete those steps and run the Pipeline model, which is then returned looking as a standard fitted model in R. This fact enhances de idea that combining Spark with R, via `sparklyr`, provides a really nice analysis framework.
+The *cyl* field is converted into a character variable, and then the `ml_linear_regression()` function is applied to the resulting data set.  This is a very straight forward thing to do inside R, but it is not so in Spark.  Firstly, Spark does not run models without a Spark PipelineModel. Secondly, it does not create Dummy Variables by default. The `ml_linear_regression()` already encases all of the needed Scala code to complete those steps and run the Pipeline model, which is then returned looking as a standard fitted model in R. 
 
 At this point it is very easy to experiment with different formulas, as shows in the code below:
 
 ```{r}
-m2 <- cars %>%
-  ml_linear_regression(wt ~ mpg)
-
-summary(m2)
+cars %>%
+  ml_linear_regression(wt ~ mpg) %>%
+  summary()
 ```
 
 ```
@@ -623,10 +622,9 @@ summary(m2)
 Additionally, it is also very easy to try out other kinds of models:
 
 ```{r}
-m3 <- cars %>%
-  ml_generalized_linear_regression(am ~ .)
-
-summary(m3)
+cars %>%
+  ml_generalized_linear_regression(am ~ .) %>%
+  summary()
 ```
 
 ```
@@ -679,8 +677,42 @@ cached_cars %>%
 ## Root Mean Squared Error: 2.041
 ```
 
+It is common to go back to visualizing and wrangling after running one or several models.  The reason is that more questions are raised, as more insights are gained from the data. After multiple iterations, one or several transformations, visualizations and models are chosen to be shared with the stakeholders. The best way of doing this is the subject of the next section.
 
 ## Communicate
 
+It is important to clearly communicate the results of the analysis to the stakeholders. It is as important as the analysis work itself. If the stakeholders are not clear what you found out, there will be no clear call to action on their part. If the stakeholders ask how you found out what you did, and it is not clear how you did this, there will be no trust on what you found.  
+
+The communication artifacts that will be covered are those that R can create, and are a common output of an analysis.  These artifacts are: reports and presentation decks.  Beyond the type of artifact, another thing to consider is the purpose of the report.  As alluded to in the outset of this section, the purposes can be divided into showing what we found, from how we found it. The `rmarkdown` package plays a central role in this.  This pakcage is incredibly versatile and robust. This makes it worth spending the time learn about this R package. This section will cover how to use `rmarkdown` as the base of effective and reproducible reports and presentations.
 
 ### Analysis versus Production work
+
+The main "deliverable" of data analysis project is the answer to a question. The answer is encased in one or several data transformations, visualizations or models. Putting the transformations, visualizations or models into an automated process that delivers continuous insights should be considered a Production project.  Analysis and Production should be considered as separate projects. Specifically to R, Production projects would involve creating a `shiny` app that folks in the organization depend on, and is used on a daily basis.  Another example of an Production artifact, is a scheduled R script reads and updates the data store with new scores. 
+
+From the Information Technology perspective.  The nature of the analysis project is experimental, the resulting code does not need to be tested or promoted as is to a Production system.  In contrast, the Production project needs to pass the usual Software Development Lifecyle (SDLC) requirements before it is ready to be placed as part of the supported reports or applications withing the organization.
+
+```{r echo=FALSE, fig.cap='Analysis vs Production projects', fig.align = 'center', eval = TRUE}
+render_nomnoml("
+#direction: right
+#edgeMargin: 2
+#padding: 10
+#fontSize: 12
+
+[Analysis project | 
+e.g: Identify risk factors and build scores|
+	[Analyze] -> [Communicate]
+    ] -> [Production project | 
+    e.g.: Score customers on a daily basis |
+    	[Develop R script] -> [Test script]
+        [Test script] -> [Approve to run on a daily basis]
+        ] 
+[Production project] -> [Production]
+", "images/analysis-program.png")
+```
+
+### Using R Markdown documents
+
+R markdown documents allow weave narrative text and code together.  The amount of output formats provides a very compelling reason to learn and use R Markdowe.  The output formats available include: HTML, PDF, PowerPoint, MS Word, presentation slides, websites and books. Most of these outputs are available in the core R packages of R Markdown: `knitr` and `rmarkdown`.  Other output formats are made available by companion R packages. For example, the package `xaringan` adds the ability to create great looking presentation decks.  This book was written using R Markdown thanks to an extension provided by the `bookdown` package.  The best resource to delve deeper into R Markdown is the official book [@r-markdown-the-definite-guide].
+
+
+
