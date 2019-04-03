@@ -2,6 +2,7 @@
 
 knitr::opts_chunk$set(eval = FALSE)
 source("r/render.R")
+source("r/plots.R")
 
 styles <- "
 #padding: 16
@@ -13,13 +14,17 @@ styles <- "
 "
 
 library(dplyr)
+library(ggplot2)
+library(cowplot)
 ```
 
 # Distributed R {#distributed}
 
-In previous chapters you learned how to perform data analysis and modeling in local Spark instances and proper Spark clusters, the previous [Extensions](#extensions) chapter, described how to make use of additional functionality provided by the Spark and R communities at large. In most cases, the combination of Spark functionality and extensions is more than enough to perform almost any computation. However, for those cases where functionality is lacking in Spark and their extensions, you can consider distributing R computations to worker nodes yourself while leveraging any existing R package.
+In previous chapters you learned how to perform data analysis and modeling in local Spark instances and proper Spark clusters and the previous [Extensions](#extensions) chapter described how to make use of additional functionality provided by the Spark and R communities at large. In most cases, the combination of Spark functionality and extensions is more than enough to perform almost any computation. However, for those cases where functionality is lacking in Spark and their extensions, you should consider distributing R computations to worker nodes yourself. %% while leveraging any existing R package.
 
-If you are already a familiar R user, you might be tempted to use this approach for all Spark operations; however, this is not the recommended use of `spark_apply()`. Previous chapters provided more efficient techiniques and tools to solve well known problems, in contrast, `spark_apply()` introduces additional cognitive overhead, additional troubleshooting steps, performance trade-offs and, in general, additional complexity that should be avoided. Not to say that `spark_apply()` should never used; but instead, `spark_apply()` is reserved to support use cases where previous tools and techniques fall short.
+You can run arbitrary R code in each worker node to run any computation -- you can run simulations, crawl content from the web, transform data and so on. In addition, you can also make use of any package available in CRAN and private packages available in your organization, this reduces the amount of code you need to write to help you keep productive.
+
+If you are already a familiar R user, you might be tempted to use this approach for all Spark operations; however, this is not the recommended use of `spark_apply()`. Previous chapters provided more efficient techiniques and tools to solve well known problems -- in contrast, `spark_apply()` introduces additional cognitive overhead, additional troubleshooting steps, performance trade-offs and, in general, additional complexity that should be avoided. Not to say that `spark_apply()` should never used; but instead, `spark_apply()` is reserved to support use cases where previous tools and techniques fall short.
 
 ## Overview
 
@@ -57,7 +62,7 @@ sdf_len(sc, 3) %>% spark_apply(~ 10 * .x)
 
 Notice that `~ 10 * .x` is plain R code executed across all worker nodes; the `~` operator is defined in the `rlang` package and provides a compact definition of a function equivalent to `function(.x) 10 * .x` -- this compact form is also known as an anonymous function or lambda expression.
 
-Now, the first thing to notice is that `f(x)` takes an R data frame as input and must also produce an R data frame as output, conceptually illustrated in Figure \@ref(fig:distributed-spark-apply-input-output).
+The `f(x)` function must take an R data frame as input and must also produce an R data frame as output, conceptually illustrated in Figure \@ref(fig:distributed-spark-apply-input-output).
 
 ```{r distributed-spark-apply-input-output, echo=FALSE, eval=TRUE, fig.cap='Expected Function Signature in spark_apply() Mappings', fig.align='center'}
 render_nomnoml("
@@ -66,7 +71,7 @@ render_nomnoml("
 ", "images/distributed-r-spark-apply-input-output.png", "Expected Function Signature in spark_apply() Mappings", styles)
 ```
 
-We can use the orginal MapReduce example from the [Introduction](#intro) chapter where, the map operation was defined to split sentences into words and then, the total unique words were counted as the reduce operation. In R, we could make use of the `unnest_tokens()` function in the `tidytext` R package, combining the functionality of `tidytext` with `spark_apply()` would allow us to tokenize those sentences into a table of words as follows:
+We can refer back to the orginal MapReduce example from the [Introduction](#intro) chapter, where the map operation was defined to split sentences into words and then, the total unique words were counted as the reduce operation. In R, we could make use of the `unnest_tokens()` function in the `tidytext` R package, combining the functionality of `tidytext` with `spark_apply()` would allow us to tokenize those sentences into a table of words as follows:
 
 ```{r}
 sentences <- copy_to(sc, data_frame(text = c("I like apples", "I like bananas")))
@@ -113,12 +118,14 @@ The rest of this chapter will explain in detail use cases, features, caveats, co
 In the overview section we presented an example to help you understand how `spark_apply()` works; this section will cover a few practical use case for `spark_apply()`:
 
 - **Parsing**: When a file format is not natevely supported in Spark or its extensions, you can consider using R code to implement a distributed **custom parser** using R packages.
-- **Modeling**: When data fits into a single machine you can make use of **grid search** to optimize their parameters in parallel, in cases where the data can be partitioned to create several models over subsets of the data you can use **partitioned modeling** in R to compute models across partitions.
+- **Modeling**: When data fits into a single machine you can make use of **grid search** to optimize their parameters in parallel. In cases where the data can be partitioned to create several models over subsets of the data you can use **partitioned modeling** in R to compute models across partitions.
 - **Interoperating**: When large data needs to be evaluated by external systems you can use R to interoperate with those external systems. For instance, to process a large image dataset using deep learning models, you can consider calling an specialized **web API** like Google's Vision API, Amazon's Rekognition API, etc.
+
+We will now explore each use case in detail and provide a working example to help you understand how you use `spark_apply()` effectevely.
 
 ### Custom Parsers
 
-While Spark and its various extensions provide support for many file formats: CSVs, JSON, Parquet, AVRO, etc. there are many more file formats that you might need to use at scale. through You can parse these additional formats using `spark_apply()` and many of the existing R packages. This section presents two use cases for parsing logs and WARC files.
+While Spark and its various extensions provide support for many file formats (CSVs, JSON, Parquet, AVRO, etc) there are many more file formats that you might need to use at scale. through You can parse these additional formats using `spark_apply()` and many of the existing R packages. This section presents two use cases for parsing logs and WARC files.
 
 #### Log Parser
 
@@ -153,11 +160,11 @@ webreadr::read_aws(aws_log)
 1 2014-05-23 01:13:11 FRA2                 182 192.0.2.10 GET         d111… /vie…
 2 2014-05-23 01:13:12 LAX1             2390282 192.0.2.2… GET         d111… /sou…
 # ... with 11 more variables: status_code <int>, referer <chr>, user_agent <chr>,
-#   query <chr>, cookie <chr>, result_type <chr>, request_id <chr>, host_header <chr>,
-#   protocol <chr>, bytes_received <chr>, time_elapsed <dbl>
+#   query <chr>, cookie <chr>, result_type <chr>, request_id <chr>,
+#   host_header <chr>, protocol <chr>, bytes_received <chr>, time_elapsed <dbl>
 ```
 
-To scale this operations, we can make use of `read_aws()` using `spark_apply()`:
+To scale this operation, we can make use of `read_aws()` using `spark_apply()`:
 
 ```{r}
 spark_read_text(sc, "logs", aws_log, overwrite = TRUE, whole = TRUE) %>%
@@ -178,9 +185,9 @@ The code between plain R and `spark_apply()` is similar; howerver, when using `s
 
 #### WARC Parser
 
-The Common Crawl project builds and maintains an open repository of web crawl data that can be accessed and analyzed by anyone. You can use their petabytes of data to analyze the contents of the web without having to manually download each web page, which would be a time consuming and error-prone process.
+The Common Crawl project builds and maintains an open repository of web crawl data that can be accessed and analyzed by anyone. You can use their petabytes of data to analyze the contents of the web without having to manually download each web page, which would be a time consuming and error-prone.
 
-The challenge with WARC files is that multiple records are embedded within the same text file, conceptually, a WARC file looks as follows:
+The challenge with WARC files is that multiple records are embedded within the same text file. Conceptually, a WARC file looks as follows:
 
 ```
 WARC/1.0
@@ -189,7 +196,7 @@ WARC/1.0
 <html>...</html>
 ```
 
-We could read all those lines using `spark_read_text()`; however, they won't be grouped by web page which is required to analyze properly the contents. Using the `warc` package, we can easily parse these files in R running,
+We could read all those lines using `spark_read_text()`; however, they won't be grouped by web page which is required to analyze properly the contents. Using the `warc` package, we can easily parse these files in R running:
 
 ```{r}
 warc_example <- system.file("samples/sample.warc.gz", package = "warc")
@@ -199,17 +206,18 @@ as_tibble(warc::read_warc(warc_example))
 # A tibble: 17 x 1
    content                                                                              
    <fct>                                                                              
- 1 "WARC/1.0\nWARC-Type: warcinfo\nWARC-Date: 2016-12-13T03:16:04Z\nWARC-Record-ID: <ur…
- 2 "WARC/1.0\nWARC-Type: request\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record-ID: <urn…
- 3 "WARC/1.0\nWARC-Type: response\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record-ID: <ur…
- 4 "WARC/1.0\nWARC-Type: metadata\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record-ID: <ur…
- 5 "WARC/1.0\nWARC-Type: request\nWARC-Date: 2016-12-11T14:08:53Z\nWARC-Record-ID: <urn…
+ 1 "WARC/1.0\nWARC-Type: warcinfo\nWARC-Date: 2016-12-13T03:16:04Z\nWARC-Record…
+ 2 "WARC/1.0\nWARC-Type: request\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record-…
+ 3 "WARC/1.0\nWARC-Type: response\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record…
+ 4 "WARC/1.0\nWARC-Type: metadata\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record…
+ 5 "WARC/1.0\nWARC-Type: request\nWARC-Date: 2016-12-11T14:08:53Z\nWARC-Record-…
  ```
 
 Suppose that you were interested in understanding the language web pages are written in. Since the `warc` package can also extract specific lines efficiently, you could use this feature to extract specific html tags that describe the language a page was written in:
 
 ```{r}
-warc::read_warc(warc_example, line_filter = "<meta http-equiv=\"Content-Language\"") %>%
+warc::read_warc(warc_example,
+                line_filter = "<meta http-equiv=\"Content-Language\"") %>%
   transmute(language = gsub(".*content=\"|\".*", "", content)) %>%
   group_by(language) %>%
   summarise(count = n())
@@ -224,26 +232,24 @@ warc::read_warc(warc_example, line_filter = "<meta http-equiv=\"Content-Language
 Now, in order to use this in Spark we can simply run:
 
 ```{r}
-paths <- readLines(system.file("samples/warc.paths", package = "warc"))
-paths_tbl <- copy_to(sc, paths, repartition = length(paths))
+paths_tbl <- copy_to(sc, warc::warc_paths(), repartition = length(warc::warc_paths()))
 
-paths_tbl %>% head() %>%
-  spark_apply(function(entry) {
-    path <- sub("s3n://commoncrawl/", "https://commoncrawl.s3.amazonaws.com/", entry[1,])
-    download.file(url = path, destfile = temp_warc)
-    warc::read_warc(path)
-  })
+paths_tbl %>%
+  head() %>%
+  spark_apply(~warc::read_warc(.x))
 ```
 
 You can remove `head()` to process several gigabytes of WARC files; however, this would require a proper Spark cluster.
+
+This concludes the custom parsers section, there are many other file formats you can parse at scale from R following an approach similar to the log and warc parsers we just presented. We will now present partitioned modeling as another use case focused on modeling across several datasets in parallel.
 
 ### Partitioned Modeling
 
 There are many modeling packages available in R that can also be run at scale by partitioning the data into manegable groups that do fit in the resources of a single machine.
 
-For instance, suppose that you have a 1TB dataset for sales data across multiple cities and you are tasked with creating sales predictions over each city. For this case, you can then considered partitioning the original dataset per city say, into 10GB of data per city, which could be managed by a single compute instance. For this kind of partitionable dataset, you can also consider using `spark_apply()` by training each model over each city.
+For instance, suppose that you have a 1TB dataset for sales data across multiple cities and you are tasked with creating sales predictions over each city. For this case, you can consider partitioning the original dataset per city, say into 10GB of data per city, which could be managed by a single compute instance. For this kind of partitionable dataset, you can also consider using `spark_apply()` by training each model over each city.
 
-As a simple example of partitoned modeling, we can run a linear regression using the `iris` dataset partiotioning by Species:
+As a simple example of partitoned modeling, we can run a linear regression using the `iris` dataset partiotioned by Species:
 
 ```{r}
 iris_tbl <- sdf_copy_to(sc, iris)
@@ -280,9 +286,47 @@ iris_tbl %>%
 ## 3     setosa 0.1099785
 ```
 
+As you can see from the `r.squared` results and intuitevely in Figure \@ref(fig:distributed-r-modeling-species), the linear model for versicolor better fits to the regression line.
+
+```{r echo=FALSE}
+build_plot <- function(filter, h_line, theme_extra) {
+  filter(iris, Species == !!filter) %>%
+    transmute(Petal_Width = Petal.Width, Petal_Length = Petal.Length) %>%
+    ggplot(aes(x = Petal_Length, y = Petal_Width)) +
+      plot_style() +
+      labs(title = filter) +
+      geom_hline(yintercept = h_line, size = 1, colour = "#333333") +
+      theme(plot.margin = unit(c(0.4, 0.4, 0.2, 0.4), "cm")) +
+      theme_extra +
+      geom_point()
+}
+cowplot::plot_grid(
+  build_plot("versicolor", 0.9, theme(axis.title.x = element_text(colour="white"))),
+  build_plot("virginica", 1.2, theme(axis.title.y = element_text(colour="white"))),
+  build_plot("setosa", 0, theme(axis.title.y = element_text(colour="white"), axis.title.x = element_text(colour="white"))),
+  nrow = 1, ncol = 3, align = "l",
+  labels = "") +
+  plot_style() +
+  labs(title = "Modeling over Species", subtitle = "Petal width and length across species") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.title = element_text(hjust = 0, vjust = 0.4),
+        plot.subtitle = element_text(hjust = 0, vjust = -0.6),
+        plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), "cm")) +
+  ggsave("images/distributed-r-partitioned-modeling.png", width = 10, height = 4)
+```
+```{r distributed-r-modeling-species, eval=TRUE, echo=FALSE, fig.cap='Modeling over Species', fig.align = 'center'}
+render_image("images/distributed-r-partitioned-modeling.png")
+```
+
+This concludes our brief overview on how to perform modeling over several different, partitionable, datasets. A similar technique can be applied to perform modeling over the same dataset using different modeling parameters which we will cover next.
+
 ### Grid Search {#distributed-grid-search}
 
-Many R packages provide models that make require defining multiple input parameters, when the value of the input parameters is not known, we can use grid search across a distributed cluster of machines to find the optimal parameter combination. For example, we can define a grid of parameters to optimize decision tree models as follows:
+Many R packages provide models that require defining multiple parameters to configure and optimize their particular models. When the value of these parameters is unknown, we can distribute this list of unknown parameters across a cluster of machines to find the optimal parameter combination. If the list contains more than one parameter to optimize, it is common to test against all the combinations between paramter A and parameter B, creating a grid of parameters. The process of searching for the best parameter over this parameter grid is commonly known as grid search.
+
+For example, we can define a grid of parameters to optimize decision tree models as follows:
 
 ```{r}
 grid <- list(minsplit = c(2, 5, 10), maxdepth = c(1, 3, 8)) %>%
@@ -314,7 +358,8 @@ spark_apply(
     model <- rpart::rpart(
       am ~ hp + mpg,
       data = cars,
-      control = rpart::rpart.control(minsplit = grid$minsplit, maxdepth = grid$maxdepth)
+      control = rpart::rpart.control(minsplit = grid$minsplit,
+                                     maxdepth = grid$maxdepth)
     )
     dplyr::mutate(
       grid,
@@ -342,9 +387,9 @@ For this particular model, `minsplit = 2` and `maxdepth = 8` produces the most a
 
 ### Web APIs
 
-A web API is a program that can fo something useful through an web interface that other programs can reuse; for instance, services like Twitter provide web APIs that allow you to automate reading tweets from a program written in R and other programming languages. You can make use of we APIs using `spark_apply()` by sending programatic requests to external services using R code.
+A Web API is a program that can do something useful through an web interface that other programs can reuse. For instance, services like Twitter provide Web APIs that allow you to automate reading tweets from a program written in R and other programming languages. You can make use of Web APIs using `spark_apply()` by sending programatic requests to external services using R code.
 
-For example, Google provides a web API to label images using deep learning techniques; you can make use of this API from R, but for larger datasets, you would need to access their APIs from Spark. You can use Spark to prepare data to be consumed by a webAPI, then use `spark_apply()` to perform this call and process all the incoming results back in Spark.
+For example, Google provides a Web API to label images using deep learning techniques; you can make use of this API from R, but for larger datasets, you would need to access their APIs from Spark. You can use Spark to prepare data to be consumed by a webAPI, then use `spark_apply()` to perform this call and process all the incoming results back in Spark.
 
 The following example makes use of the `googleAuthR` package to authenticate to Google Cloud, the `RoogleVision` package to perform labeling over the Google Vision API, and `spark_apply()` to interoperate between Spark and Google's deep learning service. If you want to run the following example you will need to disconnect first from Spark and download your `cloudml.json` from the Google developer portal.
 
@@ -380,11 +425,11 @@ spark_apply(images, function(df) {
 
 In order to successfully run a large distirbuted computation over a Web API, the Web API would have to be able to scale to support the load from all the Spark executors. One can trust that major service providers are likely to support all the request incoming from your cluster. However, when calling internal Web APIs, make sure the API can handle the load. Also, when using third-party services, consider the cost of calling their API across all the executors in your cluster to avoid potentially expensive and unexpected charges.
 
-These covers some of the common use cases for `spark_apply()`, but you are certainly welcome to find other use cases of `spark_apply()` for your particular needs.
+We've covered some of the common use cases for `spark_apply()`, but you are certainly welcome to find other use cases for your particular needs. The following sections will present technical concepts you will need to understand to create additional use cases and to use `spark_apply()` effectevely.
 
 ## Partitions
 
-As mentioned in the [Tuning](#tuning) chapter, Spark operates over partitioned data. `spark_apply()` receives each of these partitions as a data frame and allows you to perform any transformation.
+Most Spark operations, say to analyze data with `dplyr` or model with MLlib, do not require understanding how Spark partitions data, it works automatically -- this is not the case for distributed R computations. Instead, you will have to learn and understand how exactly Spark is partitioning your data and provide transformations that are compatible with them. This is required since `spark_apply()` receives each partition and allows you to perform any transformation, not the entire dataset. You can refresh concepts like partitioning and transformations using the diagrams and examples from the [Tuning](#tuning) chapter. 
 
 To help us understand how partitions are represented in `spark_apply()`, consider the following code. Should we expect the output to be the total number of rows?
 
@@ -400,7 +445,7 @@ sdf_len(sc, 10) %>%
 2      5
 ```
 
-As you can see from the results, the general the answer is no. We should not expect `spark_apply()` to operate over a single partition; so let's find out how many partitions `sdf_len(sc, 10)` contains:
+As you can see from the results, the general the answer is no; Spark assumes data will be distributed across multiple machines so you will often find it already partitioned, even for small datasets. So we should not expect `spark_apply()` to operate over a single partition, let's find out how many partitions `sdf_len(sc, 10)` contains:
 
 ```{r}
 sdf_len(sc, 10) %>% sdf_num_partitions()
@@ -409,9 +454,9 @@ sdf_len(sc, 10) %>% sdf_num_partitions()
 [1] 2
 ```
 
-Which explains why counting rows through `nrow()` under `spark_apply()` retrieves two counts of five rows. It retrieves the count of rows for each partition, 5 rows over each partitoions; not ten rows as you might have expected.
+This explains why counting rows through `nrow()` under `spark_apply()` retrieves two rows since there are two partitions, not one. `spark_apply()` is retrieving the count of rows over each partition, each partition contains five rows; not ten rows total as you might have expected.
 
-For this particular example, we could further aggregate these partitions by repartitioning and then adding up, this would resemple a simple MapReduce operation using `spark_apply()`:
+For this particular example, we could further aggregate these partitions by repartitioning and then adding up -- this would resemple a simple MapReduce operation using `spark_apply()`:
 
 ```{r}
 sdf_len(sc, 10) %>%
@@ -426,11 +471,11 @@ sdf_len(sc, 10) %>%
 1     10
 ```
 
-It was the intent of this section is to make the reader aware of partitions while using `spark_apply()`, the next section presents `group_by` as a way to control partitions.
+It was the intent of this section is to make you aware of partitions while using `spark_apply()`; the next section presents `group_by` as a way to control partitions.
 
 ## Grouping
 
-When using `spark_apply()`, we can request explicit partitions from Spark. For instance, if we had to process numbers less than four in one partition and the remaining ones in a second partition, we could create this groups explicitly and then request `spark_apply()` to use this group:
+When using `spark_apply()`, we can request explicit partitions from Spark. For instance, if we had to process numbers less than four in one partition and the remaining ones in a second partition, we could create these groups explicitly and then request `spark_apply()` to use them:
 
 ```{r distributed-parallel-grouping}
 sdf_len(sc, 10) %>%
@@ -445,7 +490,9 @@ sdf_len(sc, 10) %>%
 2 FALSE       7
 ```
 
-Notice that `spark_apply()` is still processing two partitions, but in this case, we expect these partitions since you explicitly requested them in `spark_apply()`; therefore, you can safely interpret the results as "there are three integers less than four".
+Notice that `spark_apply()` is still processing two partitions, but in this case, we expect these partitions since we explicitly requested them in `spark_apply()`; therefore, you can safely interpret the results as "there are three integers less than four".
+
+*Note*: You can only group data by partitions that fit in a single machine, if one of the groups is too large, an exception will be thrown. To perform operations over groups that exceed the resources of a single node, you can consider partitioning to smaller units or use `dplyr::do` which is currently optimized for large partitions.
 
 The takeaway from this section is to always consider partitions when dealing with `spark_apply()`. Next, we will zoom inside `spark_apply()` to understand how columns are interpreted.
 
@@ -467,7 +514,7 @@ However, this is inneficient since `spark_apply()` needs to run twice. First to 
 
 To improve performance, the columns can be specified explicitly through the `columns` parameters. The `columns` expects a named list of types expected in the resulting data frame.
 
-We can then rewrite the previous example to specify the correct type for the `numbers` column:
+We can then rewrite the previous example to run only once by specifying the correct type for the `numbers` column:
 
 ```{r distributed-columns-explicit}
 sdf_len(sc, 1) %>%
@@ -488,10 +535,10 @@ In this section and the previous one, we presented how rows and columns interact
 
 In order to process partitions using `spark_apply()`, you might need to include auxility data that is small-enough to fit in each node. This was the case in the [Grid Search](distributed-grid-search) use case, where the dataset was passed to all partitions and remained unpartitioned itself.
 
-We can modify the initial `f(x) = 10 * x` example in this chapter to allow us to customize the multiplier, it was originally set to `10` but we can make this parameter configurable by specifying it as the `context` parameter. 
+We can modify the initial `f(x) = 10 * x` example in this chapter to allow us to customize the multiplier -- it was originally set to `10` but we can make it configurable by specifying it as the `context` parameter. 
 
 ```{r distributed-context}
-sdf_len(sc, 4, repartition = 2) %>%
+sdf_len(sc, 4) %>%
   spark_apply(
     function(data, context) context * data,
     context = 100
@@ -540,16 +587,15 @@ render_nomnoml("
 ", "images/distributed-r-context.png", "Map Operation when Multiplying with Context", styles)
 ```
 
-The grid search example used this parameter to pass a data frame to each worker node; however, since the context parameter is serialized as an R object, it can contain anything. For instance, if you need to pass multiple values -- or even multiple datasets -- you can pass a list with values. The following example defines a `f(x) = m * x + b` function and runs `m = 10` and `b = 2`:
+The grid search example used this parameter to pass a data frame to each worker node; however, since the context parameter is serialized as an R object, it can contain anything. For instance, if you need to pass multiple values -- or even multiple datasets -- you can pass a list with values.
+
+The following example defines a `f(x) = m * x + b` function and runs `m = 10` and `b = 2`:
 
 ```{r distributed-context-list}
-sdf_len(sc, 4, repartition = 2) %>%
+sdf_len(sc, 4) %>%
   spark_apply(
-    function(data, context) context$m * data + context$b,
-    context = list(
-      b = 2,
-      m = 10
-    )
+    ~.y$m * x + .y$b,
+    context = list(b = 2, m = 10)
   )
 ```
 ```
@@ -562,59 +608,19 @@ sdf_len(sc, 4, repartition = 2) %>%
 4    42
 ```
 
-Up to this point, you've learned all the functionality available in `spark_apply()` but we still need to present important considerations that you'll have to consider while creating custom transformations.
+Notice that we've renamed `context` to `.y` to shorten the variable name, this works since `spark_apply()` assumes context is the second parameter in functions and expressions.
 
-## Packages
+The `context` parameter will proof to be extremely useful; for instance, the next section will present how to properly construct functions, and `context` will be used in advanced use cases to construct functions dependent on other functions.
 
-With `spark_apply()` you can use any R package inside Spark. For instance, you can use the broom package to create a tidy data frame from linear regression output.
+## Functions
 
-```{r}
-spark_apply(
-  iris_tbl,
-  function(e) broom::tidy(lm(Petal_Length ~ Petal_Width, e)),
-  names = c("term", "estimate", "std.error", "statistic", "p.value"),
-  group_by = "Species")
-```
-```
-## # Source:   table<sparklyr_tmp_378c5502500b> [?? x 6]
-## # Database: spark_connection
-##      Species        term  estimate std.error statistic      p.value
-##        <chr>       <chr>     <dbl>     <dbl>     <dbl>        <dbl>
-## 1 versicolor (Intercept) 1.7812754 0.2838234  6.276000 9.484134e-08
-## 2 versicolor Petal_Width 1.8693247 0.2117495  8.827999 1.271916e-11
-## 3  virginica (Intercept) 4.2406526 0.5612870  7.555230 1.041600e-09
-## 4  virginica Petal_Width 0.6472593 0.2745804  2.357267 2.253577e-02
-## 5     setosa (Intercept) 1.3275634 0.0599594 22.141037 7.676120e-27
-## 6     setosa Petal_Width 0.5464903 0.2243924  2.435422 1.863892e-02
-```
+Previous sections presented `spark_apply()` as an operation to perform custom transformations using a function or expression, in programming literature functions with a context are also reffered as a **closure**.
 
-The first time you call `spark_apply()` all of the contents in your local `.libPaths()`, which contains all R packages, will be copied into each Spark worker node. Packages will only be copied once and will persist as long as the connection remains open. It’s not uncommon for R libraries to be several gigabytes in size, so be prepared for a one-time tax while the R packages are copied over to your Spark cluster. You can disable package distribution by setting `packages = FALSE`.
+Expressions are useful to define short transformations, like `~ 10 * .x`. For an expression, `.x` contains a partition and `.y` the context, when available. However, it can be hard to define an expression for complex code that spans multiple lines, for those cases, functions are more appropriate.
 
-**Note:** R packages are not copied in local mode because the packages already exist on the local system.
+Functions enable complex and multi-line transformations, they are defined as `function(data, context) {}` and allow you to provide arbitrary code within `{}`. We've used them in previous sections when using Google Cloud to transform images into image captions.
 
-## Requirements
-
-The R Runtime is expected to be pre-installed in **every** node in the cluster, this is a requirement specific to `spark_apply()`. 
-
-Failure to install R in every node will trigger a `Cannot run program, no such file or directory` error while attempting to use `spark_apply()`.
-
-Contact your cluster administrator to consider making the R runtime available throughout the entire cluster. If R is already installed, you can specify the installation path to use using the `spark.r.command` configuration setting, as in:
-
-```{r}
-config <- spark_config()
-config["spark.r.command"] <- "<path-to-r-version>"
-
-sc <- spark_connect(master = "local", config = config)
-sdf_len(sc, 10) %>% spark_apply(function(e) e)
-```
-
-A Homogeneous Cluster is required since the driver node distributes, and potentially compiles, packages to the workers. For instance, the driver and workers must have the same processor architecture, system libraries, etc.
-
-## Limitations
-
-### Functions
-
-The function passed to `spark_apply()` are serialized using `serialize()`, which is described as “a simple low-level interface for serializing to connections.”. One of the current limitations of serialize is that it wont serialize objects being referenced outside of it’s environment. For instance, the following function will error out since the closures references external_value:
+The function passed to `spark_apply()` is serialized using `serialize()`, which is described as “a simple low-level interface for serializing to connections.”. One of the current limitations of `serialize()` is that it wont serialize objects being referenced outside of it’s environment. For instance, the following function will error out since the closures references `external_value`:
 
 ```{r}
 external_value <- 1
@@ -646,21 +652,181 @@ sdf_len(sc, 1) %>% spark_apply(function(df, context) {
 
 When this is not feasible, you can also create your own R package with the functionality you need and then use your package in `spark_apply()`.
 
-### Livy
+Up to this point, you've learned all the functionality available in `spark_apply()` using plain R code; however, we have not presented how to use packages when distributing computations -- R packages are essential when creating useful transformations.
 
-Currently, Livy connections do not support distributing packages since the client machine where the libraries are precompiled might not have the same processor architecture, nor operating systems that the cluster machines.
+## Packages
 
-### Grouping
+With `spark_apply()` you can use any R package inside Spark. For instance, you can use the broom package to create a tidy data frame from linear regression output.
 
-While performing computations over groups, spark_apply() will provide partitions over the selected column; however, this implies that each partition can fit into a worker node, if this is not the case an exception will be thrown. To perform operations over groups that exceed the resources of a single node, one can consider partitioning to smaller units or use dplyr::do which is currently optimized for large partitions.
+```{r}
+spark_apply(
+  iris_tbl,
+  function(e) broom::tidy(lm(Petal_Length ~ Petal_Width, e)),
+  names = c("term", "estimate", "std.error", "statistic", "p.value"),
+  group_by = "Species")
+```
+```
+## # Source:   table<sparklyr_tmp_378c5502500b> [?? x 6]
+## # Database: spark_connection
+##      Species        term  estimate std.error statistic      p.value
+##        <chr>       <chr>     <dbl>     <dbl>     <dbl>        <dbl>
+## 1 versicolor (Intercept) 1.7812754 0.2838234  6.276000 9.484134e-08
+## 2 versicolor Petal_Width 1.8693247 0.2117495  8.827999 1.271916e-11
+## 3  virginica (Intercept) 4.2406526 0.5612870  7.555230 1.041600e-09
+## 4  virginica Petal_Width 0.6472593 0.2745804  2.357267 2.253577e-02
+## 5     setosa (Intercept) 1.3275634 0.0599594 22.141037 7.676120e-27
+## 6     setosa Petal_Width 0.5464903 0.2243924  2.435422 1.863892e-02
+```
 
-### Packages
+The first time you call `spark_apply()` all of the contents in your local `.libPaths()`, which contains all R packages, will be copied into each Spark worker node. Packages will only be copied once and will persist as long as the connection remains open. It’s not uncommon for R libraries to be several gigabytes in size, so be prepared for a one-time tax while the R packages are copied over to your Spark cluster. You can disable package distribution by setting `packages = FALSE`.
 
-Since packages are copied only once for the duration of the spark_connect() connection, installing additional packages is not supported while the connection is active. Therefore, if a new package needs to be installed, spark_disconnect() the connection, modify packages and reconnect.
+**Note:** Since packages are copied only once for the duration of the `spark_connect()` connection, installing additional packages is not supported while the connection is active. Therefore, if a new package needs to be installed, spark_disconnect() the connection, modify packages and reconnect. In addition, R packages are not copied in local mode because the packages already exist on the local system.
+
+While this was a short section, using packages with distributed R code opens up and entire new universe of interesting use cases. Some where covered in the use cases section, but you can think of many more by looking at the rich ecosystem of R packages available today.
+
+This section completes all the functionality you need to distribute R code with R packages, next we will cover some of the requirements your cluster needs to make use of `spark_apply()`.
+
+## Cluster Requirements
+
+All the functionality presented in previous chapters, does not require any special configuration of your Spark cluster -- as long as you have a properly configured Spark cluster, you can use R with it. This is not the case for the functionality presented in this chapter, your cluster administrator, your cloud provider or yourself would have to confgigured the cluster by:
+
+- Installing R, to execute R code across your cluster, R must be installed in every node.
+- Different clusters, technologies and cloud providers have a few differences we will highlight.
+- To execute fast distributed computations, while Apache Arrow is not required, it is stronly encouraged to be installed across all nodes when using Spark 2.3 or later. It will provide performance improvements that bring distributed R code closer to native Scala code.
+
+Lets take a look at each requirement to make sure you properly consider the tradeoffs or benefits that they provide.
+
+### Installing R
+
+Starting with the first requirement, the R Runtime is expected to be pre-installed in **every** node in the cluster, this is a requirement specific to `spark_apply()`. 
+
+Failure to install R in every node will trigger a `Cannot run program, no such file or directory` error while attempting to use `spark_apply()`.
+
+Contact your cluster administrator to consider making the R runtime available throughout the entire cluster. If R is already installed, you can specify the installation path to use using the `spark.r.command` configuration setting, as in:
+
+```{r}
+config <- spark_config()
+config["spark.r.command"] <- "<path-to-r-version>"
+
+sc <- spark_connect(master = "local", config = config)
+sdf_len(sc, 10) %>% spark_apply(function(e) e)
+```
+
+A Homogeneous Cluster is required since the driver node distributes, and potentially compiles, packages to the workers. For instance, the driver and workers must have the same processor architecture, system libraries, etc. This is usually the case for most clusters, but might not be the case for yours.
+
+Next, we will highlight topics specific to each cluster, provider and connection technology.
+
+### Clusters
+
+When using `spark_apply()`, R needs to be properly installed in each worker node. Different cluster managers, distributions and services, proivide different solutions to install additional software; those instructions should be followed when installing R over each worker node. To mention a few,
+
+- **Spark Standalone**: Requires connecting to each machine and installing R; there are tools like `pssh` that allow you to run a single installation command against multiple machines.
+- **Cloudera**: Provides an R parcel, see ["How to Distribute your R code with sparklyr and Cloudera Data Science Workbench"](https://blog.cloudera.com/blog/2017/09/how-to-distribute-your-r-code-with-sparklyr-and-cdsw/) [@cloudera-sparklyr-parcel], which enables R over each worker node.
+- **Amazon EMR**: R is pre-installed when starting an EMR cluster as mentioned in the [Amazon EMR](#clusters-amazon-emr) section.
+- **Microsoft HDInsight**: R is pre-installed and no additional steps are needed.
+- **Livy**: Livy connections **do not** support distributing packages since the client machine where the libraries are precompiled might not have the same processor architecture, nor operating systems than the cluster machines.
+
+Strictly speaking, this completes the last requirement for your cluster. However, we strongly recommend you use Apache Arrow with `spark_apply()` to support large scale computation with minimal overhead.
+
+### Apache Arrow
+
+Before we introduce Apache Arrow, we need to present how data is stored and transfered between Spark and R. R was designed from its inception to perform fast numeric computations, to accomplish this, figuring out the best way to store data is very important.
+
+Some computing systems store data internally by row; however, most interesting numerical operations usually require processing data by column. For example, calculating the mean of a column requires processing each column on its own, not the entire row. Spark stores data by default by row, since it's easier to partition; in contrast, R stores data by column. Therefore, something needs to transform both represantations when data is transfered between Spark and R, see Figure \@ref(fig:distributed-r-transformation).
+
+```{r distributed-r-transformation, eval=TRUE, echo=FALSE, fig.cap='Data Transformation between Spark and R'}
+render_nomnoml("
+#direction: right
+#.left: align=left
+[Spark|[a,1,10|b,2,20|c,3,30]] -> [Transform]
+[Transform] -> [R]
+[R] -> [Transform]
+[Transform] -> [Spark]
+[R|[a,1,10|b,2,20|c,3,30] -> [Transform]
+[Transform] -> [<left>a,b,c|1,2,3|10,20,30]
+[a,b,c] -> [Transform]
+[Transform] -> [a,1,10]]", "images/distributed-r-data-transformation.png")
+```
+
+This transformation from rows to columns needs to happen for each partition. In addition, data also needs to be transformed from Scala's internal representation to R's internal representation. These transformations wastes a lot of CPU cycles, Apache Arrow reduces these transformations.
+
+Apache Arrow is a cross-language development platform for in-memory data. In Spark, it speeds up transfering data between Scala and R by defining a common data format compatible with many programming languages -- instead of having to transform between Scala's internal representation and R's, the same structure can be used for both languages. In addition, transforming data from row based storage to columnar storage, is performed in parallel in Spark, which can be further optimized by using the columnar storage formats presented in the [Data](#data) chapter. The improved transformation are available in Figure \@ref(fig:distributed-r-transformation).
+
+```{r distributed-r-using-arrow, eval=TRUE, echo=FALSE, fig.cap='Data Transformation between Spark and R using Arrow'}
+render_nomnoml("
+#direction: right
+#.left: align=left
+[Spark|[a,1,10|b,2,20|c,3,30] -> [Arrow]
+[Arrow] -> [<left>a,b,c|1,2,3|10,20,30]
+[a,b,c] -> [Arrow]
+[Arrow] -> [a,1,10]
+] -> [R]
+[R|[<left>a,b,c|1,2,3|10,20,30]] -> [Spark]", "images/distributed-r-data-using-arrow.png")
+```
+
+Arrow is not required but it is strongly advised while working `spark_apply()`. It has been available since Spark 2.3.0 and requires system administrators to install the Apache Arrow runtime in every node.
+
+For instance, in Linux (Ubuntu), you will need to install this in your cluster as follows:
+
+```{bash}
+sudo yum install -y https://packages.red-data-tools.org/centos/red-data-tools-release-latest.noarch.rpm
+sudo sed -i 's/\$releasever/6/g' /etc/yum.repos.d/red-data-tools.repo
+sudo yum install -y --enablerepo=red-data-tools arrow-devel
+```
+
+To use Apache Arrow with `sparklyr` you need to install the `arrow` package:
+
+```{r}
+devtools::install_github("apache/arrow", subdir = "r", ref = "apache-arrow-0.12.0")
+```
+
+Before we use `arrow`, we will take a measurement to validate 
+
+```{r}
+system.time(sdf_len(sc, 10^5) %>% spark_apply(nrow))
+```
+
+Once installed, to enable Arrow simply include the library:
+Then you can dettach `arrow` and rerun this task.
+
+```{r}
+library(arrow)
+system.time(sdf_len(sc, 10^5) %>% spark_apply(nrow))
+```
+
+Notice the performance degradation when not using `arrow`, run `library(arrow)` to reneable Arrow.
+
+Most functionality in `arrow` simply works on the background improving performance and data serialization; however, there is one setting you should be aware of. The `spark.sql.execution.arrow.maxRecordsPerBatch` configuiration settings specified the default size of each arrow data transfer. It's shared with other Spark components and defaults to 10,000 rows. Compare the results from the following two operation when using and not using `arrow()`.
+
+```{r}
+detach("package:arrow", unload = TRUE)
+sdf_len(sc, 10^6) %>% spark_apply(nrow)
+```
+
+Now using `arrow`,
+
+```{r}
+library(arrow)
+sdf_len(sc, 10^6) %>% spark_apply(nrow)
+```
+
+You might need to adjust this number based on how much data your system can handle, making it smaller for large dataset or bigger for operations that require records to be processed together. You can specify an unlimitted batch size by setting `spark.sql.execution.arrow.maxRecordsPerBatch` to zero.
+
+```{r}
+spark_disconnect(sc)
+
+config <- spark_config()
+config$spark.sql.execution.arrow.maxRecordsPerBatch <- 0
+
+sc <- spark_connect(master = "local")
+sdf_len(sc, 10^6) %>% spark_apply(nrow)
+```
+
+So far we've covered: use cases, main operations and cluster requirements. The next and last section will teach you troubleshooting techniques useful when distributing R code.
 
 ## Troubleshooting
 
-A custom transformation can fail for many reasons, to learn how to troubleshoot errors effectevely, lets simulate a problem by triggering an errors ourselves:
+A custom transformation can fail for many reasons, to learn how to troubleshoot errors, lets simulate a problem by triggering an errors ourselves:
 
 ```{r}
 sdf_len(sc, 1) %>% spark_apply(~stop("force an error"))
@@ -734,9 +900,9 @@ spark_log(sc, filter = "sparklyr: RScript")
 18/12/18 11:33:47 INFO sparklyr: RScript (3513) finished 
 ```
 
-Notice that the logs show out custom log entry showing that `id` is the name of the first column in the given data frame.
+Notice that the logs print our custom log entry showing that `id` is the name of the first column in the given data frame.
 
-This functionality is useful when troubleshooting errors, for instance, if we force an error using the `stop()` function:
+This functionality is useful when troubleshooting errors; for instance, if we force an error using the `stop()` function:
 
 ```{r distributed-force-error}
 sdf_len(sc, 1) %>% spark_apply(function(df) {
@@ -773,7 +939,7 @@ This will show an entry containing the error and the callstack:
 
 Notice that, spark_log(sc) only retrieves the worker logs when using local clusters, when running in proper clusters with multiple machines, you will have to use the tools and user interface provided by the cluster manager to find these log entries.
 
-### Partition Timeouts
+### Resolving Timeouts
 
 When running with several hundred executors, it becomes more likely that some tasks will hang indefinetely. You might be in this situation if most of the tasks in your job complete successfully, but a handful of them are still running and do not fail nor succeed.
 
@@ -794,9 +960,9 @@ config["spark.speculation"] <- TRUE
 config["spark.speculation.multiplier"] <- 4
 ```
 
-### Partition Errors
+### Inspecting Partition
 
-If a particular partition fails, you can detect the broken partition by computing a digest, and then retrieving that particular partition as follows:
+If a particular partition fails, you can detect the broken partition by computing a digest, and then retrieving that particular partition:
 
 ```{r distributed-worker-partitions}
 sdf_len(sc, 3) %>% spark_apply(function(x) {
@@ -825,7 +991,7 @@ Which you can then run in R to troubleshoot further.
 
 ### Debugging Workers
 
-You can use a debugger, which is a tool to let you execute line-by-line your code, to troubleshoot `spark_apply()` for local connections. You can start `spark_apply()` in debug mode using the `debug` parameter and then following the instructions.
+You can use a debugger, which is a tool to let you execute your code line-by-line, to troubleshoot `spark_apply()` for local connections. You can start `spark_apply()` in debug mode using the `debug` parameter and then following the instructions.
 
 ```{r distributed-debugger}
 sdf_len(sc, 1) %>% spark_apply(function() {
@@ -842,90 +1008,14 @@ Debugging spark_apply(), connect to worker debugging session as follows:
      sparklyr:::spark_worker_main(<sessionid>, <port>)
 ```
 
-As the instructions indicate, you will need to connect "as the worker node" from a different R session and then step through the code. This method is not as straightforward as previous ones so this is something we only recommend as a last resort.
+As the instructions indicate, you will need to connect "as the worker node" from a different R session and then step through the code. This method is not as straightforward as previous ones, since you will also need to step through some lines of `sparklyr` code; so this is something we only recommend as a last resort.
 
-There are a few considerations we should mention when workin with specific clusters, which we are about to present.
-
-## Clusters
-
-When using `spark_apply()`, R needs to be properly installed in each worker node. Different cluster managers, distributions and services, proivide different solutions to install additional software; those instructions should be followed when installing R over each worker node. To mention a few,
-
-- **Spark Standalone**: Requires connecting to each machine and installing R; there are tools like `pssh` that allow you to run a single installation command against multiple machines.
-- **Cloudera**: Provides an R parcel, see ["How to Distribute your R code with sparklyr and Cloudera Data Science Workbench"](https://blog.cloudera.com/blog/2017/09/how-to-distribute-your-r-code-with-sparklyr-and-cdsw/) [@cloudera-sparklyr-parcel], which enables R over each worker node.
-- **Amazon EMR**: R is pre-installed when starting an EMR cluster as mentioned in the [Amazon EMR](#clusters-amazon-emr) section.
-- **Microsoft HDInsight**: R is pre-installed and no additional steps are needed.
-
-Strictly speaking, this completes this chapter. However, we strongly recommend you use Apache Arrow with `spark_apply()` tio support large scale computation with minimal overhead.
-
-## Apache Arrow
-
-Apache Arrow is a cross-language development platform for in-memory data. Arrow is strongly adviced while working `spark_apply()`, it's available since Spark 2.3.0 and requires system administrators to install the Apache Arrow runtime in every node.
-
-For instance, in Linux (Ubuntu), you will need to install this in your cluster as follows:
-
-```{bash}
-sudo yum install -y https://packages.red-data-tools.org/centos/red-data-tools-release-latest.noarch.rpm
-sudo sed -i 's/\$releasever/6/g' /etc/yum.repos.d/red-data-tools.repo
-sudo yum install -y --enablerepo=red-data-tools arrow-devel
-```
-
-To use Apache Arrow with `sparklyr` you need to install the `arrow` package:
-
-```{r}
-devtools::install_github("apache/arrow", subdir = "r", ref = "apache-arrow-0.12.0")
-```
-
-Once installed, to enable Arrow simply include the library:
-
-```{r}
-library(arrow)
-```
-
-You can validate that significant performance improvements become available by measuring time of `spark_apply()` operations.
-
-```{r}
-system.time(sdf_len(sc, 10^5) %>% spark_apply(nrow))
-```
-
-Then you can dettach `arrow` and rerun this task.
-
-```{r}
-detach("package:arrow", unload = TRUE)
-system.time(sdf_len(sc, 10^5) %>% spark_apply(nrow))
-```
-
-Notice the performance degradation when not using `arrow`, run `library(arrow)` to reneable Arrow.
-
-Most functionality in `arrow` simply works on the background improving performance and data serialization; however, there is one setting you should be aware of. The `spark.sql.execution.arrow.maxRecordsPerBatch` configuiration settings specified the default size of each arrow data transfer. It's shared with other Spark components and defaults to 10,000 rows. Compare the results from the following two operation when using and not using `arrow()`.
-
-```{r}
-detach("package:arrow", unload = TRUE)
-sdf_len(sc, 10^6) %>% spark_apply(nrow)
-```
-
-Now using `arrow`,
-
-```{r}
-library(arrow)
-sdf_len(sc, 10^6) %>% spark_apply(nrow)
-```
-
-You might need to adjust this number based on how much data your system can handle, making it smaller for large dataset or bigger for operations that require records to be processed together. You can specify an unlimitted batch size by setting `spark.sql.execution.arrow.maxRecordsPerBatch` to zero.
-
-```{r}
-spark_disconnect(sc)
-
-config <- spark_config()
-config$spark.sql.execution.arrow.maxRecordsPerBatch <- 0
-
-sc <- spark_connect(master = "local")
-sdf_len(sc, 10^6) %>% spark_apply(nrow)
-```
+You can also use the online resources that were described in in the [Getting Started](#starting-resources) chapter. Lets now wrap up this chapter with a brief recap of all the functionality that was presented.
 
 ## Recap
 
-This chapter presented `spark_apply()` as an advanced technique that you can use to fill gaps in functionality in Spark or its many extensions. We presented sensible use cases for `spark_apply()` to parse data, model in parallel many small datasets, perform grid search and call web APIs. We detailed how partitions relate to `spark_apply()`, how to craete custom groups, distribute contextual information across all nodes, troubleshoot problems and presented limitations, cluster configuration caveats.
+This chapter presented `spark_apply()` as an advanced technique that you can use to fill gaps in functionality in Spark or its many extensions. We presented sensible use cases for `spark_apply()` to parse data, model in parallel many small datasets, perform grid search and call web APIs. You learned how partitions relate to `spark_apply()`, how to craete custom groups, distribute contextual information across all nodes, troubleshoot problems and presented limitations, cluster configuration caveats.
 
 We also introduced Apache Arrow as a library we strongly recommend when using Spark with R and presented installation, use cases and considerations you should be aware.
 
-Up to this chapter, we've only worked with large datasets of static data. As in, we've assumed our datasets do not change over time, they remain invariant while analysing, modeing and visualizing them. In the next chapter, we will introduce techniques to process datasets which, in addition to being large, are also growing an resemble a stream of information.
+Up to this chapter, we've only worked with large datasets of static data. As in, we've assumed our datasets do not change over time and remain invariant while analysing, modeing and visualizing them. In the next chapter, [Streaming](#streaming), we will introduce techniques to process datasets which, in addition to being large, are also growing an resemble a stream of information.
