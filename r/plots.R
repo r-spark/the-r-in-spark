@@ -1,6 +1,7 @@
 plot_style <- function() {
   font <- "Helvetica"
 
+  ggplot2::theme_classic() +
   ggplot2::theme(
     plot.title = ggplot2::element_text(family = font,
                                        size=14,

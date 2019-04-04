@@ -67,3 +67,6 @@ render_image <- function(image, caption = NULL) {
 render_clear_resized <- function() {
   unlink(dir("images/", "resized.png", full.names = T))
 }
+
+source("r/plots.R")
+ggplot2::theme_set(plot_style())

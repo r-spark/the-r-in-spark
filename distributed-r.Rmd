@@ -2,7 +2,6 @@
 
 knitr::opts_chunk$set(eval = FALSE)
 source("r/render.R")
-source("r/plots.R")
 
 styles <- "
 #padding: 16
@@ -291,7 +290,6 @@ build_plot <- function(filter, h_line, theme_extra) {
   filter(iris, Species == !!filter) %>%
     transmute(Petal_Width = Petal.Width, Petal_Length = Petal.Length) %>%
     ggplot(aes(x = Petal_Length, y = Petal_Width)) +
-      plot_style() +
       labs(title = filter) +
       geom_hline(yintercept = h_line, size = 1, colour = "#333333") +
       theme(plot.margin = unit(c(0.4, 0.4, 0.2, 0.4), "cm")) +
@@ -304,7 +302,6 @@ cowplot::plot_grid(
   build_plot("setosa", 0, theme(axis.title.y = element_text(colour="white"), axis.title.x = element_text(colour="white"))),
   nrow = 1, ncol = 3, align = "l",
   labels = "") +
-  plot_style() +
   labs(title = "Modeling over Species", subtitle = "Petal width and length across species") +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),

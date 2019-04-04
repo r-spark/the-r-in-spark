@@ -3,7 +3,6 @@
 ```{r include=FALSE, eval=TRUE}
 knitr::opts_chunk$set(eval = FALSE)
 source("r/render.R")
-source("r/plots.R")
 library(sparklyr)
 ```
 
@@ -31,7 +30,6 @@ read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
   gather(key = storage, value = capacity, analog, digital) %>%
   mutate(year = X1, terabytes = capacity / 10^12) %>%
   ggplot(aes(x = year, y = terabytes, group = storage, color = storage)) +
-    plot_style() +
     labs(title = "World's Information Growth",
          subtitle = "Storage capacity per year in terabytes") +
     scale_color_grey(start = 0.6, end = 0.2) +
@@ -100,13 +98,12 @@ data.frame(
   cluster = c(rep("Hadoop", length(iterations)), rep("Spark", length(iterations))),
   seconds = c(iterations * 127, 174 + (iterations - 1) * 6)) %>%
   ggplot(aes(x = iteration, y = seconds, fill = cluster)) +
-    plot_style() +
     labs(title = "Hadoop vs Spark",
          subtitle = "Logistic regression execution time") +
     scale_color_grey(start = 0.6, end = 0.2) +
     geom_bar(stat = "identity", position = position_dodge()) +
     labs(y = "seconds") +
-    geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+    geom_hline(yintercept = 0, size = 1, color = "#333333") +
     theme(panel.grid.major.x = element_line(color = "#ebebeb"), 
           panel.grid.major.y = element_line(color = "#cbcbcb")) +
     scale_x_continuous(name = "iterations",
@@ -197,7 +194,6 @@ cran_downloads <- readr::read_csv(downloads_csv)
 
 str_to_date <- function(x) lapply(x, function(y) as.Date(paste0(y, "-01-01"), origin = "1960-10-01"))
 ggplot(cran_downloads, aes(date, count)) + 
-  plot_style() +
   labs(title = "CRAN Packages",
        subtitle = "Total daily downloads over time") +
   geom_point(colour="black", pch = 21, size = 1) +

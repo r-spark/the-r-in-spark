@@ -3,7 +3,6 @@
 ```{r include=FALSE, eval=TRUE}
 knitr::opts_chunk$set(eval = FALSE)
 source("r/render.R")
-source("r/plots.R")
 library(sparklyr)
 library(ggplot2)
 ```
@@ -258,7 +257,6 @@ select(cars, hp, mpg) %>%
   collect() %>%
   ggplot() +
     geom_point(aes(hp, mpg), size = 2.5, color = "#555555") +
-    plot_style() +
     labs(title = "Vehicle Efficiency", subtitle = "Miles per gallon vs horse power") +
     geom_hline(yintercept = 0, size = 1, colour = "#333333") +
     scale_x_continuous(name = "horse power",
@@ -303,7 +301,6 @@ model %>%
   ggplot() +
     geom_point(aes(hp, mpg, color = label), size = 2.5) +
     scale_color_grey(start = 0.6, end = 0.2) +
-    plot_style() +
     labs(title = "Vehicle Efficiency", subtitle = "Miles per gallon vs horse power with predictions") +
     geom_hline(yintercept = 0, size = 1, colour = "#333333") +
     scale_x_continuous(name = "horse power",
