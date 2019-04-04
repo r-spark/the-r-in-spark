@@ -121,10 +121,10 @@ render_nomnoml("
 #direction: right
 #padding: 14
 #arrowSize: 0.4
-[R]->[<label>Collect Results]
-[Collect Results]->[Spark]
-[R]<-[<label>Push Compute]
-[Push Compute]<-[Spark]
+[R]->[<label>Push Compute]
+[Push Compute]->[Spark]
+[R]<-[<label>Collect Results]
+[Collect Results]<-[Spark]
 [Spark]<-[<label> Import / Access]
 [Import / Access]<-[Data Source]
 ", "images/analysis-import-data-to-spark.png")
@@ -730,15 +730,12 @@ render_nomnoml("
 #padding: 10
 #fontSize: 12
 
-[Analysis project | 
-[<note>e.g: Identify risk factors and build scores] |
-	[Analyze] -> [Communicate]
-    ] -> [Production project | 
-    [<note>e.g.: Score customers on a daily basis] |
-    	[Develop R script] -> [Test script]
-        [Test script] -> [Approve to run on a daily basis]
-        ] 
-[Production project] -> [Production]
+[Analysis Project |
+  [Analyze] -> [Communicate]] -> [Production Project | 
+    [Develop R script] -> [Test script]
+    [Test script] -> [Approve to run on a daily basis]] 
+[Production Project] -> [Production]
+[<note>e.g: Identify risk factors and build scores]-/-[<note> e.g: Score customers on a daily basis]
 ", "images/analysis-program.png")
 ```
 
@@ -760,14 +757,21 @@ The following figure displays when in the analysis process you should consider u
 render_nomnoml("
 #direction: right
 #padding: 10
-#fontSize: 14
-#leading: 2
-[Import - Wrangle - 
-Model - Visualize | 
-- R Notebook
-] -> [Communicate |
-- R Markdown document
-- xaringan presentation
+
+[R Notebook|
+[Import] -> [Understand]
+[Understand |
+  [Wrangle] -> [Visualize] 
+  [Visualize] -> [Model]
+  [Model] -> [Wrangle]
+]
+[Understand] -> [Communicate|[<note> - Document
+- Presentation
+- Journals
+- Websites
+- Dashboards
+- Books
+]]
 ]
 ", "images/analysis-outputs.png")
 ```
