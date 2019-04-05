@@ -35,17 +35,48 @@ The `sparklyr` package contains an interface to Spark Streaming.  The interface 
 
 - A Shiny reactive function, that allows Shiny apps to read the contents of a steam
 
-## Spark Streams, in practice
+## Working with Spark Streams
 
-In practice, a Spark stream update is a three stage operation.  Two of the stages are driven by new files being added, either from the stream, or as a result of the Spark analysis: 
+In practice, a Spark stream update is a three stage operation.  Two of the stages are driven by new files being added, either from the stream, or as a result of the Spark analysis. This is the breakdown of the three stages:
 
 1. **Input** - The stream is expected to append new files in a specified folder. Those new files contain the most recent information from the stream.  Spark monitors the folder, and reads the data from the files. 
 
-1. **Processing** - Spark applies the desired operations on top of the data. These operations could be data manipulations (`dplyr`, SQL), data transformations (`sdf` operations, PipelineModel predictions), or native R manipulations (`spark_apply()`).
+1. **Processing** - Spark applies the desired operations on top of the data. No special `sparklyr` functions are needed to process stream data.  You can use same `dplyr` verbs, Spark transformers and even native R code (via `spark_apply()`).
+
 
 1. **Output** - The results are saved in a different folder.
 
+Figure 11.1 provides a visual aid to what each stage does and how they connect:
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Working with Spark Streams', fig.align = 'center', eval = TRUE}
+render_nomnoml("
+#direction: right
+#padding: 10
+#fontSize: 14
+#leading: 2
+[<note> Input
+Folder] -> [<transceiver> Spark reads data 
+from files in folder] 
+[Spark reads data 
+from files in folder] -> [<transceiver> Spark applies 
+the operations] 
+[Spark applies 
+the operations] -> [<transceiver> Spark writes 
+results to folder]
+ [<transceirver> Spark writes 
+results to folder] -> [<note> Output 
+Folder] 
+[Spark reads data 
+from files in folder] -/- [<label> 2. Process]
+[Input
+Folder] -/- [<label> 1. Input]
+[Spark applies 
+the operations] -/- [<label> 3. Output]
+", "images/streaming-working.png")
+```
+
 In the same way all of the read and write operations in `sparklyr` for Spark Standalone, or in `sparklyr`’s local mode, the input and output folders are actual Operating System file system folders. For YARN managed clusters, these will be folder locations inside the Hadoop File System (HDFS).
+
 
 ## TBD
 
