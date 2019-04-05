@@ -1,8 +1,8 @@
 render_nomnoml <- function(code, png, caption = NULL, styles = "") {
-  nomnoml::nomnoml(paste0(styles, "\n", code), png = png)
-  png_resized <- resize_image_if_needed(png)
-
   if (identical(Sys.getenv("ASCIITEXT_RENDERING"), "TRUE")) {
+    nomnoml::nomnoml(paste0(styles, "\n", code), png = png)
+    png_resized <- resize_image_if_needed(png)
+
     if (is.null(caption)) {
       caption <- knitr::opts_current$get()[["fig.cap"]]
       if (nchar(as.character(caption)) == 0)
@@ -11,7 +11,7 @@ render_nomnoml <- function(code, png, caption = NULL, styles = "") {
 
     knitr::asis_output(paste0("![", caption, "||", knitr::opts_current$get()$label, "](", png_resized, ")"))
   } else {
-    knitr::include_graphics(png_resized)
+    nomnoml::nomnoml(paste0(styles, "\n", code), png = png)
   }
 }
 

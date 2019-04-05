@@ -18,7 +18,7 @@ plot_style <- function() {
                                         size=14,
                                         color="#222222"),
 
-    axis.title.y = element_text(margin = margin(t = 0, r = 8, b = 0, l = 0),
+    axis.title.y = ggplot2::element_text(margin = margin(t = 0, r = 8, b = 0, l = 0),
                                 size = 14,
                                 color="#666666"),
     axis.title.x = element_text(margin = margin(t = -2, r = 0, b = 0, l = 0),
