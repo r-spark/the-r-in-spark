@@ -1,10 +1,53 @@
 ```{r include=FALSE}
 knitr::opts_chunk$set(eval = FALSE)
+source("r/render.R")
+source("r/plots.R")
+library(ggplot2)
 ```
 
 # Streaming {#streaming}
 
-## Overview
+As the velocity of the generation of data increases, so does the need to analyze it in real-time. Real-time refers to the ability to continously analyze data from a constantly updating data feed. This is usually called Stream Analytics. In Stream Analytics, data is analyzed as its generated, not retroactively as it happens with "everyday" analysis.  
+
+This chapter will cover how to analyze a stream of data using R and Spark. It will also cover basics about stream analysis, along with how to implement these using `sparklyr` and other R packages.
+
+## Spark Streamming 
+
+Spark Streamming is an extension of the core Spark API.  It is used for processing live streams of data.  It does this in a scalable, high-throughput, and fault tolerant way. It also allows for the current data to be joined with the historical data.
+
+Spark Streamming works by splitting the live input into small batches.  Each batch is processed by Spark individually.  The output from Spark is also in small batches.  This process is not visible to the user.  Spark displays streams as a DStream (discretize stream).  The DStream represents the small batches as one continuos stream. Inisde Spark, the DStream is represented as a sequence of Resilient Distributed Datasets (RDD).
+
+The best resource to learn how Spark analyzes streams is the Apache Spark's Official site [@streaming-programming-guide]. This chapter will cover just enought Spark Streamming concepts to help you understand the mechanics of what the R code is doing.  It is recommended to read the official resource, specially if you need to implement solutions based on Spark Streamming.
+
+
+
+## sparklyr interface
+
+The `sparklyr` package contains an interface to Spark Streaming.  The interface provides the following capabilities:
+
+- Ability to run `dplyr`, SQL queries, `spark_apply()`, and PipelineModels against a stream
+
+- Read in multiple formats: CSV, text, JSON, parquet, Kafka, JDBC, and orc
+
+- Write stream results to Spark memory and the following file formats: CSV, text, JSON, parquet, Kafka, JDBC, and orc
+
+- An out-of-the box graph visualization to monitor the stream
+
+- A Shiny reactive function, that allows Shiny apps to read the contents of a steam
+
+## Spark Streams, in practice
+
+In practice, a Spark stream update is a three stage operation.  Two of the stages are driven by new files being added, either from the stream, or as a result of the Spark analysis: 
+
+1. **Input** - The stream is expected to append new files in a specified folder. Those new files contain the most recent information from the stream.  Spark monitors the folder, and reads the data from the files. 
+
+1. **Processing** - Spark applies the desired operations on top of the data. These operations could be data manipulations (`dplyr`, SQL), data transformations (`sdf` operations, PipelineModel predictions), or native R manipulations (`spark_apply()`).
+
+1. **Output** - The results are saved in a different folder.
+
+In the same way all of the read and write operations in `sparklyr` for Spark Standalone, or in `sparklyr`’s local mode, the input and output folders are actual Operating System file system folders. For YARN managed clusters, these will be folder locations inside the Hadoop File System (HDFS).
+
+## TBD
 
 One can understand a stream as an unbounded data frame, meaning, a data frame with finite columns but infinite rows. Streams are most relevant when processing real time data; for example, when analyzing a Twitter feed or stock prices. Both examples have well defined columns, like 'tweet' or 'price', but there are always new rows of data to be analyzed.
 
@@ -77,7 +120,7 @@ For the subsequent examples, a stream with one hundred rows of text will be used
 writeLines(paste("Row", 1:100), "source/rows.txt")
 ```
 
-## Transformations {#streaming-treansform}
+### Transformations {#streaming-treansform}
 
 Streams can be transformed using `dplyr`, SQL, pipelines or R code. We can use as many transformations as needed in the same way that Spark data frames can be transformed with `sparklyr`. The transformation source can be streams or data frames but the output is always a stream. If needed, one can always take a snapshot from the destination stream and save the output as a data frame, which is what `sparklyr` will do for you if a destination stream is not specified. Conceptually, this looks as follows:
 
@@ -90,7 +133,7 @@ r2d3::r2d3(
 )
 ```
 
-### dplyr {#streams-dplyr}
+#### dplyr {#streams-dplyr}
 
 Using `dplyr`, we can process each row of the stream; for example, we can filter the stream to only the rows containing a number one:
 
@@ -121,7 +164,7 @@ left_join(
 
 However, some operations, require watermarks to define when to stop waiting for late data. You can specify watermarks in `sparklyr` using `stream_watermak()`, see also [handling late data](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#handling-late-data-and-watermarking) in Spark's documentation.
 
-### Pipelines {#streams-pipelines}
+#### Pipelines {#streams-pipelines}
 
 Spark pipelines can be used for scoring streams, but not to train over streaming data. The former is fully supported while the latter is a feature under active development by the Spark community.
 
@@ -135,7 +178,7 @@ stream_read_csv(sc, "iris-in") %>%
   stream_write_csv("iris-out")
 ```
 
-### R Code {#streams-r}
+#### R Code {#streams-r}
 
 Arbitrary R code can also be used to transform a stream with the use of `spark_apply()`. Following the same principles from executing R code over Spark data frames, for structured streams, `spark_apply()` runs R code over each executor in the cluster where data is available, this enables processing high-throughput streams and fullfill low-latency requirements.
 
@@ -146,7 +189,7 @@ stream_read_text(sc, "source/") %>%
   spark_apply(~ jitter(as.numeric(gsub("Row ", "", .x$text))))
 ```
 
-## Shiny
+### Shiny
 
 Streams can be used with Shiny by making use of the `reactiveSpark()` to retrieve the stream as a reactive data source. Internally, `reactiveSpark()` makes use of [reactivePoll()](https://shiny.rstudio.com/reference/shiny/latest/reactivePoll.html) to check the stream's timestamp and collect the stream contents when needed.
 
@@ -187,7 +230,7 @@ unlink("source/", recursive = TRUE)
 unlink("destination/", recursive = TRUE)
 ```
 
-## Formats
+### Formats
 
 The following formats are available to read and write streaming data:
 
