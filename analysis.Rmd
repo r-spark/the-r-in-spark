@@ -60,12 +60,13 @@ Thanks to Spark's libraries, most of the data analysis project steps can be comp
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R as an interface for Spark', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
-#padding: 40
-#spacing: 140
-#arrowSize:0.2
-#.tag: visual=none
-[<tag>R]Collect results->Push compute[Spark]
-[Spark]->[R]
+#arrowSize: 0.4
+#lineWidth: 1
+#gutter: -6
+[R]->[<label> Push Compute]
+[Push Compute]->[Spark]
+[R]<-[<label> Collect Results]
+[Collect Results]<-[Spark]
 ", "images/analysis-r-interface-to-spark-sql.png")
 ```
 
@@ -76,13 +77,12 @@ The idea is take advantage of Spark's analysis components instead of R's.  For e
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R functions call Scala functions', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
-#padding: 20
-#spacing: 140
-#arrowSize:0.2
-[R/sparklyr | ml_linear_regression()]Wraps code ->  [Scala |
-        	var lr = new LinearRegression()
-            var lrModel = lr.fit(training)]
- 
+#padding: 12
+#lineWidth: 1
+#arrowSize: 0.4
+[R | [<note>ml_linear_regression()]]->[<label>Invokes]
+[Invokes]->[Scala | [<note>var lr = new LinearRegression()
+                     var lrModel = lr.fit(training)]]
 ", "images/analysis-r-interface-to-spark-scala.png")
 ```
 
@@ -91,12 +91,11 @@ For more common data manipulation tasks, `sparklyr` provides a back-end for `dpl
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='dplyr writes SQL', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
-#padding: 20
-#spacing: 140
-#arrowSize:0.2
-[R/dplyr | filter(y == 1)]Wraps code ->  [SQL |
-        	... WHERE y = 1 ...]
- 
+#padding: 12
+#lineWidth: 1
+#arrowSize: 0.4
+[R | [<note>filter(data, y == 1)]]->[<label>Invokes]
+[Invokes]->  [SQL | [<note>... WHERE y = 1 ...]]
 ", "images/analysis-dplyr-sql-translation.png")
 ```
 
@@ -120,13 +119,14 @@ The step of importing data is to be approached differently when using Spark with
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Import Data to Spark not R', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
-#padding: 40
-#spacing: 140
-#arrowSize:0.2
-#.tag: visual=none
-[<tag>R]Collect results->Push compute[Spark]
-[Spark]->[R]
-[Spark]<-Import/Access[Data;Source]
+#padding: 14
+#arrowSize: 0.4
+[R]->[<label>Push Compute]
+[Push Compute]->[Spark]
+[R]<-[<label>Collect Results]
+[Collect Results]<-[Spark]
+[Spark]<-[<label> Import / Access]
+[Import / Access]<-[Data Source]
 ", "images/analysis-import-data-to-spark.png")
 ```
 
@@ -388,9 +388,12 @@ car_group
 In the example, now that the data has been pre-aggregated and collected into R, only three records are passed to the plotting function.
 
 ```{r}
-ggplot(aes(as.factor(cyl), mpg), data = car_group) + geom_col()
+ggplot(aes(as.factor(cyl), mpg), data = car_group) + geom_col() + ggsave("images/analysis-visualizations-1.png")
 ```
-
+```{r echo=FALSE}
+ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
+  geom_col() + ggsave("images/analysis-visualizations-1.png", width = 10, height = 5)
+```
 ```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-1.png")
 ```
@@ -477,7 +480,12 @@ bins %>%
   ggplot() +
   geom_col(aes(bins, n))
 ```
-
+```{r echo=FALSE}
+bins %>%
+  ggplot() +
+  geom_col(aes(bins, n)) +
+  ggsave("images/analysis-visualizations-2.png", width = 10, height = 5)
+```
 ```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-2.png")
 ```
@@ -495,6 +503,13 @@ library(dbplot)
 cars %>%
   dbplot_histogram(mpg, binwidth = 3)
 ```
+```{r echo=FALSE}
+library(dbplot)
+
+cars %>%
+  dbplot_histogram(mpg, binwidth = 3) +
+  ggsave("images/analysis-visualizations-3.png", width = 10, height = 5)
+```
 ```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-3.png")
 ```
@@ -504,8 +519,13 @@ Because it is a `ggplot` object, it can be further refined if needed.
 ```{r}
 cars %>%
   dbplot_histogram(mpg, binwidth = 3) +
+  labs(title = "Histogram of Miles Per Galon")
+```
+```{r}
+cars %>%
+  dbplot_histogram(mpg, binwidth = 3) +
   labs(title = "Histogram of Miles Per Galon") +
-  theme_bw()
+  ggsave("images/analysis-visualizations-4.png", width = 10, height = 5)
 ```
 ```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-4.png")
@@ -547,6 +567,11 @@ The `dbplot` package provides functionality that helps with this kind of plottin
 ```{r}
 cars %>%
   dbplot_raster(mpg, wt, resolution = 5)
+```
+```{r echo=FALSE}
+cars %>%
+  dbplot_raster(mpg, wt, resolution = 5) +
+  ggsave("images/analysis-visualizations-5.png", width = 10, height = 5)
 ```
 ```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-5.png")
@@ -705,15 +730,12 @@ render_nomnoml("
 #padding: 10
 #fontSize: 12
 
-[Analysis project | 
-e.g: Identify risk factors and build scores|
-	[Analyze] -> [Communicate]
-    ] -> [Production project | 
-    e.g.: Score customers on a daily basis |
-    	[Develop R script] -> [Test script]
-        [Test script] -> [Approve to run on a daily basis]
-        ] 
-[Production project] -> [Production]
+[Analysis Project |
+  [Analyze] -> [Communicate]] -> [Production Project | 
+    [Develop R script] -> [Test script]
+    [Test script] -> [Approve to run on a daily basis]] 
+[Production Project] -> [Production]
+[<note>e.g: Identify risk factors and build scores]-/-[<note> e.g: Score customers on a daily basis]
 ", "images/analysis-program.png")
 ```
 
@@ -735,14 +757,21 @@ The following figure displays when in the analysis process you should consider u
 render_nomnoml("
 #direction: right
 #padding: 10
-#fontSize: 14
-#leading: 2
-[Import - Wrangle - 
-Model - Visualize | 
-- R Notebook
-] -> [Communicate |
-- R Markdown document
-- xaringan presentation
+
+[R Notebook|
+[Import] -> [Understand]
+[Understand |
+  [Wrangle] -> [Visualize] 
+  [Visualize] -> [Model]
+  [Model] -> [Wrangle]
+]
+[Understand] -> [Communicate|[<note> - Document
+- Presentation
+- Journals
+- Websites
+- Dashboards
+- Books
+]]
 ]
 ", "images/analysis-outputs.png")
 ```
