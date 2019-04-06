@@ -78,6 +78,8 @@ In the same way all of the read and write operations in `sparklyr` for Spark Sta
 
 This section will use a very simple example to introduce the mechanics of Spark Streaming, and how `sparklyr` interacts with it.
 
+### Test generator
+
 The `sparklyr` package includes a stream test generating function, called `stream_generate_test()`.  This function creates a local test stream.  It is ideal as a source for a introductory example. This function works independently from Spark. The follwoing example will create five files in sub-folder called "source".  The files will be created one second apart from the previous file's creation.
 
 ```{r}
@@ -94,6 +96,11 @@ list.files("source")
 ## [1] "stream_1.csv" "stream_2.csv" "stream_3.csv"
 ## [4] "stream_4.csv" "stream_5.csv"
 ```
+This function and its concepts are introduced to help clarify what parts are the execution of the stream read/write, and what parts are needed to setup a working example.
+
+### Example
+
+This very simple example will just transfer the input to the output without any other operations being done to it. 
 
 1. Open a local Spark session
     ```{r}
@@ -116,7 +123,7 @@ list.files("source")
     read_folder <- stream_read_csv(sc, "source")
     ```
 
-1. Set the output of the job to read the incoming data. That is done by passing the *read_folder* variable, set in the previous step.
+1. Set the output of the job to read the incoming data. That is done by passing the *read_folder* variable, set in the previous step.  It corresponds to the **3. Output** stage described in the previous section.
     ```{r}
     write_output <- stream_write_csv(read_folder, "destination")
     ```
@@ -133,6 +140,26 @@ list.files("source")
     stream_view(write_output)
     ```
 
+To make it easier to copy and paste, here is the full example:
+
+```{r}
+library(sparklyr)
+library(future)
+
+if(file.exists("source")) unlink("source", TRUE)
+if(file.exists("destination")) unlink("destination", TRUE)
+
+stream_generate_test(iterations = 1)
+read_folder <- stream_read_csv(sc, "source")
+write_output <- stream_write_csv(read_folder, "destination")
+invisible(future(stream_generate_test(interval = 0.3)))
+
+stream_view(write_output)
+```
+
+```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='stream_view() output', fig.align = 'center', echo = FALSE}
+render_image("images/streaming-stream-view.png")
+```
 
 ## TBD
 
