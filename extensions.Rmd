@@ -16,7 +16,7 @@ library(sparklyr)
 library(h2o)
 
 sc <- spark_connect(master = "local", version = "2.1.0")
-cars_tbl <- sdf_copy_to(sc, mtcars, "mtcars")
+cars_tbl <- copy_to(sc, mtcars, "mtcars")
 
 cars_h2o <- as_h2o_frame(sc, mtcars_tbl, strict_version_check = FALSE)
 
@@ -57,7 +57,7 @@ library(sparklyr)
 library(dplyr)
 
 sc <- spark_connect(master = "local", version = "2.1.0")
-highschool_tbl <- sdf_copy_to(sc, ggraph::highschool, "highschool", overwrite = TRUE)
+highschool_tbl <- copy_to(sc, ggraph::highschool, "highschool", overwrite = TRUE)
 highschool_tbl <- highschool_tbl %>% filter(year == 1957)
 
 from_tbl <- highschool_tbl %>% distinct(from) %>% transmute(id = from)

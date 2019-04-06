@@ -27,7 +27,7 @@ If you are already a familiar R user, you might be tempted to use this approach 
 
 ## Overview
 
-The [Introduction](#intro) chapter introduced MapReduce as a technique capable of processing large scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The [Tuning](#tuning) chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually, this is illustrated in Figure \@ref(fig:distributed-times-ten).
+The [Introduction](#intro) chapter introduced MapReduce as a technique capable of processing large-scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The [Tuning](#tuning) chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually, this is illustrated in Figure \@ref(fig:distributed-times-ten).
 
 ```{r distributed-times-ten, echo=FALSE, eval=TRUE, fig.cap='Map Operation when Multiplying by Ten', fig.align='center'}
 render_nomnoml("
@@ -326,7 +326,7 @@ For example, we can define a grid of parameters to optimize decision tree models
 ```{r}
 grid <- list(minsplit = c(2, 5, 10), maxdepth = c(1, 3, 8)) %>%
   purrr:::cross_df() %>%
-  sdf_copy_to(sc, ., repartition = 9)
+  copy_to(sc, ., repartition = 9)
 grid
 ```
 ```
@@ -344,7 +344,7 @@ grid
 9       10        8
 ```
 
-The grid dataset was copied with `repartition = 9` to ensure that each partition is contained in one machine since the grid has also nine rows. Now, assuming that the original data set fits in every machine, we can distribute this dataset to many machines and perform parameter search to find the model that best fits this data.
+The grid dataset was copied with `repartition = 9` to ensure that each partition is contained in one machine since the grid has also nine rows. Now, assuming that the original dataset fits in every machine, we can distribute this dataset to many machines and perform parameter search to find the model that best fits this data.
 
 ```{r}
 spark_apply(
@@ -721,7 +721,7 @@ When using `spark_apply()`, R needs to be properly installed in each worker node
 - **Microsoft HDInsight**: R is pre-installed and no additional steps are needed.
 - **Livy**: Livy connections **do not** support distributing packages since the client machine where the libraries are precompiled might not have the same processor architecture, nor operating systems than the cluster machines.
 
-Strictly speaking, this completes the last requirement for your cluster. However, we strongly recommend you use Apache Arrow with `spark_apply()` to support large scale computation with minimal overhead.
+Strictly speaking, this completes the last requirement for your cluster. However, we strongly recommend you use Apache Arrow with `spark_apply()` to support large-scale computation with minimal overhead.
 
 ### Apache Arrow
 
@@ -751,25 +751,15 @@ Apache Arrow is a cross-language development platform for in-memory data. In Spa
 render_nomnoml("
 #direction: right
 #.left: align=left
-[Spark|[a,1,10|b,2,20|c,3,30] -> [Arrow]
-[Arrow] -> [<left>a,b,c|1,2,3|10,20,30]
-[a,b,c] -> [Arrow]
-[Arrow] -> [a,1,10]
+[Spark|[Scala|[a,1,10|b,2,20|c,3,30]] -> [Arrow|[<left>a,b,c|1,2,3|10,20,30]]
+[Arrow] -> [Spark]
 ] -> [R]
-[R|[<left>a,b,c|1,2,3|10,20,30]] -> [Spark]", "images/distributed-r-data-using-arrow.png")
+[R|[Arrow|[<left>a,b,c|1,2,3|10,20,30]]] -> [Spark]", "images/distributed-r-data-using-arrow.png")
 ```
 
-Arrow is not required but it is strongly advised while working `spark_apply()`. It has been available since Spark 2.3.0 and requires system administrators to install the Apache Arrow runtime in every node.
+Arrow is not required but it is strongly advised while working `spark_apply()`. It has been available since Spark 2.3.0; however, it requires system administrators to install the Apache Arrow runtime in every node, see [arrow.apache.org/install](https://arrow.apache.org/install/).
 
-For instance, in Linux (Ubuntu), you will need to install this in your cluster as follows:
-
-```{bash}
-sudo yum install -y https://packages.red-data-tools.org/centos/red-data-tools-release-latest.noarch.rpm
-sudo sed -i 's/\$releasever/6/g' /etc/yum.repos.d/red-data-tools.repo
-sudo yum install -y --enablerepo=red-data-tools arrow-devel
-```
-
-To use Apache Arrow with `sparklyr` you need to install the `arrow` package:
+In addition, to use Apache Arrow with `sparklyr` you also need to install the `arrow` package:
 
 ```{r}
 devtools::install_github("apache/arrow", subdir = "r", ref = "apache-arrow-0.12.0")

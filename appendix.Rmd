@@ -23,7 +23,7 @@ From [java.com/download](https://java.com/download), download and launch the ins
 render_image("images/appendix-download-java.png", "Java Download Page")
 ```
 
-Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java 8.
+Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java 8. Java 9+ is currently unsupported so you will need to downgrade to Java 8 by uninstalling Java9+ first.
 
 ### Installing RStudio {#appendix-install-rstudio}
 
@@ -110,4 +110,60 @@ read.csv("data/clusters-trends.csv", skip = 2) %>%
            subtitle = "Search popularity for on-premise (mainframe), cloud computing and kubernetes ") +
       scale_color_grey(start = 0.6, end = 0.2) +
       geom_hline(yintercept = 0, size = 1, colour = "#333333")
+```
+
+## Formatting {#appendix-ggplot2-theme}
+
+The following `ggplot2` theme was use to format plots in this book:
+
+```{r appendix-ggplot2-theme-code}
+plot_style <- function() {
+  font <- "Helvetica"
+
+  ggplot2::theme_classic() +
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(family = font,
+                                       size=14,
+                                       color = "#222222"),
+    plot.subtitle = ggplot2::element_text(family=font,
+                                          size=12,
+                                          color = "#666666"),
+
+    legend.position = "right",
+    legend.background = ggplot2::element_blank(),
+    legend.title = ggplot2::element_blank(),
+    legend.key = ggplot2::element_blank(),
+    legend.text = ggplot2::element_text(family=font,
+                                        size=14,
+                                        color="#222222"),
+
+    axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 8, b = 0, l = 0),
+                                size = 14,
+                                color="#666666"),
+    axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = -2, r = 0, b = 0, l = 0),
+                                size = 14,
+                                color = "#666666"),
+    axis.text = ggplot2::element_text(family=font,
+                                      size=14,
+                                      color="#222222"),
+    axis.text.x = ggplot2::element_text(margin = ggplot2::margin(5, b = 10)),
+    axis.ticks = ggplot2::element_blank(),
+    axis.line = ggplot2::element_blank(),
+
+    panel.grid.minor = ggplot2::element_blank(),
+    panel.grid.major.y = ggplot2::element_line(color = "#eeeeee"),
+    panel.grid.major.x = ggplot2::element_line(color = "#ebebeb"),
+
+    panel.background = ggplot2::element_blank(),
+
+    strip.background = ggplot2::element_rect(fill = "white"),
+    strip.text = ggplot2::element_text(size  = 20,  hjust = 0)
+  )
+}
+```
+
+Which you can then active with:
+
+```{r appendix-ggplot2-theme-activate}
+ggplot2::theme_set(plot_style())
 ```

@@ -380,7 +380,7 @@ Recall from the [introduction](Intro) that Spark was designed to be faster than 
 
 In `sparklyr`, you can control when an RDD gets loaded or unloaded from memory using `tbl_cache()` and `tbl_uncache()`.
 
-Most sparklyr operations that retrieve a Spark DataFrame, cache the results in-memory. For instance, running `spark_read_parquet()` or `sdf_copy_to()` will provide a Spark DataFrame that is already cached in-memory. As a Spark DataFrame, this object can be used in most `sparklyr` functions, including data analysis with dplyr or machine learning.
+Most sparklyr operations that retrieve a Spark DataFrame, cache the results in-memory. For instance, running `spark_read_parquet()` or `copy_to()` will provide a Spark DataFrame that is already cached in-memory. As a Spark DataFrame, this object can be used in most `sparklyr` functions, including data analysis with dplyr or machine learning.
 
 ```{r tuning-caching-connect}
 library(sparklyr)
@@ -388,7 +388,7 @@ sc <- spark_connect(master = "local")
 ```
 
 ```{r tuning-caching-copy}
-iris_tbl <- sdf_copy_to(sc, iris, overwrite = TRUE)
+iris_tbl <- copy_to(sc, iris, overwrite = TRUE)
 ```
 
 You can inspect which tables are cached by navigating to the Spark UI using `spark_web(sc)`, opening the storage tab, and clicking on a given RDD:

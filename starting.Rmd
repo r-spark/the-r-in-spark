@@ -9,7 +9,7 @@ library(ggplot2)
 
 # Getting Started {#starting}
 
-From R, getting started with Spark using `sparklyr` and a local cluster is as easy as running:
+From R, getting started with Spark using `sparklyr` and a local cluster is as easy as installing and loading the `sparklyr` package followed by running:
 
 ```{r starting-connect}
 spark_install()
@@ -18,7 +18,7 @@ sc <- spark_connect(master = "local")
 
 To make sure we can all run the code above and understand it, this section will walk you through the prerequisites, installing `sparklyr` and Spark, connecting to a local Spark cluster and briefly explaining how to use Spark.
 
-However, if a Spark cluster and R environment have been made available to you, you do not need to install the [prerequisites](#starting-prerequisites) nor [install Spark](#starting-installing-spark) yourself. Instead, you should ask for the Spark `master` parameter and connect as follows; this parameter will be formally introduced under the [clusters](#clusters) and [connections](#connections) chapters.
+However, if a Spark cluster and R environment have been made available to you, you do not need to install the [prerequisites](#starting-prerequisites) nor [install Spark](#starting-installing-spark) yourself. Instead, you should ask for the Spark `master` parameter and connect as follows; this parameter will be formally introduced under the [Connections](#connections) chapter.
 
 ```{r starting-connect-master}
 sc <- spark_connect(master = "<cluster-master>")
@@ -30,7 +30,7 @@ R can run in many platforms and environments; therfore, whether you use Windows,
 
 Most people use programming languages with tools to make them more productive; for R, RStudio would be such tool. Strictly speaking, RStudio is an Integrated Development Environment (or IDE), which also happens to support many platforms and environments. We strongly recommend you get RStudio installed if you haven't done so already, see details under the [Installing RStudio](#appendix-install-rstudio) appendix.
 
-Additionally, since Spark is built in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java 8 in your system. It is likely that your system already has Java installed, but you should still check the version and update if needed as described in the [Installing Java](#appendix-install-java) appendix.
+Additionally, since Spark is built in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java 8 in your system. It is likely that your system already has Java installed, but you should still check the version and update or downgrade as described in the [Installing Java](#appendix-install-java) appendix.
 
 ## Installing sparklyr {#starting-install-sparklyr}
 
@@ -116,7 +116,7 @@ sc <- spark_connect(master = "local")
 
 The `master` parameter identifies which is the "main" machine from the Spark cluster; this machine is often called the driver node. While working with real clusters using many machines, most machines will be worker machines and one will be the master. Since we only have a local cluster with only one machine, we will default to use `"local"` for now.
 
-If connection fails, the [connections](#connections) chapter contains a [troubleshooting](#connections-troubleshooting) section which can help you resolve your connection issue.
+If connection fails, the [Connections](#connections) chapter contains a [troubleshooting](#connections-troubleshooting) section which can help you resolve your connection issue.
 
 ## Using Spark {#starting-sparklyr-hello-world}
 
@@ -188,7 +188,7 @@ render_image("images/starting-spark-web-storage.png", "Apache Spark Web Interfac
 
 Notice that this dataset is fully loaded into memory since the **fraction cached** is 100%, you can know exactly how much memory this dataset is using through the **size in memory** column.
 
-The executors tab, Figure \@ref(fig:starting-spark-executors), provides a view of your cluster resources. For local connections, you will find only one executor active with only 2GB of memory allocated to Spark and 384MB available for computation. The [tunning](#tunning) chapter you will learn how request more compute instances, resources and learn how memory is allocated.
+The executors tab, Figure \@ref(fig:starting-spark-executors), provides a view of your cluster resources. For local connections, you will find only one executor active with only 2GB of memory allocated to Spark and 384MB available for computation. The [Tunning](#tunning) chapter you will learn how request more compute instances, resources and learn how memory is allocated.
 
 ```{r starting-spark-executors-web-shot, echo=FALSE}
 invisible(webshot::webshot(
@@ -216,6 +216,8 @@ invisible(webshot::webshot(
 ```{r starting-spark-environment, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Apache Spark Web Interface - Environment Tab'}
 render_image("images/starting-spark-web-environment.png", "Apache Spark Web Interface - Environment Tab")
 ```
+
+Next, you will make use of a small subset of the practices that the [Analysis](#analysis) chapter will cover.
 
 ### Analysis {#starting-analysis}
 
@@ -274,7 +276,7 @@ The plot in Figure \@ref(fig:starting-cars-hp-vs-mpg), shows that as we increase
 
 ### Modeling {#starting-modeling}
 
-While data analysis can take you quite far when understanding data, building a mathematical model that describes and generalizes the dataset is quite powerful. In the [introduction](#intro) chapter you learned that the fields of machine learning and data science make use of mathematical models to perform predictions and find additional insights.
+While data analysis can take you quite far when understanding data, building a mathematical model that describes and generalizes the dataset is quite powerful. In the [Introduction](#intro) chapter you learned that the fields of machine learning and data science make use of mathematical models to perform predictions and find additional insights.
 
 For instance, we can use a linear model to approximate the relationship between fuel efficiency and horse power:
 
@@ -327,11 +329,11 @@ broom::glance(model)
 # … with 1 more variable: root.mean.squared.error <dbl>
 ```
 
-While the previous example lacks many of the appropriate techniques you should use while modeling, it's also a simple example to briefly introduce the modeling capabilities of Spark. All the Spark models, techniques and best practices will be properly introduced in the [modeling](#modeling) chapter.
+While the previous example lacks many of the appropriate techniques you should use while modeling, it's also a simple example to briefly introduce the modeling capabilities of Spark. All the Spark models, techniques and best practices will be properly introduced in the [Modeling](#modeling) chapter.
 
 ### Data {#starting-data}
 
-For simplicity, we copied the `mtcars` dataset into Spark; however, data is usually not copied into Spark. Instead, data is read from existing data sources in a variety of formats like plain text, CSV, JSON, JDBC and many more which, the [data](#data) chapter will introduce in detail. For instance, we can export our `cars` dataset as a CSV file:
+For simplicity, we copied the `mtcars` dataset into Spark; however, data is usually not copied into Spark. Instead, data is read from existing data sources in a variety of formats like plain text, CSV, JSON, JDBC and many more which, the [Data](#data) chapter will introduce in detail. For instance, we can export our `cars` dataset as a CSV file:
 
 ```{r}
 spark_write_csv(cars, "cars.csv")
@@ -345,7 +347,7 @@ cars <- spark_read_csv(sc, "cars.csv")
 
 ### Extensions {#starting-extensions}
 
-In the same way that R is known for it's vibrant community of package authors, at a smaller scale, many extensions for Spark and R have been written and are available to you. The [extensions](#extensions) chapter will introduce many interesting ones to perform advanced modeling, graph analysis, preprocess datasets for deep learning, etc.
+In the same way that R is known for it's vibrant community of package authors, at a smaller scale, many extensions for Spark and R have been written and are available to you. The [Extensions](#extensions) chapter will introduce many interesting ones to perform advanced modeling, graph analysis, preprocess datasets for deep learning, etc.
 
 For instance, the `sparkly.nested` extension is an R package that extends `sparklyr` to help you manage values that contain nested information. A common use case arises while dealing with JSON files which contain nested lists that require preprocessing before doing meaningful data analysis. To use this extension, we have to first install it as follows:
 
@@ -449,7 +451,7 @@ dir("output", pattern = ".csv")
 [2] "part-00000-eece04d8-7cfa-4231-b61e-f1aef8edeb97-c000.csv"
 ```
 
-You can use `dplyr`, SQL, Spark models or distributed R to analyze streams in realtime, we will properly introduce you to all the interesting transformations you can perform to analyze realtime data during the [streaming](#streaming) chapter.
+You can use `dplyr`, SQL, Spark models or distributed R to analyze streams in realtime, we will properly introduce you to all the interesting transformations you can perform to analyze realtime data during the [Streaming](#streaming) chapter.
 
 ### Logs {#starting-logs}
 
@@ -517,7 +519,7 @@ Additionally, an active connection provides the following custom actions:
 
 - **Spark**: Opens the Spark web interface, a shortcut to `spark_ui(sc)`.
 - **Log**: Opens the Spark web logs, a shortcut to `spark_log(sc)`.
-- **SQL**: Opens a new SQL query, see `DBI` and SQL support in the data [analysis](#analysis) chapter.
+- **SQL**: Opens a new SQL query, see `DBI` and SQL support in the data [Analysis](#analysis) chapter.
 - **Help**: Opens the reference documentation in a new web browser window.
 - **Disconnect**: Disconnects from Spark, a shortcut to `spark_disconnect(sc)`.
 
@@ -538,4 +540,4 @@ While we've put significant effort into simplifying the onboarding process, ther
 
 In this chapter you learned about the prerequisites required to work with Spark, how to connect to Spark using `spark_connect()`, install a local cluster using `spark_install()`, load a simple dataset, launch the web interface and display logs using `spark_web(sc)` and `spark_log(sc)` respectively, disconnect from RStudio using `spark_disconnect()` and we closed this chapter presenting the RStudio extensions `sparklyr` provides.
 
-It is our hope that this chapter will help anyone interested in learning cluster computing using Spark and R getting started, ready to experiment on your own and ready to tackle actual data analysis and modeling problems which, the next two chapters will introduce you. The next chapter, analysis, will present data analysis as the process to inspect, clean, and transform data with the goal of discovering useful information. Modeling can be considered part of data analysis; however, it deserves it's own chapter to truly understand and take advantage of the modeling functionality available in Spark.
+It is our hope that this chapter will help anyone interested in learning cluster computing using Spark and R getting started, ready to experiment on your own and ready to tackle actual data analysis and modeling problems which, the next two chapters will introduce you. The next chapter, [Analysis](#analysis), will present data analysis as the process to inspect, clean, and transform data with the goal of discovering useful information. Modeling can be considered part of data analysis; however, it deserves it's own chapter to truly understand and take advantage of the modeling functionality available in Spark.
