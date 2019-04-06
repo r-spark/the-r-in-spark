@@ -56,7 +56,28 @@ spark_context(sc) %>%
   invoke("count")
 ```
 
+### Troubleshooting
+
+We can trace all the calls made to `invoke()`, `invoke_new()` and `invoke_static()` using the `sparklyr.invoke.trace` and `sparklyr.invoke.trace.callstack` options as follows:
+
+```{r contributing-trace}
+config <- spark_config()
+config$sparklyr.invoke.trace <- TRUE
+
+spark_connect(master = "local", config = config)
+```
+
 ## Scala Extensions
+
+### R Packages
+
+#### RStudio Projects
+
+You can create with ease an Scala extension for Spark from RStudio. This feature requires RStudio 1.1 or newer and the `sparklyr` package to be installed. Then, from the `File` menu, `New Project...`, select `R Package using sparklyr`:
+
+```{r contributing-r-rstudio-project, eval=TRUE, fig.align='center', echo=FALSE, fig.cap='Creating an Scala extension package from RStudio'}
+render_image("images/contributing-r-rstudio-project.png")
+```
 
 ### Prerequisites {#scala-extension-prereq}
 
@@ -70,90 +91,6 @@ download_scalac()
 Which will download the correct compilers from [https://www.scala-lang.org/](https://www.scala-lang.org).
 
 ## Spark Extensions
-
-## R Packages
-
-### RStudio Projects
-
-You can create an `sparklyr` extension with ease from RStudio. This feature requires RStudio 1.1 or newer and the `sparklyr` package to be installed. Then, from the `File` menu, `New Project...`, select `R Packag using sparklyr`:
-
-![](images/09-extensions-rstudio-project.png)
-
-### Troubleshooting
-
-We can trace all the calls made to `invoke()`, `invoke_new()` and `invoke_static()` using the `sparklyr.invoke.trace` and `sparklyr.invoke.trace.callstack` options as follows:
-
-```{r contributing-trace}
-config <- spark_config()
-config$sparklyr.invoke.trace <- TRUE
-
-spark_connect(master = "local", config = config)
-```
-
-## sparklyr {#contributing-sparklyr}
-
-First of all, it's worth mentioning that, `sparklyr` is just another R package; a package which contains R code packaged in a format installable using the `install.packages()` function. Now, since Spark was built in the Scala programming language, `sparklyr` also contains Scala code to provide the functionality required to interoperate with Spark efficiently.
-
-[CRAN](https://cran.r-project.org/), which stands for the Comprehensive R Archive Network, provides a repository of packages that can be easily installable and which are carefully reviewed before they are made available. You can read more about the release process under [releasing a package](http://r-pkgs.had.co.nz/release.html) and Hadley Wickam's book on packages: [R Packages: Organize, Test, Document, and Share Your Code](@wickham2015r). CRAN users are always encouraged to install the latest version of a package, which means that `sparklyr` also needs to support multiple versions of Spark.
-
-Therefore, at a high level, `sparklyr` is composed of: R code and versioned Scala code:
-
-```{r contributing-sparklyr, eval=TRUE,echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Sparklyr Package Architecture', fig.align = 'center'}
-nomnoml::nomnoml("
-#spacing: 15
-[sparklyr|
-  [R Code]
-  [Scala Code|
-    [Spark 1.6.x]
-    [Spark 2.x.0]
-  ]
-]
-", svg = TRUE)
-```
-
-The `sparklyr` sources are built with `R CMD build` or from the RStudio's build menu, this topic extensevely covered in the [R Packages](@wickham2015r) book.
-
-The Scala code is compiled into [JAVA Archive](https://docs.oracle.com/javase/8/docs/technotes/guides/jar/jarGuide.html) files which will eventually be executed by Spark through the [Java Virtual Machine](https://en.wikipedia.org/wiki/Java_virtual_machine). Compilation can be manually performed with the Scala compiler using `compile_package_jars()`, a `sparklyr` function that invokes the Scala compiler over a set of supported versions.
-
-When connecting to Spark using `spark_connect()`, `sparklyr` submits the correct version of the `sparklyr` JAR to Spark which then Spark executes. We will refer to this submitted application as the **sparklyr backend** and the R code as the **sparklyr frontend**. [Fontend and backend](https://en.wikipedia.org/wiki/Front_and_back_ends) are common software engineer concepts related to separating the user interface, the R console in this case, with the data layer, Spark data proessing in this context. For most [connections], the backend is usually submitted by `sparklyr` to Spark using `spark-submit`, which is a command line tool well-known in Spark; however, for others connections, like Livy, the backend is submitted through Livy's HTTP interface.
-
-Once the backend is submitted to Spark, the frontend communicates to the backend using socket connections, expect for Livy connections where this happens over HTTP:
-
-```{r contributing-connection, eval=TRUE, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Sparklyr Connection Architecture', fig.align = 'center'}
-nomnoml::nomnoml("
-#spacing: 15
-[R|
-  [sparklyr|
-    [frontend]
-  ]
-]
-[Spark|
-  [sparklyr|
-    [backend]
-  ]
-]
-#.hidden: visual=hidden
-[<hidden> Socket / HTTP Connection]
-[R]-[Socket / HTTP Connection]
-[Socket / HTTP Connection]-[Spark]
-", svg = TRUE)
-```
-
-### Compiling
-
-To compile `sparklyr`, make sure the prerequisites described in the [Scala Extensions Prerequisites](#scala-extension-prereq) section are fullfilled.  Then you can recompile all the jars by running `configure.R` in the root of the `sparklyr` sources. Once the jars are compiled, you can build the R package as described in the [R Extensions](#r-extension) section.
-
-### Serialization
-
-### Invocations
-
-### R Packages
-
-(dbi, dplyr, broom, etc)
-
-### Connections
-
-### Distributed R
 
 ## Recap
 
