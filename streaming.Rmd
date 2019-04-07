@@ -430,8 +430,48 @@ This section's example will result in a Shiny app. It will start to accumulate a
     runGadget(ui, server)
     ```
 
-    ```{r, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny reactive', echo = FALSE}
+```{r, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny reactive', echo = FALSE}
 render_image("images/streaming-shiny-1.png")
 ```
 
+## Full example
+
+```{r}
+if(file.exists("source")) unlink("source", TRUE)
+row_numbers <- sample(seq_len(nrow(mtcars)), 1000, replace = TRUE)
+mtcars_stream <- mtcars[row_numbers, ]
+invisible(future(stream_generate_test(mtcars_stream, interval = 0.2, iterations = 10)))
+```
+
+
+```{r}
+sc <- spark_connect(master = "local", config = conf)
+model <- ml_load(sc, "cars_model")
+read_folder <- stream_read_csv(sc, "source")
+process <- model %>%
+  ml_transform(read_folder) %>%
+  stream_watermark() %>%
+  count(timestamp, over_30, prediction)
+write_folder <- stream_write_memory(process, "mtcars_predictions")
+```
+
+
+```{r}
+library(shiny)
+ui <- function() tableOutput("table")
+server <- function(input, output, session){
+  autoInvalidate <- reactiveTimer(2000)
+  output$table <- renderTable({
+    autoInvalidate()
+    tbl(sc, "mtcars_predictions") %>%
+      group_by(over_30, prediction) %>%
+      summarise(results = sum(n, na.rm = TRUE)) %>%
+      select(actual = over_30, prediction, results)
+  })}
+runGadget(ui, server)
+```
+
+```{r, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny reactive', echo = FALSE}
+render_image("images/streaming-shiny-1.png")
+```
 
