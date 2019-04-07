@@ -7,17 +7,17 @@ library(ggplot2)
 
 # Streaming {#streaming}
 
-As the velocity of the generation of data increases, so does the need to real-time analysis. Real-time refers to the ability to continously analyze data from a constantly updating data feed. This is usually called Stream Analytics. In Stream Analytics, data is analyzed as its generated, not retroactively as it happens with "everyday" analysis.  
+As the velocity of the generation of data increases, so does the need to real-time analysis. Real-time refers to the ability to continuously analyze data from a constantly updating data feed. This is usually called Stream Analytics. In Stream Analytics, data is analyzed as its generated, not retroactively as it happens with "everyday" analysis.  
 
 This chapter will cover how to analyze a stream of data using R and Spark. It will also cover basics about stream analysis, along with how to implement these using `sparklyr` and other R packages.
 
-## Spark Streamming 
+## Spark Streaming 
 
-Spark Streamming is an extension of the core Spark API.  It is used for processing live streams of data.  It does this in a scalable, high-throughput, and fault tolerant way. It also allows for the current data to be joined with the historical data.
+Spark Streaming is an extension of the core Spark API.  It is used for processing live streams of data.  It does this in a scalable, high-throughput, and fault tolerant way. It also allows for the current data to be joined with the historical data.
 
-Spark Streamming works by splitting the live input into small batches.  Each batch is processed by Spark individually.  The output from Spark is also in small batches.  This process is not visible to the user.  Spark displays streams as a DStream (discretize stream).  The DStream represents the small batches as one continuos stream. Inisde Spark, the DStream is represented as a sequence of Resilient Distributed Datasets (RDD).
+Spark Streaming works by splitting the live input into small batches.  Each batch is processed by Spark individually.  The output from Spark is also in small batches.  This process is not visible to the user.  Spark displays streams as a DStream (discretize stream).  The DStream represents the small batches as one continuous stream. Inside Spark, the DStream is represented as a sequence of Resilient Distributed Datasets (RDD).
 
-The best resource to learn how Spark analyzes streams is the Apache Spark's Official site [@streaming-programming-guide]. This chapter will cover just enought Spark Streamming concepts to help you understand the mechanics of what the R code is doing.  It is recommended to read the official resource, specially if you need to implement solutions based on Spark Streamming.
+The best resource to learn how Spark analyzes streams is the Apache Spark's Official site [@streaming-programming-guide]. This chapter will cover just enough Spark Streaming concepts to help you understand the mechanics of what the R code is doing.  It is recommended to read the official resource, specially if you need to implement solutions based on Spark Streaming.
 
 ## Working with Spark Streams
 
@@ -46,7 +46,7 @@ the operations]
 [Spark applies 
 the operations] -> [<transceiver> Spark writes 
 results to folder]
- [<transceirver> Spark writes 
+ [<transceiver> Spark writes 
 results to folder] -> [<note> Output 
 Folder] 
 [Spark reads data 
@@ -90,7 +90,7 @@ The `stream_view()` function will generate a Shiny app which displays the curren
 
 ### Stream generator
 
-The `stream_generate_test()` function creates a local test stream.  This function works independently from a Spark connection. The follwoing example will create five files in sub-folder called "source".  The files will be created one second apart from the previous file's creation. 
+The `stream_generate_test()` function creates a local test stream.  This function works independently from a Spark connection. The following example will create five files in sub-folder called "source".  The files will be created one second apart from the previous file's creation. 
 
 ```{r}
 library(sparklyr)
@@ -173,7 +173,7 @@ This section will use a very simple example to introduce the mechanics of Spark 
     invisible(future(stream_generate_test(interval = 0.3)))
     ```
 
-1. `stream_view()` is the out-of-the box graph visualization to monitor the stream that was mentiond in the *sparklyr Interface* section.
+1. `stream_view()` is the out-of-the box graph visualization to monitor the stream that was mentioned in the *sparklyr Interface* section.
     ```{r}
     stream_view(write_output)
     ```
@@ -318,7 +318,7 @@ stream_read_csv(sc, "source") %>%
 
 ### R code
 
-Arbitrary R code can also be used to transform a stream with the use of `spark_apply()`. Following the same principles from executing R code over Spark data frames, for structured streams, `spark_apply()` runs R code over each executor in the cluster where data is available, this enables processing high-throughput streams and fullfill low-latency requirements.
+Arbitrary R code can also be used to transform a stream with the use of `spark_apply()`. Following the same principles from executing R code over Spark data frames, for structured streams, `spark_apply()` runs R code over each executor in the cluster where data is available, this enables processing high-throughput streams and fulfill low-latency requirements.
 
 ```{r}
 stream_read_csv(sc, "source") %>%
@@ -391,7 +391,7 @@ Spark pipelines can be used for scoring streams, but not to train over streaming
 
 ### Shiny integration
 
-The `reactiveSpark()` provides a mechanism to process the tranformations on a stream. It allows you to circumvent the need for writing an output.  Also, because it does not depend on the stream writing functions, it is possible to to use watermark groups. 
+The `reactiveSpark()` provides a mechanism to process the transformations on a stream. It allows you to circumvent the need for writing an output.  Also, because it does not depend on the stream writing functions, it is possible to to use watermark groups. 
 
 This section's example will result in a Shiny app. It will start to accumulate and display the current and historical results. The app's output is shown on figure 11.3.
 
@@ -408,7 +408,7 @@ This section's example will result in a Shiny app. It will start to accumulate a
     ui <- function() tableOutput("table")
     ```
 
-1. The *server* function contains a `reactiveSpark()` function.  This function reads the stream, addes the watermark and then performs the aggregation.  The results are then rendered via the *table* output.
+1. The *server* function contains a `reactiveSpark()` function.  This function reads the stream, adds the watermark and then performs the aggregation.  The results are then rendered via the *table* output.
     ```{r}
     server <- function(input, output, session){
       ps <- stream_read_csv(sc, "source")  %>%
