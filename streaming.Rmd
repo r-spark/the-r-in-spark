@@ -98,13 +98,39 @@ library(sparklyr)
 stream_generate_test(iterations = 5, path = "source", interval = 1)
 ```
 
-After the function completes, all of the files should show up in the "source" folder.
+After the function completes, all of the files should show up in the "source" folder. Notice that the file size vary.  This is so that it simulates what a true stream would do.  
+
 ```{r}
-list.files("source")
+file.info(file.path("source", list.files("source")))[1] 
 ```
 ```
-## [1] "stream_1.csv" "stream_2.csv" "stream_3.csv"
-## [4] "stream_4.csv" "stream_5.csv"
+##                     size
+## source/stream_1.csv   44
+## source/stream_2.csv  121
+## source/stream_3.csv  540
+## source/stream_4.csv 2370
+## source/stream_5.csv 7236
+```
+The `stream_generate_test()` by default will create a single numeric variable data frame.  
+
+```{r}
+readr::read_csv("source/stream_5.csv")
+```
+```
+## # A tibble: 1,489 x 1
+##        x
+##    <dbl>
+##  1   630
+##  2   631
+##  3   632
+##  4   633
+##  5   634
+##  6   635
+##  7   636
+##  8   637
+##  9   638
+## 10   639
+## # ... with 1,479 more rows
 ```
 
 ### Shiny reactive
@@ -168,7 +194,126 @@ spark_disconnect(sc)
 
 ### Transformations 
 
-Streams can be transformed using `dplyr`, SQL, pipelines or R code. We can use as many transformations as needed in the same way that Spark data frames can be transformed with `sparklyr`. The transformation source can be streams or data frames but the output is always a stream. If needed, one can always take a snapshot from the destination stream and save the output as a data frame, which is what `sparklyr` will do for you if a destination stream is not specified. 
+Streams can be transformed using `dplyr`, SQL queries, ML Pipelines or R code. We can use as many transformations as needed in the same way that Spark data frames can be transformed with `sparklyr`. The transformation source can be streams or data frames but the output is always a stream. If needed, one can always take a snapshot from the destination stream and save the output as a data frame, which is what `sparklyr` will do for you if a destination stream is not specified. 
+
+### dplyr
+
+Here are some examples of how `dplyr` transformations will look like when used agaist a streaming source. This section contains a set of quick examples. To reproduce them, you just need to open a local Spark connection and generate some tests.
+```{r}
+sc <- spark_connect(master = "local")
+if(file.exists("source")) unlink("source", TRUE)
+stream_generate_test(iterations = 5)
+```
+
+The `stream_read_csv()` command can be piped into a `dplyr` verb.  In the following case, a `filter()`
+```{r}
+stream_read_csv(sc, "source") %>%
+  filter(x > 700)
+```
+```
+## # Source: spark<?> [inf x 1]
+##        x
+##    <int>
+##  1   701
+##  2   702
+##  3   703
+##  4   704
+##  5   705
+##  6   706
+##  7   707
+##  8   708
+##  9   709
+## 10   710
+## # ... with more rows
+```
+
+A derived column can be created using `mutate()`
+```{r}
+stream_read_csv(sc, "source") %>%
+  filter(x > 700) %>%
+  mutate(y = x / 2) 
+```
+```
+## # Source: spark<?> [inf x 2]
+##        x     y
+##    <int> <dbl>
+##  1   701  350.
+##  2   702  351 
+##  3   703  352.
+##  4   704  352 
+##  5   705  352.
+##  6   706  353 
+##  7   707  354.
+##  8   708  354 
+##  9   709  354.
+## 10   710  355 
+## # ... with more rows
+```
+
+A basic row count can be also done, in this case using `count()`
+```{r}
+stream_read_csv(sc, "source") %>%
+  filter(x > 700) %>%
+  mutate(y = x / 2) %>%
+  count() 
+```
+```
+## # Source: spark<?> [inf x 1]
+##       n
+##   <dbl>
+## 1   600
+```
+
+For more complex aggregation it is required to use a time stamp.  The time stamp will be of when reading function, in this case `stream_read_csv()` , first "saw" that specific record. In Spark stream terms, that time stamp is called a "watermark".  The `spark_watermark()` function is used to add the time stamp.  For this exercise, the watermark will be the same for all records.  That is because the 5 files were read by the stream after they were created.  
+
+```{r}
+stream_read_csv(sc, "source") %>%
+  stream_watermark()
+```
+
+```
+## # Source: spark<?> [inf x 2]
+##        x timestamp          
+##    <int> <dttm>             
+##  1   630 2019-04-07 15:44:50
+##  2   631 2019-04-07 15:44:50
+##  3   632 2019-04-07 15:44:50
+##  4   633 2019-04-07 15:44:50
+##  5   634 2019-04-07 15:44:50
+##  6   635 2019-04-07 15:44:50
+##  7   636 2019-04-07 15:44:50
+##  8   637 2019-04-07 15:44:50
+##  9   638 2019-04-07 15:44:50
+## 10   639 2019-04-07 15:44:50
+## # ... with more rows
+```
+
+After the watermark is created, it can be used in the `group_by()` verb.  It can then be piped into a `summarise()` function to get some stats of the stream.
+
+```{r}
+stream_read_csv(sc, "source") %>%
+  stream_watermark() %>%
+  group_by(timestamp) %>%
+  summarise(
+    max_x = max(x, na.rm = TRUE),
+    min_x = min(x, na.rm = TRUE),
+    count = n()
+  ) 
+```
+```
+## # Source: spark<?> [inf x 4]
+##   timestamp           max_x min_x count
+##   <dttm>              <int> <int> <dbl>
+## 1 2019-04-07 15:45:59  1000     1  2122
+```
+
+The final step is to clean up the stream and Spark connection
+
+```{r}
+stream_stop(write_output)
+spark_disconnect(sc)
+```
+
 
 
 ## TBD
