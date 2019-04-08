@@ -31,7 +31,7 @@ ml_logistic_regression(mtcars, am ~ .)
 ## -20.68143251  -9.52647833  -6.81113196  29.16524289   3.33862282 
 ```
 
-As can be seen in [List of ML functions](#functionlist), Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with "R for Data Science" [@intro-r-for-data-science] and "Feature Engineering and Selection: A Practical Approach for Predictive Models" [@kuhn-fes], from which we take inspiration for many examples in this chapter.
+As can be seen in [List of ML functions](#functionlist), Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with "R for Data Science" [@intro-r-for-data-science] and "Feature Engineering and Selection: A Practical Approach for Predictive Models" [@kuhn-fes], from which we adopted for examples and visualizations in this chapter.
 
 ## Overview
 
@@ -851,7 +851,9 @@ Note here we are using `regex_replace()`, which is a Spark SQL function.
 
 ### Topic Modeling
 
-Once we have a reasonably clean dataset, we can fit an LDA model with `ml_lda()`:
+LDA is a type of topic model for identifying abstract "topics" in a set of documents. It is an unsupervised algorithm in that we do not provide any labels, or topics, for the input documents. LDA posits that each document is a mixture of topics, and each topic is a mixture of words. During training, it attempts to estimate both of these simultaneously. A typical use case for topic models involves categorizing many documents, where the large number of documents renders manually approaches infeasible. The application domains range from GitHub issues to legal documents.
+
+Once we have a reasonably clean dataset following the workflow in the previous section, we can fit an LDA model with `ml_lda()`:
 
 ```{r}
 stop_words <- ml_default_stop_words(sc) %>%
