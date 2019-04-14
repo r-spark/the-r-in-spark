@@ -144,3 +144,55 @@ See also [spark.rstudio.com/guides/mleap](http://spark.rstudio.com/guides/mleap/
 ```{r extensions-nested}
 library(sparklyr.nested)
 ```
+
+## Geospatial Data {#extensions-geospatial-data}
+
+[geospark](https://github.com/harryprince/geospark) enables distributed geospatial computing with spatial index on spark in production and keeps a [`dplyr`](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) and [`sf`](https://github.com/rstudio/cheatsheets/raw/master/sf.pdf) style grammar.
+
+In this example we will join spatial data using `quadrad tree indexing`. First, we will initialize the geospark extension and connect to Spark using sparklyr:
+
+```{r extensions-geospatial}
+pak::pkg_install("harryprince/geospark")
+
+library(sparklyr)
+library(geospark)
+
+conf <- spark_config()
+sc <- spark_connect(master = "local", config = conf)
+register_gis(sc)
+```
+
+After enable Spark GIS mode, now we can use `st_join` to join spatial data using `quadrad tree indexing`.
+
+```{r}
+points_wkt <- st_example(sc, "points") %>%
+  select(city, state, geom_x = geom)
+polygons_wkt <- st_example(sc, "polygons") %>%
+  mutate(area,geom_y = geom)
+
+sc_res <- st_join(points_wkt,
+                  polygons_wkt,
+                  join = sql("st_contains(geom_y,geom_x)")) %>% 
+           group_by(area, state) %>%
+            summarise(cnt = n()) 
+```
+
+```
+   # Source: spark<?> [?? x 3]
+    # Groups: area
+      area            state   cnt
+      <chr>           <chr> <dbl>
+    1 texas area      TX       10
+    2 dakota area     SD        1
+    3 dakota area     ND       10
+    4 california area CA       10
+    5 new york area   NY        9 
+```
+
+see more [spatial join](https://github.com/harryprince/geospark#spatial-join):
+
+![](https://camo.githubusercontent.com/f18513c8002df02bdb6e3aac451519beb3c87ebb/68747470733a2f2f7365676d656e746661756c742e636f6d2f696d672f625662714665333f773d3132383026683d353038)
+
+
+
+
