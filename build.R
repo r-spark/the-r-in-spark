@@ -14,6 +14,8 @@ chapters <- list(
   "connections",
   "tuning",
   "distributed-r",
+  "streaming",
+  "contributing",
   "appendix"
 )
 chapters_pattern <- paste(chapters, collapse = "|")
