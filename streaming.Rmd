@@ -389,7 +389,7 @@ Spark pipelines can be used for scoring streams, but not to train over streaming
     ## #   probability <list>, prediction <dbl>
     ```
 
-### Shiny integration
+## Shiny integration
 
 The `reactiveSpark()` provides a mechanism to process the transformations on a stream. It allows you to circumvent the need for writing an output.  Also, because it does not depend on the stream writing functions, it is possible to to use watermark groups. 
 
@@ -434,44 +434,128 @@ This section's example will result in a Shiny app. It will start to accumulate a
 render_image("images/streaming-shiny-1.png")
 ```
 
-## Full example
+## Kafka
+
+Apache Kafka is to streaming as what Hadoop is to data storage/retrieval. Hadoop provides a a distributed, resilient and reliable architecture for large-scale data storage. Kafka does the same, but for large-scale streaming applications.
+
+### Basic Workflow
+
+The most basic Kafka workflow is illustrated on figure 2.4. This is the breakdown:
+
+- An application that streams data into Kafka is called a **Producer**.
+
+- Kafka stores the stream as records. Each record has a key, value and a timestamp. Kafka can handle multiple streams that contain different information. To properly categorize each stream, Kafka uses a mechanism called topic. A topic is a alpha-numeric identifier of the stream.
+
+- A **Consumer** is an app that is external to Kafka. It reads what is stored in Kafka for a given topic. Because the Consumer app is constantly monitoring the topic, the term used for its integration with Kafka is subscribe.
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Basic workflow', fig.align = 'center', eval = TRUE}
+render_nomnoml("
+#direction: right
+#padding: 10
+#fontSize: 14
+#leading: 2
+[Producer | Stream topic A] -> [Kafka | Store topic A]
+[Kafka] -> [Consumer | Subscribe to topic A]
+", "images/kafka-apis.png")
+```
+
+The Consumer application could use a Spark connection to the Kafka cluster. That means that aggregation or other kind of analysis can be done to the topic.
+
+### Stream Processors
+
+Kafka allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a Stream Processor.
+
+As illustrated in figure 2.5, the Stream Processor reads topic A, and then writes results to topic B. This allows for a given Consumer application to read results instead of “raw” feed data.
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka workflow', fig.align = 'center', eval = TRUE}
+render_nomnoml("
+#direction: right
+#padding: 10
+#fontSize: 14
+#leading: 2
+
+[Producer | Stream topic A] -> [Kafka | Store topics A & B]
+[Kafka] <-> [Stream Processor | Subscribes to topic A
+Results to topic B]
+[Kafka] -> [Consumer | Subscribe to topic B]
+
+", "images/kafka-apis2.png")
+```
+
+It is possible to have this functionality via Spark. The Spark routine can read from a topic, analyze the data, and write back the results to a different topic.
+
+### Spark integration
+
+An example will be used to showcase how Spark integrates with Kafka.  Figure 2.6 is a diagram of how the example will work. The **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count of how many letter A's are in the batch.  The results are written to another topic, called "a-only".  The same Spark connection will be used to setup a **Consumer** that reads the 'a-only' topic.
+
+
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka example', fig.align = 'center', eval = TRUE}
+render_nomnoml("
+#direction: right
+#padding: 10
+#fontSize: 14
+#leading: 2
+
+[Producer | Streams 'letters'] -> [Kafka | Stores 'letters' & 'a-only']
+[Kafka] <-> [Stream Processor 
+(Spark)| Subscribes to 'letters'
+Writes results to 'a-only']
+[Kafka] -> [Consumer
+(Spark) | Subscribes to 'a-only']
+
+", "images/kafka-example.png")
+```
+
+
+
+```{r, include = FALSE}
+set.seed(100)
+letter_stream <-  LETTERS[sample(length(LETTERS), size = 1000, replace = TRUE)]
+total_a <- length(letter_stream[letter_stream == "A"])
+#paste0(letter_stream[1:100], collapse = " ")
+```
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Stream Processor (Spark)', fig.align = 'center', eval = TRUE}
+render_nomnoml("
+#direction: right
+#padding: 10
+#fontSize: 14
+#leading: 2
+
+['letters' topic |
+[timestamp 1 | V A O E Q W H K T R A ]
+[timestamp 2 | P T G H T X F A A X A D B Y ]
+] -> [Stream Processor | Spark Streaming]
+[Stream Processor] -> ['a-only' topic | 
+[timestamp 1 | 1 ] 
+[timestamp 2 | 3]
+]
+", "images/kafka-processor.png")
+```
+```{r}
+library(sparklyr)
+library(dplyr)
+library(future)
+config <- spark_config()
+config$sparklyr.shell.packages <- "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
+sc <- spark_connect(master = "local", config = config)
+
+read_options <- list(kafka.bootstrap.servers = "localhost:9092", subscribe = "letters")
+write_options <- list(kafka.bootstrap.servers = "localhost:9092", topic = "a-only")
+
+stream <- stream_read_kafka(sc, options = read_options) %>%
+  mutate(value = as.character(value), key = as.character(key)) %>%
+  group_by(timestamp) %>%
+  summarise(value = sum(ifelse(value == "A", 0 ,1), na.rm = TRUE)) %>%
+  mutate(value = as.character(value)) %>%
+  stream_write_kafka(mode = "complete", options = write_options)
+
+read_options2 <- list(kafka.bootstrap.servers = "localhost:9092", subscribe = "a-only")
+stream2 <- stream_read_kafka(sc, options = read_options2) %>%
+  stream_write_memory("output")
+```
+
 
 ```{r}
-if(file.exists("source")) unlink("source", TRUE)
-row_numbers <- sample(seq_len(nrow(mtcars)), 1000, replace = TRUE)
-mtcars_stream <- mtcars[row_numbers, ]
-invisible(future(stream_generate_test(mtcars_stream, interval = 0.2, iterations = 10)))
+tbl(sc, "output") %>%
+  mutate(value = as.character(value))
 ```
-
-
-```{r}
-sc <- spark_connect(master = "local", config = conf)
-model <- ml_load(sc, "cars_model")
-read_folder <- stream_read_csv(sc, "source")
-process <- model %>%
-  ml_transform(read_folder) %>%
-  stream_watermark() %>%
-  count(timestamp, over_30, prediction)
-write_folder <- stream_write_memory(process, "mtcars_predictions")
-```
-
-
-```{r}
-library(shiny)
-ui <- function() tableOutput("table")
-server <- function(input, output, session){
-  autoInvalidate <- reactiveTimer(2000)
-  output$table <- renderTable({
-    autoInvalidate()
-    tbl(sc, "mtcars_predictions") %>%
-      group_by(over_30, prediction) %>%
-      summarise(results = sum(n, na.rm = TRUE)) %>%
-      select(actual = over_30, prediction, results)
-  })}
-runGadget(ui, server)
-```
-
-```{r, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny reactive', echo = FALSE}
-render_image("images/streaming-shiny-1.png")
-```
-
