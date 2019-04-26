@@ -488,16 +488,34 @@ Unless there is a very specific need, using Spark as a Producer does not make mu
 
 The more likely use case for this integration, is to use Spark to read (Consumer) from one, or several, topics and then reactively write (Producer) to a different topic with the results of the analysis. All within the same Kafka cluster. This effectively makes Spark a Stream Processor.
 
-```{r}
-config <- spark_config()
-config$sparklyr.shell.packages <- "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
-sc <- spark_connect(master = "local", config = config)
-```
+### R integration
+
+There are a few additional settings to keep in mind when using `sparklyr` to integrate Spark with Kafka.
+
+- The Spark package that provide Spark SQL integration with Kafka.  The name should be `org.apache.spark:spark-sql-kafka` followed by the Kafka version, then the Scala version, and lastly the Spark package version. For example: `org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0`, requests the version 2.4.0 of the Spark package that supports Scala 2.11 and Kafka 10.
+
+    ```{r}
+    config <- spark_config()
+    config$sparklyr.shell.packages <- "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
+    sc <- spark_connect(master = "local", config = config)
+    ```
+
+- The Kafka writing and reading function in `sparklyr` rely on additional parameters  These parameters are passed via the `options` argument.  The contents of the `options` argument are passed down to Kafka as-is. This means that the same Kafka options used in your other functioning applications can be reused here. There are three basic Kafka options to keep in mind. The `kafka.bootstrap.server` option is used to specify the entry server and ports of the Kafka cluster.  The name of the topic to read from goes in `subscribe`, and the name of the topic to write to goes in `topic`.  The last two would be used at the exclusion of the other. 
+    
+    ```{r}
+    stream_read_kafka(
+      sc, 
+      options = list(
+        kafka.bootstrap.server = "host1:9092, host2:9092", 
+        subscribe = "topic"
+        )
+      ) 
+    ```
 
 
-### Example background
+### Example 
 
-An example will be used to showcase how Spark integrates with Kafka.  Figure 2.6 is a diagram of how the example will work. The **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count of how many letter A's are in the batch.  The results are written to another topic, called "a-only".  The same Spark connection will be used to setup a **Consumer** that reads the 'a-only' topic.
+Figure 2.6 is a diagram of how this example will work. The **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count of how many letter A's are in the batch.  The results are written to another topic, called "a-only".  The same Spark connection will be used to setup a **Consumer** that reads the 'a-only' topic.
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka example', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -542,36 +560,90 @@ render_nomnoml("
 ", "images/kafka-processor.png")
 ```
 
-### Spark connection
+The infrascruture of this example as a local, single node Kafka cluster.  The external Producer uses the Kafka CLI to send the stream of letters. The sample code and installation instructions that were used can be found in the Appendix. 
 
-```{r}
-library(sparklyr)
-library(dplyr)
-library(future)
-config <- spark_config()
-config$sparklyr.shell.packages <- "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
-sc <- spark_connect(master = "local", config = config)
-```
+1. Load libraries, and open the connection.  Remember to load the Spark SQL Kafka package.
+    ```{r}
+    library(sparklyr)
+    library(dplyr)
+    
+    config <- spark_config()
+    config$sparklyr.shell.packages <- "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
+    sc <- spark_connect(master = "local", config = config)
+    ```
+
+1. The local Kafka cluster is served on port 9092, by default.  In order to keep the read and write calls a little cleaner, a couple of variables will contain the Kafka options.  Notice that the read option has `subscribe`, while the write option contains `topic`.  
+    ```{r}
+    hosts   <- "localhost:9092"
+    read_options  <- list(kafka.bootstrap.servers = hosts, subscribe = "letters")
+    write_options <- list(kafka.bootstrap.servers = hosts, topic = "a-only")
+    ```
+
+1. Typically, the following steps would be written together using a pipe.  So that explanations can be shared, they have been broken into individual step variables.  What is unique about this setp is the use of the `read_options` variable as the `options` argument.
+    ```{r}
+    step_1 <- stream_read_kafka(sc, options = read_options)
+    ```
+
+1. This step takes the data from the "letters" topic groups them by the timestamp, and summarises the number of A's found.  It is important to note that the results are writen to a character variable called 'value'.  Kafka expect at least one variable with this name, value.  It also considers its contents to be character, so it is better to perform any type coercion before writing back to Kafka.
+    ```{r}
+    step_2 <- step_1 %>%
+      mutate(value = as.character(value), key = as.character(key)) %>%
+      #group_by(timestamp) %>%
+      summarise(value = sum(ifelse(value == "A", 0 ,1), na.rm = TRUE)) %>%
+      mutate(value = as.character(value)) 
+    ```
+
+1. Writing back to Kafka is the last step.  As set in a prior step, the topic that the results will write to is called "a-only" 
+    ```{r}
+    step_3 <- step_2 %>%
+      stream_write_kafka(mode = "complete", options = write_options)
+    ```
+
+The last step starts a Spark job.  The job will remain active until stoped or until Spark disconnects. A this point, there is no visible output. Even if there was an active Producer sending letters over.  
 
 
-```{r}
-read_options <- list(kafka.bootstrap.servers = "localhost:9092", subscribe = "letters")
-write_options <- list(kafka.bootstrap.servers = "localhost:9092", topic = "a-only")
+1. For purposes of this exercise, a Consumer application is now started. To do that, the data from "a-only" topic will be sent to a Spark in-memory table.  
+    ```{r}
+    a_only <- stream_read_kafka(
+        sc, 
+        options = list(
+          kafka.bootstrap.servers = hosts, 
+          subscribe = "a-only")
+          #subscribe = "letters")
+        ) %>%
+      stream_write_memory("only_a")
+    ```
+    
+1. Text
+    ```{r}
+    tbl(sc, "only_a") %>%
+      head()
+    ```
+    ```
+    ## # Source: spark<?> [?? x 7]
+    ##   key       value     topic  partition offset timestamp           timestampType
+    ##   <list>    <list>    <chr>      <int>  <dbl> <dttm>                      <int>
+    ## 1 <lgl [1]> <raw [3]> a-only         0      0 2019-04-26 21:08:49             0
+    ## 2 <lgl [1]> <raw [3]> a-only         0      1 2019-04-26 21:08:49             0
+    ## 3 <lgl [1]> <raw [3]> a-only         0      2 2019-04-26 21:08:49             0
+    ## 4 <lgl [1]> <raw [3]> a-only         0      3 2019-04-26 21:08:49             0
+    ## 5 <lgl [1]> <raw [3]> a-only         0      4 2019-04-26 21:08:49             0
+    ## 6 <lgl [1]> <raw [4]> a-only         0      5 2019-04-26 21:08:49             0
+    ```
+    ```{r}
+    tbl(sc, "only_a") %>%
+      head() %>%
+      mutate(value = as.character(value))
+    ```
+    ```
+    ## # Source: spark<?> [?? x 7]
+    ##   key       value topic  partition offset timestamp           timestampType
+    ##   <list>    <chr> <chr>      <int>  <dbl> <dttm>                      <int>
+    ## 1 <lgl [1]> 2.0   a-only         0      0 2019-04-26 21:08:49             0
+    ## 2 <lgl [1]> 1.0   a-only         0      1 2019-04-26 21:08:49             0
+    ## 3 <lgl [1]> 2.0   a-only         0      2 2019-04-26 21:08:49             0
+    ## 4 <lgl [1]> 1.0   a-only         0      3 2019-04-26 21:08:49             0
+    ## 5 <lgl [1]> 1.0   a-only         0      4 2019-04-26 21:08:49             0
+    ## 6 <lgl [1]> 11.0  a-only         0      5 2019-04-26 21:08:49             0
+    ```
 
-stream <- stream_read_kafka(sc, options = read_options) %>%
-  mutate(value = as.character(value), key = as.character(key)) %>%
-  group_by(timestamp) %>%
-  summarise(value = sum(ifelse(value == "A", 0 ,1), na.rm = TRUE)) %>%
-  mutate(value = as.character(value)) %>%
-  stream_write_kafka(mode = "complete", options = write_options)
-
-read_options2 <- list(kafka.bootstrap.servers = "localhost:9092", subscribe = "a-only")
-stream2 <- stream_read_kafka(sc, options = read_options2) %>%
-  stream_write_memory("output")
-```
-
-
-```{r}
-tbl(sc, "output") %>%
-  mutate(value = as.character(value))
-```
