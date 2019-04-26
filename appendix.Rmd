@@ -255,15 +255,20 @@ Transform Word into Code | ft_word2vec()
 
 ## Kafka
 
+```
+wget http://apache.claz.org/kafka/2.2.0/kafka_2.12-2.2.0.tgz
+tar -xzf kafka_2.12-2.2.0.tgz
+cd kafka_2.12-2.2.0
+bin/zookeeper-server-start.sh config/zookeeper.properties
+bin/kafka-server-start.sh config/server.properties
+```
+
 ```{r, eval = FALSE}
-# bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic myoutput --from-beginning
-
-
-# wget http://apache.claz.org/kafka/2.2.0/kafka_2.12-2.2.0.tgz
-# tar -xzf kafka_2.12-2.2.0.tgz
-# cd kafka_2.12-2.2.0
-# bin/zookeeper-server-start.sh config/zookeeper.properties
-# bin/kafka-server-start.sh config/server.properties
-
+set.seed(100)
+writeLines(
+  LETTERS[sample(length(LETTERS), size = 1000, replace = TRUE)],
+  "/home/edgar/kafka_2.12-2.2.0/output.txt"
+  )
+system2("/home/edgar/kafka_2.12-2.2.0/bin/kafka-console-producer.sh", c("--broker-list localhost:9092", "--topic letters", "< /home/edgar/kafka_2.12-2.2.0/output.txt"))  
 ```
 
