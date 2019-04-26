@@ -438,7 +438,7 @@ render_image("images/streaming-shiny-1.png")
 
 Apache Kafka is to streaming as what Hadoop is to data storage/retrieval. Hadoop provides a a distributed, resilient and reliable architecture for large-scale data storage. Kafka does the same, but for large-scale streaming applications.
 
-### Basic Workflow
+### Workflow
 
 The most basic Kafka workflow is illustrated on figure 2.4. This is the breakdown:
 
@@ -461,11 +461,7 @@ render_nomnoml("
 
 The Consumer application could use a Spark connection to the Kafka cluster. That means that aggregation or other kind of analysis can be done to the topic.
 
-### Stream Processors
-
-Kafka allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a Stream Processor.
-
-As illustrated in figure 2.5, the Stream Processor reads topic A, and then writes results to topic B. This allows for a given Consumer application to read results instead of “raw” feed data.
+Kafka also allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a Stream Processor. As illustrated in figure 2.5, the Stream Processor reads topic A, and then writes results to topic B. This allows for a given Consumer application to read results instead of “raw” feed data.
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka workflow', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -486,8 +482,22 @@ It is possible to have this functionality via Spark. The Spark routine can read 
 
 ### Spark integration
 
-An example will be used to showcase how Spark integrates with Kafka.  Figure 2.6 is a diagram of how the example will work. The **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count of how many letter A's are in the batch.  The results are written to another topic, called "a-only".  The same Spark connection will be used to setup a **Consumer** that reads the 'a-only' topic.
+Spark Streaming enables the integration of Spark and Kafka.  Spark is able to both, read from and write into Kafka topics.  This means that Spark could be a Consumer, Stream Processor or  Producer application in a Kafka implementation.  
 
+Unless there is a very specific need, using Spark as a Producer does not make much sense.  That is because Spark Streaming reacts to a stream, it doesn't generate it.  But there could be cases where Spark reads from one stream (Kafka or not) and streams to a Kafka cluster.  To the target, Spark would look as a pure Producer, even though that's not really the case.   
+
+The more likely use case for this integration, is to use Spark to read (Consumer) from one, or several, topics and then reactively write (Producer) to a different topic with the results of the analysis. All within the same Kafka cluster. This effectively makes Spark a Stream Processor.
+
+```{r}
+config <- spark_config()
+config$sparklyr.shell.packages <- "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
+sc <- spark_connect(master = "local", config = config)
+```
+
+
+### Example background
+
+An example will be used to showcase how Spark integrates with Kafka.  Figure 2.6 is a diagram of how the example will work. The **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count of how many letter A's are in the batch.  The results are written to another topic, called "a-only".  The same Spark connection will be used to setup a **Consumer** that reads the 'a-only' topic.
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka example', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -506,7 +516,7 @@ Writes results to 'a-only']
 ", "images/kafka-example.png")
 ```
 
-
+Figure 2.7 offers an expanded view of what the **Stream Processor (Spark)** process is supposed to do.  Each small batch, identified by its *timestamp* will be processed as it comes in.  This this case it will be to check how many letter A's are in the batch.  Then the totals are send back to Kafka via the 'a-only' topic.
 
 ```{r, include = FALSE}
 set.seed(100)
@@ -531,6 +541,9 @@ render_nomnoml("
 ]
 ", "images/kafka-processor.png")
 ```
+
+### Spark connection
+
 ```{r}
 library(sparklyr)
 library(dplyr)
@@ -538,7 +551,10 @@ library(future)
 config <- spark_config()
 config$sparklyr.shell.packages <- "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
 sc <- spark_connect(master = "local", config = config)
+```
 
+
+```{r}
 read_options <- list(kafka.bootstrap.servers = "localhost:9092", subscribe = "letters")
 write_options <- list(kafka.bootstrap.servers = "localhost:9092", topic = "a-only")
 
