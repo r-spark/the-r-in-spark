@@ -560,7 +560,7 @@ render_nomnoml("
 ", "images/kafka-processor.png")
 ```
 
-The infrascruture of this example as a local, single node Kafka cluster.  The external Producer uses the Kafka CLI to send the stream of letters. The sample code and installation instructions that were used can be found in the Appendix. 
+The *infrastructure* of this example as a local, single node Kafka cluster.  The external Producer uses the Kafka CLI to send the stream of letters. The sample code and installation instructions that were used can be found in the Appendix. 
 
 1. Load libraries, and open the connection.  Remember to load the Spark SQL Kafka package.
     ```{r}
@@ -579,12 +579,12 @@ The infrascruture of this example as a local, single node Kafka cluster.  The ex
     write_options <- list(kafka.bootstrap.servers = hosts, topic = "totals")
     ```
 
-1. Typically, the following steps would be written together using a pipe.  So that explanations can be shared, they have been broken into individual step variables.  What is unique about this setp is the use of the `read_options` variable as the `options` argument.
+1. Typically, the following steps would be written together using a pipe.  So that explanations can be shared, they have been broken into individual step variables.  What is unique about this setup is the use of the `read_options` variable as the `options` argument.
     ```{r}
     step_1 <- stream_read_kafka(sc, options = read_options)
     ```
 
-1. This steps coerces the `value` field into a character. The resulting content of the field is a single letter entry from the stream.  The letters are grouped and counted.  A single field is permitted by Kafka to send back as results.  It also expect that the results are in a field called `value`.  The new `value` field is a concatenaed field with the letter and the count. 
+1. This steps coerces the `value` field into a character. The resulting content of the field is a single letter entry from the stream.  The letters are grouped and counted.  A single field is permitted by Kafka to send back as results.  It also expect that the results are in a field called `value`.  The new `value` field is a concatenated field with the letter and the count. 
 
     ```{r}
     step_2 <- step_1 %>%
@@ -593,13 +593,13 @@ The infrascruture of this example as a local, single node Kafka cluster.  The ex
       mutate(value = paste0(value, "=", n))
     ```
 
-1. The results are written to the "totals" topic.  The`mode` argument is set to "update".  This sets the count behaivor illustrated in Figure 11.7
+1. The results are written to the "totals" topic.  The`mode` argument is set to "update".  This sets the count behavior illustrated in Figure 11.7
     ```{r}
     step_3 <- step_2 %>%
       stream_write_kafka(mode = "update", options = write_options)
     ```
 
-The last step starts a Spark job.  The job will remain active until stoped or until Spark disconnects. A this point, there is no visible output. Even if there was an active Producer sending letters over.  
+The last step starts a Spark job.  The job will remain active until stopped or until Spark disconnects. A this point, there is no visible output. Even if there was an active Producer sending letters over.  
 
 A simple Shiny routine can be used as a *Consumer* app.  It will read the "totals" topic, select the latest count for a given letter, and then display the results on a table. 
 
@@ -616,7 +616,7 @@ server <- function(input, output, session){
     group_by(letter) %>%
     summarise(total = max(total, na.rm = TRUE)) %>%
     arrange(letter) %>%
-    reactiveSpark()  # Spark stream reactive
+    reactiveSpark()  
   output$table <- renderTable(ps())
 }
 runGadget(ui, server)
