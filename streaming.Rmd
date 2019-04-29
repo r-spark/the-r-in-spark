@@ -9,25 +9,25 @@ library(ggplot2)
 
 As the velocity of the generation of data increases, so does the need to real-time analysis. Real-time refers to the ability to continuously analyze data from a constantly updating data feed. This is usually called Stream Analytics. In Stream Analytics, data is analyzed as its generated, not retroactively as it happens with "everyday" analysis.  
 
-This chapter will cover how to analyze a stream of data using R and Spark. It will also cover basics about stream analysis, along with how to implement these using `sparklyr` and other R packages.
+This chapter will cover how to analyze a stream of data using R and Spark. It will also cover basics about stream analysis, along with how to implement these using `sparklyr` and other R packages. 
 
 ## Spark Streaming 
 
 Spark Streaming is an extension of the core Spark API.  It is used for processing live streams of data.  It does this in a scalable, high-throughput, and fault tolerant way. It also allows for the current data to be joined with the historical data.
 
-Spark Streaming works by splitting the live input into small batches.  Each batch is processed by Spark individually.  The output from Spark is also in small batches.  This process is not visible to the user.  Spark displays streams as a DStream (discretize stream).  The DStream represents the small batches as one continuous stream. Inside Spark, the DStream is represented as a sequence of Resilient Distributed Datasets (RDD).
+Spark Streaming works by splitting the live input into small batches.  Each batch is processed by Spark individually.  The output from Spark is also in small batches.  This process is not visible to the user.  Spark displays streams as a DStream. The name stands for "discretize stream".  DStream represents the small batches as one continuous stream. Inside Spark, the DStream is represented as a sequence of Resilient Distributed Datasets (RDD).
 
 The best resource to learn how Spark analyzes streams is the Apache Spark's Official site [@streaming-programming-guide]. This chapter will cover just enough Spark Streaming concepts to help you understand the mechanics of what the R code is doing.  It is recommended to read the official resource, specially if you need to implement solutions based on Spark Streaming.
 
 ## Working with Spark Streams
 
-In practice, a Spark stream update is a three stage operation.  Two of the stages are driven by new files being added, either from the stream, or as a result of the Spark analysis. This is the breakdown of the three stages:
+In practice, a Spark Stream update is a three stage operation. This is the breakdown of the three stages:
 
-1. **Read** - The stream is expected to append new files in a specified folder. Those new files contain the most recent information from the stream.  Spark monitors the folder, and reads the data from the files. The following formats are supported: CSV, text, JSON, parquet, Kafka, JDBC, and orc.
+1. **Read** - The stream is expected to append new files in a specified folder. Those new files contain the most recent information from the stream.  Spark monitors the folder, and reads the data from the files. The following file formats are supported: CSV, text, JSON, parquet, and orc. 
 
 1. **Transform** - Spark applies the desired operations on top of the data. No special `sparklyr` functions are needed to transform stream data.  You can use same `dplyr` verbs, Spark transformers and even native R code (via `spark_apply()`).
 
-1. **Write** - The results of the transformed input are saved in a different folder.  The following file formats are supported: CSV, text, JSON, parquet, Kafka, JDBC, and orc.
+1. **Write** - The results of the transformed input are saved in a different folder.  The following file formats are supported: CSV, text, JSON, parquet, and orc.
 
 Figure 11.1 provides a visual aid to what each stage does and how they connect:
 
@@ -58,8 +58,6 @@ the operations] -/- [<label> 3. Write]
 ", "images/streaming-working.png")
 ```
 
-## Read/Write functions
-
 Here is the breakdown of the available `sparklyr` functions for reading and writing: 
 
 | Format  | Read                | Write                |
@@ -74,9 +72,11 @@ Here is the breakdown of the available `sparklyr` functions for reading and writ
 
 In the same way all of the read and write operations in `sparklyr` for Spark Standalone, or in `sparklyr`’s local mode, the input and output folders are actual Operating System file system folders. For YARN managed clusters, these will be folder locations inside the Hadoop File System (HDFS). 
 
-## Additional features
+Non-file driven applications are also supported, such as Kafka. Kafka will be discussed in the last part of the chapter.
 
-The `sparklyr` package goes beyond providing an easy-to-use-interface to work with all three stages of Spark streaming.  The package includes additional features which provide a more complete integration with R:
+## `sparklyr` extras
+
+The `sparklyr` package goes beyond providing an easy-to-use-interface to Spark Streaming.  The R package includes  features which provide a more complete integration with R:
 
 1. An out-of-the box graph visualization to monitor the stream.
 
@@ -135,7 +135,7 @@ readr::read_csv("source/stream_5.csv")
 
 ### Shiny reactive
 
-The "live" nature of the Spark stream goes along well with the reactivity of Shiny.  The idea is that your Shiny app can automatically display the latest results as fast as Spark can process them.  The `reactiveSpark()` function provides that integration.  
+Shiny's reactive framework is well suited to support streaming information. The idea is that your Shiny app can automatically display the latest results as fast as Spark can process them.  The `reactiveSpark()` function provides that integration.  
 
 ## Intro example
 
@@ -190,7 +190,6 @@ The final step is to clean up the stream and Spark connection
 stream_stop(write_output)
 spark_disconnect(sc)
 ```
-
 
 ## Transformations 
 
@@ -482,7 +481,7 @@ There are nuances on how the Spark-to-Kafka write-back modes works. It is import
 
 ### R integration
 
-The R integration is delivered via the `sparklyr` inteface. There are a couple of things to keep in mind:
+The R integration is delivered via the `sparklyr` interface. There are a couple of things to keep in mind:
 
 - **The Kafka integration Spark package is required ** -  The name should be `org.apache.spark:spark-sql-kafka` followed by the Kafka version, then the Scala version, and lastly the Spark package version. For example: `org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0`, requests the version 2.4.0 of the Spark package that supports Scala 2.11 and Kafka 10.
 
@@ -526,7 +525,7 @@ Writes results to 'totals']
 ", "images/kafka-example.png")
 ```
 
-The example will use the `update` mode for writing back into Kafka.  This means that only the totals of the letters that changed will be sent to the "totals" topic.  The change in totals is determined after each batch from the "letters" topic is recieved. Figure 11.7 offers an deeper look of what the **Stream Processor (Spark)** process is supposed to do. 
+The example will use the `update` mode for writing back into Kafka.  This means that only the totals of the letters that changed will be sent to the "totals" topic.  The change in totals is determined after each batch from the "letters" topic is received. Figure 11.7 offers an deeper look of what the **Stream Processor (Spark)** process is supposed to do. 
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Stream Processor - Update mode', fig.align = 'center', eval = TRUE}
 render_nomnoml("
