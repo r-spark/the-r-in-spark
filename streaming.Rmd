@@ -9,25 +9,25 @@ library(ggplot2)
 
 As the velocity of the generation of data increases, so does the need to real-time analysis. Real-time refers to the ability to continuously analyze data from a constantly updating data feed. This is usually called Stream Analytics. In Stream Analytics, data is analyzed as its generated, not retroactively as it happens with "everyday" analysis.  
 
-This chapter will cover how to analyze a stream of data using R and Spark. It will also cover basics about stream analysis, along with how to implement these using `sparklyr` and other R packages.
+This chapter will cover how to analyze a stream of data using R and Spark. It will also cover basics about stream analysis, along with how to implement these using `sparklyr` and other R packages. 
 
 ## Spark Streaming 
 
 Spark Streaming is an extension of the core Spark API.  It is used for processing live streams of data.  It does this in a scalable, high-throughput, and fault tolerant way. It also allows for the current data to be joined with the historical data.
 
-Spark Streaming works by splitting the live input into small batches.  Each batch is processed by Spark individually.  The output from Spark is also in small batches.  This process is not visible to the user.  Spark displays streams as a DStream (discretize stream).  The DStream represents the small batches as one continuous stream. Inside Spark, the DStream is represented as a sequence of Resilient Distributed Datasets (RDD).
+Spark Streaming works by splitting the live input into small batches.  Each batch is processed by Spark individually.  The output from Spark is also in small batches.  This process is not visible to the user.  Spark displays streams as a DStream. The name stands for "discretize stream".  DStream represents the small batches as one continuous stream. Inside Spark, the DStream is represented as a sequence of Resilient Distributed Datasets (RDD).
 
 The best resource to learn how Spark analyzes streams is the Apache Spark's Official site [@streaming-programming-guide]. This chapter will cover just enough Spark Streaming concepts to help you understand the mechanics of what the R code is doing.  It is recommended to read the official resource, specially if you need to implement solutions based on Spark Streaming.
 
 ## Working with Spark Streams
 
-In practice, a Spark stream update is a three stage operation.  Two of the stages are driven by new files being added, either from the stream, or as a result of the Spark analysis. This is the breakdown of the three stages:
+In practice, a Spark Stream update is a three stage operation. This is the breakdown of the three stages:
 
-1. **Read** - The stream is expected to append new files in a specified folder. Those new files contain the most recent information from the stream.  Spark monitors the folder, and reads the data from the files. The following formats are supported: CSV, text, JSON, parquet, Kafka, JDBC, and orc.
+1. **Read** - The stream is expected to append new files in a specified folder. Those new files contain the most recent information from the stream.  Spark monitors the folder, and reads the data from the files. The following file formats are supported: CSV, text, JSON, parquet, and orc. 
 
 1. **Transform** - Spark applies the desired operations on top of the data. No special `sparklyr` functions are needed to transform stream data.  You can use same `dplyr` verbs, Spark transformers and even native R code (via `spark_apply()`).
 
-1. **Write** - The results of the transformed input are saved in a different folder.  The following file formats are supported: CSV, text, JSON, parquet, Kafka, JDBC, and orc.
+1. **Write** - The results of the transformed input are saved in a different folder.  The following file formats are supported: CSV, text, JSON, parquet, and orc.
 
 Figure 11.1 provides a visual aid to what each stage does and how they connect:
 
@@ -58,8 +58,6 @@ the operations] -/- [<label> 3. Write]
 ", "images/streaming-working.png")
 ```
 
-## Read/Write functions
-
 Here is the breakdown of the available `sparklyr` functions for reading and writing: 
 
 | Format  | Read                | Write                |
@@ -74,9 +72,11 @@ Here is the breakdown of the available `sparklyr` functions for reading and writ
 
 In the same way all of the read and write operations in `sparklyr` for Spark Standalone, or in `sparklyr`’s local mode, the input and output folders are actual Operating System file system folders. For YARN managed clusters, these will be folder locations inside the Hadoop File System (HDFS). 
 
-## Additional features
+Non-file driven applications are also supported, such as Kafka. Kafka will be discussed in the last part of the chapter.
 
-The `sparklyr` package goes beyond providing an easy-to-use-interface to work with all three stages of Spark streaming.  The package includes additional features which provide a more complete integration with R:
+## `sparklyr` extras
+
+The `sparklyr` package goes beyond providing an easy-to-use-interface to Spark Streaming.  The R package includes  features which provide a more complete integration with R:
 
 1. An out-of-the box graph visualization to monitor the stream.
 
@@ -135,7 +135,7 @@ readr::read_csv("source/stream_5.csv")
 
 ### Shiny reactive
 
-The "live" nature of the Spark stream goes along well with the reactivity of Shiny.  The idea is that your Shiny app can automatically display the latest results as fast as Spark can process them.  The `reactiveSpark()` function provides that integration.  
+Shiny's reactive framework is well suited to support streaming information. The idea is that your Shiny app can automatically display the latest results as fast as Spark can process them.  The `reactiveSpark()` function provides that integration.  
 
 ## Intro example
 
@@ -190,7 +190,6 @@ The final step is to clean up the stream and Spark connection
 stream_stop(write_output)
 spark_disconnect(sc)
 ```
-
 
 ## Transformations 
 
@@ -440,13 +439,7 @@ Apache Kafka is to streaming as what Hadoop is to data storage/retrieval. Hadoop
 
 ### Workflow
 
-The most basic Kafka workflow is illustrated on figure 2.4. This is the breakdown:
-
-- An application that streams data into Kafka is called a **Producer**.
-
-- Kafka stores the stream as records. Each record has a key, value and a timestamp. Kafka can handle multiple streams that contain different information. To properly categorize each stream, Kafka uses a mechanism called topic. A topic is a alpha-numeric identifier of the stream.
-
-- A **Consumer** is an app that is external to Kafka. It reads what is stored in Kafka for a given topic. Because the Consumer app is constantly monitoring the topic, the term used for its integration with Kafka is subscribe.
+A most basic Kafka workflow is illustrated on figure 11.4. An application streams data into Kafka, called a **Producer**.  Kafka stores the stream as records. Each record has a key, a value and a timestamp. Kafka can handle multiple streams that contain different information. To properly categorize each stream, Kafka uses a mechanism called topic. A topic is a alpha-numeric identifier of the stream.  A **Consumer** is an app that is external to Kafka. It reads what is stored in Kafka for a given topic. Because the Consumer app is constantly monitoring the topic, the term used for its integration with Kafka is subscribe.
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Basic workflow', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -459,9 +452,7 @@ render_nomnoml("
 ", "images/kafka-apis.png")
 ```
 
-The Consumer application could use a Spark connection to the Kafka cluster. That means that aggregation or other kind of analysis can be done to the topic.
-
-Kafka also allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a Stream Processor. As illustrated in figure 2.5, the Stream Processor reads topic A, and then writes results to topic B. This allows for a given Consumer application to read results instead of “raw” feed data.
+Kafka also allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a *Stream Processor*. In figure 11.5, the Stream Processor reads topic A, and then writes results to topic B. This allows for a given *Consumer* application to read results instead of “raw” feed data.
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka workflow', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -478,21 +469,21 @@ Results to topic B]
 ", "images/kafka-apis2.png")
 ```
 
-It is possible to have this functionality via Spark. The Spark routine can read from a topic, analyze the data, and write back the results to a different topic.
-
 ### Spark integration
 
-Spark Streaming enables the integration of Spark and Kafka.  Spark is able to both, read from and write into Kafka topics.  This means that Spark could be a Consumer, Stream Processor or  Producer application in a Kafka implementation.  
+Spark Streaming enables the integration of Spark with Kafka.  Spark is able to both, read from and write into Kafka topics.  This means that Spark could be a Consumer, Stream Processor or Producer application of a Kafka implementation.  
 
-Unless there is a very specific need, using Spark as a Producer does not make much sense.  That is because Spark Streaming reacts to a stream, it doesn't generate it.  But there could be cases where Spark reads from one stream (Kafka or not) and streams to a Kafka cluster.  To the target, Spark would look as a pure Producer, even though that's not really the case.   
+Unless there is a very specific need, using Spark as a Producer does not make much sense.  That is because Spark Streaming reacts to a stream, it doesn't generate it.  Theoretically, there could be cases where Spark reads from one stream (Kafka or not) and streams to a Kafka cluster. To the target, Spark would look as a pure Producer, even though that's not really the case.   
 
 The more likely use case for this integration, is to use Spark to read (Consumer) from one, or several, topics and then reactively write (Producer) to a different topic with the results of the analysis. All within the same Kafka cluster. This effectively makes Spark a Stream Processor.
 
+There are nuances on how the Spark-to-Kafka write-back modes works. It is important to offer some clarification.  There are three modes available: **complete**, **update** and **append**.  The **complete** mode will provide the totals for every group every time there is a new batch.  The **update** mode will provide totals for only the groups that have updates in the latest batch.  The **append** mode is able to add raw records to the target topic.  This mode is not meant for aggregates, but works well for passing a filtered subset to the target topic. 
+
 ### R integration
 
-There are a few additional settings to keep in mind when using `sparklyr` to integrate Spark with Kafka.
+The R integration is delivered via the `sparklyr` interface. There are a couple of things to keep in mind:
 
-- The Spark package that provide Spark SQL integration with Kafka.  The name should be `org.apache.spark:spark-sql-kafka` followed by the Kafka version, then the Scala version, and lastly the Spark package version. For example: `org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0`, requests the version 2.4.0 of the Spark package that supports Scala 2.11 and Kafka 10.
+- **The Kafka integration Spark package is required ** -  The name should be `org.apache.spark:spark-sql-kafka` followed by the Kafka version, then the Scala version, and lastly the Spark package version. For example: `org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0`, requests the version 2.4.0 of the Spark package that supports Scala 2.11 and Kafka 10.
 
     ```{r}
     config <- spark_config()
@@ -500,7 +491,7 @@ There are a few additional settings to keep in mind when using `sparklyr` to int
     sc <- spark_connect(master = "local", config = config)
     ```
 
-- The Kafka writing and reading function in `sparklyr` rely on additional parameters  These parameters are passed via the `options` argument.  The contents of the `options` argument are passed down to Kafka as-is. This means that the same Kafka options used in your other functioning applications can be reused here. There are three basic Kafka options to keep in mind. The `kafka.bootstrap.server` option is used to specify the entry server and ports of the Kafka cluster.  The name of the topic to read from goes in `subscribe`, and the name of the topic to write to goes in `topic`.  The last two would be used at the exclusion of the other. 
+- **The Kafka writing and reading function in `sparklyr` rely on additional parameters**  - These parameters are passed via the `options` argument.  The contents of the `options` argument are passed down to Kafka as-is. This means that the same Kafka options used in your other applications can be reused here. There are three basic Kafka options to keep in mind: `kafka.bootstrap.server`, `topic` and `subscribe`.  The former expects a list of the of one or more hosts from the Kafka cluster.  The other two set the topic that the function is either reading from or writing to.  One is used at the exclusion of the other.  For reading the `subscribe` option is used, and for writing, `topic` is used. 
     
     ```{r}
     stream_read_kafka(
@@ -515,7 +506,7 @@ There are a few additional settings to keep in mind when using `sparklyr` to int
 
 ### Example 
 
-Figure 2.6 is a diagram of how this example will work. The **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count of how many letter A's are in the batch.  The results are written to another topic, called "a-only".  The same Spark connection will be used to setup a **Consumer** that reads the 'a-only' topic.
+For the example, the **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count by unique letter passed throught the stream.  The count will be passed back to Kafka in separate topic called "totals". To see the results, the same Spark connection will be used to setup a **Consumer** that reads the "totals" topic. Figure 11.6 is a diagram of how this example will work. 
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka example', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -524,45 +515,39 @@ render_nomnoml("
 #fontSize: 14
 #leading: 2
 
-[Producer | Streams 'letters'] -> [Kafka | Stores 'letters' & 'a-only']
+[Producer | Streams 'letters'] -> [Kafka | Stores 'letters' & 'totals']
 [Kafka] <-> [Stream Processor 
 (Spark)| Subscribes to 'letters'
-Writes results to 'a-only']
+Writes results to 'totals']
 [Kafka] -> [Consumer
-(Spark) | Subscribes to 'a-only']
+(Spark) | Subscribes to 'totals']
 
 ", "images/kafka-example.png")
 ```
 
-Figure 2.7 offers an expanded view of what the **Stream Processor (Spark)** process is supposed to do.  Each small batch, identified by its *timestamp* will be processed as it comes in.  This this case it will be to check how many letter A's are in the batch.  Then the totals are send back to Kafka via the 'a-only' topic.
+The example will use the `update` mode for writing back into Kafka.  This means that only the totals of the letters that changed will be sent to the "totals" topic.  The change in totals is determined after each batch from the "letters" topic is received. Figure 11.7 offers an deeper look of what the **Stream Processor (Spark)** process is supposed to do. 
 
-```{r, include = FALSE}
-set.seed(100)
-letter_stream <-  LETTERS[sample(length(LETTERS), size = 1000, replace = TRUE)]
-total_a <- length(letter_stream[letter_stream == "A"])
-#paste0(letter_stream[1:100], collapse = " ")
-```
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Stream Processor (Spark)', fig.align = 'center', eval = TRUE}
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Stream Processor - Update mode', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 10
 #fontSize: 14
 #leading: 2
 
-['letters' topic |
-[timestamp 1 | V A O E Q W H K T R A ]
-[timestamp 2 | P T G H T X F A A X A D B Y ]
+['totlas' topic |
+[timestamp 1 | A B A A B C ]
+[timestamp 2 | B B C C B C ]
 ] -> [Stream Processor | Spark Streaming]
-[Stream Processor] -> ['a-only' topic | 
-[timestamp 1 | 1 ] 
-[timestamp 2 | 3]
+[Stream Processor] -> ['totals' topic | 
+[timestamp 1 | A=3 B=2 C=1 ] 
+[timestamp 2 | B=5 C=4 ]
 ]
 ", "images/kafka-processor.png")
 ```
 
-The infrascruture of this example as a local, single node Kafka cluster.  The external Producer uses the Kafka CLI to send the stream of letters. The sample code and installation instructions that were used can be found in the Appendix. 
+The **infrastructure** used for this example was a local, single node Kafka cluster.  The external Producer uses the Kafka CLI to send the stream of letters. The installation instructions that were used can be found in the Appendix under the Kafka section. 
 
-1. Load libraries, and open the connection.  Remember to load the Spark SQL Kafka package.
+1. Load libraries, and open the connection.  Remember to load the Kafka integration Spark package.
     ```{r}
     library(sparklyr)
     library(dplyr)
@@ -576,74 +561,66 @@ The infrascruture of this example as a local, single node Kafka cluster.  The ex
     ```{r}
     hosts   <- "localhost:9092"
     read_options  <- list(kafka.bootstrap.servers = hosts, subscribe = "letters")
-    write_options <- list(kafka.bootstrap.servers = hosts, topic = "a-only")
+    write_options <- list(kafka.bootstrap.servers = hosts, topic = "totals")
     ```
 
-1. Typically, the following steps would be written together using a pipe.  So that explanations can be shared, they have been broken into individual step variables.  What is unique about this setp is the use of the `read_options` variable as the `options` argument.
+1. Typically, the following steps would be written together using a pipe.  So that explanations can be shared, they have been broken into individual step variables.  What is unique about this setup is the use of the `read_options` variable as the `options` argument.
     ```{r}
     step_1 <- stream_read_kafka(sc, options = read_options)
     ```
 
-1. This step takes the data from the "letters" topic groups them by the timestamp, and summarises the number of A's found.  It is important to note that the results are writen to a character variable called 'value'.  Kafka expect at least one variable with this name, value.  It also considers its contents to be character, so it is better to perform any type coercion before writing back to Kafka.
+1. This steps coerces the `value` field into a character. The resulting content of the field is a single letter entry from the stream.  The letters are grouped and counted.  A single field is permitted by Kafka to send back as results.  It also expect that the results are in a field called `value`.  The new `value` field is a concatenated field with the letter and the count. 
+
     ```{r}
     step_2 <- step_1 %>%
-      mutate(value = as.character(value), key = as.character(key)) %>%
-      #group_by(timestamp) %>%
-      summarise(value = sum(ifelse(value == "A", 0 ,1), na.rm = TRUE)) %>%
-      mutate(value = as.character(value)) 
+      mutate(value = as.character(value)) %>%
+      count(value) %>%
+      mutate(value = paste0(value, "=", n))
     ```
 
-1. Writing back to Kafka is the last step.  As set in a prior step, the topic that the results will write to is called "a-only" 
+1. The results are written to the "totals" topic.  The`mode` argument is set to "update".  This sets the count behavior illustrated in Figure 11.7
     ```{r}
     step_3 <- step_2 %>%
-      stream_write_kafka(mode = "complete", options = write_options)
+      stream_write_kafka(mode = "update", options = write_options)
     ```
 
-The last step starts a Spark job.  The job will remain active until stoped or until Spark disconnects. A this point, there is no visible output. Even if there was an active Producer sending letters over.  
+The last step starts a Spark job.  The job will remain active until stopped or until Spark disconnects. At this point, there is no visible output. Even if there was an active Producer sending letters over.  
 
+A simple Shiny routine can be used as a *Consumer* app.  It will read the "totals" topic, select the latest count for a given letter, and then display the results on a table. 
 
-1. For purposes of this exercise, a Consumer application is now started. To do that, the data from "a-only" topic will be sent to a Spark in-memory table.  
-    ```{r}
-    a_only <- stream_read_kafka(
-        sc, 
-        options = list(
-          kafka.bootstrap.servers = hosts, 
-          subscribe = "a-only")
-          #subscribe = "letters")
-        ) %>%
-      stream_write_memory("only_a")
-    ```
-    
-1. Text
-    ```{r}
-    tbl(sc, "only_a") %>%
-      head()
-    ```
-    ```
-    ## # Source: spark<?> [?? x 7]
-    ##   key       value     topic  partition offset timestamp           timestampType
-    ##   <list>    <list>    <chr>      <int>  <dbl> <dttm>                      <int>
-    ## 1 <lgl [1]> <raw [3]> a-only         0      0 2019-04-26 21:08:49             0
-    ## 2 <lgl [1]> <raw [3]> a-only         0      1 2019-04-26 21:08:49             0
-    ## 3 <lgl [1]> <raw [3]> a-only         0      2 2019-04-26 21:08:49             0
-    ## 4 <lgl [1]> <raw [3]> a-only         0      3 2019-04-26 21:08:49             0
-    ## 5 <lgl [1]> <raw [3]> a-only         0      4 2019-04-26 21:08:49             0
-    ## 6 <lgl [1]> <raw [4]> a-only         0      5 2019-04-26 21:08:49             0
-    ```
-    ```{r}
-    tbl(sc, "only_a") %>%
-      head() %>%
-      mutate(value = as.character(value))
-    ```
-    ```
-    ## # Source: spark<?> [?? x 7]
-    ##   key       value topic  partition offset timestamp           timestampType
-    ##   <list>    <chr> <chr>      <int>  <dbl> <dttm>                      <int>
-    ## 1 <lgl [1]> 2.0   a-only         0      0 2019-04-26 21:08:49             0
-    ## 2 <lgl [1]> 1.0   a-only         0      1 2019-04-26 21:08:49             0
-    ## 3 <lgl [1]> 2.0   a-only         0      2 2019-04-26 21:08:49             0
-    ## 4 <lgl [1]> 1.0   a-only         0      3 2019-04-26 21:08:49             0
-    ## 5 <lgl [1]> 1.0   a-only         0      4 2019-04-26 21:08:49             0
-    ## 6 <lgl [1]> 11.0  a-only         0      5 2019-04-26 21:08:49             0
-    ```
+```{r}
+library(shiny)
+ui <- function() tableOutput("table")
+server <- function(input, output, session){
+  totals_options  <- list(kafka.bootstrap.servers = hosts, subscribe = "totals")
+  ps <- stream_read_kafka(sc, options = totals_options) %>%
+    mutate(value = as.character(value),
+           letter = substr(value, 1,1),
+           total = as.numeric(substr(value, 3, 100))
+           ) %>%
+    group_by(letter) %>%
+    summarise(total = max(total, na.rm = TRUE)) %>%
+    arrange(letter) %>%
+    reactiveSpark()  
+  output$table <- renderTable(ps())
+}
+runGadget(ui, server)
+```
 
+A new terminal session is started.  Kafka's CLI provides a simple Producer program that runs in the console.  Using that program, we can manually write a single letter, and then press enter.  
+
+```
+user@laptop:~/kafka_2.12-2.2.0$ bin/kafka-console-producer.sh --broker-list localhost:9092 --topic letters
+>A
+>B
+>C
+>A
+>A
+>C
+>D
+```
+The Shiny reactive function will poll and refresh the results as the letters are being entered.  This is shown in figure 11.8.
+
+```{r, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny with Kafka', echo = FALSE}
+render_image("images/streaming-shiny-kafka.png")
+```
