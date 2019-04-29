@@ -461,7 +461,7 @@ render_nomnoml("
 
 The Consumer application could use a Spark connection to the Kafka cluster. That means that aggregation or other kind of analysis can be done to the topic.
 
-Kafka also allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a Stream Processor. As illustrated in figure 2.5, the Stream Processor reads topic A, and then writes results to topic B. This allows for a given Consumer application to read results instead of “raw” feed data.
+Kafka also allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a Stream Processor. As illustrated in figure 11.5, the Stream Processor reads topic A, and then writes results to topic B. This allows for a given Consumer application to read results instead of “raw” feed data.
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka workflow', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -515,7 +515,7 @@ There are a few additional settings to keep in mind when using `sparklyr` to int
 
 ### Example 
 
-Figure 2.6 is a diagram of how this example will work. The **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count of how many letter A's are in the batch.  The results are written to another topic, called "a-only".  The same Spark connection will be used to setup a **Consumer** that reads the 'a-only' topic.
+Figure 11.6 is a diagram of how this example will work. The **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count by unique letter passed throught the stream.  The count will be passed back to Kafka in separate topic called "totals". To see the results, the same Spark connection will be used to setup a **Consumer** that reads the "totals" topic.
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka example', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -524,17 +524,17 @@ render_nomnoml("
 #fontSize: 14
 #leading: 2
 
-[Producer | Streams 'letters'] -> [Kafka | Stores 'letters' & 'a-only']
+[Producer | Streams 'letters'] -> [Kafka | Stores 'letters' & 'totals']
 [Kafka] <-> [Stream Processor 
 (Spark)| Subscribes to 'letters'
-Writes results to 'a-only']
+Writes results to 'totals']
 [Kafka] -> [Consumer
-(Spark) | Subscribes to 'a-only']
+(Spark) | Subscribes to 'totals']
 
 ", "images/kafka-example.png")
 ```
 
-Figure 2.7 offers an expanded view of what the **Stream Processor (Spark)** process is supposed to do.  Each small batch, identified by its *timestamp* will be processed as it comes in.  This this case it will be to check how many letter A's are in the batch.  Then the totals are send back to Kafka via the 'a-only' topic.
+Figure 11.7 offers an expanded view of what the **Stream Processor (Spark)** process is supposed to do.  Each small batch, identified by its *timestamp* will be processed as it comes in.  This this case it will be to check how many letter A's are in the batch.  Then the totals are send back to Kafka via the 'a-only' topic.
 
 ```{r, include = FALSE}
 set.seed(100)
@@ -542,20 +542,20 @@ letter_stream <-  LETTERS[sample(length(LETTERS), size = 1000, replace = TRUE)]
 total_a <- length(letter_stream[letter_stream == "A"])
 #paste0(letter_stream[1:100], collapse = " ")
 ```
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Stream Processor (Spark)', fig.align = 'center', eval = TRUE}
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Stream Processor - Update mode', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 10
 #fontSize: 14
 #leading: 2
 
-['letters' topic |
-[timestamp 1 | V A O E Q W H K T R A ]
-[timestamp 2 | P T G H T X F A A X A D B Y ]
+['totlas' topic |
+[timestamp 1 | A B A A B C ]
+[timestamp 2 | B B C C B C ]
 ] -> [Stream Processor | Spark Streaming]
-[Stream Processor] -> ['a-only' topic | 
-[timestamp 1 | 1 ] 
-[timestamp 2 | 3]
+[Stream Processor] -> ['totals' topic | 
+[timestamp 1 | A=3 B=2 C=1 ] 
+[timestamp 2 | B=5 C=4 ]
 ]
 ", "images/kafka-processor.png")
 ```
@@ -576,7 +576,7 @@ The infrascruture of this example as a local, single node Kafka cluster.  The ex
     ```{r}
     hosts   <- "localhost:9092"
     read_options  <- list(kafka.bootstrap.servers = hosts, subscribe = "letters")
-    write_options <- list(kafka.bootstrap.servers = hosts, topic = "a-only")
+    write_options <- list(kafka.bootstrap.servers = hosts, topic = "totals")
     ```
 
 1. Typically, the following steps would be written together using a pipe.  So that explanations can be shared, they have been broken into individual step variables.  What is unique about this setp is the use of the `read_options` variable as the `options` argument.
@@ -584,66 +584,58 @@ The infrascruture of this example as a local, single node Kafka cluster.  The ex
     step_1 <- stream_read_kafka(sc, options = read_options)
     ```
 
-1. This step takes the data from the "letters" topic groups them by the timestamp, and summarises the number of A's found.  It is important to note that the results are writen to a character variable called 'value'.  Kafka expect at least one variable with this name, value.  It also considers its contents to be character, so it is better to perform any type coercion before writing back to Kafka.
+1. This steps coerces the `value` field into a character. The resulting content of the field is a single letter entry from the stream.  The letters are grouped and counted.  A single field is permitted by Kafka to send back as results.  It also expect that the results are in a field called `value`.  The new `value` field is a concatenaed field with the letter and the count. 
+
     ```{r}
     step_2 <- step_1 %>%
-      mutate(value = as.character(value), key = as.character(key)) %>%
-      #group_by(timestamp) %>%
-      summarise(value = sum(ifelse(value == "A", 0 ,1), na.rm = TRUE)) %>%
-      mutate(value = as.character(value)) 
+      mutate(value = as.character(value)) %>%
+      count(value) %>%
+      mutate(value = paste0(value, "=", n))
     ```
 
-1. Writing back to Kafka is the last step.  As set in a prior step, the topic that the results will write to is called "a-only" 
+1. The results are written to the "totals" topic.  The`mode` argument is set to "update".  This sets the count behaivor illustrated in Figure 11.7
     ```{r}
     step_3 <- step_2 %>%
-      stream_write_kafka(mode = "complete", options = write_options)
+      stream_write_kafka(mode = "update", options = write_options)
     ```
 
 The last step starts a Spark job.  The job will remain active until stoped or until Spark disconnects. A this point, there is no visible output. Even if there was an active Producer sending letters over.  
 
+A simple Shiny routine can be used as a *Consumer* app.  It will read the "totals" topic, select the latest count for a given letter, and then display the results on a table. 
 
-1. For purposes of this exercise, a Consumer application is now started. To do that, the data from "a-only" topic will be sent to a Spark in-memory table.  
-    ```{r}
-    a_only <- stream_read_kafka(
-        sc, 
-        options = list(
-          kafka.bootstrap.servers = hosts, 
-          subscribe = "a-only")
-          #subscribe = "letters")
-        ) %>%
-      stream_write_memory("only_a")
-    ```
-    
-1. Text
-    ```{r}
-    tbl(sc, "only_a") %>%
-      head()
-    ```
-    ```
-    ## # Source: spark<?> [?? x 7]
-    ##   key       value     topic  partition offset timestamp           timestampType
-    ##   <list>    <list>    <chr>      <int>  <dbl> <dttm>                      <int>
-    ## 1 <lgl [1]> <raw [3]> a-only         0      0 2019-04-26 21:08:49             0
-    ## 2 <lgl [1]> <raw [3]> a-only         0      1 2019-04-26 21:08:49             0
-    ## 3 <lgl [1]> <raw [3]> a-only         0      2 2019-04-26 21:08:49             0
-    ## 4 <lgl [1]> <raw [3]> a-only         0      3 2019-04-26 21:08:49             0
-    ## 5 <lgl [1]> <raw [3]> a-only         0      4 2019-04-26 21:08:49             0
-    ## 6 <lgl [1]> <raw [4]> a-only         0      5 2019-04-26 21:08:49             0
-    ```
-    ```{r}
-    tbl(sc, "only_a") %>%
-      head() %>%
-      mutate(value = as.character(value))
-    ```
-    ```
-    ## # Source: spark<?> [?? x 7]
-    ##   key       value topic  partition offset timestamp           timestampType
-    ##   <list>    <chr> <chr>      <int>  <dbl> <dttm>                      <int>
-    ## 1 <lgl [1]> 2.0   a-only         0      0 2019-04-26 21:08:49             0
-    ## 2 <lgl [1]> 1.0   a-only         0      1 2019-04-26 21:08:49             0
-    ## 3 <lgl [1]> 2.0   a-only         0      2 2019-04-26 21:08:49             0
-    ## 4 <lgl [1]> 1.0   a-only         0      3 2019-04-26 21:08:49             0
-    ## 5 <lgl [1]> 1.0   a-only         0      4 2019-04-26 21:08:49             0
-    ## 6 <lgl [1]> 11.0  a-only         0      5 2019-04-26 21:08:49             0
-    ```
+```{r}
+library(shiny)
+ui <- function() tableOutput("table")
+server <- function(input, output, session){
+  totals_options  <- list(kafka.bootstrap.servers = hosts, subscribe = "totals")
+  ps <- stream_read_kafka(sc, options = totals_options) %>%
+    mutate(value = as.character(value),
+           letter = substr(value, 1,1),
+           total = as.numeric(substr(value, 3, 100))
+           ) %>%
+    group_by(letter) %>%
+    summarise(total = max(total, na.rm = TRUE)) %>%
+    arrange(letter) %>%
+    reactiveSpark()  # Spark stream reactive
+  output$table <- renderTable(ps())
+}
+runGadget(ui, server)
+```
 
+A new terminal session is started.  Kafka's CLI provides a simple Producer program that runs in the console.  Using that program, we can manually write a single letter, and then press enter.  
+
+```
+user@laptop:~/kafka_2.12-2.2.0$ bin/kafka-console-producer.sh --broker-list localhost:9092 --topic letters
+>A
+>B
+>C
+>A
+>A
+>C
+>D
+```
+The Shiny reactive function will poll and refresh the results as the letters are being entered.  This is shown in figure 11.8.
+
+```{r, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny with Kafka', echo = FALSE}
+render_image("images/streaming-shiny-kafka.png")
+```
