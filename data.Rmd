@@ -7,19 +7,38 @@ library(ggplot2)
 
 # Data {#data}
 
-## Formats
+[Add intro paragraph]
 
+## Default packages
+
+Spark is a very flexible computing platform.  It is able to use the libraries from external packages to add functionality.  This makes it possible to be able to read data from Amazon S3 buckets, only if it is needed. The proper package is loaded at Spark connection time. The package is typically found and loaded directly from the Interenet.  
+
+The configuration variable passed to the `spark_connect()` function should contain the reference to the desired package.  Any package that is to be loaded at connection time is added to a vector in the `defaultPackages` value of the `spark_connect()` configuration. Here is an example that loads the package needed to access Amazon S3 buckets.
+
+```{r}
+conf <- spark_config()
+conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
+sc <- spark_connect(master = "local", config = conf)
 ```
-spark_read_csv()
-spark_read_jdbc()
-spark_read_json()
-spark_read_libsvm()
-spark_read_orc()
-spark_read_parquet()
-spark_read_source()
-spark_read_table()
-spark_read_text()
+
+## File types
+
+## File system protocols
+
+Spark will default to the file protocol that it is running on.  This means that if it is running in a YARN managed cluster, the default protocol will be HDFS. For example, a given path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux files.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
+
+The file system protocol can be overriden.  This is done in the `path` argument of the `sparklyr` function that will read or write.  Passing a full path of "file://home/user/file.csv" will force the search to be done inside the local Operating System's file system.
+
+There are other file system protocols.  An example is Amazon's S3 service.  Spark is does not know how to read the S3 protocol.  Accessing the "s3a" protocol involves adding a package to the `defaultPackages` configuration variable passed at connection time.  
+
+```{r}
+conf <- spark_config()
+conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
+sc <- spark_connect(master = "local", config = conf)
+my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
+
+Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol may require loading a default package.  In some cases the vendor providing the Spark environment could already be loading the package for you.  
 
 ## Data Types
 
@@ -34,47 +53,60 @@ sdf_len(sc, 1) %>%
   )
 ```
 
-## Sources
+## Amazon S3
 
-### Amazon S3
+Amazon Simple Storage Service, or S3, has become a common location to store file.  Spark is able to directly access S3.  This functionality can be used inside `sparklyr`.  Theere are three key items to have, or use, when working with data from an S3 bucket: 
 
-[@data-maven-home]
-[@data-spark-cloud-integration]
+- AWS Credentials - They are required by the S3 service, even for publicly accessible buckets.
+- Hadoop-to-AWS package - It is loaded at connection time.
+- A bucket location - The recommended file system to use is "s3a".
+
+### Credentials
+
+There are multiple ways to set the credentials to use to access the bucket.  Please refer to the official documentation for more information. It is found in the Apache Spark official site [@data-spark-cloud-integration]. 
+
+The easiest way is to set the credentials using Environment variables.  Choose a secure way to load the values into variables in R, and then load them into the appropiate Environment variable name. In case show below, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 
 ```{r}
 Sys.setenv(AWS_ACCESS_KEY_ID = my_key_id)
 Sys.setenv(AWS_SECRET_ACCESS_KEY = my_secret_key)
 ```
 
+Spark requires an integration package in order to access Amazon S3 buckets. Interestingly, the package is not a Spark package, it is a Hadoop package.  This means that the selected version will be a Hadoop version.  After some experiments, it seems that with Spark versions 2, only up to Hadoop 2.7.7 will work.  That may change when Spark enters version 3.  If using a YARN managed cluster, the package may be different.  That would depend on the Hadoop vendor.  The official site for Apache based project is called Maven [@data-maven-home].  Please visit that site to find alternative package versions if the recommended one does not work. The recommended search term to use would be: "hadoop-aws".
+
+### AWS Package
+
 ```{r}
 conf <- spark_config()
 conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
-```
 
-```{r}
 sc <- spark_connect(master = "local", config = conf)
 ```
 
+### File system
+
+For the file system prefix use "s3a".  There are other options, such as "s3" and "s3n".  As per the Hadoop documents, the "s3a" file system should be the default selection.
+
 ```{r}
-my_file <- spark_read_csv(sc, "builds", path =  "s3a://my-bucket/my-file.csv")
+my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
 
-### Azure Storage
+## Azure Storage
 
 `wasb` files
 ```{r}
 
 ```
 
-### Cassandra
+## Cassandra
 
 See [https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources](https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources).
 
-### Databases
+## Databases
 
 See [https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources](https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources).
 
-#### Switching
+### Switching
 
 You can query multiple databases registered in Spark using the `.` syntax, as in:
 
@@ -96,9 +128,9 @@ which an alias over `DBI::dbGetQuery(sc, "use db_name”)`.
 in_schema("database", "table")
 ```
 
-### HBase
+## HBase
 
-### Nested Data
+## Nested Data
 
 See [nested data extension](#extensions-nested-data).
 
@@ -189,3 +221,16 @@ dplyr::copy_to(sc, iris, overwrite = TRUE)
 ## Recap
 
 In the next chapter, [Tuning], you will learn in-detail how Spark works and use this knowledge to optimize it's resource usage and performance.
+
+### Formats
+```
+spark_read_csv()
+spark_read_jdbc()
+spark_read_json()
+spark_read_libsvm()
+spark_read_orc()
+spark_read_parquet()
+spark_read_source()
+spark_read_table()
+spark_read_text()
+```
