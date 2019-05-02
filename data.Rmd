@@ -7,9 +7,21 @@ library(ggplot2)
 
 # Data {#data}
 
-[Add intro paragraph]
+The goal of this chapter is to help you learn how to access, read and write data using Spark.  It will provide the necessesary background to help you work with a variaety of data.  
 
-## Default packages
+This chapter will cover specific source types and file protocols. It will also aim to teach a pattern. This pattern should help you access types or protocols not covered here. 
+
+Additionally, this chapter will introduce some recommendations.  The focus of the recommendations will be to improve performance and efficiency.
+
+## Types and protocols
+
+Accessing new data for the first time may present challenges. The likely reasons are the source type, or the file system protocol. 
+
+Spark is able to interact with several source types and file system protocols.  Source types include Comma separated values (CSV), Apache Parquet, or JDBC.  File system protocols includes the local file system (Linux, Windows, Mac), and the Hadoop file System (HDFS).  
+
+Spark's capabilities can be extended. This is important when encountering new source type, or protocol. The next section will cover how to do this.
+
+### Default packages
 
 Spark is a very flexible computing platform.  It is able to use the libraries from external packages to add functionality.  This makes it possible to be able to read data from Amazon S3 buckets, only if it is needed. The proper package is loaded at Spark connection time. The package is typically found and loaded directly from the Interenet.  
 
@@ -21,13 +33,46 @@ conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
 sc <- spark_connect(master = "local", config = conf)
 ```
 
-## File types
 
-## File system protocols
+### Source types
+
+The main goal is to convert the source data into an object in Spark.  Logically, this requires a spec that "tells" Spark how to read the source data.  Each spec enables Spark to read source data formats.  
+
+Currently, out-of-the box Spark can read several formats.  In `sparklyr`, the source data formats are aligned to R functions:
+
+
+| Format                                        | Read                   | Write                   |
+|-----------------------------------------------|------------------------|-------------------------|
+| Comma separated values (CSV)                  | `spark_read_csv()`     | `spark_write_csv()`     |
+| Javascript Object Notation (JSON)             | `spark_read_json()`    | `spark_write_json()`    |
+| Library for Support Vector Machines (LIBSVM)  | `spark_read_libsvm()`  | `spark_write_libsvm()`  |
+| Java Database Connectivity (JDBC)             | `spark_read_jdbc()`    | `spark_write_jdbc()`    |
+| Optimized Row Columnar (ORC)                  | `spark_read_orc()`     | `spark_write_orc()`     |
+| Apache Parquet                                | `spark_read_parquet()` | `spark_write_parquet()` |
+| Text                                          | `spark_read_text()`    | `spark_write_text()`    |
+
+It is possible to access data source types not listed above.  It will require to load a dafault package at connection time.  In `sparklyr`, the `spark_read_source()` and `spark_write_source()` are generic functions.  They are able to use the libraries imported by the default package.
+
+The follow example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  That is what provides the mapping Spark can use to make sense of the data source.
+
+```{r}
+con <- spark_config()
+conf$sparklyr.defaultPackages <- "datastax:spark-cassandra-connector:2.0.0-RC1-s_2.11"
+sc <- spark_connect(master = "local", config = conf)
+spark_read_source(
+  sc, 
+  name = "emp",
+  source = "org.apache.spark.sql.cassandra",
+  options = list(keyspace = "dev", table = "emp")
+  )
+```
+
+
+### File system protocols
 
 Spark will default to the file protocol that it is running on.  This means that if it is running in a YARN managed cluster, the default protocol will be HDFS. For example, a given path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux files.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
 
-The file system protocol can be overriden.  This is done in the `path` argument of the `sparklyr` function that will read or write.  Passing a full path of "file://home/user/file.csv" will force the search to be done inside the local Operating System's file system.
+The file system protocol can be overridden.  This is done in the `path` argument of the `sparklyr` function that will read or write.  Passing a full path of "file://home/user/file.csv" will force the search to be done inside the local Operating System's file system.
 
 There are other file system protocols.  An example is Amazon's S3 service.  Spark is does not know how to read the S3 protocol.  Accessing the "s3a" protocol involves adding a package to the `defaultPackages` configuration variable passed at connection time.  
 
@@ -44,7 +89,7 @@ Currently, only "file://" and "hdfs://" file protocols are supported when used i
 
 ### Dates
 
-Note: Some Spark date/time functions make timezone assumtions, for instance, the following code makes use of `to_date()` which assumes the timestamp will be given in the local time zone. This is not to discourage use of date/time functions, but to be aware of time zones to be handled with care.
+Note: Some Spark date/time functions make timezone assumptions, for instance, the following code makes use of `to_date()` which assumes the timestamp will be given in the local time zone. This is not to discourage use of date/time functions, but to be aware of time zones to be handled with care.
 
 ```{r eval=FALSE}
 sdf_len(sc, 1) %>%
@@ -55,7 +100,7 @@ sdf_len(sc, 1) %>%
 
 ## Amazon S3
 
-Amazon Simple Storage Service, or S3, has become a common location to store file.  Spark is able to directly access S3.  This functionality can be used inside `sparklyr`.  Theere are three key items to have, or use, when working with data from an S3 bucket: 
+Amazon Simple Storage Service, or S3, has become a common location to store file.  Spark is able to directly access S3.  This functionality can be used inside `sparklyr`.  There are three key items to have, or use, when working with data from an S3 bucket: 
 
 - AWS Credentials - They are required by the S3 service, even for publicly accessible buckets.
 - Hadoop-to-AWS package - It is loaded at connection time.
@@ -65,7 +110,7 @@ Amazon Simple Storage Service, or S3, has become a common location to store file
 
 There are multiple ways to set the credentials to use to access the bucket.  Please refer to the official documentation for more information. It is found in the Apache Spark official site [@data-spark-cloud-integration]. 
 
-The easiest way is to set the credentials using Environment variables.  Choose a secure way to load the values into variables in R, and then load them into the appropiate Environment variable name. In case show below, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+The easiest way is to set the credentials using Environment variables.  Choose a secure way to load the values into variables in R, and then load them into the appropriate Environment variable name. In case show below, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 
 ```{r}
 Sys.setenv(AWS_ACCESS_KEY_ID = my_key_id)
@@ -222,15 +267,4 @@ dplyr::copy_to(sc, iris, overwrite = TRUE)
 
 In the next chapter, [Tuning], you will learn in-detail how Spark works and use this knowledge to optimize it's resource usage and performance.
 
-### Formats
-```
-spark_read_csv()
-spark_read_jdbc()
-spark_read_json()
-spark_read_libsvm()
-spark_read_orc()
-spark_read_parquet()
-spark_read_source()
-spark_read_table()
-spark_read_text()
-```
+
