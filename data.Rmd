@@ -1,94 +1,170 @@
+```{r include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+source("r/render.R")
+source("r/plots.R")
+library(ggplot2)
+```
+
 # Data {#data}
 
-While **this chatper has not been written.**, a few resources are available to help explore these topics until this chapter gets written.
+The goal of this chapter is to help you learn how to access, read and write data using Spark.  It will provide the necessesary background to help you work with a variaety of data.  
 
-## Overview
+This chapter will cover specific source types and file protocols. It will also aim to teach a pattern. This pattern should help you access types or protocols not covered here. 
 
-## Data Frames
+Additionally, this chapter will introduce some recommendations.  The focus of the recommendations will be to improve performance and efficiency.
 
-TODO: Introduce Data Frames
+## Types and protocols
 
-`sparklyr` provides access to  Data Frame functionality, mostly for completeness and advanced use cases. As `sparklyr` keeps evolving, it is our goal to reduce the use of this functions and provide instead propert wrappers with practices known in the R community. For instnace, we will introduce a function to **pivot** data, which is quite useful but would rather preffer to support `tidyr::spread()` and `tidyr::gather()` implementations which are already well known in the R community.
+Accessing new data for the first time may present challenges. The likely reasons are the source type, or the file system protocol. 
 
-### Functions {#data-sdf-functions}
+Spark is able to interact with several source types and file system protocols.  Source types include Comma separated values (CSV), Apache Parquet, or JDBC.  File system protocols includes the local file system (Linux, Windows, Mac), and the Hadoop file System (HDFS).  
 
-```
-sdf_nrow()
-sdf_ncol()
-sdf_dim()
-sdf_len()
-sdf_pivot()
-sdf_schema()
-...
-```
+Spark's capabilities can be extended. This is important when encountering new source type, or protocol. The next section will cover how to do this.
 
-### Pivoting
+### Default packages
 
-```{r eval=F}
-sensors <- data.frame(
-  sensor = c("sensor1", "sensor1", "sensor1", "sensor2", "sensor2", "sensor2"),
-  time = c(1, 2, 3, 1, 2, 3),
-  metric = c(1, 2, 3, 10, 20, 30)
-)
+Spark is a very flexible computing platform.  It is able to use the libraries from external packages to add functionality.  This makes it possible to be able to read data from Amazon S3 buckets, only if it is needed. The proper package is loaded at Spark connection time. The package is typically found and loaded directly from the Interenet.  
+
+The configuration variable passed to the `spark_connect()` function should contain the reference to the desired package.  Any package that is to be loaded at connection time is added to a vector in the `defaultPackages` value of the `spark_connect()` configuration. Here is an example that loads the package needed to access Amazon S3 buckets.
+
+```{r}
+conf <- spark_config()
+conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
+sc <- spark_connect(master = "local", config = conf)
 ```
 
-```
-   sensor time metric
-1 sensor1    1      1
-2 sensor1    2      2
-3 sensor1    3      3
-4 sensor2    1     10
-5 sensor2    2     20
-6 sensor2    3     30
-```
 
-```{r eval=F}
-sensors_tbl <- copy_to(sc, sensors, overwrite = T)
-sensors_tbl %>% sdf_pivot(time ~ sensor, fun.aggregate = c("avg", "metric"))
-```
+### Source types
 
-```
-# Source: spark<?> [?? x 3]
-   time sensor1 sensor2
-* <dbl>   <dbl>   <dbl>
-1     3       3      30
-2     1       1      10
-3     2       2      20
-```
+The main goal is to convert the source data into an object in Spark.  Logically, this requires a spec that "tells" Spark how to read the source data.  Each spec enables Spark to read source data formats.  
 
-## Formats
+Currently, out-of-the box Spark can read several formats.  In `sparklyr`, the source data formats are aligned to R functions:
 
-```
-spark_read_csv()
-spark_read_jdbc()
-spark_read_json()
-spark_read_libsvm()
-spark_read_orc()
-spark_read_parquet()
-spark_read_source()
-spark_read_table()
-spark_read_text()
+
+| Format                                        | Read                   | Write                   |
+|-----------------------------------------------|------------------------|-------------------------|
+| Comma separated values (CSV)                  | `spark_read_csv()`     | `spark_write_csv()`     |
+| Javascript Object Notation (JSON)             | `spark_read_json()`    | `spark_write_json()`    |
+| Library for Support Vector Machines (LIBSVM)  | `spark_read_libsvm()`  | `spark_write_libsvm()`  |
+| Java Database Connectivity (JDBC)             | `spark_read_jdbc()`    | `spark_write_jdbc()`    |
+| Optimized Row Columnar (ORC)                  | `spark_read_orc()`     | `spark_write_orc()`     |
+| Apache Parquet                                | `spark_read_parquet()` | `spark_write_parquet()` |
+| Text                                          | `spark_read_text()`    | `spark_write_text()`    |
+
+It is possible to access data source types not listed above.  It will require to load a dafault package at connection time.  In `sparklyr`, the `spark_read_source()` and `spark_write_source()` are generic functions.  They are able to use the libraries imported by the default package.
+
+The follow example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  That is what provides the mapping Spark can use to make sense of the data source.
+
+```{r}
+con <- spark_config()
+conf$sparklyr.defaultPackages <- "datastax:spark-cassandra-connector:2.0.0-RC1-s_2.11"
+sc <- spark_connect(master = "local", config = conf)
+spark_read_source(
+  sc, 
+  name = "emp",
+  source = "org.apache.spark.sql.cassandra",
+  options = list(keyspace = "dev", table = "emp")
+  )
 ```
 
-## Data Types
 
-### Dates
+### File system protocols
 
-Note: Some Spark date/time functions make timezone assumtions, for instance, the following code makes use of `to_date()` which assumes the timestamp will be given in the local time zone. This is not to discourage use of date/time functions, but to be aware of time zones to be handled with care.
+Spark will default to the file protocol that it is running on.  This means that if it is running in a YARN managed cluster, the default protocol will be HDFS. For example, a given path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux files.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
+
+The file system protocol can be overridden.  This is done in the `path` argument of the `sparklyr` function that will read or write.  Passing a full path of "file://home/user/file.csv" will force the search to be done inside the local Operating System's file system.
+
+There are other file system protocols.  An example is Amazon's S3 service.  Spark is does not know how to read the S3 protocol.  Accessing the "s3a" protocol involves adding a package to the `defaultPackages` configuration variable passed at connection time.  
+
+```{r}
+conf <- spark_config()
+conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
+sc <- spark_connect(master = "local", config = conf)
+my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
+```
+
+Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol may require loading a default package.  In some cases the vendor providing the Spark environment could already be loading the package for you.  
+
+## Reading data
+
+### Folders as a source
+
+### File layout
+
+### Data caching 
+
+### Column Names
+
+By default, `sparklyr` sanitizes column names by translating characters like `.` to `_`, this was required in Spark 1.6.X to avoid couple nuances in Spark. However, to disable this functionality, you can run the following code:
+
+```{r eval=FALSE}
+options(sparklyr.sanitize.column.names = FALSE)
+dplyr::copy_to(sc, iris, overwrite = TRUE)
+```
+```
+# Source:   table<iris> [?? x 5]
+# Database: spark_connection
+   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+          <dbl>       <dbl>        <dbl>       <dbl> <chr>  
+ 1          5.1         3.5          1.4         0.2 setosa 
+ 2          4.9         3            1.4         0.2 setosa 
+ 3          4.7         3.2          1.3         0.2 setosa 
+ 4          4.6         3.1          1.5         0.2 setosa 
+ 5          5           3.6          1.4         0.2 setosa 
+ 6          5.4         3.9          1.7         0.4 setosa 
+ 7          4.6         3.4          1.4         0.3 setosa 
+ 8          5           3.4          1.5         0.2 setosa 
+ 9          4.4         2.9          1.4         0.2 setosa 
+10          4.9         3.1          1.5         0.1 setosa 
+# ... with more rows
+```
+
+## Date & time
+
+Some Spark date/time functions make timezone assumptions. For instance, the following code makes use of `to_date()`. It assumes that the timestamp will be given in the local time zone. This is not to discourage use of date/time functions. Please be aware of time zones to be handled with care.
 
 ```{r eval=FALSE}
 sdf_len(sc, 1) %>%
   transmute(
-    date = timestamp(1419126103) %>% from_utc_timestamp('UTC') %>% to_date() %>% as.character()
+    date = timestamp(1419126103) %>% 
+      from_utc_timestamp('UTC') %>% 
+      to_date() %>% 
+      as.character()
   )
 ```
 
-## Sources
+## Specific types and protocols
 
 ### Amazon S3
 
-```{r}
+Amazon Simple Storage Service, or S3, has become a common location to store file.  Spark is able to directly access S3.  This functionality can be used inside `sparklyr`.  There are three key items to have, or use, when working with data from an S3 bucket: 
 
+- AWS Credentials - They are required by the S3 service, even for publicly accessible buckets.
+- Hadoop-to-AWS package - It is loaded at connection time.
+- A bucket location - The recommended file system to use is "s3a".
+
+There are multiple ways to set the credentials to use to access the bucket.  Please refer to the official documentation for more information. It is found in the Apache Spark official site [@data-spark-cloud-integration]. 
+
+The easiest way is to set the credentials using Environment variables.  Choose a secure way to load the values into variables in R, and then load them into the appropriate Environment variable name. In case show below, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+
+```{r}
+Sys.setenv(AWS_ACCESS_KEY_ID = my_key_id)
+Sys.setenv(AWS_SECRET_ACCESS_KEY = my_secret_key)
+```
+
+Spark requires an integration package in order to access Amazon S3 buckets. Interestingly, the package is not a Spark package, it is a Hadoop package.  This means that the selected version will be a Hadoop version.  After some experiments, it seems that with Spark versions 2, only up to Hadoop 2.7.7 will work.  That may change when Spark enters version 3.  If using a YARN managed cluster, the package may be different.  That would depend on the Hadoop vendor.  The official site for Apache based project is called Maven [@data-maven-home].  Please visit that site to find alternative package versions if the recommended one does not work. The recommended search term to use would be: "hadoop-aws".
+
+```{r}
+conf <- spark_config()
+conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
+
+sc <- spark_connect(master = "local", config = conf)
+```
+
+For the file system prefix use "s3a".  There are other options, such as "s3" and "s3n".  As per the Hadoop documents, the "s3a" file system should be the default selection.
+
+```{r}
+my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
 
 ### Azure Storage
@@ -122,7 +198,7 @@ tbl_change_db(sc, "db_name")
 
 which an alias over `DBI::dbGetQuery(sc, "use db_name”)`.
 
-#### Schemas
+##### Schemas
 
 ```
 in_schema("database", "table")
@@ -192,32 +268,10 @@ spark_read_csv(
 5    NA 2.16027303300001e+31
 ```
 
-### Column Names
 
-By default, `sparklyr` sanitizes column names by translating characters like `.` to `_`, this was required in Spark 1.6.X to avoid couple nuances in Spark. However, to disable this functionality, you can run the following code:
-
-```{r eval=FALSE}
-options(sparklyr.sanitize.column.names = FALSE)
-dplyr::copy_to(sc, iris, overwrite = TRUE)
-```
-```
-# Source:   table<iris> [?? x 5]
-# Database: spark_connection
-   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
-          <dbl>       <dbl>        <dbl>       <dbl> <chr>  
- 1          5.1         3.5          1.4         0.2 setosa 
- 2          4.9         3            1.4         0.2 setosa 
- 3          4.7         3.2          1.3         0.2 setosa 
- 4          4.6         3.1          1.5         0.2 setosa 
- 5          5           3.6          1.4         0.2 setosa 
- 6          5.4         3.9          1.7         0.4 setosa 
- 7          4.6         3.4          1.4         0.3 setosa 
- 8          5           3.4          1.5         0.2 setosa 
- 9          4.4         2.9          1.4         0.2 setosa 
-10          4.9         3.1          1.5         0.1 setosa 
-# ... with more rows
-```
 
 ## Recap
 
 In the next chapter, [Tuning], you will learn in-detail how Spark works and use this knowledge to optimize it's resource usage and performance.
+
+
