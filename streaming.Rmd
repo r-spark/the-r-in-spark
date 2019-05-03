@@ -449,7 +449,7 @@ render_nomnoml("
 #leading: 2
 [Producer | Stream topic A] -> [Kafka | Store topic A]
 [Kafka] -> [Consumer | Subscribe to topic A]
-", "images/kafka-apis.png")
+", "images/streaming-kafka-apis.png")
 ```
 
 Kafka also allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a *Stream Processor*. In figure 11.5, the Stream Processor reads topic A, and then writes results to topic B. This allows for a given *Consumer* application to read results instead of “raw” feed data.
@@ -466,7 +466,7 @@ render_nomnoml("
 Results to topic B]
 [Kafka] -> [Consumer | Subscribe to topic B]
 
-", "images/kafka-apis2.png")
+", "images/streaming-kafka-apis2.png")
 ```
 
 ### Spark integration
@@ -493,16 +493,15 @@ The R integration is delivered via the `sparklyr` interface. There are a couple 
 
 - **The Kafka writing and reading function in `sparklyr` rely on additional parameters**  - These parameters are passed via the `options` argument.  The contents of the `options` argument are passed down to Kafka as-is. This means that the same Kafka options used in your other applications can be reused here. There are three basic Kafka options to keep in mind: `kafka.bootstrap.server`, `topic` and `subscribe`.  The former expects a list of the of one or more hosts from the Kafka cluster.  The other two set the topic that the function is either reading from or writing to.  One is used at the exclusion of the other.  For reading the `subscribe` option is used, and for writing, `topic` is used. 
     
-    ```{r}
-    stream_read_kafka(
-      sc, 
-      options = list(
-        kafka.bootstrap.server = "host1:9092, host2:9092", 
-        subscribe = "topic"
-        )
-      ) 
-    ```
-
+```{r}
+stream_read_kafka(
+  sc, 
+  options = list(
+    kafka.bootstrap.server = "host1:9092, host2:9092", 
+    subscribe = "topic"
+    )
+  ) 
+```
 
 ### Example 
 
@@ -522,7 +521,7 @@ Writes results to 'totals']
 [Kafka] -> [Consumer
 (Spark) | Subscribes to 'totals']
 
-", "images/kafka-example.png")
+", "images/streaming-kafka-example.png")
 ```
 
 The example will use the `update` mode for writing back into Kafka.  This means that only the totals of the letters that changed will be sent to the "totals" topic.  The change in totals is determined after each batch from the "letters" topic is received. Figure 11.7 offers an deeper look of what the **Stream Processor (Spark)** process is supposed to do. 
@@ -542,7 +541,7 @@ render_nomnoml("
 [timestamp 1 | A=3 B=2 C=1 ] 
 [timestamp 2 | B=5 C=4 ]
 ]
-", "images/kafka-processor.png")
+", "images/streaming-kafka-processor.png")
 ```
 
 The **infrastructure** used for this example was a local, single node Kafka cluster.  The external Producer uses the Kafka CLI to send the stream of letters. The installation instructions that were used can be found in the Appendix under the Kafka section. 
