@@ -11,7 +11,7 @@ The goal of this chapter is to help you learn how to access, read and write data
 
 This chapter will cover specific source types and file protocols. It will also aim to teach a pattern. This pattern should help you access types or protocols not covered here. 
 
-Additionally, this chapter will introduce some recommendations.  The focus of the recommendations will be to improve performance and efficiency.
+Additionally, this chapter will introduce some recommendations focused on improving performance and efficiency.
 
 ## Types and protocols
 
@@ -23,7 +23,7 @@ Spark's capabilities can be extended. This is important when encountering new so
 
 ### Default packages
 
-Spark is a very flexible computing platform.  It is able to use the libraries from external packages to add functionality.  This makes it possible to be able to read data from Amazon S3 buckets, only if it is needed. The proper package is loaded at Spark connection time. The package is typically found and loaded directly from the Interenet.  
+Spark is a very flexible computing platform.  It is able to use the libraries from external packages to add functionality.  This makes it possible to be able to read data from Amazon S3 buckets, only if it is needed. The proper package is loaded at Spark connection time. The package is typically found and loaded directly from the Internet.  
 
 The configuration variable passed to the `spark_connect()` function should contain the reference to the desired package.  Any package that is to be loaded at connection time is added to a vector in the `defaultPackages` value of the `spark_connect()` configuration. Here is an example that loads the package needed to access Amazon S3 buckets.
 
@@ -53,7 +53,7 @@ Currently, out-of-the box Spark can read several formats.  In `sparklyr`, the so
 
 It is possible to access data source types not listed above.  It will require to load a dafault package at connection time.  In `sparklyr`, the `spark_read_source()` and `spark_write_source()` are generic functions.  They are able to use the libraries imported by the default package.
 
-The follow example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  That is what provides the mapping Spark can use to make sense of the data source.
+The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  That is what provides the mapping Spark can use to make sense of the data source.
 
 ```{r}
 con <- spark_config()
@@ -87,9 +87,112 @@ Currently, only "file://" and "hdfs://" file protocols are supported when used i
 
 ## Reading data
 
-### Folders as a source
+### Folders as a table
+
+Loading multiple files into a single table is a common scenario.  In R, we typically use a loop or functional programming to load the files individually into the table.
+
+```{r}
+lapply(c("data-folder/file1.csv", "data-folder/file2.csv"), read.csv)
+```
+
+In Spark, there is the notion of a folder as a table.  Instead of ennumerating each file, simply pass the path the containing folder's path.  Spark assumes that every file in that folder is part of the same table.  This implies that the target folder should only be used for data purposes. 
+
+```{r}
+spark_read_csv(sc, "my_data", path = "data-folder")
+```
+
+
+The folder as a table notion is also found in other open source technologies.  Under the hood, Hive tables work the same way.  When quering a Hive table, the mapping is done over multiple files inside the same folder. The folder's name usually match the name of the table visible to the user.  Kafka uses this same idea, see the Streaming chapter.
 
 ### File layout
+
+When reading data, Spark is able to determine the data source's column names and types.  This comes at a cost.  To determine the type Spark has to do a first pass to the data, and then assign a type.  For large data, this may add a significant amount of time to the data ingestion process.  Even for medium size data loads, this also becomes costly. If the files are read over and over again, even small additional load time adds up over time.
+
+Spark allows the user to provide a column layout. If provided, Spark will bypass the step that ut uses to determine the file's layout. In `sparklyr`, the `column` argument is used to take advantage of this functionality. The `infer_schema` argument also needs to be set to `FALSE`.  This arguments is the switch that indicates if the `column` argument should be used.
+
+
+```{r, echo = FALSE}
+x <- data.frame(x = letters, y = 1:length(letters))
+write.csv(x, "test.csv", row.names = FALSE)
+rx <- readr::read_csv("test.csv", n_max = 10)
+readr::spec(rx)
+
+top_rows <- read.csv("test.csv", nrows = 5)
+file_columns <- top_rows %>% 
+  purrr::map(function(x)"character")
+
+purrr::map(rx, class)
+
+col_spec <- c("character", "numeric")
+names(col_spec) <- c("x", "y")
+
+```
+
+For example, a file called *test.csv* is going to be loaded to Spark. This is its layout:
+
+```
+"x","y"
+"a",1
+"b",2
+"c",3
+"d",4
+"e",5
+```
+
+The column spec is started with a vector containing the column types.  Afterwards, the vector's values are named to match the field name.
+
+```{r}
+col_spec_1 <- c("character", "numeric")
+names(col_spec_1) <- c("x", "y")
+col_spec_1
+```
+```
+##           x           y 
+## "character"   "numeric" 
+```
+
+```{r}
+sc <- spark_connect(master = "local")
+test_1 <- spark_read_csv(sc, "test1","test.csv", 
+                         columns = col_spec_1, 
+                         infer_schema = FALSE)
+test_1
+```
+
+```
+## # Source: spark<test1> [?? x 2]
+##    x         y
+##    <chr> <dbl>
+##  1 a         1
+##  2 b         2
+##  3 c         3
+##  4 d         4
+##  5 e         5
+```
+
+```{r}
+col_spec_2 <- c("character", "character")
+names(col_spec_2) <- c("my_letter", "my_number")
+```
+
+```{r}
+test_2 <- spark_read_csv(sc, "test2","test.csv", 
+                         columns = col_spec_2, 
+                         infer_schema = FALSE)
+test_2
+```
+
+```
+# Source: spark<test2> [?? x 2]
+   my_letter my_number
+   <chr>     <chr>    
+ 1 a         1        
+ 2 b         2        
+ 3 c         3        
+ 4 d         4        
+ 5 e         5    
+```
+
 
 ### Data caching 
 
