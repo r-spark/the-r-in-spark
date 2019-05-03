@@ -204,11 +204,21 @@ The advantage of this method is that there is almost no up-front time cost to re
 
 In `sparklyr`, that is controlled by the `memory` argument of its read functions. Setting it to `FALSE` prevents the data copy.  It defaults to `TRUE`.
 
+```{r}
+mapped_test <- spark_read_csv(sc, "test","test.csv", memory = FALSE)
+```
+
 There are good use cases for this method. One of them is when not all columns of a table are needed.  Take a very large file, or files, that contain many columns. This may not be the first time we interact with this data. We know what columns are needed for the analysis.  The files can be read using `memory = FALSE`, and then select the needed columns with `dplyr`. The resulting `dplyr` variable can then be cached into memory, using the `compute()` function.  This will make Spark query the file(s), pull the selected fields, and copy only that data into memory. The result is a in-memory table that took comparatively less time to prepare.
+
+```{r}
+mapped_test %>%
+  select(y) %>%
+  compute("test")
+```
 
 ### Column Names
 
-By default, `sparklyr` sanitizes column names by translating characters like `.` to `_`, this was required in Spark 1.6.X to avoid couple nuances in Spark. However, to disable this functionality, you can run the following code:
+By default, `sparklyr` sanitizes column names. It translates characters such as `.` to `_`. This was required in Spark 1.6.X. To disable this functionality, you can run the following code:
 
 ```{r eval=FALSE}
 options(sparklyr.sanitize.column.names = FALSE)
@@ -279,6 +289,23 @@ For the file system prefix use "s3a".  There are other options, such as "s3" and
 ```{r}
 my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
+
+### Google Storage
+
+```{r}
+conf <- spark_config()
+conf$sparklyr.defaultPackages <- "com.google.cloud:google-cloud-storage:1.72.0"
+sc <- spark_connect(master = "local", config = conf)
+my_file <- spark_read_csv(
+  sc, 
+  "my-file", 
+  path = "gs://gcp-public-data-sentinel-2/index.csv.gz-BQU6JALH41	"
+  )
+
+spark_disconnect(sc)
+#https://storage.googleapis.com/gcp-public-data-landsat/index.csv.gz
+```
+
 
 ### Azure Storage
 
