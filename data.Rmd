@@ -139,7 +139,7 @@ For example, a file called *test.csv* is going to be loaded to Spark. This is it
 "e",5
 ```
 
-The column spec is started with a vector containing the column types.  Afterwards, the vector's values are named to match the field name.
+The column spec is started with a vector containing the column types. The vector's values are named to match the field names. The accepted variable types are: `integer`, `character`, `logical`, `double`, `numeric`, `factor`, `Date`, `POSIXct`.  
 
 ```{r}
 col_spec_1 <- c("character", "numeric")
@@ -150,6 +150,8 @@ col_spec_1
 ##           x           y 
 ## "character"   "numeric" 
 ```
+
+In `spark_read_csv()`, `col_spec_1` is passed to the `columns` argument, and `infer_schema` is set to `FALSE`.
 
 ```{r}
 sc <- spark_connect(master = "local")
@@ -169,13 +171,12 @@ test_1
 ##  4 d         4
 ##  5 e         5
 ```
+In the example we tried to match the names and types of the original file.  The ability to pass a column spec provides additional flexibility.  The following example shows how we can set the field type to something different.  The new field type needs a compatible type. For example, a `character` field could not be set as `numeric`.  The field names are also set to something different that what is on the file.  
 
 ```{r}
 col_spec_2 <- c("character", "character")
 names(col_spec_2) <- c("my_letter", "my_number")
-```
 
-```{r}
 test_2 <- spark_read_csv(sc, "test2","test.csv", 
                          columns = col_spec_2, 
                          infer_schema = FALSE)
@@ -193,8 +194,17 @@ test_2
  5 e         5    
 ```
 
+The ability to change the field type can be very useful.  Malformed entries can cause error during reading.  This is common in non-character fields.  The practical approach is to import the field as a character field, and then use `dplyr` to coerce the field's conversion.  
 
-### Data caching 
+### Spark memory
+
+Spark copies the data into its distributed memory.  This makes analyses and other processes very fast.  There are cases where loading all of the data may not be practical, or necessary.  Spark can then just "map" the files without copying their data into memory.  This creates a sort of "virtual" table in Spark memory.  The implication is that when a query runs against that table, Spark has to read the data from the files at that time.  Any consecutive read after that will do the same.  In effect, Spark is a pass-through for the data.  
+
+The advantage of this method is that there is almost no up-front time cost to reading the file.  The mapping process is comparitively fast.  
+
+In `sparklyr`, that is controlled by the `memory` argument of its read functions. Setting it to `FALSE` prevents the data copy.  It defaults to `TRUE`.
+
+There are good use cases for this method. One of them is when not all columns of a table are needed.  Take a very large file, or files, that contain many columns. This may not be the first time we interact with this data. We know what columns are needed for the analysis.  The files can be read using `memory = FALSE`, and then select the needed columns with `dplyr`. The resulting `dplyr` variable can then be cached into memory, using the `compute()` function.  This will make Spark query the file(s), pull the selected fields, and copy only that data into memory. The result is a in-memory table that took comparatively less time to prepare.
 
 ### Column Names
 
@@ -293,7 +303,7 @@ You can query multiple databases registered in Spark using the `.` syntax, as in
 DBI::dbSendQuery("SELECT * FROM databasename.table")
 ```
 
-However, if you preffer to switch to a particular database and make it the default, you can run:
+However, if you prefer to switch to a particular database and make it the default, you can run:
 
 ```{r eval=FALSE}
 tbl_change_db(sc, "db_name")
