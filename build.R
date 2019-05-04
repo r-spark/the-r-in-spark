@@ -12,6 +12,7 @@ chapters <- list(
   "modeling",
   "clusters",
   "connections",
+  "data",
   "tuning",
   "distributed-r",
   "streaming",
