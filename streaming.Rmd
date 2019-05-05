@@ -29,9 +29,9 @@ In practice, a Spark Stream update is a three stage operation. This is the break
 
 1. **Write** - The results of the transformed input are saved in a different folder.  The following file formats are supported: CSV, text, JSON, parquet, and orc.
 
-Figure 11.1 provides a visual aid to what each stage does and how they connect:
+Figure \@ref(fig:streaming-working) provides a visual aid to what each stage does and how they connect:
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Working with Spark Streams', fig.align = 'center', eval = TRUE}
+```{r streaming-working, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Working with Spark Streams', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 10
@@ -178,9 +178,9 @@ This section will use a very simple example to introduce the mechanics of Spark 
     stream_view(write_output)
     ```
 
-The Shiny app shows up in the Viewer pane.  The column bars will slowly accumulate in the app's plot After the test generator completes, the plot should look like what Figure 11.2 shows.
+The Shiny app shows up in the Viewer pane.  The column bars will slowly accumulate in the app's plot After the test generator completes, the plot should look like what Figure \@ref(fig:streaming-stream-view) shows.
 
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='stream_view() output', fig.align = 'center', echo = FALSE}
+```{r streaming-stream-view, eval = TRUE, fig.width=10, fig.height=5, fig.cap='stream_view() output', fig.align = 'center', echo = FALSE}
 render_image("images/streaming-stream-view.png")
 ```
 
@@ -392,7 +392,7 @@ Spark pipelines can be used for scoring streams, but not to train over streaming
 
 The `reactiveSpark()` provides a mechanism to process the transformations on a stream. It allows you to circumvent the need for writing an output.  Also, because it does not depend on the stream writing functions, it is possible to to use watermark groups. 
 
-This section's example will result in a Shiny app. It will start to accumulate and display the current and historical results. The app's output is shown on figure 11.3.
+This section's example will result in a Shiny app. It will start to accumulate and display the current and historical results. The app's output is shown on Figure \@ref(fig:streaming-shiny-app).
 
 1. Start by opening a Spark connection and begin a test generation.
     ```{r}
@@ -429,8 +429,8 @@ This section's example will result in a Shiny app. It will start to accumulate a
     runGadget(ui, server)
     ```
 
-```{r, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny reactive', echo = FALSE}
-render_image("images/streaming-shiny-1.png")
+```{r streaming-shiny-app, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny reactive', echo = FALSE}
+render_image("images/streaming-shiny-app.png")
 ```
 
 ## Kafka
@@ -439,9 +439,9 @@ Apache Kafka is to streaming as what Hadoop is to data storage/retrieval. Hadoop
 
 ### Workflow
 
-A most basic Kafka workflow is illustrated on figure 11.4. An application streams data into Kafka, called a **Producer**.  Kafka stores the stream as records. Each record has a key, a value and a timestamp. Kafka can handle multiple streams that contain different information. To properly categorize each stream, Kafka uses a mechanism called topic. A topic is a alpha-numeric identifier of the stream.  A **Consumer** is an app that is external to Kafka. It reads what is stored in Kafka for a given topic. Because the Consumer app is constantly monitoring the topic, the term used for its integration with Kafka is subscribe.
+A most basic Kafka workflow is illustrated on Figure \@ref(fig:streaming-kafka-apis). An application streams data into Kafka, called a **Producer**.  Kafka stores the stream as records. Each record has a key, a value and a timestamp. Kafka can handle multiple streams that contain different information. To properly categorize each stream, Kafka uses a mechanism called topic. A topic is a alpha-numeric identifier of the stream.  A **Consumer** is an app that is external to Kafka. It reads what is stored in Kafka for a given topic. Because the Consumer app is constantly monitoring the topic, the term used for its integration with Kafka is subscribe.
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Basic workflow', fig.align = 'center', eval = TRUE}
+```{r streaming-kafka-apis, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Basic workflow', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 10
@@ -452,9 +452,9 @@ render_nomnoml("
 ", "images/streaming-kafka-apis.png")
 ```
 
-Kafka also allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a *Stream Processor*. In figure 11.5, the Stream Processor reads topic A, and then writes results to topic B. This allows for a given *Consumer* application to read results instead of “raw” feed data.
+Kafka also allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a *Stream Processor*. In Figure \@ref(fig:streaming-kafka-two-outputs), the Stream Processor reads topic A, and then writes results to topic B. This allows for a given *Consumer* application to read results instead of “raw” feed data.
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka workflow', fig.align = 'center', eval = TRUE}
+```{r streaming-kafka-two-outputs, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka workflow', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 10
@@ -466,7 +466,7 @@ render_nomnoml("
 Results to topic B]
 [Kafka] -> [Consumer | Subscribe to topic B]
 
-", "images/streaming-kafka-apis2.png")
+", "images/streaming-kafka-two-outputs.png")
 ```
 
 ### Spark integration
@@ -505,9 +505,9 @@ stream_read_kafka(
 
 ### Example 
 
-For the example, the **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count by unique letter passed throught the stream.  The count will be passed back to Kafka in separate topic called "totals". To see the results, the same Spark connection will be used to setup a **Consumer** that reads the "totals" topic. Figure 11.6 is a diagram of how this example will work. 
+For the example, the **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count by unique letter passed throught the stream.  The count will be passed back to Kafka in separate topic called "totals". To see the results, the same Spark connection will be used to setup a **Consumer** that reads the "totals" topic. Figure \@ref(fig:streaming-kafka-example) is a diagram of how this example will work. 
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka example', fig.align = 'center', eval = TRUE}
+```{r streaming-kafka-example, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka example', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 10
@@ -524,9 +524,9 @@ Writes results to 'totals']
 ", "images/streaming-kafka-example.png")
 ```
 
-The example will use the `update` mode for writing back into Kafka.  This means that only the totals of the letters that changed will be sent to the "totals" topic.  The change in totals is determined after each batch from the "letters" topic is received. Figure 11.7 offers an deeper look of what the **Stream Processor (Spark)** process is supposed to do. 
+The example will use the `update` mode for writing back into Kafka.  This means that only the totals of the letters that changed will be sent to the "totals" topic.  The change in totals is determined after each batch from the "letters" topic is received. Figure \@ref(fig:streaming-kafka-processor) offers an deeper look of what the **Stream Processor (Spark)** process is supposed to do. 
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Stream Processor - Update mode', fig.align = 'center', eval = TRUE}
+```{r streaming-kafka-processor, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Stream Processor - Update mode', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 10
@@ -577,7 +577,7 @@ The **infrastructure** used for this example was a local, single node Kafka clus
       mutate(value = paste0(value, "=", n))
     ```
 
-1. The results are written to the "totals" topic.  The`mode` argument is set to "update".  This sets the count behavior illustrated in Figure 11.7
+1. The results are written to the "totals" topic.  The`mode` argument is set to "update".  This sets the count behavior illustrated in Figure \@ref(fig:streaming-shiny-kafka)
     ```{r}
     step_3 <- step_2 %>%
       stream_write_kafka(mode = "update", options = write_options)
@@ -620,6 +620,6 @@ user@laptop:~/kafka_2.12-2.2.0$ bin/kafka-console-producer.sh --broker-list loca
 ```
 The Shiny reactive function will poll and refresh the results as the letters are being entered.  This is shown in figure 11.8.
 
-```{r, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny with Kafka', echo = FALSE}
+```{r streaming-shiny-kafka, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny with Kafka', echo = FALSE}
 render_image("images/streaming-shiny-kafka.png")
 ```
