@@ -116,10 +116,17 @@ The rest of this chapter will explain in detail use cases, features, caveats, co
 
 In the overview section we presented an example to help you understand how `spark_apply()` works; this section will cover a few practical use case for `spark_apply()`:
 
-- **Import**: You can consider using R to import data from external data sources and formats. For example, when a file format is not natevely supported in Spark or its extensions, you can consider using R code to implement a distributed **custom parser** using R packages.
-- **Model**: It is natural to use the rich modeling capabilities already available in R with Spark. In most cases, R models can't be used across large data; however, we will present two particular use cases where R models can be useful at scale. For instnace, when data fits into a single machine you can make use of **grid search** to optimize their parameters in parallel. In cases where the data can be partitioned to create several models over subsets of the data you can use **partitioned modeling** in R to compute models across partitions.
-- **Transform**: You can make use of R's rich data transformation capabilities to complement Spark. We will present a use case of evaluating data by external systems and use R to interoperate with them by calling them through a **web API**.
-- **Compute**: When you need to perform large-scale computation in R, or big-compute as described in the [Introduction](#intro) chapter, Spark is ideal to distribute this computation. We will present **distributed rendering** as a particular use case for large-scale computing in R.
+Import
+: You can consider using R to import data from external data sources and formats. For example, when a file format is not natevely supported in Spark or its extensions, you can consider using R code to implement a distributed **custom parser** using R packages.
+
+Model
+: It is natural to use the rich modeling capabilities already available in R with Spark. In most cases, R models can't be used across large data; however, we will present two particular use cases where R models can be useful at scale. For instnace, when data fits into a single machine you can make use of **grid search** to optimize their parameters in parallel. In cases where the data can be partitioned to create several models over subsets of the data you can use **partitioned modeling** in R to compute models across partitions.
+
+Transform
+: You can make use of R's rich data transformation capabilities to complement Spark. We will present a use case of evaluating data by external systems and use R to interoperate with them by calling them through a **web API**.
+
+Compute
+: When you need to perform large-scale computation in R, or big-compute as described in the [Introduction](#intro) chapter, Spark is ideal to distribute this computation. We will present **distributed rendering** as a particular use case for large-scale computing in R.
 
 We will now explore each use case in detail and provide a working example to help you understand how you use `spark_apply()` effectevely.
 
@@ -739,11 +746,10 @@ This section completes all the functionality you need to distribute R code with 
 
 ## Cluster Requirements
 
-All the functionality presented in previous chapters, does not require any special configuration of your Spark cluster -- as long as you have a properly configured Spark cluster, you can use R with it. This is not the case for the functionality presented in this chapter, your cluster administrator, your cloud provider or yourself would have to confgigured the cluster by:
+All the functionality presented in previous chapters, does not require any special configuration of your Spark cluster -- as long as you have a properly configured Spark cluster, you can use R with it. This is not the case for the functionality presented in this chapter, your cluster administrator, your cloud provider or yourself will have to configure your cluster by:
 
-- Installing R, to execute R code across your cluster, R must be installed in every node.
-- Different clusters, technologies and cloud providers have a few differences we will highlight.
-- To execute fast distributed computations, while Apache Arrow is not required, it is stronly encouraged to be installed across all nodes when using Spark 2.3 or later. It will provide performance improvements that bring distributed R code closer to native Scala code.
+- Installing R in every node, to execute R code across your cluster.
+- Optionally, installing Apache Arrow in every node when using Spark 2.3 or later, Arrow provides performance improvements that bring distributed R code closer to native Scala code.
 
 Lets take a look at each requirement to make sure you properly consider the tradeoffs or benefits that they provide.
 
@@ -765,17 +771,22 @@ sdf_len(sc, 10) %>% spark_apply(function(e) e)
 
 A Homogeneous Cluster is required since the driver node distributes, and potentially compiles, packages to the workers. For instance, the driver and workers must have the same processor architecture, system libraries, etc. This is usually the case for most clusters, but might not be the case for yours.
 
-Next, we will highlight topics specific to each cluster, provider and connection technology.
+Different cluster managers, Spark distributions and cloud providers, support different solutions to install additional software, like R, across every node in the cluster; those instructions should be followed when installing R over each worker node. To mention a few,
 
-### Clusters
+Spark Standalone
+: Requires connecting to each machine and installing R; there are tools like `pssh` that allow you to run a single installation command against multiple machines.
 
-When using `spark_apply()`, R needs to be properly installed in each worker node. Different cluster managers, distributions and services, proivide different solutions to install additional software; those instructions should be followed when installing R over each worker node. To mention a few,
+Cloudera
+: Provides an R parcel, see ["How to Distribute your R code with sparklyr and Cloudera Data Science Workbench"](https://blog.cloudera.com/blog/2017/09/how-to-distribute-your-r-code-with-sparklyr-and-cdsw/) [@cloudera-sparklyr-parcel], which enables R over each worker node.
 
-- **Spark Standalone**: Requires connecting to each machine and installing R; there are tools like `pssh` that allow you to run a single installation command against multiple machines.
-- **Cloudera**: Provides an R parcel, see ["How to Distribute your R code with sparklyr and Cloudera Data Science Workbench"](https://blog.cloudera.com/blog/2017/09/how-to-distribute-your-r-code-with-sparklyr-and-cdsw/) [@cloudera-sparklyr-parcel], which enables R over each worker node.
-- **Amazon EMR**: R is pre-installed when starting an EMR cluster as mentioned in the [Amazon EMR](#clusters-amazon-emr) section.
-- **Microsoft HDInsight**: R is pre-installed and no additional steps are needed.
-- **Livy**: Livy connections **do not** support distributing packages since the client machine where the libraries are precompiled might not have the same processor architecture, nor operating systems than the cluster machines.
+Amazon EMR
+: R is pre-installed when starting an EMR cluster as mentioned in the [Amazon EMR](#clusters-amazon-emr) section.
+
+Microsoft HDInsight
+: R is pre-installed and no additional steps are needed.
+
+Livy
+: Livy connections **do not** support distributing packages since the client machine where the libraries are precompiled might not have the same processor architecture, nor operating systems than the cluster machines.
 
 Strictly speaking, this completes the last requirement for your cluster. However, we strongly recommend you use Apache Arrow with `spark_apply()` to support large-scale computation with minimal overhead.
 
