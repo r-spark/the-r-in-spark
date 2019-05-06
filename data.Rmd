@@ -67,7 +67,6 @@ spark_read_source(
   )
 ```
 
-
 ### File system protocols
 
 Spark will default to the file protocol that it is running on.  This means that if it is running in a YARN managed cluster, the default protocol will be HDFS. For example, a given path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux files.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
@@ -86,6 +85,8 @@ my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol may require loading a default package.  In some cases the vendor providing the Spark environment could already be loading the package for you.  
 
 ## Reading data
+
+This section will introduce several techniques that improve the speed and efficiency of reading data.  If new to Spark and `sparklyr`, it is highly recommended to review the ideas that are about to be covered.  The improvements covered here may save you a significant amount of time when working with large data sets.
 
 ### Folders as a table
 
@@ -242,6 +243,54 @@ dplyr::copy_to(sc, iris, overwrite = TRUE)
 # ... with more rows
 ```
 
+## Processing Data
+
+### Process in Spark
+
+## Writing Data
+
+Some projects require that new data generated in Spark to be writen back to a remote source. For example, the data could be new predicted values returned by a Spark model.  The job processes the mass generation of predictions, and there is a need to retain such predictions. This section will cover recommendations to keep in mind when working on such projects. 
+
+### Spark, not R, as pass-through
+
+Avoid collecting data in R to then upload it to the target (see Figure 8.1)  That seems to be the first approach attempted by new users.  It may look like a faster alternative. It may be coding-wise, because the new user is comfortable with known data writing techniques. Performance wise, it is not faster. Additionally, this approach will not scale properly.  The data will eventually grow to the point where R cannot handle being the middle point. 
+
+```{r echo=FALSE,  fig.cap='Avoid using R as a pass through', fig.align = 'center', eval = TRUE}
+render_nomnoml("
+#direction: right
+#arrowSize: 0.4
+#lineWidth: 1
+#spacing:90
+[Avoid this...| 
+[Source] -> [Spark | Process] 
+[Spark]collect() -> [R]
+[R] -> [Target]
+]
+", "images/data-r-pass-through.png")
+```
+
+All efforts should be made to have Spark connect to the target location.  This way, reading, processing and writing all happens within the same Spark session.  
+
+```{r echo=FALSE,  fig.cap='Spark as a pass through', fig.align = 'center', eval = TRUE}
+render_nomnoml("
+#direction: right
+#arrowSize: 0.4
+#lineWidth: 1
+#spacing:90
+[Source] -> [Spark | Reads -  Process - Writes] 
+[Spark] -> [Target]
+", "images/data-spark-pass-through.png")
+```
+
+### Practical approach
+
+Consider the following use schenario: A Spark job just processed predictions for a large data set. The data size of only the predictions are also considerable. Choosing a method to write results will depend on infrastructure.
+
+For example, Spark and the target location share the same infrastructure. For example, Spark and the target Hive table are in the same cluster.  Copying the results is not a problem.  The data transfer is between RAM and disk of the same cluster. 
+
+A contrasting example, Spark and the target location are not in the same infrastructure.  There are two options, choosing one will depend on the size of the data, and network speed.  The first is to have Spark connect to the remote target location, and copy the new data.  If this is done within the same Data Center, or cloud provider, the data transfer could be fast enough to safely have Spark write the data directly.  The second option is to have Spark write the results locally, and transfer the results via a third-party application.  For example, Spark could write the results into CSV files, and then have a separate job copy the files over via FTP.  In the target location, use a separate process to transfer the data into the target location.  Spark, R, and any other technology are tools.  It is better to recognize that one tool cannot, and should not be expected to, do everything.
+
+
 ## Date & time
 
 Some Spark date/time functions make timezone assumptions. For instance, the following code makes use of `to_date()`. It assumes that the timestamp will be given in the local time zone. This is not to discourage use of date/time functions. Please be aware of time zones to be handled with care.
@@ -289,34 +338,6 @@ For the file system prefix use "s3a".  There are other options, such as "s3" and
 ```{r}
 my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
-
-### Google Storage
-
-```{r}
-conf <- spark_config()
-conf$sparklyr.defaultPackages <- "com.google.cloud:google-cloud-storage:1.72.0"
-sc <- spark_connect(master = "local", config = conf)
-my_file <- spark_read_csv(
-  sc, 
-  "my-file", 
-  path = "gs://gcp-public-data-sentinel-2/index.csv.gz-BQU6JALH41	"
-  )
-
-spark_disconnect(sc)
-#https://storage.googleapis.com/gcp-public-data-landsat/index.csv.gz
-```
-
-
-### Azure Storage
-
-`wasb` files
-```{r}
-
-```
-
-### Cassandra
-
-See [https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources](https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources).
 
 ### Databases
 
