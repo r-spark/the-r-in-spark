@@ -334,30 +334,65 @@ For the file system prefix use "s3a".  There are other options, such as "s3" and
 my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
 
-### Databases
+### SQL 
 
-See [https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources](https://blog.rstudio.com/2017/07/31/sparklyr-0-6/#external-data-sources).
+The `sparklyr` package provides a DBI compliant interface [@data-r-dbi]. This means that DBI functions can be used to interact with data via Spark.  This includes non-SQL sources that are accessible via or cached in Spark.
 
-#### Switching
+```{r}
 
-You can query multiple databases registered in Spark using the `.` syntax, as in:
+```
+
+### Hive
+
+In YARN managed clusters, Spark provides a deeper integration with Apache Hive.  Hive tables are easily accessible after opening a Spark connection.
+
+```{r}
+sc <- spark_connect(master = "yarn-client", 
+                    spark_home = "/usr/lib/spark/",
+                    version = "2.1.0",
+                    config = conf)
+```
+
+Accessing a Hive table's data can be done with a simple reference.  Using `DBI`, a table can be referenced within a SQL statement.
+
+```{r}
+DBI::dbSendQuery(sc, "SELECT * FROM table limit 10")
+```
+
+Another way to reference a table is with `dplyr`.  The `tbl()` function, creates a pointer to the table.  
+
+```{r}
+library(dplyr)
+
+t <- tbl(sc, "table")
+```
+
+It is important to reiterate that no data is imported into R, the `tbl()` function creates only a reference.  The expectation is that there will be more `dplyr` verbs following the `tbl()` command.
+
+```{r}
+t %>%
+  group_by(field1) %>%
+  summarise(totals = sum(field2))
+```
+
+##### Database selection
+
+Hive table references assume a default database source.  Often, the table needed table is in a different database within the Metastore.  To access it using SQL, prefix the database name to the table.  Separate them using a period. 
 
 ```{r eval=FALSE}
-DBI::dbSendQuery("SELECT * FROM databasename.table")
+DBI::dbSendQuery(sc, "SELECT * FROM databasename.table")
 ```
 
-However, if you prefer to switch to a particular database and make it the default, you can run:
+In `dplyr`, the `in_schema()` function can be used.  The function is used inside the `tbl()` call.
+
+```{r}
+tbl(sc, in_schema("databasename", "table"))
+```
+
+In `sparklyr`, the `tbl_change_db()` function sets the current session's default database.  Any subsequent call via `DBI` or `dplyr` will use the selected name as the default database.
 
 ```{r eval=FALSE}
-tbl_change_db(sc, "db_name")
-```
-
-which an alias over `DBI::dbGetQuery(sc, "use db_name”)`.
-
-##### Schemas
-
-```
-in_schema("database", "table")
+tbl_change_db(sc, "databasename")
 ```
 
 ### HBase
