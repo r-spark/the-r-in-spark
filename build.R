@@ -10,6 +10,7 @@ chapters <- list(
   "starting",
   "analysis",
   "modeling",
+  "pipelines",
   "clusters",
   "connections",
   "data",
