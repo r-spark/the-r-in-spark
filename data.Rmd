@@ -9,23 +9,25 @@ library(ggplot2)
 
 The goal of this chapter is to help you learn how to access, read and write data using Spark.  It will provide the necessary background to help you work with a variety of data.  
 
-This chapter will cover specific source types and file protocols. It will also aim to teach a pattern. This pattern should help you access types or protocols not covered here. 
+This chapter will cover how to access data in different source types and file systems.  It will show you the pattern of how to extend Spark's capabilities to work with data no accessible "out-of-the-box".
 
-Additionally, this chapter will introduce some recommendations focused on improving performance and efficiency.
+Additionally, this chapter will introduce several recommendations. The recommendations will focused on improving performance and efficiency for writing or reading data. 
 
-## Types and protocols
+## Source types and file systems
 
-Accessing new data for the first time may present challenges. The likely reasons are the source type, or the file system protocol. 
+It may be challenging accessing data for the first time. The likely reasons are problems with a new source type, or file system. 
 
-Spark is able to interact with several source types and file system protocols.  Source types include Comma separated values (CSV), Apache Parquet, or JDBC.  File system protocols includes the local file system (Linux, Windows, Mac), and the Hadoop file System (HDFS).  
+"Out-of-the-box", Spark is able to interact with several source types and file system.  Source types include: Comma separated values (CSV), Apache Parquet, and JDBC.  File system protocols include: local file system (Linux, Windows, Mac), and Hadoop file System (HDFS).  
 
-Spark's capabilities can be extended. This is important when encountering new source type, or protocol. The next section will cover how to do this.
+There is a way for Spark to interact with other source types and file systems. The next sub section will cover how to do that.
 
 ### Default packages
 
-Spark is a very flexible computing platform.  It is able to use the libraries from external packages to add functionality.  This makes it possible to be able to read data from Amazon S3 buckets, only if it is needed. The proper package is loaded at Spark connection time. The package is typically found and loaded directly from the Internet.  
+Spark is a very flexible computing platform.  It can add functionality by using extension programs, called packages. Accessing a new source type or file system can be done by using the appropriate package. 
 
-The configuration variable passed to the `spark_connect()` function should contain the reference to the desired package.  Any package that is to be loaded at connection time is added to a vector in the `defaultPackages` value of the `spark_connect()` configuration. Here is an example that loads the package needed to access Amazon S3 buckets.
+Packages need to be loaded into Spark at connection time.  To load the package, Spark needs its location.  The location could be inside the cluster, in a file share or the Internet.  
+
+In `sparklyr`, the package location is passed to `spark_connect()`.  All packages should be listed in the `defaultPackages` entry of the connection configuration. Here is an example that loads the package needed to access Amazon S3 buckets:
 
 ```{r}
 conf <- spark_config()
@@ -33,13 +35,9 @@ conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
 sc <- spark_connect(master = "local", config = conf)
 ```
 
-
 ### Source types
 
-The main goal is to convert the source data into an object in Spark.  Logically, this requires a spec that "tells" Spark how to read the source data.  Each spec enables Spark to read source data formats.  
-
-Currently, out-of-the box Spark can read several formats.  In `sparklyr`, the source data formats are aligned to R functions:
-
+Spark can read and write several source types.  In `sparklyr`, the source types are aligned to R functions:
 
 | Format                                        | Read                   | Write                   |
 |-----------------------------------------------|------------------------|-------------------------|
@@ -51,9 +49,12 @@ Currently, out-of-the box Spark can read several formats.  In `sparklyr`, the so
 | Apache Parquet                                | `spark_read_parquet()` | `spark_write_parquet()` |
 | Text                                          | `spark_read_text()`    | `spark_write_text()`    |
 
-It is possible to access data source types not listed above.  It will require to load a default package at connection time.  In `sparklyr`, the `spark_read_source()` and `spark_write_source()` are generic functions.  They are able to use the libraries imported by the default package.
 
-The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  That is what provides the mapping Spark can use to make sense of the data source.
+#### New Source Type
+
+It is possible to access data source types not listed above.  Loading the appropriate default package for Spark is the first of two steps  The second step is to actually read or write the data. The `spark_read_source()` and `spark_write_source()` functions do that.  They are generic functions that can use the libraries imported by a default package.
+
+The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source.
 
 ```{r}
 con <- spark_config()
@@ -67,11 +68,11 @@ spark_read_source(
   )
 ```
 
-### File system protocols
+### File systems
 
-Spark will default to the file protocol that it is running on.  This means that if it is running in a YARN managed cluster, the default protocol will be HDFS. For example, a given path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux files.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
+Spark will default to the file system that it is currently running on.  In a YARN managed cluster, the default file system will be HDFS. An example path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux folders.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
 
-The file system protocol can be overridden.  This is done in the `path` argument of the `sparklyr` function that will read or write.  Passing a full path of "file://home/user/file.csv" will force the search to be done inside the local Operating System's file system.
+The file system protocol can be changed when reading or writing.  It is done via the `path` argument of the `sparklyr` function.  For example, a full path of "file://home/user/file.csv" will force the use of the local Operating System's file system.
 
 There are other file system protocols.  An example is Amazon's S3 service.  Spark is does not know how to read the S3 protocol.  Accessing the "s3a" protocol involves adding a package to the `defaultPackages` configuration variable passed at connection time.  
 
@@ -82,7 +83,8 @@ sc <- spark_connect(master = "local", config = conf)
 my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
 
-Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol may require loading a default package.  In some cases the vendor providing the Spark environment could already be loading the package for you.  
+Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol requires loading a default package.  In some cases, the vendor providing the Spark environment could already be loading the package for you.  
+
 
 ## Reading data
 
