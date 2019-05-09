@@ -6,13 +6,19 @@ library(ggplot2)
 
 # Clusters {#clusters}
 
-Previous chapters focused on using Spark over a single computing instance, your personal computer. In this chapter we will introduce techniques to run Spark over multiple computing instances, also known as a computing cluster. This chapter and subsequent ones will introduce and make use of concepts applicable to computing clusters; however, it's not required to use a computing cluster to follow along, you can still use your personal computer. It's worth mentioning that while previous chapters focused on single computing instances, all the data analysis and modeling techniques we presented, can also be used in a computing cluster without changing any code.
+Previous chapters focused on using Spark over a single computing instance. That single instance is your personal computer. In this chapter, we will introduce techniques to run Spark over multiple computing instances. This is also known as a computing cluster. This chapter, and subsequent ones, will introduce and make use of concepts applicable to computing clusters. It is not required to use a computing cluster to follow along, you can still use your personal computer. Conversely, all of the techniques covered in previous chapters can also be used in a computing cluster, and without changing any code.
 
-For those of you who already have a Spark cluster in your organization, you could consider skipping to the next chapter, [Connections](#connections), which will teach you how to connect to an existing cluster. Otherwise, if you don't have a cluster or are considering improvements to your existing infrastructure, this chapter will introduce the cluster trends, managers, and providers available today.
+If there is a Spark cluster in your organization, consider skipping to the next chapter. The [Connections](#connections) chapter will teach you how to connect to your cluster. If you don't have a cluster, or are considering improvements to your existing infrastructure, this chapter will introduce cluster trends, managers, and providers available today.
 
-## Overview {#clusters-overview}
+## Trends {#clusters-overview}
 
-There are three major trends in cluster computing worth discussing: **On-Premise**, **Cloud** computing, and **Kubernetes**. Framing these trends over time will help us understand how they came to be, what they are, and what their future might be. To illustrate this, Figure \@ref(fig:clusters-trends) [plots these trends over time](#appendix-cluster-trends) using data from Google trends.
+There are three major trends in cluster computing worth discussing: 
+
+- On-Premise
+- Cloud computing
+- Kubernetes
+
+Framing these trends over time will help us understand how they came to be, what they are, and what their future might be. To illustrate this, Figure \@ref(fig:clusters-trends) [plots these trends over time](#appendix-cluster-trends).  The figure uses data from Google trends.
 
 ```{r clusters-trends-code, echo=FALSE}
 library(dplyr)
@@ -37,28 +43,29 @@ read.csv("data/clusters-trends.csv", skip = 2) %>%
 render_image("images/clusters-trends.png", "Google trends for on-premise (mainframe), cloud computing and Kubernetes")
 ```
 
-For **on-premise** clusters, yourself or someone in your organization purchased physical computers that were intended to be used for cluster computing. The computers in this cluster are made of _off-the-shelf_ hardware, meaning that someone placed an order to purchase computers usually found in stores shelves or, _high-performance_ hardware, meaning that a computing vendor provided highly customized computing hardware which also comes optimized for high-performance network connectivity, power consumption, etc. When purchasing hundreds or thousands of computing instances, it doesn't make sense to keep them in the usual computing case that we are all familiar with, instead, it makes sense to stack them as efficiently as possible on top of each other to minimize the space the use. This group of efficiently stacked computing instances is known as a [rack](https://en.wikipedia.org/wiki/Rack_unit). Once a cluster grows to thousands of computers, you will also need to host hundreds of racks of computing devices, at this scale, you would also need significant physical space to hosts those racks. A building that provides racks of computing instances is usually known as a _data center_. At the scale of a data center, you would also need to find ways to make the building more efficient, specially the cooling system, power supplies, network connectivity, and so on. Since this is time consuming, a few organization have come together to open source their infrastructure under the [Open Compute Project](http://www.opencompute.org/) initiative, which provides a set of data center blueprints free for anyone to use.
-
-There is nothing preventing you from building our own data center and in fact, many organizations have followed this path. For instance, Amazon started as an online book store, over the years Amazon grew to sell much more than just books and, with its online store growth, their data centers also grew in size. In 2002, Amazon considered [renting servers in their data centers to the public](https://en.wikipedia.org/wiki/Amazon_Web_Services#History), two year laters, Amazon Web Services launched as a way to let anyone rent servers in their data centers on-demand, meaning that, one did not have to purchase, configure, maintain nor teardown it's own clusters but could rather rent them from Amazon directly.
-
-This on-demand compute model is what we know today as **Cloud Computing**. In the cloud, the cluster you use is not owned by you and it's neither in your physical building, but rather, it's a data center owned and managed by someone else. Today, there are many cloud providers in this space ranging from Amazon, Databricks, IBM, Google, Microsoft and many others. Most cloud computing platforms provide a user interface either through a web application and command line to request and manage resources.
-
-While the benefits of processing data in the _cloud_ were obvious for many years, picking a cloud provider had the unintended side-effect of locking organizations with one particular provider, making it hard to switch between providers or back to on-premise clusters. **Kubernetes**, announced by Google in 2014, is an [open source system for managing containerized applications across multiple hosts](https://github.com/kubernetes/kubernetes/). In practice, it makes it easier to deploy across multiple cloud providers and on-premise as well.
-
-In summary, we have seen a transition from on-premise, to cloud computing and more recently Kubernetes which have been also described as the **private cloud**, the **public cloud** and the **hybrid cloud** respectevely. This chapter will walk you through each cluster computing trend in the context of Spark and R.
+The trends show a transition from on-premise to cloud computing.  In other words, a migration from **private** to **public** cloud.  Companies are learning how to take advantage of both.  A **hybrid** cloud allows to run computing in both places.  This allows companies to try emerging technologies faster.  This would explain the recent interest in Kubernetes.
 
 ## On-Premise
 
-As mentioned in the overview section, on-premise clusters represent a set of computing instances procured and managed by staff members from your organization. These clusters can be highly customized and controlled; however, they can also incur higher initial expenses and maintenance costs.
+Your organization purchased physical computers intended for cluster computing. The computers could be made of _off-the-shelf_ or _high-performance_ hardware. Off-the-shelf means computers usually found in stores shelves.  High-performance means that the vendor provided highly customized computing hardware. The hardware comes optimized for high-performance network connectivity, power consumption, etc. 
 
-When using On-Premise Spark clusters, there are two concepts you should consider:
+An organization could own hundreds, or thousands, of these computing instances.  In this case, physical space becomes a problem.  It makes no sense to continue to use regular computer cases.  There has to be a way to efficiently utilize the physical space available. The solution is to use a physical case called a rack unit. A regular computer case is taller than it is wider or deeper. A rack unit, has a flat box shape. It is deeper and wider that it is taller.  Similar to a pizza box.  This allows them to efficiently stack them on top in a rack. The larger the cluster, the more space is needed to host the racks.  
 
-- **Cluster Manager**: In a similar way as to how an Operating Systems (like Windows os OS X) allows you to run multiple applications in the same computer; a cluster manager allows multiple applications to be run in the same cluster. You will have to choose one yourself when working with On-Premise clusters.
-- **Spark Distribution**: While you can install Spark from the Apache Spark site, many companies partner with companies that can provide support and enhancements to Apache Spark which we often reffer as, Spark distributions.
+A _data center_, is a building that hosts a large number of racks of computing instances.  At this scale, the building has to be more efficient. The cooling system, power supplies, network connectivity, and other features have to be properly designed and constructed. Planning and building a Data Center is time consuming.  Some organizations have come together to open source their infrastructure under the [@cluster-data-cente] initiative. It provides a free set of data center blueprints for anyone to use.
+
+### Considerations
+
+As mentioned in the previous sub-section, on-premise clusters are computing instances procured and managed by your organization. These clusters can be highly customized and controlled. The trade off is that they incur higher initial expenses and maintenance costs. 
+
+There are two concepts to consider when using on-premise Spark clusters:
+
+- **Cluster Manager**: It allows multiple applications to run in the same cluster.  This is similar to how an Operating System allows multiple applications to run on a computer. One has to be selected when working with on-premise clusters.
+
+- **Spark Distribution**: There are companies that  provide support and enhancements to Apache Spark. We often refer to them as, Spark distributions. Installing Spark directly from the Apache Spark site is also an option.  There would not be support for installation and troubleshooting in that case.
 
 ### Managers {#clusters-manager}
 
-In order to run Spark within a computing cluster, you will need to run software capable of initializing Spark over each pyshical machine and register all the available computing nodes, this software is known as a [cluster manager](https://en.wikipedia.org/wiki/Cluster_manager). The available cluster managers in Spark are: **Spark Standalone**, **YARN**, **Mesos** and **Kubernetes**.
+In order to run Spark within a computing cluster, you will need to run software capable of initializing Spark over each physical machine and register all the available computing nodes, this software is known as a [cluster manager](https://en.wikipedia.org/wiki/Cluster_manager). The available cluster managers in Spark are: **Spark Standalone**, **YARN**, **Mesos** and **Kubernetes**.
 
 **Note:** In distributed systems and clusters literature, we often refer to each physical machine as a compute instance, compute node, instance or node.
 
@@ -193,7 +200,11 @@ Hortonworks partnered with Microsoft [@clusters-hortonworks-microsoft] to improv
 
 **MapR** is a business software company headquartered in Santa Clara, California. MapR provides access to a variety of data sources from a single computer cluster, including big data workloads such as Apache Hadoop and Apache Spark, a distributed file system, a multi-model database management system, and event stream processing, combining analytics in real-time with operational applications. Its technology runs on both commodity hardware and public cloud computing services [@clusters-mapr-wikipedia].
 
+There is nothing preventing you from building our own data center. Many organizations have followed this path. For instance, Amazon started as an online book store. Over the years, Amazon grew to sell much more than just books. Along with its online store growth, their data centers also grew in size. In 2002, Amazon considered renting servers in their data centers to the public.  Amazon Web Services is launched two years after. It enables anyone to rent servers in their data centers on-demand. This meant that one did not have to purchase, configure, maintain nor teardown it's own clusters. Instead, one could rather rent them from Amazon directly.
+
 ## Cloud
+
+This on-demand compute model is what we know today as **Cloud Computing**. In the cloud, the cluster you use is not owned by you and it's neither in your physical building, but rather, it's a data center owned and managed by someone else. Today, there are many cloud providers in this space ranging from Amazon, Databricks, IBM, Google, Microsoft and many others. Most cloud computing platforms provide a user interface either through a web application and command line to request and manage resources.
 
 If you don't have an on-prem cluster nor spare machines to reuse, starting with a cloud cluster can be quite convenient since it will allow you to access a proper cluster in a matter of minutes. This section will briefly mention some of the major cloud infrastructure providers and give you resources to help you get started if you choose to use a cloud provider.
 
@@ -336,6 +347,8 @@ Up to date pricing for HDInsight is available under [azure.microsoft.com/en-us/p
 | G5             | 64   | 448 GB | $9.298/hour  |
 
 ## Kubernetes
+
+While the benefits of processing data in the _cloud_ were obvious for many years, picking a cloud provider had the unintended side-effect of locking organizations with one particular provider, making it hard to switch between providers or back to on-premise clusters. **Kubernetes**, announced by Google in 2014, is an [open source system for managing containerized applications across multiple hosts](https://github.com/kubernetes/kubernetes/). In practice, it makes it easier to deploy across multiple cloud providers and on-premise as well.
 
 Kubernetes is an open-source container-orchestration system for automating deployment, scaling and management of containerized applications that was originally designed by Google and now maintained by the [Cloud Native Computing Foundation](https://www.cncf.io/). Kubernetes was originally based on [Docker](https://www.docker.com/) while, like Mesos, it's also based on Linux Cgroups.
 
