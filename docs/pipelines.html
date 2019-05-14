@@ -5,11 +5,11 @@
 
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Chapter 1 Introduction | Mastering Apache Spark with R</title>
+  <title>Chapter 5 Pipelines | Mastering Apache Spark with R</title>
   <meta name="description" content="The complete guide to large-scale analysis and modeling.">
   <meta name="generator" content="bookdown  and GitBook 2.6.7">
 
-  <meta property="og:title" content="Chapter 1 Introduction | Mastering Apache Spark with R" />
+  <meta property="og:title" content="Chapter 5 Pipelines | Mastering Apache Spark with R" />
   <meta property="og:type" content="book" />
   
   
@@ -17,7 +17,7 @@
   <meta name="github-repo" content="javierluraschi/the-r-in-spark" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 1 Introduction | Mastering Apache Spark with R" />
+  <meta name="twitter:title" content="Chapter 5 Pipelines | Mastering Apache Spark with R" />
   
   <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
   
@@ -32,8 +32,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="index.html">
-<link rel="next" href="starting.html">
+<link rel="prev" href="modeling.html">
+<link rel="next" href="clusters.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -426,307 +426,312 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="intro" class="section level1">
-<h1><span class="header-section-number">Chapter 1</span> Introduction</h1>
-<p>With information growing at exponential rates, it’s no surprise that historians are referring to this period of history as the Information Age. The increasing speed at which data is being collected has created new opportunities and is certainly staged to create even more. This chapter presents the tools that have been used to solve large-scale data challenges and introduces Apache Spark as a leading tool that is democratizing our ability to process data at large-scale. We will then introduce the R computing language, which was specifically designed to simplify data analysis. It is then natural to ask what the outcome would be from combining the ease of use provided by R, with the compute power available through Apache Spark. This will lead us to introduce sparklyr, a project merging R and Spark into a powerful tool that is easily accessible to all.</p>
-<p>The next chapter, <a href="starting.html#starting">Getting Started</a>, will present the prerequisites, tools and steps you will need to perform to get Spark and R working in your personal computer. You will learn how to install Spark, initialize Spark, get introduced to common operations and help you get your very first data processing and modeling task done. It is the goal of that chapter to help anyone grasp the concepts and tools required to start tackling large-scale data challenges which, until recently, were only accessible to just a few organizations.</p>
-<p>You will then move on into learning how to analyze large-scale data, followed by building models capable of predicting trends and discover information hidden in vasts amounts of information. At which point, you will have the tools required to perform data analysis and modeling at scale. Subsequent chapters will help you move away from your local computer into computing clusters required to solve many real world problems. The last chapters will present additional topics, like real time data processing and graph analysis, which you will need to truly master the art of analyzing data at any scale. The last chapter of this book will give you tools and inspiration to consider contributing back to this project and many others.</p>
-<p>We hope this is a journey you will enjoy, that will help you solve problems in your professional career to nudge the world into taking better decisions that can benefit us all.</p>
-<div id="intro-background" class="section level2">
-<h2><span class="header-section-number">1.1</span> Information</h2>
-<p>As humans, we have been storing, retrieving, manipulating, and communicating information since the Sumerians in Mesopotamia developed writing in about 3000 BC. Based on the storage and processing technologies employed, it is possible to distinguish four distinct phases of development: pre-mechanical (3000 BC – 1450 AD), mechanical (1450–1840), electromechanical (1840–1940), and electronic (1940–present) <span class="citation">(Laudon, Traver, and Laudon <a href="#ref-intro-information-technology">1996</a>)</span>.</p>
-<p>Mathematician George Stibitz used the word <strong>digital</strong> to describe fast electric pulses back in 1942 <span class="citation">(Ceruzzi <a href="#ref-intro-computing-concise-history">2012</a>)</span> and, to this day, we describe information stored electronically as digital information. In contrast, <strong>analog</strong> information represents everything we have stored by any non-electronic means such as hand written notes, books, newspapers, and so on <span class="citation">(Webster <a href="#ref-intro-webster2006merriam">2006</a>)</span>.</p>
-<p>The world bank report on digital development provides an estimate of digital and analog information stored over the last decades <span class="citation">(Group <a href="#ref-intro-data-revolution">2016</a>)</span>. This report noted that digital information surpassed analog information around 2003. At that time, there were about 10 million terabytes of digital information, which is roughly about 10 million computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at <a href="appendix.html#appendix-storage-capacity">exponential rates</a>. Figure <a href="intro.html#fig:intro-store-capacity">1.1</a> shows the findings of this report, notice that every other year, the worlds information has grown tenfold.</p>
-<div class="figure" style="text-align: center"><span id="fig:intro-store-capacity"></span>
-<img src="images/intro-world-store-capacity-resized.png" alt="World’s capacity to store information" width="1500" />
-<p class="caption">
-FIGURE 1.1: World’s capacity to store information
-</p>
+<div id="pipelines" class="section level1">
+<h1><span class="header-section-number">Chapter 5</span> Pipelines</h1>
+<p>In this chapter, we dive into ML Pipelines, which are the engine that powers the machine learning functionality we saw in the <a href="modeling.html#modeling">Modeling</a> chapter. When you invoke an ML function via the formula interface, for example <code>ml_logistic_regression(mtcars, am ~ .)</code>, sparklyr actually constructs a <em>pipeline</em> for you under the hood. The Pipelines API is a lower level interface that enables advanced workflows, and we will soon show how to utilize it.</p>
+<div id="estimators-and-transformers" class="section level2">
+<h2><span class="header-section-number">5.1</span> Estimators and Transformers</h2>
+<p>The building blocks of pipelines are objects called transformers and estimators, which are collectively referred to as <strong>pipeline stages</strong>. A <strong>transformer</strong> can be used to apply transformations to a data frame and return another data frame; the resulting data frame often comprises the original data frame with new columns appended to it. An <strong>estimator</strong>, on the other hand, can be used to create a transformer giving some training data. Consider the following example to illustrate this relationship: a “center and scale” estimator can learn the mean and standard deviation of some data and store the statistics in a resulting transformer; this transformer can then be used to normalize the data it was trained on and also any new, yet unseen, data.</p>
+<p>Here is an example of how to define an estimator:</p>
+<pre class="sourceCode r"><code class="sourceCode r">scaler &lt;-<span class="st"> </span><span class="kw">ft_standard_scaler</span>(sc, <span class="dt">input_col =</span> <span class="st">&quot;features&quot;</span>, <span class="dt">output_col =</span> <span class="st">&quot;features_scaled&quot;</span>, <span class="dt">with_mean =</span> <span class="ot">TRUE</span>)
+scaler</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## StandardScaler (Estimator)</span>
+<span class="co">## &lt;standard_scaler_7f6d46f452a1&gt; </span>
+<span class="co">##  (Parameters -- Column Names)</span>
+<span class="co">##   input_col: features</span>
+<span class="co">##   output_col: features_scaled</span>
+<span class="co">##  (Parameters)</span>
+<span class="co">##   with_mean: TRUE</span>
+<span class="co">##   with_std: TRUE</span></code></pre>
+<p>We can now create some data (for which we know the mean and standard deviation) then fit our scaling model to it using the <code>ml_fit()</code> function.</p>
+<pre class="sourceCode r"><code class="sourceCode r">df &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">value =</span> <span class="kw">rnorm</span>(<span class="dv">100000</span>))) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ft_vector_assembler</span>(<span class="dt">input_cols =</span> <span class="st">&quot;value&quot;</span>, <span class="dt">output_col =</span> <span class="st">&quot;features&quot;</span>)
+
+scaler_model &lt;-<span class="st"> </span>scaler <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ml_fit</span>(df)
+scaler_model</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## StandardScalerModel (Transformer)</span>
+<span class="co">## &lt;standard_scaler_7f6d46f452a1&gt; </span>
+<span class="co">##  (Parameters -- Column Names)</span>
+<span class="co">##   input_col: features</span>
+<span class="co">##   output_col: features_scaled</span>
+<span class="co">##  (Transformer Info)</span>
+<span class="co">##   mean:  num 0.00421 </span>
+<span class="co">##   std:  num 0.999 </span></code></pre>
+<p><strong>Note:</strong> In Spark ML, many algorithms and feature transformers require that the input be a vector column. The function <code>ft_vector_assembler()</code> performs this task. The function can also be used to initialize a transformer to be used in a pipeline.</p>
+<p>We see that the mean and standard deviation are very close to <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span>, respectively, which is what we expect. We can then use the transformer to <em>transform</em> a data frame, using the <code>ml_transform()</code> function:</p>
+<pre class="sourceCode r"><code class="sourceCode r">scaler_model <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ml_transform</span>(df) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">glimpse</span>()</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Observations: ??</span>
+<span class="co">## Variables: 3</span>
+<span class="co">## Database: spark_connection</span>
+<span class="co">## $ value           &lt;dbl&gt; 0.75373300, -0.84207731, 0.59365113, -…</span>
+<span class="co">## $ features        &lt;list&gt; [0.753733, -0.8420773, 0.5936511, -0.…</span>
+<span class="co">## $ features_scaled &lt;list&gt; [0.7502211, -0.8470762, 0.58999, -0.4…</span></code></pre>
 </div>
-<p>With the ambition to provide tools capable of searching all this new digital information, many companies attempted to provide such functionality with what we know today as search engines, used when searching the web. Given the vast amount of digital information, managing information at this scale was a challenging problem. Search engines were unable to store all the web page information required to support web searches in a single computer. This meant that they had to split information into several files and store them across many machines. This approach became known as the Google File System, a research paper published in 2003 by Google <span class="citation">(Ghemawat, Gobioff, and Leung <a href="#ref-intro-google-file-system">2003</a>)</span>.</p>
+<div id="pipelines-and-pipeline-models" class="section level2">
+<h2><span class="header-section-number">5.2</span> Pipelines and Pipeline Models</h2>
+<p>A <strong>pipeline</strong> is simply a sequence of transformers and estimators, and a <strong>pipeline model</strong> is a pipeline that has been trained on data so all of its components have been converted to transformers. Note that Spark ML internals dictate that pipelines are always estimators, even if they comprise only of transformers.</p>
+<p>There are a couple ways to construct a pipeline in sparklyr, both of which uses the <code>ml_pipeline()</code> function.</p>
+<p>We can initialize an empty pipeline with <code>ml_pipeline(sc)</code> and append stages to it:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ml_pipeline</span>(sc) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ft_standard_scaler</span>(
+    <span class="dt">input_col =</span> <span class="st">&quot;features&quot;</span>,
+    <span class="dt">output_col =</span> <span class="st">&quot;features_scaled&quot;</span>, 
+    <span class="dt">with_mean =</span> <span class="ot">TRUE</span>
+  )</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Pipeline (Estimator) with 1 stage</span>
+<span class="co">## &lt;pipeline_7f6d6a6a38ee&gt; </span>
+<span class="co">##   Stages </span>
+<span class="co">##   |--1 StandardScaler (Estimator)</span>
+<span class="co">##   |    &lt;standard_scaler_7f6d63bfc7d6&gt; </span>
+<span class="co">##   |     (Parameters -- Column Names)</span>
+<span class="co">##   |      input_col: features</span>
+<span class="co">##   |      output_col: features_scaled</span>
+<span class="co">##   |     (Parameters)</span>
+<span class="co">##   |      with_mean: TRUE</span>
+<span class="co">##   |      with_std: TRUE</span></code></pre>
+<p>Alternatively, we can pass stages directly to <code>ml_pipeline()</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">pipeline &lt;-<span class="st"> </span><span class="kw">ml_pipeline</span>(scaler)</code></pre>
+<p>We fit a pipeline as we would fit an estimator:</p>
+<pre class="sourceCode r"><code class="sourceCode r">pipeline_model &lt;-<span class="st"> </span>pipeline <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ml_fit</span>(df)
+pipeline_model</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## PipelineModel (Transformer) with 1 stage</span>
+<span class="co">## &lt;pipeline_7f6d64df6e45&gt; </span>
+<span class="co">##   Stages </span>
+<span class="co">##   |--1 StandardScalerModel (Transformer)</span>
+<span class="co">##   |    &lt;standard_scaler_7f6d46f452a1&gt; </span>
+<span class="co">##   |     (Parameters -- Column Names)</span>
+<span class="co">##   |      input_col: features</span>
+<span class="co">##   |      output_col: features_scaled</span>
+<span class="co">##   |     (Transformer Info)</span>
+<span class="co">##   |      mean:  num 0.00421 </span>
+<span class="co">##   |      std:  num 0.999 </span></code></pre>
+<pre><code>pipeline </code></pre>
 </div>
-<div id="intro-hadoop" class="section level2">
-<h2><span class="header-section-number">1.2</span> Hadoop</h2>
-<p>One year later, Google published a new paper describing how to perform operations across the Google File System, this approach came to be known as <strong>MapReduce</strong> <span class="citation">(Dean and Ghemawat <a href="#ref-intro-google-map-reduce">2008</a>)</span>. As you would expect, there are two operations in MapReduce: Map and Reduce. The <strong>map operation</strong> provides an arbitrary way to transform each file into a new file, while the <strong>reduce operation</strong> combines two files. Both operations require custom computer code, but the MapReduce framework takes care of automatically executing them across many computers at once. These two operations are sufficient to process all the data available in the web, while also providing enough flexibility to extract meaningful information from it.</p>
-<p>For example, as illustrated in Figure <a href="intro.html#fig:intro-mapreduce-example">1.2</a>, we can use MapReduce to count words in two different text files stored in different machines. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files.</p>
-<div class="figure"><span id="fig:intro-mapreduce-example"></span>
-<div id="htmlwidget-3ffc07189f8136bfa5f9" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-3ffc07189f8136bfa5f9">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#spacing: 80\n#direction: right\n#zoom: 4\n[Alice's File|I like apples]\n[Bob's File|I like bananas]\n\n[Alice's File]-Map[Alice's Words]\n[Bob's File]-Map[Bob's Words]\n\n[Alice's Words|I,1|like,1|apples,1]\n[Bob's Words|I,1|like,1|bananas,1]\n\n[Alice's Words]- Reduce[Word Counts]\n[Bob's Words]- Reduce[Word Counts]\n\n[Word Counts|I,2|like,2|apples,1|bananas,1]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
-<p class="caption">
-FIGURE 1.2: A simple MapReduce example
-</p>
+<div id="applying-pipelines-to-okcupid-data" class="section level2">
+<h2><span class="header-section-number">5.3</span> Applying Pipelines to OKCupid Data</h2>
+<p>Now that we have an understanding of the rudimentary concepts for ML Pipelines, let us apply them to the predictive modeling problem from the previous chapter, where we are trying to predict whether people are currently employed by looking at their profiles. Our starting point is the <code>okc_train</code> data frame.</p>
+<p>We first exhibit the pipeline, which includes feature engineering and modeling steps, then walk through it.</p>
+<pre class="sourceCode r"><code class="sourceCode r">pipeline &lt;-<span class="st"> </span><span class="kw">ml_pipeline</span>(sc) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ft_dplyr_transformer</span>(
+    okc_train <span class="op">%&gt;%</span>
+<span class="st">      </span><span class="kw">mutate</span>(
+        <span class="dt">essay_length =</span> <span class="kw">char_length</span>(<span class="kw">paste</span>(<span class="op">!!!</span><span class="kw">syms</span>(<span class="kw">paste0</span>(<span class="st">&quot;essay&quot;</span>, <span class="dv">0</span><span class="op">:</span><span class="dv">9</span>))))
+      )
+  ) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ft_string_indexer</span>(<span class="dt">input_col =</span> <span class="st">&quot;sex&quot;</span>, <span class="dt">output_col =</span> <span class="st">&quot;sex_indexed&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ft_string_indexer</span>(<span class="dt">input_col =</span> <span class="st">&quot;drinks&quot;</span>, <span class="dt">output_col =</span> <span class="st">&quot;drinks_indexed&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ft_string_indexer</span>(<span class="dt">input_col =</span> <span class="st">&quot;drugs&quot;</span>, <span class="dt">output_col =</span> <span class="st">&quot;drugs_indexed&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ft_one_hot_encoder_estimator</span>(
+    <span class="dt">input_cols =</span> <span class="kw">c</span>(<span class="st">&quot;sex_indexed&quot;</span>, <span class="st">&quot;drinks_indexed&quot;</span>, <span class="st">&quot;drugs_indexed&quot;</span>),
+    <span class="dt">output_cols =</span> <span class="kw">c</span>(<span class="st">&quot;sex_encoded&quot;</span>, <span class="st">&quot;drinks_encoded&quot;</span>, <span class="st">&quot;drugs_encoded&quot;</span>)
+  ) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ft_vector_assembler</span>(
+    <span class="dt">input_cols =</span> <span class="kw">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;sex_encoded&quot;</span>, <span class="st">&quot;drinks_encoded&quot;</span>, <span class="st">&quot;drugs_encoded&quot;</span>, <span class="st">&quot;essay_length&quot;</span>), 
+    <span class="dt">output_col =</span> <span class="st">&quot;features&quot;</span>
+  ) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ft_standard_scaler</span>(<span class="dt">input_col =</span> <span class="st">&quot;features&quot;</span>, <span class="dt">output_col =</span> <span class="st">&quot;features_scaled&quot;</span>, <span class="dt">with_mean =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ml_logistic_regression</span>(<span class="dt">features_col =</span> <span class="st">&quot;features_scaled&quot;</span>, <span class="dt">label_col =</span> <span class="st">&quot;not_working&quot;</span>)</code></pre>
+<p>The first stage in our pipeline is a SQL transformer defined by a data frame. The <code>ft_dplyr_transformer()</code> function extracts the SQL statement associated with <code>mutate(., essay_length = char_length(paste(!!!syms(paste0("essay", 0:9)))))</code> and constructs a SQL transformer with it. You can also use <code>ft_sql_transformer()</code> directly if you prefer writing SQL; note that only single table verbs are supported either way so joins are not supported. The next three stages index the <code>sex</code>, <code>drinks</code>, and <code>drugs</code> columns, which are character, into numeric indicies via <code>ft_string_indexer()</code>. This is necessary for the <code>ft_one_hot_encoder_estimator()</code> that comes next which requires numeric column inputs. Once all of our predictor variables are of numeric type (recall that <code>age</code> is numeric already), we can create our features vector using <code>ft_vector_assembler()</code> which concatenates all of its inputs together into one column of vectors. We can then use <code>ft_standard_scaler()</code> to normalize all elements of the features column (including the one-hot encoded 0/1 values of the categorical variables), and finally apply a logistic regression via <code>ml_logistic_regression()</code>.</p>
+<p>During prototyping, you may want to execute these transformations <em>eagerly</em> on a small subset of the data, by passing the data frame to the <code>ft_</code> and <code>ml_</code> functions, and inspecting the transformed data frame. For example, you can do the following:</p>
+<pre class="sourceCode r"><code class="sourceCode r">okc_train <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ft_string_indexer</span>(<span class="st">&quot;sex&quot;</span>, <span class="st">&quot;sex_indexed&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">select</span>(sex_indexed)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## # Source: spark&lt;?&gt; [?? x 1]</span>
+<span class="co">##    sex_indexed</span>
+<span class="co">##          &lt;dbl&gt;</span>
+<span class="co">##  1           0</span>
+<span class="co">##  2           0</span>
+<span class="co">##  3           1</span>
+<span class="co">##  4           0</span>
+<span class="co">##  5           1</span>
+<span class="co">##  6           0</span>
+<span class="co">##  7           0</span>
+<span class="co">##  8           1</span>
+<span class="co">##  9           1</span>
+<span class="co">## 10           0</span>
+<span class="co">## # … with more rows</span></code></pre>
+<p>Once you have found the right transformations for your dataset, you can then replace the data frame input with <code>ml_pipeline(sc)</code>, and the result will be a pipeline that you can apply to any data frame with the appropriate schema.</p>
+<div id="hyperparameter-tuning" class="section level3">
+<h3><span class="header-section-number">5.3.1</span> Hyperparameter Tuning</h3>
+<p>Going back to the pipeline we have created above, we can use <code>ml_cross_validator()</code> to perform the cross validation workflow we demonstrated in the previous chapter and easily test different hyperparameter combinations. In this example, we test whether centering the variables improve predictions together with various regularization values for the logistic regression. We define the cross validator as follows:</p>
+<pre class="sourceCode r"><code class="sourceCode r">cv &lt;-<span class="st"> </span><span class="kw">ml_cross_validator</span>(
+  sc,
+  <span class="dt">estimator =</span> pipeline,
+  <span class="dt">estimator_param_maps =</span> <span class="kw">list</span>(
+    <span class="dt">standard_scaler =</span> <span class="kw">list</span>(<span class="dt">with_mean =</span> <span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="ot">FALSE</span>)),
+    <span class="dt">logistic_regression =</span> <span class="kw">list</span>(
+      <span class="dt">elastic_net_param =</span> <span class="kw">c</span>(<span class="fl">0.25</span>, <span class="fl">0.75</span>),
+      <span class="dt">reg_param =</span> <span class="kw">c</span>(<span class="fl">1e-2</span>, <span class="fl">1e-3</span>)
+    )
+  ),
+  <span class="dt">evaluator =</span> <span class="kw">ml_binary_classification_evaluator</span>(sc, <span class="dt">label_col =</span> <span class="st">&quot;not_working&quot;</span>),
+  <span class="dt">num_folds =</span> <span class="dv">10</span>
+)</code></pre>
+<p>The <code>estimator</code> argument is simply the estimator we want to tune, and in this case it is the <code>pipeline</code> that we defined. We provide the hyperparameter values we are interested in via the <code>estimator_param_maps</code> parameter, which takes a nested named list. The names at the first level correspond to UIDs of the stages we want to tune (if a partial UID is provided sparklyr will attempt to match it to a pipeline stage) and the names at the second level correspond to parameters of each stage. In the snippet above, we are specifying that we want to test</p>
+<ul>
+<li>Standard scaler: the values <code>TRUE</code> and <code>FALSE</code> for <code>with_mean</code>, which denotes whether predictor values are centered</li>
+<li>Logistic regression: The values <code>0.25</code> and <code>0.75</code> for <span class="math inline">\(\alpha\)</span>, and the values <code>1e-2</code> and <code>1e-3</code> for <span class="math inline">\(\lambda\)</span></li>
+</ul>
+<p>We expect this to give rise to <span class="math inline">\(2 \times 2 \times 2 = 8\)</span> hyperparameter combinations, which we can confirm by printing the <code>cv</code> object:</p>
+<pre class="sourceCode r"><code class="sourceCode r">cv</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## CrossValidator (Estimator)</span>
+<span class="co">## &lt;cross_validator_d5676ac6f5&gt; </span>
+<span class="co">##  (Parameters -- Tuning)</span>
+<span class="co">##   estimator: Pipeline</span>
+<span class="co">##              &lt;pipeline_d563b0cba31&gt; </span>
+<span class="co">##   evaluator: BinaryClassificationEvaluator</span>
+<span class="co">##              &lt;binary_classification_evaluator_d561d90b53d&gt; </span>
+<span class="co">##     with metric areaUnderROC </span>
+<span class="co">##   num_folds: 10 </span>
+<span class="co">##   [Tuned over 8 hyperparameter sets]</span></code></pre>
+<p>As with any other estimator, we can fit the cross validator using <code>ml_fit()</code></p>
+<pre class="sourceCode r"><code class="sourceCode r">cv_model &lt;-<span class="st"> </span>cv <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ml_fit</span>(okc_train)</code></pre>
+<p>and inspect the results:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ml_validation_metrics</span>(cv_model) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">arrange</span>(<span class="op">-</span>areaUnderROC)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">##   areaUnderROC elastic_net_param_1 reg_param_1 with_mean_2</span>
+<span class="co">## 1    0.7722700                0.75       0.001        TRUE</span>
+<span class="co">## 2    0.7718431                0.75       0.010       FALSE</span>
+<span class="co">## 3    0.7718350                0.75       0.010        TRUE</span>
+<span class="co">## 4    0.7717677                0.25       0.001        TRUE</span>
+<span class="co">## 5    0.7716070                0.25       0.010        TRUE</span>
+<span class="co">## 6    0.7715972                0.25       0.010       FALSE</span>
+<span class="co">## 7    0.7713816                0.75       0.001       FALSE</span>
+<span class="co">## 8    0.7703913                0.25       0.001       FALSE</span></code></pre>
 </div>
-<p>Counting words is often the most basic MapReduce example, but it can be also used for much more sophisticated and interesting applications. For instance, MapReduce can be used to rank web pages in Google’s <strong>PageRank</strong> algorithm, which assigns ranks to web pages based on the count of hyperlinks linking to a web page and the rank of the page linking to it.</p>
-<p>After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as <strong>Hadoop</strong> with the Google File System implemented as the Hadoop File System, or <strong>HDFS</strong> for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations which enabled them to make use of MapReduce beyond web data processing.</p>
-<p>While Hadoop provided support to perform MapReduce operations over a distributed file system, it still required MapReduce operations to be written with code every time a data analysis was run. To improve over this tedious process, the <strong>Hive</strong> project released in 2008 by Facebook, brought Structured Query Language (<strong>SQL</strong>) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each MapReduce operation; instead, one could write generic data analysis statements in SQL that are much easier to understand and write.</p>
 </div>
-<div id="intro-spark" class="section level2">
-<h2><span class="header-section-number">1.3</span> Spark</h2>
-<p>In 2009, <strong>Apache Spark</strong> began as a research project at the UC Berkeley’s AMPLab to improve on MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines, and by loading data in-memory making operations much fasters than Hadoop’s on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the <a href="modeling.html#modeling">Modeling</a> chapter, allowed Spark to run 10 times faster than Hadoop by making use of in-memory datasets <span class="citation">(Zaharia et al. <a href="#ref-intro-zaharia2010spark">2010</a>)</span>, a chart similar to Figure <a href="intro.html#fig:intro-spark-logistic-regression">1.3</a> was presented in the original research publication.</p>
-<div class="figure"><span id="fig:intro-spark-logistic-regression"></span>
-<img src="images/intro-hadoop-spark-logistic-regression-resized.png" alt="Logistic regression performance in Hadoop and Spark" width="1500" />
-<p class="caption">
-FIGURE 1.3: Logistic regression performance in Hadoop and Spark
-</p>
-</div>
-<p>While Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. For instance, Spark has set new records in large-scale sorting <span class="citation">(“Sort Benchmark” <a href="#ref-intro-sort-benchmark">2019</a>)</span>, where data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU’s cache to dramatically improve performance. For comparison, one can sort 100 terabytes of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23 minutes using Spark <span class="citation">(“Apache Spark Officially Sets a New Record in Large-Scale Sorting” <a href="#ref-intro-spark-record-sorting">2014</a>)</span>, it’s also the case that Spark holds the record in the cloud sorting benchmark <span class="citation">(“Spark Wins Cloudsort Benchmark as the Most Efficient Engine” <a href="#ref-intro-spark-record-cloudsort">2016</a>)</span>, which makes Spark the most cost effective solution for large-scale sorting.</p>
+<div id="operating-modes-of-pipelines-functions" class="section level2">
+<h2><span class="header-section-number">5.4</span> Operating Modes of Pipelines Functions</h2>
+<p>By now, you have likely noticed that the pipeline stage functions, such as <code>ft_string_indexer()</code> and <code>ml_logistic_regression()</code> behave differently depending on the first argument passed to them<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>. The full pattern is as follows:</p>
 <table>
+<colgroup>
+<col width="27%" />
+<col width="28%" />
+<col width="43%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th></th>
-<th>Hadoop Record</th>
-<th>Spark Record</th>
+<th>First argument</th>
+<th>Returns</th>
+<th>Example</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Data Size</td>
-<td>102.5 TB</td>
-<td>100 TB</td>
+<td>Spark connection</td>
+<td>Estimator or transformer object</td>
+<td><code>ft_string_indexer(sc)</code></td>
 </tr>
 <tr class="even">
-<td>Elapsed Time</td>
-<td>72 mins</td>
-<td>23 mins</td>
+<td>Pipeline</td>
+<td>Pipeline</td>
+<td><code>ml_pipeline(sc) %&gt;% ft_string_indexer()</code></td>
 </tr>
 <tr class="odd">
-<td>Nodes</td>
-<td>2100</td>
-<td>206</td>
+<td>Data frame, without formula</td>
+<td>Data frame</td>
+<td><code>ft_string_indexer(iris, "Species", "indexed")</code></td>
 </tr>
 <tr class="even">
-<td>Cores</td>
-<td>50400</td>
-<td>6592</td>
-</tr>
-<tr class="odd">
-<td>Disk</td>
-<td>3150 GB/s</td>
-<td>618 GB/s</td>
-</tr>
-<tr class="even">
-<td>Network</td>
-<td>10Gbps</td>
-<td>10Gbps</td>
-</tr>
-<tr class="odd">
-<td>Sort rate</td>
-<td>1.42 TB/min</td>
-<td>4.27 TB/min</td>
-</tr>
-<tr class="even">
-<td>Sort rate / node</td>
-<td>0.67 GB/min</td>
-<td>20.7 GB/min</td>
+<td>Data frame, with formula</td>
+<td>sparklyr ML model object</td>
+<td><code>ml_logistic_regression(iris, Species ~ .)</code></td>
 </tr>
 </tbody>
 </table>
-<p>In 2010, Spark was released as an open source project and then donated to the Apache Software Foundation in 2013. Spark is licensed under the <a href="https://en.wikipedia.org/wiki/Apache_License">Apache 2.0</a>, which allows you to freely use, modify, and distribute it. In 2015, Spark reaches more than 1000 contributors, making it one of the most active projects in the Apache Software Foundation.</p>
-<p>This gives an overview of how Spark came to be, which we can now use to formally introduce Apache Spark as follows:</p>
-<blockquote>
-<p>“Apache Spark is a fast and general engine for large-scale data processing.”</p>
-<p>— <a href="http://spark.apache.org/">spark.apache.org</a></p>
-</blockquote>
-<p>To help us understand this definition of Apache Spark, we will break it down as follows:</p>
-<dl>
-<dt>Data Processing</dt>
-<dd>Data processing is the collection and manipulation of items of data to produce meaningful information <span class="citation">(French <a href="#ref-intro-data-processing">1996</a>)</span>.
-</dd>
-<dt>General</dt>
-<dd>Spark optimizes and executes parallel generic code, as in, there are no restrictions as to what type of code one can write in Spark.
-</dd>
-<dt>Large-Scale</dt>
-<dd>One can interpret this as <strong>cluster</strong>-scale, as in, a set of connected computers working together to accomplish specific goals.
-</dd>
-<dt>Fast</dt>
-<dd>Spark is much faster than its predecessor by making efficient use of memory, network and CPUs to speed data processing algorithms in computing clusters.
-</dd>
-</dl>
-<p>Since Spark is <em>general</em>, you can use Spark to solve many problems, from calculating averages to approximating the value of Pi, predicting customer churn <span class="citation">(“Churn Prediction with Apache Spark Machine Learning” <a href="#ref-intro-spark-churn-prediction">2017</a>)</span>, aligning protein sequences <span class="citation">(“Bioinformatics Applications on Apache Spark” <a href="#ref-intro-spark-bioinformatics">2018</a>)</span> or analyzing high energy physics at CERN <span class="citation">(“Apache Spark and Cern Open Data Analysis, an Example” <a href="#ref-intro-spark-cern">2017</a>)</span>.</p>
-<p>Describing Spark as <em>large</em> <em>scale</em> implies that a good use case for Spark is tackling problems that can be solved with multiple machines. For instance, when data does not fit in a single disk driver or does not fit into memory, Spark is a good candidate to consider.</p>
-<p>Since Spark is <em>fast</em>, it is worth considering for problems that may not be large-scale, but where using multiple processors could speed up computation. For instance, sorting large datasets or CPU intensive models could also bennefit from running in Spark.</p>
-<p>Therefore, Spark is good at tackling large-scale data processing problems, this usually known as <strong>big data</strong> (datasets that are more voluminous and complex that traditional ones <span class="citation">(“Big Data Wikipedia” <a href="#ref-intro-spark-big-data">2019</a>)</span>), but also is good at tackling large-scale computation problems, known as <strong>big compute</strong> ([tools and approaches using a large amount of CPU and memory resources in a coordinated way <span class="citation">(“Big Compute Wikipedia” <a href="#ref-intro-spark-big-compute">2019</a>)</span>). Big data often requires big compute and big compute requires big data <span class="citation">(“Big Compute Vs Big Data” <a href="#ref-intro-spark-big-compute-big-data">2013</a>)</span>; but it’s not necessarily always the case.</p>
-<p>Big data and big compute problems are usually easy to spot – if the data does not fit into a single machine, you might have a big data problem; if the data fits into a single machine but a process over the data takes days, weeks or even months to compute, you might have a big compute problem.</p>
-<p>However, there is also a third problem space where neither data nor compute are necessarily large-scale and yet, there are significant benefits to using cluster computing frameworkds like Spark. For this third problem space, there are a few use cases this breaks to:</p>
-<dl>
-<dt>Velocity</dt>
-<dd>Suppose you have a dataset of 10 gigabytes in size and a process that takes 30 minutes to run over this data – this is by no means big compute nor big data. However, if you happen to be researching ways to improve the accuracy of your models, reducing the runtime down to 3 minutes is a significant improvement, which can lead to significant advances and productivity gains by increasing the velocity at which you can analyze data. Alternatevely, you might need to process data faster, for stock trading for instance, while 3 minutes could seem fast enough; it can be way too slow for realtime data processing, where you might need to process data in a few seconds – or even down to a few milliseconds.
-</dd>
-<dt>Variety</dt>
-<dd>You could also have an efficient process to collect data from many sources into a single location, usually a database, this process could be already running efficiently and close to realtime. Such processes are known at ETL (Extract-Transform-Load); data is extracted from multiple sources, transformed to the required format and loaded in a single data store. While this has worked for years, the tradeoff from this approach is that adding a new data source is expensive. Since the system is centralized and tightly controlled, making changes could cause the entire process to halt; therefore, adding new data source usually takes too long to be implemented. Instead, one can store all data its natural format and process it as needed using cluster computing, this architecture is currently known as a <a href="https://en.wikipedia.org/wiki/Data_lake">data lake</a>. In addition, storing data in its raw format allows you to process a variety of new file formats like images, audio and video; without having to figure out how to fit them into conventional structured storage systems.
-</dd>
-<dt>Veracity</dt>
-<dd>Asserts that data can vary greatly in quality which might require special analysis methods to improve its accuracy. For instance, suppose you have a table of cities with values like San Francisco, Seattle and Boston, what happens when data contains a misspelled entry like “Bston”? In a relational database, this invalid entry might get dropped; however, dropping values is not necessarily the best approach in all cases, you might want to correct this field by making use of geocodes, cross referencing data sources or attempting a best-effort match. Therefore, understanding the veracity of the original data source and what accuracy your particular analysis needs, can get yield a better outcome in many cases.
-</dd>
-</dl>
-<p>If we include “Volume” as a synonym for big data, you get the mnemonics people refer as <a href="http://www.theserverside.com/feature/Handling-the-four-Vs-of-big-data-volume-velocity-variety-and-veracity">the four ’V’s of big data</a>; others have gone as far as expanding this to <a href="https://en.wikipedia.org/wiki/Big_data">five</a> or even as <a href="https://tdwi.org/articles/2017/02/08/10-vs-of-big-data.aspx">the 10 Vs of Big Data</a>. Mnemonics aside, cluster computing is being used today in more innovative ways and and is not uncommon to see organizations experimenting with new workflows and a variety of tasks that were traditionally uncommon for cluster computing. Much of the hype attributed to big data falls into this space where, strictly speaking, one is not handling big data but there are still benefits from using tools designed for big data and big compute.</p>
-<p>Our hope is that this book will help you understand the opportunities and limitations of cluster computing, and specifically, the opportunities and limitations from using Apache Spark with R.</p>
-</div>
-<div id="intro-r" class="section level2">
-<h2><span class="header-section-number">1.4</span> R</h2>
-<p>The R computing language has its origins in the S language, created at Bell Laboratories. R was not created at Bell Labs, but its predecesor, the S computing language was. <a href="https://blog.revolutionanalytics.com/2016/07/rick-becker-s-talk.html">Rick Becker explained in useR 2016</a> <span class="citation">(“The History of R’s Predecessor, S, from Co-Creator Rick Becker” <a href="#ref-intro-r-rick-becker-user">2016</a>)</span> that at that time in Bell Labs, computing was done by calling subroutines written in the Fortran language which, apparently, were not pleasant to deal with. The S computing language was designed as an interface language to solve particular problems without having to worry about other languages, such as Fortran. The creator of S, <a href="https://en.wikipedia.org/wiki/John_Chambers_(statistician)">John Chambers</a>, describes in Figure <a href="intro.html#fig:intro-r-diagram">1.4</a> how S was designed to provide an interface that simplifies data processing, this was presented during <em>useR! 2016</em> as the original diagram that inspired the creation of S.</p>
-<div class="figure" style="text-align: center"><span id="fig:intro-r-diagram"></span>
-<img src="images/intro-s-algorithm-interface-resized.png" alt="Interface language diagram by John Chambers - Rick Becker useR 2016" width="1500" />
-<p class="caption">
-FIGURE 1.4: Interface language diagram by John Chambers - Rick Becker useR 2016
-</p>
-</div>
-<p>R is a modern and free implementation of S, specifically:</p>
-<blockquote>
-<p>R is a programming language and free software environment for statistical computing and graphics.</p>
-<p>— <a href="https://www.r-project.org/">The R Project for Statistical Computing</a></p>
-</blockquote>
-<p>While working with data, I believe there are two strong arguments for using R:</p>
-<dl>
-<dt>R Language</dt>
-<dd>was designed by statisticians for statisticians, meaning, this is one of the few successful languages designed for non-programmers; so learning R will probably feel more natural. Additionally, since the R language was designed to be an interface to other tools and languages, R allows you to focus more on modeling and less on peculiarities of computer science and engineering.
-</dd>
-<dt>R Community</dt>
-<dd>provides a rich package archive provided by CRAN (<a href="https://cran.r-project.org/">The Comprehensive R Archive Network</a>) which allows you to install ready-to-use packages to perform many tasks; most notably, high-quality data manipulation, visualizations and statistic models, many of which are only available in R. In addition, the R community is a welcoming and active group of talented individuals motivated to help you succeed. Many packages provided by the R community make R, by far, the best option for statistical computing. Some of the most downloaded R packages include: <a href="https://CRAN.R-project.org/package=dplyr">dplyr</a> to manipulate data, <a href="https://CRAN.R-project.org/package=cluster">cluster</a> to analyze clusters and <a href="https://CRAN.R-project.org/package=ggplot2">ggplot2</a> to visualize data. Figure <a href="intro.html#fig:intro-cran-downloads">1.5</a> quantifies the <a href="appendix.html#appendix-cran-downloads">growth of the R community</a> by plotting daily downloads of R packages in CRAN.
-</dd>
-</dl>
-<div class="figure" style="text-align: center"><span id="fig:intro-cran-downloads"></span>
-<img src="images/intro-daily-cran-downloads-resized.png" alt="Daily downloads of CRAN packages" width="1500" />
-<p class="caption">
-FIGURE 1.5: Daily downloads of CRAN packages
-</p>
-</div>
-<p>Aside from statistics, R is also used in many other fields. The following ones are particularily relevant to this book:</p>
-<dl>
-<dt>Data Science</dt>
-<dd>Data science is based on knowledge and practices from statistics and computer science that turns raw data into understanding <span class="citation">(Wickham and Grolemund <a href="#ref-intro-r-for-data-science">2016</a>)</span> by using data analysis and modeling techniques. Statistical methods provide a solid foundation to understand the world and perform predictions, while the automation provided by computing methods allows us to simplify statistical analysis and make it much more accessible. Some have advocated that statistics should be renamed data science <span class="citation">(Wu <a href="#ref-intro-statisticsisdatascience">1997</a>)</span>; however, data science goes beyond statistics by also incorporating advances in computing <span class="citation">(Cleveland <a href="#ref-intro-datascienceindependent">2001</a>)</span>. This book presents analysis and modeling techniques common in statistics, but applied to large datasets which requires incorporating advances in distributed computing.
-</dd>
-<dt>Machine Learning</dt>
-<dd>Machine learning uses practices from statistics and computer science; however, it is heavily focused on automation and prediction. For instance, the term “machine learning” was coined by Arthur Samuel while automating a computer program to play checkers <span class="citation">(Samuel <a href="#ref-intro-samuel1959some">1959</a>)</span>. While we could perform data science on particular games, we rather need to automate the entire process. Therefore, this falls in the realm of machine learning, not data science. Machine learning makes it possible for many users to take advantage of statistical methods without being aware of the statistical methods that are being used. One of the first important applications of machine learning was to filter spam emails; in this case, it’s just not feasible to perform data analysis and modeling over each email account; therefore, machine learning automates the entire process of finding spam and filtering it out without having to involve users at all. This book will present the methods to transition data science workflows into fully-automated machine learning methods through, for instance, providing support to build and export Spark pipelines that can be easily reused in automated environments.
-</dd>
-<dt>Deep Learning</dt>
-<dd>Deep learning builds on knowledge of statistics, data science and machine learning to define models vaguely inspired on biological nervous systems. Deep learning models evolved from neural network models after the vanishing-gradient-problem was resolved by training one layer at a time <span class="citation">(Hinton, Osindero, and Teh <a href="#ref-intro-hinton2006fast">2006</a>)</span> and have proven useful in image and speech recognition tasks. For instance, when using voice assistants like Siri, Alexa, Cortana or Google, the model performing the audio to text conversion is most likely to be based on deep learning models. While GPUs (Graphic Processing Units) have been successfully used to train deep learning models <span class="citation">(Krizhevsky, Sutskever, and Hinton <a href="#ref-intro-krizhevsky2012imagenet">2012</a>)</span>; some datasets can not be processed in a single GPU. It is also the case that deep learning models require huge amounts of data, which needs to be preprocessed across many machines before they can be fed into a single GPU for training. This book won’t make any direct references to deep learning models; however, the methods presented in this book can be used to prepare data for deep learning and, in the years to come, using deep learning with large-scale computing will become a common practice. In fact, recent versions of Spark have already introduced execution models optimized for training deep learning in Spark.
-</dd>
-</dl>
-<p>While working in any of the previous fields, you will be faced with increasingly large datasets or increasingly complex computations that are slow to execute or at times, even impossible to process in a single computer. However, it is important to understand that Spark does not need to be the answer to all our computations problems; instead, when faced with computing challenges in R, the following techniques can be as effective:</p>
-<dl>
-<dt>Sampling</dt>
-<dd>A first approach to try is reduce the amount of data being handled, through sampling. However, data must be sampled properly by applying sound statistical principles. For instance, selecting the top results is not sufficient in sorted datasets; with simple random sampling, there might be underrepresented groups, which we could overcome with stratified sampling, which in turn adds complexity to properly select categories. It is out of the scope of this book to teach how to properly perform statistical sampling, but many online resources and literature is available on this subject.
-</dd>
-<dt>Profiling</dt>
-<dd>One can try to understand why a computation is slow and make the necessary improvements. A profiler, is a tool capable of inspecting code execution to help identify bottlenecks. In R, the R profiler, the <code>profvis</code> R package <span class="citation">(“Profvis” <a href="#ref-intro-profvis">2018</a>)</span> and RStudio profiler feature <span class="citation">(“RStudio Profiler” <a href="#ref-intro-rstudio-profiler">2018</a>)</span>, allow you to easily to retrieve and visualize a profile; however, it’s not always trivial to optimize.
-</dd>
-<dt>Scaling Up</dt>
-<dd>Speeding up computation is usually possible by buying faster or more capable hardware, say, increasing your machine memory, hard drive or procuring a machine with many more CPUs, this approach is known as “scaling up”. However, there are usually hard limits as to how much a single computer can scale up and even with significant CPUs, one needs to find frameworks that parallelize computation efficiently.
-</dd>
-<dt>Scaling Out</dt>
-<dd>Finally, we can consider spreading computation and storage across multiple machines; this approach provides the highest degree of scalability since one can potentially use an arbitrary number of machines to perform a computation, this approach is commonly known as “scaling out”. However, spreading computation effectively across many machines is a complex endeavour, specially without using specialized tools and frameworks like Apache Spark.
-</dd>
-</dl>
-<p>This last point brings us closer to the purpose of this book, which is to bring the power of distributed computing systems provided by Apache Spark, to solve meaningful computation problems in Data Science and related fields, using R.</p>
-</div>
-<div id="intro-sparklyr" class="section level2">
-<h2><span class="header-section-number">1.5</span> sparklyr</h2>
-<p>When you think of the computation power that Spark provides and the ease of use of the R language, it is natural to want them to work together – seamlessly. This is also what the R community expected, an R package that would provide an interface to Spark that was, easy to use, compatible with other R packages and, available in CRAN; with this goal, we started developing <code>sparklyr</code>. The first version, <a href="https://blog.rstudio.com/2016/09/27/sparklyr-r-interface-for-apache-spark/">sparklyr 0.4</a>, was released during the <em>useR! 2016</em> conference, this first version included support for <code>dplyr</code>, <code>DBI</code>, modeling with <code>MLlib</code> and an extensible API that enabled extensions like <a href="https://www.h2o.ai/">H2O</a>’s <a href="https://github.com/h2oai/rsparkling/">rsparkling</a> package. Since then, many new features and improvements have been made available through <a href="https://blog.rstudio.com/2017/01/24/sparklyr-0-5/">sparklyr 0.5</a>, <a href="https://blog.rstudio.com/2017/07/31/sparklyr-0-6/">0.6</a>, <a href="https://blog.rstudio.com/2018/01/29/sparklyr-0-7/">0.7</a>, <a href="https://blog.rstudio.com/2018/05/14/sparklyr-0-8/">0.8</a>, <a href="https://blog.rstudio.com/2018/10/01/sparklyr-0-9/">0.9</a> and <a href="https://blog.rstudio.com/2019/03/15/sparklyr-1-0/">1.0</a>.</p>
-<p>Officially, <code>sparklyr</code> is an R interface for Apache Spark. It’s available in CRAN and works like any other CRAN package, meaning that: it’s agnostic to Spark versions, it’s easy to install, it serves the R community, it embraces other packages and practices from the R community and so on. It’s hosted in GitHub under <a href="https://github.com/rstudio/sparklyr">github.com/rstudio/sparklyr</a> and licensed under Apache 2.0 which allows you to clone, modify and <a href="contributing.html#contributing">contribute back</a> to this project.</p>
-<p>While thinking of who should use <code>sparklyr</code>, the following roles come to mind:</p>
 <ul>
-<li><strong>New Users</strong>: For new users, it is our belief that <code>sparklyr</code> provides the easiest way to get started with Spark. Our hope is that the early chapters of this book will get you up running with ease and set you up for long term success.</li>
-<li><strong>Data Scientists</strong>: For data scientists that already use and love R, <code>sparklyr</code> integrates with many other R practices and packages like <code>dplyr</code>, <code>magrittr</code>, <code>broom</code>, <code>DBI</code>, <code>tibble</code>, <code>rlang</code> and many others that will make you feel at home while working with Spark. For those new to R and Spark, the combination of high-level workflows available in <code>sparklyr</code> and low-level extensibility mechanisms make it a productive environment to match the needs and skills of every data scientist.</li>
-<li><strong>Expert Users</strong>: For those users that are already immersed in Spark and can write code natively in Scala, consider making your Spark libraries available as an <a href="contributing.html#contributing-overview">R package</a> to the R community, a diverse and skilled community that can put your contributions to good use while moving <a href="https://en.wikipedia.org/wiki/Open_science">open science</a> forward.</li>
+<li>If a Spark connection is provided, the function returns a transformer or estimator object, which can be utilized directly using <code>ml_fit()</code> or <code>ml_transform()</code> or be included in a pipeline.</li>
+<li>If a pipeline is provided, the function returns a pipeline object with the stage appended to it.</li>
+<li>If a data frame is provided to a feature transformer function (those with prefix <code>ft_</code>), or an ML algorithm without also providing a formula, the function instantiates the pipeline stage object, fit it to the data if necessary (if the stage is an estimator), then transforms the data frame returning a data frame.</li>
+<li>If a data frame and a formula are provided to an ML algorithm that supports the formula interface, sparklyr builds a pipeline model under the hood and returns an ML model object which contains additional metadata information.</li>
 </ul>
-<p>We wrote this book to describe and teach the exciting overlap between Apache Spark and R. <code>sparklyr</code> is the R package that materializes this overlap of communities, expectations, future directions, packages, and package extensions as well. We believe there is an opportunity to use this book to bridge the R and Spark communities, to present to the R community why Spark is exciting and to the Spark community what makes R great. Both communities are solving very similar problems with a set of different skills and backgrounds; therefore, it is our hope that <code>sparklyr</code> can be a fertile ground for innovation, a welcoming place to newcomers, a productive place for experienced data scientists and an open community where cluster computing and modeling can come together.</p>
+<p>The formula interface approach is what we studied in the <a href="modeling.html#modeling">Modeling</a> section, and is what we recommend new users to Spark start with, since its syntax is similar to existing R modeling packages and abstracts away some Spark ML peculiarities. However, to take advantage of the full power of Spark ML and leverage pipelines for workflow organization and interoperability, it is worthwhile to learn the ML Pipelines API.</p>
 </div>
-<div id="intro-recap" class="section level2">
-<h2><span class="header-section-number">1.6</span> Recap</h2>
-<p>This chapter presented Spark as a modern and powerful computing platform, R as an easy-to-use computing language with solid foundations in statistical methods and, <code>sparklyr</code>, as a project bridging both technologies and communities together. In a world where the total amount of information is growing exponentailly, learning how to analyze data at scale will help you tackle the problems and opportunities humanity is facing today. However, before we start analzing data, the <a href="starting.html#starting">Getting Started</a> chapter will equip you with the tools you will need through the rest of this book. We recommend you follow each step carefully and take the time to install the recommended tools which, we hope will become familiar tools that you use and love.</p>
+<div id="model-persistence-and-interoperability" class="section level2">
+<h2><span class="header-section-number">5.5</span> Model Persistence and Interoperability</h2>
+<p>One of the most powerful aspects of pipelines is that they can be serialized to disk and are fully interoperable with the other Spark APIs, such as Python and Scala. To save a pipeline model, call <code>ml_save()</code> and provide a path.</p>
+<pre class="sourceCode r"><code class="sourceCode r">model_dir &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="kw">tempdir</span>(), <span class="st">&quot;model&quot;</span>)
+<span class="kw">ml_save</span>(pipeline_model, model_dir)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Model successfully saved.</span></code></pre>
+<p>Let us take a look at the directory we just wrote to.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">list.dirs</span>(model_dir,<span class="dt">full.names =</span> <span class="ot">FALSE</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">##  [1] &quot;&quot;                                                        &quot;metadata&quot;                                               </span>
+<span class="co">##  [3] &quot;stages&quot;                                                  &quot;stages/0_dplyr_transformer_d5640940540&quot;                 </span>
+<span class="co">##  [5] &quot;stages/0_dplyr_transformer_d5640940540/metadata&quot;         &quot;stages/1_string_indexer_d5635e4cddf&quot;                    </span>
+<span class="co">##  [7] &quot;stages/1_string_indexer_d5635e4cddf/data&quot;                &quot;stages/1_string_indexer_d5635e4cddf/metadata&quot;           </span>
+<span class="co">##  [9] &quot;stages/2_string_indexer_d564088071d&quot;                     &quot;stages/2_string_indexer_d564088071d/data&quot;               </span>
+<span class="co">## [11] &quot;stages/2_string_indexer_d564088071d/metadata&quot;            &quot;stages/3_string_indexer_d56228b2204&quot;                    </span>
+<span class="co">## [13] &quot;stages/3_string_indexer_d56228b2204/data&quot;                &quot;stages/3_string_indexer_d56228b2204/metadata&quot;           </span>
+<span class="co">## [15] &quot;stages/4_one_hot_encoder_estimator_d565c664653&quot;          &quot;stages/4_one_hot_encoder_estimator_d565c664653/data&quot;    </span>
+<span class="co">## [17] &quot;stages/4_one_hot_encoder_estimator_d565c664653/metadata&quot; &quot;stages/5_vector_assembler_d563e932289&quot;                  </span>
+<span class="co">## [19] &quot;stages/5_vector_assembler_d563e932289/metadata&quot;          &quot;stages/6_standard_scaler_d562dc07077&quot;                   </span>
+<span class="co">## [21] &quot;stages/6_standard_scaler_d562dc07077/data&quot;               &quot;stages/6_standard_scaler_d562dc07077/metadata&quot;          </span>
+<span class="co">## [23] &quot;stages/7_logistic_regression_d563517ac18&quot;                &quot;stages/7_logistic_regression_d563517ac18/data&quot;          </span>
+<span class="co">## [25] &quot;stages/7_logistic_regression_d563517ac18/metadata&quot;      </span></code></pre>
+<p>We can dive into a couple of the files to see what type of data was saved.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_json</span>(sc, <span class="kw">file.path</span>(model_dir, <span class="st">&quot;stages/0_dplyr_transformer_d5640940540/metadata/&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">glimpse</span>()</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Observations: ??</span>
+<span class="co">## Variables: 5</span>
+<span class="co">## Database: spark_connection</span>
+<span class="co">## $ class        &lt;chr&gt; &quot;org.apache.spark.ml.feature.SQLTransformer&quot;</span>
+<span class="co">## $ paramMap     &lt;list&gt; [[&quot;SELECT `age`, `body_type`, `diet`, `drinks`, `drugs`, …</span>
+<span class="co">## $ sparkVersion &lt;chr&gt; &quot;2.4.0&quot;</span>
+<span class="co">## $ timestamp    &lt;dbl&gt; 1.557277e+12</span>
+<span class="co">## $ uid          &lt;chr&gt; &quot;dplyr_transformer_d5640940540&quot;</span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_parquet</span>(sc, <span class="kw">file.path</span>(model_dir, <span class="st">&quot;stages/7_logistic_regression_d563517ac18/data&quot;</span>))</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## # Source: spark&lt;data&gt; [?? x 5]</span>
+<span class="co">##   numClasses numFeatures interceptVector coefficientMatrix                      isMultinomial</span>
+<span class="co">##        &lt;int&gt;       &lt;int&gt; &lt;list&gt;          &lt;list&gt;                                 &lt;lgl&gt;        </span>
+<span class="co">## 1          2          12 &lt;dbl [1]&gt;       &lt;-1.3263745374391678  -0.101825246818… FALSE  </span></code></pre>
+<p>We see that quite a bit of information has been exported, from the SQL statement in the dplyr transformer to the fitted coefficient estimates of the logistic regression. We can then (in a new Spark session) reconstruct the model by using <code>ml_load()</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">model_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="kw">ml_load</span>(sc, model_dir)</code></pre>
+<p>Let us see if we can retrieve the logistic regression stage from this pipeline model:</p>
+<pre class="sourceCode r"><code class="sourceCode r">model_<span class="dv">2</span> <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ml_stage</span>(<span class="st">&quot;logistic_regression&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## LogisticRegressionModel (Transformer)</span>
+<span class="co">## &lt;logistic_regression_d563517ac18&gt; </span>
+<span class="co">##  (Parameters -- Column Names)</span>
+<span class="co">##   features_col: features_scaled</span>
+<span class="co">##   label_col: not_working</span>
+<span class="co">##   prediction_col: prediction</span>
+<span class="co">##   probability_col: probability</span>
+<span class="co">##   raw_prediction_col: rawPrediction</span>
+<span class="co">##  (Transformer Info)</span>
+<span class="co">##   coefficient_matrix:  num [1, 1:12] -1.3264 -0.1018 0.1143 0.207 0.0247 ... </span>
+<span class="co">##   coefficients:  num [1:12] -1.3264 -0.1018 0.1143 0.207 0.0247 ... </span>
+<span class="co">##   intercept:  num 1.68 </span>
+<span class="co">##   intercept_vector:  num 1.68 </span>
+<span class="co">##   num_classes:  int 2 </span>
+<span class="co">##   num_features:  int 12 </span>
+<span class="co">##   threshold:  num 0.5 </span>
+<span class="co">##   thresholds:  num [1:2] 0.5 0.5 </span></code></pre>
+<p>Note that the exported JSON and parquet files are agnostic of the API that exported them. This means that in a multilingual machine learning engineering team, you can pick up a data preprocessing pipeline from a data engineer working in Python, build a prediction model on top of it, then hand off the final pipeline off to a deployment engineering working in Scala.</p>
+<div id="sparklyr-ml-models" class="section level3">
+<h3><span class="header-section-number">5.5.1</span> Sparklyr ML Models</h3>
+<p>When <code>ml_save()</code> is called for sparklyr ML models (created using the formula interface), the associated pipeline model is saved, but any sparklyr specific metadata, such as index labels, are not. In other words, saving a sparklyr <code>ml_model</code> object then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. What we gain from this tradeoff of loss information is interoperability with other languages.</p>
 
-
 </div>
 </div>
-<h3> References</h3>
-<div id="refs" class="references">
-<div id="ref-intro-information-technology">
-<p>Laudon, Kenneth C, Carol Guercio Traver, and Jane P Laudon. 1996. “Information Technology and Systems.” <em>Cambridge, MA: Course Technology</em>.</p>
 </div>
-<div id="ref-intro-computing-concise-history">
-<p>Ceruzzi, Paul E. 2012. <em>Computing: A Concise History</em>. MIT Press.</p>
-</div>
-<div id="ref-intro-webster2006merriam">
-<p>Webster, Merriam. 2006. “Merriam-Webster Online Dictionary.” <em>Webster, Merriam</em>.</p>
-</div>
-<div id="ref-intro-data-revolution">
-<p>Group, World Bank. 2016. <em>The Data Revolution</em>. World Bank Publications.</p>
-</div>
-<div id="ref-intro-google-file-system">
-<p>Ghemawat, Sanjay, Howard Gobioff, and Shun-Tak Leung. 2003. “The Google File System.” In <em>Proceedings of the Nineteenth Acm Symposium on Operating Systems Principles</em>. New York, NY, USA: ACM.</p>
-</div>
-<div id="ref-intro-google-map-reduce">
-<p>Dean, Jeffrey, and Sanjay Ghemawat. 2008. “MapReduce: Simplified Data Processing on Large Clusters.” <em>Commun. ACM</em> 51 (1): 107–13.</p>
-</div>
-<div id="ref-intro-zaharia2010spark">
-<p>Zaharia, Matei, Mosharaf Chowdhury, Michael J Franklin, Scott Shenker, and Ion Stoica. 2010. “Spark: Cluster Computing with Working Sets.” <em>HotCloud</em> 10 (10-10): 95.</p>
-</div>
-<div id="ref-intro-sort-benchmark">
-<p>“Sort Benchmark.” 2019. <a href="http://sortbenchmark.org/">http://sortbenchmark.org/</a>.</p>
-</div>
-<div id="ref-intro-spark-record-sorting">
-<p>“Apache Spark Officially Sets a New Record in Large-Scale Sorting.” 2014. <a href="https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html">https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html</a>.</p>
-</div>
-<div id="ref-intro-spark-record-cloudsort">
-<p>“Spark Wins Cloudsort Benchmark as the Most Efficient Engine.” 2016. <a href="https://spark.apache.org/news/spark-wins-cloudsort-100tb-benchmark.html">https://spark.apache.org/news/spark-wins-cloudsort-100tb-benchmark.html</a>.</p>
-</div>
-<div id="ref-intro-data-processing">
-<p>French, Carl. 1996. <em>Data Processing and Information Technology</em>. Cengage Learning Business Press.</p>
-</div>
-<div id="ref-intro-spark-churn-prediction">
-<p>“Churn Prediction with Apache Spark Machine Learning.” 2017. <a href="https://mapr.com/blog/churn-prediction-sparkml/">https://mapr.com/blog/churn-prediction-sparkml/</a>.</p>
-</div>
-<div id="ref-intro-spark-bioinformatics">
-<p>“Bioinformatics Applications on Apache Spark.” 2018. <a href="https://academic.oup.com/gigascience/article/7/8/giy098/5067872">https://academic.oup.com/gigascience/article/7/8/giy098/5067872</a>.</p>
-</div>
-<div id="ref-intro-spark-cern">
-<p>“Apache Spark and Cern Open Data Analysis, an Example.” 2017. <a href="https://db-blog.web.cern.ch/blog/luca-canali/2017-08-apache-spark-and-cern-open-data-example">https://db-blog.web.cern.ch/blog/luca-canali/2017-08-apache-spark-and-cern-open-data-example</a>.</p>
-</div>
-<div id="ref-intro-spark-big-data">
-<p>“Big Data Wikipedia.” 2019. <a href="https://en.wikipedia.org/wiki/big_data">https://en.wikipedia.org/wiki/big_data</a>.</p>
-</div>
-<div id="ref-intro-spark-big-compute">
-<p>“Big Compute Wikipedia.” 2019. <a href="https://www.nimbix.net/glossary/big-compute/">https://www.nimbix.net/glossary/big-compute/</a>.</p>
-</div>
-<div id="ref-intro-spark-big-compute-big-data">
-<p>“Big Compute Vs Big Data.” 2013. <a href="http://tedxvirginiatech.com/2013/11/wu-feng-at-tedxvt-2013-big-compute-vs-big-data/">http://tedxvirginiatech.com/2013/11/wu-feng-at-tedxvt-2013-big-compute-vs-big-data/</a>.</p>
-</div>
-<div id="ref-intro-r-rick-becker-user">
-<p>“The History of R’s Predecessor, S, from Co-Creator Rick Becker.” 2016. <a href="https://blog.revolutionanalytics.com/2016/07/rick-becker-s-talk.html">https://blog.revolutionanalytics.com/2016/07/rick-becker-s-talk.html</a>.</p>
-</div>
-<div id="ref-intro-r-for-data-science">
-<p>Wickham, Hadley, and Garrett Grolemund. 2016. <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. O’Reilly Media, Inc.</p>
-</div>
-<div id="ref-intro-statisticsisdatascience">
-<p>Wu, C.F. Jeff. 1997. “Statistics = Data Science?”</p>
-</div>
-<div id="ref-intro-datascienceindependent">
-<p>Cleveland, William S. 2001. “Data Science: An Action Plan for Expanding the Technical Areas of the Field of Statistics?”</p>
-</div>
-<div id="ref-intro-samuel1959some">
-<p>Samuel, Arthur L. 1959. “Some Studies in Machine Learning Using the Game of Checkers.” <em>IBM Journal of Research and Development</em> 3 (3): 210–29.</p>
-</div>
-<div id="ref-intro-hinton2006fast">
-<p>Hinton, Geoffrey E, Simon Osindero, and Yee-Whye Teh. 2006. “A Fast Learning Algorithm for Deep Belief Nets.” <em>Neural Computation</em> 18 (7): 1527–54.</p>
-</div>
-<div id="ref-intro-krizhevsky2012imagenet">
-<p>Krizhevsky, Alex, Ilya Sutskever, and Geoffrey E Hinton. 2012. “Imagenet Classification with Deep Convolutional Neural Networks.” In <em>Advances in Neural Information Processing Systems</em>, 1097–1105.</p>
-</div>
-<div id="ref-intro-profvis">
-<p>“Profvis.” 2018. <a href="https://rstudio.github.io/profvis/">https://rstudio.github.io/profvis/</a>.</p>
-</div>
-<div id="ref-intro-rstudio-profiler">
-<p>“RStudio Profiler.” 2018. <a href="https://support.rstudio.com/hc/en-us/articles/218221837-Profiling-with-RStudio">https://support.rstudio.com/hc/en-us/articles/218221837-Profiling-with-RStudio</a>.</p>
-</div>
+<div class="footnotes">
+<hr />
+<ol start="3">
+<li id="fn3"><p>They are implemented using S3, see <a href="https://adv-r.hadley.nz/s3.html">https://adv-r.hadley.nz/s3.html</a> for a discussion.<a href="pipelines.html#fnref3" class="footnote-back">↩</a></p></li>
+</ol>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="starting.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="modeling.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="clusters.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
