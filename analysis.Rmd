@@ -298,13 +298,13 @@ It is much easier to see which relationships are positive or negative. Positive 
 
 ## Visualize
 
-Visualizations are fundamentally a human task.  They are a vital tool to help us find patterns from data.  It is easier for us to identify outliers in a data set of 1,000 observations when plotted in a graph, as opposed to reading them from a list.
+Visualizations are a vital tool to help us find patterns in the data.  It is easier for us to identify outliers in a data set of 1,000 observations when plotted in a graph, as opposed to reading them from a list.
 
 R is great at data visualizations. Its capabilities for creating plots is extended by the many R packages that focus on this analysis step.   Unfortunately, the vast majority of R functions that create plots depend on the data already being in local memory within R, so they fail when using a remote table inside Spark. 
 
-It is possible to create visualizations in R from data source from Spark. To understand how to do this, let's first break down how computer programs build plots:
+It is possible to create visualizations in R from data source from Spark. To understand how to do this, let's first break down how computer programs build plots:  It takes the raw data and performs some sort of transformation.  The transformed data is then mapped to a set of coordinates.  Finally, the mapped values are drawn in a plot. Figure \@ref(fig:analysis-plot) summarizes each of the steps.
 
-```{r echo=FALSE, out.width='100%', out.height='100pt', fig.cap='Stages of a plot', fig.align = 'center', eval = eval_code}
+```{r analysis-plot, echo=FALSE, out.width='100%', out.height='100pt', fig.cap='Stages of a plot', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -324,9 +324,9 @@ library(ggplot2)
 ggplot(aes(as.factor(cyl), mpg), data = mtcars) + geom_col()
 ```
 
-In this case, the `mtcars` raw data was **automatically** transformed into three discrete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn, see *figure 3.8*. As R users, all of the stages of building the plot are conveniently abstracted for us.
+In this case, the `mtcars` raw data was **automatically** transformed into three discrete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn, see  figure \@ref(fig:analysis-mtcars-plot). As R users, all of the stages of building the plot are conveniently abstracted for us.
 
-```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='R plotting function', fig.align = 'center', eval = eval_code}
+```{r analysis-mtcars-plot, echo=FALSE, out.width='100%', out.height='200pt', fig.cap='R plotting function', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -343,10 +343,9 @@ render_nomnoml("
 
 ### Recommended approach
 
-In essence, the approach for visualizing is the same as in wrangling.  Push the computation to Spark, and then collect the results in R for plotting.  The heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, the plot that will be used is a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins.
+In essence, the approach for visualizing is the same as in wrangling, push the computation to Spark, and then collect the results in R for plotting.  As illustrated in figure \@ref(fig:analysis-spark-plot), the heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, use a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins. 
 
-
-```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark and R', fig.align = 'center', eval = eval_code}
+```{r analysis-spark-plot, echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark and R', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -362,9 +361,11 @@ render_nomnoml("
 ", "images/analysis-plotting-with-spark-and-r.png")
 ```
 
-### Simple plots
+The next section will cover how to use plot simple, but useful, plots. 
 
-There are a couple of key steps when codifying the "Transform remotely, plot locally" approach.  First, ensure that the transformation operations happen inside Spark. In the example below, `group_by()` and `summarise()` will run as SQL inside the Spark session.  The second is to bring the results back into R after the data has been transformed.  Make sure to transform and then collect, in that order, because if `collect()` is run first, then all R will try to ingest the entire data set from Spark. Depending on the size of the data, collecting all of the data will slow down or may even bring down your system.
+### Simple Plots
+
+There are a couple of key steps when codifying the "push compute, collect results" approach.  First, ensure that the transformation operations happen inside Spark. In the example below, `group_by()` and `summarise()` will run as SQL inside the Spark session.  The second is to bring the results back into R after the data has been transformed.  Make sure to transform and then collect, in that order, because if `collect()` is run first, then all R will try to ingest the entire data set from Spark. Depending on the size of the data, collecting all of the data will slow down or may even bring down your system.
 
 ```{r}
 car_group <- cars %>%
@@ -384,16 +385,19 @@ car_group
 ## 3     8  211.
 ```
 
-In the example, now that the data has been pre-aggregated and collected into R, only three records are passed to the plotting function.
+In this example, now that the data has been pre-aggregated and collected into R, only three records are passed to the plotting function.  Figure \@ref(fig:analysis-viz1) shows the resulting plot.
 
 ```{r}
-ggplot(aes(as.factor(cyl), mpg), data = car_group) + geom_col() + ggsave("images/analysis-visualizations-1.png")
+ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
+  geom_col() 
 ```
-```{r echo=FALSE}
+
+```{r, eval = FALSE, echo = FALSE}
 ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
   geom_col() + ggsave("images/analysis-visualizations-1.png", width = 10, height = 5)
 ```
-```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+
+```{r analysis-viz1, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-1.png")
 ```
 
@@ -408,17 +412,19 @@ cars %>%
   geom_col()
 ```
 
-```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+The resulting plot is in figure \@ref(fig:analysis-viz1b).
+
+```{r analysis-viz1b, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-1.png")
 ```
 
-Using this approach, most visualizations can be easily produced. 
+Using this approach, most visualizations can be easily produced. More complex plots require a bit more work, the next section will breakdown how to create a Histogram. 
 
 ### Histograms
 
-There are plots that are both useful and commonly used, but their calculations are not easily reproducible. For example, producing a histogram that runs over the entire large data set has not been typically feasible, because the data needs to be imported into R first. 
+There are plots that are both useful, and commonly used. They provide a clear idea of the distribution of values in a single variable. Their calculations are not easily reproducible. For example, producing a histogram that runs over the entire large data set has not been typically feasible, because the data needs to be imported into R first. 
 
-The formula breaks down the creation of bins 3 mpg wide into a combination of the most basic aggregation functions. It can run easily inside the `mutate()` command.  It creates as many discrete bins size 3 mpg, and passes the minimum value as the "label" of that bin.
+The following code breaks down the creation of bins 3 mpg wide into a combination of the most basic aggregation functions. It can run easily inside the `mutate()` command.  It creates as many discrete bins size 3 mpg, and passes the minimum value as the "label" of that bin.
 
 
 ```{r}
@@ -443,7 +449,7 @@ mtcars %>%
 ## 6 18.1 16.4
 ```
 
-The same R formula can run inside Spark, `dplyr` will translate the R code into a SQL statement.  The results can then be collected into R for visualizing. 
+The same R code can run inside Spark, `dplyr` will translate the R code into a SQL statement.  The results can then be collected into R for visualizing. 
 
 ```{r}
 bins <- cars %>%
@@ -472,29 +478,32 @@ bins
 ## 7  25.4     2
 ```
 
-Since the bins and counts have been pre-calculated, a simple column plot is used.  
+The bins and counts have been pre-calculated, so a simple column plot is used.  The resulting plot is in figure \@ref(fig:analysis-viz2).
 
 ```{r}
 bins %>%
   ggplot() +
   geom_col(aes(bins, n))
 ```
-```{r echo=FALSE}
+
+```{r, eval = FALSE, echo = FALSE}
 bins %>%
   ggplot() +
   geom_col(aes(bins, n)) +
   ggsave("images/analysis-visualizations-2.png", width = 10, height = 5)
 ```
-```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+
+```{r analysis-viz2, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-2.png")
 ```
 
+There is an R package that can make plotting histograms and other plots easier.  The next section will cover that.
 
 #### Using dbplot
 
-The `dbplot` package provides helper function for plotting with remote data.  The package uses `dplyr` to push the calculations to Spark and collects the results.
+The `dbplot` package provides helper function for plotting with remote data.  The R code `dbplot` uses to transform the data is written so that it can be translated by `sparklyr` into SQL.  It then uses the results to generate a `ggplot2` plot.
 
-The `dbplot_histogram()` function will have Spark calculate the bins and the count per bin, and then outputs a `ggplot` object.  It accepts a `binwidth` argument.
+The `dbplot_histogram()` function will have Spark calculate the bins and the count per bin, and then outputs a `ggplot` object.  It accepts a `binwidth` argument.  The resulting plot is in figure \@ref(fig:analysis-viz3).
 
 ```{r}
 library(dbplot)
@@ -502,33 +511,37 @@ library(dbplot)
 cars %>%
   dbplot_histogram(mpg, binwidth = 3)
 ```
-```{r echo=FALSE}
-library(dbplot)
 
+```{r, eval = FALSE, echo = FALSE}
+library(dbplot)
 cars %>%
   dbplot_histogram(mpg, binwidth = 3) +
   ggsave("images/analysis-visualizations-3.png", width = 10, height = 5)
 ```
-```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+
+```{r analysis-viz3, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Histogram created by dbplot', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-3.png")
 ```
 
-Because it is a `ggplot` object, it can be further refined if needed.
+Because it is a `ggplot` object, it can be further refined by adding more steps to the plot object.  In the example on figure \@ref(fig:analysis-viz4), we added a title to the plot, after it was created by `dbplot`.
 
 ```{r}
 cars %>%
   dbplot_histogram(mpg, binwidth = 3) +
   labs(title = "Histogram of Miles Per Galon")
 ```
-```{r}
+
+```{r, eval = FALSE, echo = FALSE}
 cars %>%
   dbplot_histogram(mpg, binwidth = 3) +
   labs(title = "Histogram of Miles Per Galon") +
   ggsave("images/analysis-visualizations-4.png", width = 10, height = 5)
 ```
-```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+
+```{r analysis-viz4, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Refined Histogram', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-4.png")
 ```
+
 The package also provides a way to obtain the raw results via the `db_compute_bins()` package.
 
 ```{r}
@@ -567,11 +580,13 @@ The `dbplot` package provides functionality that helps with this kind of plottin
 cars %>%
   dbplot_raster(mpg, wt, resolution = 5)
 ```
-```{r echo=FALSE}
+
+```{r, eval = FALSE, echo = FALSE}
 cars %>%
   dbplot_raster(mpg, wt, resolution = 5) +
   ggsave("images/analysis-visualizations-5.png", width = 10, height = 5)
 ```
+
 ```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-5.png")
 ```
