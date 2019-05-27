@@ -15,8 +15,46 @@ The combination of all the content presented in all the previous chapters should
 
 ## Overview
 
+In the [Introduction](#intro) chapter we presented the R community as a vibrant group of individuals collaborating with each other in many ways, one of them, by moving open science forward by creating R packages that can be installed from CRAN. In a similar way, but in a much smaller scale, the R community has contributed extensions that increase the functionality initially supported in Spark and R. Spark itself also provides support for creating Spark extensions and, in-fact, many R extensions make use of Spark extensions.
 
+Extensions are constantly being created so this section will be outdated at any given point in time, in addition, we might not be even aware of many Spark and R extensions; however, at the very least we can track the extensions that are available in CRAN by looking at the "reverse imports" for `sparklyr` in CRAN [@extensions-sparklyr-cran]. Extensions and R packages published in CRAN tend to be the most stable since when a package is published in CRAN, it will go through a review process which increases the overall quality of a contribution.
 
+While we wish we could present all the extensions, we've picked a few that we believe should be interesting to most readers and which we will present next. You can find a few more under the [github.com/r-spark](https://github.com/r-spark) organization or by searching repos in GitHub with the `sparklyr` tag.
+
+rsparkling
+: The `rsparkling` extensions allows you to use H2O and Spark from R. This extension is what we would consider advanced modeling in Spark. While Spark's built-in modeling library, Spark MLlib, is quite useful in many cases; H2O's modeling capabilities can compute additional statistical metrics and can proivide performance and scalability improvements over Spark MLlib. We, ourselves, have not performed detailed comparisons nor benchamarks between MLlib and H2O; so this is something you will have to research on your own to create a complete picture of when to use H2O's capabilities.
+
+graphframes
+: The `graphframes` extensions adds support to process graphs in Spark. A graph is a structure that describes a set of objects in which some pairs of the objects are in some sense related. As you learned in the Introduction chapter, ranking web pages was an early motivation to develop precursos to Spark powered by MapReduce; web pages happen to form a graph if you consider a link between pages as the relationship between each pair of pages. Computing operations likes PageRank over graphs can be quite useful in web search and social networks to mention a few applications.
+
+sparktf
+: The `sparktf` extension provides support to write TensorFlow records in Spark. TensorFlow is one of the leading deep learning frameworks and it is often used with large amounts of numerical data represented as TensorFlow records, a file format optimized for TensorFlow. Spark it is often used to process unstructured and large-scale datasets into smaller numerical datasets that can easily fit into a GPU. You can use this extension to save datasets in the TensorFLow record file format.
+
+xgboost
+: The `xgboost` extension brings the well-known XGBoost modeling library to the world of large-scale computing. XGBoost is a scalable, portable and distributed library for gradient boosting. It became well known in the machine learning competition circles after its use in the winning solution of the Higgs Machine Learning Challenge [@extensions-higgs-challenge] and has remain popular in other Kaggle competitions since then.
+
+variantspark
+: The `variantspark` extension provides an interface to use Variant Spark, a scalable toolkit for genome-wide association studies (GWAS). It currently provides functionality to build random forest models, estimating variable importance and reading Variant Call Format (VCF) files. While there are other random forest implementations in Spark, most of them are not optimized to deal with GWAS datasets, which usually come with thousands of samples and millions of variables.
+
+geospark
+: The `geospark` extensions enables us to load and query large-scale geographic datasets. Usually datasets containing latitude and longitude points or complex areas defined in the Well-known Text (WKT) format, a text markup language for representing vector geometry objects on a map.
+
+Before you learn how and when to use each extension, we should first briefly explain how extensions can be used with R and Spark.
+
+First, an Spark extension is just and R package that happens to be aware of Spark. As any other R package, you will first have to install the R package with `install.packlages("package-name")`. Once installed, it is important to know that you willn need to reconnect to Spark before the extension can be used. Son in general, the pattern you should follow goes as follows:
+
+```{r}
+library(sparkextension1)
+library(sparkextension2)
+library(sparkextension3)
+library(sparklyr)
+
+sc <- spark_connect(master = "<master>")
+```
+
+Notice that `sparklyr` is loaded after the extensions to allow the extension to register properly. If you had to install and load a new extension you would simply have to disconnect first using `spark_disconnect(sc)` and repeat the steps above with the new extension.
+
+As you can notice, it's not hard to install and use Spark extensions from R; however, each extension can be a world on it's own so most of the time you will have to spend time understand what the extension is, when to use it and how to use it properly. The first extension you will learn about is the `rsparkling` extension which enables you to use H2O in Spark with R.
 
 ## H2O
 
