@@ -103,7 +103,7 @@ An example of a practical implementation of this concept will be covered in the 
 In order to practice as you learn, the rest of this chapter's code will use a single exercise that runs in the **local** Spark master. This way, the code can be replicated in your personal computer. Please, make sure to already have `sparklyr` and a local copy of Spark installed. The installation of Spark can be done by using the utility that comes with the package.  For more information on how to do that please see the Local section in the [Connections](conections/#connections-local) chapter.
 
 First, load the `sparklyr` and `dplyr` packages, and open a new **local** connection.
-```{r}
+```{r, eval = FALSE}
 library(sparklyr)
 sc <- spark_connect(master = "local")
 ```
@@ -134,7 +134,7 @@ The decision of having Spark either access the data source, or to import data in
 
 The exercise's Spark session does not have any data.  So the next step is to prime the session with data, in this case `mtcars`. The `copy_to()` command from `dplyr` can be used for that. The mechanics of this operation is explained in the [Getting Started](starting.html#starting-sparklyr-hello-world) chapter. 
 
-```{r}
+```{r, eval = FALSE}
 library(dplyr)
 cars <- copy_to(sc, mtcars, "mtcars_remote")
 ```
@@ -155,7 +155,7 @@ The main goal is to write the data transformations using R syntax as much as pos
 
 In the R environment, *cars* can be treated as if it is a local data frame, so `dplyr` verbs can be used, and in a piped fashion.
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   group_by(am) %>%
   summarise(mpg_mean = mean(mpg, na.rm = TRUE))
@@ -170,7 +170,7 @@ cars %>%
 
 Instead of importing the *mtcars_remote* data set from Spark, and then performing the aggregation, `dplyr` converts the verbs into SQL statements that are then sent to Spark.  The `show_query()` command makes it possible to peer into the SQL statement that `sparklyr` and `dplyr` created and sent to Spark.
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   group_by(am) %>%
   summarise(mpg_mean = mean(mpg, na.rm = TRUE)) %>%
@@ -184,7 +184,7 @@ cars %>%
 ```
 As it is evident, it will not be necessary to have to see the resulting query every time `dplyr` verbs are being used. The focus can remain on obtaining insights from the data, as opposed to figuring out how to express a given set of transformation in SQL.
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   group_by(am) %>%
   summarise(
@@ -206,7 +206,7 @@ Most of the data transformation made available by `dplyr` to work with local dat
 
 A very common exploration technique is to calculate and visualize correlations. We often calculate correlations to find out what kind of statistical relationship are between paired sets of variables.  The Spark API provides an internal function that calculates correlations across the entire data set.  The results are then returned to R as a `data.frame` object. 
 
-```{r}
+```{r, eval = FALSE}
 ml_corr(cars) %>%
   as_tibble()
 ```
@@ -232,7 +232,7 @@ ml_corr(cars) %>%
 
 The `corrr` R package specializes in correlations.  It contains friendly functions to prepare and visualize the results.  Included inside the package is a back-end for `sparklyr` table objects, so it will not return an error if a non local table is passed to it.  In the background, the `correlate()` function runs `ml_corr()`, so there is no need to collect any data into R prior running the command.
 
-```{r}
+```{r, eval = FALSE}
 library(corrr)
 
 cars %>%
@@ -260,7 +260,7 @@ cars %>%
 
 The `correlate()` function returns a local R object that `corrr` recognizes. This way, it is easy to perform more functions on top of the results. In this case, the `shave()` command turns all of the duplicated results into `NA`'s
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   correlate(use = "pairwise.complete.obs", method = "pearson") %>%
   shave()
@@ -286,7 +286,7 @@ cars %>%
 ```
 Finally, the results can be easily visualized using `rplot()`.  This function returns a `ggplot` object. Figure \@ref(fig:analysis-rplot) is an example of what `rplot()` returns. 
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   correlate(use = "pairwise.complete.obs", method = "pearson") %>%
   shave() %>%
@@ -370,7 +370,7 @@ The next section will cover how to use plot simple, but useful, plots.
 
 There are a couple of key steps when codifying the "push compute, collect results" approach.  First, ensure that the transformation operations happen inside Spark. In the example below, `group_by()` and `summarise()` will run as SQL inside the Spark session.  The second is to bring the results back into R after the data has been transformed.  Make sure to transform and then collect, in that order, because if `collect()` is run first, then all R will try to ingest the entire data set from Spark. Depending on the size of the data, collecting all of the data will slow down or may even bring down your system.
 
-```{r}
+```{r, eval = FALSE}
 car_group <- cars %>%
   group_by(cyl) %>%
   summarise(mpg = sum(mpg, na.rm = TRUE)) %>%
@@ -390,7 +390,7 @@ car_group
 
 In this example, now that the data has been pre-aggregated and collected into R, only three records are passed to the plotting function.  Figure \@ref(fig:analysis-viz1) shows the resulting plot.
 
-```{r}
+```{r, eval = FALSE}
 ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
   geom_col() 
 ```
@@ -407,7 +407,7 @@ render_image("images/analysis-visualizations-1.png")
 
 Thanks to the consistency among the `tidyverse` packages, the entire operation can be written in a single piped code segment:
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   group_by(cyl) %>%
   summarise(mpg = sum(mpg, na.rm = TRUE)) %>%
@@ -431,7 +431,7 @@ There are plots that are both useful, and commonly used. They provide a clear id
 The following code breaks down the creation of bins 3 mpg wide into a combination of the most basic aggregation functions. It can run easily inside the `mutate()` command.  It creates as many discrete bins size 3 mpg, and passes the minimum value as the "label" of that bin.
 
 
-```{r}
+```{r, eval = FALSE}
 mtcars %>%
   mutate(
     fx    = floor((mpg - min(mpg, na.rm = TRUE))/3),
@@ -455,7 +455,7 @@ mtcars %>%
 
 The same R code can run inside Spark, `dplyr` will translate the R code into a SQL statement.  The results can then be collected into R for visualizing. 
 
-```{r}
+```{r, eval = FALSE}
 bins <- cars %>%
   mutate(
     fx    = floor((mpg - min(mpg, na.rm = TRUE))/3),
@@ -484,7 +484,7 @@ bins
 
 The bins and counts have been pre-calculated, so a simple column plot is used.  The resulting plot is in figure \@ref(fig:analysis-viz2).
 
-```{r}
+```{r, eval = FALSE}
 bins %>%
   ggplot() +
   geom_col(aes(bins, n))
@@ -509,7 +509,7 @@ The `dbplot` package provides helper function for plotting with remote data.  Th
 
 The `dbplot_histogram()` function will have Spark calculate the bins and the count per bin, and then outputs a `ggplot` object.  It accepts a `binwidth` argument.  The resulting plot is in figure \@ref(fig:analysis-viz3).
 
-```{r}
+```{r, eval = FALSE}
 library(dbplot)
 
 cars %>%
@@ -529,7 +529,7 @@ render_image("images/analysis-visualizations-3.png")
 
 Because it is a `ggplot` object, it can be further refined by adding more steps to the plot object.  In the example on figure \@ref(fig:analysis-viz4), we added a title to the plot, after it was created by `dbplot`.
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   dbplot_histogram(mpg, binwidth = 3) +
   labs(title = "Histogram of Miles Per Galon")
@@ -548,7 +548,7 @@ render_image("images/analysis-visualizations-4.png")
 
 The package also provides a way to obtain the raw results via the `db_compute_bins()` package.
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   db_compute_bins(mpg, binwidth = 3) 
 ```
@@ -601,7 +601,7 @@ The best alternative is to find a plot type that represents the x/y relationship
 
 The `dbplot` package provides functionality that helps with this kind of plotting.  The first one is `dbplot_raster()`.  It is the way to quickly run a visualization of this kind.
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   dbplot_raster(mpg, wt, resolution = 5)
 ```
@@ -620,7 +620,7 @@ As shown in figure \@ref(fig:analysis-raster1), the plot returns a grid no bigge
 
 If the user prefers to either visualize, or simply obtain the result data, the `db_compute_raster()` and `db_compute_raster2()` functions return the data.  The `db_compute_raster2()` includes the upper and lower bounds of each square.
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   db_compute_raster2(mpg, wt, resolution = 5)
 ```
@@ -641,13 +641,11 @@ cars %>%
 
 ## Model
 
-The analysis project focuses on going through as many transformations and models to find the answer.  The ideal data analysis framework enables the user to quickly and easily complete each iteration. The transition from an analysis to a deployment project occurs after the model is selected, and findings are presented to the stakeholders. The [Modeling](modeling) chapter will dive deeper into how to prepare and run models.  The focus of this section will be how to properly and easily transition from the wrangling to modeling.
-
-### Models during analysis
+An analysis project focuses on going through as many transformations and models to find the answer.  The ideal data analysis framework enables the user to quickly complete each iteration. The transition from an analysis to a deployment project occurs after the model is selected, and findings are presented to the stakeholders. The [Modeling](modeling) chapter will dive deeper into how to prepare and run models.  The focus of this section will be how to properly, and easily, transition from wrangling to modeling.
 
 There are some steps needed for Spark to run even the most simple models.  The modeling functions in `sparklyr` already cover those steps in order to make them easier to use.  Transitioning from data wrangling to model prototyping is as easy as piping the transformed code right into the a `sparklyr` modeling function. Consider the following example:
 
-```{r}
+```{r, eval = FALSE}
 cars %>% 
   mutate(cyl = paste0("cyl_", cyl)) %>%
   ml_linear_regression(wt ~ .) %>%
@@ -672,7 +670,7 @@ The *cyl* field is converted into a character variable, and then the `ml_linear_
 
 At this point it is very easy to experiment with different formulas, as shows in the code below:
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   ml_linear_regression(wt ~ mpg) %>%
   summary()
@@ -691,9 +689,9 @@ cars %>%
 ## Root Mean Squared Error: 0.4788
 ```
 
-Additionally, it is also very easy to try out other kinds of models:
+Additionally, it is also very easy to try out other kinds of models.  The following code shows a Generalized Linear model using the `ml_generalized_linear_regression()` function:
 
-```{r}
+```{r, eval = FALSE}
 cars %>%
   ml_generalized_linear_regression(am ~ .) %>%
   summary()
@@ -717,19 +715,21 @@ cars %>%
 ## AIC: 17.926
 ```
 
+It is recommended that data used to fit a model be inside Spark memory.  The reasons and explanation will be covered in the next section.
+
 ### Cache model data
 
-The examples in this chapter are built using a very small data set.  In real-life scenarios, where large amounts of data are used, running models based on data that first needs to be transformed become a heavy toll on the Spark session if multiple experiments are being run.  That is why it is a good idea to save the results of the transformations as a new table in Spark memory, before running models.
+The examples in this chapter are built using a very small data set.  In real-life scenarios, large amounts of data are used for models. If the data needs to be transformed first, the volume of the data  could exact a heavy toll on the Spark session. Before fitting the models, it is a good idea to save the results of all the transformations in a new table inside Spark memory.
 
 The `compute()` command can take the end of a `dplyr` piped command set and save the results to Spark memory.
 
-```{r}
+```{r, eval = FALSE}
 cached_cars <- cars %>% 
   mutate(cyl = paste0("cyl_", cyl)) %>%
   compute("cached_cars")
 ```
 
-```{r}
+```{r, eval = FALSE}
 cached_cars %>%
   ml_linear_regression(mpg ~ .) %>%
   summary()
@@ -749,7 +749,7 @@ cached_cars %>%
 ## Root Mean Squared Error: 2.041
 ```
 
-It is common to go back to visualizing and wrangling after running one or several models.  The reason is that more questions are raised, as more insights are gained from the data. After multiple iterations, one or several transformations, visualizations and models are chosen to be shared with the stakeholders. The best way of doing this is the subject of the next section.
+As more insights are gained from the data, more questions may be raised.  That is why we expect to iterate through data **wrangle**, **visualize**, and **model** multiple times.  Each iteration should provide incremental insights of what the data is "telling us".  There will be a point where we reach a satisfactory level of understanding.  It is at this point that we will be ready to share the results with the stakeholders of the analysis.  How to do this is the topic of the next section.
 
 ## Communicate
 
@@ -835,7 +835,7 @@ conf$spark.memory.fraction <- 0.9
 
 ## Setup Spark environment
 A local Spark environment is setup and the `mtcars` data set preloaded
-`r ''````{r}
+`r ''````{r, eval = FALSE}
 sc <- spark_connect(master = "local", config = conf)
 cars <- copy_to(sc, mtcars, "mtcars_remote")
 cars
@@ -843,7 +843,7 @@ cars
 
 ## Visualize
 A histogram was run over the `mpg` data
-`r ''````{r}
+`r ''````{r, eval = FALSE}
 library(dbplot)
 cars %>%
   dbplot_histogram(mpg, binwidth = 3)
@@ -851,7 +851,7 @@ cars %>%
 
 ## Model
 The selected model was a simple linear regression that uses the weight as the predictor of MPG
-`r ''````{r}
+`r ''````{r, eval = FALSE}
 cars %>%
   ml_linear_regression(wt ~ mpg) %>%
   summary()
@@ -894,7 +894,7 @@ conf$spark.memory.fraction <- 0.9
 
 ## Setup Spark environment
 A local Spark environment is setup and the `mtcars` dataset preloaded
-`r ''````{r}
+`r ''````{r, eval = FALSE}
 sc <- spark_connect(master = "local", config = conf)
 cars <- copy_to(sc, mtcars, "mtcars_remote")
 cars
