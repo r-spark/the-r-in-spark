@@ -1,22 +1,17 @@
 ```{r analysis-setup, include=FALSE}
+library(ggplot2)
 source("r/render.R")
 knitr::opts_chunk$set(eval = FALSE)	
-library(ggplot2)
+eval_code <- TRUE
 ```
 
 # Analysis {#analysis}
 
 Previous chapters focused on introducing Spark and R. They also focused on helping you get started with the tools you need throughout this book. In this chapter, you will learn how to perform data analysis in Spark from R. 
 
-Data analysis will likely become the most common task when working with Spark. This chapter will serve as a foundation to later chapters. The concepts from this chapter will apply to properly prepare data when doing modeling, graph processing, streaming and other related topics, that might not be strictly considered data analysis.
+In a data analysis project, the main goal is to understand what the data is trying to “tell us”. The hope is that the data provides an answer to a specific question. The question is typically poised by stakeholders of the analysis. Most data analysis projects follow a set of steps outlined in Figure \@ref(fig:analysis-steps). 
 
-The `sparklyr` package implements data analysis principles of R and specifically a subset of R packages called the `tidyverse`.  If you are new to R, Data Science, or the `tidyverse`, it is recommended to read the book "R for Data Science" [@intro-r-for-data-science]. This chapter will try to briefly introduce all the concepts it presents.
-
-## Search for an answer
-
-In a data analysis project, the main goal is to gain understanding of what the data is trying to "tell us". The hope is that the data provides an answer to a specific question. The question is typically poised by stakeholders of the analysis. Most data analysis projects follow a set of steps outlined in *Figure 3.1*. 
-
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='General steps of a data analysis', fig.align = 'center', eval = TRUE}
+```{r analysis-steps, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='General steps of a data analysis', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -33,15 +28,15 @@ render_nomnoml("
 ", "images/analysis-overview-diagram.png")
 ```
 
-As the diagram illustrates, the data is **imported** into our analysis stem, then **wrangled** by trying different data transformations, such as aggregations, and then **visualized** to help us perceive relationships and trends. In order to get deeper insight, one or multiple statistical **models** can be fitted against sample data. This will help in finding out if the patterns hold true when new data is applied to them.  And lastly, the results are **communicated** with stakeholders. 
+As the diagram illustrates, the data is **imported** into our analysis stem, then **wrangled** by trying different data transformations, such as aggregations, and then **visualized** to help us perceive relationships and trends. In order to get deeper insight, one or multiple statistical **models** can be fitted against sample data. This will help in finding out if the patterns hold true when new data is applied to them.  And lastly, the results are **communicated** to stakeholders. 
 
 Commonly, in R all of the steps are performed in local memory.  But that approach has to change when the analysis adds the use of Spark.  The next section will introduce the main concept of how to best integrate R and Spark for data analysis.
 
-## R as an interface to Spark
+## R as an Interface to Spark
 
-For data analysis, the ideal approach  is to let Spark do what its good at. It excels at being a parallel computation engine that works at a large scale.  Spark goes beyond offering generic calculations. Out of the box, Spark includes libraries that actually can do a lot of what analysts usually do in R, but for large amounts of data. *Figure 3.2* paraphrases the four main capabilities available to data analysts in Spark.
+For data analysis, the ideal approach  is to let Spark do what its good at. Spark is a parallel computation engine that works at a large scale. Spark includes a SQL Engine and Machine Learning libraries.  These can be used to perform most of the same operations R performs. Such operations include data selection, transformation, and modeling.  Additionally, Spark include Graph analysis and Streaming libraries that extend the R user's capabilities.  Figure \@ref(fig:analysis-features) lists the four main capabilities available to data analysts in Spark.
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark capabilities', fig.align = 'center', eval = TRUE}
+```{r analysis-features, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark capabilities', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: down
 #fontSize: 18
@@ -55,9 +50,9 @@ render_nomnoml("
 ", "images/analysis-spark-capabilities.png")
 ```
 
-Thanks to Spark's libraries, most of the data analysis project steps can be completed inside Spark.  For example, selecting, transforming and modeling can all be done by Spark.  The idea is to use R to tell Spark what data operations to run, and then focus on only bringing back into R the results of the operation.  
+The data **import**, **wrangling**, and **modeling** can be performed inside Spark.  **Visualization** can also partly be done by Spark, we will cover that later in this capter.  The idea is to use R to tell Spark what data operations to run, and then bring only the results into R.  As illustrated in Figured \@ref(fig:analysis-approach), the ideal method **pushes compute** to the Spark cluster, and then **collects results** into R.
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R as an interface for Spark', fig.align = 'center', eval = TRUE}
+```{r analysis-approach, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark computes, R collects results', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #arrowSize: 0.4
@@ -70,11 +65,10 @@ render_nomnoml("
 ", "images/analysis-r-interface-to-spark-sql.png")
 ```
 
-The `sparklyr` package focuses on implementing the principle mentioned in the previous section.  Most of its functions are mainly wrappers on top of Spark API calls.
+The `sparklyr` package aids in using the "push compute, collect results" principle.  Most of its functions are mainly wrappers on top of Spark API calls. This allows us to take advantage of Spark's analysis components, instead of R's.  
+For example, an analyst needs to fit a Linear Regression model. The data is available in Spark. Instead of using the familiar `lm()` function, the analyst would use `ml_linear_regression()`. This R function will run the Scala code that uses the Spark's API model. This specific example is illustrated in Figure \@ref(fig:analysis-scala).
 
-The idea is take advantage of Spark's analysis components instead of R's.  For example, if the analyst needs to fit a Linear Regression model, instead of using the familiar `lm()` function, for data available via Spark, the analyst would use the `ml_linear_regression()` function.  The R function will actually run Scala code that runs the Spark's API model.  
-
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R functions call Scala functions', fig.align = 'center', eval = TRUE}
+```{r analysis-scala, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R functions call Scala functions', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #padding: 12
@@ -86,9 +80,9 @@ render_nomnoml("
 ", "images/analysis-r-interface-to-spark-scala.png")
 ```
 
-For more common data manipulation tasks, `sparklyr` provides a back-end for `dplyr`.  This means that already familiar `dplyr` verbs can be used in R, and then `sparklyr` and `dplyr` will translate those actions into Spark SQL statements, see *figure 3.5*.
+For more common data manipulation tasks, `sparklyr` provides a back-end for `dplyr`.  This means that already familiar `dplyr` verbs can be used in R, and then `sparklyr` and `dplyr` will translate those actions into Spark SQL statements.
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='dplyr writes SQL', fig.align = 'center', eval = TRUE}
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='dplyr writes SQL', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #padding: 12
@@ -101,9 +95,9 @@ render_nomnoml("
 
 An example of a practical implementation of this concept will be covered in the following sections.
 
-## Exercise
+### Exercise
 
-In order to practice as you learn, the rest of this chapter's code will use a single exercise that runs in the **local** Spark master, this allows the code to be replicated in your laptop. Please, make sure to already have `sparklyr` and a local copy of Spark installed. The installation of Spark can be done by using the utility that comes with the package.  For more information on how to do that please see the Local section in the [Connections](conections/#connections-local) chapter.
+In order to practice as you learn, the rest of this chapter's code will use a single exercise that runs in the **local** Spark master. This way, the code can be replicated in your personal computer. Please, make sure to already have `sparklyr` and a local copy of Spark installed. The installation of Spark can be done by using the utility that comes with the package.  For more information on how to do that please see the Local section in the [Connections](conections/#connections-local) chapter.
 
 First, load the `sparklyr` and `dplyr` packages, and open a new **local** connection.
 ```{r}
@@ -115,8 +109,9 @@ The environment is ready to be used.  The next step is to add data that we can a
 
 ## Import / Access
 
-The step of importing data is to be approached differently when using Spark with R, as oppose to R alone.  When used alone, importing data means that R will read files and import the information into memory  But when used with Spark, it is important to only focus in importing results into R.  The data is either imported or accessed by Spark. This way, the actual analysis takes place inside the Spark session. 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Import Data to Spark not R', fig.align = 'center', eval = TRUE}
+The step of importing data is to be approached differently when using Spark with R, as opposed to R alone.  Usually, importing means that R will read files and save the information into memory.  But when used with Spark, it is important to only focus in importing results into R.  The data is either imported, or accessed by Spark. Notice how in Figure \@ref(fig:analysis-access) the Data Source is connected to Spark, and not R. 
+
+```{r analysis-access, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Import Data to Spark not R', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #padding: 14
@@ -130,9 +125,9 @@ render_nomnoml("
 ", "images/analysis-import-data-to-spark.png")
 ```
 
-An example of accessing versus importing is found in an enterprise environment.  More likely, Spark sessions are created on top of Hadoop clusters, so data would already be available to be accessed directly by Spark via either a Hive table, or through the Hadoop File System (HDFS). 
+Most organization will use Spark inside a YARN managed cluster.  For thos cases the vast majority of the necessary data is already available in the cluster's Hadoop File System (HDFS).  It is made available to users via Hive tables, or by accessing the file system directly.  Because the Spark session is initiated inside the same server hosts as the rest of the cluster, it is much easier to transfer large amounts of data between the HDFS and Spark memory.
 
-The decision of having Spark either access the data source or to import data into memory is mostly a decisions based on speed and performance.  That will be covered in the [Tuning](tuning) chapter.
+The decision of having Spark either access the data source, or to import data into memory is mostly a decisions based on speed and performance.  Importing all of the data into the Spark session will incur an up-front cost of time. That is because we would have to wait for the data to be loaded before analyzing. Accessing the data incurs cost with every query sent to the cluster via Spark.  That is because we depend on the cluster's in-disk data, which has to be retrieved before it is analyzed. More will be covered in the [Tuning](tuning) chapter.
 
 The exercise's Spark session does not have any data.  So the next step is to prime the session with data, in this case `mtcars`. The `copy_to()` command from `dplyr` can be used for that. The mechanics of this operation is explained in the [Getting Started](starting.html#starting-sparklyr-hello-world) chapter. 
 
@@ -291,7 +286,7 @@ cars %>%
   rplot()
 ```
 
-```{r, eval = TRUE, out.width='800pt', out.height='400pt', fig.align = 'center', fig.cap = 'Using rplot() to visualize correlations', echo = FALSE}
+```{r, eval = eval_code, out.width='800pt', out.height='400pt', fig.align = 'center', fig.cap = 'Using rplot() to visualize correlations', echo = FALSE}
 render_image("images/analysis-wrangling-1.png")
 ```
 
@@ -306,7 +301,7 @@ R is great at data visualizations. Its capabilities for creating plots is extend
 
 It is possible to create visualizations in R from data source from Spark. To understand how to do this, let's first break down how computer programs build plots:
 
-```{r echo=FALSE, out.width='100%', out.height='100pt', fig.cap='Stages of a plot', fig.align = 'center', eval = TRUE}
+```{r echo=FALSE, out.width='100%', out.height='100pt', fig.cap='Stages of a plot', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -321,13 +316,14 @@ render_nomnoml("
 
 For example, to create a bar plot in R, we simply call a function:
 
-```{r, eval = TRUE, out.width='500pt', out.height='400pt', fig.cap='Plotting inside R', fig.align = 'center', eval = TRUE}
+```{r, eval = eval_code, out.width='500pt', out.height='400pt', fig.cap='Plotting inside R', fig.align = 'center', eval = eval_code}
+library(ggplot2)
 ggplot(aes(as.factor(cyl), mpg), data = mtcars) + geom_col()
 ```
 
 In this case, the `mtcars` raw data was **automatically** transformed into three discrete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn, see *figure 3.8*. As R users, all of the stages of building the plot are conveniently abstracted for us.
 
-```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='R plotting function', fig.align = 'center', eval = TRUE}
+```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='R plotting function', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -347,7 +343,7 @@ render_nomnoml("
 In essence, the approach for visualizing is the same as in wrangling.  Push the computation to Spark, and then collect the results in R for plotting.  The heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, the plot that will be used is a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins.
 
 
-```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark and R', fig.align = 'center', eval = TRUE}
+```{r echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark and R', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -394,7 +390,7 @@ ggplot(aes(as.factor(cyl), mpg), data = car_group) + geom_col() + ggsave("images
 ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
   geom_col() + ggsave("images/analysis-visualizations-1.png", width = 10, height = 5)
 ```
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-1.png")
 ```
 
@@ -409,7 +405,7 @@ cars %>%
   geom_col()
 ```
 
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-1.png")
 ```
 
@@ -486,7 +482,7 @@ bins %>%
   geom_col(aes(bins, n)) +
   ggsave("images/analysis-visualizations-2.png", width = 10, height = 5)
 ```
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-2.png")
 ```
 
@@ -510,7 +506,7 @@ cars %>%
   dbplot_histogram(mpg, binwidth = 3) +
   ggsave("images/analysis-visualizations-3.png", width = 10, height = 5)
 ```
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-3.png")
 ```
 
@@ -527,7 +523,7 @@ cars %>%
   labs(title = "Histogram of Miles Per Galon") +
   ggsave("images/analysis-visualizations-4.png", width = 10, height = 5)
 ```
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-4.png")
 ```
 The package also provides a way to obtain the raw results via the `db_compute_bins()` package.
@@ -573,7 +569,7 @@ cars %>%
   dbplot_raster(mpg, wt, resolution = 5) +
   ggsave("images/analysis-visualizations-5.png", width = 10, height = 5)
 ```
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-5.png")
 ```
 As shown in *figure []*, the plot returns a grid no bigger than 5x5.  This limits the number of records that need to be collected into R to 25.  
@@ -723,7 +719,7 @@ The main "deliverable" of data analysis project is the answer to a question. The
 
 From the Information Technology perspective.  The nature of the analysis project is experimental, the resulting code does not need to be tested or promoted as is to a Production system.  In contrast, the Production project needs to pass the usual Software Development Lifecyle (SDLC) requirements before it is ready to be placed as part of the supported reports or applications withing the organization.
 
-```{r echo=FALSE, fig.cap='Analysis vs Production projects', fig.align = 'center', eval = TRUE}
+```{r echo=FALSE, fig.cap='Analysis vs Production projects', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #edgeMargin: 2
@@ -753,7 +749,7 @@ For purposes of the book, and as an introduction to R Markdown, this section wil
 
 The following figure displays when in the analysis process you should consider using them.
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R Markdown output formats', fig.align = 'center', eval = TRUE}
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R Markdown output formats', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #padding: 10
@@ -822,7 +818,7 @@ spark_disconnect(sc)
 ````
 If using the RStudio IDE, click on the **Knit** button at the top of the document to run it. The HTML output should look like this:
 
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
+```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-rmarkdown.png")
 ```
 
@@ -873,10 +869,12 @@ spark_disconnect(sc)
 ````
 Here is what the first full slide should look like:
 
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
+```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-xaringan.png")
 ```
 
 ## Recap
 
 R and Spark are a very powerful combination.  Being able to use a powerful computing platform, along with an incredibly robust ecosystem of packages makes up for an ideal analysis platform.  Keep in mind to push computation to Spark, and focus on collecting results in R.  The result can then be used for further data manipulation or for plotting.  The results can then be shared with stakeholders in a variety of outputs.  A a learner of R, hopefully this chapter also encouraged you to learn more about the `tidyverse` as well as `rmarkdown`.
+
+The `sparklyr` package implements data analysis principles of R and specifically a subset of R packages called the `tidyverse`.  If you are new to R, Data Science, or the `tidyverse`, the book "R for Data Science" [@intro-r-for-data-science] provides the best introduction to these concepts. 
