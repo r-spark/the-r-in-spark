@@ -7,17 +7,26 @@ library(ggplot2)
 
 # Extensions {#extensions}
 
-H2O Models, Graphs (PageRank), XGBoost, Spatial, Deep Learning, Genomics, 
+In the previous chapter, [Tuning](tuning), you learned how Spark processes data at large-scale by allowing users to configure the cluster resources, partition data implicitly or explicitly, execute commands across distributed compute nodes, shuffle data across them when needed, cache data to improve performance and serialize data efficiently over the network. You also learned how to configure the different Spark settings used while connecting, submitting a job, running and application and particular settings applicable only to R and R extensions that we will present in this chapter.
+
+The [Analysis](#analysis), [Modeling](#modeling) and [Data](#data) chapters provided a foundation to read and understand most datasets. However, the functionality that was presented was scoped to Spark's built-in features and tabular datasets. This chapter will go beyond tabular data and explore how to analyze and model networks of interconnected objects through graph processing, read genomics datasets, prepare data for deep learning, analyze geographic datasets and use advanced modeling libraries like H2O and XGBoost over large-scale datasets.
+
+The combination of all the content presented in all the previous chapters should take care of most of your large-scale computing needs. However, for those few use cases where functionality is still lacking, the following chapters will teach you provide the tools to extend Spark yourself; either, through custom R transformation, custom Scala code or through recent new execution mode in Spark that enable analyzing realtime datasets. Although, before reinventing the wheel, we will present all the extensions available when using Spark with R.
+
+## Overview
+
+
+
 
 ## H2O
 
-[H2O](https://www.h2o.ai/) is open-source software for large-scale modeling created by H2O.ai, it allows users to fit thousands of potential models as part of discovering patterns in data. Many users that require advanced modeling capabilities in Spark consider H2O to complement or replace Spark's default modeling algorithms. An approach we recommend is to start with Spark's default modeling algorithms and transition to H2O running in Spark when Spark's algorithms fall short or when advanced functionality (like additional modeling metrics) are required.
+[H2O](https://www.h2o.ai/) is open-source software for large-scale modeling created by H2O.ai, which allows you to fit thousands of potential models as part of discovering patterns in data. You can consider using H2O to complement or replace Spark's default modeling algorithms. It is common to Spark's default modeling algorithms and transition to H2O when Spark's algorithms fall short or when advanced functionality (like additional modeling metrics) are required.
 
-However, we can't do justice to H2O's great modeling capabilities in a simgle paragraph since explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the "Practical machine learning with H2O" [@extensions-practical-h2o] book to explore in-depth H2O's modeling algorithms and features and present this chapter as a brief guide to get started using H2O in Spark with R through the [rsparkling](https://github.com/h2oai/sparkling-water/tree/master/r) extension.
+We can't do justice to H2O's great modeling capabilities in a single paragraph, explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the "Practical machine learning with H2O" [@extensions-practical-h2o] book to explore in-depth H2O's modeling algorithms and features. In the meantime, you can use this section as a brief guide to get started using H2O in Spark with R.
 
-In order to use H2O with Spark, it is important to know that there are four compoinents involved: H2O, Sparkling Water, `rsparkling` and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and `rsparkling` as the R front-end for Sparkling Water.
+In order to use H2O with Spark, it is important to know that there are four compoinents involved: H2O, Sparkling Water, [rsparkling][rsparkling](https://github.com/h2oai/sparkling-water/tree/master/r) and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and `rsparkling` as the R front-end for Sparkling Water, this is illustrated in Figure \@ref(fig:extensions-h2o-diagram).
 
-```{r extensions-h2o-diagram, eval=TRUE}
+```{r extensions-h2o-diagram, eval=TRUE, echo=FALSE, fig.height=3, fig.width=8, fig.align='center', fig.caption='H2O components with Spark and R'}
 render_nomnoml("
 #spacing: 20
 #padding: 16
@@ -45,11 +54,18 @@ packageVersion("h2o")
 
 Then we can explore the Spark and Sparkling Water versions that are compatible with `h2o_release_table()`.
 
-```{r}
-library(rsparkling)
-
-h2o_release_table() %>%
+```{r extensions-h2o-versions}
+rsparkling::h2o_release_table() %>%
   dplyr::filter(H2O_Version == !!as.character(packageVersion("h2o")))
+```
+```
+# A tibble: 4 x 5
+  Spark_Version Sparkling_Water_V… H2O_Version H2O_Release_Name H2O_Release_Patch…
+          <dbl> <fct>              <fct>       <fct>                         <int>
+1           2.4 2.4.5              3.22.1.3    rel-xu                            3
+2           2.3 2.3.23             3.22.1.3    rel-xu                            3
+3           2.2 2.2.34             3.22.1.3    rel-xu                            3
+4           2.1 2.1.48             3.22.1.3    rel-xu                            3
 ```
 
 We can then connect with the supported Spark versions as follows, you will have to adjust the `master` parameter for your particular cluster. We also recommend increasing the connection timeout since Spark might require to download various H2O components while the connection is established for the first time:
@@ -90,7 +106,7 @@ cars_h2o
 [32 rows x 11 columns] 
 ```
 
-Then you can use many of the modeling functions available in the `h2o` package with ease. For instance, we can fir a generalized linear model with ease:
+Then you can use many of the modeling functions available in the `h2o` package with ease. For instance, we can fit a generalized linear model with ease:
 
 ```{r eval=FALSE}
 model <- h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = cars_h2o, lambda_search = TRUE)
