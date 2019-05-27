@@ -1,7 +1,10 @@
 ```{r analysis-setup, include=FALSE}
 library(ggplot2)
 source("r/render.R")
-knitr::opts_chunk$set(eval = FALSE)	
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r, echo = FALSE, eval = TRUE}
 eval_code <- TRUE
 ```
 
@@ -394,7 +397,8 @@ ggplot(aes(as.factor(cyl), mpg), data = car_group) +
 
 ```{r, eval = FALSE, echo = FALSE}
 ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
-  geom_col() + ggsave("images/analysis-visualizations-1.png", width = 10, height = 5)
+  geom_col() + 
+  ggsave("images/analysis-visualizations-1.png", width = 10, height = 5)
 ```
 
 ```{r analysis-viz1, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
@@ -562,13 +566,34 @@ cars %>%
 ## 7  25.4     2
 ```
 
-### Scatter plots
+Histograms provide a great way to analyze a single variable.  To analyze two variables, a scatter or raster plot is commonly used.  The next section will discuss how to do that with `dbplot`.
 
-Scatter plots are incredibly useful because of their multiple applications.  Very commonly, they are used to compare the relationship between two continuous variables.  The problems that arise when trying to use this visualization with a large amount of data are:
+### Scatter vs Raster Plots
 
-- Performance problems - Too many single dots have to be calculated and drawn.
+Scatter plots are used to compare the relationship between two continuous variables. For example, a scatter plot will display the relationship between the weight of a car and its gas consumption.  The plot will show that the higher the weight, the higher the gas consumption because the dots clump together into almost a line that goes from the top left towards the bottom right. See figure  \@ref(fig:analysis-point) for an example of the plot. 
 
-- Perception problems - It becomes hard to see the true amount of dots in a single area.
+```{r, eval = FALSE}
+ggplot(aes(mpg, wt), data = mtcars) + 
+  geom_point()
+```
+
+```{r, eval = FALSE, echo = FALSE}
+ggplot(aes(mpg, wt), data = mtcars) + 
+  geom_point() +
+  ggsave("images/analysis-point.png", width = 10, height = 5)
+```
+
+```{r analysis-point, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Scatter plot example', fig.align = 'center', echo = FALSE}
+render_image("images/analysis-point.png")
+```
+
+The problems that arise when trying to use this visualization with a large amount of data are:
+
+Performance problems 
+: Too many single dots have to be calculated and drawn.
+
+Perception problems
+: It becomes hard to see the true amount of dots in a single area.
 
 No amount of "pushing the computation" to Spark will help with this problem because the data has to be plotted in individual dots.  
 
@@ -587,10 +612,11 @@ cars %>%
   ggsave("images/analysis-visualizations-5.png", width = 10, height = 5)
 ```
 
-```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+```{r analysis-raster1, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Using dbplot_raster()', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-5.png")
 ```
-As shown in *figure []*, the plot returns a grid no bigger than 5x5.  This limits the number of records that need to be collected into R to 25.  
+
+As shown in figure \@ref(fig:analysis-raster1), the plot returns a grid no bigger than 5x5.  This limits the number of records that need to be collected into R to 25.  
 
 If the user prefers to either visualize, or simply obtain the result data, the `db_compute_raster()` and `db_compute_raster2()` functions return the data.  The `db_compute_raster2()` includes the upper and lower bounds of each square.
 
