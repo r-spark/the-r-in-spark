@@ -7,8 +7,6 @@ library(ggplot2)
 
 # Extensions {#extensions}
 
-
-
 H2O Models, Graphs (PageRank), XGBoost, Spatial, Deep Learning, Genomics, 
 
 ## H2O
@@ -94,7 +92,7 @@ cars_h2o
 
 Then you can use many of the modeling functions available in the `h2o` package with ease. For instance, we can fir a generalized linear model with ease:
 
-```{r eval=FALSEz}
+```{r eval=FALSE}
 model <- h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = cars_h2o, lambda_search = TRUE)
 ```
 ```{r extensions-rsparkling, echo=FALSE}
@@ -343,6 +341,17 @@ ggplot(importance_df) +
 
 ## Spatial 
 
+[geospark](https://github.com/harryprince/geospark) enables distributed geospatial computing with spatial index on spark in production and keeps a [`dplyr`](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) and [`sf`](https://github.com/rstudio/cheatsheets/raw/master/sf.pdf) style grammar.
+
+You can install `geospark` from GitHub as follows:
+
+```{r}
+install.packages("remotes")
+remotes::install_github("harryprince/geospark")
+```
+
+In this example we will join spatial data using `quadrad tree indexing`. First, we will initialize the geospark extension and connect to Spark using sparklyr:
+
 ```{r}
 library(sparklyr)
 library(geospark)
@@ -361,6 +370,14 @@ points <- read.table(system.file(package="geospark","examples/points.txt"), sep=
 polygons_wkt <- copy_to(sc, polygons)
 points_wkt <- copy_to(sc, points)
 ```
+
+There are various spatial operations defined in `geospark`, which Figure \@ref(fig:extensions-geospark-operations) describes.
+
+```{r extensions-geospark-operations, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Spatial operations available in geospark.'}
+render_image("images/extensions-geospark-operations.png")
+```
+
+The following examples makes use of `st_contains()` to find the polygons that contain the given points.
 
 ```{r}
 library(dplyr)
@@ -388,18 +405,20 @@ sc_res %>%
     5 new york area   NY        9
 ```
 
-The final result can be present by leaflet, you would need to install the `leaflet` and `colormap` package for the following example to work:
+The final result can be present by leaflet, you would need to install the `sf`, `leaflet` and `colormap` packages for the following example to work:
 
 ```{r}
 Idx_df = collect(sc_res) %>% 
 right_join(polygons,by = (c("area"="area"))) %>% 
-sf::st_as_sf(wkt="geom")
+  sf::st_as_sf(wkt="geom")
 
 Idx_df %>% 
 leaflet::leaflet() %>% 
 leaflet::addTiles() %>% 
 leaflet::addPolygons(popup = ~as.character(cnt),color=~colormap::colormap_pal()(cnt))
 ```
+
+see more [spatial join](https://github.com/harryprince/geospark#spatial-join):
 
 ## Troubleshooting
 
@@ -411,53 +430,4 @@ unlink("~/.ivy2/cache", recursive = TRUE)
 
 ## Recap
 
-## Geospatial Data {#extensions-geospatial-data}
-
-[geospark](https://github.com/harryprince/geospark) enables distributed geospatial computing with spatial index on spark in production and keeps a [`dplyr`](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) and [`sf`](https://github.com/rstudio/cheatsheets/raw/master/sf.pdf) style grammar.
-
-In this example we will join spatial data using `quadrad tree indexing`. First, we will initialize the geospark extension and connect to Spark using sparklyr:
-
-```{r extensions-geospatial}
-pak::pkg_install("harryprince/geospark")
-
-library(sparklyr)
-library(geospark)
-
-conf <- spark_config()
-sc <- spark_connect(master = "local", config = conf)
-register_gis(sc)
-```
-
-After enable Spark GIS mode, now we can use `st_join` to join spatial data using `quadrad tree indexing`.
-
-```{r}
-points_wkt <- st_example(sc, "points") %>%
-  select(city, state, geom_x = geom)
-polygons_wkt <- st_example(sc, "polygons") %>%
-  mutate(area,geom_y = geom)
-
-sc_res <- st_join(points_wkt,
-                  polygons_wkt,
-                  join = sql("st_contains(geom_y,geom_x)")) %>% 
-           group_by(area, state) %>%
-            summarise(cnt = n()) 
-
-```
-
-```
-   # Source: spark<?> [?? x 3]
-    # Groups: area
-      area            state   cnt
-      <chr>           <chr> <dbl>
-    1 texas area      TX       10
-    2 dakota area     SD        1
-    3 dakota area     ND       10
-    4 california area CA       10
-    5 new york area   NY        9 
-```
-
-
-see more [spatial join](https://github.com/harryprince/geospark#spatial-join):
-
-![](https://camo.githubusercontent.com/f18513c8002df02bdb6e3aac451519beb3c87ebb/68747470733a2f2f7365676d656e746661756c742e636f6d2f696d672f625662714665333f773d3132383026683d353038)
 
