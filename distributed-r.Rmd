@@ -132,9 +132,7 @@ We will now explore each use case in detail and provide a working example to hel
 
 ### Custom Parsers
 
-While Spark and its various extensions provide support for many file formats (CSVs, JSON, Parquet, AVRO, etc) there are many more file formats that you might need to use at scale. You can parse these additional formats using `spark_apply()` and many of the existing R packages. This section presents two use cases for parsing logs and WARC files.
-
-#### Log Parser
+While Spark and its various extensions provide support for many file formats (CSVs, JSON, Parquet, AVRO, etc) there are many more file formats that you might need to use at scale. You can parse these additional formats using `spark_apply()` and many of the existing R packages. In this section we will understand how to parse log files, but similar approaches can be followed to parse other file formats.
 
 It is common to use Spark to analize log files; for instance, logs that track download data from Amazon S3. To parse logs, the `webreadr` package can simplify this process by providing support to load logs stored as: Amazon S3, Squid and the Common log format. An Amazon S3 log looks as follows:
 
@@ -190,65 +188,7 @@ spark_read_text(sc, "logs", aws_log, overwrite = TRUE, whole = TRUE) %>%
 
 The code between plain R and `spark_apply()` is similar; howerver, when using `spark_apply()` logs are parsed in parallel across all the worker nodes available in your cluster.
 
-#### WARC Parser
-
-The Common Crawl project builds and maintains an open repository of web crawl data that can be accessed and analyzed by anyone. You can use their petabytes of data to analyze the contents of the web without having to manually download each web page, which would be a time consuming and error-prone.
-
-The challenge with WARC files is that multiple records are embedded within the same text file. Conceptually, a WARC file looks as follows:
-
-```
-WARC/1.0
-<html>...</html>
-WARC/1.0
-<html>...</html>
-```
-
-We could read all those lines using `spark_read_text()`; however, they won't be grouped by web page which is required to analyze properly the contents. Using the `warc` package, we can easily parse these files in R running:
-
-```{r}
-warc_example <- system.file("samples/sample.warc.gz", package = "warc")
-as_tibble(warc::read_warc(warc_example))
-```
-```
-# A tibble: 17 x 1
-   content                                                                              
-   <fct>                                                                              
- 1 "WARC/1.0\nWARC-Type: warcinfo\nWARC-Date: 2016-12-13T03:16:04Z\nWARC-Record…
- 2 "WARC/1.0\nWARC-Type: request\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record-…
- 3 "WARC/1.0\nWARC-Type: response\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record…
- 4 "WARC/1.0\nWARC-Type: metadata\nWARC-Date: 2016-12-11T14:00:57Z\nWARC-Record…
- 5 "WARC/1.0\nWARC-Type: request\nWARC-Date: 2016-12-11T14:08:53Z\nWARC-Record-…
- ```
-
-Suppose that you were interested in understanding the language web pages are written in. Since the `warc` package can also extract specific lines efficiently, you could use this feature to extract specific html tags that describe the language a page was written in:
-
-```{r}
-warc::read_warc(warc_example,
-                line_filter = "<meta http-equiv=\"Content-Language\"") %>%
-  transmute(language = gsub(".*content=\"|\".*", "", content)) %>%
-  group_by(language) %>%
-  summarise(count = n())
-```
-```
-# A tibble: 1 x 2
-  language count
-  <chr>    <int>
-1 ru-RU        5
-```
-
-Now, in order to use this in Spark we can simply run:
-
-```{r}
-paths_tbl <- copy_to(sc, warc::warc_paths(), repartition = length(warc::warc_paths()))
-
-paths_tbl %>%
-  head() %>%
-  spark_apply(~warc::read_warc(.x))
-```
-
-You can remove `head()` to process several gigabytes of WARC files; however, this would require a proper Spark cluster.
-
-This concludes the custom parsers section, there are many other file formats you can parse at scale from R following an approach similar to the log and warc parsers we just presented. We will now present partitioned modeling as another use case focused on modeling across several datasets in parallel.
+This concludes the custom parsers section, there are many other file formats you can parse at scale from R following a similar approach. We will now present partitioned modeling as another use case focused on modeling across several datasets in parallel.
 
 ### Partitioned Modeling
 
