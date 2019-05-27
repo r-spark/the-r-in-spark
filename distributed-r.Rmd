@@ -116,15 +116,23 @@ The rest of this chapter will explain in detail use cases, features, caveats, co
 
 In the overview section we presented an example to help you understand how `spark_apply()` works; this section will cover a few practical use case for `spark_apply()`:
 
-- **Parsing**: When a file format is not natevely supported in Spark or its extensions, you can consider using R code to implement a distributed **custom parser** using R packages.
-- **Modeling**: When data fits into a single machine you can make use of **grid search** to optimize their parameters in parallel. In cases where the data can be partitioned to create several models over subsets of the data you can use **partitioned modeling** in R to compute models across partitions.
-- **Interoperating**: When large data needs to be evaluated by external systems you can use R to interoperate with those external systems. For instance, to process a large image dataset using deep learning models, you can consider calling an specialized **web API** like Google's Vision API, Amazon's Rekognition API, etc.
+Import
+: You can consider using R to import data from external data sources and formats. For example, when a file format is not natevely supported in Spark or its extensions, you can consider using R code to implement a distributed **custom parser** using R packages.
+
+Model
+: It is natural to use the rich modeling capabilities already available in R with Spark. In most cases, R models can't be used across large data; however, we will present two particular use cases where R models can be useful at scale. For instance, when data fits into a single machine you can make use of **grid search** to optimize their parameters in parallel. In cases where the data can be partitioned to create several models over subsets of the data you can use **partitioned modeling** in R to compute models across partitions.
+
+Transform
+: You can make use of R's rich data transformation capabilities to complement Spark. We will present a use case of evaluating data by external systems and use R to interoperate with them by calling them through a **web API**.
+
+Compute
+: When you need to perform large-scale computation in R, or big-compute as described in the [Introduction](#intro) chapter, Spark is ideal to distribute this computation. We will present **distributed rendering** as a particular use case for large-scale computing in R.
 
 We will now explore each use case in detail and provide a working example to help you understand how you use `spark_apply()` effectevely.
 
 ### Custom Parsers
 
-While Spark and its various extensions provide support for many file formats (CSVs, JSON, Parquet, AVRO, etc) there are many more file formats that you might need to use at scale. through You can parse these additional formats using `spark_apply()` and many of the existing R packages. This section presents two use cases for parsing logs and WARC files.
+While Spark and its various extensions provide support for many file formats (CSVs, JSON, Parquet, AVRO, etc) there are many more file formats that you might need to use at scale. You can parse these additional formats using `spark_apply()` and many of the existing R packages. This section presents two use cases for parsing logs and WARC files.
 
 #### Log Parser
 
@@ -420,6 +428,61 @@ spark_apply(images, function(df) {
 
 In order to successfully run a large distirbuted computation over a Web API, the Web API would have to be able to scale to support the load from all the Spark executors. One can trust that major service providers are likely to support all the request incoming from your cluster. However, when calling internal Web APIs, make sure the API can handle the load. Also, when using third-party services, consider the cost of calling their API across all the executors in your cluster to avoid potentially expensive and unexpected charges.
 
+Next you will learn an use case for large-compute where R is use to perform distributed rendering.
+
+### Distributed Rendering
+
+R can be used in combination with Spark to perform large-scale computing, the use case we will explore in this section is rendering images that are computationally-expensive to render by using the `rayrender` package; which uses ray tracing -- a photorealistic technique commonly used in movie production. Lets use this package to render a simple scene that includes a few spheres.
+
+```{r echo=FALSE}
+library(rayrender)
+
+scene <- generate_ground(material = lambertian()) %>%
+  add_object(sphere(material = metal(color="orange"), z = -2)) %>%
+  add_object(sphere(material = metal(color="orange"), z = +2)) %>%
+  add_object(sphere(material = metal(color="orange"), x = -2))
+
+render_scene(scene, width = 1920, height = 1080, lookfrom = c(10, 5, 0), parallel = TRUE, filename = "images/distributed-r-rayrender.png")
+```
+```{r}
+library(rayrender)
+
+scene <- generate_ground(material = lambertian()) %>%
+  add_object(sphere(material = metal(color="orange"), z = -2)) %>%
+  add_object(sphere(material = metal(color="orange"), z = +2)) %>%
+  add_object(sphere(material = metal(color="orange"), x = -2))
+
+render_scene(scene, width = 1920, height = 1080, lookfrom = c(10, 5, 0), parallel = TRUE)
+```
+```{r distributed-r-ray-tracing, eval=TRUE, echo=FALSE, fig.cap='Ray tracing in Spark using R and rayrender', fig.align = 'center'}
+render_image("images/distributed-r-rayrender.png")
+```
+
+The previous example takes several minutes to render the single frame from Figure \@ref(fig:distributed-r-ray-tracing), rendering a few seconds at 30 frames-per-second would take several hours in a single machine. However, we can reduce this time using multiple machines by parallelizing computation across them. For instance, using ten machines with the same amount of CPUs would cut rendering time ten fold:
+
+```{r}
+system2("hadoop", args = c("fs", "-mkdir", "/rendering"))
+
+sdf_len(sc, 628, repartition = 628) %>%
+  spark_apply(function(idx, scene) {
+    render <- sprintf("%04d.png", idx$id)
+    rayrender::render_scene(scene, width = 1920, height = 1080,
+                            lookfrom = c(12 * sin(idx$id/100), 5, 12 * cos(idx$id/100)),
+                            filename = render)
+      
+    system2("hadoop", args = c("fs", "-put", render, "/user/hadoop/rendering/"))
+  }, context = scene, columns = list()) %>% collect()
+```
+
+After all the images are rendered, the last step is to collect them from HDFS and use tools like `ffmpeg` to convert individual images into an animation:
+
+```{bash}
+hadoop fs -get rendering/
+ffmpeg -s 1920x1080 -i rendering/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p rendering.mp4
+```
+
+**Note:** This example assumes HDFS is used as the storage technology for Spark and being run under a `hadoop` user, you will need to adjust this for your particular storage or user.
+
 We've covered some of the common use cases for `spark_apply()`, but you are certainly welcome to find other use cases for your particular needs. The following sections will present technical concepts you will need to understand to create additional use cases and to use `spark_apply()` effectevely.
 
 ## Partitions
@@ -683,11 +746,10 @@ This section completes all the functionality you need to distribute R code with 
 
 ## Cluster Requirements
 
-All the functionality presented in previous chapters, does not require any special configuration of your Spark cluster -- as long as you have a properly configured Spark cluster, you can use R with it. This is not the case for the functionality presented in this chapter, your cluster administrator, your cloud provider or yourself would have to confgigured the cluster by:
+All the functionality presented in previous chapters, does not require any special configuration of your Spark cluster -- as long as you have a properly configured Spark cluster, you can use R with it. This is not the case for the functionality presented in this chapter, your cluster administrator, your cloud provider or yourself will have to configure your cluster by:
 
-- Installing R, to execute R code across your cluster, R must be installed in every node.
-- Different clusters, technologies and cloud providers have a few differences we will highlight.
-- To execute fast distributed computations, while Apache Arrow is not required, it is stronly encouraged to be installed across all nodes when using Spark 2.3 or later. It will provide performance improvements that bring distributed R code closer to native Scala code.
+- Installing R in every node, to execute R code across your cluster.
+- Optionally, installing Apache Arrow in every node when using Spark 2.3 or later, Arrow provides performance improvements that bring distributed R code closer to native Scala code.
 
 Lets take a look at each requirement to make sure you properly consider the tradeoffs or benefits that they provide.
 
@@ -709,17 +771,22 @@ sdf_len(sc, 10) %>% spark_apply(function(e) e)
 
 A Homogeneous Cluster is required since the driver node distributes, and potentially compiles, packages to the workers. For instance, the driver and workers must have the same processor architecture, system libraries, etc. This is usually the case for most clusters, but might not be the case for yours.
 
-Next, we will highlight topics specific to each cluster, provider and connection technology.
+Different cluster managers, Spark distributions and cloud providers, support different solutions to install additional software, like R, across every node in the cluster; those instructions should be followed when installing R over each worker node. To mention a few,
 
-### Clusters
+Spark Standalone
+: Requires connecting to each machine and installing R; there are tools like `pssh` that allow you to run a single installation command against multiple machines.
 
-When using `spark_apply()`, R needs to be properly installed in each worker node. Different cluster managers, distributions and services, proivide different solutions to install additional software; those instructions should be followed when installing R over each worker node. To mention a few,
+Cloudera
+: Provides an R parcel, see ["How to Distribute your R code with sparklyr and Cloudera Data Science Workbench"](https://blog.cloudera.com/blog/2017/09/how-to-distribute-your-r-code-with-sparklyr-and-cdsw/) [@cloudera-sparklyr-parcel], which enables R over each worker node.
 
-- **Spark Standalone**: Requires connecting to each machine and installing R; there are tools like `pssh` that allow you to run a single installation command against multiple machines.
-- **Cloudera**: Provides an R parcel, see ["How to Distribute your R code with sparklyr and Cloudera Data Science Workbench"](https://blog.cloudera.com/blog/2017/09/how-to-distribute-your-r-code-with-sparklyr-and-cdsw/) [@cloudera-sparklyr-parcel], which enables R over each worker node.
-- **Amazon EMR**: R is pre-installed when starting an EMR cluster as mentioned in the [Amazon EMR](#clusters-amazon-emr) section.
-- **Microsoft HDInsight**: R is pre-installed and no additional steps are needed.
-- **Livy**: Livy connections **do not** support distributing packages since the client machine where the libraries are precompiled might not have the same processor architecture, nor operating systems than the cluster machines.
+Amazon EMR
+: R is pre-installed when starting an EMR cluster as mentioned in the [Amazon EMR](#clusters-amazon-emr) section.
+
+Microsoft HDInsight
+: R is pre-installed and no additional steps are needed.
+
+Livy
+: Livy connections **do not** support distributing packages since the client machine where the libraries are precompiled might not have the same processor architecture, nor operating systems than the cluster machines.
 
 Strictly speaking, this completes the last requirement for your cluster. However, we strongly recommend you use Apache Arrow with `spark_apply()` to support large-scale computation with minimal overhead.
 
@@ -875,11 +942,11 @@ There are a few other more advanced troubleshooting techniquest applicable to `s
 
 Whenever `spark_apply()` is executed, information regarding execution is written over each worker node. You can use this log to write custom messages o help you diagnose and fine-tune your code.
 
-For instance, suppose that you don't know what the first column name of `df` is, we can write a custom log message executed from the worker nodes using `worker_log()` as follows:
+For instance, suppose that you don't know what the first column name of `df` is, we can write a custom log message executed from the worker nodes using `spark_apply_log()` as follows:
 
 ```{r distributed-logs}
 sdf_len(sc, 1) %>% spark_apply(function(df) {
-  worker_log("the first column in the data frame is named ", names(df)[[1]])
+  spark_apply_log("the first column in the data frame is named ", names(df)[[1]])
   df
 })
 ```

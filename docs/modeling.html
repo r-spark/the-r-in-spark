@@ -5,26 +5,27 @@
 
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Chapter 4 Modeling | The R in Spark: Learning Apache Spark with R</title>
-  <meta name="description" content="A book to learn Apache Spark with R using the sparklyr R package.">
+  <title>Chapter 4 Modeling | Mastering Apache Spark with R</title>
+  <meta name="description" content="The complete guide to large-scale analysis and modeling.">
   <meta name="generator" content="bookdown  and GitBook 2.6.7">
 
-  <meta property="og:title" content="Chapter 4 Modeling | The R in Spark: Learning Apache Spark with R" />
+  <meta property="og:title" content="Chapter 4 Modeling | Mastering Apache Spark with R" />
   <meta property="og:type" content="book" />
   
   
-  <meta property="og:description" content="A book to learn Apache Spark with R using the sparklyr R package." />
+  <meta property="og:description" content="The complete guide to large-scale analysis and modeling." />
   <meta name="github-repo" content="javierluraschi/the-r-in-spark" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 Modeling | The R in Spark: Learning Apache Spark with R" />
+  <meta name="twitter:title" content="Chapter 4 Modeling | Mastering Apache Spark with R" />
   
-  <meta name="twitter:description" content="A book to learn Apache Spark with R using the sparklyr R package." />
+  <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
   
 
+<meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
 
 
-<meta name="date" content="2019-03-22">
+<meta name="date" content="2019-05-14">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,7 +33,7 @@
   
   
 <link rel="prev" href="analysis.html">
-<link rel="next" href="clusters.html">
+<link rel="next" href="pipelines.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -48,10 +49,6 @@
 
 
 <script src="libs/htmlwidgets-1.3/htmlwidgets.js"></script>
-<script src="libs/r2d3-render-0.1.0/r2d3-render.js"></script>
-<script src="libs/webcomponents-2.0.0/webcomponents.js"></script>
-<script src="libs/r2d3-binding-0.2.3/r2d3.js"></script>
-<script src="libs/d3v5-5.0.0/d3.min.js"></script>
 <script src="libs/dagre-0.0.1/dagre.min.js"></script>
 <script src="libs/lodash-3.7.0/lodash.js"></script>
 <script src="libs/nomnoml-0.2.0/nomnoml.js"></script>
@@ -148,11 +145,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Welcome</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html"><i class="fa fa-check"></i>Preface</a><ul>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#authors"><i class="fa fa-check"></i>Authors</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#formatting"><i class="fa fa-check"></i>Formatting</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#acknowledgments"><i class="fa fa-check"></i>Acknowledgments</a></li>
-</ul></li>
 <li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
 <li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#intro-background"><i class="fa fa-check"></i><b>1.1</b> Information</a></li>
 <li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#intro-hadoop"><i class="fa fa-check"></i><b>1.2</b> Hadoop</a></li>
@@ -182,224 +174,241 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.9" data-path="starting.html"><a href="starting.html#starting-recap"><i class="fa fa-check"></i><b>2.9</b> Recap</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="analysis.html"><a href="analysis.html"><i class="fa fa-check"></i><b>3</b> Analysis</a><ul>
-<li class="chapter" data-level="3.1" data-path="analysis.html"><a href="analysis.html#introduction"><i class="fa fa-check"></i><b>3.1</b> Introduction</a><ul>
-<li class="chapter" data-level="3.1.1" data-path="analysis.html"><a href="analysis.html#searching-for-insights"><i class="fa fa-check"></i><b>3.1.1</b> Searching for insights</a></li>
-<li class="chapter" data-level="3.1.2" data-path="analysis.html"><a href="analysis.html#r-as-an-interface-to-spark"><i class="fa fa-check"></i><b>3.1.2</b> R as an interface to Spark</a></li>
+<li class="chapter" data-level="3.1" data-path="analysis.html"><a href="analysis.html#search-for-an-answer"><i class="fa fa-check"></i><b>3.1</b> Search for an answer</a></li>
+<li class="chapter" data-level="3.2" data-path="analysis.html"><a href="analysis.html#r-as-an-interface-to-spark"><i class="fa fa-check"></i><b>3.2</b> R as an interface to Spark</a></li>
+<li class="chapter" data-level="3.3" data-path="analysis.html"><a href="analysis.html#exercise"><i class="fa fa-check"></i><b>3.3</b> Exercise</a></li>
+<li class="chapter" data-level="3.4" data-path="analysis.html"><a href="analysis.html#import-access"><i class="fa fa-check"></i><b>3.4</b> Import / Access</a></li>
+<li class="chapter" data-level="3.5" data-path="analysis.html"><a href="analysis.html#wrangle"><i class="fa fa-check"></i><b>3.5</b> Wrangle</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="analysis.html"><a href="analysis.html#correlations"><i class="fa fa-check"></i><b>3.5.1</b> Correlations</a></li>
 </ul></li>
-<li class="chapter" data-level="3.2" data-path="analysis.html"><a href="analysis.html#exercise"><i class="fa fa-check"></i><b>3.2</b> Exercise</a></li>
-<li class="chapter" data-level="3.3" data-path="analysis.html"><a href="analysis.html#import-access"><i class="fa fa-check"></i><b>3.3</b> Import / Access</a></li>
-<li class="chapter" data-level="3.4" data-path="analysis.html"><a href="analysis.html#wrangle"><i class="fa fa-check"></i><b>3.4</b> Wrangle</a><ul>
-<li class="chapter" data-level="3.4.1" data-path="analysis.html"><a href="analysis.html#transformations-using-dplyr"><i class="fa fa-check"></i><b>3.4.1</b> Transformations using <code>dplyr</code></a></li>
-<li class="chapter" data-level="3.4.2" data-path="analysis.html"><a href="analysis.html#correlations"><i class="fa fa-check"></i><b>3.4.2</b> Correlations</a></li>
+<li class="chapter" data-level="3.6" data-path="analysis.html"><a href="analysis.html#visualize"><i class="fa fa-check"></i><b>3.6</b> Visualize</a><ul>
+<li class="chapter" data-level="3.6.1" data-path="analysis.html"><a href="analysis.html#recommended-approach"><i class="fa fa-check"></i><b>3.6.1</b> Recommended approach</a></li>
+<li class="chapter" data-level="3.6.2" data-path="analysis.html"><a href="analysis.html#simple-plots"><i class="fa fa-check"></i><b>3.6.2</b> Simple plots</a></li>
+<li class="chapter" data-level="3.6.3" data-path="analysis.html"><a href="analysis.html#histograms"><i class="fa fa-check"></i><b>3.6.3</b> Histograms</a></li>
+<li class="chapter" data-level="3.6.4" data-path="analysis.html"><a href="analysis.html#scatter-plots"><i class="fa fa-check"></i><b>3.6.4</b> Scatter plots</a></li>
 </ul></li>
-<li class="chapter" data-level="3.5" data-path="analysis.html"><a href="analysis.html#visualize"><i class="fa fa-check"></i><b>3.5</b> Visualize</a><ul>
-<li class="chapter" data-level="3.5.1" data-path="analysis.html"><a href="analysis.html#transform-remotely-plot-locally"><i class="fa fa-check"></i><b>3.5.1</b> Transform remotely, plot locally</a></li>
-<li class="chapter" data-level="3.5.2" data-path="analysis.html"><a href="analysis.html#simple-plots"><i class="fa fa-check"></i><b>3.5.2</b> Simple plots</a></li>
-<li class="chapter" data-level="3.5.3" data-path="analysis.html"><a href="analysis.html#complex-plots"><i class="fa fa-check"></i><b>3.5.3</b> Complex plots</a></li>
+<li class="chapter" data-level="3.7" data-path="analysis.html"><a href="analysis.html#model"><i class="fa fa-check"></i><b>3.7</b> Model</a><ul>
+<li class="chapter" data-level="3.7.1" data-path="analysis.html"><a href="analysis.html#models-during-analysis"><i class="fa fa-check"></i><b>3.7.1</b> Models during analysis</a></li>
+<li class="chapter" data-level="3.7.2" data-path="analysis.html"><a href="analysis.html#cache-model-data"><i class="fa fa-check"></i><b>3.7.2</b> Cache model data</a></li>
 </ul></li>
-<li class="chapter" data-level="3.6" data-path="analysis.html"><a href="analysis.html#model"><i class="fa fa-check"></i><b>3.6</b> Model</a></li>
-<li class="chapter" data-level="3.7" data-path="analysis.html"><a href="analysis.html#communicate"><i class="fa fa-check"></i><b>3.7</b> Communicate</a></li>
-<li class="chapter" data-level="3.8" data-path="analysis.html"><a href="analysis.html#later-review"><i class="fa fa-check"></i><b>3.8</b> Later review</a><ul>
-<li class="chapter" data-level="3.8.1" data-path="analysis.html"><a href="analysis.html#background"><i class="fa fa-check"></i><b>3.8.1</b> Background</a></li>
-<li class="chapter" data-level="3.8.2" data-path="analysis.html"><a href="analysis.html#working-with-big-data"><i class="fa fa-check"></i><b>3.8.2</b> Working with Big Data</a></li>
-<li class="chapter" data-level="3.8.3" data-path="analysis.html"><a href="analysis.html#avoid-running-r-inside-spark"><i class="fa fa-check"></i><b>3.8.3</b> Avoid running R inside Spark</a></li>
-<li class="chapter" data-level="3.8.4" data-path="analysis.html"><a href="analysis.html#r-under-the-hood"><i class="fa fa-check"></i><b>3.8.4</b> R, under the hood</a></li>
+<li class="chapter" data-level="3.8" data-path="analysis.html"><a href="analysis.html#communicate"><i class="fa fa-check"></i><b>3.8</b> Communicate</a><ul>
+<li class="chapter" data-level="3.8.1" data-path="analysis.html"><a href="analysis.html#analysis-versus-production-work"><i class="fa fa-check"></i><b>3.8.1</b> Analysis versus Production work</a></li>
+<li class="chapter" data-level="3.8.2" data-path="analysis.html"><a href="analysis.html#using-r-markdown-documents"><i class="fa fa-check"></i><b>3.8.2</b> Using R Markdown documents</a></li>
+<li class="chapter" data-level="3.8.3" data-path="analysis.html"><a href="analysis.html#reporting-results"><i class="fa fa-check"></i><b>3.8.3</b> Reporting results</a></li>
+<li class="chapter" data-level="3.8.4" data-path="analysis.html"><a href="analysis.html#presentation-decks"><i class="fa fa-check"></i><b>3.8.4</b> Presentation decks</a></li>
 </ul></li>
+<li class="chapter" data-level="3.9" data-path="analysis.html"><a href="analysis.html#recap"><i class="fa fa-check"></i><b>3.9</b> Recap</a></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a><ul>
-<li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#the-data"><i class="fa fa-check"></i><b>4.1</b> The Data</a></li>
-<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#exploratory-data-analysis-eda"><i class="fa fa-check"></i><b>4.2</b> Exploratory Data Analysis (EDA)</a></li>
-<li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#feature-engineering"><i class="fa fa-check"></i><b>4.3</b> Feature Engineering</a></li>
-<li class="chapter" data-level="4.4" data-path="modeling.html"><a href="modeling.html#model-building"><i class="fa fa-check"></i><b>4.4</b> Model Building</a><ul>
-<li class="chapter" data-level="4.4.1" data-path="modeling.html"><a href="modeling.html#logistic-regression-as-a-generalized-linear-regression"><i class="fa fa-check"></i><b>4.4.1</b> Logistic Regression as a Generalized Linear Regression</a></li>
+<li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
+<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#the-data"><i class="fa fa-check"></i><b>4.2</b> The Data</a></li>
+<li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>4.3</b> Exploratory Data Analysis</a></li>
+<li class="chapter" data-level="4.4" data-path="modeling.html"><a href="modeling.html#feature-engineering"><i class="fa fa-check"></i><b>4.4</b> Feature Engineering</a></li>
+<li class="chapter" data-level="4.5" data-path="modeling.html"><a href="modeling.html#model-building"><i class="fa fa-check"></i><b>4.5</b> Model Building</a><ul>
+<li class="chapter" data-level="4.5.1" data-path="modeling.html"><a href="modeling.html#logistic-regression-as-a-generalized-linear-regression"><i class="fa fa-check"></i><b>4.5.1</b> Logistic Regression as a Generalized Linear Regression</a></li>
+<li class="chapter" data-level="4.5.2" data-path="modeling.html"><a href="modeling.html#more-machine-learning-algorithms"><i class="fa fa-check"></i><b>4.5.2</b> More Machine Learning Algorithms</a></li>
 </ul></li>
-<li class="chapter" data-level="4.5" data-path="modeling.html"><a href="modeling.html#more-machine-learning-algorithms"><i class="fa fa-check"></i><b>4.5</b> More Machine Learning Algorithms</a></li>
-<li class="chapter" data-level="4.6" data-path="modeling.html"><a href="modeling.html#functionlist"><i class="fa fa-check"></i><b>4.6</b> List of ML Functions</a><ul>
-<li class="chapter" data-level="4.6.1" data-path="modeling.html"><a href="modeling.html#classification"><i class="fa fa-check"></i><b>4.6.1</b> Classification</a></li>
-<li class="chapter" data-level="4.6.2" data-path="modeling.html"><a href="modeling.html#regression"><i class="fa fa-check"></i><b>4.6.2</b> Regression</a></li>
-<li class="chapter" data-level="4.6.3" data-path="modeling.html"><a href="modeling.html#clustering"><i class="fa fa-check"></i><b>4.6.3</b> Clustering</a></li>
-<li class="chapter" data-level="4.6.4" data-path="modeling.html"><a href="modeling.html#recommendation"><i class="fa fa-check"></i><b>4.6.4</b> Recommendation</a></li>
-<li class="chapter" data-level="4.6.5" data-path="modeling.html"><a href="modeling.html#frequent-pattern-mining"><i class="fa fa-check"></i><b>4.6.5</b> Frequent Pattern Mining</a></li>
-<li class="chapter" data-level="4.6.6" data-path="modeling.html"><a href="modeling.html#feature-transformers"><i class="fa fa-check"></i><b>4.6.6</b> Feature Transformers</a></li>
+<li class="chapter" data-level="4.6" data-path="modeling.html"><a href="modeling.html#working-with-textual-data"><i class="fa fa-check"></i><b>4.6</b> Working with Textual Data</a><ul>
+<li class="chapter" data-level="4.6.1" data-path="modeling.html"><a href="modeling.html#data-prep"><i class="fa fa-check"></i><b>4.6.1</b> Data Prep</a></li>
+<li class="chapter" data-level="4.6.2" data-path="modeling.html"><a href="modeling.html#topic-modeling"><i class="fa fa-check"></i><b>4.6.2</b> Topic Modeling</a></li>
 </ul></li>
+<li class="chapter" data-level="4.7" data-path="modeling.html"><a href="modeling.html#conclusion"><i class="fa fa-check"></i><b>4.7</b> Conclusion</a></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>5</b> Clusters</a><ul>
-<li class="chapter" data-level="5.1" data-path="clusters.html"><a href="clusters.html#clusters-overview"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
-<li class="chapter" data-level="5.2" data-path="clusters.html"><a href="clusters.html#on-premise"><i class="fa fa-check"></i><b>5.2</b> On-Premise</a><ul>
-<li class="chapter" data-level="5.2.1" data-path="clusters.html"><a href="clusters.html#clusters-manager"><i class="fa fa-check"></i><b>5.2.1</b> Managers</a></li>
-<li class="chapter" data-level="5.2.2" data-path="clusters.html"><a href="clusters.html#distributions"><i class="fa fa-check"></i><b>5.2.2</b> Distributions</a></li>
+<li class="chapter" data-level="5" data-path="pipelines.html"><a href="pipelines.html"><i class="fa fa-check"></i><b>5</b> Pipelines</a><ul>
+<li class="chapter" data-level="5.1" data-path="pipelines.html"><a href="pipelines.html#estimators-and-transformers"><i class="fa fa-check"></i><b>5.1</b> Estimators and Transformers</a></li>
+<li class="chapter" data-level="5.2" data-path="pipelines.html"><a href="pipelines.html#pipelines-and-pipeline-models"><i class="fa fa-check"></i><b>5.2</b> Pipelines and Pipeline Models</a></li>
+<li class="chapter" data-level="5.3" data-path="pipelines.html"><a href="pipelines.html#applying-pipelines-to-okcupid-data"><i class="fa fa-check"></i><b>5.3</b> Applying Pipelines to OKCupid Data</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="pipelines.html"><a href="pipelines.html#hyperparameter-tuning"><i class="fa fa-check"></i><b>5.3.1</b> Hyperparameter Tuning</a></li>
 </ul></li>
-<li class="chapter" data-level="5.3" data-path="clusters.html"><a href="clusters.html#cloud"><i class="fa fa-check"></i><b>5.3</b> Cloud</a><ul>
-<li class="chapter" data-level="5.3.1" data-path="clusters.html"><a href="clusters.html#clusters-amazon-emr"><i class="fa fa-check"></i><b>5.3.1</b> Amazon</a></li>
-<li class="chapter" data-level="5.3.2" data-path="clusters.html"><a href="clusters.html#databricks"><i class="fa fa-check"></i><b>5.3.2</b> Databricks</a></li>
-<li class="chapter" data-level="5.3.3" data-path="clusters.html"><a href="clusters.html#google"><i class="fa fa-check"></i><b>5.3.3</b> Google</a></li>
-<li class="chapter" data-level="5.3.4" data-path="clusters.html"><a href="clusters.html#ibm"><i class="fa fa-check"></i><b>5.3.4</b> IBM</a></li>
-<li class="chapter" data-level="5.3.5" data-path="clusters.html"><a href="clusters.html#microsoft"><i class="fa fa-check"></i><b>5.3.5</b> Microsoft</a></li>
-</ul></li>
-<li class="chapter" data-level="5.4" data-path="clusters.html"><a href="clusters.html#kubernetes"><i class="fa fa-check"></i><b>5.4</b> Kubernetes</a></li>
-<li class="chapter" data-level="5.5" data-path="clusters.html"><a href="clusters.html#tools"><i class="fa fa-check"></i><b>5.5</b> Tools</a><ul>
-<li class="chapter" data-level="5.5.1" data-path="clusters.html"><a href="clusters.html#rstudio"><i class="fa fa-check"></i><b>5.5.1</b> RStudio</a></li>
-<li class="chapter" data-level="5.5.2" data-path="clusters.html"><a href="clusters.html#jupyter"><i class="fa fa-check"></i><b>5.5.2</b> Jupyter</a></li>
-<li class="chapter" data-level="5.5.3" data-path="clusters.html"><a href="clusters.html#clusters-livy"><i class="fa fa-check"></i><b>5.5.3</b> Livy</a></li>
-</ul></li>
-<li class="chapter" data-level="5.6" data-path="clusters.html"><a href="clusters.html#recap"><i class="fa fa-check"></i><b>5.6</b> Recap</a></li>
-</ul></li>
-<li class="chapter" data-level="6" data-path="connections.html"><a href="connections.html"><i class="fa fa-check"></i><b>6</b> Connections</a><ul>
-<li class="chapter" data-level="6.1" data-path="connections.html"><a href="connections.html#connections-overview"><i class="fa fa-check"></i><b>6.1</b> Overview</a><ul>
-<li class="chapter" data-level="6.1.1" data-path="connections.html"><a href="connections.html#connections-spark-edge-nodes"><i class="fa fa-check"></i><b>6.1.1</b> Edge Nodes</a></li>
-<li class="chapter" data-level="6.1.2" data-path="connections.html"><a href="connections.html#connections-spark-home"><i class="fa fa-check"></i><b>6.1.2</b> Spark Home</a></li>
-</ul></li>
-<li class="chapter" data-level="6.2" data-path="connections.html"><a href="connections.html#connections-local"><i class="fa fa-check"></i><b>6.2</b> Local</a></li>
-<li class="chapter" data-level="6.3" data-path="connections.html"><a href="connections.html#connections-standalone"><i class="fa fa-check"></i><b>6.3</b> Standalone</a></li>
-<li class="chapter" data-level="6.4" data-path="connections.html"><a href="connections.html#connections-yarn"><i class="fa fa-check"></i><b>6.4</b> Yarn</a><ul>
-<li class="chapter" data-level="6.4.1" data-path="connections.html"><a href="connections.html#connections-yarn-client"><i class="fa fa-check"></i><b>6.4.1</b> Yarn Client</a></li>
-<li class="chapter" data-level="6.4.2" data-path="connections.html"><a href="connections.html#connections-yarn-cluster"><i class="fa fa-check"></i><b>6.4.2</b> Yarn Cluster</a></li>
-</ul></li>
-<li class="chapter" data-level="6.5" data-path="connections.html"><a href="connections.html#connections-livy"><i class="fa fa-check"></i><b>6.5</b> Livy</a></li>
-<li class="chapter" data-level="6.6" data-path="connections.html"><a href="connections.html#connections-mesos"><i class="fa fa-check"></i><b>6.6</b> Mesos</a></li>
-<li class="chapter" data-level="6.7" data-path="connections.html"><a href="connections.html#connections-kubernetes"><i class="fa fa-check"></i><b>6.7</b> Kubernetes</a></li>
-<li class="chapter" data-level="6.8" data-path="connections.html"><a href="connections.html#cloud-1"><i class="fa fa-check"></i><b>6.8</b> Cloud</a></li>
-<li class="chapter" data-level="6.9" data-path="connections.html"><a href="connections.html#batches"><i class="fa fa-check"></i><b>6.9</b> Batches</a></li>
-<li class="chapter" data-level="6.10" data-path="connections.html"><a href="connections.html#tools-1"><i class="fa fa-check"></i><b>6.10</b> Tools</a></li>
-<li class="chapter" data-level="6.11" data-path="connections.html"><a href="connections.html#multiple"><i class="fa fa-check"></i><b>6.11</b> Multiple</a></li>
-<li class="chapter" data-level="6.12" data-path="connections.html"><a href="connections.html#connections-troubleshooting"><i class="fa fa-check"></i><b>6.12</b> Troubleshooting</a><ul>
-<li class="chapter" data-level="6.12.1" data-path="connections.html"><a href="connections.html#logging"><i class="fa fa-check"></i><b>6.12.1</b> Logging</a></li>
-<li class="chapter" data-level="6.12.2" data-path="connections.html"><a href="connections.html#troubleshoot-spark-submit"><i class="fa fa-check"></i><b>6.12.2</b> Spark Submit</a></li>
-<li class="chapter" data-level="6.12.3" data-path="connections.html"><a href="connections.html#windows"><i class="fa fa-check"></i><b>6.12.3</b> Windows</a></li>
-</ul></li>
-<li class="chapter" data-level="6.13" data-path="connections.html"><a href="connections.html#recap-1"><i class="fa fa-check"></i><b>6.13</b> Recap</a></li>
-</ul></li>
-<li class="chapter" data-level="7" data-path="data.html"><a href="data.html"><i class="fa fa-check"></i><b>7</b> Data</a><ul>
-<li class="chapter" data-level="7.1" data-path="data.html"><a href="data.html#overview"><i class="fa fa-check"></i><b>7.1</b> Overview</a></li>
-<li class="chapter" data-level="7.2" data-path="data.html"><a href="data.html#data-frames"><i class="fa fa-check"></i><b>7.2</b> Data Frames</a><ul>
-<li class="chapter" data-level="7.2.1" data-path="data.html"><a href="data.html#data-sdf-functions"><i class="fa fa-check"></i><b>7.2.1</b> Functions</a></li>
-<li class="chapter" data-level="7.2.2" data-path="data.html"><a href="data.html#pivoting"><i class="fa fa-check"></i><b>7.2.2</b> Pivoting</a></li>
-</ul></li>
-<li class="chapter" data-level="7.3" data-path="data.html"><a href="data.html#formats"><i class="fa fa-check"></i><b>7.3</b> Formats</a></li>
-<li class="chapter" data-level="7.4" data-path="data.html"><a href="data.html#data-types"><i class="fa fa-check"></i><b>7.4</b> Data Types</a><ul>
-<li class="chapter" data-level="7.4.1" data-path="data.html"><a href="data.html#dates"><i class="fa fa-check"></i><b>7.4.1</b> Dates</a></li>
-</ul></li>
-<li class="chapter" data-level="7.5" data-path="data.html"><a href="data.html#sources"><i class="fa fa-check"></i><b>7.5</b> Sources</a><ul>
-<li class="chapter" data-level="7.5.1" data-path="data.html"><a href="data.html#amazon-s3"><i class="fa fa-check"></i><b>7.5.1</b> Amazon S3</a></li>
-<li class="chapter" data-level="7.5.2" data-path="data.html"><a href="data.html#azure-storage"><i class="fa fa-check"></i><b>7.5.2</b> Azure Storage</a></li>
-<li class="chapter" data-level="7.5.3" data-path="data.html"><a href="data.html#cassandra"><i class="fa fa-check"></i><b>7.5.3</b> Cassandra</a></li>
-<li class="chapter" data-level="7.5.4" data-path="data.html"><a href="data.html#databases"><i class="fa fa-check"></i><b>7.5.4</b> Databases</a></li>
-<li class="chapter" data-level="7.5.5" data-path="data.html"><a href="data.html#hbase"><i class="fa fa-check"></i><b>7.5.5</b> HBase</a></li>
-<li class="chapter" data-level="7.5.6" data-path="data.html"><a href="data.html#nested-data"><i class="fa fa-check"></i><b>7.5.6</b> Nested Data</a></li>
-</ul></li>
-<li class="chapter" data-level="7.6" data-path="data.html"><a href="data.html#troubleshooting"><i class="fa fa-check"></i><b>7.6</b> Troubleshooting</a><ul>
-<li class="chapter" data-level="7.6.1" data-path="data.html"><a href="data.html#troubleshoot-csvs"><i class="fa fa-check"></i><b>7.6.1</b> Troubleshoot CSVs</a></li>
-<li class="chapter" data-level="7.6.2" data-path="data.html"><a href="data.html#column-names"><i class="fa fa-check"></i><b>7.6.2</b> Column Names</a></li>
-</ul></li>
-<li class="chapter" data-level="7.7" data-path="data.html"><a href="data.html#recap-2"><i class="fa fa-check"></i><b>7.7</b> Recap</a></li>
-</ul></li>
-<li class="chapter" data-level="8" data-path="tuning.html"><a href="tuning.html"><i class="fa fa-check"></i><b>8</b> Tuning</a><ul>
-<li class="chapter" data-level="8.1" data-path="tuning.html"><a href="tuning.html#overview-1"><i class="fa fa-check"></i><b>8.1</b> Overview</a><ul>
-<li class="chapter" data-level="8.1.1" data-path="tuning.html"><a href="tuning.html#tuning-graph-visualization"><i class="fa fa-check"></i><b>8.1.1</b> Graph</a></li>
-<li class="chapter" data-level="8.1.2" data-path="tuning.html"><a href="tuning.html#tuning-event-timeline"><i class="fa fa-check"></i><b>8.1.2</b> Timeline</a></li>
-</ul></li>
-<li class="chapter" data-level="8.2" data-path="tuning.html"><a href="tuning.html#tuning-configuring"><i class="fa fa-check"></i><b>8.2</b> Configuring</a><ul>
-<li class="chapter" data-level="8.2.1" data-path="tuning.html"><a href="tuning.html#connect-settings"><i class="fa fa-check"></i><b>8.2.1</b> Connect Settings</a></li>
-<li class="chapter" data-level="8.2.2" data-path="tuning.html"><a href="tuning.html#submit-settings"><i class="fa fa-check"></i><b>8.2.2</b> Submit Settings</a></li>
-<li class="chapter" data-level="8.2.3" data-path="tuning.html"><a href="tuning.html#runtime-settings"><i class="fa fa-check"></i><b>8.2.3</b> Runtime Settings</a></li>
-<li class="chapter" data-level="8.2.4" data-path="tuning.html"><a href="tuning.html#sparklyr-settings"><i class="fa fa-check"></i><b>8.2.4</b> sparklyr Settings</a></li>
-</ul></li>
-<li class="chapter" data-level="8.3" data-path="tuning.html"><a href="tuning.html#tuning-partitioning"><i class="fa fa-check"></i><b>8.3</b> Partitioning</a><ul>
-<li class="chapter" data-level="8.3.1" data-path="tuning.html"><a href="tuning.html#implicit"><i class="fa fa-check"></i><b>8.3.1</b> Implicit</a></li>
-<li class="chapter" data-level="8.3.2" data-path="tuning.html"><a href="tuning.html#explicit"><i class="fa fa-check"></i><b>8.3.2</b> Explicit</a></li>
-</ul></li>
-<li class="chapter" data-level="8.4" data-path="tuning.html"><a href="tuning.html#tuning-caching"><i class="fa fa-check"></i><b>8.4</b> Caching</a><ul>
-<li class="chapter" data-level="8.4.1" data-path="tuning.html"><a href="tuning.html#checkpointing"><i class="fa fa-check"></i><b>8.4.1</b> Checkpointing</a></li>
-<li class="chapter" data-level="8.4.2" data-path="tuning.html"><a href="tuning.html#tuning-memory"><i class="fa fa-check"></i><b>8.4.2</b> Memory</a></li>
-</ul></li>
-<li class="chapter" data-level="8.5" data-path="tuning.html"><a href="tuning.html#tuning-shuffling"><i class="fa fa-check"></i><b>8.5</b> Shuffling</a></li>
-<li class="chapter" data-level="8.6" data-path="tuning.html"><a href="tuning.html#tuning-serialization"><i class="fa fa-check"></i><b>8.6</b> Serialization</a></li>
-<li class="chapter" data-level="8.7" data-path="tuning.html"><a href="tuning.html#configuration-files"><i class="fa fa-check"></i><b>8.7</b> Configuration Files</a></li>
-<li class="chapter" data-level="8.8" data-path="tuning.html"><a href="tuning.html#recap-3"><i class="fa fa-check"></i><b>8.8</b> Recap</a></li>
-</ul></li>
-<li class="chapter" data-level="9" data-path="extensions.html"><a href="extensions.html"><i class="fa fa-check"></i><b>9</b> Extensions</a><ul>
-<li class="chapter" data-level="9.1" data-path="extensions.html"><a href="extensions.html#rsparkling"><i class="fa fa-check"></i><b>9.1</b> RSparkling</a><ul>
-<li class="chapter" data-level="9.1.1" data-path="extensions.html"><a href="extensions.html#troubleshooting-1"><i class="fa fa-check"></i><b>9.1.1</b> Troubleshooting</a></li>
-</ul></li>
-<li class="chapter" data-level="9.2" data-path="extensions.html"><a href="extensions.html#graphframes"><i class="fa fa-check"></i><b>9.2</b> GraphFrames</a></li>
-<li class="chapter" data-level="9.3" data-path="extensions.html"><a href="extensions.html#mleap"><i class="fa fa-check"></i><b>9.3</b> Mleap</a></li>
-<li class="chapter" data-level="9.4" data-path="extensions.html"><a href="extensions.html#extensions-nested-data"><i class="fa fa-check"></i><b>9.4</b> Nested Data</a></li>
-</ul></li>
-<li class="chapter" data-level="10" data-path="distributed.html"><a href="distributed.html"><i class="fa fa-check"></i><b>10</b> Distributed R</a><ul>
-<li class="chapter" data-level="10.1" data-path="distributed.html"><a href="distributed.html#overview-2"><i class="fa fa-check"></i><b>10.1</b> Overview</a></li>
-<li class="chapter" data-level="10.2" data-path="distributed.html"><a href="distributed.html#use-cases"><i class="fa fa-check"></i><b>10.2</b> Use Cases</a><ul>
-<li class="chapter" data-level="10.2.1" data-path="distributed.html"><a href="distributed.html#custom-parsers"><i class="fa fa-check"></i><b>10.2.1</b> Custom Parsers</a></li>
-<li class="chapter" data-level="10.2.2" data-path="distributed.html"><a href="distributed.html#partitioned-modeling"><i class="fa fa-check"></i><b>10.2.2</b> Partitioned Modeling</a></li>
-<li class="chapter" data-level="10.2.3" data-path="distributed.html"><a href="distributed.html#distributed-grid-search"><i class="fa fa-check"></i><b>10.2.3</b> Grid Search</a></li>
-<li class="chapter" data-level="10.2.4" data-path="distributed.html"><a href="distributed.html#web-apis"><i class="fa fa-check"></i><b>10.2.4</b> Web APIs</a></li>
-</ul></li>
-<li class="chapter" data-level="10.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>10.3</b> Partitions</a></li>
-<li class="chapter" data-level="10.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>10.4</b> Grouping</a></li>
-<li class="chapter" data-level="10.5" data-path="distributed.html"><a href="distributed.html#columns"><i class="fa fa-check"></i><b>10.5</b> Columns</a></li>
-<li class="chapter" data-level="10.6" data-path="distributed.html"><a href="distributed.html#context"><i class="fa fa-check"></i><b>10.6</b> Context</a></li>
-<li class="chapter" data-level="10.7" data-path="distributed.html"><a href="distributed.html#packages"><i class="fa fa-check"></i><b>10.7</b> Packages</a></li>
-<li class="chapter" data-level="10.8" data-path="distributed.html"><a href="distributed.html#requirements"><i class="fa fa-check"></i><b>10.8</b> Requirements</a></li>
-<li class="chapter" data-level="10.9" data-path="distributed.html"><a href="distributed.html#limitations"><i class="fa fa-check"></i><b>10.9</b> Limitations</a><ul>
-<li class="chapter" data-level="10.9.1" data-path="distributed.html"><a href="distributed.html#functions"><i class="fa fa-check"></i><b>10.9.1</b> Functions</a></li>
-<li class="chapter" data-level="10.9.2" data-path="distributed.html"><a href="distributed.html#livy"><i class="fa fa-check"></i><b>10.9.2</b> Livy</a></li>
-<li class="chapter" data-level="10.9.3" data-path="distributed.html"><a href="distributed.html#grouping-1"><i class="fa fa-check"></i><b>10.9.3</b> Grouping</a></li>
-<li class="chapter" data-level="10.9.4" data-path="distributed.html"><a href="distributed.html#packages-1"><i class="fa fa-check"></i><b>10.9.4</b> Packages</a></li>
-</ul></li>
-<li class="chapter" data-level="10.10" data-path="distributed.html"><a href="distributed.html#troubleshooting-2"><i class="fa fa-check"></i><b>10.10</b> Troubleshooting</a><ul>
-<li class="chapter" data-level="10.10.1" data-path="distributed.html"><a href="distributed.html#worker-logs"><i class="fa fa-check"></i><b>10.10.1</b> Worker Logs</a></li>
-<li class="chapter" data-level="10.10.2" data-path="distributed.html"><a href="distributed.html#partition-timeouts"><i class="fa fa-check"></i><b>10.10.2</b> Partition Timeouts</a></li>
-<li class="chapter" data-level="10.10.3" data-path="distributed.html"><a href="distributed.html#partition-errors"><i class="fa fa-check"></i><b>10.10.3</b> Partition Errors</a></li>
-<li class="chapter" data-level="10.10.4" data-path="distributed.html"><a href="distributed.html#debugging-workers"><i class="fa fa-check"></i><b>10.10.4</b> Debugging Workers</a></li>
-</ul></li>
-<li class="chapter" data-level="10.11" data-path="distributed.html"><a href="distributed.html#clusters-1"><i class="fa fa-check"></i><b>10.11</b> Clusters</a></li>
-<li class="chapter" data-level="10.12" data-path="distributed.html"><a href="distributed.html#apache-arrow"><i class="fa fa-check"></i><b>10.12</b> Apache Arrow</a></li>
-<li class="chapter" data-level="10.13" data-path="distributed.html"><a href="distributed.html#recap-4"><i class="fa fa-check"></i><b>10.13</b> Recap</a></li>
-</ul></li>
-<li class="chapter" data-level="11" data-path="streaming.html"><a href="streaming.html"><i class="fa fa-check"></i><b>11</b> Streaming</a><ul>
-<li class="chapter" data-level="11.1" data-path="streaming.html"><a href="streaming.html#overview-3"><i class="fa fa-check"></i><b>11.1</b> Overview</a></li>
-<li class="chapter" data-level="11.2" data-path="streaming.html"><a href="streaming.html#streaming-treansform"><i class="fa fa-check"></i><b>11.2</b> Transformations</a><ul>
-<li class="chapter" data-level="11.2.1" data-path="streaming.html"><a href="streaming.html#streams-dplyr"><i class="fa fa-check"></i><b>11.2.1</b> dplyr</a></li>
-<li class="chapter" data-level="11.2.2" data-path="streaming.html"><a href="streaming.html#streams-pipelines"><i class="fa fa-check"></i><b>11.2.2</b> Pipelines</a></li>
-<li class="chapter" data-level="11.2.3" data-path="streaming.html"><a href="streaming.html#streams-r"><i class="fa fa-check"></i><b>11.2.3</b> R Code</a></li>
-</ul></li>
-<li class="chapter" data-level="11.3" data-path="streaming.html"><a href="streaming.html#shiny"><i class="fa fa-check"></i><b>11.3</b> Shiny</a></li>
-<li class="chapter" data-level="11.4" data-path="streaming.html"><a href="streaming.html#formats-1"><i class="fa fa-check"></i><b>11.4</b> Formats</a></li>
-</ul></li>
-<li class="chapter" data-level="12" data-path="contributing.html"><a href="contributing.html"><i class="fa fa-check"></i><b>12</b> Contributing</a><ul>
-<li class="chapter" data-level="12.1" data-path="contributing.html"><a href="contributing.html#overview-4"><i class="fa fa-check"></i><b>12.1</b> Overview</a></li>
-<li class="chapter" data-level="12.2" data-path="contributing.html"><a href="contributing.html#contributing-r-extension"><i class="fa fa-check"></i><b>12.2</b> R Extensions</a></li>
-<li class="chapter" data-level="12.3" data-path="contributing.html"><a href="contributing.html#scala-extensions"><i class="fa fa-check"></i><b>12.3</b> Scala Extensions</a><ul>
-<li class="chapter" data-level="12.3.1" data-path="contributing.html"><a href="contributing.html#scala-extension-prereq"><i class="fa fa-check"></i><b>12.3.1</b> Prerequisites</a></li>
-</ul></li>
-<li class="chapter" data-level="12.4" data-path="contributing.html"><a href="contributing.html#spark-extensions"><i class="fa fa-check"></i><b>12.4</b> Spark Extensions</a></li>
-<li class="chapter" data-level="12.5" data-path="contributing.html"><a href="contributing.html#r-packages"><i class="fa fa-check"></i><b>12.5</b> R Packages</a><ul>
-<li class="chapter" data-level="12.5.1" data-path="contributing.html"><a href="contributing.html#rstudio-projects"><i class="fa fa-check"></i><b>12.5.1</b> RStudio Projects</a></li>
-<li class="chapter" data-level="12.5.2" data-path="contributing.html"><a href="contributing.html#troubleshooting-3"><i class="fa fa-check"></i><b>12.5.2</b> Troubleshooting</a></li>
-</ul></li>
-<li class="chapter" data-level="12.6" data-path="contributing.html"><a href="contributing.html#contributing-sparklyr"><i class="fa fa-check"></i><b>12.6</b> sparklyr</a><ul>
-<li class="chapter" data-level="12.6.1" data-path="contributing.html"><a href="contributing.html#compiling"><i class="fa fa-check"></i><b>12.6.1</b> Compiling</a></li>
-<li class="chapter" data-level="12.6.2" data-path="contributing.html"><a href="contributing.html#serialization"><i class="fa fa-check"></i><b>12.6.2</b> Serialization</a></li>
-<li class="chapter" data-level="12.6.3" data-path="contributing.html"><a href="contributing.html#invocations"><i class="fa fa-check"></i><b>12.6.3</b> Invocations</a></li>
-<li class="chapter" data-level="12.6.4" data-path="contributing.html"><a href="contributing.html#r-packages-1"><i class="fa fa-check"></i><b>12.6.4</b> R Packages</a></li>
-<li class="chapter" data-level="12.6.5" data-path="contributing.html"><a href="contributing.html#connections-1"><i class="fa fa-check"></i><b>12.6.5</b> Connections</a></li>
-<li class="chapter" data-level="12.6.6" data-path="contributing.html"><a href="contributing.html#distributed-r"><i class="fa fa-check"></i><b>12.6.6</b> Distributed R</a></li>
-</ul></li>
-<li class="chapter" data-level="12.7" data-path="contributing.html"><a href="contributing.html#recap-5"><i class="fa fa-check"></i><b>12.7</b> Recap</a></li>
-</ul></li>
-<li class="chapter" data-level="" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i>Appendix</a><ul>
-<li class="chapter" data-level="12.8" data-path="appendix.html"><a href="appendix.html#appendix-prerequisites"><i class="fa fa-check"></i><b>12.8</b> Prerequisites</a><ul>
-<li class="chapter" data-level="12.8.1" data-path="appendix.html"><a href="appendix.html#appendix-install-r"><i class="fa fa-check"></i><b>12.8.1</b> Installing R</a></li>
-<li class="chapter" data-level="12.8.2" data-path="appendix.html"><a href="appendix.html#appendix-install-java"><i class="fa fa-check"></i><b>12.8.2</b> Installing Java</a></li>
-<li class="chapter" data-level="12.8.3" data-path="appendix.html"><a href="appendix.html#appendix-install-rstudio"><i class="fa fa-check"></i><b>12.8.3</b> Installing RStudio</a></li>
-<li class="chapter" data-level="12.8.4" data-path="appendix.html"><a href="appendix.html#appendix-using-rstudio"><i class="fa fa-check"></i><b>12.8.4</b> Using RStudio</a></li>
-</ul></li>
-<li class="chapter" data-level="12.9" data-path="appendix.html"><a href="appendix.html#diagrams"><i class="fa fa-check"></i><b>12.9</b> Diagrams</a><ul>
-<li class="chapter" data-level="12.9.1" data-path="appendix.html"><a href="appendix.html#appendix-storage-capacity"><i class="fa fa-check"></i><b>12.9.1</b> Worlds Store Capacity</a></li>
-<li class="chapter" data-level="12.9.2" data-path="appendix.html"><a href="appendix.html#appendix-cran-downloads"><i class="fa fa-check"></i><b>12.9.2</b> Daily downloads of CRAN packages</a></li>
-<li class="chapter" data-level="12.9.3" data-path="appendix.html"><a href="appendix.html#appendix-cluster-trends"><i class="fa fa-check"></i><b>12.9.3</b> Google trends for mainframes, cloud computing and kubernetes</a></li>
+<li class="chapter" data-level="5.4" data-path="pipelines.html"><a href="pipelines.html#operating-modes-of-pipelines-functions"><i class="fa fa-check"></i><b>5.4</b> Operating Modes of Pipelines Functions</a></li>
+<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a><ul>
+<li class="chapter" data-level="5.5.1" data-path="pipelines.html"><a href="pipelines.html#sparklyr-ml-models"><i class="fa fa-check"></i><b>5.5.1</b> Sparklyr ML Models</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="13" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>13</b> References</a></li>
+<li class="chapter" data-level="6" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>6</b> Clusters</a><ul>
+<li class="chapter" data-level="6.1" data-path="clusters.html"><a href="clusters.html#clusters-overview"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
+<li class="chapter" data-level="6.2" data-path="clusters.html"><a href="clusters.html#on-premise"><i class="fa fa-check"></i><b>6.2</b> On-Premise</a><ul>
+<li class="chapter" data-level="6.2.1" data-path="clusters.html"><a href="clusters.html#clusters-manager"><i class="fa fa-check"></i><b>6.2.1</b> Managers</a></li>
+<li class="chapter" data-level="6.2.2" data-path="clusters.html"><a href="clusters.html#distributions"><i class="fa fa-check"></i><b>6.2.2</b> Distributions</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="clusters.html"><a href="clusters.html#cloud"><i class="fa fa-check"></i><b>6.3</b> Cloud</a><ul>
+<li class="chapter" data-level="6.3.1" data-path="clusters.html"><a href="clusters.html#clusters-amazon-emr"><i class="fa fa-check"></i><b>6.3.1</b> Amazon</a></li>
+<li class="chapter" data-level="6.3.2" data-path="clusters.html"><a href="clusters.html#databricks"><i class="fa fa-check"></i><b>6.3.2</b> Databricks</a></li>
+<li class="chapter" data-level="6.3.3" data-path="clusters.html"><a href="clusters.html#google"><i class="fa fa-check"></i><b>6.3.3</b> Google</a></li>
+<li class="chapter" data-level="6.3.4" data-path="clusters.html"><a href="clusters.html#ibm"><i class="fa fa-check"></i><b>6.3.4</b> IBM</a></li>
+<li class="chapter" data-level="6.3.5" data-path="clusters.html"><a href="clusters.html#microsoft"><i class="fa fa-check"></i><b>6.3.5</b> Microsoft</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="clusters.html"><a href="clusters.html#kubernetes"><i class="fa fa-check"></i><b>6.4</b> Kubernetes</a></li>
+<li class="chapter" data-level="6.5" data-path="clusters.html"><a href="clusters.html#tools"><i class="fa fa-check"></i><b>6.5</b> Tools</a><ul>
+<li class="chapter" data-level="6.5.1" data-path="clusters.html"><a href="clusters.html#rstudio"><i class="fa fa-check"></i><b>6.5.1</b> RStudio</a></li>
+<li class="chapter" data-level="6.5.2" data-path="clusters.html"><a href="clusters.html#jupyter"><i class="fa fa-check"></i><b>6.5.2</b> Jupyter</a></li>
+<li class="chapter" data-level="6.5.3" data-path="clusters.html"><a href="clusters.html#clusters-livy"><i class="fa fa-check"></i><b>6.5.3</b> Livy</a></li>
+</ul></li>
+<li class="chapter" data-level="6.6" data-path="clusters.html"><a href="clusters.html#recap-1"><i class="fa fa-check"></i><b>6.6</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="connections.html"><a href="connections.html"><i class="fa fa-check"></i><b>7</b> Connections</a><ul>
+<li class="chapter" data-level="7.1" data-path="connections.html"><a href="connections.html#connections-overview"><i class="fa fa-check"></i><b>7.1</b> Overview</a><ul>
+<li class="chapter" data-level="7.1.1" data-path="connections.html"><a href="connections.html#connections-spark-edge-nodes"><i class="fa fa-check"></i><b>7.1.1</b> Edge Nodes</a></li>
+<li class="chapter" data-level="7.1.2" data-path="connections.html"><a href="connections.html#connections-spark-home"><i class="fa fa-check"></i><b>7.1.2</b> Spark Home</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="connections.html"><a href="connections.html#connections-local"><i class="fa fa-check"></i><b>7.2</b> Local</a></li>
+<li class="chapter" data-level="7.3" data-path="connections.html"><a href="connections.html#connections-standalone"><i class="fa fa-check"></i><b>7.3</b> Standalone</a></li>
+<li class="chapter" data-level="7.4" data-path="connections.html"><a href="connections.html#connections-yarn"><i class="fa fa-check"></i><b>7.4</b> Yarn</a><ul>
+<li class="chapter" data-level="7.4.1" data-path="connections.html"><a href="connections.html#connections-yarn-client"><i class="fa fa-check"></i><b>7.4.1</b> Yarn Client</a></li>
+<li class="chapter" data-level="7.4.2" data-path="connections.html"><a href="connections.html#connections-yarn-cluster"><i class="fa fa-check"></i><b>7.4.2</b> Yarn Cluster</a></li>
+</ul></li>
+<li class="chapter" data-level="7.5" data-path="connections.html"><a href="connections.html#connections-livy"><i class="fa fa-check"></i><b>7.5</b> Livy</a></li>
+<li class="chapter" data-level="7.6" data-path="connections.html"><a href="connections.html#connections-mesos"><i class="fa fa-check"></i><b>7.6</b> Mesos</a></li>
+<li class="chapter" data-level="7.7" data-path="connections.html"><a href="connections.html#connections-kubernetes"><i class="fa fa-check"></i><b>7.7</b> Kubernetes</a></li>
+<li class="chapter" data-level="7.8" data-path="connections.html"><a href="connections.html#cloud-1"><i class="fa fa-check"></i><b>7.8</b> Cloud</a></li>
+<li class="chapter" data-level="7.9" data-path="connections.html"><a href="connections.html#batches"><i class="fa fa-check"></i><b>7.9</b> Batches</a></li>
+<li class="chapter" data-level="7.10" data-path="connections.html"><a href="connections.html#tools-1"><i class="fa fa-check"></i><b>7.10</b> Tools</a></li>
+<li class="chapter" data-level="7.11" data-path="connections.html"><a href="connections.html#multiple"><i class="fa fa-check"></i><b>7.11</b> Multiple</a></li>
+<li class="chapter" data-level="7.12" data-path="connections.html"><a href="connections.html#connections-troubleshooting"><i class="fa fa-check"></i><b>7.12</b> Troubleshooting</a><ul>
+<li class="chapter" data-level="7.12.1" data-path="connections.html"><a href="connections.html#logging"><i class="fa fa-check"></i><b>7.12.1</b> Logging</a></li>
+<li class="chapter" data-level="7.12.2" data-path="connections.html"><a href="connections.html#troubleshoot-spark-submit"><i class="fa fa-check"></i><b>7.12.2</b> Spark Submit</a></li>
+<li class="chapter" data-level="7.12.3" data-path="connections.html"><a href="connections.html#windows"><i class="fa fa-check"></i><b>7.12.3</b> Windows</a></li>
+</ul></li>
+<li class="chapter" data-level="7.13" data-path="connections.html"><a href="connections.html#recap-2"><i class="fa fa-check"></i><b>7.13</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="data.html"><a href="data.html"><i class="fa fa-check"></i><b>8</b> Data</a><ul>
+<li class="chapter" data-level="8.1" data-path="data.html"><a href="data.html#source-types-and-file-systems"><i class="fa fa-check"></i><b>8.1</b> Source types and file systems</a><ul>
+<li class="chapter" data-level="8.1.1" data-path="data.html"><a href="data.html#default-packages"><i class="fa fa-check"></i><b>8.1.1</b> Default packages</a></li>
+<li class="chapter" data-level="8.1.2" data-path="data.html"><a href="data.html#source-types"><i class="fa fa-check"></i><b>8.1.2</b> Source types</a></li>
+<li class="chapter" data-level="8.1.3" data-path="data.html"><a href="data.html#file-systems"><i class="fa fa-check"></i><b>8.1.3</b> File systems</a></li>
+</ul></li>
+<li class="chapter" data-level="8.2" data-path="data.html"><a href="data.html#reading-data"><i class="fa fa-check"></i><b>8.2</b> Reading data</a><ul>
+<li class="chapter" data-level="8.2.1" data-path="data.html"><a href="data.html#folders-as-a-table"><i class="fa fa-check"></i><b>8.2.1</b> Folders as a table</a></li>
+<li class="chapter" data-level="8.2.2" data-path="data.html"><a href="data.html#file-layout"><i class="fa fa-check"></i><b>8.2.2</b> File layout</a></li>
+<li class="chapter" data-level="8.2.3" data-path="data.html"><a href="data.html#spark-memory"><i class="fa fa-check"></i><b>8.2.3</b> Spark memory</a></li>
+<li class="chapter" data-level="8.2.4" data-path="data.html"><a href="data.html#column-names"><i class="fa fa-check"></i><b>8.2.4</b> Column Names</a></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="data.html"><a href="data.html#writing-data"><i class="fa fa-check"></i><b>8.3</b> Writing Data</a><ul>
+<li class="chapter" data-level="8.3.1" data-path="data.html"><a href="data.html#spark-not-r-as-pass-through"><i class="fa fa-check"></i><b>8.3.1</b> Spark, not R, as pass-through</a></li>
+<li class="chapter" data-level="8.3.2" data-path="data.html"><a href="data.html#practical-approach"><i class="fa fa-check"></i><b>8.3.2</b> Practical approach</a></li>
+</ul></li>
+<li class="chapter" data-level="8.4" data-path="data.html"><a href="data.html#date-time"><i class="fa fa-check"></i><b>8.4</b> Date &amp; time</a></li>
+<li class="chapter" data-level="8.5" data-path="data.html"><a href="data.html#specific-types-and-protocols"><i class="fa fa-check"></i><b>8.5</b> Specific types and protocols</a><ul>
+<li class="chapter" data-level="8.5.1" data-path="data.html"><a href="data.html#amazon-s3"><i class="fa fa-check"></i><b>8.5.1</b> Amazon S3</a></li>
+<li class="chapter" data-level="8.5.2" data-path="data.html"><a href="data.html#sql"><i class="fa fa-check"></i><b>8.5.2</b> SQL</a></li>
+<li class="chapter" data-level="8.5.3" data-path="data.html"><a href="data.html#hive"><i class="fa fa-check"></i><b>8.5.3</b> Hive</a></li>
+<li class="chapter" data-level="8.5.4" data-path="data.html"><a href="data.html#comma-delimited-values-csv"><i class="fa fa-check"></i><b>8.5.4</b> Comma Delimited Values (CSV)</a></li>
+</ul></li>
+<li class="chapter" data-level="8.6" data-path="data.html"><a href="data.html#recap-3"><i class="fa fa-check"></i><b>8.6</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="tuning.html"><a href="tuning.html"><i class="fa fa-check"></i><b>9</b> Tuning</a><ul>
+<li class="chapter" data-level="9.1" data-path="tuning.html"><a href="tuning.html#overview-1"><i class="fa fa-check"></i><b>9.1</b> Overview</a><ul>
+<li class="chapter" data-level="9.1.1" data-path="tuning.html"><a href="tuning.html#tuning-graph-visualization"><i class="fa fa-check"></i><b>9.1.1</b> Graph</a></li>
+<li class="chapter" data-level="9.1.2" data-path="tuning.html"><a href="tuning.html#tuning-event-timeline"><i class="fa fa-check"></i><b>9.1.2</b> Timeline</a></li>
+</ul></li>
+<li class="chapter" data-level="9.2" data-path="tuning.html"><a href="tuning.html#tuning-configuring"><i class="fa fa-check"></i><b>9.2</b> Configuring</a><ul>
+<li class="chapter" data-level="9.2.1" data-path="tuning.html"><a href="tuning.html#connect-settings"><i class="fa fa-check"></i><b>9.2.1</b> Connect Settings</a></li>
+<li class="chapter" data-level="9.2.2" data-path="tuning.html"><a href="tuning.html#submit-settings"><i class="fa fa-check"></i><b>9.2.2</b> Submit Settings</a></li>
+<li class="chapter" data-level="9.2.3" data-path="tuning.html"><a href="tuning.html#runtime-settings"><i class="fa fa-check"></i><b>9.2.3</b> Runtime Settings</a></li>
+<li class="chapter" data-level="9.2.4" data-path="tuning.html"><a href="tuning.html#sparklyr-settings"><i class="fa fa-check"></i><b>9.2.4</b> sparklyr Settings</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3" data-path="tuning.html"><a href="tuning.html#tuning-partitioning"><i class="fa fa-check"></i><b>9.3</b> Partitioning</a><ul>
+<li class="chapter" data-level="9.3.1" data-path="tuning.html"><a href="tuning.html#implicit"><i class="fa fa-check"></i><b>9.3.1</b> Implicit</a></li>
+<li class="chapter" data-level="9.3.2" data-path="tuning.html"><a href="tuning.html#explicit"><i class="fa fa-check"></i><b>9.3.2</b> Explicit</a></li>
+</ul></li>
+<li class="chapter" data-level="9.4" data-path="tuning.html"><a href="tuning.html#tuning-caching"><i class="fa fa-check"></i><b>9.4</b> Caching</a><ul>
+<li class="chapter" data-level="9.4.1" data-path="tuning.html"><a href="tuning.html#checkpointing"><i class="fa fa-check"></i><b>9.4.1</b> Checkpointing</a></li>
+<li class="chapter" data-level="9.4.2" data-path="tuning.html"><a href="tuning.html#tuning-memory"><i class="fa fa-check"></i><b>9.4.2</b> Memory</a></li>
+</ul></li>
+<li class="chapter" data-level="9.5" data-path="tuning.html"><a href="tuning.html#tuning-shuffling"><i class="fa fa-check"></i><b>9.5</b> Shuffling</a></li>
+<li class="chapter" data-level="9.6" data-path="tuning.html"><a href="tuning.html#tuning-serialization"><i class="fa fa-check"></i><b>9.6</b> Serialization</a></li>
+<li class="chapter" data-level="9.7" data-path="tuning.html"><a href="tuning.html#configuration-files"><i class="fa fa-check"></i><b>9.7</b> Configuration Files</a></li>
+<li class="chapter" data-level="9.8" data-path="tuning.html"><a href="tuning.html#recap-4"><i class="fa fa-check"></i><b>9.8</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="extensions.html"><a href="extensions.html"><i class="fa fa-check"></i><b>10</b> Extensions</a><ul>
+<li class="chapter" data-level="10.1" data-path="extensions.html"><a href="extensions.html#rsparkling"><i class="fa fa-check"></i><b>10.1</b> RSparkling</a><ul>
+<li class="chapter" data-level="10.1.1" data-path="extensions.html"><a href="extensions.html#troubleshooting"><i class="fa fa-check"></i><b>10.1.1</b> Troubleshooting</a></li>
+</ul></li>
+<li class="chapter" data-level="10.2" data-path="extensions.html"><a href="extensions.html#graphframes"><i class="fa fa-check"></i><b>10.2</b> GraphFrames</a></li>
+<li class="chapter" data-level="10.3" data-path="extensions.html"><a href="extensions.html#mleap"><i class="fa fa-check"></i><b>10.3</b> Mleap</a></li>
+<li class="chapter" data-level="10.4" data-path="extensions.html"><a href="extensions.html#extensions-nested-data"><i class="fa fa-check"></i><b>10.4</b> Nested Data</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="distributed.html"><a href="distributed.html"><i class="fa fa-check"></i><b>11</b> Distributed R</a><ul>
+<li class="chapter" data-level="11.1" data-path="distributed.html"><a href="distributed.html#overview-2"><i class="fa fa-check"></i><b>11.1</b> Overview</a></li>
+<li class="chapter" data-level="11.2" data-path="distributed.html"><a href="distributed.html#use-cases"><i class="fa fa-check"></i><b>11.2</b> Use Cases</a><ul>
+<li class="chapter" data-level="11.2.1" data-path="distributed.html"><a href="distributed.html#custom-parsers"><i class="fa fa-check"></i><b>11.2.1</b> Custom Parsers</a></li>
+<li class="chapter" data-level="11.2.2" data-path="distributed.html"><a href="distributed.html#partitioned-modeling"><i class="fa fa-check"></i><b>11.2.2</b> Partitioned Modeling</a></li>
+<li class="chapter" data-level="11.2.3" data-path="distributed.html"><a href="distributed.html#distributed-grid-search"><i class="fa fa-check"></i><b>11.2.3</b> Grid Search</a></li>
+<li class="chapter" data-level="11.2.4" data-path="distributed.html"><a href="distributed.html#web-apis"><i class="fa fa-check"></i><b>11.2.4</b> Web APIs</a></li>
+<li class="chapter" data-level="11.2.5" data-path="distributed.html"><a href="distributed.html#distributed-rendering"><i class="fa fa-check"></i><b>11.2.5</b> Distributed Rendering</a></li>
+</ul></li>
+<li class="chapter" data-level="11.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>11.3</b> Partitions</a></li>
+<li class="chapter" data-level="11.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>11.4</b> Grouping</a></li>
+<li class="chapter" data-level="11.5" data-path="distributed.html"><a href="distributed.html#columns"><i class="fa fa-check"></i><b>11.5</b> Columns</a></li>
+<li class="chapter" data-level="11.6" data-path="distributed.html"><a href="distributed.html#context"><i class="fa fa-check"></i><b>11.6</b> Context</a></li>
+<li class="chapter" data-level="11.7" data-path="distributed.html"><a href="distributed.html#functions"><i class="fa fa-check"></i><b>11.7</b> Functions</a></li>
+<li class="chapter" data-level="11.8" data-path="distributed.html"><a href="distributed.html#packages"><i class="fa fa-check"></i><b>11.8</b> Packages</a></li>
+<li class="chapter" data-level="11.9" data-path="distributed.html"><a href="distributed.html#cluster-requirements"><i class="fa fa-check"></i><b>11.9</b> Cluster Requirements</a><ul>
+<li class="chapter" data-level="11.9.1" data-path="distributed.html"><a href="distributed.html#installing-r"><i class="fa fa-check"></i><b>11.9.1</b> Installing R</a></li>
+<li class="chapter" data-level="11.9.2" data-path="distributed.html"><a href="distributed.html#apache-arrow"><i class="fa fa-check"></i><b>11.9.2</b> Apache Arrow</a></li>
+</ul></li>
+<li class="chapter" data-level="11.10" data-path="distributed.html"><a href="distributed.html#troubleshooting-1"><i class="fa fa-check"></i><b>11.10</b> Troubleshooting</a><ul>
+<li class="chapter" data-level="11.10.1" data-path="distributed.html"><a href="distributed.html#worker-logs"><i class="fa fa-check"></i><b>11.10.1</b> Worker Logs</a></li>
+<li class="chapter" data-level="11.10.2" data-path="distributed.html"><a href="distributed.html#resolving-timeouts"><i class="fa fa-check"></i><b>11.10.2</b> Resolving Timeouts</a></li>
+<li class="chapter" data-level="11.10.3" data-path="distributed.html"><a href="distributed.html#inspecting-partition"><i class="fa fa-check"></i><b>11.10.3</b> Inspecting Partition</a></li>
+<li class="chapter" data-level="11.10.4" data-path="distributed.html"><a href="distributed.html#debugging-workers"><i class="fa fa-check"></i><b>11.10.4</b> Debugging Workers</a></li>
+</ul></li>
+<li class="chapter" data-level="11.11" data-path="distributed.html"><a href="distributed.html#recap-5"><i class="fa fa-check"></i><b>11.11</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="streaming.html"><a href="streaming.html"><i class="fa fa-check"></i><b>12</b> Streaming</a><ul>
+<li class="chapter" data-level="12.1" data-path="streaming.html"><a href="streaming.html#spark-streaming"><i class="fa fa-check"></i><b>12.1</b> Spark Streaming</a></li>
+<li class="chapter" data-level="12.2" data-path="streaming.html"><a href="streaming.html#working-with-spark-streams"><i class="fa fa-check"></i><b>12.2</b> Working with Spark Streams</a></li>
+<li class="chapter" data-level="12.3" data-path="streaming.html"><a href="streaming.html#sparklyr-extras"><i class="fa fa-check"></i><b>12.3</b> <code>sparklyr</code> extras</a><ul>
+<li class="chapter" data-level="12.3.1" data-path="streaming.html"><a href="streaming.html#stream-monitor"><i class="fa fa-check"></i><b>12.3.1</b> Stream monitor</a></li>
+<li class="chapter" data-level="12.3.2" data-path="streaming.html"><a href="streaming.html#stream-generator"><i class="fa fa-check"></i><b>12.3.2</b> Stream generator</a></li>
+<li class="chapter" data-level="12.3.3" data-path="streaming.html"><a href="streaming.html#shiny-reactive"><i class="fa fa-check"></i><b>12.3.3</b> Shiny reactive</a></li>
+</ul></li>
+<li class="chapter" data-level="12.4" data-path="streaming.html"><a href="streaming.html#intro-example"><i class="fa fa-check"></i><b>12.4</b> Intro example</a></li>
+<li class="chapter" data-level="12.5" data-path="streaming.html"><a href="streaming.html#transformations"><i class="fa fa-check"></i><b>12.5</b> Transformations</a><ul>
+<li class="chapter" data-level="12.5.1" data-path="streaming.html"><a href="streaming.html#dplyr"><i class="fa fa-check"></i><b>12.5.1</b> dplyr</a></li>
+<li class="chapter" data-level="12.5.2" data-path="streaming.html"><a href="streaming.html#transformer-functions"><i class="fa fa-check"></i><b>12.5.2</b> Transformer functions</a></li>
+<li class="chapter" data-level="12.5.3" data-path="streaming.html"><a href="streaming.html#r-code"><i class="fa fa-check"></i><b>12.5.3</b> R code</a></li>
+<li class="chapter" data-level="12.5.4" data-path="streaming.html"><a href="streaming.html#ml-pipelines"><i class="fa fa-check"></i><b>12.5.4</b> ML Pipelines</a></li>
+</ul></li>
+<li class="chapter" data-level="12.6" data-path="streaming.html"><a href="streaming.html#shiny-integration"><i class="fa fa-check"></i><b>12.6</b> Shiny integration</a></li>
+<li class="chapter" data-level="12.7" data-path="streaming.html"><a href="streaming.html#kafka"><i class="fa fa-check"></i><b>12.7</b> Kafka</a><ul>
+<li class="chapter" data-level="12.7.1" data-path="streaming.html"><a href="streaming.html#workflow"><i class="fa fa-check"></i><b>12.7.1</b> Workflow</a></li>
+<li class="chapter" data-level="12.7.2" data-path="streaming.html"><a href="streaming.html#spark-integration"><i class="fa fa-check"></i><b>12.7.2</b> Spark integration</a></li>
+<li class="chapter" data-level="12.7.3" data-path="streaming.html"><a href="streaming.html#r-integration"><i class="fa fa-check"></i><b>12.7.3</b> R integration</a></li>
+<li class="chapter" data-level="12.7.4" data-path="streaming.html"><a href="streaming.html#example"><i class="fa fa-check"></i><b>12.7.4</b> Example</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="contributing.html"><a href="contributing.html"><i class="fa fa-check"></i><b>13</b> Contributing</a><ul>
+<li class="chapter" data-level="13.1" data-path="contributing.html"><a href="contributing.html#contributing-overview"><i class="fa fa-check"></i><b>13.1</b> Overview</a></li>
+<li class="chapter" data-level="13.2" data-path="contributing.html"><a href="contributing.html#contributing-spark-api"><i class="fa fa-check"></i><b>13.2</b> Spark API</a></li>
+<li class="chapter" data-level="13.3" data-path="contributing.html"><a href="contributing.html#spark-extensions"><i class="fa fa-check"></i><b>13.3</b> Spark Extensions</a></li>
+<li class="chapter" data-level="13.4" data-path="contributing.html"><a href="contributing.html#scala-code"><i class="fa fa-check"></i><b>13.4</b> Scala Code</a></li>
+<li class="chapter" data-level="13.5" data-path="contributing.html"><a href="contributing.html#recap-6"><i class="fa fa-check"></i><b>13.5</b> Recap</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>14</b> Appendix</a><ul>
+<li class="chapter" data-level="14.1" data-path="appendix.html"><a href="appendix.html#appendix-prerequisites"><i class="fa fa-check"></i><b>14.1</b> Prerequisites</a><ul>
+<li class="chapter" data-level="14.1.1" data-path="appendix.html"><a href="appendix.html#appendix-install-r"><i class="fa fa-check"></i><b>14.1.1</b> Installing R</a></li>
+<li class="chapter" data-level="14.1.2" data-path="appendix.html"><a href="appendix.html#appendix-install-java"><i class="fa fa-check"></i><b>14.1.2</b> Installing Java</a></li>
+<li class="chapter" data-level="14.1.3" data-path="appendix.html"><a href="appendix.html#appendix-install-rstudio"><i class="fa fa-check"></i><b>14.1.3</b> Installing RStudio</a></li>
+<li class="chapter" data-level="14.1.4" data-path="appendix.html"><a href="appendix.html#appendix-using-rstudio"><i class="fa fa-check"></i><b>14.1.4</b> Using RStudio</a></li>
+</ul></li>
+<li class="chapter" data-level="14.2" data-path="appendix.html"><a href="appendix.html#diagrams"><i class="fa fa-check"></i><b>14.2</b> Diagrams</a><ul>
+<li class="chapter" data-level="14.2.1" data-path="appendix.html"><a href="appendix.html#appendix-storage-capacity"><i class="fa fa-check"></i><b>14.2.1</b> Worlds Store Capacity</a></li>
+<li class="chapter" data-level="14.2.2" data-path="appendix.html"><a href="appendix.html#appendix-cran-downloads"><i class="fa fa-check"></i><b>14.2.2</b> Daily downloads of CRAN packages</a></li>
+<li class="chapter" data-level="14.2.3" data-path="appendix.html"><a href="appendix.html#appendix-cluster-trends"><i class="fa fa-check"></i><b>14.2.3</b> Google trends for mainframes, cloud computing and kubernetes</a></li>
+</ul></li>
+<li class="chapter" data-level="14.3" data-path="appendix.html"><a href="appendix.html#appendix-ggplot2-theme"><i class="fa fa-check"></i><b>14.3</b> Formatting</a></li>
+<li class="chapter" data-level="14.4" data-path="appendix.html"><a href="appendix.html#ml-functionlist"><i class="fa fa-check"></i><b>14.4</b> List of ML Functions</a><ul>
+<li class="chapter" data-level="14.4.1" data-path="appendix.html"><a href="appendix.html#classification"><i class="fa fa-check"></i><b>14.4.1</b> Classification</a></li>
+<li class="chapter" data-level="14.4.2" data-path="appendix.html"><a href="appendix.html#regression"><i class="fa fa-check"></i><b>14.4.2</b> Regression</a></li>
+<li class="chapter" data-level="14.4.3" data-path="appendix.html"><a href="appendix.html#clustering"><i class="fa fa-check"></i><b>14.4.3</b> Clustering</a></li>
+<li class="chapter" data-level="14.4.4" data-path="appendix.html"><a href="appendix.html#recommendation"><i class="fa fa-check"></i><b>14.4.4</b> Recommendation</a></li>
+<li class="chapter" data-level="14.4.5" data-path="appendix.html"><a href="appendix.html#frequent-pattern-mining"><i class="fa fa-check"></i><b>14.4.5</b> Frequent Pattern Mining</a></li>
+<li class="chapter" data-level="14.4.6" data-path="appendix.html"><a href="appendix.html#feature-transformers"><i class="fa fa-check"></i><b>14.4.6</b> Feature Transformers</a></li>
+</ul></li>
+<li class="chapter" data-level="14.5" data-path="appendix.html"><a href="appendix.html#kafka-1"><i class="fa fa-check"></i><b>14.5</b> Kafka</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>15</b> References</a></li>
 </ul>
 
       </nav>
@@ -409,7 +418,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">The R in Spark: Learning Apache Spark with R</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Mastering Apache Spark with R</a>
           </h1>
         </div>
 
@@ -419,20 +428,40 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="modeling" class="section level1">
 <h1><span class="header-section-number">Chapter 4</span> Modeling</h1>
-<p>In this chapter, we discover how Spark can be used to scale up predictive modeling workflows to big data. We build off of the ideas presented in the Analysis chapter and introduce the machine learning (ML) aspects. Spark MLlib is the component of Spark that allows one to write high level code to perform machine learning tasks on distributed data. Sparklyr provides an interface to the ML algorithms that should be familiar to R users. For example, you can run a logistic regression as follows:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ml_logistic_regression</span>(big_dataset, response <span class="op">~</span><span class="st"> </span>.)</code></pre>
-<p>As can be seen in <a href="modeling.html#functionlist">List of ML functions</a>, Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with <span class="citation">Wickham and Grolemund (<a href="#ref-intro-r-for-data-science">2016</a>)</span> and <span class="citation">Kuhn, Max and Johnson, Kjell (<a href="#ref-kuhn-fes">2019</a>)</span>, from which we take inspiration for many examples in this chapter.</p>
+<p>In this chapter, we discover how Spark can be used to scale up machine learning workflows to big data. We build off of the ideas presented in the Analysis chapter and introduce the machine learning (ML) aspects. Spark MLlib is the component of Spark that allows one to write high level code to perform machine learning tasks on distributed data. Sparklyr provides an interface to the ML algorithms that should be familiar to R users. For example, you can run a logistic regression as follows:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ml_logistic_regression</span>(mtcars, am <span class="op">~</span><span class="st"> </span>.)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Formula: am ~ .</span>
+<span class="co">## </span>
+<span class="co">## Coefficients:</span>
+<span class="co">##  (Intercept)          mpg          cyl         disp           hp         drat </span>
+<span class="co">##  -0.68057477   1.73068529  -6.50306685  -0.11106774   0.01566047  33.02750111 </span>
+<span class="co">##           wt         qsec           vs         gear         carb </span>
+<span class="co">## -20.68143251  -9.52647833  -6.81113196  29.16524289   3.33862282 </span></code></pre>
+<p>As can be seen in <a href="#functionlist">List of ML functions</a>, Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with “R for Data Science” <span class="citation">(Wickham and Grolemund <a href="#ref-intro-r-for-data-science">2016</a>)</span> and “Feature Engineering and Selection: A Practical Approach for Predictive Models” <span class="citation">(Kuhn, Max and Johnson, Kjell <a href="#ref-kuhn-fes">2019</a>)</span>, from which we adopted for examples and visualizations in this chapter.</p>
+<div id="overview" class="section level2">
+<h2><span class="header-section-number">4.1</span> Overview</h2>
+<p>The tasks we focus on in this chapter involve machine learning, which is what Spark ML aims to enable, as opposed to statistical inference. This means that we are often more concerned about forecasting the future rather than inferring the process by which our data is generated.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> Machine learning can be categorized into supervised learning, or predictive modeling, and unsupervised learning. In supervised learning, we try to learn a function that will map from “X” to “Y”, from a dataset of “(x, y)” examples. In unsupervised learning, we just have “X” and not the “Y” labels, so instead we try to learn something about the structure of “X”. Some practical use cases for supervised learning include forecasting the weather tomorrow, determining whether a credit card transaction is fradulent, and coming up with a price for your car insurance policy. For unsupervised learning, examples include automated grouping of photos of individuals, segmenting customers based on their purchase history, and clustering of documents.</p>
+<p>The ML interface in sparklyr has been designed to minimize the cognitive effort for moving from a local, in-memory, native R workflow to the cluster, and back. While the Spark ecosystem is very rich, there is still a tremendous number of packages from CRAN, with some implementing functionality that you may require for a project. Also, you may want to leverage your skills and experience working in R to maintain productivity. What we learned in the Analysis section also applis here — it is important to keep track of where you are performing computations, and move between the cluster and your R session as appropriate.</p>
+<p>In the next section, we will introduce the dataset that will be used throughout the chapter. We then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We then move on to a topic modeling example that looks at some unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis.</p>
+</div>
 <div id="the-data" class="section level2">
-<h2><span class="header-section-number">4.1</span> The Data</h2>
-<p>The examples in this chapter will utilize the OkCupid dataset, available at.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> The dataset consists of user profile data from an online dating site, and contains a diverse set of features, including biographical characteristics such as gender and profession, and free text fields related to personal interests. There are about 60,000 profiles in the dataset, which fits comfortably into memory on a modern laptop and wouldn’t be considered “big data”, so you can easily follow along running Spark local mode. In a later chapter, we’ll discuss specific considerations for dealing with distributed datasets on clusters.</p>
+<h2><span class="header-section-number">4.2</span> The Data</h2>
+<p>The examples in this chapter will utilize the OkCupid dataset, available at.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> The dataset consists of user profile data from an online dating site, and contains a diverse set of features, including biographical characteristics such as gender and profession, and free text fields related to personal interests. There are about 60,000 profiles in the dataset, which fits comfortably into memory on a modern laptop and wouldn’t be considered “big data”, so you can easily follow along running Spark local mode. In a later chapter, we’ll discuss specific considerations for dealing with distributed datasets on clusters.</p>
 <p>To motivate the examples, we will consider the following problem:</p>
 <blockquote>
 <p>Predict whether someone is actively working, i.e. not retired, a student, or unemployed.</p>
 </blockquote>
 <p><strong>Note:</strong> The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the ML algorithm. For example, you may want to use the ranger package instead of <code>ml_random_forest_classifier()</code>.</p>
+<p>Next up, we will look at the data.</p>
 </div>
-<div id="exploratory-data-analysis-eda" class="section level2">
-<h2><span class="header-section-number">4.2</span> Exploratory Data Analysis (EDA)</h2>
+<div id="exploratory-data-analysis" class="section level2">
+<h2><span class="header-section-number">4.3</span> Exploratory Data Analysis</h2>
+<p>Exploratory data analysis (EDA), in the context of predictive modeling, is the exercise of looking at excerpts and summaries of the data. The specific goals of the EDA stage is informed by the business problem, but here are some common objectives:</p>
+<ul>
+<li>Checking for data quality — confirming meaning and prevalence of missing values and reconciling statistics against existing controls,</li>
+<li>Understand univariate relationships between variables, and</li>
+<li>Perform an initial assessment on what variables to include and what transformations need to be done on them.</li>
+</ul>
 <p>We’ll first read in the data, assuming <code>profiles.csv</code> is in the <code>data/</code> folder.</p>
 <pre class="sourceCode r"><code class="sourceCode r">okc &lt;-<span class="st"> </span><span class="kw">spark_read_csv</span>(
   sc, 
@@ -445,49 +474,59 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <span class="dt">income =</span> <span class="kw">ifelse</span>(income <span class="op">==</span><span class="st"> &quot;-1&quot;</span>, <span class="ot">NA</span>, <span class="kw">as.numeric</span>(income))
   ) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate_if</span>(is.character, <span class="kw">list</span>(<span class="op">~</span><span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(.), <span class="st">&quot;missing&quot;</span>, .)))</code></pre>
-<p>Note that we specify <code>escape = "\""</code> and <code>options = list(multiline = TRUE)</code> here to accommodate for embedded quote characters and newlines in the essay fields. We also convert the <code>height</code> and <code>income</code> columns to numeric types, and recode missing values in the string columns.</p>
-<p>We can take a quick look at the data with <code>glimpse()</code>:</p>
+<p>We specify <code>escape = "\""</code> and <code>options = list(multiline = TRUE)</code> here to accommodate for embedded quote characters and newlines in the essay fields. We also convert the <code>height</code> and <code>income</code> columns to numeric types, and recode missing values in the string columns. Note that it may very well take a few tries of specifying different parameters to get the initial data ingest correct, and sometimes you may have to revisit this step after you learn more about the data during modeling.</p>
+<p>We can now take a quick look at our data with <code>glimpse()</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glimpse</span>(okc)</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Observations: ??</span>
 <span class="co">## Variables: 31</span>
 <span class="co">## Database: spark_connection</span>
-<span class="co">## $ age         &lt;int&gt; 22, 35, 38, 23, 29, 29, 32, 31, 24, 37, 35, 28, 24, 30, 29, 3…</span>
-<span class="co">## $ body_type   &lt;chr&gt; &quot;a little extra&quot;, &quot;average&quot;, &quot;thin&quot;, &quot;thin&quot;, &quot;athletic&quot;, &quot;ave…</span>
-<span class="co">## $ diet        &lt;chr&gt; &quot;strictly anything&quot;, &quot;mostly other&quot;, &quot;anything&quot;, &quot;vegetarian&quot;…</span>
-<span class="co">## $ drinks      &lt;chr&gt; &quot;socially&quot;, &quot;often&quot;, &quot;socially&quot;, &quot;socially&quot;, &quot;socially&quot;, &quot;soc…</span>
-<span class="co">## $ drugs       &lt;chr&gt; &quot;never&quot;, &quot;sometimes&quot;, &quot;missing&quot;, &quot;missing&quot;, &quot;never&quot;, &quot;missing…</span>
-<span class="co">## $ education   &lt;chr&gt; &quot;working on college/university&quot;, &quot;working on space camp&quot;, &quot;gr…</span>
-<span class="co">## $ essay0      &lt;chr&gt; &quot;about me:&lt;br /&gt;\n&lt;br /&gt;\ni would love to think that i was so…</span>
-<span class="co">## $ essay1      &lt;chr&gt; &quot;currently working as an international agent for a freight\nf…</span>
-<span class="co">## $ essay2      &lt;chr&gt; &quot;making people laugh.&lt;br /&gt;\nranting about a good salting.&lt;br…</span>
-<span class="co">## $ essay3      &lt;chr&gt; &quot;the way i look. i am a six foot half asian, half caucasian m…</span>
-<span class="co">## $ essay4      &lt;chr&gt; &quot;books:&lt;br /&gt;\nabsurdistan, the republic, of mice and men (on…</span>
-<span class="co">## $ essay5      &lt;chr&gt; &quot;food.&lt;br /&gt;\nwater.&lt;br /&gt;\ncell phone.&lt;br /&gt;\nshelter.&quot;, &quot;de…</span>
-<span class="co">## $ essay6      &lt;chr&gt; &quot;duality and humorous things&quot;, &quot;missing&quot;, &quot;missing&quot;, &quot;cats an…</span>
-<span class="co">## $ essay7      &lt;chr&gt; &quot;trying to find someone to hang out with. i am down for anyth…</span>
-<span class="co">## $ essay8      &lt;chr&gt; &quot;i am new to california and looking for someone to wisper my …</span>
-<span class="co">## $ essay9      &lt;chr&gt; &quot;you want to be swept off your feet!&lt;br /&gt;\nyou are tired of …</span>
-<span class="co">## $ ethnicity   &lt;chr&gt; &quot;asian, white&quot;, &quot;white&quot;, &quot;missing&quot;, &quot;white&quot;, &quot;asian, black, o…</span>
-<span class="co">## $ height      &lt;dbl&gt; 75, 70, 68, 71, 66, 67, 65, 65, 67, 65, 70, 72, 72, 66, 62, 6…</span>
-<span class="co">## $ income      &lt;dbl&gt; NaN, 80000, NaN, 20000, NaN, NaN, NaN, NaN, NaN, NaN, NaN, 40…</span>
-<span class="co">## $ job         &lt;chr&gt; &quot;transportation&quot;, &quot;hospitality / travel&quot;, &quot;missing&quot;, &quot;student…</span>
-<span class="co">## $ last_online &lt;chr&gt; &quot;2012-06-28-20-30&quot;, &quot;2012-06-29-21-41&quot;, &quot;2012-06-27-09-10&quot;, &quot;…</span>
-<span class="co">## $ location    &lt;chr&gt; &quot;south san francisco, california&quot;, &quot;oakland, california&quot;, &quot;sa…</span>
-<span class="co">## $ offspring   &lt;chr&gt; &quot;doesn&amp;rsquo;t have kids, but might want them&quot;, &quot;doesn&amp;rsquo;…</span>
-<span class="co">## $ orientation &lt;chr&gt; &quot;straight&quot;, &quot;straight&quot;, &quot;straight&quot;, &quot;straight&quot;, &quot;straight&quot;, &quot;…</span>
-<span class="co">## $ pets        &lt;chr&gt; &quot;likes dogs and likes cats&quot;, &quot;likes dogs and likes cats&quot;, &quot;ha…</span>
-<span class="co">## $ religion    &lt;chr&gt; &quot;agnosticism and very serious about it&quot;, &quot;agnosticism but not…</span>
-<span class="co">## $ sex         &lt;chr&gt; &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;f&quot;, &quot;f&quot;, &quot;f&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;…</span>
-<span class="co">## $ sign        &lt;chr&gt; &quot;gemini&quot;, &quot;cancer&quot;, &quot;pisces but it doesn&amp;rsquo;t matter&quot;, &quot;pi…</span>
-<span class="co">## $ smokes      &lt;chr&gt; &quot;sometimes&quot;, &quot;no&quot;, &quot;no&quot;, &quot;no&quot;, &quot;no&quot;, &quot;no&quot;, &quot;missing&quot;, &quot;no&quot;, &quot;…</span>
-<span class="co">## $ speaks      &lt;chr&gt; &quot;english&quot;, &quot;english (fluently), spanish (poorly), french (poo…</span>
-<span class="co">## $ status      &lt;chr&gt; &quot;single&quot;, &quot;single&quot;, &quot;available&quot;, &quot;single&quot;, &quot;single&quot;, &quot;single&quot;…</span></code></pre>
-<p>Now we will add our response variable as a column in the dataset.</p>
+<span class="co">## $ age         &lt;int&gt; 22, 35, 38, 23, 29, 29, 32, 31, 24, 37, 35…</span>
+<span class="co">## $ body_type   &lt;chr&gt; &quot;a little extra&quot;, &quot;average&quot;, &quot;thin&quot;, &quot;thin…</span>
+<span class="co">## $ diet        &lt;chr&gt; &quot;strictly anything&quot;, &quot;mostly other&quot;, &quot;anyt…</span>
+<span class="co">## $ drinks      &lt;chr&gt; &quot;socially&quot;, &quot;often&quot;, &quot;socially&quot;, &quot;socially…</span>
+<span class="co">## $ drugs       &lt;chr&gt; &quot;never&quot;, &quot;sometimes&quot;, &quot;missing&quot;, &quot;missing&quot;…</span>
+<span class="co">## $ education   &lt;chr&gt; &quot;working on college/university&quot;, &quot;working …</span>
+<span class="co">## $ essay0      &lt;chr&gt; &quot;about me:&lt;br /&gt;\n&lt;br /&gt;\ni would love to …</span>
+<span class="co">## $ essay1      &lt;chr&gt; &quot;currently working as an international age…</span>
+<span class="co">## $ essay2      &lt;chr&gt; &quot;making people laugh.&lt;br /&gt;\nranting about…</span>
+<span class="co">## $ essay3      &lt;chr&gt; &quot;the way i look. i am a six foot half asia…</span>
+<span class="co">## $ essay4      &lt;chr&gt; &quot;books:&lt;br /&gt;\nabsurdistan, the republic, …</span>
+<span class="co">## $ essay5      &lt;chr&gt; &quot;food.&lt;br /&gt;\nwater.&lt;br /&gt;\ncell phone.&lt;br…</span>
+<span class="co">## $ essay6      &lt;chr&gt; &quot;duality and humorous things&quot;, &quot;missing&quot;, …</span>
+<span class="co">## $ essay7      &lt;chr&gt; &quot;trying to find someone to hang out with. …</span>
+<span class="co">## $ essay8      &lt;chr&gt; &quot;i am new to california and looking for so…</span>
+<span class="co">## $ essay9      &lt;chr&gt; &quot;you want to be swept off your feet!&lt;br /&gt;…</span>
+<span class="co">## $ ethnicity   &lt;chr&gt; &quot;asian, white&quot;, &quot;white&quot;, &quot;missing&quot;, &quot;white…</span>
+<span class="co">## $ height      &lt;dbl&gt; 75, 70, 68, 71, 66, 67, 65, 65, 67, 65, 70…</span>
+<span class="co">## $ income      &lt;dbl&gt; NaN, 80000, NaN, 20000, NaN, NaN, NaN, NaN…</span>
+<span class="co">## $ job         &lt;chr&gt; &quot;transportation&quot;, &quot;hospitality / travel&quot;, …</span>
+<span class="co">## $ last_online &lt;chr&gt; &quot;2012-06-28-20-30&quot;, &quot;2012-06-29-21-41&quot;, &quot;2…</span>
+<span class="co">## $ location    &lt;chr&gt; &quot;south san francisco, california&quot;, &quot;oaklan…</span>
+<span class="co">## $ offspring   &lt;chr&gt; &quot;doesn&amp;rsquo;t have kids, but might want t…</span>
+<span class="co">## $ orientation &lt;chr&gt; &quot;straight&quot;, &quot;straight&quot;, &quot;straight&quot;, &quot;strai…</span>
+<span class="co">## $ pets        &lt;chr&gt; &quot;likes dogs and likes cats&quot;, &quot;likes dogs a…</span>
+<span class="co">## $ religion    &lt;chr&gt; &quot;agnosticism and very serious about it&quot;, &quot;…</span>
+<span class="co">## $ sex         &lt;chr&gt; &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;f&quot;, &quot;f&quot;, &quot;f…</span>
+<span class="co">## $ sign        &lt;chr&gt; &quot;gemini&quot;, &quot;cancer&quot;, &quot;pisces but it doesn&amp;r…</span>
+<span class="co">## $ smokes      &lt;chr&gt; &quot;sometimes&quot;, &quot;no&quot;, &quot;no&quot;, &quot;no&quot;, &quot;no&quot;, &quot;no&quot;,…</span>
+<span class="co">## $ speaks      &lt;chr&gt; &quot;english&quot;, &quot;english (fluently), spanish (p…</span>
+<span class="co">## $ status      &lt;chr&gt; &quot;single&quot;, &quot;single&quot;, &quot;available&quot;, &quot;single&quot;,…</span></code></pre>
+<p>Now we will add our response variable as a column in the dataset and look at its distribution</p>
 <pre class="sourceCode r"><code class="sourceCode r">okc &lt;-<span class="st"> </span>okc <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">filter</span>(<span class="op">!</span><span class="kw">is.na</span>(job)) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">not_working =</span> <span class="kw">ifelse</span>(job <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;student&quot;</span>, <span class="st">&quot;unemployed&quot;</span>, <span class="st">&quot;retired&quot;</span>), <span class="dv">1</span> , <span class="dv">0</span>))</code></pre>
-<p>Before we proceed further, let us perform an initial split of our data into a training set and a testing set. In practice, this is a crucial step because we would like to have a holdout set that we set aside at the end of the modeling process to evaluate model performance. This can be done easily by using the <code>sdf_partition()</code> function:</p>
-<pre class="sourceCode r"><code class="sourceCode r">data_splits &lt;-<span class="st"> </span><span class="kw">sdf_partition</span>(okc, <span class="dt">training =</span> <span class="fl">0.8</span>, <span class="dt">testing =</span> <span class="fl">0.2</span>)
+<span class="st">  </span><span class="kw">mutate</span>(
+    <span class="dt">not_working =</span> <span class="kw">ifelse</span>(job <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;student&quot;</span>, <span class="st">&quot;unemployed&quot;</span>, <span class="st">&quot;retired&quot;</span>), <span class="dv">1</span> , <span class="dv">0</span>)
+  )
+
+okc <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">group_by</span>(not_working) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">tally</span>()</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## # Source: spark&lt;?&gt; [?? x 2]</span>
+<span class="co">##   not_working     n</span>
+<span class="co">##         &lt;dbl&gt; &lt;dbl&gt;</span>
+<span class="co">## 1           0 54541</span>
+<span class="co">## 2           1  5405</span></code></pre>
+<p>Before we proceed further, let us perform an initial split of our data into a training set and a testing set and put away the latter. In practice, this is a crucial step because we would like to have a holdout set that we set aside at the end of the modeling process to evaluate model performance. If we were to include the entire dataset during EDA, information from the testing set could “leak” into the visualizations and summary statistics, and bias our model building process even though the data is not used directly in a learning algorithm. This would undermine the credibility of our performance metrics. Splitting the data can be done easily by using the <code>sdf_partition()</code> function:</p>
+<pre class="sourceCode r"><code class="sourceCode r">data_splits &lt;-<span class="st"> </span><span class="kw">sdf_random_split</span>(okc, <span class="dt">training =</span> <span class="fl">0.8</span>, <span class="dt">testing =</span> <span class="fl">0.2</span>, <span class="dt">seed =</span> <span class="dv">42</span>)
 okc_train &lt;-<span class="st"> </span>data_splits<span class="op">$</span>training
 okc_test &lt;-<span class="st"> </span>data_splits<span class="op">$</span>testing</code></pre>
 <p>We can quickly look at the distribution of our response variable:</p>
@@ -498,18 +537,18 @@ okc_test &lt;-<span class="st"> </span>data_splits<span class="op">$</span>testi
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co">## # Source: spark&lt;?&gt; [?? x 3]</span>
 <span class="co">##   not_working     n   frac</span>
 <span class="co">##         &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;</span>
-<span class="co">## 1           0 43593 0.909 </span>
-<span class="co">## 2           1  4342 0.0906</span></code></pre>
+<span class="co">## 1           0 43785 0.910 </span>
+<span class="co">## 2           1  4317 0.0897</span></code></pre>
 <p>Using the <code>sdf_describe()</code> function, we can obtain numerical summaries of specific columns:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sdf_describe</span>(okc_train, <span class="dt">cols =</span> <span class="kw">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;income&quot;</span>))</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co">## # Source: spark&lt;?&gt; [?? x 3]</span>
-<span class="co">##   summary age               income            </span>
-<span class="co">##   &lt;chr&gt;   &lt;chr&gt;             &lt;chr&gt;             </span>
-<span class="co">## 1 count   47935             9196              </span>
-<span class="co">## 2 mean    32.31519766350266 104385.60243584168</span>
-<span class="co">## 3 stddev  9.426466867310086 201771.7144657046 </span>
-<span class="co">## 4 min     18                20000.0           </span>
-<span class="co">## 5 max     109               1000000.0 </span></code></pre>
+<span class="co">##   summary age                income            </span>
+<span class="co">##   &lt;chr&gt;   &lt;chr&gt;              &lt;chr&gt;             </span>
+<span class="co">## 1 count   48102              9193              </span>
+<span class="co">## 2 mean    32.336534863415245 104968.99815076689</span>
+<span class="co">## 3 stddev  9.43908920033797   202235.2291773537 </span>
+<span class="co">## 4 min     18                 20000.0           </span>
+<span class="co">## 5 max     110                1000000.0   </span></code></pre>
 <p>Like we saw in the Analysis chapter, we can also utilize the dbplot package to plot distributions of these variables:</p>
 <pre class="sourceCode r"><code class="sourceCode r">okc_train <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">dbplot_histogram</span>(age)</code></pre>
@@ -536,16 +575,16 @@ prop_data</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co">## # A tibble: 10 x 4</span>
 <span class="co">##    religion     count   prop      se</span>
 <span class="co">##    &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;</span>
-<span class="co">##  1 judaism       2489 0.0836 0.00557</span>
-<span class="co">##  2 atheism       5561 0.120  0.00436</span>
-<span class="co">##  3 christianity  4645 0.114  0.00469</span>
-<span class="co">##  4 hinduism       375 0.0907 0.0148 </span>
-<span class="co">##  5 islam          114 0.193  0.0370 </span>
-<span class="co">##  6 agnosticism   7048 0.0989 0.00361</span>
-<span class="co">##  7 other         6184 0.0881 0.00361</span>
-<span class="co">##  8 missing      16124 0.0710 0.002  </span>
-<span class="co">##  9 buddhism      1562 0.0883 0.00721</span>
-<span class="co">## 10 catholicism   3833 0.0931 0.00469</span></code></pre>
+<span class="co">##  1 judaism       2520 0.0794 0.00539</span>
+<span class="co">##  2 atheism       5624 0.118  0.00436</span>
+<span class="co">##  3 christianity  4671 0.120  0.00480</span>
+<span class="co">##  4 hinduism       358 0.101  0.0159 </span>
+<span class="co">##  5 islam          115 0.191  0.0367 </span>
+<span class="co">##  6 agnosticism   7078 0.0958 0.00346</span>
+<span class="co">##  7 other         6240 0.0841 0.00346</span>
+<span class="co">##  8 missing      16152 0.0719 0.002  </span>
+<span class="co">##  9 buddhism      1575 0.0851 0.007  </span>
+<span class="co">## 10 catholicism   3769 0.0886 0.00458</span></code></pre>
 <p>Note that <code>prop_data</code> is a small data frame that has been collected into memory in our R session, we can take advantage of ggplot2 to create an informative visualization.</p>
 <div class="figure" style="text-align: center"><span id="fig:religion-prop"></span>
 <img src="images/modeling-okc-prop-resized.png" alt="Proportion of individuals not working by religion" width="1500" />
@@ -562,13 +601,13 @@ contingency_tbl</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co">## # A tibble: 7 x 5</span>
 <span class="co">##   drinks_drugs missing never often sometimes</span>
 <span class="co">##   &lt;chr&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span>
-<span class="co">## 1 very often        50   142    48       137</span>
-<span class="co">## 2 socially        8138 21048   132      4100</span>
-<span class="co">## 3 not at all       166  2343    12        91</span>
-<span class="co">## 4 desperately       71    98    23        68</span>
-<span class="co">## 5 often           1054  1692    68      1294</span>
-<span class="co">## 6 missing         1114  1229     9        65</span>
-<span class="co">## 7 rarely           630  3637    40       436</span></code></pre>
+<span class="co">## 1 very often        54   144    44       137</span>
+<span class="co">## 2 socially        8221 21066   126      4106</span>
+<span class="co">## 3 not at all       146  2371    15       109</span>
+<span class="co">## 4 desperately       72    89    23        74</span>
+<span class="co">## 5 often           1049  1718    69      1271</span>
+<span class="co">## 6 missing         1121  1226    10        59</span>
+<span class="co">## 7 rarely           613  3689    35       445</span></code></pre>
 <p>We can visualize this contingency table using a mosaic plot.</p>
 <div class="figure" style="text-align: center"><span id="fig:mosaic"></span>
 <img src="images/modeling-okc-mosaic-resized.png" alt="Mosaic plot of drug and alcohol use" width="1500" />
@@ -577,7 +616,6 @@ FIGURE 4.3: Mosaic plot of drug and alcohol use
 </p>
 </div>
 <p>To further explore the relationship between this two variables, we can perform correspondence analysis using the FactoMineR package and visualize the results.</p>
-<pre><code>## Warning: Removed 2 rows containing missing values (geom_text).</code></pre>
 <div class="figure" style="text-align: center"><span id="fig:ca-pcs"></span>
 <img src="images/modeling-okc-correspondence-analysis-resized.png" alt="Correspondence analysis principal coordinates for drugs and alcohol use" width="1500" />
 <p class="caption">
@@ -585,9 +623,35 @@ FIGURE 4.4: Correspondence analysis principal coordinates for drugs and alcohol 
 </p>
 </div>
 <p>Correspondence analysis transforms the factors into variables called <em>principal coordinates</em>, which correspond to the axes in the plot and represent how much information in the contingency table they contain. We can, for example, interpret the proximity of “drinking often” and “using drugs very often” as indicating association.</p>
+<p>This concludes our discussion on EDA, and we will now proceed to feature engineering.</p>
 </div>
 <div id="feature-engineering" class="section level2">
-<h2><span class="header-section-number">4.3</span> Feature Engineering</h2>
+<h2><span class="header-section-number">4.4</span> Feature Engineering</h2>
+<p>The feature engineering exercise comprises transforming the data to increase the performance of the model. This can include things like centering and scaling numerical values and performing string manipulation to extract meaningful variables. It also often includes variable selection — the process of selecting which predictors are used in the model.</p>
+<p>Let us start with scaling the <code>age</code> variable by removing the mean and scaling to unit variance. Some algorithms, especially neural networks, train faster if we normalize our inputs. We begin by calculating the mean and standard deviation of the variable:</p>
+<pre class="sourceCode r"><code class="sourceCode r">scale_values &lt;-<span class="st"> </span>okc_train <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">summarize</span>(
+    <span class="dt">mean_age =</span> <span class="kw">mean</span>(age, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),
+    <span class="dt">sd_age =</span> <span class="kw">sd</span>(age)
+  ) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">collect</span>()
+
+scale_values</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## # A tibble: 1 x 2</span>
+<span class="co">##   mean_age sd_age</span>
+<span class="co">##      &lt;dbl&gt;  &lt;dbl&gt;</span>
+<span class="co">## 1     32.3   9.44</span></code></pre>
+<p>We can then use these to transform the dataset:</p>
+<pre class="sourceCode r"><code class="sourceCode r">okc_train &lt;-<span class="st"> </span>okc_train <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">scaled_age =</span> (age <span class="op">-</span><span class="st"> </span><span class="op">!!</span>scale_values<span class="op">$</span>mean_age) <span class="op">/</span><span class="st"> </span><span class="op">!!</span>scale_values<span class="op">$</span>sd_age)
+okc_train <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">dbplot_histogram</span>(scaled_age)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:scaled-age-distribution"></span>
+<img src="images/modeling-okc-histogram-scaled-age-resized.png" alt="Distribution of scaled age" width="1500" />
+<p class="caption">
+FIGURE 4.5: Distribution of scaled age
+</p>
+</div>
 <p>Since some of the profile feature are multiple-select, we need to process them before we can build meaningful models. If we take a look at the ethnicity column, for example, we see that there are many different combinations:</p>
 <pre class="sourceCode r"><code class="sourceCode r">okc_train <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">group_by</span>(ethnicity) <span class="op">%&gt;%</span>
@@ -595,17 +659,17 @@ FIGURE 4.4: Correspondence analysis principal coordinates for drugs and alcohol 
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co">## # Source: spark&lt;?&gt; [?? x 2]</span>
 <span class="co">##    ethnicity                                     n</span>
 <span class="co">##    &lt;chr&gt;                                     &lt;dbl&gt;</span>
-<span class="co">##  1 hispanic / latin, white                    1039</span>
-<span class="co">##  2 black, pacific islander, hispanic / latin     4</span>
-<span class="co">##  3 black, native american, indian, white         1</span>
-<span class="co">##  4 asian, black, pacific islander                5</span>
-<span class="co">##  5 black, native american, white                94</span>
-<span class="co">##  6 middle eastern, white, other                 32</span>
-<span class="co">##  7 asian, other                                 77</span>
-<span class="co">##  8 asian, black, white                          15</span>
-<span class="co">##  9 indian, hispanic / latin                      5</span>
-<span class="co">## 10 asian, hispanic / latin, white, other         7</span>
-<span class="co"># … with more rows</span></code></pre>
+<span class="co">##  1 hispanic / latin, white                    1051</span>
+<span class="co">##  2 black, pacific islander, hispanic / latin     2</span>
+<span class="co">##  3 asian, black, pacific islander                5</span>
+<span class="co">##  4 black, native american, white                91</span>
+<span class="co">##  5 middle eastern, white, other                 34</span>
+<span class="co">##  6 asian, other                                 78</span>
+<span class="co">##  7 asian, black, white                          12</span>
+<span class="co">##  8 asian, hispanic / latin, white, other         7</span>
+<span class="co">##  9 middle eastern, pacific islander              1</span>
+<span class="co">## 10 indian, hispanic / latin                      5</span>
+<span class="co">## # … with more rows</span></code></pre>
 <p>For our model, we create indicator variables for each race, as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r">ethnicities &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;asian&quot;</span>, <span class="st">&quot;middle eastern&quot;</span>, <span class="st">&quot;black&quot;</span>, <span class="st">&quot;native american&quot;</span>, <span class="st">&quot;indian&quot;</span>, 
                  <span class="st">&quot;pacific islander&quot;</span>, <span class="st">&quot;hispanic / latin&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="st">&quot;other&quot;</span>)
@@ -619,15 +683,15 @@ okc_train <span class="op">%&gt;%</span><span class="st"> </span>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Observations: ??</span>
 <span class="co">## Variables: 9</span>
 <span class="co">## Database: spark_connection</span>
-<span class="co">## $ ethnicity_asian           &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…</span>
-<span class="co">## $ ethnicity_middleeastern   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,…</span>
-<span class="co">## $ ethnicity_black           &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…</span>
-<span class="co">## $ ethnicity_nativeamerican  &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…</span>
-<span class="co">## $ ethnicity_indian          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,…</span>
-<span class="co">## $ ethnicity_pacificislander &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…</span>
-<span class="co">## $ ethnicity_hispaniclatin   &lt;dbl&gt; 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,…</span>
-<span class="co">## $ ethnicity_white           &lt;dbl&gt; 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,…</span>
-<span class="co">## $ ethnicity_other           &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…</span></code></pre>
+<span class="co">## $ ethnicity_asian           &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</span>
+<span class="co">## $ ethnicity_middleeastern   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</span>
+<span class="co">## $ ethnicity_black           &lt;dbl&gt; 0, 1, 0, 0, 0, 0, 0, 0, 0, 0…</span>
+<span class="co">## $ ethnicity_nativeamerican  &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</span>
+<span class="co">## $ ethnicity_indian          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</span>
+<span class="co">## $ ethnicity_pacificislander &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</span>
+<span class="co">## $ ethnicity_hispaniclatin   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</span>
+<span class="co">## $ ethnicity_white           &lt;dbl&gt; 1, 0, 1, 0, 1, 1, 1, 0, 1, 0…</span>
+<span class="co">## $ ethnicity_other           &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</span></code></pre>
 <p>For the free text fields, a straightforward way to extract features is counting the total number of characters.</p>
 <pre class="sourceCode r"><code class="sourceCode r">okc_train &lt;-<span class="st"> </span>okc_train <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate</span>(
@@ -638,34 +702,58 @@ okc_train <span class="op">%&gt;%</span>
 <div class="figure" style="text-align: center"><span id="fig:essay-length-distribution"></span>
 <img src="images/modeling-okc-histogram-essay-length-resized.png" alt="Distribution of essay length" width="1500" />
 <p class="caption">
-FIGURE 4.5: Distribution of essay length
+FIGURE 4.6: Distribution of essay length
 </p>
 </div>
+<p>Now that we have a few more features to work with, we can begin running some ML algorithms!</p>
 </div>
 <div id="model-building" class="section level2">
-<h2><span class="header-section-number">4.4</span> Model Building</h2>
+<h2><span class="header-section-number">4.5</span> Model Building</h2>
 <p>Once we have a good grasp on our dataset, we can start building some models. Before we do so, however, we need to come up with a plan to tune and validate our candidate models. Since we are dealing with a binary classification problem, the metrics one can use include accuracy, precision, sensitivity, and area under the receiver operating characteristic (ROC) curve (AUC), among others. The metric you optimize depends on your specific business problem, but for this exercise, we will focus on the AUC.</p>
 <p>It is important that we don’t peek at the testing holdout set until the very end. For tuning and validation, we will perform 10-fold cross validation. The scheme works as follows: We first divide our dataset into 10 approximately equal sized subsets. We take the 2nd to 10th sets together as the training set for an algorithm, and validate the resulting model on the 1st set. Next, we reserve the 2nd set as the validation set, and train the algorithm on the 1st and 3rd to 10th sets. In total, we train ten models and average the performance. If time and resources allow, you can also perform this procedure multiple times with different random partitions of the data. In our case, we will demonstrate how to perform the cross validation once.</p>
 <p>Using the <code>sdf_partition()</code> function, we can create a list of subsets from our <code>okc_train</code> table:</p>
 <pre class="sourceCode r"><code class="sourceCode r">vfolds &lt;-<span class="st"> </span><span class="kw">sdf_partition</span>(
   okc_train,
-  <span class="dt">weights =</span> <span class="kw">set_names</span>(<span class="kw">rep</span>(<span class="fl">0.1</span>, <span class="dv">10</span>), <span class="kw">paste0</span>(<span class="st">&quot;fold&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>))
+  <span class="dt">weights =</span> <span class="kw">set_names</span>(<span class="kw">rep</span>(<span class="fl">0.1</span>, <span class="dv">10</span>), <span class="kw">paste0</span>(<span class="st">&quot;fold&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)),
+  <span class="dt">seed =</span> <span class="dv">42</span>
 )</code></pre>
 <p>We then create our first training/validation split as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r">train_set &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, vfolds[<span class="dv">2</span><span class="op">:</span><span class="dv">10</span>])
 validation_set &lt;-<span class="st"> </span>vfolds[[<span class="dv">1</span>]]</code></pre>
+<p>One item we need to carefully treat here is the scaling of variables. We need to make sure we do not leak any information from the validation set to the training set, so we calculate the mean and standard deviation on the training set only, and apply the same transformation to both sets. Here is how we would handle this for the <code>age</code> variable:</p>
+<pre class="sourceCode r"><code class="sourceCode r">make_scale_age &lt;-<span class="st"> </span><span class="cf">function</span>(training) {
+  scale_values &lt;-<span class="st"> </span>training <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">summarize</span>(
+      <span class="dt">mean_age =</span> <span class="kw">mean</span>(age, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),
+      <span class="dt">sd_age =</span> <span class="kw">sd</span>(age)
+    ) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">collect</span>()
+
+  <span class="cf">function</span>(data) {
+    data <span class="op">%&gt;%</span>
+<span class="st">      </span><span class="kw">mutate</span>(<span class="dt">scaled_age =</span> (age <span class="op">-</span><span class="st"> </span><span class="op">!!</span>scale_values<span class="op">$</span>mean_age) <span class="op">/</span><span class="st"> </span><span class="op">!!</span>scale_values<span class="op">$</span>sd_age)
+  }
+}
+
+scale_age &lt;-<span class="st"> </span><span class="kw">make_scale_age</span>(train_set)
+train_set &lt;-<span class="st"> </span><span class="kw">scale_age</span>(train_set)
+validation_set &lt;-<span class="st"> </span><span class="kw">scale_age</span>(validation_set)</code></pre>
 <p>Logistic regression is often a reasonable starting point for binary classification problems, so let us give it a try. Suppose also that our domain knowledge provides us with an initial set of predictors. We can then fit a model by using the formula interface:</p>
-<pre class="sourceCode r"><code class="sourceCode r">lr &lt;-<span class="st"> </span><span class="kw">ml_logistic_regression</span>(train_set, not_working <span class="op">~</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>drinks <span class="op">+</span><span class="st"> </span>drugs <span class="op">+</span><span class="st"> </span>essay_length)
+<pre class="sourceCode r"><code class="sourceCode r">lr &lt;-<span class="st"> </span><span class="kw">ml_logistic_regression</span>(
+  train_set, not_working <span class="op">~</span><span class="st"> </span>scaled_age <span class="op">+</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>drinks <span class="op">+</span><span class="st"> </span>drugs <span class="op">+</span><span class="st"> </span>essay_length
+)
 lr</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Formula: not_working ~ age + sex + drinks + drugs + essay_length</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Formula: not_working ~ scaled_age + sex + drinks + drugs + essay_length</span>
 <span class="co">## </span>
 <span class="co">## Coefficients:</span>
-<span class="co">##       (Intercept)               age             sex_m   drinks_socially     drinks_rarely      drinks_often </span>
-<span class="co">##      1.674124e+00     -1.359159e-01     -1.913872e-01      3.333511e-01      7.787464e-01      8.154644e-02 </span>
-<span class="co">## drinks_not at all    drinks_missing drinks_very often       drugs_never     drugs_missing   drugs_sometimes </span>
-<span class="co">##      9.376850e-01     -2.369372e-01      3.641265e-01     -3.665337e-01     -5.526731e-01     -2.806046e-01 </span>
+<span class="co">##       (Intercept)        scaled_age             sex_m   drinks_socially </span>
+<span class="co">##     -2.823517e+00     -1.309498e+00     -1.918137e-01      2.235833e-01 </span>
+<span class="co">##     drinks_rarely      drinks_often drinks_not at all    drinks_missing </span>
+<span class="co">##      6.732361e-01      7.572970e-02      8.214072e-01     -4.456326e-01 </span>
+<span class="co">## drinks_very often       drugs_never     drugs_missing   drugs_sometimes </span>
+<span class="co">##      8.032052e-02     -1.712702e-01     -3.995422e-01     -7.483491e-02 </span>
 <span class="co">##      essay_length </span>
-<span class="co">##      3.474749e-05 </span></code></pre>
+<span class="co">##      3.664964e-05 </span></code></pre>
 <p>To obtain a summary of performance metrics on the validation set, we can use the <code>ml_evaluate()</code> function.</p>
 <pre class="sourceCode r"><code class="sourceCode r">validation_summary &lt;-<span class="st"> </span><span class="kw">ml_evaluate</span>(lr, validation_set)</code></pre>
 <p>You can print <code>validation_summary</code> to see the available metrics</p>
@@ -699,7 +787,7 @@ lr</code></pre>
 <div class="figure" style="text-align: center"><span id="fig:roc1"></span>
 <img src="images/modeling-okc-roc1-resized.png" alt="ROC curve for the logistic regression model" width="1500" />
 <p class="caption">
-FIGURE 4.6: ROC curve for the logistic regression model
+FIGURE 4.7: ROC curve for the logistic regression model
 </p>
 </div>
 <p>Recall that the ROC curve plots the true positive rate (sensitivity) against the false positive rate (1 - specificity) for varying values of the classification threshold. In practice, the business problem helps to determine where on the curve one sets the threshold for classification. The AUC is a summary measure for determining the quality of a model, and we can compute it by calling the <code>area_under_roc()</code> function.</p>
@@ -710,7 +798,14 @@ FIGURE 4.6: ROC curve for the logistic regression model
 <pre class="sourceCode r"><code class="sourceCode r">cv_results &lt;-<span class="st"> </span><span class="kw">map_df</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="cf">function</span>(v) {
   train_set &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, vfolds[<span class="kw">setdiff</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, v)])
   validation_set &lt;-<span class="st"> </span>vfolds[[v]]
-  model &lt;-<span class="st"> </span><span class="kw">ml_logistic_regression</span>(train_set, not_working <span class="op">~</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>drinks <span class="op">+</span><span class="st"> </span>drugs <span class="op">+</span><span class="st"> </span>essay_length)
+  
+  scale_age &lt;-<span class="st"> </span><span class="kw">make_scale_age</span>(train_set)
+  train_set &lt;-<span class="st"> </span><span class="kw">scale_age</span>(train_set)
+  validation_set &lt;-<span class="st"> </span><span class="kw">scale_age</span>(validation_set)
+  
+  model &lt;-<span class="st"> </span><span class="kw">ml_logistic_regression</span>(
+    train_set, not_working <span class="op">~</span><span class="st"> </span>scaled_age <span class="op">+</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>drinks <span class="op">+</span><span class="st"> </span>drugs <span class="op">+</span><span class="st"> </span>essay_length
+  )
   s &lt;-<span class="st"> </span><span class="kw">ml_evaluate</span>(model, validation_set)
   roc_df &lt;-<span class="st"> </span>s<span class="op">$</span><span class="kw">roc</span>() <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">    </span><span class="kw">collect</span>()
@@ -726,344 +821,138 @@ FIGURE 4.6: ROC curve for the logistic regression model
 <div class="figure" style="text-align: center"><span id="fig:roc2"></span>
 <img src="images/modeling-okc-roc2-resized.png" alt="Cross-validated ROC curves for the logistic regression model" width="1500" />
 <p class="caption">
-FIGURE 4.7: Cross-validated ROC curves for the logistic regression model
+FIGURE 4.8: Cross-validated ROC curves for the logistic regression model
 </p>
 </div>
 <p>and we can obtain the average AUC metric:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">mean</span>(cv_results<span class="op">$</span>auc)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## [1] 0.7703891</span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## [1] 0.7715102</span></code></pre>
 <div id="logistic-regression-as-a-generalized-linear-regression" class="section level3">
-<h3><span class="header-section-number">4.4.1</span> Logistic Regression as a Generalized Linear Regression</h3>
+<h3><span class="header-section-number">4.5.1</span> Logistic Regression as a Generalized Linear Regression</h3>
 <p>In Spark ML, you can also fit a logistic regression via the generalized linear regression interface by specifying <code>family = "binomial"</code>. Because the result is a regression model, the <code>ml_predict()</code> method does not give class probabilities. However, this interface may be of interest to those who are looking for generalized linear model (GLM) diagnostics, including confidence intervals for coefficient estimates.</p>
 <pre class="sourceCode r"><code class="sourceCode r">glr &lt;-<span class="st"> </span><span class="kw">ml_generalized_linear_regression</span>(
   train_set, 
-  not_working <span class="op">~</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>drinks <span class="op">+</span><span class="st"> </span>drugs, 
+  not_working <span class="op">~</span><span class="st"> </span>scaled_age <span class="op">+</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>drinks <span class="op">+</span><span class="st"> </span>drugs, 
   <span class="dt">family =</span> <span class="st">&quot;binomial&quot;</span>
 )
 
-<span class="kw">tidy</span>(glr)</code></pre>
-<pre><code>## # A tibble: 13 x 5
-##    term                estimate  std.error statistic  p.value
-##    &lt;chr&gt;                  &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-##  1 (Intercept)        2.08      0.262          7.97  1.78e-15
-##  2 age               -0.139     0.00340      -40.9   0.      
-##  3 sex_m             -0.204     0.0352        -5.81  6.39e- 9
-##  4 drinks_socially   -0.0777    0.211         -0.369 7.12e- 1
-##  5 drinks_rarely      0.327     0.216          1.52  1.29e- 1
-##  6 drinks_often      -0.277     0.218         -1.27  2.04e- 1
-##  7 drinks_not at all  0.554     0.220          2.52  1.18e- 2
-##  8 drinks_missing    -0.654     0.231         -2.83  4.67e- 3
-##  9 drinks_very often -0.0676    0.268         -0.252 8.01e- 1
-## 10 drugs_never       -0.259     0.155         -1.67  9.43e- 2
-## 11 drugs_missing     -0.515     0.158         -3.25  1.14e- 3
-## 12 drugs_sometimes   -0.201     0.158         -1.27  2.03e- 1
-## 13 essay_length       0.0000355 0.00000827     4.29  1.75e- 5</code></pre>
+tidy_glr &lt;-<span class="st"> </span><span class="kw">tidy</span>(glr)</code></pre>
 <p>We can extract the coefficient estimates into a tidy data frame, which we can then process further, for example, to create a coefficient plot.</p>
 <div class="figure" style="text-align: center"><span id="fig:glr-coefs"></span>
 <img src="images/modeling-okc-glr-coefs-resized.png" alt="Coefficient estimates with 95% confidence intervals" width="1500" />
 <p class="caption">
-FIGURE 4.8: Coefficient estimates with 95% confidence intervals
+FIGURE 4.9: Coefficient estimates with 95% confidence intervals
 </p>
 </div>
-<p><strong>Note:</strong> Both <code>ml_logistic_regression()</code> and <code>ml_linear_regression()</code> support elastic net regularization <span class="citation">(Zou and Hastie <a href="#ref-zou2005regularization">2005</a>)</span> through the <code>reg_param</code> and <code>elastic_net_param</code> parameters. <code>reg_param</code> corresponds to <span class="math inline">\(lambda\)</span> whereas <code>elastic_net_param</code> correspond to <span class="math inline">\(alpha\)</span>. <code>ml_generalized_linear_regression()</code> supports only <code>reg_param</code>.</p>
+<p><strong>Note:</strong> Both <code>ml_logistic_regression()</code> and <code>ml_linear_regression()</code> support elastic net regularization <span class="citation">(Zou and Hastie <a href="#ref-zou2005regularization">2005</a>)</span> through the <code>reg_param</code> and <code>elastic_net_param</code> parameters. <code>reg_param</code> corresponds to <span class="math inline">\(\lambda\)</span> whereas <code>elastic_net_param</code> correspond to <span class="math inline">\(\alpha\)</span>. <code>ml_generalized_linear_regression()</code> supports only <code>reg_param</code>.</p>
 </div>
-</div>
-<div id="more-machine-learning-algorithms" class="section level2">
-<h2><span class="header-section-number">4.5</span> More Machine Learning Algorithms</h2>
-<p>Beyond linear models, Spark ML supports many of the standard ML algorithms with the mechanism demonstrated above, you can try different algorithms and hyperparameters for your problem. The interfaces to access these functionalities are largely identical, so it is easy to experiment with them. For example, to fit a neural network model we can run:</p>
+<div id="more-machine-learning-algorithms" class="section level3">
+<h3><span class="header-section-number">4.5.2</span> More Machine Learning Algorithms</h3>
+<p>Beyond linear models, Spark ML supports many of the standard ML algorithms with the mechanism demonstrated above, you can try different algorithms and hyperparameters for your problem. You can find a list of supported ML related functions in the <a href="appendix.html#ml-functionlist">Appendix</a>. The interfaces to access these functionalities are largely identical, so it is easy to experiment with them. For example, to fit a neural network model we can run:</p>
 <pre class="sourceCode r"><code class="sourceCode r">nn &lt;-<span class="st"> </span><span class="kw">ml_multilayer_perceptron_classifier</span>(
   train_set,
-  not_working <span class="op">~</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>drinks <span class="op">+</span><span class="st"> </span>drugs <span class="op">+</span><span class="st"> </span>essay_length, 
-  <span class="dt">layers =</span> <span class="kw">c</span>(<span class="dv">12</span>, <span class="dv">32</span>, <span class="dv">32</span>, <span class="dv">2</span>)
+  not_working <span class="op">~</span><span class="st"> </span>scaled_age <span class="op">+</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>drinks <span class="op">+</span><span class="st"> </span>drugs <span class="op">+</span><span class="st"> </span>essay_length, 
+  <span class="dt">layers =</span> <span class="kw">c</span>(<span class="dv">12</span>, <span class="dv">64</span>, <span class="dv">64</span>, <span class="dv">2</span>)
 )</code></pre>
-<p>This gives us a feedforward neural network model with two hidden layers of 32 nodes each. Note that you have to specify the correct values for the input and output layers in the <code>layers</code> argument. We can obtain predictions on a validation set using <code>ml_predict()</code></p>
+<p>This gives us a feedforward neural network model with two hidden layers of 64 nodes each. Note that you have to specify the correct values for the input and output layers in the <code>layers</code> argument. We can obtain predictions on a validation set using <code>ml_predict()</code></p>
 <pre class="sourceCode r"><code class="sourceCode r">predictions &lt;-<span class="st"> </span><span class="kw">ml_predict</span>(nn, validation_set)</code></pre>
 <p>then compute the AUC via <code>ml_binary_classification_evaluator()</code></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ml_binary_classification_evaluator</span>(predictions)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## [1] 0.7337616</span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## [1] 0.7812709</span></code></pre>
+<p>Up until now, we have not look into the unstructured text in the essay fields apart from doing simple character counts. In the next section, we will explore the textual data in more depth.</p>
 </div>
-<div id="functionlist" class="section level2">
-<h2><span class="header-section-number">4.6</span> List of ML Functions</h2>
-<p>The following table exhibits the ML algorithms supported in sparklyr:</p>
-<div id="classification" class="section level3">
-<h3><span class="header-section-number">4.6.1</span> Classification</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Algorithm</th>
-<th>Function</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Decision Trees</td>
-<td>ml_decision_tree_classifier()</td>
-</tr>
-<tr class="even">
-<td>Gradient-Boosted Trees</td>
-<td>ml_gbt_classifier()</td>
-</tr>
-<tr class="odd">
-<td>Linear Support Vector Machines</td>
-<td>ml_linear_svc()</td>
-</tr>
-<tr class="even">
-<td>Logistic Regression</td>
-<td>ml_logistic_regression()</td>
-</tr>
-<tr class="odd">
-<td>Multilayer Perceptron</td>
-<td>ml_multilayer_perceptron_classifier()</td>
-</tr>
-<tr class="even">
-<td>Naive-Bayes</td>
-<td>ml_naive_bayes()</td>
-</tr>
-<tr class="odd">
-<td>One vs Rest</td>
-<td>ml_one_vs_rest()</td>
-</tr>
-<tr class="even">
-<td>Random Forests</td>
-<td>ml_random_forest_classifier()</td>
-</tr>
-</tbody>
-</table>
 </div>
-<div id="regression" class="section level3">
-<h3><span class="header-section-number">4.6.2</span> Regression</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Algorithm</th>
-<th>Function</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Accelerated Failure Time Survival Regression</td>
-<td>ml_aft_survival_regression()</td>
-</tr>
-<tr class="even">
-<td>Decision Trees</td>
-<td>ml_decision_tree_regressor()</td>
-</tr>
-<tr class="odd">
-<td>Generalized Linear Regression</td>
-<td>ml_generalized_linear_regression()</td>
-</tr>
-<tr class="even">
-<td>Gradient-Boosted Trees</td>
-<td>ml_gbt_regressor()</td>
-</tr>
-<tr class="odd">
-<td>Isotonic Regression</td>
-<td>ml_isotonic_regression()</td>
-</tr>
-<tr class="even">
-<td>Linear Regression</td>
-<td>ml_linear_regression()</td>
-</tr>
-</tbody>
-</table>
+<div id="working-with-textual-data" class="section level2">
+<h2><span class="header-section-number">4.6</span> Working with Textual Data</h2>
+<p>Along with speech, images, and videos, textual data is one of the components of the “big data” explosion. Prior to modern text mining techniques and the computational resources to support them, companies had little use for freeform text fields. Today, text is considered a rich source of insights, and can be found anywhere from physician’s notes to customer complaints. In this section, we show some basic text analysis capabilities of sparklyr. If you would like more background on text mining techniques, we recommend checking out “Text Mining with R: A Tidy Approach” <span class="citation">(<span class="citeproc-not-found" data-reference-id="silge2017text"><strong>???</strong></span>)</span>.</p>
+<p>In this section, we show how to perform a basic topic modeling task on the essay data in the OKCupid dataset. Our plan is to concatenate the essay fields (of which there are 10) of each profile, and regard each profile as a document, then attempt to discover topics using Latent Dirichlet Allocation (LDA).</p>
+<div id="data-prep" class="section level3">
+<h3><span class="header-section-number">4.6.1</span> Data Prep</h3>
+<p>As always, before analyzing a dataset (or a subset of one), we want to take a quick look to orient ourselves.</p>
+<pre class="sourceCode r"><code class="sourceCode r">essay_cols &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;essay&quot;</span>, <span class="dv">0</span><span class="op">:</span><span class="dv">9</span>)
+essays &lt;-<span class="st"> </span>okc <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">select</span>(<span class="op">!!</span>essay_cols)
+essays <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">glimpse</span>()</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Observations: ??</span>
+<span class="co">## Variables: 10</span>
+<span class="co">## Database: spark_connection</span>
+<span class="co">## $ essay0 &lt;chr&gt; &quot;about me:&lt;br /&gt;\n&lt;br /&gt;\ni would love to think that…</span>
+<span class="co">## $ essay1 &lt;chr&gt; &quot;currently working as an international agent for a f…</span>
+<span class="co">## $ essay2 &lt;chr&gt; &quot;making people laugh.&lt;br /&gt;\nranting about a good sa…</span>
+<span class="co">## $ essay3 &lt;chr&gt; &quot;the way i look. i am a six foot half asian, half ca…</span>
+<span class="co">## $ essay4 &lt;chr&gt; &quot;books:&lt;br /&gt;\nabsurdistan, the republic, of mice an…</span>
+<span class="co">## $ essay5 &lt;chr&gt; &quot;food.&lt;br /&gt;\nwater.&lt;br /&gt;\ncell phone.&lt;br /&gt;\nshelt…</span>
+<span class="co">## $ essay6 &lt;chr&gt; &quot;duality and humorous things&quot;, &quot;missing&quot;, &quot;missing&quot;,…</span>
+<span class="co">## $ essay7 &lt;chr&gt; &quot;trying to find someone to hang out with. i am down …</span>
+<span class="co">## $ essay8 &lt;chr&gt; &quot;i am new to california and looking for someone to w…</span>
+<span class="co">## $ essay9 &lt;chr&gt; &quot;you want to be swept off your feet!&lt;br /&gt;\nyou are …</span></code></pre>
+<p>Just from this output, we see that</p>
+<ul>
+<li>The text contain HTML tags,</li>
+<li>The text contains the newline <code>\n</code> character, and</li>
+<li>There are missing values in the data.</li>
+</ul>
+<p>As you analyze your own text data, you will quickly come across and become familiar with the peculiarities of the specific dataset. Preoprocessing text data, like with tabular numerical data, is an iterative process, and after a few tries we have the following transformations:</p>
+<pre class="sourceCode r"><code class="sourceCode r">essays &lt;-<span class="st"> </span>essays <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="co"># Replace `missing` with empty string.</span>
+<span class="st">  </span><span class="kw">mutate_all</span>(<span class="kw">list</span>(<span class="op">~</span><span class="st"> </span><span class="kw">ifelse</span>(. <span class="op">==</span><span class="st"> &quot;missing&quot;</span>, <span class="st">&quot;&quot;</span>, .))) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="co"># Concatenate the columns.</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">essay =</span> <span class="kw">paste</span>(<span class="op">!!!</span><span class="kw">syms</span>(essay_cols))) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="co"># Replace URLs with the &quot;URL&quot; string</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">words =</span> <span class="kw">regexp_replace</span>(essay, <span class="op">!!</span>re2, <span class="st">&quot;URL&quot;</span>)) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="co"># Remove miscellaneous characters and HTML tags</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">words =</span> <span class="kw">regexp_replace</span>(words, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">n|&amp;nbsp;|&lt;[^&gt;]*&gt;|[^A-Za-z|&#39;]&quot;</span>, <span class="st">&quot; &quot;</span>))</code></pre>
+<p>Note here we are using <code>regex_replace()</code>, which is a Spark SQL function.</p>
 </div>
-<div id="clustering" class="section level3">
-<h3><span class="header-section-number">4.6.3</span> Clustering</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Algorithm</th>
-<th>Function</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Bisecting K-Means Clustering</td>
-<td>ml_bisecting_kmeans()</td>
-</tr>
-<tr class="even">
-<td>Gaussian Mixture Clustering</td>
-<td>ml_gaussian_mixture()</td>
-</tr>
-<tr class="odd">
-<td>K-Means Clustering</td>
-<td>ml_kmeans()</td>
-</tr>
-<tr class="even">
-<td>Latent Dirichlet Allocation</td>
-<td>ml_lda()</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="recommendation" class="section level3">
-<h3><span class="header-section-number">4.6.4</span> Recommendation</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Algorithm</th>
-<th>Function</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Alternating Least Squares Factorization</td>
-<td>ml_als()</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="frequent-pattern-mining" class="section level3">
-<h3><span class="header-section-number">4.6.5</span> Frequent Pattern Mining</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Algorithm</th>
-<th>Function</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>FPGrowth</td>
-<td>ml_fpgrowth()</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="feature-transformers" class="section level3">
-<h3><span class="header-section-number">4.6.6</span> Feature Transformers</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Transformer</th>
-<th>Function</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Binarizer</td>
-<td>ft_binarizer()</td>
-</tr>
-<tr class="even">
-<td>Bucketizer</td>
-<td>ft_bucketizer()</td>
-</tr>
-<tr class="odd">
-<td>Chi-Squared Feature Selector</td>
-<td>ft_chisq_selector()</td>
-</tr>
-<tr class="even">
-<td>Vocabulary from Document Collections</td>
-<td>ft_count_vectorizer()</td>
-</tr>
-<tr class="odd">
-<td>Discrete Cosine Transform</td>
-<td>ft_discrete_cosine_transform()</td>
-</tr>
-<tr class="even">
-<td>Transformation using dplyr</td>
-<td>ft_dplyr_transformer()</td>
-</tr>
-<tr class="odd">
-<td>Hadamard Product</td>
-<td>ft_elementwise_product()</td>
-</tr>
-<tr class="even">
-<td>Feature Hasher</td>
-<td>ft_feature_hasher()</td>
-</tr>
-<tr class="odd">
-<td>Term Frequencies using Hashing</td>
-<td>export(ft_hashing_tf)</td>
-</tr>
-<tr class="even">
-<td>Inverse Document Frequency</td>
-<td>ft_idf()</td>
-</tr>
-<tr class="odd">
-<td>Imputation for Missing Values</td>
-<td>export(ft_imputer)</td>
-</tr>
-<tr class="even">
-<td>Index to String</td>
-<td>ft_index_to_string()</td>
-</tr>
-<tr class="odd">
-<td>Feature Interaction Transform</td>
-<td>ft_interaction()</td>
-</tr>
-<tr class="even">
-<td>Rescale to [-1, 1] Range</td>
-<td>ft_max_abs_scaler()</td>
-</tr>
-<tr class="odd">
-<td>Rescale to [min, max] Range</td>
-<td>ft_min_max_scaler()</td>
-</tr>
-<tr class="even">
-<td>Locality Sensitive Hashing</td>
-<td>ft_minhash_lsh()</td>
-</tr>
-<tr class="odd">
-<td>Converts to n-grams</td>
-<td>ft_ngram()</td>
-</tr>
-<tr class="even">
-<td>Normalize using the given P-Norm</td>
-<td>ft_normalizer()</td>
-</tr>
-<tr class="odd">
-<td>One-Hot Encoding</td>
-<td>ft_one_hot_encoder()</td>
-</tr>
-<tr class="even">
-<td>Feature Expansion in Polynomial Space</td>
-<td>ft_polynomial_expansion()</td>
-</tr>
-<tr class="odd">
-<td>Maps to Binned Categorical Features</td>
-<td>ft_quantile_discretizer()</td>
-</tr>
-<tr class="even">
-<td>SQL Transformation</td>
-<td>ft_sql_transformer()</td>
-</tr>
-<tr class="odd">
-<td>Standardizes Features using Corrected STD</td>
-<td>ft_standard_scaler()</td>
-</tr>
-<tr class="even">
-<td>Filters out Stop Words</td>
-<td>ft_stop_words_remover()</td>
-</tr>
-<tr class="odd">
-<td>Map to Label Indices</td>
-<td>ft_string_indexer()</td>
-</tr>
-<tr class="even">
-<td>Splits by White Spaces</td>
-<td>ft_tokenizer()</td>
-</tr>
-<tr class="odd">
-<td>Combine Vectors to Row Vector</td>
-<td>ft_vector_assembler()</td>
-</tr>
-<tr class="even">
-<td>Indexing Categorical Feature</td>
-<td>ft_vector_indexer()</td>
-</tr>
-<tr class="odd">
-<td>Subarray of the Original Feature</td>
-<td>ft_vector_slicer()</td>
-</tr>
-<tr class="even">
-<td>Transform Word into Code</td>
-<td>ft_word2vec()</td>
-</tr>
-</tbody>
-</table>
+<div id="topic-modeling" class="section level3">
+<h3><span class="header-section-number">4.6.2</span> Topic Modeling</h3>
+<p>LDA is a type of topic model for identifying abstract “topics” in a set of documents. It is an unsupervised algorithm in that we do not provide any labels, or topics, for the input documents. LDA posits that each document is a mixture of topics, and each topic is a mixture of words. During training, it attempts to estimate both of these simultaneously. A typical use case for topic models involves categorizing many documents, where the large number of documents renders manually approaches infeasible. The application domains range from GitHub issues to legal documents.</p>
+<p>Once we have a reasonably clean dataset following the workflow in the previous section, we can fit an LDA model with <code>ml_lda()</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">stop_words &lt;-<span class="st"> </span><span class="kw">ml_default_stop_words</span>(sc) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">c</span>(
+    <span class="st">&quot;like&quot;</span>, <span class="st">&quot;love&quot;</span>, <span class="st">&quot;good&quot;</span>, <span class="st">&quot;music&quot;</span>, <span class="st">&quot;friends&quot;</span>, <span class="st">&quot;people&quot;</span>, <span class="st">&quot;life&quot;</span>,
+    <span class="st">&quot;time&quot;</span>, <span class="st">&quot;things&quot;</span>, <span class="st">&quot;food&quot;</span>, <span class="st">&quot;really&quot;</span>, <span class="st">&quot;also&quot;</span>, <span class="st">&quot;movies&quot;</span>
+  )
 
+lda_model &lt;-<span class="st">  </span><span class="kw">ml_lda</span>(essays, <span class="op">~</span><span class="st"> </span>words, <span class="dt">k =</span> <span class="dv">6</span>, <span class="dt">max_iter =</span> <span class="dv">1</span>, <span class="dt">min_token_length =</span> <span class="dv">4</span>, <span class="dt">stop_words =</span> stop_words, <span class="dt">min_df =</span> <span class="dv">5</span>)</code></pre>
+<p>We are also including a <code>stop_words</code> vector consisting of commonly used English words and common words in our dataset, which tells the algorithm to ignore them. After the model is fit, we can use the <code>tidy()</code> function to extract the associated betas, which are the per-topic-per-word probabilities, from the model.</p>
+<pre class="sourceCode r"><code class="sourceCode r">betas &lt;-<span class="st"> </span><span class="kw">tidy</span>(lda_model)
+betas</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## # A tibble: 256,992 x 3</span>
+<span class="co">##    topic term      beta</span>
+<span class="co">##    &lt;int&gt; &lt;chr&gt;    &lt;dbl&gt;</span>
+<span class="co">##  1     0 know      303.</span>
+<span class="co">##  2     0 work      250.</span>
+<span class="co">##  3     0 want      367.</span>
+<span class="co">##  4     0 books     211.</span>
+<span class="co">##  5     0 family    213.</span>
+<span class="co">##  6     0 think     291.</span>
+<span class="co">##  7     0 going     160.</span>
+<span class="co">##  8     0 anything  292.</span>
+<span class="co">##  9     0 enjoy     145.</span>
+<span class="co">## 10     0 much      272.</span>
+<span class="co">## # … with 256,982 more rows</span></code></pre>
+<p>We can then visualize this output by looking at word probabilities by topic. In Fig. N we show the results at 1 iteration and 100 iterations.</p>
+<div class="figure" style="text-align: center"><span id="fig:betas-topics"></span>
+<img src="images/modeling-okc-betas-topics-1-resized.png" alt="The terms that are most common within each topic, 1 iteration" width="1500" />
+<p class="caption">
+FIGURE 4.10: The terms that are most common within each topic, 1 iteration
+</p>
 </div>
+<div class="figure" style="text-align: center"><span id="fig:betas-topics-2"></span>
+<img src="images/modeling-okc-betas-topics-100-resized.png" alt="The terms that are most common within each topic, 100 iterations" width="1500" />
+<p class="caption">
+FIGURE 4.11: The terms that are most common within each topic, 100 iterations
+</p>
+</div>
+<p>We can see that, at 100 iterations, we can see “topics” starting to emerge!</p>
+</div>
+</div>
+<div id="conclusion" class="section level2">
+<h2><span class="header-section-number">4.7</span> Conclusion</h2>
+<p>In this chapter, we cover the basics of building preditive models with sparklyr. You should now have the knowledge to begin applying machine learning to your own large datasets. In the next chapter on pipelines and deployment, we will look at ways to make your workflow more flexible for the advanced use cases.</p>
+
 </div>
 </div>
 <h3> References</h3>
@@ -1081,7 +970,8 @@ FIGURE 4.8: Coefficient estimates with 95% confidence intervals
 <div class="footnotes">
 <hr />
 <ol start="1">
-<li id="fn1"><p><a href="https://github.com/rudeboybert/JSE_OkCupid">https://github.com/rudeboybert/JSE_OkCupid</a><a href="modeling.html#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>We acknowledge that the terms here may mean different things to different people, and that there is a continuum between the two approaches, however they are defined.<a href="modeling.html#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>They are implemented using S3, see <a href="https://adv-r.hadley.nz/s3.html">https://adv-r.hadley.nz/s3.html</a> for a discussion.<a href="modeling.html#fnref2" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
             </section>
@@ -1090,7 +980,7 @@ FIGURE 4.8: Coefficient estimates with 95% confidence intervals
         </div>
       </div>
 <a href="analysis.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="clusters.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="pipelines.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

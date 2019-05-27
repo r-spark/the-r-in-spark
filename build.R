@@ -10,10 +10,14 @@ chapters <- list(
   "starting",
   "analysis",
   "modeling",
+  "pipelines",
   "clusters",
   "connections",
+  "data",
   "tuning",
   "distributed-r",
+  "streaming",
+  "contributing",
   "appendix"
 )
 chapters_pattern <- paste(chapters, collapse = "|")

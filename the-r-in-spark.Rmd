@@ -1,0 +1,617 @@
+--- 
+title: "Mastering Apache Spark with R"
+author: "Javier Luraschi, Kevin Kuo, Edgar Ruiz"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+github-repo: javierluraschi/the-r-in-spark
+description: "The complete guide to large-scale analysis and modeling."
+---
+
+# Welcome {-}
+
+Placeholder
+
+
+
+<!--chapter:end:index.rmd-->
+
+
+# Introduction {#intro}
+
+Placeholder
+
+
+## Information {#intro-background}
+## Hadoop {#intro-hadoop}
+## Spark {#intro-spark}
+## R {#intro-r}
+## sparklyr {#intro-sparklyr}
+## Recap {#intro-recap}
+
+<!--chapter:end:intro.Rmd-->
+
+
+# Getting Started {#starting}
+
+Placeholder
+
+
+## Prerequisites {#starting-prerequisites}
+## Installing sparklyr {#starting-install-sparklyr}
+## Installing Spark {#starting-installing-spark}
+## Connecting to Spark {#starting-connect-to-spark}
+## Using Spark {#starting-sparklyr-hello-world}
+### Web Interface {#starting-spark-web-interface}
+### Analysis {#starting-analysis}
+### Modeling {#starting-modeling}
+### Data {#starting-data}
+### Extensions {#starting-extensions}
+### Distributed R {#starting-distributed-r}
+### Streaming {#starting-streaming}
+### Logs {#starting-logs}
+## Disconnecting {#starting-disconnecting}
+## Using RStudio {#starting-using-spark-from-rstudio}
+## Resources {#starting-resources}
+## Recap {#starting-recap}
+
+<!--chapter:end:starting.Rmd-->
+
+
+# Analysis {#analysis}
+
+Placeholder
+
+
+## Search for an answer
+## R as an interface to Spark
+## Exercise
+## Import / Access
+## Wrangle
+### Correlations
+## Visualize
+### Recommended approach
+### Simple plots
+### Histograms
+#### Using dbplot
+### Scatter plots
+## Model
+### Models during analysis
+### Cache model data
+## Communicate
+### Analysis versus Production work
+### Using R Markdown documents
+### Reporting results
+### Presentation decks
+## Recap
+
+<!--chapter:end:analysis.Rmd-->
+
+
+# Modeling {#modeling}
+
+Placeholder
+
+
+## Formula: am ~ .
+## 
+## Coefficients:
+##  (Intercept)          mpg          cyl         disp           hp         drat 
+##  -0.68057477   1.73068529  -6.50306685  -0.11106774   0.01566047  33.02750111 
+##           wt         qsec           vs         gear         carb 
+## -20.68143251  -9.52647833  -6.81113196  29.16524289   3.33862282 
+## Overview
+## The Data
+## Exploratory Data Analysis
+## Observations: ??
+## Variables: 31
+## Database: spark_connection
+## $ age         <int> 22, 35, 38, 23, 29, 29, 32, 31, 24, 37, 35…
+## $ body_type   <chr> "a little extra", "average", "thin", "thin…
+## $ diet        <chr> "strictly anything", "mostly other", "anyt…
+## $ drinks      <chr> "socially", "often", "socially", "socially…
+## $ drugs       <chr> "never", "sometimes", "missing", "missing"…
+## $ education   <chr> "working on college/university", "working …
+## $ essay0      <chr> "about me:<br />\n<br />\ni would love to …
+## $ essay1      <chr> "currently working as an international age…
+## $ essay2      <chr> "making people laugh.<br />\nranting about…
+## $ essay3      <chr> "the way i look. i am a six foot half asia…
+## $ essay4      <chr> "books:<br />\nabsurdistan, the republic, …
+## $ essay5      <chr> "food.<br />\nwater.<br />\ncell phone.<br…
+## $ essay6      <chr> "duality and humorous things", "missing", …
+## $ essay7      <chr> "trying to find someone to hang out with. …
+## $ essay8      <chr> "i am new to california and looking for so…
+## $ essay9      <chr> "you want to be swept off your feet!<br />…
+## $ ethnicity   <chr> "asian, white", "white", "missing", "white…
+## $ height      <dbl> 75, 70, 68, 71, 66, 67, 65, 65, 67, 65, 70…
+## $ income      <dbl> NaN, 80000, NaN, 20000, NaN, NaN, NaN, NaN…
+## $ job         <chr> "transportation", "hospitality / travel", …
+## $ last_online <chr> "2012-06-28-20-30", "2012-06-29-21-41", "2…
+## $ location    <chr> "south san francisco, california", "oaklan…
+## $ offspring   <chr> "doesn&rsquo;t have kids, but might want t…
+## $ orientation <chr> "straight", "straight", "straight", "strai…
+## $ pets        <chr> "likes dogs and likes cats", "likes dogs a…
+## $ religion    <chr> "agnosticism and very serious about it", "…
+## $ sex         <chr> "m", "m", "m", "m", "m", "m", "f", "f", "f…
+## $ sign        <chr> "gemini", "cancer", "pisces but it doesn&r…
+## $ smokes      <chr> "sometimes", "no", "no", "no", "no", "no",…
+## $ speaks      <chr> "english", "english (fluently), spanish (p…
+## $ status      <chr> "single", "single", "available", "single",…
+## # Source: spark<?> [?? x 2]
+##   not_working     n
+##         <dbl> <dbl>
+## 1           0 54541
+## 2           1  5405
+## # Source: spark<?> [?? x 3]
+##   not_working     n   frac
+##         <dbl> <dbl>  <dbl>
+## 1           0 43785 0.910 
+## 2           1  4317 0.0897
+## # Source: spark<?> [?? x 3]
+##   summary age                income            
+##   <chr>   <chr>              <chr>             
+## 1 count   48102              9193              
+## 2 mean    32.336534863415245 104968.99815076689
+## 3 stddev  9.43908920033797   202235.2291773537 
+## 4 min     18                 20000.0           
+## 5 max     110                1000000.0   
+## # A tibble: 10 x 4
+##    religion     count   prop      se
+##    <chr>        <dbl>  <dbl>   <dbl>
+##  1 judaism       2520 0.0794 0.00539
+##  2 atheism       5624 0.118  0.00436
+##  3 christianity  4671 0.120  0.00480
+##  4 hinduism       358 0.101  0.0159 
+##  5 islam          115 0.191  0.0367 
+##  6 agnosticism   7078 0.0958 0.00346
+##  7 other         6240 0.0841 0.00346
+##  8 missing      16152 0.0719 0.002  
+##  9 buddhism      1575 0.0851 0.007  
+## 10 catholicism   3769 0.0886 0.00458
+## # A tibble: 7 x 5
+##   drinks_drugs missing never often sometimes
+##   <chr>          <dbl> <dbl> <dbl>     <dbl>
+## 1 very often        54   144    44       137
+## 2 socially        8221 21066   126      4106
+## 3 not at all       146  2371    15       109
+## 4 desperately       72    89    23        74
+## 5 often           1049  1718    69      1271
+## 6 missing         1121  1226    10        59
+## 7 rarely           613  3689    35       445
+## Feature Engineering
+## # A tibble: 1 x 2
+##   mean_age sd_age
+##      <dbl>  <dbl>
+## 1     32.3   9.44
+## # Source: spark<?> [?? x 2]
+##    ethnicity                                     n
+##    <chr>                                     <dbl>
+##  1 hispanic / latin, white                    1051
+##  2 black, pacific islander, hispanic / latin     2
+##  3 asian, black, pacific islander                5
+##  4 black, native american, white                91
+##  5 middle eastern, white, other                 34
+##  6 asian, other                                 78
+##  7 asian, black, white                          12
+##  8 asian, hispanic / latin, white, other         7
+##  9 middle eastern, pacific islander              1
+## 10 indian, hispanic / latin                      5
+## # … with more rows
+## Observations: ??
+## Variables: 9
+## Database: spark_connection
+## $ ethnicity_asian           <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ ethnicity_middleeastern   <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ ethnicity_black           <dbl> 0, 1, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ ethnicity_nativeamerican  <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ ethnicity_indian          <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ ethnicity_pacificislander <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ ethnicity_hispaniclatin   <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ ethnicity_white           <dbl> 1, 0, 1, 0, 1, 1, 1, 0, 1, 0…
+## $ ethnicity_other           <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## Model Building
+## Formula: not_working ~ scaled_age + sex + drinks + drugs + essay_length
+## 
+## Coefficients:
+##       (Intercept)        scaled_age             sex_m   drinks_socially 
+##     -2.823517e+00     -1.309498e+00     -1.918137e-01      2.235833e-01 
+##     drinks_rarely      drinks_often drinks_not at all    drinks_missing 
+##      6.732361e-01      7.572970e-02      8.214072e-01     -4.456326e-01 
+## drinks_very often       drugs_never     drugs_missing   drugs_sometimes 
+##      8.032052e-02     -1.712702e-01     -3.995422e-01     -7.483491e-02 
+##      essay_length 
+##      3.664964e-05 
+## BinaryLogisticRegressionSummaryImpl 
+##  Access the following via `$` or `ml_summary()`. 
+##  - features_col() 
+##  - label_col() 
+##  - predictions() 
+##  - probability_col() 
+##  - area_under_roc() 
+##  - f_measure_by_threshold() 
+##  - pr() 
+##  - precision_by_threshold() 
+##  - recall_by_threshold() 
+##  - roc() 
+##  - prediction_col() 
+##  - accuracy() 
+##  - f_measure_by_label() 
+##  - false_positive_rate_by_label() 
+##  - labels() 
+##  - precision_by_label() 
+##  - recall_by_label() 
+##  - true_positive_rate_by_label() 
+##  - weighted_f_measure() 
+##  - weighted_false_positive_rate() 
+##  - weighted_precision() 
+##  - weighted_recall() 
+##  - weighted_true_positive_rate() 
+## [1] 0.7872754
+## [1] 0.7715102
+### Logistic Regression as a Generalized Linear Regression
+### More Machine Learning Algorithms
+## [1] 0.7812709
+## Working with Textual Data
+### Data Prep
+## Observations: ??
+## Variables: 10
+## Database: spark_connection
+## $ essay0 <chr> "about me:<br />\n<br />\ni would love to think that…
+## $ essay1 <chr> "currently working as an international agent for a f…
+## $ essay2 <chr> "making people laugh.<br />\nranting about a good sa…
+## $ essay3 <chr> "the way i look. i am a six foot half asian, half ca…
+## $ essay4 <chr> "books:<br />\nabsurdistan, the republic, of mice an…
+## $ essay5 <chr> "food.<br />\nwater.<br />\ncell phone.<br />\nshelt…
+## $ essay6 <chr> "duality and humorous things", "missing", "missing",…
+## $ essay7 <chr> "trying to find someone to hang out with. i am down …
+## $ essay8 <chr> "i am new to california and looking for someone to w…
+## $ essay9 <chr> "you want to be swept off your feet!<br />\nyou are …
+### Topic Modeling
+## # A tibble: 256,992 x 3
+##    topic term      beta
+##    <int> <chr>    <dbl>
+##  1     0 know      303.
+##  2     0 work      250.
+##  3     0 want      367.
+##  4     0 books     211.
+##  5     0 family    213.
+##  6     0 think     291.
+##  7     0 going     160.
+##  8     0 anything  292.
+##  9     0 enjoy     145.
+## 10     0 much      272.
+## # … with 256,982 more rows
+## Conclusion
+
+<!--chapter:end:modeling.Rmd-->
+
+
+# Pipelines {#pipelines}
+
+Placeholder
+
+
+## Estimators and Transformers
+## Pipelines and Pipeline Models
+## Applying Pipelines to OKCupid Data
+### Hyperparameter Tuning
+## Operating Modes of Pipelines Functions
+## Model Persistence and Interoperability
+### Sparklyr ML Models
+
+<!--chapter:end:pipelines.Rmd-->
+
+
+# Clusters {#clusters}
+
+Placeholder
+
+
+## Overview {#clusters-overview}
+## On-Premise
+### Managers {#clusters-manager}
+#### Standalone {#clusters-standalone}
+#### Yarn
+#### Mesos
+### Distributions
+## Cloud
+### Amazon {#clusters-amazon-emr}
+### Databricks
+### Google
+### IBM
+### Microsoft
+## Kubernetes
+## Tools
+### RStudio
+### Jupyter
+### Livy {#clusters-livy}
+## Recap
+
+<!--chapter:end:clusters.Rmd-->
+
+
+# Connections {#connections}
+
+Placeholder
+
+
+## Overview {#connections-overview}
+### Edge Nodes {#connections-spark-edge-nodes}
+### Spark Home {#connections-spark-home}
+## Local {#connections-local}
+## Standalone {#connections-standalone}
+## Yarn {#connections-yarn}
+### Yarn Client {#connections-yarn-client}
+### Yarn Cluster {#connections-yarn-cluster}
+## Livy {#connections-livy}
+## Mesos {#connections-mesos}
+## Kubernetes {#connections-kubernetes}
+## Cloud
+## Batches
+## Tools
+## Multiple
+## Troubleshooting {#connections-troubleshooting}
+### Logging
+### Spark Submit {#troubleshoot-spark-submit}
+#### Detailed
+### Windows
+## Recap
+
+<!--chapter:end:connections.Rmd-->
+
+
+# Data {#data}
+
+Placeholder
+
+
+## Source types and file systems
+### Default packages
+### Source types
+#### New Source Type
+### File systems
+## Reading data
+### Folders as a table
+### File layout
+### Spark memory
+### Column Names
+## Writing Data
+### Spark, not R, as pass-through
+### Practical approach
+## Date & time
+## Specific types and protocols
+### Amazon S3
+### SQL 
+### Hive
+##### Database selection
+### Comma Delimited Values (CSV)
+## Recap
+
+<!--chapter:end:data.Rmd-->
+
+
+# Tuning {#tuning}
+
+Placeholder
+
+
+## Overview
+### Graph {#tuning-graph-visualization}
+### Timeline {#tuning-event-timeline}
+## Configuring {#tuning-configuring}
+### Connect Settings {#connect-settings}
+### Submit Settings {#submit-settings}
+### Runtime Settings
+### sparklyr Settings
+## Partitioning {#tuning-partitioning}
+### Implicit
+### Explicit
+## Caching {#tuning-caching}
+### Checkpointing
+### Memory {#tuning-memory}
+## Shuffling {#tuning-shuffling}
+## Serialization {#tuning-serialization}
+## Configuration Files
+## Recap
+
+<!--chapter:end:tuning.Rmd-->
+
+```{r include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+source("r/render.R")
+source("r/plots.R")
+library(ggplot2)
+```
+
+# Extensions {#extensions}
+
+While **this chatper has not been written.**, a few resources are available to help explore these topics until this chapter gets written.
+
+**crassy** by Akhil Nair, **geospark** by Harry Zhu, **graphframes** by Kevin Kuo, **mleap** by Kevin Kuo, **rsparkling** by Jakub Hava and Navdeep Gill, **spark.sas7bdat** by Jan Wijffels, **sparkavro** by Aki Ariga, **sparkbq** by Martin Studer, **sparklyr.nested** by Matt Pollock, **sparktf** by Kevin Kuo, **sparkts** by Nathan Eastwood, **sparkwarc** by Javier Luraschi, **sparkxgb** by Kevin Kuo and **variantspark** by Samuel Macêdo.
+
+H2O Models, Graphs (PageRank), XGBoost, Spatial, Deep Learning, Genomics, 
+
+
+
+## Graphs
+
+[GraphFrames](https://graphframes.github.io/) provides graph algorithms: PageRank, ShortestPaths, etc.
+
+```{r extensions-graphframes, echo=FALSE}
+library(ggraph)
+library(igraph)
+library(graphframes)
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local", version = "2.1.0")
+highschool_tbl <- copy_to(sc, ggraph::highschool, "highschool", overwrite = TRUE)
+highschool_tbl <- highschool_tbl %>% filter(year == 1957)
+
+from_tbl <- highschool_tbl %>% distinct(from) %>% transmute(id = from)
+to_tbl <- highschool_tbl %>% distinct(to) %>% transmute(id = to)
+
+vertices_tbl <- from_tbl %>% sdf_bind_rows(to_tbl)
+edges_tbl <- highschool_tbl %>% transmute(src = from, dst = to)
+
+model <- gf_graphframe(vertices_tbl, edges_tbl) %>%
+  gf_pagerank(reset_prob = 0.15, max_iter = 10L)
+
+highschool_tbl %>% collect() %>%
+  saveRDS("data/09-extensions-graphframes-highschool.rds")
+```
+```{r extensions-graphframes-code}
+gf_graphframe(vertices_tbl, edges_tbl) %>% gf_pagerank(reset_prob = 0.15, max_iter = 10L)
+```
+```
+GraphFrame
+Vertices:
+  $ id       <dbl> 12, 12, 59, 59, 1, 20, 20, 45, 45, 8, 8, 9, 9, 26, 26, 37, 37, 47, 47, 16, 16, 71, 71, ...
+  $ pagerank <dbl> 0.0058199702, 0.0058199702, 0.0000000000, 0.0000000000, 0.1500000000, 0.0344953402, 0.0...
+Edges:
+  $ src    <dbl> 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 58, 58, 58, 58, 58, 58, 5...
+  $ dst    <dbl> 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 65, 65, 65, 65, 65, 65, 6...
+  $ weight <dbl> 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0...
+```
+```{r extensions-graphframes-chart, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, fig.cap='Highschool ggraph dataset with pagerank highlighted', fig.align='center'}
+library(ggraph)
+library(igraph)
+highschool_rdf <- readRDS("data/09-extensions-graphframes-highschool.rds")
+highschool_rdf %>% graph_from_data_frame() %>%
+  ggraph(layout = 'kk') + 
+    geom_edge_link(alpha = 0.1) + 
+    geom_node_point(size = 2, alpha = 0.4) + theme_light() +
+    annotate("point", x = -1.18, y = -3.55, size = 3) +
+    annotate("point", x = 6.25, y = 2.85, size = 3) + xlab("") + ylab("")
+```
+
+See also [spark.rstudio.com/graphframes](http://spark.rstudio.com/graphframes/).
+
+## XGBoost
+
+## Deep Learning
+
+## Genomics
+
+## Spatial 
+
+
+<!--chapter:end:extensions.Rmd-->
+
+
+# Distributed R {#distributed}
+
+Placeholder
+
+
+## Overview
+## Use Cases
+### Custom Parsers
+#### Log Parser
+#### WARC Parser
+### Partitioned Modeling
+### Grid Search {#distributed-grid-search}
+### Web APIs
+### Distributed Rendering
+## Partitions
+## Grouping
+## Columns
+## Context
+## Functions
+## Packages
+## Cluster Requirements
+### Installing R
+### Apache Arrow
+## Troubleshooting
+### Worker Logs
+### Resolving Timeouts
+### Inspecting Partition
+### Debugging Workers
+## Recap
+
+<!--chapter:end:distributed-r.Rmd-->
+
+
+# Streaming {#streaming}
+
+Placeholder
+
+
+## Spark Streaming 
+## Working with Spark Streams
+## `sparklyr` extras
+### Stream monitor
+### Stream generator
+### Shiny reactive
+## Intro example
+## Transformations 
+### dplyr
+### Transformer functions
+### R code
+### ML Pipelines
+## Shiny integration
+## Kafka
+### Workflow
+### Spark integration
+### R integration
+### Example 
+
+<!--chapter:end:streaming.Rmd-->
+
+
+# Contributing {#contributing}
+
+Placeholder
+
+
+## Overview {#contributing-overview}
+## Spark API {#contributing-spark-api}
+## Spark Extensions
+## Scala Code
+## Recap
+
+<!--chapter:end:contributing.Rmd-->
+
+
+# Appendix
+
+Placeholder
+
+
+## Prerequisites {#appendix-prerequisites}
+### Installing R {#appendix-install-r}
+### Installing Java {#appendix-install-java}
+### Installing RStudio {#appendix-install-rstudio}
+### Using RStudio {#appendix-using-rstudio}
+## Diagrams
+### Worlds Store Capacity {#appendix-storage-capacity}
+### Daily downloads of CRAN packages {#appendix-cran-downloads}
+### Google trends for mainframes, cloud computing and kubernetes {#appendix-cluster-trends}
+## Formatting {#appendix-ggplot2-theme}
+## List of ML Functions {#ml-functionlist}
+### Classification
+### Regression
+### Clustering
+### Recommendation
+### Frequent Pattern Mining
+### Feature Transformers
+## Kafka
+
+<!--chapter:end:appendix.Rmd-->
+
+`r if (knitr::is_html_output()) '
+# References
+'`
+
+```{r references-bib, include=FALSE}
+knitr::write_bib(c(
+  .packages(), 'sparklyr'
+), 'packages.bib')
+```
+
+<!--chapter:end:references.Rmd-->
+

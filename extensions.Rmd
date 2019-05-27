@@ -1,51 +1,165 @@
 ```{r include=FALSE}
 knitr::opts_chunk$set(eval = FALSE)
+source("r/render.R")
+source("r/plots.R")
+library(ggplot2)
 ```
 
 # Extensions {#extensions}
 
-While **this chatper has not been written.**, a few resources are available to help explore these topics until this chapter gets written.
 
-## RSparkling
 
-[rsparkling](https://github.com/h2oai/sparkling-water/tree/master/r) provies [H2O](https://www.h2o.ai/) support in Spark using `sparklyr`:
+H2O Models, Graphs (PageRank), XGBoost, Spatial, Deep Learning, Genomics, 
 
-```{r extensions-rsparkling, echo=FALSE}
+## H2O
+
+[H2O](https://www.h2o.ai/) is open-source software for large-scale modeling created by H2O.ai, it allows users to fit thousands of potential models as part of discovering patterns in data. Many users that require advanced modeling capabilities in Spark consider H2O to complement or replace Spark's default modeling algorithms. An approach we recommend is to start with Spark's default modeling algorithms and transition to H2O running in Spark when Spark's algorithms fall short or when advanced functionality (like additional modeling metrics) are required.
+
+However, we can't do justice to H2O's great modeling capabilities in a simgle paragraph since explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the "Practical machine learning with H2O" [@extensions-practical-h2o] book to explore in-depth H2O's modeling algorithms and features and present this chapter as a brief guide to get started using H2O in Spark with R through the [rsparkling](https://github.com/h2oai/sparkling-water/tree/master/r) extension.
+
+In order to use H2O with Spark, it is important to know that there are four compoinents involved: H2O, Sparkling Water, `rsparkling` and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and `rsparkling` as the R front-end for Sparkling Water.
+
+```{r extensions-h2o-diagram, eval=TRUE}
+render_nomnoml("
+#spacing: 20
+#padding: 16
+[R | 
+  [rsparkling]
+  [sparklyr]
+]->[Spark |
+  [Sparkling Water]
+  [H2O]
+]
+", "images/extensions-h2o-diagram.png")
+```
+
+First, install `rsparkling`:
+
+```{r}
+install.packages("rsparkling")
+```
+
+Is is then important to notice that you need to use compatible versions of Spark, Sparkling Water and H2O. So let's start by checking the version of H2O by running,
+
+```{r eval=TRUE}
+packageVersion("h2o")
+```
+
+Then we can explore the Spark and Sparkling Water versions that are compatible with `h2o_release_table()`.
+
+```{r}
+library(rsparkling)
+
+h2o_release_table() %>%
+  dplyr::filter(H2O_Version == !!as.character(packageVersion("h2o")))
+```
+
+We can then connect with the supported Spark versions as follows, you will have to adjust the `master` parameter for your particular cluster. We also recommend increasing the connection timeout since Spark might require to download various H2O components while the connection is established for the first time:
+
+```{r}
 library(rsparkling)
 library(sparklyr)
 library(h2o)
 
-sc <- spark_connect(master = "local", version = "2.1.0")
-cars_tbl <- copy_to(sc, mtcars, "mtcars")
+config <- spark_config()
+config$sparklyr.connect.timeout <- 3 * 60
+  
+sc <- spark_connect(master = "local", version = "2.3", config = config)
+cars <- copy_to(sc, mtcars)
+```
 
-cars_h2o <- as_h2o_frame(sc, mtcars_tbl, strict_version_check = FALSE)
+H2O provides a web interface which can help you monitor training and access much of H2O's functionality. The web interface can be accessed through `h2o_flow(sc)`, it is reffered to as H2O Flow and is shown in Figure \@ref(fig:extensions-h2o-flow).
 
+```{r extensions-h2o-flow, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='H2O Flow Interface using Spark with R'}
+render_image("images/extensions-h2o-flow.png")
+```
+
+When using H2O, you will have to convert your Spark DataFrame into and H2O DataFrame through `as_h2o_frame`:
+
+```{r}
+cars_h2o <- as_h2o_frame(sc, cars)
+cars_h2o
+```
+```
+   mpg cyl disp  hp drat    wt  qsec vs am gear carb
+1 21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
+2 21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
+3 22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
+4 21.4   6  258 110 3.08 3.215 19.44  1  0    3    1
+5 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2
+6 18.1   6  225 105 2.76 3.460 20.22  1  0    3    1
+
+[32 rows x 11 columns] 
+```
+
+Then you can use many of the modeling functions available in the `h2o` package with ease. For instance, we can fir a generalized linear model with ease:
+
+```{r eval=FALSEz}
 model <- h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = cars_h2o, lambda_search = TRUE)
+```
+```{r extensions-rsparkling, echo=FALSE}
 saveRDS(model, "data/09-extensions-h2o-glm.rds")
 ```
-```{r eval=FALSE, }
-library(rsparkling)
-library(sparklyr)
-library(h2o)
 
-cars_h2o <- as_h2o_frame(sc, cars_tbl, strict_version_check = FALSE)
-h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = mtcars_h2o, lambda_search = TRUE)
+H2O provides additional metrics not necessarily available in Spark's modeling algorithms, the model that we just fit  `Residual Deviance` is provided in the model while this would not be a standard metric when using Spark MLlib:
+
+```{r}
+model
 ```
-```{r extensions-rsparkling-results, echo=FALSE}
-readRDS("data/09-extensions-h2o-glm.rds")
+```
+Model Details:
+==============
+
+H2ORegressionModel: glm
+Model ID:  GLM_model_R_1533086487173_1 
+GLM Model: summary
+    family     link                              regularization
+1 gaussian identity Elastic Net (alpha = 0.5, lambda = 0.1013 )
+                                                               lambda_search
+1 nlambda = 100, lambda.max = 10.132, lambda.min = 0.1013, lambda.1se = -1.0
+  number_of_predictors_total number_of_active_predictors number_of_iterations
+1                          2                           2                  100
+                                 training_frame
+1 frame_rdd_33_a539369727fb5223dbccfbc5b7894962
+
+Coefficients: glm coefficients
+      names coefficients standardized_coefficients
+1 Intercept    38.941654                 20.090625
+2       cyl    -1.468783                 -2.623132
+3        wt    -3.034558                 -2.969186
+
+H2ORegressionMetrics: glm
+** Reported on training data. **
+
+MSE:  6.017684
+RMSE:  2.453097
+MAE:  1.940985
+RMSLE:  0.1114801
+Mean Residual Deviance :  6.017684
+R^2 :  0.8289895
+Null Deviance :1126.047
+Null D.o.F. :31
+Residual Deviance :192.5659
+Residual D.o.F. :29
+AIC :156.2425
 ```
 
-See [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/).
+Finally, we can run prediction over the generalized linear model model, a similar approach would work for many other models available in H2O:
 
-### Troubleshooting
+```{r}
+predictions <- as_h2o_frame(sc, copy_to(sc, data.frame(wt = 2, cyl = 6)))
+h2o.predict(model, predictions)
+```
+```
+   predict
+1 24.05984
 
-[Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility and simplicity, which happens to be used by Apache Spark while installing extensions. When connection fails while using `rsparkling`, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
-
-```{r extensions-rsparkling-cache}
-unlink("~/.ivy2/cache", recursive = TRUE)
+[1 row x 1 column]
 ```
 
-## GraphFrames
+Many additional examples are available under [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/), you can also request help from [github.com/h2oai/sparkling-water/tree/master/r](https://github.com/h2oai/sparkling-water/tree/master/r), the official GitHub repository for the `rsparkling` package. 
+
+## Graphs
 
 [GraphFrames](https://graphframes.github.io/) provides graph algorithms: PageRank, ShortestPaths, etc.
 
@@ -99,51 +213,23 @@ highschool_rdf %>% graph_from_data_frame() %>%
 
 See also [spark.rstudio.com/graphframes](http://spark.rstudio.com/graphframes/).
 
-## Mleap
+## XGBoost
 
-[Mleap](https://github.com/rstudio/mleap) enables Spark pipelines in production.
+## Deep Learning
 
-```{r extensions-mleap}
-# Create pipeline
-pipeline_model <- ml_pipeline(sc) %>%
-  ft_binarizer("hp", "big_hp", threshold = 100) %>%
-  ft_vector_assembler(c("big_hp", "wt", "qsec"), "features") %>%
-  ml_gbt_regressor(label_col = "mpg") %>%
-  ml_fit(cars_tbl)
+## Genomics
 
-# Perform predictions
-predictions_tbl <- ml_predict(pipeline_model, mtcars_tbl)
+## Spatial 
 
-# Export model with mleap
-ml_write_bundle(pipeline_model, predictions_tbl, "mtcars_model.zip")
+## Troubleshooting
+
+[Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility and simplicity, which happens to be used by Apache Spark while installing extensions. When connection fails while using `rsparkling`, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
+
+```{r extensions-rsparkling-cache}
+unlink("~/.ivy2/cache", recursive = TRUE)
 ```
 
-Use model outside Spark and productions systems. For instance, in <span class="javaHighlight">Java:</span>
-
-<div class="java">
-```{java}
-import ml.combust.mleap.runtime.MleapContext;
-
-// Initialize
-BundleBuilder bundleBuilder = new BundleBuilder();
-MleapContext context = (new ContextBuilder()).createMleapContext();
-Bundle<Transformer> bundle = bundleBuilder.load(new File(request.get("mtcars_model.zip")), context);
-
-// Read into Mleap DataFrame
-DefaultLeapFrame inputLeapFrame = new DefaultLeapFrame();
-
-// Perform Mleap transformation
-DefaultLeapFrame transformedLeapFrame = bundle.root().transform(inputLeapFrame).get();
-```
-</div>
-
-See also [spark.rstudio.com/guides/mleap](http://spark.rstudio.com/guides/mleap/).
-
-## Nested Data {#extensions-nested-data}
-
-```{r extensions-nested}
-library(sparklyr.nested)
-```
+## Recap
 
 ## Geospatial Data {#extensions-geospatial-data}
 
@@ -194,7 +280,4 @@ sc_res <- st_join(points_wkt,
 see more [spatial join](https://github.com/harryprince/geospark#spatial-join):
 
 ![](https://camo.githubusercontent.com/f18513c8002df02bdb6e3aac451519beb3c87ebb/68747470733a2f2f7365676d656e746661756c742e636f6d2f696d672f625662714665333f773d3132383026683d353038)
-
-
-
 
