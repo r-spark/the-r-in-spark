@@ -15,6 +15,7 @@ chapters <- list(
   "connections",
   "data",
   "tuning",
+  "extensions",
   "distributed-r",
   "streaming",
   "contributing",
