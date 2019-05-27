@@ -7,9 +7,7 @@ library(ggplot2)
 
 # Extensions {#extensions}
 
-While **this chatper has not been written.**, a few resources are available to help explore these topics until this chapter gets written.
 
-**crassy** by Akhil Nair, **geospark** by Harry Zhu, **graphframes** by Kevin Kuo, **mleap** by Kevin Kuo, **rsparkling** by Jakub Hava and Navdeep Gill, **spark.sas7bdat** by Jan Wijffels, **sparkavro** by Aki Ariga, **sparkbq** by Martin Studer, **sparklyr.nested** by Matt Pollock, **sparktf** by Kevin Kuo, **sparkts** by Nathan Eastwood, **sparkwarc** by Javier Luraschi, **sparkxgb** by Kevin Kuo and **variantspark** by Samuel Macêdo.
 
 H2O Models, Graphs (PageRank), XGBoost, Spatial, Deep Learning, Genomics, 
 
@@ -67,25 +65,43 @@ config <- spark_config()
 config$sparklyr.connect.timeout <- 3 * 60
   
 sc <- spark_connect(master = "local", version = "2.3", config = config)
-cars <- copy_to(sc, cars)
+cars <- copy_to(sc, mtcars)
 ```
 
 H2O provides a web interface which can help you monitor training and access much of H2O's functionality. The web interface can be accessed through `h2o_flow(sc)`, it is reffered to as H2O Flow and is shown in Figure \@ref(fig:extensions-h2o-flow).
 
-
-
-```{r}
-cars_h2o <- as_h2o_frame(sc, mtcars_tbl, strict_version_check = FALSE)
+```{r extensions-h2o-flow, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='H2O Flow Interface using Spark with R'}
+render_image("images/extensions-h2o-flow.png")
 ```
 
+When using H2O, you will have to convert your Spark DataFrame into and H2O DataFrame through `as_h2o_frame`:
+
+```{r}
+cars_h2o <- as_h2o_frame(sc, cars)
+cars_h2o
+```
+```
+   mpg cyl disp  hp drat    wt  qsec vs am gear carb
+1 21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
+2 21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
+3 22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
+4 21.4   6  258 110 3.08 3.215 19.44  1  0    3    1
+5 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2
+6 18.1   6  225 105 2.76 3.460 20.22  1  0    3    1
+
+[32 rows x 11 columns] 
+```
+
+Then you can use many of the modeling functions available in the `h2o` package with ease. For instance, we can fir a generalized linear model with ease:
+
 ```{r eval=FALSEz}
-model <- h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = mtcars_h2o, lambda_search = TRUE)
+model <- h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = cars_h2o, lambda_search = TRUE)
 ```
 ```{r extensions-rsparkling, echo=FALSE}
 saveRDS(model, "data/09-extensions-h2o-glm.rds")
 ```
 
-H2O provides additional metrics than Spark MLlib, notice for instance that `Residual Deviance` is provided in the model while this would not be a standard metric when using Spark MLlib:
+H2O provides additional metrics not necessarily available in Spark's modeling algorithms, the model that we just fit  `Residual Deviance` is provided in the model while this would not be a standard metric when using Spark MLlib:
 
 ```{r}
 model
@@ -128,15 +144,20 @@ Residual D.o.F. :29
 AIC :156.2425
 ```
 
-See [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/).
+Finally, we can run prediction over the generalized linear model model, a similar approach would work for many other models available in H2O:
 
-### Troubleshooting
-
-[Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility and simplicity, which happens to be used by Apache Spark while installing extensions. When connection fails while using `rsparkling`, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
-
-```{r extensions-rsparkling-cache}
-unlink("~/.ivy2/cache", recursive = TRUE)
+```{r}
+predictions <- as_h2o_frame(sc, copy_to(sc, data.frame(wt = 2, cyl = 6)))
+h2o.predict(model, predictions)
 ```
+```
+   predict
+1 24.05984
+
+[1 row x 1 column]
+```
+
+Many additional examples are available under [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/), you can also request help from [github.com/h2oai/sparkling-water/tree/master/r](https://github.com/h2oai/sparkling-water/tree/master/r), the official GitHub repository for the `rsparkling` package. 
 
 ## Graphs
 
@@ -199,4 +220,16 @@ See also [spark.rstudio.com/graphframes](http://spark.rstudio.com/graphframes/).
 ## Genomics
 
 ## Spatial 
+
+## Troubleshooting
+
+[Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility and simplicity, which happens to be used by Apache Spark while installing extensions. When connection fails while using `rsparkling`, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
+
+```{r extensions-rsparkling-cache}
+unlink("~/.ivy2/cache", recursive = TRUE)
+```
+
+## Recap
+
+
 
