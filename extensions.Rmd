@@ -41,12 +41,10 @@ geospark
 
 Before you learn how and when to use each extension, we should first briefly explain how extensions can be used with R and Spark.
 
-First, an Spark extension is just and R package that happens to be aware of Spark. As any other R package, you will first have to install the R package with `install.packlages("package-name")`. Once installed, it is important to know that you willn need to reconnect to Spark before the extension can be used. Son in general, the pattern you should follow goes as follows:
+First, an Spark extension is just and R package that happens to be aware of Spark. As any other R package, you will first have to install the R package with `install.packages("package-name")`. Once installed, it is important to know that you willn need to reconnect to Spark before the extension can be used. Son in general, the pattern you should follow goes as follows:
 
 ```{r}
-library(sparkextension1)
-library(sparkextension2)
-library(sparkextension3)
+library(sparkextension)
 library(sparklyr)
 
 sc <- spark_connect(master = "<master>")
@@ -147,7 +145,10 @@ cars_h2o
 Then you can use many of the modeling functions available in the `h2o` package with ease. For instance, we can fit a generalized linear model with ease:
 
 ```{r eval=FALSE}
-model <- h2o.glm(x = c("wt", "cyl"), y = "mpg", training_frame = cars_h2o, lambda_search = TRUE)
+model <- h2o.glm(x = c("wt", "cyl"),
+                 y = "mpg",
+                 training_frame = cars_h2o,
+                 lambda_search = TRUE)
 ```
 ```{r extensions-rsparkling, echo=FALSE}
 saveRDS(model, "data/09-extensions-h2o-glm.rds")
@@ -215,29 +216,155 @@ We should then disconnect since using different extensions require us to reconne
 spark_disconnect(sc)
 ```
 
-Many additional examples are available under [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/), you can also request help from [github.com/h2oai/sparkling-water/tree/master/r](https://github.com/h2oai/sparkling-water/tree/master/r), the official GitHub repository for the `rsparkling` package. 
+Many additional examples are available under [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/), you can also request help from [github.com/h2oai/sparkling-water/tree/master/r](https://github.com/h2oai/sparkling-water/tree/master/r), the official GitHub repository for the `rsparkling` package.
+
+The next extension we will present will allow you to process large-scale graph datasets.
 
 ## Graphs
 
-[GraphFrames](https://graphframes.github.io/) provides graph algorithms: PageRank, ShortestPaths, etc.
+The first paper in the history of graph theory was written by Leonhard Euler on the Seven Bridges of Königsberg in 1736. The problem was to devise a walk through the city that would cross each of those bridges once and only, the original diagram is shown in Figure \@ref(fig:extensions-eulers-paths).
 
-```{r extensions-graphframes, echo=FALSE}
+```{r extensions-eulers-paths, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Seven Bridges of Königsberg from the Euler Archive'}
+render_image("images/extensions-eulers-paths.png")
+```
+
+Today, a graph is defined as an ordered pair $G=(V,E)$, with $V$ a set of vertices (nodes or points) and $E \subseteq \{\{x, y\} | (x, y) ∈ \mathrm{V}^2 \land x \ne y\}$ a set of edges (links or lines) which are either an unordered pair for **undirected graphs** or an ordered pair for **directed graphs**. The former describing links where the direction does not matter and the latter linked where it does.
+
+As a simple example, we can use the `highschool` dataset from the `ggraph` package which tracks friendship among high school boys,
+
+```{r}
 library(ggraph)
 library(igraph)
+
+highschool
+```
+```
+# A tibble: 506 x 3
+    from    to  year
+   <dbl> <dbl> <dbl>
+ 1     1    14  1957
+ 2     1    15  1957
+ 3     1    21  1957
+ 4     1    54  1957
+ 5     1    55  1957
+ 6     2    21  1957
+ 7     2    22  1957
+ 8     3     9  1957
+ 9     3    15  1957
+10     4     5  1957
+# … with 496 more rows
+```
+
+A graph in [GraphFrames](https://graphframes.github.io/) is also represented as a table of edges and vertices; however, the format needs to follow an specific schema. Lets first install the `graphframes` extension,
+
+```{r}
+install.packages(graphframes)
+```
+
+Followed by connecting, copying the `highschool` dataset and transforming the graph to the format that this extension expects, we will scope this dataset to the friendships of year 1957.
+
+```{r extensions-graphframes, echo=FALSE}
 library(graphframes)
 library(sparklyr)
 library(dplyr)
 
 sc <- spark_connect(master = "local", version = "2.1.0")
-highschool_tbl <- copy_to(sc, ggraph::highschool, "highschool", overwrite = TRUE)
-highschool_tbl <- highschool_tbl %>% filter(year == 1957)
+highschool_tbl <- copy_to(sc, highschool, "highschool") %>%
+  filter(year == 1957) %>%
+  transmute(from = as.character(as.integer(from)),
+            to = as.character(as.integer(to)))
 
 from_tbl <- highschool_tbl %>% distinct(from) %>% transmute(id = from)
 to_tbl <- highschool_tbl %>% distinct(to) %>% transmute(id = to)
 
-vertices_tbl <- from_tbl %>% sdf_bind_rows(to_tbl)
+vertices_tbl <- distinct(sdf_bind_rows(from_tbl, to_tbl))
 edges_tbl <- highschool_tbl %>% transmute(src = from, dst = to)
+```
 
+The `vertices_tbl` table is expected to have a single `id` column:
+
+```
+# Source: spark<?> [?? x 1]
+   id   
+   <chr>
+ 1 1    
+ 2 34   
+ 3 37   
+ 4 43   
+ 5 44   
+ 6 45   
+ 7 56   
+ 8 57   
+ 9 65   
+10 71   
+# … with more rows
+```
+
+While the `edges_tbl` is expected to have a `src` and `dst` columns:
+
+```
+# Source: spark<?> [?? x 2]
+   src   dst  
+   <chr> <chr>
+ 1 1     14   
+ 2 1     15   
+ 3 1     21   
+ 4 1     54   
+ 5 1     55   
+ 6 2     21   
+ 7 2     22   
+ 8 3     9    
+ 9 3     15   
+10 4     5    
+# … with more rows
+```
+
+You can now create a GraphFrame,
+
+```{r}
+graph <- gf_graphframe(vertices_tbl, edges_tbl)
+```
+
+We can now use this graph to start analyzing this dataset. For instance, by finding out how many friends on average every one has, this is reffered as the degree or valency of a vertex:
+
+```{r}
+gf_degrees(graph) %>% summarise(friends = mean(degree))
+```
+```
+# Source: spark<?> [?? x 1]
+  friends
+    <dbl>
+1    6.94
+```
+
+We can then find what the shortest path to some specific vertex (person for this dataset). Since the data is annonimized, we can just pick the person identified as $33$ and find how many degrees of separation exist between them:
+
+```{r}
+gf_shortest_paths(graph, c(33)) %>%
+  filter(size(distances) > 0) %>%
+  mutate(distance = explode(map_values(distances))) %>%
+  select(id, distance)
+```
+```
+# Source: spark<?> [?? x 2]
+   id    distance
+   <chr>    <int>
+ 1 19           5
+ 2 5            4
+ 3 27           6
+ 4 4            4
+ 5 11           6
+ 6 23           4
+ 7 36           1
+ 8 26           2
+ 9 33           0
+10 18           5
+# … with more rows
+```
+
+Finally, we can compute PageRank over this graph, which is named after Google's foudner Larry Page: 
+
+```{r echo=FALSE}
 model <- gf_graphframe(vertices_tbl, edges_tbl) %>%
   gf_pagerank(reset_prob = 0.15, max_iter = 10L)
 
@@ -245,36 +372,44 @@ highschool_tbl %>% collect() %>%
   saveRDS("data/09-extensions-graphframes-highschool.rds")
 ```
 ```{r extensions-graphframes-code}
-gf_graphframe(vertices_tbl, edges_tbl) %>% gf_pagerank(reset_prob = 0.15, max_iter = 10L)
+gf_graphframe(vertices_tbl, edges_tbl) %>%
+  gf_pagerank(reset_prob = 0.15, max_iter = 10L)
 ```
 ```
 GraphFrame
 Vertices:
-  $ id       <dbl> 12, 12, 59, 59, 1, 20, 20, 45, 45, 8, 8, 9, 9, 26, 26, 37, 37, 47, 47, 16, 16, 71, 71, ...
-  $ pagerank <dbl> 0.0058199702, 0.0058199702, 0.0000000000, 0.0000000000, 0.1500000000, 0.0344953402, 0.0...
+  Database: spark_connection
+  $ id       <dbl> 12, 12, 14, 14, 27, 27, 55, 55, 64, 64, 41, 41, 47, 47, 6…
+  $ pagerank <dbl> 0.3573460, 0.3573460, 0.3893665, 0.3893665, 0.2362396, 0.…
 Edges:
-  $ src    <dbl> 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 58, 58, 58, 58, 58, 58, 5...
-  $ dst    <dbl> 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 65, 65, 65, 65, 65, 65, 6...
-  $ weight <dbl> 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0...
+  Database: spark_connection
+  $ src    <dbl> 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 12, 12, 12,…
+  $ dst    <dbl> 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17,…
+  $ weight <dbl> 0.25000000, 0.25000000, 0.25000000, 0.25000000, 0.25000000,…
 ```
 
-```{r extensions-graphframes-chart, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, fig.cap='Highschool ggraph dataset with pagerank highlighted', fig.align='center'}
+To give you some insights into this dataset, Figure \@ref(fig:extensions-graph-pagerank) plots this chart using the `ggraph` and highlights the highest PageRank scores fot this dataset, 
+
+```{r extensions-graph-pagerank-create, eval=FALSE, echo=FALSE}
 library(ggraph)
 library(igraph)
 highschool_rdf <- readRDS("data/09-extensions-graphframes-highschool.rds")
-highschool_rdf %>% graph_from_data_frame() %>%
+highschool_rdf %>% graph_from_data_frame(directed = FALSE) %>%
   ggraph(layout = 'kk') + 
-    geom_edge_link(alpha = 0.1) + 
+    geom_edge_link(alpha = 0.2,
+                   arrow = arrow(length = unit(2, 'mm')),
+                   end_cap = circle(2, 'mm'),
+                   start_cap = circle(2, 'mm')) + 
     geom_node_point(size = 2, alpha = 0.4) + theme_light() +
     annotate("point", x = -1.18, y = -3.55, size = 3) +
-    annotate("point", x = 6.25, y = 2.85, size = 3) + xlab("") + ylab("")
+    annotate("point", x = 6.25, y = 2.85, size = 3) + xlab("") + ylab("") +
+    ggsave("images/extensions-graph-pagerank.png", width = 10, height = 5)
+```
+```{r extensions-graph-pagerank, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Highschool ggraph dataset with highest pagerank highlighted'}
+render_image("images/extensions-graph-pagerank.png")
 ```
 
-```{r}
-spark_disconnect(sc)
-```
-
-See also [spark.rstudio.com/graphframes](http://spark.rstudio.com/graphframes/).
+There are many more graph algorithms provided in `graphframes`, to mention some: bread depth search, connected components, label propagation for detecting communities, etc. For questions on this extension reffer to the official GitHub repo, [github.com/rstudio/graphframes](https://github.com/rstudio/graphframes). We will now present a popular gradient boosting framework.
 
 ## XGBoost
 
@@ -477,7 +612,7 @@ see more [spatial join](https://github.com/harryprince/geospark#spatial-join):
 
 ## Troubleshooting
 
-[Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility and simplicity, which happens to be used by Apache Spark while installing extensions. When connection fails while using `rsparkling`, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
+[Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility and simplicity, which happens to be used by Apache Spark while installing extensions. When connection fails while using an extension, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
 
 ```{r extensions-rsparkling-cache}
 unlink("~/.ivy2/cache", recursive = TRUE)
