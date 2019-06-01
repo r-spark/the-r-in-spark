@@ -19,7 +19,7 @@ In the [Introduction](#intro) chapter we presented the R community as a vibrant 
 
 Extensions are constantly being created so this section will be outdated at any given point in time, in addition, we might not be even aware of many Spark and R extensions; however, at the very least we can track the extensions that are available in CRAN by looking at the "reverse imports" for `sparklyr` in CRAN [@extensions-sparklyr-cran]. Extensions and R packages published in CRAN tend to be the most stable since when a package is published in CRAN, it will go through a review process which increases the overall quality of a contribution.
 
-While we wish we could present all the extensions, we've picked a few that we believe should be interesting to most readers and which we will present next. You can find a few more under the [github.com/r-spark](https://github.com/r-spark) organization or by searching repos in GitHub with the `sparklyr` tag.
+While we wish we could present all the extensions, we will present next the extensions that should be the most interesting to most readers. You can find additional ones under the [github.com/r-spark](https://github.com/r-spark) organization or by searching repos in GitHub with the `sparklyr` tag.
 
 rsparkling
 : The `rsparkling` extensions allows you to use H2O and Spark from R. This extension is what we would consider advanced modeling in Spark. While Spark's built-in modeling library, Spark MLlib, is quite useful in many cases; H2O's modeling capabilities can compute additional statistical metrics and can proivide performance and scalability improvements over Spark MLlib. We, ourselves, have not performed detailed comparisons nor benchamarks between MLlib and H2O; so this is something you will have to research on your own to create a complete picture of when to use H2O's capabilities.
@@ -41,7 +41,7 @@ geospark
 
 Before you learn how and when to use each extension, we should first briefly explain how extensions can be used with R and Spark.
 
-First, an Spark extension is just and R package that happens to be aware of Spark. As any other R package, you will first have to install the R package with `install.packages("package-name")`. Once installed, it is important to know that you willn need to reconnect to Spark before the extension can be used. Son in general, the pattern you should follow goes as follows:
+First, an Spark extension is just and R package that happens to be aware of Spark. As any other R package, you will first have to install the R package. Once installed, it is important to know that you will need to reconnect to Spark before the extension can be used. So, in general, the pattern you should follow goes as follows:
 
 ```{r}
 library(sparkextension)
@@ -52,11 +52,11 @@ sc <- spark_connect(master = "<master>")
 
 Notice that `sparklyr` is loaded after the extensions to allow the extension to register properly. If you had to install and load a new extension you would simply have to disconnect first using `spark_disconnect(sc)` and repeat the steps above with the new extension.
 
-As you can notice, it's not hard to install and use Spark extensions from R; however, each extension can be a world on it's own so most of the time you will have to spend time understand what the extension is, when to use it and how to use it properly. The first extension you will learn about is the `rsparkling` extension which enables you to use H2O in Spark with R.
+It's not hard to install and use Spark extensions from R; however, each extension can be a world on it's own so most of the time you will have to spend time understand what the extension is, when to use it and how to use it properly. The first extension you will learn about is the `rsparkling` extension which enables you to use H2O in Spark with R.
 
 ## H2O
 
-[H2O](https://www.h2o.ai/) is open-source software for large-scale modeling created by H2O.ai, which allows you to fit thousands of potential models as part of discovering patterns in data. You can consider using H2O to complement or replace Spark's default modeling algorithms. It is common to Spark's default modeling algorithms and transition to H2O when Spark's algorithms fall short or when advanced functionality (like additional modeling metrics) are required.
+[H2O](https://www.h2o.ai/) is open-source software for large-scale modeling created by H2O.ai, which allows you to fit thousands of potential models as part of discovering patterns in data. You can consider using H2O to complement or replace Spark's default modeling algorithms. It is common to Spark's default modeling algorithms and transition to H2O when Spark's algorithms fall short or when advanced functionality (like additional modeling metrics or automatic model selection) are desired
 
 We can't do justice to H2O's great modeling capabilities in a single paragraph, explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the "Practical machine learning with H2O" [@extensions-practical-h2o] book to explore in-depth H2O's modeling algorithms and features. In the meantime, you can use this section as a brief guide to get started using H2O in Spark with R.
 
@@ -213,7 +213,7 @@ model_id              mean_residual_deviance     rmse      mse      mae     rmsl
 
 Many additional examples are available under [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/), you can also request help from [github.com/h2oai/sparkling-water/tree/master/r](https://github.com/h2oai/sparkling-water/tree/master/r), the official GitHub repository for the `rsparkling` package.
 
-The next extension we will present will allow you to process large-scale graph datasets; therefore, make sure to disconnect with `spark_disconnect(sc)` since using different extensions requires you to reconnect to Spark.
+The next extension, `graphframes`, will allow you to process large-scale relational datasets; however, before you start using it, make make sure to disconnect with `spark_disconnect(sc)` since using a different extensions requires you to reconnect to Spark.
 
 ## Graphs
 
@@ -225,7 +225,7 @@ render_image("images/extensions-eulers-paths.png")
 
 Today, a graph is defined as an ordered pair $G=(V,E)$, with $V$ a set of vertices (nodes or points) and $E \subseteq \{\{x, y\} | (x, y) ∈ \mathrm{V}^2 \land x \ne y\}$ a set of edges (links or lines) which are either an unordered pair for **undirected graphs** or an ordered pair for **directed graphs**. The former describing links where the direction does not matter and the latter linked where it does.
 
-As a simple example, we can use the `highschool` dataset from the `ggraph` package which tracks friendship among high school boys,
+As a simple example, we can use the `highschool` dataset from the `ggraph` package which tracks friendship among high school boys. In this dataset, the vertices are the students and the edges describe pairs of students who happen to be friends in a particular year.
 
 ```{r}
 library(ggraph)
@@ -250,7 +250,9 @@ highschool
 # … with 496 more rows
 ```
 
-A graph in [GraphFrames](https://graphframes.github.io/) is also represented as a table of edges and vertices; however, the format needs to follow an specific schema. Lets first install the `graphframes` extension,
+While the highschool dataset can be easily processed in R, even medium size graph datasets can be hard to process without distributing this work across a cluster of machines which Spark is suited for. Spark supports processing graphs through the [graphframes](https://github.com/rstudio/graphframes) extension which in turn uses the [GraphX](https://spark.apache.org/graphx/) Spark component. GraphX is Apache Spark's API for graphs and graph-parallel computation and allows you to seamlessly work with both graphs and collection, it's comparable in performance to the fastest specialized graph processing systems and provides a growing library of graph algorithms.
+
+A graph in Spark is also represented as a dataframe of edges and vertices; however, the format is slightly different since we will need to construct a dataframe for vertices. Lets first install the [GraphFrames](https://graphframes.github.io/) extension,
 
 ```{r}
 install.packages(graphframes)
@@ -404,7 +406,7 @@ highschool_rdf %>% graph_from_data_frame(directed = FALSE) %>%
 render_image("images/extensions-graph-pagerank.png")
 ```
 
-There are many more graph algorithms provided in `graphframes`, to mention some: bread depth search, connected components, label propagation for detecting communities, etc. For questions on this extension reffer to the official GitHub repo, [github.com/rstudio/graphframes](https://github.com/rstudio/graphframes). We will now present a popular gradient boosting framework.
+There are many more graph algorithms provided in `graphframes`, to mention some: bread depth search, connected components, label propagation for detecting communities, strongly connected components and triangle count. For questions on this extension reffer to the official GitHub repo, [github.com/rstudio/graphframes](https://github.com/rstudio/graphframes). We will now present a popular gradient boosting framework.
 
 ## XGBoost
 
