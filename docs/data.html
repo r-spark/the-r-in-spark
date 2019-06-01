@@ -637,16 +637,16 @@ dplyr<span class="op">::</span><span class="kw">copy_to</span>(sc, iris, <span c
 <h3><span class="header-section-number">8.3.1</span> Spark, not R, as pass-through</h3>
 <p>Avoid collecting data in R to then upload it to the target (see Figure 8.1) That seems to be the first approach attempted by new users. It may look like a faster alternative. Performance wise, it is not faster. Additionally, this approach will not scale properly. The data will eventually grow to the point where R cannot handle being the middle point.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-155"></span>
-<div id="htmlwidget-e96ff3e9f14b65f257b6" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-e96ff3e9f14b65f257b6">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#arrowSize: 0.4\n#lineWidth: 1\n#spacing:90\n[Avoid this...| \n[Source] -> [Spark | Process] \n[Spark]collect() -> [R]\n[R] -> [Target]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-a06d5e5637cd01e533c4" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-a06d5e5637cd01e533c4">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#arrowSize: 0.4\n#lineWidth: 1\n#spacing:90\n[Avoid this...| \n[Source] -> [Spark | Process] \n[Spark]collect() -> [R]\n[R] -> [Target]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 8.1: Avoid using R as a pass through
 </p>
 </div>
 <p>All efforts should be made to have Spark connect to the target location. This way, reading, processing and writing all happens within the same Spark session.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-156"></span>
-<div id="htmlwidget-2d01f2886adf001caab5" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-2d01f2886adf001caab5">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#arrowSize: 0.4\n#lineWidth: 1\n#spacing:90\n[Source] -> [Spark | Reads -  Process - Writes] \n[Spark] -> [Target]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-aa031672ee8cc487c79e" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-aa031672ee8cc487c79e">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#arrowSize: 0.4\n#lineWidth: 1\n#spacing:90\n[Source] -> [Spark | Reads -  Process - Writes] \n[Spark] -> [Target]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 8.2: Spark as a pass through
 </p>

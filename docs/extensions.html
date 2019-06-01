@@ -471,8 +471,8 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <p>We can’t do justice to H2O’s great modeling capabilities in a single paragraph, explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the “Practical machine learning with H2O” <span class="citation">(Cook <a href="#ref-extensions-practical-h2o">2016</a>)</span> book to explore in-depth H2O’s modeling algorithms and features. In the meantime, you can use this section as a brief guide to get started using H2O in Spark with R.</p>
 <p>In order to use H2O with Spark, it is important to know that there are four compoinents involved: H2O, Sparkling Water, [rsparkling][rsparkling](<a href="https://github.com/h2oai/sparkling-water/tree/master/r" class="uri">https://github.com/h2oai/sparkling-water/tree/master/r</a>) and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and <code>rsparkling</code> as the R front-end for Sparkling Water, this is illustrated in Figure <a href="extensions.html#fig:extensions-h2o-diagram">10.1</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:extensions-h2o-diagram"></span>
-<div id="htmlwidget-f1ad982465ba91cba4c3" style="width:768px;height:288px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-f1ad982465ba91cba4c3">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#spacing: 20\n#padding: 16\n[R | \n  [rsparkling]\n  [sparklyr]\n]->[Spark |\n  [Sparkling Water]\n  [H2O]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-e1600b660174ed2f0f14" style="width:768px;height:288px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-e1600b660174ed2f0f14">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#spacing: 20\n#padding: 16\n[R | \n  [rsparkling]\n  [sparklyr]\n]->[Spark |\n  [Sparkling Water]\n  [H2O]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 10.1: H2O components with Spark and R
 </p>
@@ -526,32 +526,9 @@ cars_h2o</code></pre>
                  <span class="dt">y =</span> <span class="st">&quot;mpg&quot;</span>,
                  <span class="dt">training_frame =</span> cars_h2o,
                  <span class="dt">lambda_search =</span> <span class="ot">TRUE</span>)</code></pre>
-<p>H2O provides additional metrics not necessarily available in Spark’s modeling algorithms, the model that we just fit <code>Residual Deviance</code> is provided in the model while this would not be a standard metric when using Spark MLlib:</p>
+<p>H2O provides additional metrics not necessarily available in Spark’s modeling algorithms, the model that we just fit <code>Residual Deviance</code> is provided in the model while this would not be a standard metric when using Spark MLlib.</p>
 <pre class="sourceCode r"><code class="sourceCode r">model</code></pre>
-<pre><code>Model Details:
-==============
-
-H2ORegressionModel: glm
-Model ID:  GLM_model_R_1533086487173_1 
-GLM Model: summary
-    family     link                              regularization
-1 gaussian identity Elastic Net (alpha = 0.5, lambda = 0.1013 )
-                                                               lambda_search
-1 nlambda = 100, lambda.max = 10.132, lambda.min = 0.1013, lambda.1se = -1.0
-  number_of_predictors_total number_of_active_predictors number_of_iterations
-1                          2                           2                  100
-                                 training_frame
-1 frame_rdd_33_a539369727fb5223dbccfbc5b7894962
-
-Coefficients: glm coefficients
-      names coefficients standardized_coefficients
-1 Intercept    38.941654                 20.090625
-2       cyl    -1.468783                 -2.623132
-3        wt    -3.034558                 -2.969186
-
-H2ORegressionMetrics: glm
-** Reported on training data. **
-
+<pre><code>...
 MSE:  6.017684
 RMSE:  2.453097
 MAE:  1.940985
@@ -563,17 +540,29 @@ Null D.o.F. :31
 Residual Deviance :192.5659
 Residual D.o.F. :29
 AIC :156.2425</code></pre>
-<p>Finally, we can run prediction over the generalized linear model model, a similar approach would work for many other models available in H2O:</p>
+<p>Then you can run prediction over the generalized linear model model, a similar approach would work for many other models available in H2O:</p>
 <pre class="sourceCode r"><code class="sourceCode r">predictions &lt;-<span class="st"> </span><span class="kw">as_h2o_frame</span>(sc, <span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">wt =</span> <span class="dv">2</span>, <span class="dt">cyl =</span> <span class="dv">6</span>)))
 <span class="kw">h2o.predict</span>(model, predictions)</code></pre>
 <pre><code>   predict
 1 24.05984
 
 [1 row x 1 column]</code></pre>
-<p>We should then disconnect since using different extensions require us to reconnect to Spark.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)</code></pre>
+<p>H2O can also be used to perform automatic training and tuning of many models; meaning that, H2O can choose which model to use for you using <code>h2o.automl</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">automl &lt;-<span class="st"> </span><span class="kw">h2o.automl</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="st">&quot;wt&quot;</span>, <span class="st">&quot;cyl&quot;</span>), <span class="dt">y =</span> <span class="st">&quot;mpg&quot;</span>,
+                     <span class="dt">training_frame =</span> cars_h2o,
+                     <span class="dt">max_models =</span> <span class="dv">20</span>,
+                     <span class="dt">seed =</span> <span class="dv">1</span>)</code></pre>
+<p>For this particular dataset, H2O finds out that XGBoost is a better fit than GLM. Specifically, the H2O explored using XGBoost, Deep Learning, GLM and a Stacked Ensemble.</p>
+<pre class="sourceCode r"><code class="sourceCode r">automl</code></pre>
+<pre><code>model_id              mean_residual_deviance     rmse      mse      mae     rmsle
+1 XGBoost_1_...       6.627278               2.574350 6.627278 2.066412 0.1329469
+2 DeepLearning_...    6.945850               2.635498 6.945850 2.209201 0.1258008
+3 XGBoost_grid_1_...  7.025614               2.650587 7.025614 2.192791 0.1339280
+4 XGBoost_grid_1_...  7.266691               2.695680 7.266691 2.167930 0.1331849
+5 GLM_grid_...        7.416367               2.723301 7.416367 2.184664 0.1269808
+6 StackedEnsemble...  7.596133               2.756108 7.596133 2.029900 0.1340302</code></pre>
 <p>Many additional examples are available under <a href="http://spark.rstudio.com/guides/h2o/">spark.rstudio.com/guides/h2o</a>, you can also request help from <a href="https://github.com/h2oai/sparkling-water/tree/master/r">github.com/h2oai/sparkling-water/tree/master/r</a>, the official GitHub repository for the <code>rsparkling</code> package.</p>
-<p>The next extension we will present will allow you to process large-scale graph datasets.</p>
+<p>The next extension we will present will allow you to process large-scale graph datasets; therefore, make sure to disconnect with <code>spark_disconnect(sc)</code> since using different extensions requires you to reconnect to Spark.</p>
 </div>
 <div id="graphs" class="section level2">
 <h2><span class="header-section-number">10.3</span> Graphs</h2>
