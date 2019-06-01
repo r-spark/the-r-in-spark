@@ -154,36 +154,13 @@ model <- h2o.glm(x = c("wt", "cyl"),
 saveRDS(model, "data/09-extensions-h2o-glm.rds")
 ```
 
-H2O provides additional metrics not necessarily available in Spark's modeling algorithms, the model that we just fit  `Residual Deviance` is provided in the model while this would not be a standard metric when using Spark MLlib:
+H2O provides additional metrics not necessarily available in Spark's modeling algorithms, the model that we just fit  `Residual Deviance` is provided in the model while this would not be a standard metric when using Spark MLlib.
 
 ```{r}
 model
 ```
 ```
-Model Details:
-==============
-
-H2ORegressionModel: glm
-Model ID:  GLM_model_R_1533086487173_1 
-GLM Model: summary
-    family     link                              regularization
-1 gaussian identity Elastic Net (alpha = 0.5, lambda = 0.1013 )
-                                                               lambda_search
-1 nlambda = 100, lambda.max = 10.132, lambda.min = 0.1013, lambda.1se = -1.0
-  number_of_predictors_total number_of_active_predictors number_of_iterations
-1                          2                           2                  100
-                                 training_frame
-1 frame_rdd_33_a539369727fb5223dbccfbc5b7894962
-
-Coefficients: glm coefficients
-      names coefficients standardized_coefficients
-1 Intercept    38.941654                 20.090625
-2       cyl    -1.468783                 -2.623132
-3        wt    -3.034558                 -2.969186
-
-H2ORegressionMetrics: glm
-** Reported on training data. **
-
+...
 MSE:  6.017684
 RMSE:  2.453097
 MAE:  1.940985
@@ -197,7 +174,7 @@ Residual D.o.F. :29
 AIC :156.2425
 ```
 
-Finally, we can run prediction over the generalized linear model model, a similar approach would work for many other models available in H2O:
+Then you can run prediction over the generalized linear model model, a similar approach would work for many other models available in H2O:
 
 ```{r}
 predictions <- as_h2o_frame(sc, copy_to(sc, data.frame(wt = 2, cyl = 6)))
@@ -210,15 +187,33 @@ h2o.predict(model, predictions)
 [1 row x 1 column]
 ```
 
-We should then disconnect since using different extensions require us to reconnect to Spark.
+H2O can also be used to perform automatic training and tuning of many models; meaning that, H2O can choose which model to use for you using `h2o.automl`:
 
 ```{r}
-spark_disconnect(sc)
+automl <- h2o.automl(x = c("wt", "cyl"), y = "mpg",
+                     training_frame = cars_h2o,
+                     max_models = 20,
+                     seed = 1)
+```
+
+For this particular dataset, H2O finds out that XGBoost is a better fit than GLM. Specifically, the H2O explored using XGBoost, Deep Learning, GLM and a Stacked Ensemble.
+
+```{r}
+automl
+```
+```
+model_id              mean_residual_deviance     rmse      mse      mae     rmsle
+1 XGBoost_1_...       6.627278               2.574350 6.627278 2.066412 0.1329469
+2 DeepLearning_...    6.945850               2.635498 6.945850 2.209201 0.1258008
+3 XGBoost_grid_1_...  7.025614               2.650587 7.025614 2.192791 0.1339280
+4 XGBoost_grid_1_...  7.266691               2.695680 7.266691 2.167930 0.1331849
+5 GLM_grid_...        7.416367               2.723301 7.416367 2.184664 0.1269808
+6 StackedEnsemble...  7.596133               2.756108 7.596133 2.029900 0.1340302
 ```
 
 Many additional examples are available under [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/), you can also request help from [github.com/h2oai/sparkling-water/tree/master/r](https://github.com/h2oai/sparkling-water/tree/master/r), the official GitHub repository for the `rsparkling` package.
 
-The next extension we will present will allow you to process large-scale graph datasets.
+The next extension we will present will allow you to process large-scale graph datasets; therefore, make sure to disconnect with `spark_disconnect(sc)` since using different extensions requires you to reconnect to Spark.
 
 ## Graphs
 
