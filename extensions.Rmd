@@ -439,7 +439,7 @@ XGBoost is an open-source software library which provides a gradient boosting fr
 install.packages("sparkxgb")
 ```
 
-We can then use `xgboost_classifier()` to train and `ml_predict()` to predict over large-scale datasets:
+Then you would need to import the `sparkxgb` extension followed by your usual Spark connection code, adjusting `master` as needed:
 
 ```{r}
 library(sparkxgb)
@@ -447,29 +447,65 @@ library(sparklyr)
 library(dplyr)
 
 sc <- spark_connect(master = "local")
-iris <- copy_to(sc, iris)
+```
 
-xgb_model <- xgboost_classifier(iris,
-                                Species ~ .,
-                                num_class = 3,
+For this example, we will use the `attrition` dataset from the `rsample` package which you would need to install with `install.packages("rsample")`. This dataset is a fictional dataset created by IBM data scientists to uncover the factors that lead to employee attrition.
+
+```{r}
+attrition <- copy_to(sc, rsample::attrition)
+attrition
+```
+```
+# Source: spark<?> [?? x 31]
+     Age Attrition BusinessTravel DailyRate Department DistanceFromHome
+   <int> <chr>     <chr>              <int> <chr>                 <int>
+ 1    41 Yes       Travel_Rarely       1102 Sales                     1
+ 2    49 No        Travel_Freque…       279 Research_…                8
+ 3    37 Yes       Travel_Rarely       1373 Research_…                2
+ 4    33 No        Travel_Freque…      1392 Research_…                3
+ 5    27 No        Travel_Rarely        591 Research_…                2
+ 6    32 No        Travel_Freque…      1005 Research_…                2
+ 7    59 No        Travel_Rarely       1324 Research_…                3
+ 8    30 No        Travel_Rarely       1358 Research_…               24
+ 9    38 No        Travel_Freque…       216 Research_…               23
+10    36 No        Travel_Rarely       1299 Research_…               27
+# … with more rows, and 25 more variables: Education <chr>,
+#   EducationField <chr>, EnvironmentSatisfaction <chr>, Gender <chr>,
+#   HourlyRate <int>, JobInvolvement <chr>, JobLevel <int>, JobRole <chr>,
+#   JobSatisfaction <chr>, MaritalStatus <chr>, MonthlyIncome <int>,
+#   MonthlyRate <int>, NumCompaniesWorked <int>, OverTime <chr>,
+#   PercentSalaryHike <int>, PerformanceRating <chr>,
+#   RelationshipSatisfaction <chr>, StockOptionLevel <int>,
+#   TotalWorkingYears <int>, TrainingTimesLastYear <int>,
+#   WorkLifeBalance <chr>, YearsAtCompany <int>, YearsInCurrentRole <int>,
+#   YearsSinceLastPromotion <int>, YearsWithCurrManager <int>
+```
+
+To build an XGBoost model in Spark use `xgboost_classifier()`, we will compute attrition against all other features by using the `Attrition ~ .` formula and specify two for the number of classes since the attrition attribute tracks only whether an employee leaves or not. Then you can use `ml_predict()` to predict over large-scale datasets:
+
+```{r}
+xgb_model <- xgboost_classifier(attrition,
+                                Attrition ~ .,
+                                num_class = 2,
                                 num_round = 50,
                                 max_depth = 4)
 
 xgb_model %>%
-  ml_predict(iris) %>%
-  select(Species, predicted_label, starts_with("probability_")) %>%
+  ml_predict(attrition) %>%
+  select(Attrition, predicted_label, starts_with("probability_")) %>%
   glimpse()
 ```
 ```
-#> Observations: ??
-#> Variables: 5
-#> Database: spark_connection
-#> $ Species                <chr> "setosa", "setosa", "setosa", "setosa", "…
-#> $ predicted_label        <chr> "setosa", "setosa", "setosa", "setosa", "…
-#> $ probability_versicolor <dbl> 0.003566429, 0.003564076, 0.003566429, 0.…
-#> $ probability_virginica  <dbl> 0.001423170, 0.002082058, 0.001423170, 0.…
-#> $ probability_setosa     <dbl> 0.9950104, 0.9943539, 0.9950104, 0.995010…
+Observations: ??
+Variables: 4
+Database: spark_connection
+$ Attrition       <chr> "Yes", "No", "Yes", "No", "No", "No", "No", "No", "No", …
+$ predicted_label <chr> "No", "Yes", "No", "Yes", "Yes", "Yes", "Yes", "Yes", "Y…
+$ probability_No  <dbl> 0.753938094, 0.024780750, 0.915146366, 0.143568754, 0.07…
+$ probability_Yes <dbl> 0.24606191, 0.97521925, 0.08485363, 0.85643125, 0.927375…
 ```
+
+XGBoost became well known in the competition circles after its use in the winning solution of the Higgs Machine Learning Challenge which uses the ATLAS experiment to identify the Higgs boson. Since then, it has become a popular model and used for a large number of Kaggle competitions. However, decision trees could prove limiting specially in datasets with non tabular data like images, audio and text which you can tackle with deep learning models.
 
 ## Deep Learning
 
