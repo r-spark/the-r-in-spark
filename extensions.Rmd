@@ -76,10 +76,11 @@ render_nomnoml("
 ", "images/extensions-h2o-diagram.png")
 ```
 
-First, install `rsparkling`:
+First, install `rsparkling` and `h2o`:
 
 ```{r}
 install.packages("rsparkling")
+install.packages("h2o")
 ```
 
 Is is then important to notice that you need to use compatible versions of Spark, Sparkling Water and H2O. So let's start by checking the version of H2O by running,
@@ -410,7 +411,7 @@ There are many more graph algorithms provided in `graphframes`, to mention some:
 
 ## XGBoost
 
-A decision tree is a flowchart-like structure in which each internal node represents a test on an attribute, each branch represents the outcome of the test, and each leaf node represents a class label. For example, the diagram in Figure \@ref(fig:extensions-decision-diagram) shows an a decision tree that could help classify if an employee is likely to leave given a set of factors like job satisfaction and overtime. When a decision tree is used to predict continuous variables instead of discrete outcomes, say, how likely someone is to leave a company, these structures are reffered to as regression trees.
+A decision tree is a flowchart-like structure in which each internal node represents a test on an attribute, each branch represents the outcome of the test, and each leaf node represents a class label. For example, the diagram in Figure \@ref(fig:extensions-decision-diagram) shows an a decision tree that could help classify if an employee is likely to leave given a set of factors, like job satisfaction and overtime. When a decision tree is used to predict continuous variables instead of discrete outcomes, say, how likely someone is to leave a company,  decision trees are reffered to as regression trees.
 
 ```{r extensions-decision-diagram, eval=TRUE, echo=FALSE, fig.height=3, fig.width=8, fig.align='center', fig.cap='A Decision tree to predict job attrition based on known factors'}
 render_nomnoml("
@@ -424,13 +425,21 @@ render_nomnoml("
 ", "images/extensions-decision-diagram.png")
 ```
 
-sparkxgb is a new sparklyr extension that can be used to train XGBoost models in Spark and is installed as follows:
+While a decision tree representation is quite easy to understand and to interpret, finding out the decisions in the treee requires mathematical techniquest like gradient descent to find a local minimum. Gradient descent takes steps proportional to the negative of the gradient of the function at the current point. The gradient is represented by $\nabla$, the learning rate by $\gamma$ and one simply starts from a given state $a_n$ and compute the next iteration $a_{n+1}$ by simply following the direction of the gradient:
+
+$$
+a_{n+1} = a_n - \gamma \nabla F(a_n)
+$$
+
+XGBoost is an open-source software library which provides a gradient boosting framework. It aims to provide a scalable, portable and distributed gradient boosting for training gradient-boosted decision trees (GBDT) and gradient-boosted regression trees (GBDT). Gradient-boosted means xgboost uses gradient descent and boostrin, which is a technique that chooses each predictor sequentially.
+
+`sparkxgb` is an extension that you can use to train XGBoost models in Spark. To use this extension, first install it from CRAN:
 
 ```{r}
 install.packages("sparkxgb")
 ```
 
-We can then use xgboost_classifier() to train and ml_predict() to predict over large datasets with ease:
+We can then use `xgboost_classifier()` to train and `ml_predict()` to predict over large-scale datasets:
 
 ```{r}
 library(sparkxgb)
@@ -450,8 +459,6 @@ xgb_model %>%
   ml_predict(iris) %>%
   select(Species, predicted_label, starts_with("probability_")) %>%
   glimpse()
-
-spark_disconnect(sc)
 ```
 ```
 #> Observations: ??
