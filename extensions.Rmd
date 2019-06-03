@@ -509,13 +509,50 @@ XGBoost became well known in the competition circles after its use in the winnin
 
 ## Deep Learning
 
-sparktf is a new sparklyr extension allowing you to write TensorFlow records in Spark. This can be used to preprocess large amounts of data before processing them in GPU instances with Keras or TensorFlow. sparktf is now available on CRAN and can be installed as follows:
+A perceptron is a mathematical model introduced by Rosenblatt [@extensions-rosenblatt-perceptron] whom developed it as a theory for a hypothetical nervous system. The perceptron tries to mimic a neuron by mapping stimulae to numeric inputs that are weighted into an threshold function that activates only when enough stimulae is present, mathematically:
+
+$$
+f(x) =
+\begin{cases}
+1 & \sum_{i=1}^m w_i x_i + b > 0\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+A perceptron has limited application but layering perceptrons does have non-linear classification capabilities. Using Spark we can create a multi-layer perceptron classifier with `ml_multilayer_perceptron_classifier()` and predict as usual with `ml_predict`. This technique was introduced by Hinton [@extensions-hinton-layered] and like XGBoost, it also makes use of gradient descent.
+
+```{r}
+nn_model <- ml_multilayer_perceptron_classifier(
+  attrition,
+  Attrition ~ Age + DailyRate + DistanceFromHome + MonthlyIncome,
+  layers = c(4, 3, 2))
+
+nn_model %>%
+  ml_predict(attrition) %>%
+  select(Attrition, predicted_label, starts_with("probability_")) %>%
+  glimpse()
+```
+```
+Observations: ??
+Variables: 4
+Database: spark_connection
+$ Attrition       <chr> "Yes", "No", "Yes", "No", "No", "No", "No", "No", "No"…
+$ predicted_label <chr> "No", "No", "No", "No", "No", "No", "No", "No", "No", …
+$ probability_No  <dbl> 0.8439275, 0.8439275, 0.8439275, 0.8439275, 0.8439275,…
+$ probability_Yes <dbl> 0.1560725, 0.1560725, 0.1560725, 0.1560725, 0.1560725,…
+```
+
+Notice that the columns must be numeric so you will have to manually convert them with feature transformin techniques presented in the [Modeling](#modeling) chapter. It is natural to try to add more layers to classify more complex datasets; however, adding too many layers will cause the gradient to vanish and other techniques will have to use these deep layered networds also known as, deep learning models.
+
+Deep learning models solve the vanishing gradient problem by making use of special activation functions, dropout, data augmentation and graphic processing units (GPUs). You can use Spark to retrieve and preprocess large datasets into numerical-only datasets that can fit in a GPU for deep learning training. Tensorflow is one of the most popular deep learning frameworks and supports a binary format known as TensorFlow Records.
+
+You can write TensorFlow records using the `sparktf` in Spark which you can prepare to process in GPU instances with libraries like Keras or TensorFlow. `sparktf` is available on CRAN and can be installed as follows:
 
 ```{r}
 install.packages("sparktf")
 ```
 
-You can simply preprocess data in Spark and write it as TensorFlow records using spark_write_tf():
+You can then preprocess large datasets in Spark and write it as TensorFlow records using `spark_write_tf()`:
 
 ```{r}
 library(sparktf)
@@ -529,9 +566,52 @@ copy_to(sc, iris) %>%
     labels = c("setosa", "versicolor", "virginica")
   ) %>%
   spark_write_tfrecord(path = "tfrecord")
-
-spark_disconnect(sc)
 ```
+
+Once trained, you can use the `tfdatasets` package to load the dataset followed by training with `keras` or `tensorflow`. To learn more about training deep learning models with Keras we recommend reading "Deep Learning with R" [@extensions-chollet-jj].
+
+```{r}
+tfdatasets::tfrecord_dataset("tfrecord/part-r-00000")
+```
+```
+<DatasetV1Adapter shapes: (), types: tf.string>
+```
+
+Training deep learning models in a single local node with one or more GPUs is often enough for most applciations; however, recent state-of-the-art deep learning models train using distributed computing frameworks like Apache Spark. Distributed computing frameworks are used to achieve higher petaflops each day the systems spends training these models. OpenAI analyzed trends in AI and Compute [@extensions-openai-compute] which Figure \@ref(fig:extensions-distributed-training) adapted to show which systems were trained in local instances or distributed computing systems. It shouldbe obvious from the figure that there is a clear trend in recent years to use distributed computing frameworks like Spark.
+
+```{r echo=FALSE}
+data.frame(
+  system = c("AlexNet", "Dropout", "DQN", "Conv Nets", "GoogleNet", "Seq2Seq / VGG", "ResNets", "DeepSpeech2",
+             "Xception", "TI7 Dota 1v1", "Neural Architecture Search", "Neural Machine Translation", "AlphaZero", "AlphaGo Zero"),
+  petaflops = c(0.0058, 0.003, 0.0002, 0.009, 0.02, 0.1, 0.12, 0.30,
+                4.5, 8.5, 40, 90, 500, 2000),
+  year = as.Date(paste0(c("2012-02", "2012-06", "2013-09", "2013-08", "2013-08", "2013-07", "2015-11", "2015-11",
+                          "2016-10", "2017-08", "2016-10", "2016-08", "2017-11", "2017-09"), "-01"), "%Y-%m-%d"),
+  training = c("local", "local", "local", "local", "local", "local", "local", "local",
+               "distributed", "distributed", "distributed", "distributed", "distributed", "distributed")) %>%
+    ggplot(aes(x = year, y = petaflops, label = system, color = training)) +
+      scale_color_grey(start = 0.2, end = 0.6) +
+      labs(title = "Distributed Deep Learning",
+           subtitle = "Training using distributed systems based on OpenAI analysis") +
+      theme(legend.position = "right") +
+      geom_point(size = 2.5) +
+      geom_text(aes(label = system), hjust = -0.2, vjust = 0.4) +
+      scale_y_log10(
+        limits = c(1/10^4, 10^4),
+        breaks = c(1/10^5, 1/10^4, 1/10^3, 1/10^2, 1/10^1, 1, 10^1, 10^2, 10^3, 10^4),
+        labels = c("0.00001", "0.0001", "0.001", "0.01", "0.1", "1", "10", "100", "1000", "10000")
+      ) +
+      scale_x_date(name = "",
+                   limits = as.Date(as.character(c(2011, 2020)), "%Y"),
+                   breaks = as.Date(as.character(seq(2013, 2019, by = 2)), "%Y"),
+                   labels = as.character(seq(2013, 2019, by = 2))) +
+       ggsave("images/extensions-distributed-training.png", width = 10, height = 5)
+```
+```{r extensions-distributed-training, eval=TRUE, echo=FALSE, fig.cap='Training using distributed systems based on OpenAI analysis', fig.align = 'center'}
+render_image("images/extensions-distributed-training.png")
+```
+
+Training large-scale deep learning models is possible in Spark and TensorFlow through frameworks like Horovod. Today, it's possible to use Horovod with Spark from R using the `reticualte` package since Horovod requires Python and Open MPI which goes beyond the scope of this book. Instead, we will introduce an extension in the domain of genomics.
 
 ## Genomics
 
