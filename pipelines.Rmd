@@ -15,16 +15,22 @@ sc <- spark_connect(master = "local", config = config)
 
 # Pipelines {#pipelines}
 
-In this chapter, we dive into ML Pipelines, which are the engine that powers the machine learning functionality we saw in the [Modeling](#modeling) chapter. When you invoke an ML function via the formula interface, for example `ml_logistic_regression(mtcars, am ~ .)`, sparklyr actually constructs a *pipeline* for you under the hood. The Pipelines API is a lower level interface that enables advanced workflows, and we will soon show how to utilize it.
+In this chapter, we dive into ML Pipelines, which are the engine that powers the machine learning functionality we saw in the [Modeling](#modeling) chapter. When you invoke an ML function via the formula interface, for example `ml_logistic_regression(mtcars, am ~ .)`, sparklyr actually constructs a *pipeline* for you under the hood. The Pipelines API is a lower level interface that enables advanced data processing and modeling workflows. In addition, it also facilitates the *deployment* of ML models. We wil begin with a few definitions and move on to specific examples.
 
 ## Estimators and Transformers
 
-The building blocks of pipelines are objects called transformers and estimators, which are collectively referred to as **pipeline stages**. A **transformer** can be used to apply transformations to a data frame and return another data frame; the resulting data frame often comprises the original data frame with new columns appended to it. An **estimator**, on the other hand, can be used to create a transformer giving some training data. Consider the following example to illustrate this relationship: a "center and scale" estimator can learn the mean and standard deviation of some data and store the statistics in a resulting transformer; this transformer can then be used to normalize the data it was trained on and also any new, yet unseen, data.
+The building blocks of pipelines are objects called transformers and estimators, which are collectively referred to as **pipeline stages**. A **transformer** can be used to apply transformations to a data frame and return another data frame; the resulting data frame often comprises the original data frame with new columns appended to it. An **estimator**, on the other hand, can be used to create a transformer giving some training data. Consider the following example to illustrate this relationship: a "center and scale" estimator can learn the mean and standard deviation of some data and store the statistics in a resulting transformer object; this transformer can then be used to normalize the data it was trained on and also any new, yet unseen, data.
 
 Here is an example of how to define an estimator:
 
 ```{r}
-scaler <- ft_standard_scaler(sc, input_col = "features", output_col = "features_scaled", with_mean = TRUE)
+scaler <- ft_standard_scaler(
+  sc,
+  input_col = "features",
+  output_col = "features_scaled",
+  with_mean = TRUE
+)
+
 scaler
 ```
 
@@ -145,18 +151,17 @@ pipeline
 
 ## Applying Pipelines to OKCupid Data
 
-Now that we have an understanding of the rudimentary concepts for ML Pipelines, let us apply them to the predictive modeling problem from the previous chapter, where we are trying to predict whether people are currently employed by looking at their profiles. Our starting point is the `okc_train` data frame.
+Now that we have an understanding of the rudimentary concepts for ML Pipelines, let us apply them to the predictive modeling problem from the previous chapter, where we are trying to predict whether people are currently employed by looking at their profiles. Our starting point is the `okc_train` data frame with the relevant columns.
+
+```{r}
+okc_train <- okc_train %>% 
+  select(not_working, age, sex, drinks, drugs, essay1:essay9)
+```
 
 We first exhibit the pipeline, which includes feature engineering and modeling steps, then walk through it.
 
 ```{r}
 pipeline <- ml_pipeline(sc) %>%
-  ft_dplyr_transformer(
-    okc_train %>%
-      mutate(
-        essay_length = char_length(paste(!!!syms(paste0("essay", 0:9))))
-      )
-  ) %>% 
   ft_string_indexer(input_col = "sex", output_col = "sex_indexed") %>%
   ft_string_indexer(input_col = "drinks", output_col = "drinks_indexed") %>%
   ft_string_indexer(input_col = "drugs", output_col = "drugs_indexed") %>%
@@ -165,14 +170,17 @@ pipeline <- ml_pipeline(sc) %>%
     output_cols = c("sex_encoded", "drinks_encoded", "drugs_encoded")
   ) %>%
   ft_vector_assembler(
-    input_cols = c("age", "sex_encoded", "drinks_encoded", "drugs_encoded", "essay_length"), 
+    input_cols = c("age", "sex_encoded", "drinks_encoded", 
+                   "drugs_encoded", "essay_length"), 
     output_col = "features"
   ) %>%
-  ft_standard_scaler(input_col = "features", output_col = "features_scaled", with_mean = TRUE) %>%
-  ml_logistic_regression(features_col = "features_scaled", label_col = "not_working")
+  ft_standard_scaler(input_col = "features", output_col = "features_scaled", 
+                     with_mean = TRUE) %>%
+  ml_logistic_regression(features_col = "features_scaled", 
+                         label_col = "not_working")
 ```
 
-The first stage in our pipeline is a SQL transformer defined by a data frame. The `ft_dplyr_transformer()` function extracts the SQL statement associated with `mutate(., essay_length = char_length(paste(!!!syms(paste0("essay", 0:9)))))` and constructs a SQL transformer with it. You can also use `ft_sql_transformer()` directly if you prefer writing SQL; note that only single table verbs are supported either way so joins are not supported. The next three stages index the `sex`, `drinks`, and `drugs` columns, which are character, into numeric indicies via `ft_string_indexer()`. This is necessary for the `ft_one_hot_encoder_estimator()` that comes next which requires numeric column inputs. Once all of our predictor variables are of numeric type (recall that `age` is numeric already), we can create our features vector using `ft_vector_assembler()` which concatenates all of its inputs together into one column of vectors. We can then use `ft_standard_scaler()` to normalize all elements of the features column (including the one-hot encoded 0/1 values of the categorical variables), and finally apply a logistic regression via `ml_logistic_regression()`.
+The first three stages index the `sex`, `drinks`, and `drugs` columns, which are character, into numeric indicies via `ft_string_indexer()`. This is necessary for the `ft_one_hot_encoder_estimator()` that comes next which requires numeric column inputs. Once all of our predictor variables are of numeric type (recall that `age` is numeric already), we can create our features vector using `ft_vector_assembler()` which concatenates all of its inputs together into one column of vectors. We can then use `ft_standard_scaler()` to normalize all elements of the features column (including the one-hot encoded 0/1 values of the categorical variables), and finally apply a logistic regression via `ml_logistic_regression()`.
 
 During prototyping, you may want to execute these transformations *eagerly* on a small subset of the data, by passing the data frame to the `ft_` and `ml_` functions, and inspecting the transformed data frame. For example, you can do the following:
 
@@ -295,8 +303,8 @@ The formula interface approach is what we studied in the [Modeling](#modeling) s
 One of the most powerful aspects of pipelines is that they can be serialized to disk and are fully interoperable with the other Spark APIs, such as Python and Scala. To save a pipeline model, call `ml_save()` and provide a path.
 
 ```{r}
-model_dir <- file.path(tempdir(), "model")
-ml_save(pipeline_model, model_dir)
+model_dir <- file.path("spark_model")
+ml_save(cv_model$best_model, model_dir, overwrite = TRUE)
 ```
 
 ```r
@@ -306,49 +314,52 @@ ml_save(pipeline_model, model_dir)
 Let us take a look at the directory we just wrote to.
 
 ```{r}
-list.dirs(model_dir,full.names = FALSE)
+list.dirs(model_dir,full.names = FALSE) %>%
+  head(10)
 ```
 ```r
-##  [1] ""                                                        "metadata"                                               
-##  [3] "stages"                                                  "stages/0_dplyr_transformer_d5640940540"                 
-##  [5] "stages/0_dplyr_transformer_d5640940540/metadata"         "stages/1_string_indexer_d5635e4cddf"                    
-##  [7] "stages/1_string_indexer_d5635e4cddf/data"                "stages/1_string_indexer_d5635e4cddf/metadata"           
-##  [9] "stages/2_string_indexer_d564088071d"                     "stages/2_string_indexer_d564088071d/data"               
-## [11] "stages/2_string_indexer_d564088071d/metadata"            "stages/3_string_indexer_d56228b2204"                    
-## [13] "stages/3_string_indexer_d56228b2204/data"                "stages/3_string_indexer_d56228b2204/metadata"           
-## [15] "stages/4_one_hot_encoder_estimator_d565c664653"          "stages/4_one_hot_encoder_estimator_d565c664653/data"    
-## [17] "stages/4_one_hot_encoder_estimator_d565c664653/metadata" "stages/5_vector_assembler_d563e932289"                  
-## [19] "stages/5_vector_assembler_d563e932289/metadata"          "stages/6_standard_scaler_d562dc07077"                   
-## [21] "stages/6_standard_scaler_d562dc07077/data"               "stages/6_standard_scaler_d562dc07077/metadata"          
-## [23] "stages/7_logistic_regression_d563517ac18"                "stages/7_logistic_regression_d563517ac18/data"          
-## [25] "stages/7_logistic_regression_d563517ac18/metadata"      
+##  [1] ""                                             
+##  [2] "metadata"                                     
+##  [3] "stages"                                       
+##  [4] "stages/0_string_indexer_5b42c72817b"          
+##  [5] "stages/0_string_indexer_5b42c72817b/data"     
+##  [6] "stages/0_string_indexer_5b42c72817b/metadata" 
+##  [7] "stages/1_string_indexer_5b423192b89f"         
+##  [8] "stages/1_string_indexer_5b423192b89f/data"    
+##  [9] "stages/1_string_indexer_5b423192b89f/metadata"
+## [10] "stages/2_string_indexer_5b421796e826"    
 ```
 
 We can dive into a couple of the files to see what type of data was saved.
 
 ```{r}
-spark_read_json(sc, file.path(model_dir, "stages/0_dplyr_transformer_d5640940540/metadata/")) %>% 
+spark_read_json(sc, file.path(
+  model_dir, "stages/1_string_indexer_5b423192b89f/metadata"
+)) %>% 
   glimpse()
 ```
 ```r
 ## Observations: ??
-## Variables: 5
+## Variables: 6
 ## Database: spark_connection
-## $ class        <chr> "org.apache.spark.ml.feature.SQLTransformer"
-## $ paramMap     <list> [["SELECT `age`, `body_type`, `diet`, `drinks`, `drugs`, …
-## $ sparkVersion <chr> "2.4.0"
-## $ timestamp    <dbl> 1.557277e+12
-## $ uid          <chr> "dplyr_transformer_d5640940540"
+## $ class           <chr> "org.apache.spark.ml.feature.StringIndexerModel"
+## $ defaultParamMap <list> [["error", "string_indexer_5b423192b89f__output", "frequencyDesc"]]
+## $ paramMap        <list> [["error", "drinks", "drinks_indexed", "frequencyDesc"]]
+## $ sparkVersion    <chr> "2.4.0"
+## $ timestamp       <dbl> 1.559467e+12
+## $ uid             <chr> "string_indexer_5b423192b89f"
 ```
 
 ```{r}
-spark_read_parquet(sc, file.path(model_dir, "stages/7_logistic_regression_d563517ac18/data"))
+spark_read_parquet(sc, file.path(
+  model_dir, "stages/6_logistic_regression_5b423b539d0f/data"
+))
 ```
 ```r
 ## # Source: spark<data> [?? x 5]
-##   numClasses numFeatures interceptVector coefficientMatrix                      isMultinomial
-##        <int>       <int> <list>          <list>                                 <lgl>        
-## 1          2          12 <dbl [1]>       <-1.3263745374391678  -0.101825246818… FALSE  
+##   numClasses numFeatures interceptVector coefficientMatr… isMultinomial
+##        <int>       <int> <list>          <list>           <lgl>        
+## 1          2          12 <dbl [1]>       <-1.27950828662… FALSE        
 ```
 
 We see that quite a bit of information has been exported, from the SQL statement in the dplyr transformer to the fitted coefficient estimates of the logistic regression. We can then (in a new Spark session) reconstruct the model by using `ml_load()`:
@@ -365,7 +376,7 @@ model_2 %>%
 ```
 ```r
 ## LogisticRegressionModel (Transformer)
-## <logistic_regression_d563517ac18> 
+## <logistic_regression_5b423b539d0f> 
 ##  (Parameters -- Column Names)
 ##   features_col: features_scaled
 ##   label_col: not_working
@@ -373,10 +384,10 @@ model_2 %>%
 ##   probability_col: probability
 ##   raw_prediction_col: rawPrediction
 ##  (Transformer Info)
-##   coefficient_matrix:  num [1, 1:12] -1.3264 -0.1018 0.1143 0.207 0.0247 ... 
-##   coefficients:  num [1:12] -1.3264 -0.1018 0.1143 0.207 0.0247 ... 
-##   intercept:  num 1.68 
-##   intercept_vector:  num 1.68 
+##   coefficient_matrix:  num [1, 1:12] -1.2795 -0.0915 0 0.126 -0.0324 ... 
+##   coefficients:  num [1:12] -1.2795 -0.0915 0 0.126 -0.0324 ... 
+##   intercept:  num -2.79 
+##   intercept_vector:  num -2.79 
 ##   num_classes:  int 2 
 ##   num_features:  int 12 
 ##   threshold:  num 0.5 
@@ -385,6 +396,162 @@ model_2 %>%
 
 Note that the exported JSON and parquet files are agnostic of the API that exported them. This means that in a multilingual machine learning engineering team, you can pick up a data preprocessing pipeline from a data engineer working in Python, build a prediction model on top of it, then hand off the final pipeline off to a deployment engineering working in Scala.
 
-### Sparklyr ML Models
+**Note:** When `ml_save()` is called for sparklyr ML models (created using the formula interface), the associated pipeline model is saved, but any sparklyr specific metadata, such as index labels, are not. In other words, saving a sparklyr `ml_model` object then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. What we gain from this tradeoff of loss information is interoperability with other languages.
 
-When `ml_save()` is called for sparklyr ML models (created using the formula interface), the associated pipeline model is saved, but any sparklyr specific metadata, such as index labels, are not. In other words, saving a sparklyr `ml_model` object then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. What we gain from this tradeoff of loss information is interoperability with other languages.
+## Model Deployment
+
+What we have just demonstrated bears emphasizing: by collaborating within the framework of ML pipelines, we reduce friction among different personas in a data science team. In particular, we can cut down on the time from modeling to deployment.
+
+In many cases, a data science project does not end with just a slide deck with insights and recommendations. Instead, the business problem at hand may require scoring new data points on a schedule or on-demand in real time. For example, a bank might want to evaluate its mortgage portfolio risk nightly, or to provide instant decisions on credit card applications. This process of taking a model and turning it into a service that others can consume is usually referred to as *deployment* or *productionization*. Historically, there was a large gap between the analyst who built the model and the engineer who deployed it: the former might work in R and develop extensive documentation on the scoring mechanism, so the latter can re-implement the model in C++ or Java. This practice, which may easily take months in some organizations, is less prevalent today, but is almost always unnecessary in Spark ML workflows.
+
+The nightly portfolio risk and credit application scoring examples we mention above represent two modes of ML deployment known as *batch* and *real-time*. Loosely, batch processing implies processing many records at the same time and that execution time is not important as long it is reasonable (often on the scale of minutes to hours.) On the other hand, real-time processing implies scoring one or a few records at a time but the latency is crucial (on the scale of <1 second.) We will now see how we can take our OKCupid pipeline model to "production."
+
+### Batch Scoring With ML Pipelines
+
+For both cases, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The plumber[^1] R package enables us to do this very easily by annotating our prediction function.
+
+[^1]: https://www.rplumber.io/
+
+In the batch scoring use case, we simply initiate a Spark connection and load the saved model. Save the following script as `plumber/spark-plumber.R`:
+
+```{r}
+library(sparklyr)
+sc <- spark_connect(master = "local", version = "2.3.0")
+spark_model <- ml_load(sc, "spark_model")
+
+#* @post /predict
+score_spark <- function(age, sex, drinks, drugs, essay_length) {
+  new_data <- data.frame(
+    age = age,
+    sex = sex,
+    drinks = drinks,
+    drugs = drugs,
+    essay_length = essay_length,
+    stringsAsFactors = FALSE
+  )
+  new_data_tbl <- copy_to(sc, new_data, overwrite = TRUE)
+  
+  ml_transform(spark_model, pred_data_tbl) %>%
+    dplyr::pull(prediction)
+}
+```
+
+We can then initialize the service by executing the following:
+
+```{r}
+p <- plumber::plumb("plumber/spark-plumber.R")
+p$run(port = 8000)
+```
+
+This should start the web service locally and emit a message similar to
+
+```r
+## Starting server to listen on port 8000
+## Running the swagger UI at http://127.0.0.1:8000/__swagger__/
+```
+
+In a separate R session, we can try to query the service with new data to be scored:
+
+```{r}
+httr::POST(
+  "http://127.0.0.1:8000/predict",
+  body = '{"age": [42], "sex": "m", "drinks": "not at all", 
+           "drugs": "never", "essay_length": [99]}'
+) %>%
+  httr::content()
+```
+
+```r
+## [[1]]
+## [1] 0
+```
+
+If we were to time this operation (e.g. with `system.time()`), we see that the latency is on the order of hundreds of milliseconds, which may be appropriate for batch applications but insufficient for real-time. The main bottleneck is the serialization of the R data frame to a Spark data frame and back. Also, it also requires an active Spark session which is a heavy runtime requirement.
+
+### Real-Time Scoring with MLeap
+
+For real-time production, we want to keep dependencies as light as possible so we can target more platforms for deployment. We now show how we can use the mleap[^2] package, which provides an interface to the MLeap[^3] library, to serialize and serve Spark ML models. At run time, the only prerequisites for the environment are the Java Virtual Machine (JVM) and the MLeap runtime library. This avoids both the Spark binaries and expensive overhead in converting data to and from Spark data frames.
+
+[^2]: [https://github.com/rstudio/mleap](https://github.com/rstudio/mleap)
+[^3]: [https://github.com/combust/mleap](https://github.com/combust/mleap)
+
+Since mleap is a sparklyr extension, it must be loaded when `spark_connect()` is called. We can start a new R session and establish a new Spark connection[^4], and load the pipeline model that we previously saved.
+
+```{r}
+library(sparklyr)
+library(mleap)
+sc <- spark_connect(master = "local", version = "2.3.0")
+
+spark_model <- ml_load(sc, "spark_model")
+```
+
+[^4]: Note that, as of the writing of this book, MLeap does not yet support Spark 2.4, so we use Spark 2.3 instead.
+
+The way we save a model to MLeap bundle format is very similar to saving a model using the Spark ML Pipelines API; the only additional argument is `sample_input`, which is a Spark data frame with schema that we expect new data to be scored to have.
+
+```{r}
+sample_input <- data.frame(
+  sex = "m",
+  drinks = "not at all",
+  drugs = "never",
+  essay_length = 99,
+  age = 25,
+  stringsAsFactors = FALSE
+)
+
+sample_input_tbl <- copy_to(sc, sample_input)
+
+ml_write_bundle(spark_model, sample_input = sample_input_tbl, path = "mleap_model.zip")
+```
+
+The artifact we just created, `mleap_model.zip`, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark. To test this model, we can create a new plumber API to expose it. The script `plumber/mleap-plumber.R` is very similar to the previous example:
+
+```{r}
+library(mleap)
+# install_maven()
+# install_mleap()
+
+mleap_model <- mleap_load_bundle("mleap_model.zip")
+
+#* @post /predict
+score_spark <- function(age, sex, drinks, drugs, essay_length) {
+  new_data <- data.frame(
+    age = as.double(age),
+    sex = sex,
+    drinks = drinks,
+    drugs = drugs,
+    essay_length = as.double(essay_length),
+    stringsAsFactors = FALSE
+  )
+  mleap_transform(mleap_model, new_data)$prediction
+}
+```
+
+And the way we launch the service is exactly the same:
+
+```{r}
+p <- plumber::plumb("plumber/mleap-plumber.R")
+p$run(port = 8000)
+```
+
+Again, in a separate session, we can run the exact same code we did previously to test this new service:
+
+```{r}
+httr::POST(
+  "http://127.0.0.1:8000/predict",
+  body = '{"age": [42], "sex": "m", "drinks": "not at all", 
+           "drugs": "never", "essay_length": [99]}'
+) %>%
+  httr::content()
+```
+
+```r
+## [[1]]
+## [1] 0
+```
+
+If we were to time this operation, we will see that the service now returns predictions in tens of milliseconds!
+
+## Conclusion
+
+In this chapter, we discuss the Spark ML Pipelines API which is the engine behind the modeling functions covered in the previous chapter. We show how to tidy up our sparklyr predictive modeling workflow by organize data processing and machine learning routines into pipelines. Pipelines also facilitate collaboration among members of a multilingual data science and engineering team by sharing a language agnostic serialization format. Model deployment is examined, and paths to productionization for both batch and real-time settings are demonstrated.
