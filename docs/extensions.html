@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
 
 
-<meta name="date" content="2019-05-31">
+<meta name="date" content="2019-06-02">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -435,7 +435,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">10.1</span> Overview</h2>
 <p>In the <a href="intro.html#intro">Introduction</a> chapter we presented the R community as a vibrant group of individuals collaborating with each other in many ways, one of them, by moving open science forward by creating R packages that can be installed from CRAN. In a similar way, but in a much smaller scale, the R community has contributed extensions that increase the functionality initially supported in Spark and R. Spark itself also provides support for creating Spark extensions and, in-fact, many R extensions make use of Spark extensions.</p>
 <p>Extensions are constantly being created so this section will be outdated at any given point in time, in addition, we might not be even aware of many Spark and R extensions; however, at the very least we can track the extensions that are available in CRAN by looking at the “reverse imports” for <code>sparklyr</code> in CRAN <span class="citation">(“CRAN - Package Sparklyr” <a href="#ref-extensions-sparklyr-cran">2019</a>)</span>. Extensions and R packages published in CRAN tend to be the most stable since when a package is published in CRAN, it will go through a review process which increases the overall quality of a contribution.</p>
-<p>While we wish we could present all the extensions, we’ve picked a few that we believe should be interesting to most readers and which we will present next. You can find a few more under the <a href="https://github.com/r-spark">github.com/r-spark</a> organization or by searching repos in GitHub with the <code>sparklyr</code> tag.</p>
+<p>While we wish we could present all the extensions, we will present next the extensions that should be the most interesting to most readers. You can find additional ones under the <a href="https://github.com/r-spark">github.com/r-spark</a> organization or by searching repos in GitHub with the <code>sparklyr</code> tag.</p>
 <dl>
 <dt>rsparkling</dt>
 <dd>The <code>rsparkling</code> extensions allows you to use H2O and Spark from R. This extension is what we would consider advanced modeling in Spark. While Spark’s built-in modeling library, Spark MLlib, is quite useful in many cases; H2O’s modeling capabilities can compute additional statistical metrics and can proivide performance and scalability improvements over Spark MLlib. We, ourselves, have not performed detailed comparisons nor benchamarks between MLlib and H2O; so this is something you will have to research on your own to create a complete picture of when to use H2O’s capabilities.
@@ -457,28 +457,29 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </dd>
 </dl>
 <p>Before you learn how and when to use each extension, we should first briefly explain how extensions can be used with R and Spark.</p>
-<p>First, an Spark extension is just and R package that happens to be aware of Spark. As any other R package, you will first have to install the R package with <code>install.packages("package-name")</code>. Once installed, it is important to know that you willn need to reconnect to Spark before the extension can be used. Son in general, the pattern you should follow goes as follows:</p>
+<p>First, an Spark extension is just and R package that happens to be aware of Spark. As any other R package, you will first have to install the R package. Once installed, it is important to know that you will need to reconnect to Spark before the extension can be used. So, in general, the pattern you should follow goes as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparkextension)
 <span class="kw">library</span>(sparklyr)
 
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;&lt;master&gt;&quot;</span>)</code></pre>
 <p>Notice that <code>sparklyr</code> is loaded after the extensions to allow the extension to register properly. If you had to install and load a new extension you would simply have to disconnect first using <code>spark_disconnect(sc)</code> and repeat the steps above with the new extension.</p>
-<p>As you can notice, it’s not hard to install and use Spark extensions from R; however, each extension can be a world on it’s own so most of the time you will have to spend time understand what the extension is, when to use it and how to use it properly. The first extension you will learn about is the <code>rsparkling</code> extension which enables you to use H2O in Spark with R.</p>
+<p>It’s not hard to install and use Spark extensions from R; however, each extension can be a world on it’s own so most of the time you will have to spend time understand what the extension is, when to use it and how to use it properly. The first extension you will learn about is the <code>rsparkling</code> extension which enables you to use H2O in Spark with R.</p>
 </div>
 <div id="h2o" class="section level2">
 <h2><span class="header-section-number">10.2</span> H2O</h2>
-<p><a href="https://www.h2o.ai/">H2O</a> is open-source software for large-scale modeling created by H2O.ai, which allows you to fit thousands of potential models as part of discovering patterns in data. You can consider using H2O to complement or replace Spark’s default modeling algorithms. It is common to Spark’s default modeling algorithms and transition to H2O when Spark’s algorithms fall short or when advanced functionality (like additional modeling metrics) are required.</p>
+<p><a href="https://www.h2o.ai/">H2O</a> is open-source software for large-scale modeling created by H2O.ai, which allows you to fit thousands of potential models as part of discovering patterns in data. You can consider using H2O to complement or replace Spark’s default modeling algorithms. It is common to Spark’s default modeling algorithms and transition to H2O when Spark’s algorithms fall short or when advanced functionality (like additional modeling metrics or automatic model selection) are desired</p>
 <p>We can’t do justice to H2O’s great modeling capabilities in a single paragraph, explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the “Practical machine learning with H2O” <span class="citation">(Cook <a href="#ref-extensions-practical-h2o">2016</a>)</span> book to explore in-depth H2O’s modeling algorithms and features. In the meantime, you can use this section as a brief guide to get started using H2O in Spark with R.</p>
 <p>In order to use H2O with Spark, it is important to know that there are four compoinents involved: H2O, Sparkling Water, [rsparkling][rsparkling](<a href="https://github.com/h2oai/sparkling-water/tree/master/r" class="uri">https://github.com/h2oai/sparkling-water/tree/master/r</a>) and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and <code>rsparkling</code> as the R front-end for Sparkling Water, this is illustrated in Figure <a href="extensions.html#fig:extensions-h2o-diagram">10.1</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:extensions-h2o-diagram"></span>
-<div id="htmlwidget-e1600b660174ed2f0f14" style="width:768px;height:288px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-e1600b660174ed2f0f14">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#spacing: 20\n#padding: 16\n[R | \n  [rsparkling]\n  [sparklyr]\n]->[Spark |\n  [Sparkling Water]\n  [H2O]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-9f51b024e11e8965b78a" style="width:768px;height:288px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9f51b024e11e8965b78a">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#spacing: 20\n#padding: 16\n[R | \n  [rsparkling]\n  [sparklyr]\n]->[Spark |\n  [Sparkling Water]\n  [H2O]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 10.1: H2O components with Spark and R
 </p>
 </div>
-<p>First, install <code>rsparkling</code>:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;rsparkling&quot;</span>)</code></pre>
+<p>First, install <code>rsparkling</code> and <code>h2o</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;rsparkling&quot;</span>)
+<span class="kw">install.packages</span>(<span class="st">&quot;h2o&quot;</span>)</code></pre>
 <p>Is is then important to notice that you need to use compatible versions of Spark, Sparkling Water and H2O. So let’s start by checking the version of H2O by running,</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">packageVersion</span>(<span class="st">&quot;h2o&quot;</span>)</code></pre>
 <pre><code>## [1] &#39;3.22.1.3&#39;</code></pre>
@@ -562,7 +563,7 @@ AIC :156.2425</code></pre>
 5 GLM_grid_...        7.416367               2.723301 7.416367 2.184664 0.1269808
 6 StackedEnsemble...  7.596133               2.756108 7.596133 2.029900 0.1340302</code></pre>
 <p>Many additional examples are available under <a href="http://spark.rstudio.com/guides/h2o/">spark.rstudio.com/guides/h2o</a>, you can also request help from <a href="https://github.com/h2oai/sparkling-water/tree/master/r">github.com/h2oai/sparkling-water/tree/master/r</a>, the official GitHub repository for the <code>rsparkling</code> package.</p>
-<p>The next extension we will present will allow you to process large-scale graph datasets; therefore, make sure to disconnect with <code>spark_disconnect(sc)</code> since using different extensions requires you to reconnect to Spark.</p>
+<p>The next extension, <code>graphframes</code>, will allow you to process large-scale relational datasets; however, before you start using it, make make sure to disconnect with <code>spark_disconnect(sc)</code> since using a different extensions requires you to reconnect to Spark.</p>
 </div>
 <div id="graphs" class="section level2">
 <h2><span class="header-section-number">10.3</span> Graphs</h2>
@@ -574,7 +575,7 @@ FIGURE 10.3: Seven Bridges of Königsberg from the Euler Archive
 </p>
 </div>
 <p>Today, a graph is defined as an ordered pair <span class="math inline">\(G=(V,E)\)</span>, with <span class="math inline">\(V\)</span> a set of vertices (nodes or points) and <span class="math inline">\(E \subseteq \{\{x, y\} | (x, y) ∈ \mathrm{V}^2 \land x \ne y\}\)</span> a set of edges (links or lines) which are either an unordered pair for <strong>undirected graphs</strong> or an ordered pair for <strong>directed graphs</strong>. The former describing links where the direction does not matter and the latter linked where it does.</p>
-<p>As a simple example, we can use the <code>highschool</code> dataset from the <code>ggraph</code> package which tracks friendship among high school boys,</p>
+<p>As a simple example, we can use the <code>highschool</code> dataset from the <code>ggraph</code> package which tracks friendship among high school boys. In this dataset, the vertices are the students and the edges describe pairs of students who happen to be friends in a particular year.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggraph)
 <span class="kw">library</span>(igraph)
 
@@ -593,7 +594,8 @@ highschool</code></pre>
  9     3    15  1957
 10     4     5  1957
 # … with 496 more rows</code></pre>
-<p>A graph in <a href="https://graphframes.github.io/">GraphFrames</a> is also represented as a table of edges and vertices; however, the format needs to follow an specific schema. Lets first install the <code>graphframes</code> extension,</p>
+<p>While the highschool dataset can be easily processed in R, even medium size graph datasets can be hard to process without distributing this work across a cluster of machines which Spark is suited for. Spark supports processing graphs through the <a href="https://github.com/rstudio/graphframes">graphframes</a> extension which in turn uses the <a href="https://spark.apache.org/graphx/">GraphX</a> Spark component. GraphX is Apache Spark’s API for graphs and graph-parallel computation and allows you to seamlessly work with both graphs and collection, it’s comparable in performance to the fastest specialized graph processing systems and provides a growing library of graph algorithms.</p>
+<p>A graph in Spark is also represented as a dataframe of edges and vertices; however, the format is slightly different since we will need to construct a dataframe for vertices. Lets first install the <a href="https://graphframes.github.io/">GraphFrames</a> extension,</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(graphframes)</code></pre>
 <p>Followed by connecting, copying the <code>highschool</code> dataset and transforming the graph to the format that this extension expects, we will scope this dataset to the friendships of year 1957.</p>
 <p>The <code>vertices_tbl</code> table is expected to have a single <code>id</code> column:</p>
@@ -673,46 +675,116 @@ Edges:
 FIGURE 10.4: Highschool ggraph dataset with highest pagerank highlighted
 </p>
 </div>
-<p>There are many more graph algorithms provided in <code>graphframes</code>, to mention some: bread depth search, connected components, label propagation for detecting communities, etc. For questions on this extension reffer to the official GitHub repo, <a href="https://github.com/rstudio/graphframes">github.com/rstudio/graphframes</a>. We will now present a popular gradient boosting framework.</p>
+<p>There are many more graph algorithms provided in <code>graphframes</code>, to mention some: bread depth search, connected components, label propagation for detecting communities, strongly connected components and triangle count. For questions on this extension reffer to the official GitHub repo, <a href="https://github.com/rstudio/graphframes">github.com/rstudio/graphframes</a>. We will now present a popular gradient boosting framework.</p>
 </div>
 <div id="xgboost" class="section level2">
 <h2><span class="header-section-number">10.4</span> XGBoost</h2>
-<p>sparkxgb is a new sparklyr extension that can be used to train XGBoost models in Spark and is installed as follows:</p>
+<p>A decision tree is a flowchart-like structure in which each internal node represents a test on an attribute, each branch represents the outcome of the test, and each leaf node represents a class label. For example, the diagram in Figure <a href="extensions.html#fig:extensions-decision-diagram">10.5</a> shows an a decision tree that could help classify if an employee is likely to leave given a set of factors, like job satisfaction and overtime. When a decision tree is used to predict continuous variables instead of discrete outcomes, say, how likely someone is to leave a company, decision trees are reffered to as regression trees.</p>
+<div class="figure" style="text-align: center"><span id="fig:extensions-decision-diagram"></span>
+<div id="htmlwidget-19dd0e867c00fcbede07" style="width:768px;height:288px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-19dd0e867c00fcbede07">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n[0.5|Job Satisfaction > 0.2?\n]-Yes[0.3|Over Time Hours > 10?]\n[0.5]-No[0.7|Job Level > 2?]\n[0.3]-Yes[0.65]\n[0.3]-No[0.20]\n[0.7]-Yes[0.15]\n[0.7]-No[0.70]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+FIGURE 10.5: A Decision tree to predict job attrition based on known factors
+</p>
+</div>
+<p>While a decision tree representation is quite easy to understand and to interpret, finding out the decisions in the treee requires mathematical techniquest like gradient descent to find a local minimum. Gradient descent takes steps proportional to the negative of the gradient of the function at the current point. The gradient is represented by <span class="math inline">\(\nabla\)</span>, the learning rate by <span class="math inline">\(\gamma\)</span> and one simply starts from a given state <span class="math inline">\(a_n\)</span> and compute the next iteration <span class="math inline">\(a_{n+1}\)</span> by simply following the direction of the gradient:</p>
+<p><span class="math display">\[
+a_{n+1} = a_n - \gamma \nabla F(a_n)
+\]</span></p>
+<p>XGBoost is an open-source software library which provides a gradient boosting framework. It aims to provide a scalable, portable and distributed gradient boosting for training gradient-boosted decision trees (GBDT) and gradient-boosted regression trees (GBDT). Gradient-boosted means xgboost uses gradient descent and boostrin, which is a technique that chooses each predictor sequentially.</p>
+<p><code>sparkxgb</code> is an extension that you can use to train XGBoost models in Spark. To use this extension, first install it from CRAN:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;sparkxgb&quot;</span>)</code></pre>
-<p>We can then use xgboost_classifier() to train and ml_predict() to predict over large datasets with ease:</p>
+<p>Then you would need to import the <code>sparkxgb</code> extension followed by your usual Spark connection code, adjusting <code>master</code> as needed:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparkxgb)
 <span class="kw">library</span>(sparklyr)
 <span class="kw">library</span>(dplyr)
 
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)
-iris &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, iris)
-
-xgb_model &lt;-<span class="st"> </span><span class="kw">xgboost_classifier</span>(iris,
-                                Species <span class="op">~</span><span class="st"> </span>.,
-                                <span class="dt">num_class =</span> <span class="dv">3</span>,
+sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</code></pre>
+<p>For this example, we will use the <code>attrition</code> dataset from the <code>rsample</code> package which you would need to install with <code>install.packages("rsample")</code>. This dataset is a fictional dataset created by IBM data scientists to uncover the factors that lead to employee attrition.</p>
+<pre class="sourceCode r"><code class="sourceCode r">attrition &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, rsample<span class="op">::</span>attrition)
+attrition</code></pre>
+<pre><code># Source: spark&lt;?&gt; [?? x 31]
+     Age Attrition BusinessTravel DailyRate Department DistanceFromHome
+   &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;              &lt;int&gt; &lt;chr&gt;                 &lt;int&gt;
+ 1    41 Yes       Travel_Rarely       1102 Sales                     1
+ 2    49 No        Travel_Freque…       279 Research_…                8
+ 3    37 Yes       Travel_Rarely       1373 Research_…                2
+ 4    33 No        Travel_Freque…      1392 Research_…                3
+ 5    27 No        Travel_Rarely        591 Research_…                2
+ 6    32 No        Travel_Freque…      1005 Research_…                2
+ 7    59 No        Travel_Rarely       1324 Research_…                3
+ 8    30 No        Travel_Rarely       1358 Research_…               24
+ 9    38 No        Travel_Freque…       216 Research_…               23
+10    36 No        Travel_Rarely       1299 Research_…               27
+# … with more rows, and 25 more variables: Education &lt;chr&gt;,
+#   EducationField &lt;chr&gt;, EnvironmentSatisfaction &lt;chr&gt;, Gender &lt;chr&gt;,
+#   HourlyRate &lt;int&gt;, JobInvolvement &lt;chr&gt;, JobLevel &lt;int&gt;, JobRole &lt;chr&gt;,
+#   JobSatisfaction &lt;chr&gt;, MaritalStatus &lt;chr&gt;, MonthlyIncome &lt;int&gt;,
+#   MonthlyRate &lt;int&gt;, NumCompaniesWorked &lt;int&gt;, OverTime &lt;chr&gt;,
+#   PercentSalaryHike &lt;int&gt;, PerformanceRating &lt;chr&gt;,
+#   RelationshipSatisfaction &lt;chr&gt;, StockOptionLevel &lt;int&gt;,
+#   TotalWorkingYears &lt;int&gt;, TrainingTimesLastYear &lt;int&gt;,
+#   WorkLifeBalance &lt;chr&gt;, YearsAtCompany &lt;int&gt;, YearsInCurrentRole &lt;int&gt;,
+#   YearsSinceLastPromotion &lt;int&gt;, YearsWithCurrManager &lt;int&gt;</code></pre>
+<p>To build an XGBoost model in Spark use <code>xgboost_classifier()</code>, we will compute attrition against all other features by using the <code>Attrition ~ .</code> formula and specify two for the number of classes since the attrition attribute tracks only whether an employee leaves or not. Then you can use <code>ml_predict()</code> to predict over large-scale datasets:</p>
+<pre class="sourceCode r"><code class="sourceCode r">xgb_model &lt;-<span class="st"> </span><span class="kw">xgboost_classifier</span>(attrition,
+                                Attrition <span class="op">~</span><span class="st"> </span>.,
+                                <span class="dt">num_class =</span> <span class="dv">2</span>,
                                 <span class="dt">num_round =</span> <span class="dv">50</span>,
                                 <span class="dt">max_depth =</span> <span class="dv">4</span>)
 
 xgb_model <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">ml_predict</span>(iris) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">select</span>(Species, predicted_label, <span class="kw">starts_with</span>(<span class="st">&quot;probability_&quot;</span>)) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">glimpse</span>()
-
-<span class="kw">spark_disconnect</span>(sc)</code></pre>
-<pre><code>#&gt; Observations: ??
-#&gt; Variables: 5
-#&gt; Database: spark_connection
-#&gt; $ Species                &lt;chr&gt; &quot;setosa&quot;, &quot;setosa&quot;, &quot;setosa&quot;, &quot;setosa&quot;, &quot;…
-#&gt; $ predicted_label        &lt;chr&gt; &quot;setosa&quot;, &quot;setosa&quot;, &quot;setosa&quot;, &quot;setosa&quot;, &quot;…
-#&gt; $ probability_versicolor &lt;dbl&gt; 0.003566429, 0.003564076, 0.003566429, 0.…
-#&gt; $ probability_virginica  &lt;dbl&gt; 0.001423170, 0.002082058, 0.001423170, 0.…
-#&gt; $ probability_setosa     &lt;dbl&gt; 0.9950104, 0.9943539, 0.9950104, 0.995010…</code></pre>
+<span class="st">  </span><span class="kw">ml_predict</span>(attrition) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">select</span>(Attrition, predicted_label, <span class="kw">starts_with</span>(<span class="st">&quot;probability_&quot;</span>)) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">glimpse</span>()</code></pre>
+<pre><code>Observations: ??
+Variables: 4
+Database: spark_connection
+$ Attrition       &lt;chr&gt; &quot;Yes&quot;, &quot;No&quot;, &quot;Yes&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, …
+$ predicted_label &lt;chr&gt; &quot;No&quot;, &quot;Yes&quot;, &quot;No&quot;, &quot;Yes&quot;, &quot;Yes&quot;, &quot;Yes&quot;, &quot;Yes&quot;, &quot;Yes&quot;, &quot;Y…
+$ probability_No  &lt;dbl&gt; 0.753938094, 0.024780750, 0.915146366, 0.143568754, 0.07…
+$ probability_Yes &lt;dbl&gt; 0.24606191, 0.97521925, 0.08485363, 0.85643125, 0.927375…</code></pre>
+<p>XGBoost became well known in the competition circles after its use in the winning solution of the Higgs Machine Learning Challenge which uses the ATLAS experiment to identify the Higgs boson. Since then, it has become a popular model and used for a large number of Kaggle competitions. However, decision trees could prove limiting specially in datasets with non tabular data like images, audio and text which you can tackle with deep learning models.</p>
 </div>
 <div id="deep-learning" class="section level2">
 <h2><span class="header-section-number">10.5</span> Deep Learning</h2>
-<p>sparktf is a new sparklyr extension allowing you to write TensorFlow records in Spark. This can be used to preprocess large amounts of data before processing them in GPU instances with Keras or TensorFlow. sparktf is now available on CRAN and can be installed as follows:</p>
+<p>A perceptron is a mathematical model introduced by Rosenblatt <span class="citation">(Rosenblatt <a href="#ref-extensions-rosenblatt-perceptron">1958</a>)</span> whom developed it as a theory for a hypothetical nervous system. The perceptron tries to mimic a neuron by mapping stimulae to numeric inputs that are weighted into an threshold function that activates only when enough stimulae is present, mathematically:</p>
+<p><span class="math display">\[
+f(x) =
+\begin{cases}
+1 &amp; \sum_{i=1}^m w_i x_i + b &gt; 0\\
+0 &amp; \text{otherwise}
+\end{cases}
+\]</span></p>
+<p>Minsky found out that a single perceptron can only classify datasets that are linearly separable; however, he also presented in his perceptrons book <span class="citation">(Minsky and Papert <a href="#ref-extensions-minsky-perceptrons">2017</a>)</span> that layering perceptrons would bring additional classification capabilities, the original diagram showcasing a multi-layered perceptron is presented in Figure <a href="extensions.html#fig:extensions-minsky-layered">10.6</a>.</p>
+<div class="figure" style="text-align: center"><span id="fig:extensions-minsky-layered"></span>
+<img src="images/extensions-minsky-multi-layers.png" alt="Layered perceptrons as illustrated in the perceptrons book" width="1821" />
+<p class="caption">
+FIGURE 10.6: Layered perceptrons as illustrated in the perceptrons book
+</p>
+</div>
+<p>Using Spark we can create a multi-layer perceptron classifier with <code>ml_multilayer_perceptron_classifier()</code> to classify and predict over large datasets. This technique was introduced by Hinton <span class="citation">(Ackley, Hinton, and Sejnowski <a href="#ref-extensions-hinton-layered">1985</a>)</span> and like XGBoost, it also makes use of gradient descent.</p>
+<pre class="sourceCode r"><code class="sourceCode r">nn_model &lt;-<span class="st"> </span><span class="kw">ml_multilayer_perceptron_classifier</span>(
+  attrition,
+  Attrition <span class="op">~</span><span class="st"> </span>Age <span class="op">+</span><span class="st"> </span>DailyRate <span class="op">+</span><span class="st"> </span>DistanceFromHome <span class="op">+</span><span class="st"> </span>MonthlyIncome,
+  <span class="dt">layers =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">2</span>))
+
+nn_model <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ml_predict</span>(attrition) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">select</span>(Attrition, predicted_label, <span class="kw">starts_with</span>(<span class="st">&quot;probability_&quot;</span>)) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">glimpse</span>()</code></pre>
+<pre><code>Observations: ??
+Variables: 4
+Database: spark_connection
+$ Attrition       &lt;chr&gt; &quot;Yes&quot;, &quot;No&quot;, &quot;Yes&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;…
+$ predicted_label &lt;chr&gt; &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, …
+$ probability_No  &lt;dbl&gt; 0.8439275, 0.8439275, 0.8439275, 0.8439275, 0.8439275,…
+$ probability_Yes &lt;dbl&gt; 0.1560725, 0.1560725, 0.1560725, 0.1560725, 0.1560725,…</code></pre>
+<p>Notice that the columns must be numeric so you will have to manually convert them with feature transformin techniques presented in the <a href="modeling.html#modeling">Modeling</a> chapter. It is natural to try to add more layers to classify more complex datasets; however, adding too many layers will cause the gradient to vanish and other techniques will have to use these deep layered networds also known as, deep learning models.</p>
+<p>Deep learning models solve the vanishing gradient problem by making use of special activation functions, dropout, data augmentation and graphic processing units (GPUs). You can use Spark to retrieve and preprocess large datasets into numerical-only datasets that can fit in a GPU for deep learning training. Tensorflow is one of the most popular deep learning frameworks and supports a binary format known as TensorFlow Records.</p>
+<p>You can write TensorFlow records using the <code>sparktf</code> in Spark which you can prepare to process in GPU instances with libraries like Keras or TensorFlow. <code>sparktf</code> is available on CRAN and can be installed as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;sparktf&quot;</span>)</code></pre>
-<p>You can simply preprocess data in Spark and write it as TensorFlow records using spark_write_tf():</p>
+<p>You can then preprocess large datasets in Spark and write it as TensorFlow records using <code>spark_write_tf()</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparktf)
 <span class="kw">library</span>(sparklyr)
 
@@ -723,9 +795,18 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
     <span class="st">&quot;Species&quot;</span>, <span class="st">&quot;label&quot;</span>,
     <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;setosa&quot;</span>, <span class="st">&quot;versicolor&quot;</span>, <span class="st">&quot;virginica&quot;</span>)
   ) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">spark_write_tfrecord</span>(<span class="dt">path =</span> <span class="st">&quot;tfrecord&quot;</span>)
-
-<span class="kw">spark_disconnect</span>(sc)</code></pre>
+<span class="st">  </span><span class="kw">spark_write_tfrecord</span>(<span class="dt">path =</span> <span class="st">&quot;tfrecord&quot;</span>)</code></pre>
+<p>Once trained, you can use the <code>tfdatasets</code> package to load the dataset followed by training with <code>keras</code> or <code>tensorflow</code>. To learn more about training deep learning models with Keras we recommend reading “Deep Learning with R” <span class="citation">(Chollet and Allaire <a href="#ref-extensions-chollet-jj">2018</a>)</span>.</p>
+<pre class="sourceCode r"><code class="sourceCode r">tfdatasets<span class="op">::</span><span class="kw">tfrecord_dataset</span>(<span class="st">&quot;tfrecord/part-r-00000&quot;</span>)</code></pre>
+<pre><code>&lt;DatasetV1Adapter shapes: (), types: tf.string&gt;</code></pre>
+<p>Training deep learning models in a single local node with one or more GPUs is often enough for most applciations; however, recent state-of-the-art deep learning models train using distributed computing frameworks like Apache Spark. Distributed computing frameworks are used to achieve higher petaflops each day the systems spends training these models. OpenAI analyzed trends in AI and Compute <span class="citation">(“AI and Compute” <a href="#ref-extensions-openai-compute">2019</a>)</span> which Figure <a href="extensions.html#fig:extensions-distributed-training">10.7</a> adapted to show which systems were trained in local instances or distributed computing systems. It should be obvious from the figure that there is a trend in recent years to use distributed computing frameworks.</p>
+<div class="figure" style="text-align: center"><span id="fig:extensions-distributed-training"></span>
+<img src="images/extensions-distributed-training-resized.png" alt="Training using distributed systems based on OpenAI analysis" width="1500" />
+<p class="caption">
+FIGURE 10.7: Training using distributed systems based on OpenAI analysis
+</p>
+</div>
+<p>Training large-scale deep learning models is possible in Spark and TensorFlow through frameworks like Horovod. Today, it’s possible to use Horovod with Spark from R using the <code>reticualte</code> package since Horovod requires Python and Open MPI which goes beyond the scope of this book. Instead, we will introduce a different Spark extension in the domain of genomics.</p>
 </div>
 <div id="genomics" class="section level2">
 <h2><span class="header-section-number">10.6</span> Genomics</h2>
@@ -777,11 +858,11 @@ points &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span cl
 
 polygons_wkt &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, polygons)
 points_wkt &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, points)</code></pre>
-<p>There are various spatial operations defined in <code>geospark</code>, which Figure <a href="extensions.html#fig:extensions-geospark-operations">10.5</a> describes.</p>
+<p>There are various spatial operations defined in <code>geospark</code>, which Figure <a href="extensions.html#fig:extensions-geospark-operations">10.8</a> describes.</p>
 <div class="figure" style="text-align: center"><span id="fig:extensions-geospark-operations"></span>
 <img src="images/extensions-geospark-operations.png" alt="Spatial operations available in geospark." width="400" />
 <p class="caption">
-FIGURE 10.5: Spatial operations available in geospark.
+FIGURE 10.8: Spatial operations available in geospark.
 </p>
 </div>
 <p>The following examples makes use of <code>st_contains()</code> to find the polygons that contain the given points.</p>
@@ -837,6 +918,21 @@ leaflet<span class="op">::</span><span class="kw">addPolygons</span>(<span class
 </div>
 <div id="ref-extensions-practical-h2o">
 <p>Cook, Darren. 2016. <em>Practical Machine Learning with H2o: Powerful, Scalable Techniques for Deep Learning and Ai</em>. " O’Reilly Media, Inc.".</p>
+</div>
+<div id="ref-extensions-rosenblatt-perceptron">
+<p>Rosenblatt, Frank. 1958. “The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain.” <em>Psychological Review</em> 65 (6): 386.</p>
+</div>
+<div id="ref-extensions-minsky-perceptrons">
+<p>Minsky, Marvin, and Seymour A Papert. 2017. <em>Perceptrons: An Introduction to Computational Geometry</em>. MIT press.</p>
+</div>
+<div id="ref-extensions-hinton-layered">
+<p>Ackley, David H, Geoffrey E Hinton, and Terrence J Sejnowski. 1985. “A Learning Algorithm for Boltzmann Machines.” <em>Cognitive Science</em> 9 (1): 147–69.</p>
+</div>
+<div id="ref-extensions-chollet-jj">
+<p>Chollet, Francois, and J.J. Allaire. 2018. <em>Deep Learning with R</em>. Manning Publications.</p>
+</div>
+<div id="ref-extensions-openai-compute">
+<p>“AI and Compute.” 2019. <a href="https://openai.com/blog/ai-and-compute">https://openai.com/blog/ai-and-compute</a>.</p>
 </div>
 </div>
             </section>
