@@ -519,7 +519,13 @@ f(x) =
 \end{cases}
 $$
 
-A perceptron has limited application but layering perceptrons does have non-linear classification capabilities. Using Spark we can create a multi-layer perceptron classifier with `ml_multilayer_perceptron_classifier()` and predict as usual with `ml_predict`. This technique was introduced by Hinton [@extensions-hinton-layered] and like XGBoost, it also makes use of gradient descent.
+Minsky found out that a single perceptron can only classify datasets that are linearly separable; however, he also presented in his perceptrons book [@extensions-minsky-perceptrons] that layering perceptrons would bring additional classification capabilities, the original diagram showcasing a multi-layered perceptron is presented in Figure \@ref(fig:extensions-minsky-layered).
+
+```{r extensions-minsky-layered, eval=TRUE, echo=FALSE, fig.cap='', fig.align = 'center'}
+render_image("images/extensions-minsky-multi-layers.png")
+```
+
+Using Spark we can create a multi-layer perceptron classifier with `ml_multilayer_perceptron_classifier()` to classify and predict over large datasets. This technique was introduced by Hinton [@extensions-hinton-layered] and like XGBoost, it also makes use of gradient descent.
 
 ```{r}
 nn_model <- ml_multilayer_perceptron_classifier(
@@ -577,7 +583,7 @@ tfdatasets::tfrecord_dataset("tfrecord/part-r-00000")
 <DatasetV1Adapter shapes: (), types: tf.string>
 ```
 
-Training deep learning models in a single local node with one or more GPUs is often enough for most applciations; however, recent state-of-the-art deep learning models train using distributed computing frameworks like Apache Spark. Distributed computing frameworks are used to achieve higher petaflops each day the systems spends training these models. OpenAI analyzed trends in AI and Compute [@extensions-openai-compute] which Figure \@ref(fig:extensions-distributed-training) adapted to show which systems were trained in local instances or distributed computing systems. It shouldbe obvious from the figure that there is a clear trend in recent years to use distributed computing frameworks like Spark.
+Training deep learning models in a single local node with one or more GPUs is often enough for most applciations; however, recent state-of-the-art deep learning models train using distributed computing frameworks like Apache Spark. Distributed computing frameworks are used to achieve higher petaflops each day the systems spends training these models. OpenAI analyzed trends in AI and Compute [@extensions-openai-compute] which Figure \@ref(fig:extensions-distributed-training) adapted to show which systems were trained in local instances or distributed computing systems. It should be obvious from the figure that there is a trend in recent years to use distributed computing frameworks.
 
 ```{r echo=FALSE}
 data.frame(
@@ -611,7 +617,7 @@ data.frame(
 render_image("images/extensions-distributed-training.png")
 ```
 
-Training large-scale deep learning models is possible in Spark and TensorFlow through frameworks like Horovod. Today, it's possible to use Horovod with Spark from R using the `reticualte` package since Horovod requires Python and Open MPI which goes beyond the scope of this book. Instead, we will introduce an extension in the domain of genomics.
+Training large-scale deep learning models is possible in Spark and TensorFlow through frameworks like Horovod. Today, it's possible to use Horovod with Spark from R using the `reticualte` package since Horovod requires Python and Open MPI which goes beyond the scope of this book. Instead, we will introduce a different Spark extension in the domain of genomics.
 
 ## Genomics
 
