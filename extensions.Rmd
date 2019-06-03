@@ -105,17 +105,14 @@ rsparkling::h2o_release_table() %>%
 4           2.1 2.1.48             3.22.1.3    rel-xu                            3
 ```
 
-We can then connect with the supported Spark versions as follows, you will have to adjust the `master` parameter for your particular cluster. We also recommend increasing the connection timeout since Spark might require to download various H2O components while the connection is established for the first time:
+We can then connect with the supported Spark versions as follows, you will have to adjust the `master` parameter for your particular cluster.
 
 ```{r}
 library(rsparkling)
 library(sparklyr)
 library(h2o)
 
-config <- spark_config()
-config$sparklyr.connect.timeout <- 3 * 60
-  
-sc <- spark_connect(master = "local", version = "2.3", config = config)
+sc <- spark_connect(master = "local", version = "2.3")
 cars <- copy_to(sc, mtcars)
 ```
 
@@ -708,7 +705,7 @@ This concludes a brief introduction to genomic analysis in Spark using the varia
 
 ## Spatial 
 
-[geospark](https://github.com/harryprince/geospark) enables distributed geospatial computing with spatial index on spark in production and keeps a [`dplyr`](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) and [`sf`](https://github.com/rstudio/cheatsheets/raw/master/sf.pdf) style grammar.
+[geospark](https://github.com/harryprince/geospark) enables distributed geospatial computing using a grammar compatible with [`dplyr`](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) and [`sf`](https://github.com/rstudio/cheatsheets/raw/master/sf.pdf) package which provides a set of tools for working with geospatial vectors.
 
 You can install `geospark` from GitHub as follows:
 
@@ -717,47 +714,47 @@ install.packages("remotes")
 remotes::install_github("r-spark/geospark")
 ```
 
-In this example we will join spatial data using `quadrad tree indexing`. First, we will initialize the geospark extension and connect to Spark using sparklyr:
+Then we will initialize the geospark extension and connect to Spark:
 
 ```{r}
-library(sparklyr)
 library(geospark)
+library(sparklyr)
 
-conf <- spark_config()
-sc <- spark_connect(master = "local", config = conf)
+sc <- spark_connect(master = "local")
 register_gis(sc)
 ```
 
-Next we will load some spatial dataset containing as polygons and points.
+Next we will load a spatial dataset containing polygons and points.
 
 ```{r}
-polygons <- read.table(system.file(package="geospark","examples/polygons.txt"), sep="|", col.names=c("area","geom"))
-points <- read.table(system.file(package="geospark","examples/points.txt"), sep="|", col.names=c("city","state","geom"))
+polygons <- system.file("examples/polygons.txt", package="geospark") %>%
+  read.table(sep="|", col.names = c("area", "geom"))
+
+points <- system.file("examples/points.txt", package="geospark") %>%
+  read.table(sep = "|", col.names = c("city", "state", "geom"))
 
 polygons_wkt <- copy_to(sc, polygons)
 points_wkt <- copy_to(sc, points)
 ```
 
-There are various spatial operations defined in `geospark`, which Figure \@ref(fig:extensions-geospark-operations) describes.
+There are various spatial operations defined in `geospark`, which Figure \@ref(fig:extensions-geospark-operations) describes. These operations allow you to control how geospatial data should be queried based on overlap, intersection, disjoint sets, etc.
 
 ```{r extensions-geospark-operations, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Spatial operations available in geospark.'}
 render_image("images/extensions-geospark-operations.png")
 ```
 
-The following examples makes use of `st_contains()` to find the polygons that contain the given points.
+For isntance, we can use these operations to find the polygons that contain a given set of points using `st_contains()`,
 
 ```{r}
 library(dplyr)
 polygons_wkt <- mutate(polygons_wkt, y = st_geomfromwkt(geom))
 points_wkt <- mutate(points_wkt, x = st_geomfromwkt(geom))
 
-sc_res <- st_join(polygons_wkt,
-                  points_wkt,
-                  join = sql("st_contains(y,x)")) %>% 
+sc_res <- inner_join(polygons_wkt,
+                     points_wkt,
+                     join = sql("st_contains(y,x)")) %>% 
   group_by(area, state) %>%
-  summarise(cnt = n()) 
-  
-sc_res %>%
+  summarise(cnt = n()) %>%
   head()
 ```
 ```
@@ -772,29 +769,38 @@ sc_res %>%
     5 new york area   NY        9
 ```
 
-The final result can be present by leaflet, you would need to install the `sf`, `leaflet` and `colormap` packages for the following example to work:
-
-```{r}
-Idx_df = collect(sc_res) %>% 
-right_join(polygons,by = (c("area"="area"))) %>% 
-  sf::st_as_sf(wkt="geom")
-
-Idx_df %>% 
-leaflet::leaflet() %>% 
-leaflet::addTiles() %>% 
-leaflet::addPolygons(popup = ~as.character(cnt),color=~colormap::colormap_pal()(cnt))
-```
-
-see more [spatial join](https://github.com/harryprince/geospark#spatial-join):
+You can also plot these datasets by collecting a subset of the entire dataset or aggregating the geometries in spark before collecting them, one package you should look into is the `sf` package. We will now start closing this chapter by presenting a couple troubleshooting techniques applicable to all extensions.
 
 ## Troubleshooting
 
-[Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility and simplicity, which happens to be used by Apache Spark while installing extensions. When connection fails while using an extension, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
+When using a new extension for the first time, we recommend increasing the connection timeout since Spark will usually have to download extension dependencies and changing logging to verbose to help troubleshoot when the download process does not complete:
+
+```{r}
+config <- spark_config()
+config$sparklyr.connect.timeout <- 3 * 60
+config$sparklyr.log.console = TRUE
+
+sc <- spark_connect(master = "local", config = config)
+```
+
+In addition, you should know that [Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility, simplicity, and is used by Apache Spark while installing extensions. When the connection fails while using an extension, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
 
 ```{r extensions-rsparkling-cache}
 unlink("~/.ivy2/cache", recursive = TRUE)
 ```
 
+In addition, you can also consider opening GitHub issues from the following extensions repos to get help from the extension authors:
+
+- **rsparkling**: [github.com/h2oai/sparkling-water](https://github.com/h2oai/sparkling-water).
+- **sparkxgb**: [github.com/rstudio/sparkxgb](https://github.com/rstudio/sparkxgb).
+- **sparktf**: [github.com/rstudio/sparktf](https://github.com/rstudio/sparktf).
+- **variantspark**: [github.com/r-spark/variantspark](https://github.com/r-spark/variantspark).
+- **geospark**: [github.com/r-spark/geospark](https://github.com/r-spark/geospark).
+
 ## Recap
 
+This chapter provideed a brief oveview on using some of the Spark extensions available in R, which happens to be as easy as installing a package. You then learned how to use the `rsparkling` extension which provides access to H2O in Spark to which provides additional modeling functionality like enhanced metrics and ability to automatically select models. We then jumped to `graphframes`, an extension to help you process relational datasets which are formaly referred as graphs; you learned how to compute simple connection metrics or run complex algorithms like pagerank.
 
+THe XGBoost and Deep Learning sections provided alternate modeling techniques that use gradient descent, the former over decision trees and the latter over deep multi-layered perceptrons where Spark can be used to preprocess datasets into records that can then be later consument by TensorFlow and Keras using the `sparktf` extension. The last two sections untroduced extensions to process genomic and spatial datasets through the `variantspark` and `geospark` extensions.
+
+These extensions and many more, provide a comprehensive library of advanced functionality that in combination with analysis and modeling techniques presented, should cover most tasks required to run in computing clusters. However, when functionality is lacking, you can consideer writting your own extension as we will present in the [Contributing](#contributing) or you can apply custom transformations over each partition using R code as we will described in the next chapter, [Ditributed R](#distributed-r).
