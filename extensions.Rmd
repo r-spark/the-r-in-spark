@@ -621,17 +621,17 @@ Training large-scale deep learning models is possible in Spark and TensorFlow th
 
 ## Genomics
 
-VariantSpark is a framework based on scala and spark to analyze genome datasets. It is being developed by CSIRO Bioinformatics team in Australia. VariantSpark was tested on datasets with 3000 samples each one containing 80 million features in either unsupervised clustering approaches and supervised applications, like classification and regression.
+The human genome consists of two copies of about three billion base pairs of DNA within the 23 chromosome pairs, Figure \@ref(fig:extensions-genomics-diagram) shows the organization of the genome into chromosomes. DNA strands are composed of nucleotides, each composed of one of four nitrogen-containing nucleobases: cytosine (C), guanine (G), adenine (A) or thymine (T) [@extensions-genomics-wikipedia]. Since the DNA of all humans is nearly identical, we only need to store the differences from the reference genome in the form of a Variant Call Format (VCF) file.
 
-The genome datasets are usually writing in Variant Call Format (VCF), a specific text file format used in bioinformatics for storing gene sequence variations. So, VariantSaprk is a great tool because it is able to read VCF files, run analyses and give us the output in a spark data frame.
-
-```{r}
-install.packages("sparktf")
+```{r extensions-genomics-diagram, eval=TRUE, echo=FALSE, fig.cap='The idealized human diploid karyotype showing the organization of the genome into chromosomes', fig.align = 'center'}
+render_image("images/extensions-genomics-diagram.png")
 ```
 
+VariantSpark is a framework based on scala and spark to analyze genome datasets. It is being developed by CSIRO Bioinformatics team in Australia. VariantSpark was tested on datasets with 3000 samples each one containing 80 million features in either unsupervised clustering approaches and supervised applications, like classification and regression. VariantSpark can read VCF files and run analyses while using familiar Spark DataFrames. To get started, install `variantspark` from CRAN and connect to Spark:
+
 ```{r}
-library(sparklyr)
 library(variantspark)
+library(sparklyr)
 
 sc <- spark_connect(master = "local")
 vsc <- vs_connect(sc)
@@ -639,21 +639,40 @@ vsc <- vs_connect(sc)
 
 We can start by loading a VCF file,
 
-```
-hipster_vcf <- vs_read_vcf(vsc, "inst/extdata/hipster.vcf.bz2")
+```{r}
+vsc_data <- system.file("extdata/", package = "variantspark")
+
+hipster_vcf <- vs_read_vcf(vsc, file.path(vsc_data, "hipster.vcf.bz2"))
+hipster_labels <- vs_read_csv(vsc, file.path(vsc_data, "hipster_labels.txt"))
+labels <- vs_read_labels(vsc, file.path(vsc_data, "hipster_labels.txt"))
 ```
 
-VariantSpark uses Random Forest to assign an "Importance" score to each tested variant reflecting its association to the interest phenotype. A variant with higher "Importance" score implies it is more strongly associated with the phenotype of interest.
+VariantSpark uses Random Forest to assign an Importance score to each tested variant reflecting its association to the interest phenotype. A variant with higher Importance score implies it is more strongly associated with the phenotype of interest. You can compute the Importance and transform it into a Spark table as follows,
 
 ```{r}
-# calculate the "Importance"
-importance <- vs_importance_analysis(vsc, hipster_vcf, labels, n_trees = 100)
+importance_tbl <- vs_importance_analysis(vsc, hipster_vcf, labels, n_trees = 100) %>%
+  importance_tbl()
 
-# transform the output in a tibble spark
-importance_tbl <- importance_tbl(importance) 
+importance_tbl
+```
+```
+# Source: spark<?> [?? x 2]
+   variable    importance
+   <chr>            <dbl>
+ 1 2_109511398 0         
+ 2 2_109511454 0         
+ 3 2_109511463 0.00000164
+ 4 2_109511467 0.00000309
+ 5 2_109511478 0         
+ 6 2_109511497 0         
+ 7 2_109511525 0         
+ 8 2_109511527 0         
+ 9 2_109511532 0         
+10 2_109511579 0         
+# … with more rows
 ```
 
-You can use dplyr and ggplot2 to transform the output and plot!
+You can then use `dplyr` and `ggplot2` to transform the output and visualize it,
 
 ```{r}
 importance_df <- importance_tbl %>% 
@@ -661,13 +680,31 @@ importance_df <- importance_tbl %>%
   head(20) %>% 
   collect()
 
-# importance barplot
 ggplot(importance_df) +
   aes(x = variable, y = importance) + 
   geom_bar(stat = 'identity') +          
   scale_x_discrete(limits = importance_df[order(importance_df$importance), 1]$variable) + 
   coord_flip()
 ```
+```{r echo=FALSE}
+ggplot(importance_df) +
+  aes(x = variable, y = importance) + 
+  labs(title = "Importance Analysis",
+       subtitle = "Genomic importance analysis using variantspark") +
+  scale_color_grey(start = 0.2, end = 0.6) +
+  theme(legend.position = "right",
+        axis.text.y = element_text(color = "#999999"),
+        axis.text = ggplot2::element_text(size=8)) +
+  geom_bar(stat = 'identity', fill = "#888888") +
+  scale_x_discrete(limits = importance_df[order(importance_df$importance), 1]$variable) + 
+  coord_flip() +
+  ggsave("images/extensions-genomics-importance.png", width = 10, height = 5)
+```
+```{r extensions-genomics-importance, eval=TRUE, echo=FALSE, fig.cap='Genomic importance analysis using variantspark', fig.align = 'center'}
+render_image("images/extensions-genomics-importance.png")
+```
+
+This concludes a brief introduction to genomic analysis in Spark using the variantspark extensions. Next, we will move away from micrososcopic genes, to macroscopic datasets that contain geographic locations across the world.
 
 ## Spatial 
 
@@ -677,7 +714,7 @@ You can install `geospark` from GitHub as follows:
 
 ```{r}
 install.packages("remotes")
-remotes::install_github("harryprince/geospark")
+remotes::install_github("r-spark/geospark")
 ```
 
 In this example we will join spatial data using `quadrad tree indexing`. First, we will initialize the geospark extension and connect to Spark using sparklyr:
