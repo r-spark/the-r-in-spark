@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
 
 
-<meta name="date" content="2019-06-02">
+<meta name="date" content="2019-06-03">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -218,9 +218,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5.3.1" data-path="pipelines.html"><a href="pipelines.html#hyperparameter-tuning"><i class="fa fa-check"></i><b>5.3.1</b> Hyperparameter Tuning</a></li>
 </ul></li>
 <li class="chapter" data-level="5.4" data-path="pipelines.html"><a href="pipelines.html#operating-modes-of-pipelines-functions"><i class="fa fa-check"></i><b>5.4</b> Operating Modes of Pipelines Functions</a></li>
-<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a><ul>
-<li class="chapter" data-level="5.5.1" data-path="pipelines.html"><a href="pipelines.html#sparklyr-ml-models"><i class="fa fa-check"></i><b>5.5.1</b> Sparklyr ML Models</a></li>
+<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a></li>
+<li class="chapter" data-level="5.6" data-path="pipelines.html"><a href="pipelines.html#model-deployment"><i class="fa fa-check"></i><b>5.6</b> Model Deployment</a><ul>
+<li class="chapter" data-level="5.6.1" data-path="pipelines.html"><a href="pipelines.html#batch-scoring-with-ml-pipelines"><i class="fa fa-check"></i><b>5.6.1</b> Batch Scoring With ML Pipelines</a></li>
+<li class="chapter" data-level="5.6.2" data-path="pipelines.html"><a href="pipelines.html#real-time-scoring-with-mleap"><i class="fa fa-check"></i><b>5.6.2</b> Real-Time Scoring with MLeap</a></li>
 </ul></li>
+<li class="chapter" data-level="5.7" data-path="pipelines.html"><a href="pipelines.html#conclusion-1"><i class="fa fa-check"></i><b>5.7</b> Conclusion</a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>6</b> Clusters</a><ul>
 <li class="chapter" data-level="6.1" data-path="clusters.html"><a href="clusters.html#clusters-overview"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
@@ -446,8 +449,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ol>
 <p>Figure <a href="streaming.html#fig:streaming-working">12.1</a> provides a visual aid to what each stage does and how they connect:</p>
 <div class="figure" style="text-align: center"><span id="fig:streaming-working"></span>
-<div id="htmlwidget-17124c865b8d2d807568" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-17124c865b8d2d807568">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 10\n#fontSize: 14\n#leading: 2\n[<note> Input\nFolder] -> [<transceiver> Spark reads data \nfrom files in folder] \n[Spark reads data \nfrom files in folder] -> [<transceiver> Spark applies \nthe operations] \n[Spark applies \nthe operations] -> [<transceiver> Spark writes \nresults to folder]\n [<transceiver> Spark writes \nresults to folder] -> [<note> Output \nFolder] \n[Spark reads data \nfrom files in folder] -/- [<label> 2. Transform]\n[Input\nFolder] -/- [<label> 1. Read]\n[Spark applies \nthe operations] -/- [<label> 3. Write]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-ac86c28d5990af3911ac" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ac86c28d5990af3911ac">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 10\n#fontSize: 14\n#leading: 2\n[<note> Input\nFolder] -> [<transceiver> Spark reads data \nfrom files in folder] \n[Spark reads data \nfrom files in folder] -> [<transceiver> Spark applies \nthe operations] \n[Spark applies \nthe operations] -> [<transceiver> Spark writes \nresults to folder]\n [<transceiver> Spark writes \nresults to folder] -> [<note> Output \nFolder] \n[Spark reads data \nfrom files in folder] -/- [<label> 2. Transform]\n[Input\nFolder] -/- [<label> 1. Read]\n[Spark applies \nthe operations] -/- [<label> 3. Write]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.1: Working with Spark Streams
 </p>
@@ -775,16 +778,16 @@ FIGURE 12.3: Shiny reactive
 <h3><span class="header-section-number">12.7.1</span> Workflow</h3>
 <p>A most basic Kafka workflow is illustrated on Figure <a href="streaming.html#fig:streaming-kafka-apis">12.4</a>. An application streams data into Kafka, called a <strong>Producer</strong>. Kafka stores the stream as records. Each record has a key, a value and a timestamp. Kafka can handle multiple streams that contain different information. To properly categorize each stream, Kafka uses a mechanism called topic. A topic is a alpha-numeric identifier of the stream. A <strong>Consumer</strong> is an app that is external to Kafka. It reads what is stored in Kafka for a given topic. Because the Consumer app is constantly monitoring the topic, the term used for its integration with Kafka is subscribe.</p>
 <div class="figure" style="text-align: center"><span id="fig:streaming-kafka-apis"></span>
-<div id="htmlwidget-3a71978a46bb61de9ab7" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-3a71978a46bb61de9ab7">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 10\n#fontSize: 14\n#leading: 2\n[Producer | Stream topic A] -> [Kafka | Store topic A]\n[Kafka] -> [Consumer | Subscribe to topic A]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-2f682760842161859ef5" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2f682760842161859ef5">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 10\n#fontSize: 14\n#leading: 2\n[Producer | Stream topic A] -> [Kafka | Store topic A]\n[Kafka] -> [Consumer | Subscribe to topic A]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.4: Basic workflow
 </p>
 </div>
 <p>Kafka also allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a <em>Stream Processor</em>. In Figure <a href="streaming.html#fig:streaming-kafka-two-outputs">12.5</a>, the Stream Processor reads topic A, and then writes results to topic B. This allows for a given <em>Consumer</em> application to read results instead of “raw” feed data.</p>
 <div class="figure" style="text-align: center"><span id="fig:streaming-kafka-two-outputs"></span>
-<div id="htmlwidget-623a4b0cc1cf6f07ccd0" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-623a4b0cc1cf6f07ccd0">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 10\n#fontSize: 14\n#leading: 2\n\n[Producer | Stream topic A] -> [Kafka | Store topics A & B]\n[Kafka] <-> [Stream Processor | Subscribes to topic A\nResults to topic B]\n[Kafka] -> [Consumer | Subscribe to topic B]\n\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-a4a60acf22f2b814302a" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-a4a60acf22f2b814302a">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 10\n#fontSize: 14\n#leading: 2\n\n[Producer | Stream topic A] -> [Kafka | Store topics A & B]\n[Kafka] <-> [Stream Processor | Subscribes to topic A\nResults to topic B]\n[Kafka] -> [Consumer | Subscribe to topic B]\n\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.5: Kafka workflow
 </p>
@@ -819,16 +822,16 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <h3><span class="header-section-number">12.7.4</span> Example</h3>
 <p>For the example, the <strong>Producer</strong> will stream random, single letters of the alphabet into Kafka. The topic will be called “letters”. A <strong>Stream Processor</strong> will be built in Spark by having it read the “letters” topic, and then produce the count by unique letter passed throught the stream. The count will be passed back to Kafka in separate topic called “totals”. To see the results, the same Spark connection will be used to setup a <strong>Consumer</strong> that reads the “totals” topic. Figure <a href="streaming.html#fig:streaming-kafka-example">12.6</a> is a diagram of how this example will work.</p>
 <div class="figure" style="text-align: center"><span id="fig:streaming-kafka-example"></span>
-<div id="htmlwidget-a4bc6a1ef8d5334a4b2a" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-a4bc6a1ef8d5334a4b2a">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 10\n#fontSize: 14\n#leading: 2\n\n[Producer | Streams 'letters'] -> [Kafka | Stores 'letters' & 'totals']\n[Kafka] <-> [Stream Processor \n(Spark)| Subscribes to 'letters'\nWrites results to 'totals']\n[Kafka] -> [Consumer\n(Spark) | Subscribes to 'totals']\n\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-b4ab11aa4eed03b86f25" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b4ab11aa4eed03b86f25">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 10\n#fontSize: 14\n#leading: 2\n\n[Producer | Streams 'letters'] -> [Kafka | Stores 'letters' & 'totals']\n[Kafka] <-> [Stream Processor \n(Spark)| Subscribes to 'letters'\nWrites results to 'totals']\n[Kafka] -> [Consumer\n(Spark) | Subscribes to 'totals']\n\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.6: Kafka example
 </p>
 </div>
 <p>The example will use the <code>update</code> mode for writing back into Kafka. This means that only the totals of the letters that changed will be sent to the “totals” topic. The change in totals is determined after each batch from the “letters” topic is received. Figure <a href="streaming.html#fig:streaming-kafka-processor">12.7</a> offers an deeper look of what the <strong>Stream Processor (Spark)</strong> process is supposed to do.</p>
 <div class="figure" style="text-align: center"><span id="fig:streaming-kafka-processor"></span>
-<div id="htmlwidget-6fe0ed9df94569e870c3" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6fe0ed9df94569e870c3">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 10\n#fontSize: 14\n#leading: 2\n\n['totlas' topic |\n[timestamp 1 | A B A A B C ]\n[timestamp 2 | B B C C B C ]\n] -> [Stream Processor | Spark Streaming]\n[Stream Processor] -> ['totals' topic | \n[timestamp 1 | A=3 B=2 C=1 ] \n[timestamp 2 | B=5 C=4 ]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-54077357c7b6ad19f7a2" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-54077357c7b6ad19f7a2">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 10\n#fontSize: 14\n#leading: 2\n\n['totlas' topic |\n[timestamp 1 | A B A A B C ]\n[timestamp 2 | B B C C B C ]\n] -> [Stream Processor | Spark Streaming]\n[Stream Processor] -> ['totals' topic | \n[timestamp 1 | A=3 B=2 C=1 ] \n[timestamp 2 | B=5 C=4 ]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 12.7: Stream Processor - Update mode
 </p>

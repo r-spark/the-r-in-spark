@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
 
 
-<meta name="date" content="2019-06-02">
+<meta name="date" content="2019-06-03">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -218,9 +218,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5.3.1" data-path="pipelines.html"><a href="pipelines.html#hyperparameter-tuning"><i class="fa fa-check"></i><b>5.3.1</b> Hyperparameter Tuning</a></li>
 </ul></li>
 <li class="chapter" data-level="5.4" data-path="pipelines.html"><a href="pipelines.html#operating-modes-of-pipelines-functions"><i class="fa fa-check"></i><b>5.4</b> Operating Modes of Pipelines Functions</a></li>
-<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a><ul>
-<li class="chapter" data-level="5.5.1" data-path="pipelines.html"><a href="pipelines.html#sparklyr-ml-models"><i class="fa fa-check"></i><b>5.5.1</b> Sparklyr ML Models</a></li>
+<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a></li>
+<li class="chapter" data-level="5.6" data-path="pipelines.html"><a href="pipelines.html#model-deployment"><i class="fa fa-check"></i><b>5.6</b> Model Deployment</a><ul>
+<li class="chapter" data-level="5.6.1" data-path="pipelines.html"><a href="pipelines.html#batch-scoring-with-ml-pipelines"><i class="fa fa-check"></i><b>5.6.1</b> Batch Scoring With ML Pipelines</a></li>
+<li class="chapter" data-level="5.6.2" data-path="pipelines.html"><a href="pipelines.html#real-time-scoring-with-mleap"><i class="fa fa-check"></i><b>5.6.2</b> Real-Time Scoring with MLeap</a></li>
 </ul></li>
+<li class="chapter" data-level="5.7" data-path="pipelines.html"><a href="pipelines.html#conclusion-1"><i class="fa fa-check"></i><b>5.7</b> Conclusion</a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>6</b> Clusters</a><ul>
 <li class="chapter" data-level="6.1" data-path="clusters.html"><a href="clusters.html#clusters-overview"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
@@ -636,17 +639,17 @@ dplyr<span class="op">::</span><span class="kw">copy_to</span>(sc, iris, <span c
 <div id="spark-not-r-as-pass-through" class="section level3">
 <h3><span class="header-section-number">8.3.1</span> Spark, not R, as pass-through</h3>
 <p>Avoid collecting data in R to then upload it to the target (see Figure 8.1) That seems to be the first approach attempted by new users. It may look like a faster alternative. Performance wise, it is not faster. Additionally, this approach will not scale properly. The data will eventually grow to the point where R cannot handle being the middle point.</p>
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-155"></span>
-<div id="htmlwidget-30c577fec8654e84dfdd" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-30c577fec8654e84dfdd">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#arrowSize: 0.4\n#lineWidth: 1\n#spacing:90\n[Avoid this...| \n[Source] -> [Spark | Process] \n[Spark]collect() -> [R]\n[R] -> [Target]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-164"></span>
+<div id="htmlwidget-b144b1d5af673b3d6dbc" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b144b1d5af673b3d6dbc">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#arrowSize: 0.4\n#lineWidth: 1\n#spacing:90\n[Avoid this...| \n[Source] -> [Spark | Process] \n[Spark]collect() -> [R]\n[R] -> [Target]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 8.1: Avoid using R as a pass through
 </p>
 </div>
 <p>All efforts should be made to have Spark connect to the target location. This way, reading, processing and writing all happens within the same Spark session.</p>
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-156"></span>
-<div id="htmlwidget-015426fb28104bdf7795" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-015426fb28104bdf7795">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#arrowSize: 0.4\n#lineWidth: 1\n#spacing:90\n[Source] -> [Spark | Reads -  Process - Writes] \n[Spark] -> [Target]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-165"></span>
+<div id="htmlwidget-77c41e48d009d41e8010" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-77c41e48d009d41e8010">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#arrowSize: 0.4\n#lineWidth: 1\n#spacing:90\n[Source] -> [Spark | Reads -  Process - Writes] \n[Spark] -> [Target]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 8.2: Spark as a pass through
 </p>

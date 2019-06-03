@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
 
 
-<meta name="date" content="2019-06-02">
+<meta name="date" content="2019-06-03">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -218,9 +218,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5.3.1" data-path="pipelines.html"><a href="pipelines.html#hyperparameter-tuning"><i class="fa fa-check"></i><b>5.3.1</b> Hyperparameter Tuning</a></li>
 </ul></li>
 <li class="chapter" data-level="5.4" data-path="pipelines.html"><a href="pipelines.html#operating-modes-of-pipelines-functions"><i class="fa fa-check"></i><b>5.4</b> Operating Modes of Pipelines Functions</a></li>
-<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a><ul>
-<li class="chapter" data-level="5.5.1" data-path="pipelines.html"><a href="pipelines.html#sparklyr-ml-models"><i class="fa fa-check"></i><b>5.5.1</b> Sparklyr ML Models</a></li>
+<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a></li>
+<li class="chapter" data-level="5.6" data-path="pipelines.html"><a href="pipelines.html#model-deployment"><i class="fa fa-check"></i><b>5.6</b> Model Deployment</a><ul>
+<li class="chapter" data-level="5.6.1" data-path="pipelines.html"><a href="pipelines.html#batch-scoring-with-ml-pipelines"><i class="fa fa-check"></i><b>5.6.1</b> Batch Scoring With ML Pipelines</a></li>
+<li class="chapter" data-level="5.6.2" data-path="pipelines.html"><a href="pipelines.html#real-time-scoring-with-mleap"><i class="fa fa-check"></i><b>5.6.2</b> Real-Time Scoring with MLeap</a></li>
 </ul></li>
+<li class="chapter" data-level="5.7" data-path="pipelines.html"><a href="pipelines.html#conclusion-1"><i class="fa fa-check"></i><b>5.7</b> Conclusion</a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>6</b> Clusters</a><ul>
 <li class="chapter" data-level="6.1" data-path="clusters.html"><a href="clusters.html#clusters-overview"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
@@ -450,8 +453,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>In addition to using R packages like <code>sparklyr</code>, <code>dplyr</code>, <code>broom</code>, etc. to create new R packages that extend Spark; you can also make use of all the functionality available in the Spark API, Spark Extensions or write custom Scala code.</p>
 <p>For instance, suppose that there is a new file format similar to a CSV but not quite the same, we might want to write a function named <code>spark_read_file()</code> that would take a path to this new file type and read it in Spark. One approach would be to use <code>dplyr</code> to process each line of text or any other R library using <code>spark_apply()</code>. Another approach would be to use the <strong>Spark API</strong> to access methods provided by Spark. A third approach would be to find if someone in the Spark community has already provided an <strong>Spark Extension</strong> that supports this new file format. Last but not least, you can write our own custom <strong>Scala Code</strong> that makes use any Java library, including Spark and its extensions. This is illustrated in a Figure <a href="contributing.html#fig:contributing-types-of-extensions">13.1</a>.</p>
 <div class="figure"><span id="fig:contributing-types-of-extensions"></span>
-<div id="htmlwidget-58dc90d3187d443cdb15" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-58dc90d3187d443cdb15">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n[R|\n[<note> spark_read_file(\"path\")]\n]->[R Package|\n[<note> spark_read_file <- function(path) {\ninvoke_static(\"FileReader\", \"read\", path)\n}]]\n[R Package]->[Spark API|\n[<note> package org.apache.spark\nclass FileReader]]\n[R Package]->[Spark Extension|\n[<note> package spark.extension\nclass FileReader]]\n[R Package]->[Scala Code |\n[<note> package scala.extension\nclass FileReader:\ndef read = {}]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-64dd01bff6b33c9d1908" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-64dd01bff6b33c9d1908">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n[R|\n[<note> spark_read_file(\"path\")]\n]->[R Package|\n[<note> spark_read_file <- function(path) {\ninvoke_static(\"FileReader\", \"read\", path)\n}]]\n[R Package]->[Spark API|\n[<note> package org.apache.spark\nclass FileReader]]\n[R Package]->[Spark Extension|\n[<note> package spark.extension\nclass FileReader]]\n[R Package]->[Scala Code |\n[<note> package scala.extension\nclass FileReader:\ndef read = {}]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 13.1: Extending Spark using the Spark API, Spark extensions or Scala code
 </p>
@@ -537,8 +540,8 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <h2><span class="header-section-number">13.4</span> Scala Code</h2>
 <p>Scala code enables you to use any method in the Spark API, Spark extensions or Java library; in addition, writting Scala code when running in Spark can provide performance improvements over R code using <code>spark_apply()</code>. In general, the structure of your R package will contains R code and Scala code; however, the Scala code will be need to be compiled as JARs (Java ARchive files) and included in your package. Conceptually, your R package will look as shown in Figure <a href="contributing.html#fig:contributing-scala-code">13.2</a>.</p>
 <div class="figure"><span id="fig:contributing-scala-code"></span>
-<div id="htmlwidget-2062f70889752e9a9bfb" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-2062f70889752e9a9bfb">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n[R Package|\n[R Code|\n[<note>invoke()\ninvoke_static()\ninvoke_new()]]-[Scala Code]\n[Scala Code|\n[<note>package scala.extension\nclass YourExtension\ndef yourMethod = {}]]-[JARs]\n[JARs|\n[<note>extension-spark-1.6.jar\nextension-spark-2.0.jar\nextension-spark-2.4.jar]]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-0119b446dcd0f5e30f16" style="width:672px;height:480px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0119b446dcd0f5e30f16">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n[R Package|\n[R Code|\n[<note>invoke()\ninvoke_static()\ninvoke_new()]]-[Scala Code]\n[Scala Code|\n[<note>package scala.extension\nclass YourExtension\ndef yourMethod = {}]]-[JARs]\n[JARs|\n[<note>extension-spark-1.6.jar\nextension-spark-2.0.jar\nextension-spark-2.4.jar]]\n]","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 13.2: R package structure when using Scala code
 </p>

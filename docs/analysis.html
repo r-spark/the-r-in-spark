@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
 
 
-<meta name="date" content="2019-06-02">
+<meta name="date" content="2019-06-03">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -218,9 +218,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5.3.1" data-path="pipelines.html"><a href="pipelines.html#hyperparameter-tuning"><i class="fa fa-check"></i><b>5.3.1</b> Hyperparameter Tuning</a></li>
 </ul></li>
 <li class="chapter" data-level="5.4" data-path="pipelines.html"><a href="pipelines.html#operating-modes-of-pipelines-functions"><i class="fa fa-check"></i><b>5.4</b> Operating Modes of Pipelines Functions</a></li>
-<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a><ul>
-<li class="chapter" data-level="5.5.1" data-path="pipelines.html"><a href="pipelines.html#sparklyr-ml-models"><i class="fa fa-check"></i><b>5.5.1</b> Sparklyr ML Models</a></li>
+<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a></li>
+<li class="chapter" data-level="5.6" data-path="pipelines.html"><a href="pipelines.html#model-deployment"><i class="fa fa-check"></i><b>5.6</b> Model Deployment</a><ul>
+<li class="chapter" data-level="5.6.1" data-path="pipelines.html"><a href="pipelines.html#batch-scoring-with-ml-pipelines"><i class="fa fa-check"></i><b>5.6.1</b> Batch Scoring With ML Pipelines</a></li>
+<li class="chapter" data-level="5.6.2" data-path="pipelines.html"><a href="pipelines.html#real-time-scoring-with-mleap"><i class="fa fa-check"></i><b>5.6.2</b> Real-Time Scoring with MLeap</a></li>
 </ul></li>
+<li class="chapter" data-level="5.7" data-path="pipelines.html"><a href="pipelines.html#conclusion-1"><i class="fa fa-check"></i><b>5.7</b> Conclusion</a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>6</b> Clusters</a><ul>
 <li class="chapter" data-level="6.1" data-path="clusters.html"><a href="clusters.html#clusters-overview"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
@@ -431,8 +434,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Previous chapters focused on introducing Spark and R. They also focused on helping you get started with the tools you need throughout this book. In this chapter, you will learn how to perform data analysis in Spark from R.</p>
 <p>In a data analysis project, the main goal is to understand what the data is trying to “tell us”. The hope is that the data provides an answer to a specific question. The question is typically poised by stakeholders of the analysis. Most data analysis projects follow a set of steps outlined in Figure <a href="analysis.html#fig:analysis-steps">3.1</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-steps"></span>
-<div id="htmlwidget-c3f690f0f1b83ad479ca" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-c3f690f0f1b83ad479ca">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[Import] -> [Understand]\n[Understand |\n  [Wrangle] -> [Visualize] \n  [Visualize] -> [Model]\n  [Model] -> [Wrangle]\n]\n[Understand] -> [Communicate]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-28e59dc7de287ad2a29b" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-28e59dc7de287ad2a29b">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[Import] -> [Understand]\n[Understand |\n  [Wrangle] -> [Visualize] \n  [Visualize] -> [Model]\n  [Model] -> [Wrangle]\n]\n[Understand] -> [Communicate]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.1: General steps of a data analysis
 </p>
@@ -443,16 +446,16 @@ FIGURE 3.1: General steps of a data analysis
 <h2><span class="header-section-number">3.1</span> R as an Interface to Spark</h2>
 <p>For data analysis, the ideal approach is to let Spark do what its good at. Spark is a parallel computation engine that works at a large scale. Spark includes a SQL Engine and Machine Learning libraries. These can be used to perform most of the same operations R performs. Such operations include data selection, transformation, and modeling. Additionally, Spark include Graph analysis and Streaming libraries that extend the R user’s capabilities. Figure <a href="analysis.html#fig:analysis-features">3.2</a> lists the four main capabilities available to data analysts in Spark.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-features"></span>
-<div id="htmlwidget-b6e3a3509f4dd1ada974" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b6e3a3509f4dd1ada974">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: down\n#fontSize: 18\n#padding: 30\n[Apache Spark |\n  [SQL Engine]\n  [Machine Learning]\n  [Graph analysis]\n  [Streaming]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-f40bbb2b9749d4dc56d7" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-f40bbb2b9749d4dc56d7">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: down\n#fontSize: 18\n#padding: 30\n[Apache Spark |\n  [SQL Engine]\n  [Machine Learning]\n  [Graph analysis]\n  [Streaming]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.2: Spark capabilities
 </p>
 </div>
 <p>The data <strong>import</strong>, <strong>wrangling</strong>, and <strong>modeling</strong> can be performed inside Spark. <strong>Visualization</strong> can also partly be done by Spark, we will cover that later in this chapter. The idea is to use R to tell Spark what data operations to run, and then bring only the results into R. As illustrated in Figured <a href="analysis.html#fig:analysis-approach">3.3</a>, the ideal method <strong>pushes compute</strong> to the Spark cluster, and then <strong>collects results</strong> into R.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-approach"></span>
-<div id="htmlwidget-d69c5ce5e0ed892d7683" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-d69c5ce5e0ed892d7683">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#arrowSize: 0.4\n#lineWidth: 1\n#gutter: -6\n[R]->[<label> Push Compute]\n[Push Compute]->[Spark]\n[R]<-[<label> Collect Results]\n[Collect Results]<-[Spark]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-5e2993d65bc1471fe9cf" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5e2993d65bc1471fe9cf">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#arrowSize: 0.4\n#lineWidth: 1\n#gutter: -6\n[R]->[<label> Push Compute]\n[Push Compute]->[Spark]\n[R]<-[<label> Collect Results]\n[Collect Results]<-[Spark]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.3: Spark computes, R collects results
 </p>
@@ -460,16 +463,16 @@ FIGURE 3.3: Spark computes, R collects results
 <p>The <code>sparklyr</code> package aids in using the “push compute, collect results” principle. Most of its functions are mainly wrappers on top of Spark API calls. This allows us to take advantage of Spark’s analysis components, instead of R’s.<br />
 For example, an analyst needs to fit a Linear Regression model. The data is available in Spark. Instead of using the familiar <code>lm()</code> function, the analyst would use <code>ml_linear_regression()</code>. This R function will run the Scala code that uses the Spark’s API model. This specific example is illustrated in Figure <a href="analysis.html#fig:analysis-scala">3.4</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-scala"></span>
-<div id="htmlwidget-19e1180a95d98689706f" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-19e1180a95d98689706f">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 12\n#lineWidth: 1\n#arrowSize: 0.4\n[R | [<note>ml_linear_regression()]]->[<label>Invokes]\n[Invokes]->[Scala | [<note>var lr = new LinearRegression()\n                     var lrModel = lr.fit(training)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-41d17e78d7388d32aebf" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-41d17e78d7388d32aebf">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 12\n#lineWidth: 1\n#arrowSize: 0.4\n[R | [<note>ml_linear_regression()]]->[<label>Invokes]\n[Invokes]->[Scala | [<note>var lr = new LinearRegression()\n                     var lrModel = lr.fit(training)]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.4: R functions call Scala functions
 </p>
 </div>
 <p>For more common data manipulation tasks, <code>sparklyr</code> provides a back-end for <code>dplyr</code>. This means that already familiar <code>dplyr</code> verbs can be used in R, and then <code>sparklyr</code> and <code>dplyr</code> will translate those actions into Spark SQL statements.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-22"></span>
-<div id="htmlwidget-f2513f76d416fd6c45ea" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-f2513f76d416fd6c45ea">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 12\n#lineWidth: 1\n#arrowSize: 0.4\n[R | [<note>filter(data, y == 1)]]->[<label>Invokes]\n[Invokes]->  [SQL | [<note>... WHERE y = 1 ...]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-74c2c0fef0b5aa0bd212" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-74c2c0fef0b5aa0bd212">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 12\n#lineWidth: 1\n#arrowSize: 0.4\n[R | [<note>filter(data, y == 1)]]->[<label>Invokes]\n[Invokes]->  [SQL | [<note>... WHERE y = 1 ...]]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.5: dplyr writes SQL
 </p>
@@ -488,8 +491,8 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <h2><span class="header-section-number">3.2</span> Import / Access</h2>
 <p>The step of importing data is to be approached differently when using Spark with R, as opposed to R alone. Usually, importing means that R will read files and save the information into memory. But when used with Spark, it is important to only focus in importing results into R. The data is either imported, or accessed by Spark. Notice how in Figure <a href="analysis.html#fig:analysis-access">3.6</a> the Data Source is connected to Spark, and not R.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-access"></span>
-<div id="htmlwidget-3c2532b79763b5732731" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-3c2532b79763b5732731">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 14\n#arrowSize: 0.4\n[R]->[<label>Push Compute]\n[Push Compute]->[Spark]\n[R]<-[<label>Collect Results]\n[Collect Results]<-[Spark]\n[Spark]<-[<label> Import / Access]\n[Import / Access]<-[Data Source]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-0434ca39a7e27450c325" style="width:100%;height:220pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0434ca39a7e27450c325">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#padding: 14\n#arrowSize: 0.4\n[R]->[<label>Push Compute]\n[Push Compute]->[Spark]\n[R]<-[<label>Collect Results]\n[Collect Results]<-[Spark]\n[Spark]<-[<label> Import / Access]\n[Import / Access]<-[Data Source]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.6: Import Data to Spark not R
 </p>
@@ -621,8 +624,8 @@ FIGURE 3.7: Using rplot() to visualize correlations
 <p>R is great at data visualizations. Its capabilities for creating plots is extended by the many R packages that focus on this analysis step. Unfortunately, the vast majority of R functions that create plots depend on the data already being in local memory within R, so they fail when using a remote table inside Spark.</p>
 <p>It is possible to create visualizations in R from data source from Spark. To understand how to do this, let’s first break down how computer programs build plots: It takes the raw data and performs some sort of transformation. The transformed data is then mapped to a set of coordinates. Finally, the mapped values are drawn in a plot. Figure <a href="analysis.html#fig:analysis-plot">3.8</a> summarizes each of the steps.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-plot"></span>
-<div id="htmlwidget-329112c1b44a4d23548d" style="width:100%;height:100pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-329112c1b44a4d23548d">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[Raw data] -> [Transformed Data]\n[Transformed Data] -> [Map data to coordinates]\n[Map data to coordinates] -> [Draw plot]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-3f0b3863c5edfdeb0ff2" style="width:100%;height:100pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3f0b3863c5edfdeb0ff2">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[Raw data] -> [Transformed Data]\n[Transformed Data] -> [Map data to coordinates]\n[Map data to coordinates] -> [Draw plot]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.8: Stages of a plot
 </p>
@@ -638,8 +641,8 @@ FIGURE 3.9: Plotting inside R
 </div>
 <p>In this case, the <code>mtcars</code> raw data was <strong>automatically</strong> transformed into three discrete aggregated numbers, then each result was mapped into an <code>x</code> and <code>y</code> plane, and then the plot was drawn, see figure <a href="analysis.html#fig:analysis-mtcars-plot">3.10</a>. As R users, all of the stages of building the plot are conveniently abstracted for us.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-mtcars-plot"></span>
-<div id="htmlwidget-07d7ff2bb7c24e605b54" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-07d7ff2bb7c24e605b54">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[R |\n  [mtcars] -> [Total mpg for each cyl]\n  [Total mpg for each cyl] -> [x = cyl, y = mpg]\n  [x = cyl, y = mpg] -> [Draw plot]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-9ae8e793cb29c022dba5" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9ae8e793cb29c022dba5">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n\n[R |\n  [mtcars] -> [Total mpg for each cyl]\n  [Total mpg for each cyl] -> [x = cyl, y = mpg]\n  [x = cyl, y = mpg] -> [Draw plot]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.10: R plotting function
 </p>
@@ -648,8 +651,8 @@ FIGURE 3.10: R plotting function
 <h3><span class="header-section-number">3.4.1</span> Recommended approach</h3>
 <p>In essence, the approach for visualizing is the same as in wrangling, push the computation to Spark, and then collect the results in R for plotting. As illustrated in figure <a href="analysis.html#fig:analysis-spark-plot">3.11</a>, the heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R. Inside R, the plot becomes a more basic operation. For example, to plot a histogram, the bins are calculated in Spark, and then in R, use a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-spark-plot"></span>
-<div id="htmlwidget-05a2c417f8c710a6c170" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-05a2c417f8c710a6c170">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n[Spark |\n  [Raw data] -> [Transformed Data]\n]\n[R |\n  [Map to coordinates] -> [Draw plot]\n]\n[Spark] -> [R]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-e05adb1c9d834d7a1c15" style="width:100%;height:200pt;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-e05adb1c9d834d7a1c15">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#direction: right\n#edgeMargin: 4\n#padding: 25\n#fontSize: 18\n[Spark |\n  [Raw data] -> [Transformed Data]\n]\n[R |\n  [Map to coordinates] -> [Draw plot]\n]\n[Spark] -> [R]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 3.11: Plotting with Spark and R
 </p>

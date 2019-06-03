@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
 
 
-<meta name="date" content="2019-06-02">
+<meta name="date" content="2019-06-03">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -218,9 +218,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5.3.1" data-path="pipelines.html"><a href="pipelines.html#hyperparameter-tuning"><i class="fa fa-check"></i><b>5.3.1</b> Hyperparameter Tuning</a></li>
 </ul></li>
 <li class="chapter" data-level="5.4" data-path="pipelines.html"><a href="pipelines.html#operating-modes-of-pipelines-functions"><i class="fa fa-check"></i><b>5.4</b> Operating Modes of Pipelines Functions</a></li>
-<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a><ul>
-<li class="chapter" data-level="5.5.1" data-path="pipelines.html"><a href="pipelines.html#sparklyr-ml-models"><i class="fa fa-check"></i><b>5.5.1</b> Sparklyr ML Models</a></li>
+<li class="chapter" data-level="5.5" data-path="pipelines.html"><a href="pipelines.html#model-persistence-and-interoperability"><i class="fa fa-check"></i><b>5.5</b> Model Persistence and Interoperability</a></li>
+<li class="chapter" data-level="5.6" data-path="pipelines.html"><a href="pipelines.html#model-deployment"><i class="fa fa-check"></i><b>5.6</b> Model Deployment</a><ul>
+<li class="chapter" data-level="5.6.1" data-path="pipelines.html"><a href="pipelines.html#batch-scoring-with-ml-pipelines"><i class="fa fa-check"></i><b>5.6.1</b> Batch Scoring With ML Pipelines</a></li>
+<li class="chapter" data-level="5.6.2" data-path="pipelines.html"><a href="pipelines.html#real-time-scoring-with-mleap"><i class="fa fa-check"></i><b>5.6.2</b> Real-Time Scoring with MLeap</a></li>
 </ul></li>
+<li class="chapter" data-level="5.7" data-path="pipelines.html"><a href="pipelines.html#conclusion-1"><i class="fa fa-check"></i><b>5.7</b> Conclusion</a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="clusters.html"><a href="clusters.html"><i class="fa fa-check"></i><b>6</b> Clusters</a><ul>
 <li class="chapter" data-level="6.1" data-path="clusters.html"><a href="clusters.html#clusters-overview"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
@@ -471,8 +474,8 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <p>We can’t do justice to H2O’s great modeling capabilities in a single paragraph, explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the “Practical machine learning with H2O” <span class="citation">(Cook <a href="#ref-extensions-practical-h2o">2016</a>)</span> book to explore in-depth H2O’s modeling algorithms and features. In the meantime, you can use this section as a brief guide to get started using H2O in Spark with R.</p>
 <p>In order to use H2O with Spark, it is important to know that there are four compoinents involved: H2O, Sparkling Water, [rsparkling][rsparkling](<a href="https://github.com/h2oai/sparkling-water/tree/master/r" class="uri">https://github.com/h2oai/sparkling-water/tree/master/r</a>) and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and <code>rsparkling</code> as the R front-end for Sparkling Water, this is illustrated in Figure <a href="extensions.html#fig:extensions-h2o-diagram">10.1</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:extensions-h2o-diagram"></span>
-<div id="htmlwidget-9f51b024e11e8965b78a" style="width:768px;height:288px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-9f51b024e11e8965b78a">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#spacing: 20\n#padding: 16\n[R | \n  [rsparkling]\n  [sparklyr]\n]->[Spark |\n  [Sparkling Water]\n  [H2O]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-3ab5c37f7b0f5ba6cc11" style="width:768px;height:288px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3ab5c37f7b0f5ba6cc11">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n#spacing: 20\n#padding: 16\n[R | \n  [rsparkling]\n  [sparklyr]\n]->[Spark |\n  [Sparkling Water]\n  [H2O]\n]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 10.1: H2O components with Spark and R
 </p>
@@ -493,15 +496,12 @@ FIGURE 10.1: H2O components with Spark and R
 2           2.3 2.3.23             3.22.1.3    rel-xu                            3
 3           2.2 2.2.34             3.22.1.3    rel-xu                            3
 4           2.1 2.1.48             3.22.1.3    rel-xu                            3</code></pre>
-<p>We can then connect with the supported Spark versions as follows, you will have to adjust the <code>master</code> parameter for your particular cluster. We also recommend increasing the connection timeout since Spark might require to download various H2O components while the connection is established for the first time:</p>
+<p>We can then connect with the supported Spark versions as follows, you will have to adjust the <code>master</code> parameter for your particular cluster.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rsparkling)
 <span class="kw">library</span>(sparklyr)
 <span class="kw">library</span>(h2o)
 
-config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()
-config<span class="op">$</span>sparklyr.connect.timeout &lt;-<span class="st"> </span><span class="dv">3</span> <span class="op">*</span><span class="st"> </span><span class="dv">60</span>
-  
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">config =</span> config)
+sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)
 cars &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, mtcars)</code></pre>
 <p>H2O provides a web interface which can help you monitor training and access much of H2O’s functionality. The web interface can be accessed through <code>h2o_flow(sc)</code>, it is reffered to as H2O Flow and is shown in Figure <a href="extensions.html#fig:extensions-h2o-flow">10.2</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:extensions-h2o-flow"></span>
@@ -681,8 +681,8 @@ FIGURE 10.4: Highschool ggraph dataset with highest pagerank highlighted
 <h2><span class="header-section-number">10.4</span> XGBoost</h2>
 <p>A decision tree is a flowchart-like structure in which each internal node represents a test on an attribute, each branch represents the outcome of the test, and each leaf node represents a class label. For example, the diagram in Figure <a href="extensions.html#fig:extensions-decision-diagram">10.5</a> shows an a decision tree that could help classify if an employee is likely to leave given a set of factors, like job satisfaction and overtime. When a decision tree is used to predict continuous variables instead of discrete outcomes, say, how likely someone is to leave a company, decision trees are reffered to as regression trees.</p>
 <div class="figure" style="text-align: center"><span id="fig:extensions-decision-diagram"></span>
-<div id="htmlwidget-19dd0e867c00fcbede07" style="width:768px;height:288px;" class="nomnoml html-widget"></div>
-<script type="application/json" data-for="htmlwidget-19dd0e867c00fcbede07">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n[0.5|Job Satisfaction > 0.2?\n]-Yes[0.3|Over Time Hours > 10?]\n[0.5]-No[0.7|Job Level > 2?]\n[0.3]-Yes[0.65]\n[0.3]-No[0.20]\n[0.7]-Yes[0.15]\n[0.7]-No[0.70]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-fbaf4850044e08bff926" style="width:768px;height:288px;" class="nomnoml html-widget"></div>
+<script type="application/json" data-for="htmlwidget-fbaf4850044e08bff926">{"x":{"code":"\n  #fill: #FEFEFF\n  #lineWidth: 2\n  #zoom: 4\n  #direction: right\n   \n\n[0.5|Job Satisfaction > 0.2?\n]-Yes[0.3|Over Time Hours > 10?]\n[0.5]-No[0.7|Job Level > 2?]\n[0.3]-Yes[0.65]\n[0.3]-No[0.20]\n[0.7]-Yes[0.15]\n[0.7]-No[0.70]\n","className":null,"svg":false},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 FIGURE 10.5: A Decision tree to predict job attrition based on known factors
 </p>
@@ -810,73 +810,101 @@ FIGURE 10.7: Training using distributed systems based on OpenAI analysis
 </div>
 <div id="genomics" class="section level2">
 <h2><span class="header-section-number">10.6</span> Genomics</h2>
-<p>VariantSpark is a framework based on scala and spark to analyze genome datasets. It is being developed by CSIRO Bioinformatics team in Australia. VariantSpark was tested on datasets with 3000 samples each one containing 80 million features in either unsupervised clustering approaches and supervised applications, like classification and regression.</p>
-<p>The genome datasets are usually writing in Variant Call Format (VCF), a specific text file format used in bioinformatics for storing gene sequence variations. So, VariantSaprk is a great tool because it is able to read VCF files, run analyses and give us the output in a spark data frame.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;sparktf&quot;</span>)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
-<span class="kw">library</span>(variantspark)
+<p>The human genome consists of two copies of about three billion base pairs of DNA within the 23 chromosome pairs, Figure <a href="extensions.html#fig:extensions-genomics-diagram">10.8</a> shows the organization of the genome into chromosomes. DNA strands are composed of nucleotides, each composed of one of four nitrogen-containing nucleobases: cytosine (C), guanine (G), adenine (A) or thymine (T) <span class="citation">(“HUman Genome” <a href="#ref-extensions-genomics-wikipedia">2019</a>)</span>. Since the DNA of all humans is nearly identical, we only need to store the differences from the reference genome in the form of a Variant Call Format (VCF) file.</p>
+<div class="figure" style="text-align: center"><span id="fig:extensions-genomics-diagram"></span>
+<img src="images/extensions-genomics-diagram-resized.png" alt="The idealized human diploid karyotype showing the organization of the genome into chromosomes" width="1500" />
+<p class="caption">
+FIGURE 10.8: The idealized human diploid karyotype showing the organization of the genome into chromosomes
+</p>
+</div>
+<p>VariantSpark is a framework based on scala and spark to analyze genome datasets. It is being developed by CSIRO Bioinformatics team in Australia. VariantSpark was tested on datasets with 3000 samples each one containing 80 million features in either unsupervised clustering approaches and supervised applications, like classification and regression. VariantSpark can read VCF files and run analyses while using familiar Spark DataFrames. To get started, install <code>variantspark</code> from CRAN and connect to Spark:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(variantspark)
+<span class="kw">library</span>(sparklyr)
 
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)
 vsc &lt;-<span class="st"> </span><span class="kw">vs_connect</span>(sc)</code></pre>
 <p>We can start by loading a VCF file,</p>
-<pre><code>hipster_vcf &lt;- vs_read_vcf(vsc, &quot;inst/extdata/hipster.vcf.bz2&quot;)</code></pre>
-<p>VariantSpark uses Random Forest to assign an “Importance” score to each tested variant reflecting its association to the interest phenotype. A variant with higher “Importance” score implies it is more strongly associated with the phenotype of interest.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># calculate the &quot;Importance&quot;</span>
-importance &lt;-<span class="st"> </span><span class="kw">vs_importance_analysis</span>(vsc, hipster_vcf, labels, <span class="dt">n_trees =</span> <span class="dv">100</span>)
+<pre class="sourceCode r"><code class="sourceCode r">vsc_data &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata/&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;variantspark&quot;</span>)
 
-<span class="co"># transform the output in a tibble spark</span>
-importance_tbl &lt;-<span class="st"> </span><span class="kw">importance_tbl</span>(importance) </code></pre>
-<p>You can use dplyr and ggplot2 to transform the output and plot!</p>
+hipster_vcf &lt;-<span class="st"> </span><span class="kw">vs_read_vcf</span>(vsc, <span class="kw">file.path</span>(vsc_data, <span class="st">&quot;hipster.vcf.bz2&quot;</span>))
+hipster_labels &lt;-<span class="st"> </span><span class="kw">vs_read_csv</span>(vsc, <span class="kw">file.path</span>(vsc_data, <span class="st">&quot;hipster_labels.txt&quot;</span>))
+labels &lt;-<span class="st"> </span><span class="kw">vs_read_labels</span>(vsc, <span class="kw">file.path</span>(vsc_data, <span class="st">&quot;hipster_labels.txt&quot;</span>))</code></pre>
+<p>VariantSpark uses Random Forest to assign an Importance score to each tested variant reflecting its association to the interest phenotype. A variant with higher Importance score implies it is more strongly associated with the phenotype of interest. You can compute the Importance and transform it into a Spark table as follows,</p>
+<pre class="sourceCode r"><code class="sourceCode r">importance_tbl &lt;-<span class="st"> </span><span class="kw">vs_importance_analysis</span>(vsc, hipster_vcf, labels, <span class="dt">n_trees =</span> <span class="dv">100</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">importance_tbl</span>()
+
+importance_tbl</code></pre>
+<pre><code># Source: spark&lt;?&gt; [?? x 2]
+   variable    importance
+   &lt;chr&gt;            &lt;dbl&gt;
+ 1 2_109511398 0         
+ 2 2_109511454 0         
+ 3 2_109511463 0.00000164
+ 4 2_109511467 0.00000309
+ 5 2_109511478 0         
+ 6 2_109511497 0         
+ 7 2_109511525 0         
+ 8 2_109511527 0         
+ 9 2_109511532 0         
+10 2_109511579 0         
+# … with more rows</code></pre>
+<p>You can then use <code>dplyr</code> and <code>ggplot2</code> to transform the output and visualize it,</p>
 <pre class="sourceCode r"><code class="sourceCode r">importance_df &lt;-<span class="st"> </span>importance_tbl <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">arrange</span>(<span class="op">-</span>importance) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">head</span>(<span class="dv">20</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">collect</span>()
 
-<span class="co"># importance barplot</span>
 <span class="kw">ggplot</span>(importance_df) <span class="op">+</span>
 <span class="st">  </span><span class="kw">aes</span>(<span class="dt">x =</span> variable, <span class="dt">y =</span> importance) <span class="op">+</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&#39;identity&#39;</span>) <span class="op">+</span><span class="st">          </span>
 <span class="st">  </span><span class="kw">scale_x_discrete</span>(<span class="dt">limits =</span> importance_df[<span class="kw">order</span>(importance_df<span class="op">$</span>importance), <span class="dv">1</span>]<span class="op">$</span>variable) <span class="op">+</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">coord_flip</span>()</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:extensions-genomics-importance"></span>
+<img src="images/extensions-genomics-importance-resized.png" alt="Genomic importance analysis using variantspark" width="1500" />
+<p class="caption">
+FIGURE 10.9: Genomic importance analysis using variantspark
+</p>
+</div>
+<p>This concludes a brief introduction to genomic analysis in Spark using the variantspark extensions. Next, we will move away from micrososcopic genes, to macroscopic datasets that contain geographic locations across the world.</p>
 </div>
 <div id="spatial" class="section level2">
 <h2><span class="header-section-number">10.7</span> Spatial</h2>
-<p><a href="https://github.com/harryprince/geospark">geospark</a> enables distributed geospatial computing with spatial index on spark in production and keeps a <a href="https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf"><code>dplyr</code></a> and <a href="https://github.com/rstudio/cheatsheets/raw/master/sf.pdf"><code>sf</code></a> style grammar.</p>
+<p><a href="https://github.com/harryprince/geospark">geospark</a> enables distributed geospatial computing using a grammar compatible with <a href="https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf"><code>dplyr</code></a> and <a href="https://github.com/rstudio/cheatsheets/raw/master/sf.pdf"><code>sf</code></a> package which provides a set of tools for working with geospatial vectors.</p>
 <p>You can install <code>geospark</code> from GitHub as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;remotes&quot;</span>)
-remotes<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;harryprince/geospark&quot;</span>)</code></pre>
-<p>In this example we will join spatial data using <code>quadrad tree indexing</code>. First, we will initialize the geospark extension and connect to Spark using sparklyr:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
-<span class="kw">library</span>(geospark)
+remotes<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;r-spark/geospark&quot;</span>)</code></pre>
+<p>Then we will initialize the geospark extension and connect to Spark:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(geospark)
+<span class="kw">library</span>(sparklyr)
 
-conf &lt;-<span class="st"> </span><span class="kw">spark_config</span>()
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> conf)
+sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)
 <span class="kw">register_gis</span>(sc)</code></pre>
-<p>Next we will load some spatial dataset containing as polygons and points.</p>
-<pre class="sourceCode r"><code class="sourceCode r">polygons &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="kw">system.file</span>(<span class="dt">package=</span><span class="st">&quot;geospark&quot;</span>,<span class="st">&quot;examples/polygons.txt&quot;</span>), <span class="dt">sep=</span><span class="st">&quot;|&quot;</span>, <span class="dt">col.names=</span><span class="kw">c</span>(<span class="st">&quot;area&quot;</span>,<span class="st">&quot;geom&quot;</span>))
-points &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="kw">system.file</span>(<span class="dt">package=</span><span class="st">&quot;geospark&quot;</span>,<span class="st">&quot;examples/points.txt&quot;</span>), <span class="dt">sep=</span><span class="st">&quot;|&quot;</span>, <span class="dt">col.names=</span><span class="kw">c</span>(<span class="st">&quot;city&quot;</span>,<span class="st">&quot;state&quot;</span>,<span class="st">&quot;geom&quot;</span>))
+<p>Next we will load a spatial dataset containing polygons and points.</p>
+<pre class="sourceCode r"><code class="sourceCode r">polygons &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;examples/polygons.txt&quot;</span>, <span class="dt">package=</span><span class="st">&quot;geospark&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">read.table</span>(<span class="dt">sep=</span><span class="st">&quot;|&quot;</span>, <span class="dt">col.names =</span> <span class="kw">c</span>(<span class="st">&quot;area&quot;</span>, <span class="st">&quot;geom&quot;</span>))
+
+points &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;examples/points.txt&quot;</span>, <span class="dt">package=</span><span class="st">&quot;geospark&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">read.table</span>(<span class="dt">sep =</span> <span class="st">&quot;|&quot;</span>, <span class="dt">col.names =</span> <span class="kw">c</span>(<span class="st">&quot;city&quot;</span>, <span class="st">&quot;state&quot;</span>, <span class="st">&quot;geom&quot;</span>))
 
 polygons_wkt &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, polygons)
 points_wkt &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, points)</code></pre>
-<p>There are various spatial operations defined in <code>geospark</code>, which Figure <a href="extensions.html#fig:extensions-geospark-operations">10.8</a> describes.</p>
+<p>There are various spatial operations defined in <code>geospark</code>, which Figure <a href="extensions.html#fig:extensions-geospark-operations">10.10</a> describes. These operations allow you to control how geospatial data should be queried based on overlap, intersection, disjoint sets, etc.</p>
 <div class="figure" style="text-align: center"><span id="fig:extensions-geospark-operations"></span>
-<img src="images/extensions-geospark-operations.png" alt="Spatial operations available in geospark." width="400" />
+<img src="images/extensions-geospark-operations.png" alt="Spatial operations available in geospark." width="1234" />
 <p class="caption">
-FIGURE 10.8: Spatial operations available in geospark.
+FIGURE 10.10: Spatial operations available in geospark.
 </p>
 </div>
-<p>The following examples makes use of <code>st_contains()</code> to find the polygons that contain the given points.</p>
+<p>For isntance, we can use these operations to find the polygons that contain a given set of points using <code>st_contains()</code>,</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
 polygons_wkt &lt;-<span class="st"> </span><span class="kw">mutate</span>(polygons_wkt, <span class="dt">y =</span> <span class="kw">st_geomfromwkt</span>(geom))
 points_wkt &lt;-<span class="st"> </span><span class="kw">mutate</span>(points_wkt, <span class="dt">x =</span> <span class="kw">st_geomfromwkt</span>(geom))
 
-sc_res &lt;-<span class="st"> </span><span class="kw">st_join</span>(polygons_wkt,
-                  points_wkt,
-                  <span class="dt">join =</span> <span class="kw">sql</span>(<span class="st">&quot;st_contains(y,x)&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span>
+sc_res &lt;-<span class="st"> </span><span class="kw">inner_join</span>(polygons_wkt,
+                     points_wkt,
+                     <span class="dt">join =</span> <span class="kw">sql</span>(<span class="st">&quot;st_contains(y,x)&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">group_by</span>(area, state) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">summarise</span>(<span class="dt">cnt =</span> <span class="kw">n</span>()) 
-  
-sc_res <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">summarise</span>(<span class="dt">cnt =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">head</span>()</code></pre>
 <pre><code>    # Source: spark&lt;?&gt; [?? x 3]
     # Groups: area
@@ -887,24 +915,32 @@ sc_res <span class="op">%&gt;%</span>
     3 dakota area     ND       10
     4 california area CA       10
     5 new york area   NY        9</code></pre>
-<p>The final result can be present by leaflet, you would need to install the <code>sf</code>, <code>leaflet</code> and <code>colormap</code> packages for the following example to work:</p>
-<pre class="sourceCode r"><code class="sourceCode r">Idx_df =<span class="st"> </span><span class="kw">collect</span>(sc_res) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="kw">right_join</span>(polygons,<span class="dt">by =</span> (<span class="kw">c</span>(<span class="st">&quot;area&quot;</span>=<span class="st">&quot;area&quot;</span>))) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span>sf<span class="op">::</span><span class="kw">st_as_sf</span>(<span class="dt">wkt=</span><span class="st">&quot;geom&quot;</span>)
-
-Idx_df <span class="op">%&gt;%</span><span class="st"> </span>
-leaflet<span class="op">::</span><span class="kw">leaflet</span>() <span class="op">%&gt;%</span><span class="st"> </span>
-leaflet<span class="op">::</span><span class="kw">addTiles</span>() <span class="op">%&gt;%</span><span class="st"> </span>
-leaflet<span class="op">::</span><span class="kw">addPolygons</span>(<span class="dt">popup =</span> <span class="op">~</span><span class="kw">as.character</span>(cnt),<span class="dt">color=</span><span class="op">~</span>colormap<span class="op">::</span><span class="kw">colormap_pal</span>()(cnt))</code></pre>
-<p>see more <a href="https://github.com/harryprince/geospark#spatial-join">spatial join</a>:</p>
+<p>You can also plot these datasets by collecting a subset of the entire dataset or aggregating the geometries in spark before collecting them, one package you should look into is the <code>sf</code> package. We will now start closing this chapter by presenting a couple troubleshooting techniques applicable to all extensions.</p>
 </div>
 <div id="troubleshooting" class="section level2">
 <h2><span class="header-section-number">10.8</span> Troubleshooting</h2>
-<p><a href="http://ant.apache.org/ivy/">Apache IVY</a> is a popular dependency manager focusing on flexibility and simplicity, which happens to be used by Apache Spark while installing extensions. When connection fails while using an extension, consider clearing your <a href="http://ant.apache.org/ivy/history/2.0.0/settings/caches.html">IVY Cache</a> by running:</p>
+<p>When using a new extension for the first time, we recommend increasing the connection timeout since Spark will usually have to download extension dependencies and changing logging to verbose to help troubleshoot when the download process does not complete:</p>
+<pre class="sourceCode r"><code class="sourceCode r">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()
+config<span class="op">$</span>sparklyr.connect.timeout &lt;-<span class="st"> </span><span class="dv">3</span> <span class="op">*</span><span class="st"> </span><span class="dv">60</span>
+config<span class="op">$</span>sparklyr.log.console =<span class="st"> </span><span class="ot">TRUE</span>
+
+sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> config)</code></pre>
+<p>In addition, you should know that <a href="http://ant.apache.org/ivy/">Apache IVY</a> is a popular dependency manager focusing on flexibility, simplicity, and is used by Apache Spark while installing extensions. When the connection fails while using an extension, consider clearing your <a href="http://ant.apache.org/ivy/history/2.0.0/settings/caches.html">IVY Cache</a> by running:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">unlink</span>(<span class="st">&quot;~/.ivy2/cache&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</code></pre>
+<p>In addition, you can also consider opening GitHub issues from the following extensions repos to get help from the extension authors:</p>
+<ul>
+<li><strong>rsparkling</strong>: <a href="https://github.com/h2oai/sparkling-water">github.com/h2oai/sparkling-water</a>.</li>
+<li><strong>sparkxgb</strong>: <a href="https://github.com/rstudio/sparkxgb">github.com/rstudio/sparkxgb</a>.</li>
+<li><strong>sparktf</strong>: <a href="https://github.com/rstudio/sparktf">github.com/rstudio/sparktf</a>.</li>
+<li><strong>variantspark</strong>: <a href="https://github.com/r-spark/variantspark">github.com/r-spark/variantspark</a>.</li>
+<li><strong>geospark</strong>: <a href="https://github.com/r-spark/geospark">github.com/r-spark/geospark</a>.</li>
+</ul>
 </div>
 <div id="recap-5" class="section level2">
 <h2><span class="header-section-number">10.9</span> Recap</h2>
+<p>This chapter provideed a brief oveview on using some of the Spark extensions available in R, which happens to be as easy as installing a package. You then learned how to use the <code>rsparkling</code> extension which provides access to H2O in Spark to which provides additional modeling functionality like enhanced metrics and ability to automatically select models. We then jumped to <code>graphframes</code>, an extension to help you process relational datasets which are formaly referred as graphs; you learned how to compute simple connection metrics or run complex algorithms like pagerank.</p>
+<p>THe XGBoost and Deep Learning sections provided alternate modeling techniques that use gradient descent, the former over decision trees and the latter over deep multi-layered perceptrons where Spark can be used to preprocess datasets into records that can then be later consument by TensorFlow and Keras using the <code>sparktf</code> extension. The last two sections untroduced extensions to process genomic and spatial datasets through the <code>variantspark</code> and <code>geospark</code> extensions.</p>
+<p>These extensions and many more, provide a comprehensive library of advanced functionality that in combination with analysis and modeling techniques presented, should cover most tasks required to run in computing clusters. However, when functionality is lacking, you can consideer writting your own extension as we will present in the <a href="contributing.html#contributing">Contributing</a> or you can apply custom transformations over each partition using R code as we will described in the next chapter, <a href="#distributed-r">Ditributed R</a>.</p>
 
 </div>
 </div>
@@ -933,6 +969,9 @@ leaflet<span class="op">::</span><span class="kw">addPolygons</span>(<span class
 </div>
 <div id="ref-extensions-openai-compute">
 <p>“AI and Compute.” 2019. <a href="https://openai.com/blog/ai-and-compute">https://openai.com/blog/ai-and-compute</a>.</p>
+</div>
+<div id="ref-extensions-genomics-wikipedia">
+<p>“HUman Genome.” 2019. <a href="https://en.wikipedia.org/wiki/Human_genome">https://en.wikipedia.org/wiki/Human_genome</a>.</p>
 </div>
 </div>
             </section>
