@@ -25,7 +25,7 @@
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
 
 
-<meta name="date" content="2019-06-03">
+<meta name="date" content="2019-06-10">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -237,6 +237,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="6.3.3" data-path="clusters.html"><a href="clusters.html#google"><i class="fa fa-check"></i><b>6.3.3</b> Google</a></li>
 <li class="chapter" data-level="6.3.4" data-path="clusters.html"><a href="clusters.html#ibm"><i class="fa fa-check"></i><b>6.3.4</b> IBM</a></li>
 <li class="chapter" data-level="6.3.5" data-path="clusters.html"><a href="clusters.html#microsoft"><i class="fa fa-check"></i><b>6.3.5</b> Microsoft</a></li>
+<li class="chapter" data-level="6.3.6" data-path="clusters.html"><a href="clusters.html#qubole"><i class="fa fa-check"></i><b>6.3.6</b> Qubole</a></li>
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="clusters.html"><a href="clusters.html#kubernetes"><i class="fa fa-check"></i><b>6.4</b> Kubernetes</a></li>
 <li class="chapter" data-level="6.5" data-path="clusters.html"><a href="clusters.html#tools"><i class="fa fa-check"></i><b>6.5</b> Tools</a><ul>
@@ -338,7 +339,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="11.2.2" data-path="distributed.html"><a href="distributed.html#partitioned-modeling"><i class="fa fa-check"></i><b>11.2.2</b> Partitioned Modeling</a></li>
 <li class="chapter" data-level="11.2.3" data-path="distributed.html"><a href="distributed.html#distributed-grid-search"><i class="fa fa-check"></i><b>11.2.3</b> Grid Search</a></li>
 <li class="chapter" data-level="11.2.4" data-path="distributed.html"><a href="distributed.html#web-apis"><i class="fa fa-check"></i><b>11.2.4</b> Web APIs</a></li>
-<li class="chapter" data-level="11.2.5" data-path="distributed.html"><a href="distributed.html#distributed-rendering"><i class="fa fa-check"></i><b>11.2.5</b> Distributed Rendering</a></li>
+<li class="chapter" data-level="11.2.5" data-path="distributed.html"><a href="distributed.html#intensive-computations"><i class="fa fa-check"></i><b>11.2.5</b> Intensive Computations</a></li>
 </ul></li>
 <li class="chapter" data-level="11.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>11.3</b> Partitions</a></li>
 <li class="chapter" data-level="11.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>11.4</b> Grouping</a></li>
@@ -843,16 +844,44 @@ FIGURE 6.12: Creating an Azure HDInsight Spark Cluster
 </tbody>
 </table>
 </div>
+<div id="qubole" class="section level3">
+<h3><span class="header-section-number">6.3.6</span> Qubole</h3>
+<p><a href="https://www.qubole.com">Qubole</a> is a company founded in 2013 with a mission to close the data accessibility gap. Qubole delivers a Self-Service Platform for Big Data Analytics built on Amazon, Microsoft, Google and Oracle Clouds. You can use R with Spark clusters though <a href="https://docs.qubole.com/en/latest/user-guide/notebooks-and-dashboards/notebooks/notebook.html">Qubole notebooks</a> or following Qubole’s documentation to use RStudio with Qubole clusters. Figure <a href="clusters.html#fig:clusters-qubole-notebook">6.13</a> shows a Qubole notebook using Spark through <code>sparkylr</code>.</p>
+<div class="figure" style="text-align: center"><span id="fig:clusters-qubole-notebook"></span>
+<img src="images/clusters-qubole-sparklyr.png" alt="Qubole notebook running sparklyr" width="1061" />
+<p class="caption">
+FIGURE 6.13: Qubole notebook running sparklyr
+</p>
+</div>
+<p>The latest pricing information can be found under <a href="https://www.qubole.com/qubole-pricing/">qubole.com/qubole-pricing/</a>, as of this writing the following plans are described in their pricing page:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Test Drive</th>
+<th>Full-Featured Trial</th>
+<th>Enterprise Edition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>$0 USD</td>
+<td>$0 USD</td>
+<td>$0.14 USD/QCU</td>
+</tr>
+</tbody>
+</table>
+<p>Notice that pricing is based on cost of QCU/hr which stands for “Qubole Compute Unit per hour” and the “Enterprise Edition” requires an annual contract as of this writting.</p>
+</div>
 </div>
 <div id="kubernetes" class="section level2">
 <h2><span class="header-section-number">6.4</span> Kubernetes</h2>
 <p>Kubernetes is an open-source container-orchestration system for automating deployment, scaling and management of containerized applications that was originally designed by Google and now maintained by the <a href="https://www.cncf.io/">Cloud Native Computing Foundation</a>. Kubernetes was originally based on <a href="https://www.docker.com/">Docker</a> while, like Mesos, it’s also based on Linux Cgroups.</p>
 <p>Kubernetes can execute many cluster applications and frameworks that can be highly customized by using container images with specific resources and libraries. This allows a single Kubernetes cluster to be used for many different purposes beyond data analysis, which in turn helps organizations manage their compute resources with ease. One trade off from using custom images is that they add additional configuration overhead but make kubernetes clusters extremely flexible. Nevertheless, this flexibility has proven to be instrumental to administrate with ease cluster resources in many organizations and, as shown in the <a href="clusters.html#clusters-overview">overview</a> section, it’s becoming a very popular cluster framework.</p>
-<p>Kubernetes is supported across all major cloud providers. They all provide extensive documentation as to how to launch, manage and teard down Kubernetes clusters; Figure <a href="clusters.html#fig:clusters-kubernetes-google-console">6.13</a> shows Google Gloud’s console while creating a Kubernetes cluster. Spark can be deployed over any Kubernetes cluster and R used to connect, analyze, model and so on.</p>
+<p>Kubernetes is supported across all major cloud providers. They all provide extensive documentation as to how to launch, manage and teard down Kubernetes clusters; Figure <a href="clusters.html#fig:clusters-kubernetes-google-console">6.14</a> shows Google Gloud’s console while creating a Kubernetes cluster. Spark can be deployed over any Kubernetes cluster and R used to connect, analyze, model and so on.</p>
 <div class="figure" style="text-align: center"><span id="fig:clusters-kubernetes-google-console"></span>
 <img src="images/clusters-kubernetes-google-console-resized.png" alt="Creating a Kubernetes cluster for Spark and R using Google Cloud" width="1500" />
 <p class="caption">
-FIGURE 6.13: Creating a Kubernetes cluster for Spark and R using Google Cloud
+FIGURE 6.14: Creating a Kubernetes cluster for Spark and R using Google Cloud
 </p>
 </div>
 <p>You can learn more about <a href="https://kubernetes.io/">kubernetes.io</a>, and the “Running Spark on Kubernetes” guide from <a href="https://spark.apache.org/docs/latest/running-on-kubernetes.html">spark.apache.org</a>.</p>
@@ -863,11 +892,11 @@ FIGURE 6.13: Creating a Kubernetes cluster for Spark and R using Google Cloud
 <p>While using only R and Spark can be sufficient for some clusters, it is common to install complementary tools in your cluster to improve: monitoring, sql analysis, workflow coordination, etc. with applications like <a href="http://ganglia.info/">Ganglia</a>, <a href="http://gethue.com/">Hue</a> and <a href="https://oozie.apache.org">Oozie</a> respectively. This section is not meant to cover all, but rather mention the ones that are commonly to use.</p>
 <div id="rstudio" class="section level3">
 <h3><span class="header-section-number">6.5.1</span> RStudio</h3>
-<p>From reading the Introduction chapter, you are aware that RStudio is a well known, free, desktop development environment for R; therefore, it is likely that you are following the examples in this book using RStudio Desktop; however, you might not be aware that RStudio can also be run as a web service inside an Spark cluster, this version of RStudio is known as RStudio Server. You can see RStudio Server running in Figure <a href="clusters.html#fig:clusters-rstudio-server">6.14</a>. In the same way that the Spark UI runs in the cluster, RStudio Server can be installed inside the cluster, then you can connect to RStudio Server and use RStudio in exactly the same way you use RStudio Desktop but with the ability to run code against the Spark cluster. As you can see on the following image, RStudio Server is running on a web browser inside a Spark cluster; it looks and feels just like RStudio Desktop, but adds support to run commands efficiently by being located within the cluster.</p>
+<p>From reading the Introduction chapter, you are aware that RStudio is a well known, free, desktop development environment for R; therefore, it is likely that you are following the examples in this book using RStudio Desktop; however, you might not be aware that RStudio can also be run as a web service inside an Spark cluster, this version of RStudio is known as RStudio Server. You can see RStudio Server running in Figure <a href="clusters.html#fig:clusters-rstudio-server">6.15</a>. In the same way that the Spark UI runs in the cluster, RStudio Server can be installed inside the cluster, then you can connect to RStudio Server and use RStudio in exactly the same way you use RStudio Desktop but with the ability to run code against the Spark cluster. As you can see on the following image, RStudio Server is running on a web browser inside a Spark cluster; it looks and feels just like RStudio Desktop, but adds support to run commands efficiently by being located within the cluster.</p>
 <div class="figure" style="text-align: center"><span id="fig:clusters-rstudio-server"></span>
 <img src="images/clusters-rstudio-server-resized.png" alt="RStudio Server Pro running inside Apache Spark" width="1500" />
 <p class="caption">
-FIGURE 6.14: RStudio Server Pro running inside Apache Spark
+FIGURE 6.15: RStudio Server Pro running inside Apache Spark
 </p>
 </div>
 <p>For those familiar with R, Shiny is a very popular tool for building interactive web applications from R; which it is also recommended you install directly in your Spark cluster.</p>
@@ -875,11 +904,11 @@ FIGURE 6.14: RStudio Server Pro running inside Apache Spark
 </div>
 <div id="jupyter" class="section level3">
 <h3><span class="header-section-number">6.5.2</span> Jupyter</h3>
-<p>Project <a href="http://jupyter.org/">Jupyter</a> exists to develop open-source software, open-standards, and services for interactive computing across dozens of programming languages. A Jupyter notebook, provide support for various programming languages, including R. <code>sparklyr</code> can be used with Jupyter notebooks using the R Kernel. Figure <a href="clusters.html#fig:clusters-jupyter-sparklyr">6.15</a> shows <code>sparklyr</code> running inside a local Jupyter notebook.</p>
+<p>Project <a href="http://jupyter.org/">Jupyter</a> exists to develop open-source software, open-standards, and services for interactive computing across dozens of programming languages. A Jupyter notebook, provide support for various programming languages, including R. <code>sparklyr</code> can be used with Jupyter notebooks using the R Kernel. Figure <a href="clusters.html#fig:clusters-jupyter-sparklyr">6.16</a> shows <code>sparklyr</code> running inside a local Jupyter notebook.</p>
 <div class="figure" style="text-align: center"><span id="fig:clusters-jupyter-sparklyr"></span>
 <img src="images/clusters-jupyter-resized.png" alt="Jupyter notebook running sparklyr" width="1500" />
 <p class="caption">
-FIGURE 6.15: Jupyter notebook running sparklyr
+FIGURE 6.16: Jupyter notebook running sparklyr
 </p>
 </div>
 </div>
@@ -901,11 +930,11 @@ FIGURE 6.15: Jupyter notebook running sparklyr
 
 <span class="co"># Start the Livy service</span>
 <span class="kw">livy_service_start</span>()</code></pre>
-<p>You can then navigate to this local Livy session under <a href="http://localhost:8998" class="uri">http://localhost:8998</a>, the <a href="connections.html#connections-livy">Livy Connections</a> section will detail how to connect to this local instance and also proper clusters with Livy enabled, once connected, you can navigate to the Livy web application as captured by Figure <a href="clusters.html#fig:clusters-livy-local">6.16</a>.</p>
+<p>You can then navigate to this local Livy session under <a href="http://localhost:8998" class="uri">http://localhost:8998</a>, the <a href="connections.html#connections-livy">Livy Connections</a> section will detail how to connect to this local instance and also proper clusters with Livy enabled, once connected, you can navigate to the Livy web application as captured by Figure <a href="clusters.html#fig:clusters-livy-local">6.17</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:clusters-livy-local"></span>
 <img src="images/clusters-livy-local.png" alt="Apache Livy running as a local service" width="1440" />
 <p class="caption">
-FIGURE 6.16: Apache Livy running as a local service
+FIGURE 6.17: Apache Livy running as a local service
 </p>
 </div>
 <p>Make sure you also stop the Livy service when working with local Livy instances, for proper Livy services running in a cluster, you won’t have to.</p>
