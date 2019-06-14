@@ -1,6 +1,7 @@
 render_nomnoml <- function(code, png, caption = NULL, styles = "") {
+  defaults <- "#lineWidth: 2\n"
   if (identical(Sys.getenv("ASCIITEXT_RENDERING"), "TRUE")) {
-    nomnoml::nomnoml(paste0(styles, "\n", code), png = png)
+    nomnoml::nomnoml(paste0(defaults, "\n", styles, "\n", code), png = png)
     png_resized <- resize_image_if_needed(png)
 
     if (is.null(caption)) {
