@@ -26,8 +26,7 @@ format_chapters_files <- dir(pattern = paste0(format_chapters_pattern, ".Rmd"))
 
 # Apply editorial formatting rules
 format_all_chapters <- function() {
-  # for (chapter_file in format_chapters_files) {
-  for (chapter_file in "intro.Rmd") {
+  for (chapter_file in format_chapters_files) {
     lines <- readLines(chapter_file)
     all_lines <- paste(lines, collapse = "\n")
 
