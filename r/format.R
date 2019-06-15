@@ -2,7 +2,7 @@ format_footnote_with_period <- function(groups, remaining) {
   footnote_name <- groups[1]
 
   paste(
-    ". @[",
+    ". [@",
     footnote_name,
     "]",
     sep = ""
