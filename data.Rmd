@@ -11,21 +11,21 @@ The goal of this chapter is to help you learn how to access, read and write data
 
 This chapter will cover how to access data in different source types and file systems.  It will show you the pattern of how to extend Spark's capabilities to work with data no accessible "out-of-the-box".
 
-Additionally, this chapter will introduce several recommendations. The recommendations will focused on improving performance and efficiency for writing or reading data. 
+Additionally, this chapter will introduce several recommendations focused on improving performance for writing or reading data. 
 
 ## Source types and file systems
 
-It may be challenging accessing data for the first time. The likely reasons are problems with a new source type, or file system. 
+It may be challenging accessing data for the first time, particularly if you're working with new sources or file systems. 
 
 "Out-of-the-box", Spark is able to interact with several source types and file system.  Source types include: Comma separated values (CSV), Apache Parquet, and JDBC.  File system protocols include: local file system (Linux, Windows, Mac), and Hadoop file System (HDFS).  
 
-There is a way for Spark to interact with other source types and file systems. The next sub section will cover how to do that.
+However, there is a way for Spark to interact with other source types and file systems, which will cover next. This chapter will also cover some of the most common source types and protocols.
 
 ### Default packages
 
 Spark is a very flexible computing platform.  It can add functionality by using extension programs, called packages. Accessing a new source type or file system can be done by using the appropriate package. 
 
-Packages need to be loaded into Spark at connection time.  To load the package, Spark needs its location.  The location could be inside the cluster, in a file share or the Internet.  
+Packages need to be loaded into Spark at connection time.  To load the package, Spark needs its location, which could be inside the cluster, in a file share or the Internet.  
 
 In `sparklyr`, the package location is passed to `spark_connect()`.  All packages should be listed in the `defaultPackages` entry of the connection configuration. Here is an example that loads the package needed to access Amazon S3 buckets:
 
@@ -37,7 +37,7 @@ sc <- spark_connect(master = "local", config = conf)
 
 ### Source types
 
-Spark can read and write several source types.  In `sparklyr`, the source types are aligned to R functions:
+Spark can read and write several source types.  In `sparklyr`, the source types are aligned to R functions.
 
 | Format                                        | Read                   | Write                   |
 |-----------------------------------------------|------------------------|-------------------------|
@@ -49,8 +49,6 @@ Spark can read and write several source types.  In `sparklyr`, the source types 
 | Apache Parquet                                | `spark_read_parquet()` | `spark_write_parquet()` |
 | Text                                          | `spark_read_text()`    | `spark_write_text()`    |
 
-
-#### New Source Type
 
 It is possible to access data source types not listed above.  Loading the appropriate default package for Spark is the first of two steps  The second step is to actually read or write the data. The `spark_read_source()` and `spark_write_source()` functions do that.  They are generic functions that can use the libraries imported by a default package.
 
@@ -74,7 +72,7 @@ Spark will default to the file system that it is currently running on.  In a YAR
 
 The file system protocol can be changed when reading or writing.  It is done via the `path` argument of the `sparklyr` function.  For example, a full path of "file://home/user/file.csv" will force the use of the local Operating System's file system.
 
-There are other file system protocols.  An example is Amazon's S3 service.  Spark is does not know how to read the S3 protocol.  Accessing the "s3a" protocol involves adding a package to the `defaultPackages` configuration variable passed at connection time.  
+There are other file system protocols,  is Amazon's S3 service for example.  Spark is does not know how to read the S3 protocol, so accessing the "s3a" protocol involves adding a package to the `defaultPackages` configuration variable passed at connection time.  
 
 ```{r}
 conf <- spark_config()
@@ -83,7 +81,7 @@ sc <- spark_connect(master = "local", config = conf)
 my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
 
-Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol requires loading a default package.  In some cases, the vendor providing the Spark environment could already be loading the package for you.  
+Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol requires loading a default package.  In some cases, the vendor providing the Spark environment could already be loading the package for you.  Please refer to your vendor's documentation to find out if that is the case.
 
 
 ## Reading data
@@ -92,7 +90,7 @@ This section will introduce several techniques that improve the speed and effici
 
 ### Folders as a table
 
-Loading multiple files into a single data object is a common scenario.  In R, we typically use a loop or functional programming to accomplish this.
+When analyzing data, loading multiple files into a single data object is a common scenario.  In R, we typically use a loop or functional programming to accomplish this.  That is because R has to load each file indidually into the session.
 
 ```{r}
 lapply(c("data-folder/file1.csv", "data-folder/file2.csv"), read.csv)
@@ -104,13 +102,13 @@ In Spark, there is the notion of a folder as a table.  Instead of enumerating ea
 spark_read_csv(sc, "my_data", path = "data-folder")
 ```
 
-The folder as a table notion is also found in other open source technologies.  Under the hood, Hive tables work the same way.  When querying a Hive table, the mapping is done over multiple files inside the same folder. The folder's name usually match the name of the table visible to the user.  
+The "folder as a table" idea is found in other open source technologies as well.  Under the hood, Hive tables work the same way.  When querying a Hive table, the mapping is done over multiple files inside the same folder. The folder's name usually match the name of the table visible to the user.  
 
 ### File layout
 
-When reading data, Spark is able to determine the data source's column names and types.  This comes at a cost.  To determine the type Spark has to do an initial pass on the data, and then assign a type.  For large data, this may add a significant amount of time to the data ingestion process.  This can become costly even for medium size data loads.  For files that are read over and over again,  the additional read time accumulates over time.
+When reading data, Spark is able to determine the data source's column names and types.  This comes at a cost.  To determine the type Spark has to do an initial pass on the data, and then assign a type.  For large data, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size data loads.  For files that are read over and over again,  the additional read time accumulates over time.
 
-Spark allows the user to provide a column layout. If provided, Spark will bypass the step that it uses to determine the file's layout. In `sparklyr`, the `column` argument is used to take advantage of this functionality. The `infer_schema` argument also needs to be set to `FALSE`.  This arguments is the switch that indicates if the `column` argument should be used.
+Spark allows the user to provide a column layout. If provided, Spark will bypass the step that it uses to determine the file's layout. In `sparklyr`, we can use the `column` argument to take advantage of this functionality. The `infer_schema` argument also needs to be set to `FALSE`.  This arguments is the switch that indicates if the `column` argument should be used.
 
 
 ```{r, echo = FALSE}
@@ -130,7 +128,7 @@ names(col_spec) <- c("x", "y")
 
 ```
 
-For example, a file called *test.csv* is going to be loaded to Spark. This is its layout:
+For example, lets take a file called *test.csv*, and load it to Spark. This is its layout:
 
 ```
 "x","y"
@@ -171,7 +169,7 @@ The accepted variable types are:
 
 - `POSIXct`
 
-In `spark_read_csv()`, `col_spec_1` is passed to the `columns` argument, and `infer_schema` is set to `FALSE`.
+In `spark_read_csv()`, `col_spec_1` is passed to the `columns` argument, and `infer_schema` is set to `FALSE`. We will try match the names and types of the original file.  Also, we will pass the column specification. Doing this will help with performance because Spark will not have to figure out the column types.
 
 ```{r}
 sc <- spark_connect(master = "local")
@@ -191,7 +189,8 @@ test_1
 ##  4 d         4
 ##  5 e         5
 ```
-In the example we tried to match the names and types of the original file.  The ability to pass a column spec provides additional flexibility.  The following example shows how to set the field type to something different.  The new field type needs a compatible type. For example, a `character` field could not be set tp `numeric`.  The example also changes the names of the fields.
+
+The following example shows how to set the field type to something different. However, the new field type needs a compatible type from the original. For example, a `character` field could not be set to `numeric`. If an incompatible type is used, the file read will faill with an error. Additionally, the example also changes the names of the fields.
 
 ```{r}
 col_spec_2 <- c("character", "character")
@@ -214,13 +213,13 @@ test_2
  5 e         5    
 ```
 
-The ability to change the field type can be very useful.  Malformed entries can cause error during reading.  This is common in non-character fields.  The practical approach is to import the field as a character field, and then use `dplyr` to coerce the field's conversion.  
+In Spark, malformed entries can cause error during reading, specially for non-character fields.  To prevent such errors, we can use a file spec that imports them as character, and then use `dplyr` to coerce the field into the desired type.
 
 ### Spark memory
 
-Spark copies the data into its distributed memory.  This makes analyses and other processes very fast.  There are cases where loading all of the data may not be practical, or necessary.  For those cases, Spark can then just "map" the files without copying data into memory.  
+Spark copies the data into its distributed memory, which makes analyses and other processes very fast.  There are cases, such as when the data is too big, that loading all of the data may not be practical, or even necessary. For those cases, Spark can then just "map" the files without copying data into memory.  
 
-The mapping creates a sort of "virtual" table in Spark memory.  The implication is that when a query runs against that table, Spark has to read the data from the files at that time.  Any consecutive read after that will do the same.  In effect, Spark becomes a pass-through for the data. The advantage of this method is that there is almost no up-front time cost to "reading" the file.  The mapping process is comparatively fast.  
+The mapping creates a sort of "virtual" table in Spark memory.  The implication is that when a query runs against that table, Spark has to read the data from the files at that time.  Any consecutive read after that will do the same.  In effect, Spark becomes a pass-through for the data. The advantage of this method is that there is almost no up-front time cost to "reading" the file,  the mapping is very fast. The downside is that running queries that actually extract data will take longer. 
 
 In `sparklyr`, that is controlled by the `memory` argument of its read functions. Setting it to `FALSE` prevents the data copy.  It defaults to `TRUE`.
 
@@ -238,7 +237,7 @@ mapped_test %>%
 
 ### Column Names
 
-By default, `sparklyr` sanitizes column names. It translates characters such as `.` to `_`. This was required in Spark 1.6.X. To disable this functionality, you can run the following code:
+Spark version 1.6 required that column names be sanitized, so `sparklyr` does that by default.  There may be cases when you would like to keep the original names intact, and are also working with Spark version 2.0 or above.  To do that set the `sparklyr.sanitize.column.names` option to `FALSE`.
 
 ```{r eval=FALSE}
 options(sparklyr.sanitize.column.names = FALSE)
