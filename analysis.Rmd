@@ -202,6 +202,79 @@ cars %>%
 
 Most of the data transformation made available by `dplyr` to work with local data frames are also available to use with a Spark connection.  This means that a general approach to learning `dplyr` can be taken in order to gain more proficiency with data exploration and preparation with Spark.  The chapter on Data Transformation in the R for Data Science [@intro-r-for-data-science] book should be a great help with this.  If proficiency with `dplyr` is not an issue for you, then please take some time to experiment with different `dplyr` functions against the *cars* table.
 
+Sometimes we may need to perform an operation not yet available through `dplyr` and `sparklyr`.  Instead of downloading the data into R so that we can perform the operation, there may be a way to use a Hive function within Spark to accomplish what we need.  The next section will cover this scenario.
+
+### Hive Built-in Functions
+
+Spark SQL is based on Hive's SQL conventions and functions.  It is possible to call Hive query functions within the `dplyr` interface. This means that we can use Hive functions to accomplish operations that may not be available via `dplyr`.  The Hive functions can be accesses ed within the `dplyr` verb, by calling them as if they were R functions.  Instead of failing, `dplyr` passes functions it does not recognize "as-is" to the query engine.  This gives us a lot of flexibility on the function we can use from Hive SQL.  
+
+The Hive SQL's *percentile* function returns the exact percentile of a column in a group.  The function expects a column name, and either a single percentile value, or an array of multiple percentile values. 
+
+```{r}
+cars %>%
+  summarise(
+    mpg_percentile = percentile(mpg, 0.25)
+    )
+```
+
+```
+## # Source: spark<?> [?? x 1]
+##   mpg_percentile
+##            <dbl>
+## 1           15.4
+```
+
+There is no `percentile()` function in R, so `dplyr` passes the that portion of the code, "as-is", to the resulting SQL query.
+
+```{r}
+cars %>%
+  summarise(
+    mpg_percentile = percentile(mpg, 0.25)
+    ) %>%
+  show_query()
+```
+
+```
+<SQL>
+SELECT percentile(`mpg`, 0.25) AS `mpg_percentile`
+FROM `mtcars_remote`
+```
+
+To pass multiple values to *percentile*, we can call another Hive function called *array*. In this case, *array* would work similarly to R's `list()` function.  We can pass multiple values separated by commas. The output from Spark is an array variable, which is imported into R as a list variable column.
+
+```{r}
+cars %>%
+  summarise(
+    mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75))
+    )
+```
+
+```
+## # Source: spark<?> [?? x 1]
+##   mpg_percentile
+##   <list>        
+## 1 <list [3]>   
+```
+
+The *explode* function can be used to separate the Spark's array value results into their own record.  To do this, use *explode* within a `mutate()` command, and pass the variable containing the results of the percentile operation. 
+
+```{r}
+cars %>%
+  summarise(
+    mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75))
+    ) %>%
+  mutate(mpg_percentile = explode(mpg_percentile))
+```
+
+```
+## # Source: spark<?> [?? x 1]
+##   mpg_percentile
+##            <dbl>
+## 1           15.4
+## 2           19.2
+## 3           22.8
+```
+
 ### Correlations
 
 A very common exploration technique is to calculate and visualize correlations. We often calculate correlations to find out what kind of statistical relationship are between paired sets of variables.  The Spark API provides an internal function that calculates correlations across the entire data set.  The results are then returned to R as a `data.frame` object. 
@@ -258,33 +331,7 @@ cars %>%
 ## #   am <dbl>, gear <dbl>, carb <dbl>
 ```
 
-The `correlate()` function returns a local R object that `corrr` recognizes. This way, it is easy to perform more functions on top of the results. In this case, the `shave()` command turns all of the duplicated results into `NA`'s
-
-```{r, eval = FALSE}
-cars %>%
-  correlate(use = "pairwise.complete.obs", method = "pearson") %>%
-  shave()
-```
-
-```
-## # A tibble: 11 x 12
-##    rowname     mpg     cyl    disp      hp     drat      wt
-##    <chr>     <dbl>   <dbl>   <dbl>   <dbl>    <dbl>   <dbl>
-##  1 mpg      NA      NA      NA      NA      NA       NA    
-##  2 cyl      -0.852  NA      NA      NA      NA       NA    
-##  3 disp     -0.848   0.902  NA      NA      NA       NA    
-##  4 hp       -0.776   0.832   0.791  NA      NA       NA    
-##  5 drat      0.681  -0.700  -0.710  -0.449  NA       NA    
-##  6 wt       -0.868   0.782   0.888   0.659  -0.712   NA    
-##  7 qsec      0.419  -0.591  -0.434  -0.708   0.0912  -0.175
-##  8 vs        0.664  -0.811  -0.710  -0.723   0.440   -0.555
-##  9 am        0.600  -0.523  -0.591  -0.243   0.713   -0.692
-## 10 gear      0.480  -0.493  -0.556  -0.126   0.700   -0.583
-## 11 carb     -0.551   0.527   0.395   0.750  -0.0908   0.428
-## # ... with 5 more variables: qsec <dbl>, vs <dbl>,
-## #   am <dbl>, gear <dbl>, carb <dbl>
-```
-Finally, the results can be easily visualized using `rplot()`.  This function returns a `ggplot` object. Figure \@ref(fig:analysis-rplot) is an example of what `rplot()` returns. 
+We can pipe the results to other `corrr` functions. For example, the `shave()` functions turns all of the duplicated results into `NA`’s.  Additionally, the results can be easily visualized using the `rplot()` function, it returns a `ggplot` object. Figure \@ref(fig:analysis-rplot) is an example the plot resulting of combining these two functions. 
 
 ```{r, eval = FALSE}
 cars %>%
@@ -298,6 +345,7 @@ render_image("images/analysis-wrangling-1.png")
 ```
 
 It is much easier to see which relationships are positive or negative. Positive relationships are in blue, and negative relationships are in red. The size of the circle indicates how significant their relationship is. The power of a visualizing data is in how much easier it makes it for us to understand results.  The next section will expand on this step of the process.
+
 
 ## Visualize
 
@@ -364,10 +412,6 @@ render_nomnoml("
 ", "images/analysis-plotting-with-spark-and-r.png")
 ```
 
-The next section will cover how to use plot simple, but useful, plots. 
-
-### Simple Plots
-
 There are a couple of key steps when codifying the "push compute, collect results" approach.  First, ensure that the transformation operations happen inside Spark. In the example below, `group_by()` and `summarise()` will run as SQL inside the Spark session.  The second is to bring the results back into R after the data has been transformed.  Make sure to transform and then collect, in that order, because if `collect()` is run first, then all R will try to ingest the entire data set from Spark. Depending on the size of the data, collecting all of the data will slow down or may even bring down your system.
 
 ```{r, eval = FALSE}
@@ -405,105 +449,7 @@ ggplot(aes(as.factor(cyl), mpg), data = car_group) +
 render_image("images/analysis-visualizations-1.png")
 ```
 
-Thanks to the consistency among the `tidyverse` packages, the entire operation can be written in a single piped code segment:
-
-```{r, eval = FALSE}
-cars %>%
-  group_by(cyl) %>%
-  summarise(mpg = sum(mpg, na.rm = TRUE)) %>%
-  collect() %>%
-  ggplot(aes(as.factor(cyl), mpg)) + 
-  geom_col()
-```
-
-The resulting plot is in figure \@ref(fig:analysis-viz1b).
-
-```{r analysis-viz1b, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
-render_image("images/analysis-visualizations-1.png")
-```
-
-Using this approach, most visualizations can be easily produced. More complex plots require a bit more work, the next section will breakdown how to create a Histogram. 
-
-### Histograms
-
-There are plots that are both useful, and commonly used. They provide a clear idea of the distribution of values in a single variable. Their calculations are not easily reproducible. For example, producing a histogram that runs over the entire large data set has not been typically feasible, because the data needs to be imported into R first. 
-
-The following code breaks down the creation of bins 3 mpg wide into a combination of the most basic aggregation functions. It can run easily inside the `mutate()` command.  It creates as many discrete bins size 3 mpg, and passes the minimum value as the "label" of that bin.
-
-
-```{r, eval = FALSE}
-mtcars %>%
-  mutate(
-    fx    = floor((mpg - min(mpg, na.rm = TRUE))/3),
-    min_x = min(mpg, na.rm = TRUE),
-    max_x = max(mpg, na.rm = TRUE),
-    bins  = (3 * ifelse(fx == (max_x - min_x)/3, fx - 1, fx)) + min_x
-  ) %>%
-  select(mpg, bins) %>%
-  head()
-```
-
-```
-##    mpg bins
-## 1 21.0 19.4
-## 2 21.0 19.4
-## 3 22.8 22.4
-## 4 21.4 19.4
-## 5 18.7 16.4
-## 6 18.1 16.4
-```
-
-The same R code can run inside Spark, `dplyr` will translate the R code into a SQL statement.  The results can then be collected into R for visualizing. 
-
-```{r, eval = FALSE}
-bins <- cars %>%
-  mutate(
-    fx    = floor((mpg - min(mpg, na.rm = TRUE))/3),
-    min_x = min(mpg, na.rm = TRUE),
-    max_x = max(mpg, na.rm = TRUE),
-    bins  = (3 * ifelse(fx == (max_x - min_x)/3, fx - 1, fx)) + min_x
-  ) %>%
-  count(bins)%>%
-  collect()
-
-bins
-```
-
-```
-## # A tibble: 7 x 2
-##    bins     n
-##   <dbl> <dbl>
-## 1  19.4     6
-## 2  22.4     3
-## 3  13.4     8
-## 4  10.4     3
-## 5  16.4     6
-## 6  28.4     4
-## 7  25.4     2
-```
-
-The bins and counts have been pre-calculated, so a simple column plot is used.  The resulting plot is in figure \@ref(fig:analysis-viz2).
-
-```{r, eval = FALSE}
-bins %>%
-  ggplot() +
-  geom_col(aes(bins, n))
-```
-
-```{r, eval = FALSE, echo = FALSE}
-bins %>%
-  ggplot() +
-  geom_col(aes(bins, n)) +
-  ggsave("images/analysis-visualizations-2.png", width = 10, height = 5)
-```
-
-```{r analysis-viz2, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
-render_image("images/analysis-visualizations-2.png")
-```
-
-There is an R package that can make plotting histograms and other plots easier.  The next section will cover that.
-
-#### Using dbplot
+### Using dbplot
 
 The `dbplot` package provides helper function for plotting with remote data.  The R code `dbplot` uses to transform the data is written so that it can be translated by `sparklyr` into SQL.  It then uses the results to generate a `ggplot2` plot.
 
@@ -638,6 +584,8 @@ cars %>%
 ## 8  24.5  1.51     2  29.2  2.30
 ## 9  15.1  2.30     1  19.8  3.08
 ```
+
+We use statistical models to gain even deeper insights into our data.  The next section will cover how we can prepare and run models within Spark.  
 
 ## Model
 
