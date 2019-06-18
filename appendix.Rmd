@@ -170,6 +170,178 @@ Which you can then active with:
 ggplot2::theme_set(plot_style())
 ```
 
+## Source types and file systems {#data-source-files}
+
+This section will cover techniques to help you interface with some of the most popular data types and protocols.
+
+### Amazon S3
+
+Amazon Simple Storage Service, or S3, has become a common location to store file.  Spark is able to directly access S3.  This functionality can be used inside `sparklyr`.  There are three key items to have, or use, when working with data from an S3 bucket: 
+
+- *AWS Credentials* - They are required by the S3 service, even for publicly accessible buckets.
+- *Hadoop-to-AWS package* - It is loaded at connection time.
+- *A bucket location* - The recommended file system to use is "s3a".
+
+There are multiple ways to set the credentials to use to access the bucket.  Please refer to the official documentation for more information. It is found in the Apache Spark official site [@data-spark-cloud-integration]. 
+
+The easiest way is to set the credentials using Environment variables.  Choose a secure way to load the values into variables in R, and then load them into the appropriate Environment variable name. In case show below, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+
+```{r}
+Sys.setenv(AWS_ACCESS_KEY_ID = my_key_id)
+Sys.setenv(AWS_SECRET_ACCESS_KEY = my_secret_key)
+```
+
+Spark requires an integration package in order to access Amazon S3 buckets. Interestingly, the package is not a Spark package, it is a Hadoop package.  This means that the selected version will be a Hadoop version.  After some experiments, it seems that with Spark versions 2, only up to Hadoop 2.7.7 will work.  That may change when Spark enters version 3.  If using a YARN managed cluster, the package may be different.  That would depend on the Hadoop vendor.  The official site for Apache based project is called Maven [@data-maven-home].  Please visit that site to find alternative package versions if the recommended one does not work. The recommended search term to use would be: "hadoop-aws".
+
+```{r}
+conf <- spark_config()
+conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
+
+sc <- spark_connect(master = "local", config = conf)
+```
+
+For the file system prefix use "s3a".  There are other options, such as "s3" and "s3n".  As per the Hadoop documents, the "s3a" file system should be the default selection.
+
+```{r}
+my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
+```
+
+### SQL 
+
+The `sparklyr` package provides a DBI compliant interface [@data-r-dbi]. This means that DBI functions can be used to interact with data via Spark.  This includes non-SQL sources that are accessible via or cached in Spark.
+
+```{r}
+library(sparklyr)
+library(dplyr)
+sc <- spark_connect(master = "local")
+cars <- copy_to(sc, mtcars, "remote_mtcars")
+
+DBI::dbGetQuery(sc, "SELECT * FROM remote_mtcars LIMIT 5")
+```
+
+```
+##    mpg cyl disp  hp drat    wt  qsec vs am gear carb
+## 1 21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
+## 2 21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
+## 3 22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
+## 4 21.4   6  258 110 3.08 3.215 19.44  1  0    3    1
+## 5 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2
+```
+
+### Hive
+
+In YARN managed clusters, Spark provides a deeper integration with Apache Hive.  Hive tables are easily accessible after opening a Spark connection.
+
+```{r}
+sc <- spark_connect(master = "yarn-client", 
+                    spark_home = "/usr/lib/spark/",
+                    version = "2.1.0",
+                    config = conf)
+```
+
+Accessing a Hive table's data can be done with a simple reference.  Using `DBI`, a table can be referenced within a SQL statement.
+
+```{r}
+DBI::dbSendQuery(sc, "SELECT * FROM table limit 10")
+```
+
+Another way to reference a table is with `dplyr`.  The `tbl()` function, creates a pointer to the table.  
+
+```{r}
+library(dplyr)
+
+t <- tbl(sc, "table")
+```
+
+It is important to reiterate that no data is imported into R, the `tbl()` function creates only a reference.  The expectation is that there will be more `dplyr` verbs following the `tbl()` command.
+
+```{r}
+t %>%
+  group_by(field1) %>%
+  summarise(totals = sum(field2))
+```
+
+##### Database selection
+
+Hive table references assume a default database source.  Often, the table needed table is in a different database within the Metastore.  To access it using SQL, prefix the database name to the table.  Separate them using a period. 
+
+```{r eval=FALSE}
+DBI::dbSendQuery(sc, "SELECT * FROM databasename.table")
+```
+
+In `dplyr`, the `in_schema()` function can be used.  The function is used inside the `tbl()` call.
+
+```{r}
+tbl(sc, in_schema("databasename", "table"))
+```
+
+In `sparklyr`, the `tbl_change_db()` function sets the current session's default database.  Any subsequent call via `DBI` or `dplyr` will use the selected name as the default database.
+
+```{r eval=FALSE}
+tbl_change_db(sc, "databasename")
+```
+
+### Comma Delimited Values (CSV)
+
+The CSV format may be the most common file type in use today.  Spark offers a couple of techniques to help you troubleshoot issues when reading these kinds of files. 
+
+Spark offers the following modes for addressing parsing issues:
+
+- **PERMISSIVE**: `NULL`s are inserted for missing tokens.
+
+- **DROPMALFORMED**: Drops lines which are malformed.
+
+- **FAILFAST**: Aborts if encounters any malformed line.
+
+These can be used in `sparklyr` by passing them inside the `options` argument.  The following example creates a file with a broken entry.  It then shows how it can be read into Spark.
+
+```{r}
+library(sparklyr)
+sc <- spark_connect(master = "local")
+
+## Creates bad test file
+writeLines(c("bad", 1, 2, 3, "broken"), "bad.csv")
+
+spark_read_csv(
+  sc,
+  "bad3",
+  "bad.csv",
+  columns = list(foo = "integer"),
+  infer_schema = FALSE,
+  options = list(mode = "DROPMALFORMED"))
+```
+```
+## # Source: spark<bad3> [?? x 1]
+##     foo
+##   <int>
+## 1     1
+## 2     2
+## 3     3
+```
+
+Spark 2 provides an issue tracking column.  The column is hidden by default.  To enable it, add `_corrupt_record` to the `columns` list. This can be combines with the use of the *PERMISIVE* mode.  All rows will be imported, invalid entries will receive an `NA`, and the issue tracked in the `_corrupt_record` column.
+
+```{r eval=FALSE}
+spark_read_csv(
+  sc,
+  "bad2",
+  "bad.csv",
+  columns = list(foo = "integer", "_corrupt_record" = "character"),
+  infer_schema = FALSE,
+  options = list(mode = "PERMISIVE")
+)
+```
+```
+## # Source: spark<bad2> [?? x 2]
+##     foo `_corrupt_record`
+##   <int> <chr>            
+## 1     1 NA               
+## 2     2 NA               
+## 3     3 NA               
+## 4    NA broken  
+```
+
+
 ## List of ML Functions {#ml-functionlist}
 
 The following table exhibits the ML algorithms supported in sparklyr:
@@ -254,7 +426,7 @@ Indexing Categorical Feature | ft_vector_indexer()
 Subarray of the Original Feature | ft_vector_slicer()
 Transform Word into Code | ft_word2vec()
 
-## Hive Functions
+## Hive Functions {#hive-functions}
 
 Name |     Description
 -----|----------------
