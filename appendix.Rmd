@@ -256,119 +256,115 @@ Transform Word into Code | ft_word2vec()
 
 ## Hive Functions
 
-Name | Description
-----------|---------
+Name |     Description
+-----|----------------
 size(Map<K.V>) | Returns the number of elements in the map type.
 size(Array<T>) | Returns the number of elements in the array type.
 map_keys(Map<K.V>) | Returns an unordered array containing the keys of the input map.
 map_values(Map<K.V>) | Returns an unordered array containing the values of the input map.
 array_contains(Array<T>, value) | Returns TRUE if the array contains value.
-sort_array(Array<T>) | Sorts the input array in ascending order according to the natural ordering of the array elements and returns it (as of version 0.9.0).
-binary(string|binary) | Casts the parameter into a binary.
-cast(expr as <type>) | Converts the results of the expression expr to <type>. For example, cast('1' as BIGINT) will convert the string '1' to its integral representation. A null is returned if the conversion does not succeed. If cast(expr as boolean) Hive returns true for a non-empty string.
-from_unixtime(bigint unixtime[, string format]) | Converts the number of seconds from unix epoch (1970-01-01 00:00:00 UTC) to a string representing the timestamp of that moment in the current system time zone in the format of "1970-01-01 00:00:00".
-unix_timestamp() | Gets current Unix timestamp in seconds. This function is not deterministic and its value is not fixed for the scope of a query execution, therefore prevents proper optimization of queries - this has been deprecated since 2.0 in favour of CURRENT_TIMESTAMP constant.
-unix_timestamp(string date) | Converts time string in format yyyy-MM-dd HH:mm:ss to Unix timestamp (in seconds), using the default timezone and the default locale, return 0 if fail: unix_timestamp('2009-03-20 11:30:01') = 1237573801
-unix_timestamp(string date, string pattern) | Convert time string with given pattern (see [http://docs.oracle.com/javase/tutorial/i18n/format/simpleDateFormat.html]) to Unix time stamp (in seconds), return 0 if fail: unix_timestamp('2009-03-20', 'yyyy-MM-dd') = 1237532400.
-to_date(string timestamp) | Returns the date part of a timestamp string (pre-Hive 2.1.0): to_date("1970-01-01 00:00:00") = "1970-01-01". As of Hive 2.1.0, returns a date object.Prior to Hive 2.1.0 (HIVE-13248) the return type was a String because no Date type existed when the method was created.
-year(string date) | Returns the year part of a date or a timestamp string: year("1970-01-01 00:00:00") = 1970, year("1970-01-01") = 1970.
-quarter(date/timestamp/string) | Returns the quarter of the year for a date, timestamp, or string in the range 1 to 4 (as of Hive 1.3.0). Example: quarter('2015-04-08') = 2.
-month(string date) | Returns the month part of a date or a timestamp string: month("1970-11-01 00:00:00") = 11, month("1970-11-01") = 11.
-day(string date) dayofmonth(date) | Returns the day part of a date or a timestamp string: day("1970-11-01 00:00:00") = 1, day("1970-11-01") = 1.
-hour(string date) | Returns the hour of the timestamp: hour('2009-07-30 12:58:59') = 12, hour('12:58:59') = 12.
+sort_array(Array<T>) | Sorts the input array in ascending order according to the natural ordering of the array elements and returns it 
+binary(string or binary) | Casts the parameter into a binary.
+cast(expr as <type>) | Converts the results of the expression expr to <type>. 
+from_unixtime(bigint unixtime[, string format]) | Converts the number of seconds from unix epoch (1970-01-01 00:00:00 UTC) to a string.
+unix_timestamp() | Gets current Unix timestamp in seconds. 
+unix_timestamp(string date) | Converts time string in format yyyy-MM-dd HH:mm:ss to Unix timestamp (in seconds).
+to_date(string timestamp) | Returns the date part of a timestamp string.
+year(string date) | Returns the year part of a date.
+quarter(date/timestamp/string) | Returns the quarter of the year for a date.
+month(string date) | Returns the month part of a date or a timestamp string.
+day(string date) dayofmonth(date) | Returns the day part of a date or a timestamp string.
+hour(string date) | Returns the hour of the timestamp.
 minute(string date) | Returns the minute of the timestamp.
 second(string date) | Returns the second of the timestamp.
-weekofyear(string date) | Returns the week number of a timestamp string: weekofyear("1970-11-01 00:00:00") = 44, weekofyear("1970-11-01") = 44.
-extract(field FROM source) | Retrieve fields such as days or hours from source (as of Hive 2.2.0). Source must be a date, timestamp, interval or a string that can be converted into either a date or timestamp. Supported fields include: day, dayofweek, hour, minute, month, quarter, second, week and year.Examples:select extract(month from "2016-10-20") results in 10.select extract(hour from "2016-10-20 05:06:07") results in 5.select extract(dayofweek from "2016-10-20 05:06:07") results in 5.select extract(month from interval '1-3' year to month) results in 3.select extract(minute from interval '3 12:20:30' day to second) results in 20.
-datediff(string enddate, string startdate) | Returns the number of days from startdate to enddate: datediff('2009-03-01', '2009-02-27') = 2.
-date_add(date/timestamp/string startdate, tinyint/smallint/int days) | Adds a number of days to startdate: date_add('2008-12-31', 1) = '2009-01-01'.Prior to Hive 2.1.0 (HIVE-13248) the return type was a String because no Date type existed when the method was created.
-date_sub(date/timestamp/string startdate, tinyint/smallint/int days) | Subtracts a number of days to startdate: date_sub('2008-12-31', 1) = '2008-12-30'.Prior to Hive 2.1.0 (HIVE-13248) the return type was a String because no Date type existed when the method was created.
-from_utc_timestamp({any primitive type} ts, string timezone) | Converts a timestamp* in UTC to a given timezone (as of Hive 0.8.0).* timestamp is a primitive type, including timestamp/date, tinyint/smallint/int/bigint, float/double and decimal.Fractional values are considered as seconds. Integer values are considered as milliseconds. For example, from_utc_timestamp(2592000.0,'PST'), from_utc_timestamp(2592000000,'PST') and from_utc_timestamp(timestamp '1970-01-30 16:00:00','PST') all return the timestamp 1970-01-30 08:00:00.
-to_utc_timestamp({any primitive type} ts, string timezone) | Converts a timestamp* in a given timezone to UTC (as of Hive 0.8.0).* timestamp is a primitive type, including timestamp/date, tinyint/smallint/int/bigint, float/double and decimal.Fractional values are considered as seconds. Integer values are considered as milliseconds. For example, to_utc_timestamp(2592000.0,'PST'), to_utc_timestamp(2592000000,'PST') and to_utc_timestamp(timestamp '1970-01-30 16:00:00','PST') all return the timestamp 1970-01-31 00:00:00.
-current_date | Returns the current date at the start of query evaluation (as of Hive 1.2.0). All calls of current_date within the same query return the same value.
-current_timestamp | Returns the current timestamp at the start of query evaluation (as of Hive 1.2.0). All calls of current_timestamp within the same query return the same value.
-add_months(string start_date, int num_months, output_date_format) | Returns the date that is num_months after start_date (as of Hive 1.1.0). start_date is a string, date or timestamp. num_months is an integer. If start_date is the last day of the month or if the resulting month has fewer days than the day component of start_date, then the result is the last day of the resulting month. Otherwise, the result has the same day component as start_date. The default output format is 'yyyy-MM-dd'.Before Hive 4.0.0, the time part of the date is ignored.As of Hive 4.0.0, add_months supports an optional argument output_date_format, which accepts a String that represents a valid date format for the output. This allows to retain the time format in the output.For example :add_months('2009-08-31', 1) returns '2009-09-30'.add_months('2017-12-31 14:15:16', 2, 'YYYY-MM-dd HH:mm:ss') returns '2018-02-28 14:15:16'.
-last_day(string date) | Returns the last day of the month which the date belongs to (as of Hive 1.1.0). date is a string in the format 'yyyy-MM-dd HH:mm:ss' or 'yyyy-MM-dd'. The time part of date is ignored.
-next_day(string start_date, string day_of_week) | Returns the first date which is later than start_date and named as day_of_week (as of Hive 1.2.0). start_date is a string/date/timestamp. day_of_week is 2 letters, 3 letters or full name of the day of the week (e.g. Mo, tue, FRIDAY). The time part of start_date is ignored. Example: next_day('2015-01-14', 'TU') = 2015-01-20.
-trunc(string date, string format) | Returns date truncated to the unit specified by the format (as of Hive 1.2.0). Supported formats: MONTH/MON/MM, YEAR/YYYY/YY. Example: trunc('2015-03-17', 'MM') = 2015-03-01.
-months_between(date1, date2) | Returns number of months between dates date1 and date2 (as of Hive 1.2.0). If date1 is later than date2, then the result is positive. If date1 is earlier than date2, then the result is negative. If date1 and date2 are either the same days of the month or both last days of months, then the result is always an integer. Otherwise the UDF calculates the fractional portion of the result based on a 31-day month and considers the difference in time components date1 and date2. date1 and date2 type can be date, timestamp or string in the format 'yyyy-MM-dd' or 'yyyy-MM-dd HH:mm:ss'. The result is rounded to 8 decimal places. Example: months_between('1997-02-28 10:30:00', '1996-10-30') = 3.94959677
-date_format(date/timestamp/string ts, string fmt) | Converts a date/timestamp/string to a value of string in the format specified by the date format fmt (as of Hive 1.2.0). Supported formats are Java SimpleDateFormat formats – https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html. The second argument fmt should be constant. Example: date_format('2015-04-08', 'y') = '2015'.date_format can be used to implement other UDFs, e.g.:dayname(date) is date_format(date, 'EEEE')dayofyear(date) is date_format(date, 'D')
+weekofyear(string date) | Returns the week number of a timestamp string.
+extract(field FROM source) | Retrieve fields such as days or hours from source. Source must be a date, timestamp, interval or a string that can be converted into either a date or timestamp.
+datediff(string enddate, string startdate) | Returns the number of days from startdate to enddate.
+date_add(date/timestamp/string startdate, tinyint/smallint/int days) | Adds a number of days to startdate.
+date_sub(date/timestamp/string startdate, tinyint/smallint/int days) | Subtracts a number of days to startdate.
+from_utc_timestamp({any primitive type} ts, string timezone) | Converts a timestamp in UTC to a given timezone.
+to_utc_timestamp({any primitive type} ts, string timezone) | Converts a timestamp in a given timezone to UTC.
+current_date | Returns the current date.
+current_timestamp | Returns the current timestamp.
+add_months(string start_date, int num_months, output_date_format) | Returns the date that is num_months after start_date.
+last_day(string date) | Returns the last day of the month which the date belongs to.
+next_day(string start_date, string day_of_week) | Returns the first date which is later than start_date and named as day_of_week. 
+trunc(string date, string format) | Returns date truncated to the unit specified by the format.
+months_between(date1, date2) | Returns number of months between dates date1 and date2. 
+date_format(date/timestamp/string ts, string fmt) | Converts a date/timestamp/string to a value of string in the format specified by the date format fmt.
 if(boolean testCondition, T valueTrue, T valueFalseOrNull) | Returns valueTrue when testCondition is true, returns valueFalseOrNull otherwise.
 isnull( a ) | Returns true if a is NULL and false otherwise.
 isnotnull ( a ) | Returns true if a is not NULL and false otherwise.
-nvl(T value, T default_value) | Returns default value if value is null else returns value (as of HIve 0.11).
+nvl(T value, T default_value) | Returns default value if value is null else returns value.
 COALESCE(T v1, T v2, ...) | Returns the first v that is not NULL, or NULL if all v's are NULL.
 CASE a WHEN b THEN c [WHEN d THEN e]* [ELSE f] END | When a = b, returns c; when a = d, returns e; else returns f.
-CASE WHEN a THEN b [WHEN c THEN d]* [ELSE e] END | When a = true, returns b; when c = true, returns d; else returns e.
-nullif( a, b ) | Returns NULL if a=b; otherwise returns a (as of Hive 2.3.0).Shorthand for: CASE WHEN a = b then NULL else a
-assert_true(boolean condition) | Throw an exception if 'condition' is not true, otherwise return null (as of Hive 0.8.0). For example, select assert_true (2<1).
+nullif( a, b ) | Returns NULL if a=b; otherwise returns a.
+assert_true(boolean condition) | Throw an exception if 'condition' is not true, otherwise return null.
 ascii(string str) | Returns the numeric value of the first character of str.
-base64(binary bin) | Converts the argument from binary to a base 64 string (as of Hive 0.12.0).
-character_length(string str) | Returns the number of UTF-8 characters contained in str (as of Hive 2.2.0). The function char_length is shorthand for this function.
-chr(bigint|double A) | Returns the ASCII character having the binary equivalent to A (as of Hive 1.3.0 and 2.1.0). If A is larger than 256 the result is equivalent to chr(A % 256). Example: select chr(88); returns "X".
-concat(string|binary A, string|binary B...) | Returns the string or bytes resulting from concatenating the strings or bytes passed in as parameters in order. For example, concat('foo', 'bar') results in 'foobar'. Note that this function can take any number of input strings.
-context_ngrams(array<array<string>>, array<string>, int K, int pf) | Returns the top-k contextual N-grams from a set of tokenized sentences, given a string of "context". See StatisticsAndDataMining for more information.
+base64(binary bin) | Converts the argument from binary to a base 64 string.
+character_length(string str) | Returns the number of UTF-8 characters contained in str.
+chr(bigint|double A) | Returns the ASCII character having the binary equivalent to A.
+concat(string|binary A, string|binary B...) | Returns the string or bytes resulting from concatenating the strings or bytes passed in as parameters in order. 
+context_ngrams(array<array<string>>, array<string>, int K, int pf) | Returns the top-k contextual N-grams from a set of tokenized sentences.
 concat_ws(string SEP, string A, string B...) | Like concat() above, but with custom separator SEP.
-concat_ws(string SEP, array<string>) | Like concat_ws() above, but taking an array of strings. (as of Hive 0.9.0)
-decode(binary bin, string charset) | Decodes the first argument into a String using the provided character set (one of 'US-ASCII', 'ISO-8859-1', 'UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-16'). If either argument is null, the result will also be null. (As of Hive 0.12.0.)
-elt(N int,str1 string,str2 string,str3 string,...) | Return string at index number. For example elt(2,'hello','world') returns 'world'. Returns NULL if N is less than 1 or greater than the number of arguments.(see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_elt)
-encode(string src, string charset) | Encodes the first argument into a BINARY using the provided character set (one of 'US-ASCII', 'ISO-8859-1', 'UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-16'). If either argument is null, the result will also be null. (As of Hive 0.12.0.)
-field(val T,val1 T,val2 T,val3 T,...) | Returns the index of val in the val1,val2,val3,... list or 0 if not found.  For example field('world','say','hello','world') returns 3.All primitive types are supported, arguments are compared using str.equals(x). If val is NULL, the return value is 0.(see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_field)
-find_in_set(string str, string strList) | Returns the first occurance of str in strList where strList is a comma-delimited string. Returns null if either argument is null. Returns 0 if the first argument contains any commas. For example, find_in_set('ab', 'abc,b,ab,c,def') returns 3.
-format_number(number x, int d) | Formats the number X to a format like '#,###,###.##', rounded to D decimal places, and returns the result as a string. If D is 0, the result has no decimal point or fractional part. (As of Hive 0.10.0; bug with float types fixed in Hive 0.14.0, decimal type support added in Hive 0.14.0)
-get_json_object(string json_string, string path) | Extracts json object from a json string based on json path specified, and returns json string of the extracted json object. It will return null if the input json string is invalid. NOTE: The json path can only have the characters [0-9a-z_], i.e., no upper-case or special characters. Also, the keys *cannot start with numbers.* This is due to restrictions on Hive column names.
+decode(binary bin, string charset) | Decodes the first argument into a String using the provided character set (one of 'US-ASCII', 'ISO-8859-1', 'UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-16'). If either argument is null, the result will also be null. 
+elt(N int,str1 string,str2 string,str3 string,...) | Return string at index number,  elt(2,'hello','world') returns 'world'. 
+encode(string src, string charset) | Encodes the first argument into a BINARY using the provided character set (one of 'US-ASCII', 'ISO-8859-1', 'UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-16'). 
+field(val T,val1 T,val2 T,val3 T,...) | Returns the index of val in the val1,val2,val3,... list or 0 if not found.
+find_in_set(string str, string strList) | Returns the first occurance of str in strList where strList is a comma-delimited string. 
+format_number(number x, int d) | Formats the number X to a format like `'#,###,###.##'`, rounded to D decimal places, and returns the result as a string. If D is 0, the result has no decimal point or fractional part. 
+get_json_object(string json_string, string path) | Extracts json object from a json string based on json path specified, and returns json string of the extracted json object.
 in_file(string str, string filename) | Returns true if the string str appears as an entire line in filename.
-instr(string str, string substr) | Returns the position of the first occurrence of substr in str. Returns null if either of the arguments are null and returns 0 if substr could not be found in str. Be aware that this is not zero based. The first character in str has index 1.
+instr(string str, string substr) | Returns the position of the first occurrence of substr in str. 
 length(string A) | Returns the length of the string.
 locate(string substr, string str[, int pos]) | Returns the position of the first occurrence of substr in str after position pos.
-lower(string A) lcase(string A) | Returns the string resulting from converting all characters of B to lower case. For example, lower('fOoBaR') results in 'foobar'.
-lpad(string str, int len, string pad) | Returns str, left-padded with pad to a length of len. If str is longer than len, the return value is shortened to len characters. In case of empty pad string, the return value is null.
-ltrim(string A) | Returns the string resulting from trimming spaces from the beginning(left hand side) of A. For example, ltrim(' foobar ') results in 'foobar '.
-ngrams(array<array<string>>, int N, int K, int pf) | Returns the top-k N-grams from a set of tokenized sentences, such as those returned by the sentences() UDAF. See StatisticsAndDataMining for more information.
-octet_length(string str) | Returns the number of octets required to hold the string str in UTF-8 encoding (since Hive 2.2.0). Note that octet_length(str) can be larger than character_length(str).
-parse_url(string urlString, string partToExtract [, string keyToExtract]) | Returns the specified part from the URL. Valid values for partToExtract include HOST, PATH, QUERY, REF, PROTOCOL, AUTHORITY, FILE, and USERINFO. For example, parse_url('http://facebook.com/path1/p.php?k1=v1&k2=v2#Ref1', 'HOST') returns 'facebook.com'. Also a value of a particular key in QUERY can be extracted by providing the key as the third argument, for example, parse_url('http://facebook.com/path1/p.php?k1=v1&k2=v2#Ref1', 'QUERY', 'k1') returns 'v1'.
-printf(String format, Obj... args) | Returns the input formatted according do printf-style format strings (as of Hive 0.9.0).
-regexp_extract(string subject, string pattern, int index) | Returns the string extracted using the pattern. For example, regexp_extract('foothebar', 'foo(.*?)(bar)', 2) returns 'bar.' Note that some care is necessary in using predefined character classes: using '\s' as the second argument will match the letter s; '\\s' is necessary to match whitespace, etc. The 'index' parameter is the Java regex Matcher group() method index. See docs/api/java/util/regex/Matcher.html for more information on the 'index' or Java regex group() method.
-regexp_replace(string INITIAL_STRING, string PATTERN, string REPLACEMENT) | Returns the string resulting from replacing all substrings in INITIAL_STRING that match the java regular expression syntax defined in PATTERN with instances of REPLACEMENT. For example, regexp_replace("foobar", "oo|ar", "") returns 'fb.' Note that some care is necessary in using predefined character classes: using '\s' as the second argument will match the letter s; '\\s' is necessary to match whitespace, etc.
+lower(string A) lcase(string A) | Returns the string resulting from converting all characters of B to lower case. 
+lpad(string str, int len, string pad) | Returns str, left-padded with pad to a length of len. If str is longer than len, the return value is shortened to len characters. 
+ltrim(string A) | Returns the string resulting from trimming spaces from the beginning(left hand side) of A. 
+ngrams(array<array<string>>, int N, int K, int pf) | Returns the top-k N-grams from a set of tokenized sentences, such as those returned by the sentences() UDAF.
+octet_length(string str) | Returns the number of octets required to hold the string str in UTF-8 encoding.
+parse_url(string urlString, string partToExtract [, string keyToExtract]) | Returns the specified part from the URL. Valid values for partToExtract include HOST, PATH, QUERY, REF, PROTOCOL, AUTHORITY, FILE, and USERINFO. 
+printf(String format, Obj... args) | Returns the input formatted according do printf-style format strings.
+regexp_extract(string subject, string pattern, int index) | Returns the string extracted using the pattern. 
+regexp_replace(string INITIAL_STRING, string PATTERN, string REPLACEMENT) | Returns the string resulting from replacing all substrings in INITIAL_STRING that match the java regular expression syntax defined in PATTERN with instances of REPLACEMENT.
 repeat(string str, int n) | Repeats str n times.
-replace(string A, string OLD, string NEW) | Returns the string A with all non-overlapping occurrences of OLD replaced with NEW (as of Hive 1.3.0 and 2.1.0). Example: select replace("ababab", "abab", "Z"); returns "Zab".
+replace(string A, string OLD, string NEW) | Returns the string A with all non-overlapping occurrences of OLD replaced with NEW.
 reverse(string A) | Returns the reversed string.
-rpad(string str, int len, string pad) | Returns str, right-padded with pad to a length of len. If str is longer than len, the return value is shortened to len characters. In case of empty pad string, the return value is null.
-rtrim(string A) | Returns the string resulting from trimming spaces from the end(right hand side) of A. For example, rtrim(' foobar ') results in ' foobar'.
-sentences(string str, string lang, string locale) | Tokenizes a string of natural language text into words and sentences, where each sentence is broken at the appropriate sentence boundary and returned as an array of words. The 'lang' and 'locale' are optional arguments. For example, sentences('Hello there! How are you?') returns ( ("Hello", "there"), ("How", "are", "you") ).
+rpad(string str, int len, string pad) | Returns str, right-padded with pad to a length of len. 
+rtrim(string A) | Returns the string resulting from trimming spaces from the end(right hand side) of A.
+sentences(string str, string lang, string locale) | Tokenizes a string of natural language text into words and sentences, where each sentence is broken at the appropriate sentence boundary and returned as an array of words. 
 space(int n) | Returns a string of n spaces.
 split(string str, string pat) | Splits str around pat (pat is a regular expression).
 str_to_map(text[, delimiter1, delimiter2]) | Splits text into key-value pairs using two delimiters. Delimiter1 separates text into K-V pairs, and Delimiter2 splits each K-V pair. Default delimiters are ',' for delimiter1 and ':' for delimiter2.
-substr(string|binary A, int start) substring(string|binary A, int start) | Returns the substring or slice of the byte array of A starting from start position till the end of string A. For example, substr('foobar', 4) results in 'bar' (see [http://dev.mysql.com/doc/refman/5.0/en/string-functions.html#function_substr]).
-substr(string|binary A, int start, int len) substring(string|binary A, int start, int len) | Returns the substring or slice of the byte array of A starting from start position with length len. For example, substr('foobar', 4, 1) results in 'b' (see [http://dev.mysql.com/doc/refman/5.0/en/string-functions.html#function_substr]).
-substring_index(string A, string delim, int count) | Returns the substring from string A before count occurrences of the delimiter delim (as of Hive 1.3.0). If count is positive, everything to the left of the final delimiter (counting from the left) is returned. If count is negative, everything to the right of the final delimiter (counting from the right) is returned. Substring_index performs a case-sensitive match when searching for delim. Example: substring_index('www.apache.org', '.', 2) = 'www.apache'.
-translate(string|char|varchar input, string|char|varchar from, string|char|varchar to) | Translates the input string by replacing the characters present in the from string with the corresponding characters in the to string. This is similar to the translate function in PostgreSQL. If any of the parameters to this UDF are NULL, the result is NULL as well. (Available as of Hive 0.10.0, for string types)Char/varchar support added as of Hive 0.14.0.
-trim(string A) | Returns the string resulting from trimming spaces from both ends of A. For example, trim(' foobar ') results in 'foobar'
-unbase64(string str) | Converts the argument from a base 64 string to BINARY. (As of Hive 0.12.0.)
+substr(string|binary A, int start) | Returns the substring or slice of the byte array of A starting from start position till the end of string A. For example, substr('foobar', 4) results in 'bar' 
+substring_index(string A, string delim, int count) | Returns the substring from string A before count occurrences of the delimiter delim.
+translate(string|char|varchar input, string|char|varchar from, string|char|varchar to) | Translates the input string by replacing the characters present in the from string with the corresponding characters in the to string.
+trim(string A) | Returns the string resulting from trimming spaces from both ends of A.
+unbase64(string str) | Converts the argument from a base 64 string to BINARY.
 upper(string A) ucase(string A) | Returns the string resulting from converting all characters of A to upper case. For example, upper('fOoBaR') results in 'FOOBAR'.
-initcap(string A) | Returns string, with the first letter of each word in uppercase, all other letters in lowercase. Words are delimited by whitespace. (As of Hive 1.1.0.)
-levenshtein(string A, string B) | Returns the Levenshtein distance between two strings (as of Hive 1.2.0). For example, levenshtein('kitten', 'sitting') results in 3.
-soundex(string A) | Returns soundex code of the string (as of Hive 1.2.0). For example, soundex('Miller') results in M460.
-mask(string str[, string upper[, string lower[, string number]]]) | Returns a masked version of str (as of Hive 2.1.0). By default, upper case letters are converted to "X", lower case letters are converted to "x" and numbers are converted to "n". For example mask("abcd-EFGH-8765-4321") results in xxxx-XXXX-nnnn-nnnn. You can override the characters used in the mask by supplying additional arguments: the second argument controls the mask character for upper case letters, the third argument for lower case letters and the fourth argument for numbers. For example, mask("abcd-EFGH-8765-4321", "U", "l", "#") results in llll-UUUU-####-####.
-mask_first_n(string str[, int n]) | Returns a masked version of str with the first n values masked (as of Hive 2.1.0). Upper case letters are converted to "X", lower case letters are converted to "x" and numbers are converted to "n". For example, mask_first_n("1234-5678-8765-4321", 4) results in nnnn-5678-8765-4321.
-mask_last_n(string str[, int n]) | Returns a masked version of str with the last n values masked (as of Hive 2.1.0). Upper case letters are converted to "X", lower case letters are converted to "x" and numbers are converted to "n". For example, mask_last_n("1234-5678-8765-4321", 4) results in 1234-5678-8765-nnnn.
-mask_show_first_n(string str[, int n]) | Returns a masked version of str, showing the first n characters unmasked (as of Hive 2.1.0). Upper case letters are converted to "X", lower case letters are converted to "x" and numbers are converted to "n". For example, mask_show_first_n("1234-5678-8765-4321", 4) results in 1234-nnnn-nnnn-nnnn.
-mask_show_last_n(string str[, int n]) | Returns a masked version of str, showing the last n characters unmasked (as of Hive 2.1.0). Upper case letters are converted to "X", lower case letters are converted to "x" and numbers are converted to "n". For example, mask_show_last_n("1234-5678-8765-4321", 4) results in nnnn-nnnn-nnnn-4321.
-mask_hash(string|char|varchar str) | Returns a hashed value based on str (as of Hive 2.1.0). The hash is consistent and can be used to join masked values together across tables. This function returns null for non-string types.
-java_method(class, method[, arg1[, arg2..]]) | Synonym for reflect. (As of Hive 0.9.0.)
-reflect(class, method[, arg1[, arg2..]]) | Calls a Java method by matching the argument signature, using reflection. (As of Hive 0.7.0.) See Reflect (Generic) UDF for examples.
-hash(a1[, a2...]) | Returns a hash value of the arguments. (As of Hive 0.4.)
-current_user() | Returns current user name from the configured authenticator manager (as of Hive 1.2.0). Could be the same as the user provided when connecting, but with some authentication managers (for example HadoopDefaultAuthenticator) it could be different.
-logged_in_user() | Returns current user name from the session state (as of Hive 2.2.0). This is the username provided when connecting to Hive.
-current_database() | Returns current database name (as of Hive 0.13.0).
-md5(string/binary) | Calculates an MD5 128-bit checksum for the string or binary (as of Hive 1.3.0). The value is returned as a string of 32 hex digits, or NULL if the argument was NULL. Example: md5('ABC') = '902fbdd2b1df0c4f70b4a5d23525e932'.
-sha1(string/binary)sha(string/binary) | Calculates the SHA-1 digest for string or binary and returns the value as a hex string (as of Hive 1.3.0). Example: sha1('ABC') = '3c01bdbb26f358bab27f267924aa2c9a03fcfdb8'.
-crc32(string/binary) | Computes a cyclic redundancy check value for string or binary argument and returns bigint value (as of Hive 1.3.0). Example: crc32('ABC') = 2743272264.
-sha2(string/binary, int) | Calculates the SHA-2 family of hash functions (SHA-224, SHA-256, SHA-384, and SHA-512) (as of Hive 1.3.0). The first argument is the string or binary to be hashed. The second argument indicates the desired bit length of the result, which must have a value of 224, 256, 384, 512, or 0 (which is equivalent to 256). SHA-224 is supported starting from Java 8. If either argument is NULL or the hash length is not one of the permitted values, the return value is NULL. Example: sha2('ABC', 256) = 'b5d4045c3f466fa91fe2cc6abe79232a1a57cdf104f7a26e716e0a1e2789df78'.
-aes_encrypt(input string/binary, key string/binary) | Encrypt input using AES (as of Hive 1.3.0). Key lengths of 128, 192 or 256 bits can be used. 192 and 256 bits keys can be used if Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files are installed. If either argument is NULL or the key length is not one of the permitted values, the return value is NULL. Example: base64(aes_encrypt('ABC', '1234567890123456')) = 'y6Ss+zCYObpCbgfWfyNWTw=='.
-aes_decrypt(input binary, key string/binary) | Decrypt input using AES (as of Hive 1.3.0). Key lengths of 128, 192 or 256 bits can be used. 192 and 256 bits keys can be used if Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files are installed. If either argument is NULL or the key length is not one of the permitted values, the return value is NULL. Example: aes_decrypt(unbase64('y6Ss+zCYObpCbgfWfyNWTw=='), '1234567890123456') = 'ABC'.
-version() | Returns the Hive version (as of Hive 2.1.0). The string contains 2 fields, the first being a build number and the second being a build hash. Example: "select version();" might return "2.1.0.2.5.0.0-1245 r027527b9c5ce1a3d7d0b6d2e6de2378fb0c39232". Actual results will depend on your build.
-count(*), count(expr), count(DISTINCT expr[, expr...]) | count(*) - Returns the total number of retrieved rows, including rows containing NULL values.count(expr) - Returns the number of rows for which the supplied expression is non-NULL.count(DISTINCT expr[, expr]) - Returns the number of rows for which the supplied expression(s) are unique and non-NULL. Execution of this can be optimized with hive.optimize.distinct.rewrite.
+initcap(string A) | Returns string, with the first letter of each word in uppercase, all other letters in lowercase. Words are delimited by whitespace. 
+levenshtein(string A, string B) | Returns the Levenshtein distance between two strings.
+soundex(string A) | Returns soundex code of the string.
+mask(string str[, string upper[, string lower[, string number]]]) | Returns a masked version of str.
+mask_first_n(string str[, int n]) | Returns a masked version of str with the first n values masked. mask_first_n("1234-5678-8765-4321", 4) results in nnnn-5678-8765-4321.
+mask_last_n(string str[, int n]) | Returns a masked version of str with the last n values masked.
+mask_show_first_n(string str[, int n]) | Returns a masked version of str, showing the first n characters unmasked.
+mask_show_last_n(string str[, int n]) | Returns a masked version of str, showing the last n characters unmasked.
+mask_hash(string|char|varchar str) | Returns a hashed value based on str.
+java_method(class, method[, arg1[, arg2..]]) | Synonym for reflect.
+reflect(class, method[, arg1[, arg2..]]) | Calls a Java method by matching the argument signature, using reflection. 
+hash(a1[, a2...]) | Returns a hash value of the arguments.
+current_user() | Returns current user name from the configured authenticator manager.
+logged_in_user() | Returns current user name from the session state.
+current_database() | Returns current database name.
+md5(string/binary) | Calculates an MD5 128-bit checksum for the string or binary.
+sha1(string/binary)sha(string/binary) | Calculates the SHA-1 digest for string or binary and returns the value as a hex string.
+crc32(string/binary) | Computes a cyclic redundancy check value for string or binary argument and returns bigint value.
+sha2(string/binary, int) | Calculates the SHA-2 family of hash functions (SHA-224, SHA-256, SHA-384, and SHA-512).
+aes_encrypt(input string/binary, key string/binary) | Encrypt input using AES.
+aes_decrypt(input binary, key string/binary) | Decrypt input using AES.
+version() | Returns the Hive version.
+count(expr) | Returns the total number of retrieved rows.
 sum(col), sum(DISTINCT col) | Returns the sum of the elements in the group or the sum of the distinct values of the column in the group.
 avg(col), avg(DISTINCT col) | Returns the average of the elements in the group or the average of the distinct values of the column in the group.
 min(col) | Returns the minimum of the column in the group.
@@ -380,31 +376,30 @@ stddev_samp(col) | Returns the unbiased sample standard deviation of a numeric c
 covar_pop(col1, col2) | Returns the population covariance of a pair of numeric columns in the group.
 covar_samp(col1, col2) | Returns the sample covariance of a pair of a numeric columns in the group.
 corr(col1, col2) | Returns the Pearson coefficient of correlation of a pair of a numeric columns in the group.
-percentile(BIGINT col, p) | Returns the exact pth percentile of a column in the group (does not work with floating point types). p must be between 0 and 1. NOTE: A true percentile can only be computed for integer values. Use PERCENTILE_APPROX if your input is non-integral.
-percentile(BIGINT col, array(p1 [, p2]...)) | Returns the exact percentiles p1, p2, ... of a column in the group (does not work with floating point types). pi must be between 0 and 1. NOTE: A true percentile can only be computed for integer values. Use PERCENTILE_APPROX if your input is non-integral.
+percentile(BIGINT col, p) | Returns the exact pth percentile of a column in the group (does not work with floating point types). p must be between 0 and 1. 
+percentile(BIGINT col, array(p1 [, p2]...)) | Returns the exact percentiles p1, p2, ... of a column in the group. pi must be between 0 and 1. 
 percentile_approx(DOUBLE col, p [, B]) | Returns an approximate pth percentile of a numeric column (including floating point types) in the group. The B parameter controls approximation accuracy at the cost of memory. Higher values yield better approximations, and the default is 10,000. When the number of distinct values in col is smaller than B, this gives an exact percentile value.
 percentile_approx(DOUBLE col, array(p1 [, p2]...) [, B]) | Same as above, but accepts and returns an array of percentile values instead of a single one.
-regr_avgx(independent, dependent) | Equivalent to avg(dependent). As of Hive 2.2.0.
-regr_avgy(independent, dependent) | Equivalent to avg(independent). As of Hive 2.2.0.
-regr_count(independent, dependent) | Returns the number of non-null pairs used to fit the linear regression line. As of Hive 2.2.0.
-regr_intercept(independent, dependent) | Returns the y-intercept of the linear regression line, i.e. the value of b in the equation dependent = a * independent + b. As of Hive 2.2.0.
-regr_r2(independent, dependent) | Returns the coefficient of determination for the regression. As of Hive 2.2.0.
-regr_slope(independent, dependent) | Returns the slope of the linear regression line, i.e. the value of a in the equation dependent = a * independent + b. As of Hive 2.2.0.
-regr_sxx(independent, dependent) | Equivalent to regr_count(independent, dependent) * var_pop(dependent). As of Hive 2.2.0.
-regr_sxy(independent, dependent) | Equivalent to regr_count(independent, dependent) * covar_pop(independent, dependent). As of Hive 2.2.0.
-regr_syy(independent, dependent) | Equivalent to regr_count(independent, dependent) * var_pop(independent). As of Hive 2.2.0.
+regr_avgx(independent, dependent) | Equivalent to avg(dependent). 
+regr_avgy(independent, dependent) | Equivalent to avg(independent). 
+regr_count(independent, dependent) | Returns the number of non-null pairs used to fit the linear regression line. 
+regr_intercept(independent, dependent) | Returns the y-intercept of the linear regression line, i.e. the value of b in the equation dependent = a * independent + b. 
+regr_r2(independent, dependent) | Returns the coefficient of determination for the regression. 
+regr_slope(independent, dependent) | Returns the slope of the linear regression line, i.e. the value of a in the equation dependent = a * independent + b. 
+regr_sxx(independent, dependent) | Equivalent to regr_count(independent, dependent) * var_pop(dependent). 
+regr_sxy(independent, dependent) | Equivalent to regr_count(independent, dependent) * covar_pop(independent, dependent).
+regr_syy(independent, dependent) | Equivalent to regr_count(independent, dependent) * var_pop(independent). 
 histogram_numeric(col, b) | Computes a histogram of a numeric column in the group using b non-uniformly spaced bins. The output is an array of size b of double-valued (x,y) coordinates that represent the bin centers and heights
 collect_set(col) | Returns a set of objects with duplicate elements eliminated.
-collect_list(col) | Returns a list of objects with duplicates. (As of Hive 0.13.0.)
-ntile(INTEGER x) | Divides an ordered partition into x groups called buckets and assigns a bucket number to each row in the partition. This allows easy calculation of tertiles, quartiles, deciles, percentiles and other common summary statistics. (As of Hive 0.11.0.)
+collect_list(col) | Returns a list of objects with duplicates. 
+ntile(INTEGER x) | Divides an ordered partition into x groups called buckets and assigns a bucket number to each row in the partition. This allows easy calculation of tertiles, quartiles, deciles, percentiles and other common summary statistics.
 explode(ARRAY<T> a) | Explodes an array to multiple rows. Returns a row-set with a single column (col), one row for each element from the array.
-explode(MAP<Tkey,Tvalue> m) | Explodes a map to multiple rows. Returns  a row-set with a two columns (key,value) , one row for each key-value pair from the input map. (As of Hive 0.8.0.).
+explode(MAP<Tkey,Tvalue> m) | Explodes a map to multiple rows. Returns  a row-set with a two columns (key,value) , one row for each key-value pair from the input map.
 posexplode(ARRAY<T> a) | Explodes an array to multiple rows with additional positional column of int type (position of items in the original array, starting with 0). Returns a row-set with two columns (pos,val), one row for each element from the array.
-inline(ARRAY<STRUCT<f1:T1,...,fn:Tn>> a) | Explodes an array of structs to multiple rows. Returns  a row-set with N columns (N = number of top level elements in the struct), one row per struct from the array. (As of Hive 0.10.)
+inline(ARRAY<STRUCT<f1:T1,...,fn:Tn>> a) | Explodes an array of structs to multiple rows. Returns  a row-set with N columns (N = number of top level elements in the struct), one row per struct from the array. 
 stack(int r,T1  V1,...,Tn/r Vn) | Breaks up n values V1,...,Vn into r rows. Each row will have n/r columns. r must be constant.
-json_tuple(string jsonStr,string k1,...,string kn) | Takes JSON string and a set of n keys, and returns a tuple of n values. This is a more efficient version of the get_json_object UDF because it can get multiple keys with just one call.
-parse_url_tuple(string urlStr,string p1,...,string pn) | Takes URL string and a set of n URL parts, and returns a tuple of n values. This is similar to the parse_url() UDF but can extract multiple parts at once out of a URL. Valid part names are: HOST, PATH, QUERY, REF, PROTOCOL, AUTHORITY, FILE, USERINFO, QUERY:<KEY>.
-
+json_tuple(string jsonStr,string k1,...,string kn) | Takes JSON string and a set of n keys, and returns a tuple of n values. 
+parse_url_tuple(string urlStr,string p1,...,string pn) | Takes URL string and a set of n URL parts, and returns a tuple of n values. 
 
 ## Kafka
 
