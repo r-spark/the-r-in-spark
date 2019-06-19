@@ -438,7 +438,7 @@ This concludes our discussion on EDA, and we will now proceed to feature enginee
 
 The feature engineering exercise comprises transforming the data to increase the performance of the model. This can include things like centering and scaling numerical values and performing string manipulation to extract meaningful variables. It also often includes variable selection --- the process of selecting which predictors are used in the model.
 
-Let us start with scaling the `age` variable by removing the mean and scaling to unit variance. Some algorithms, especially neural networks, train faster if we normalize our inputs. We begin by calculating the mean and standard deviation of the variable:
+In Figure \@ref(fig:scaled-age-distribution) we see that the `age` variable has a range from 18 to over 60. Some algorithms, especially neural networks, train faster if we normalize our inputs so that they are of the same magnitude. Let's now normalize the `age` variable by removing the mean and scaling to unit variance, beginning by calculating its mean and standard deviation:
 
 ```{r}
 scale_values <- okc_train %>%
@@ -474,7 +474,7 @@ p <- okc_train %>%
 ggsave("images/modeling-okc-histogram-scaled-age.png", plot = p, device = "png", width = 10, height = 5)
 ```
 
-
+In Figure \@ref(fig:scaled-age-distribution), we see that the scaled age variable has values that are closer to zero. We now move on to discussing other types of transformations, but during your feature engineering workflow you may want to perform the normalization to all numeric variables you want to include in the model.
 
 ```{r scaled-age-distribution, echo = FALSE, eval = TRUE, fig.cap='Distribution of scaled age', fig.align = 'center'}
 render_image("images/modeling-okc-histogram-scaled-age.png", "Distribution of scaled age")
