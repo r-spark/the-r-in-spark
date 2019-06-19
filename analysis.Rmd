@@ -453,7 +453,7 @@ render_image("images/analysis-visualizations-1.png")
 
 ### Using dbplot
 
-The `dbplot` package provides helper function for plotting with remote data.  The R code `dbplot` uses to transform the data is written so that it can be translated by `sparklyr` into SQL.  It then uses the results to generate a `ggplot2` plot.
+The `dbplot` package provides helper functions for plotting with remote data.  The R code `dbplot` uses to transform the data is written so that it can be translated by `sparklyr` into SQL.  It then uses those results to create a graph using the `ggplot2` package.  The data transformation, and the plotting are both triggered by a single `dbplot` function.  
 
 The `dbplot_histogram()` function will have Spark calculate the bins and the count per bin, and then outputs a `ggplot` object.  It accepts a `binwidth` argument.  The resulting plot is in figure \@ref(fig:analysis-viz3).
 
@@ -586,6 +586,8 @@ cars %>%
 ## 8  24.5  1.51     2  29.2  2.30
 ## 9  15.1  2.30     1  19.8  3.08
 ```
+
+As we covered in this section, `dbplot` offers the convenience of pushing the calculations to Spark, and also to automatically plot the results.  If desired, `ggplot2` functions can be used directly, the plot's calculations would have to be coded by you.  For small and local data sets, either `dbplot` or `ggplot2` will perform well. 
 
 We use statistical models to gain even deeper insights into our data.  The next section will cover how we can prepare and run models within Spark.  
 
