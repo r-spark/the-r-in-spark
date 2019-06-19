@@ -285,7 +285,23 @@ contingency_tbl
 saveRDS(contingency_tbl, "data/modeling-okc-contingency-table.rds")
 ```
 
-We can visualize this contingency table using a mosaic plot.
+We can visualize this contingency table using a mosaic plot, shown in Figure \@ref(fig:mosaic):
+
+```r
+contingency_tbl %>%
+  rename(drinks = drinks_drugs) %>%
+  gather("drugs", "count", missing:sometimes) %>%
+  mutate(
+    drinks = as_factor(drinks) %>% 
+      fct_relevel("missing", "not at all", "rarely", "socially", 
+                  "very often", "desperately"),
+    drugs = as_factor(drugs) %>%
+      fct_relevel("missing", "never", "sometimes", "often")
+  ) %>%
+  ggplot() +
+  geom_mosaic(aes(x = product(drinks, drugs), fill = drinks, 
+                  weight = count))
+```
 
 ```{r echo = FALSE}
 library(ggmosaic)
