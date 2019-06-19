@@ -480,7 +480,7 @@ In Figure \@ref(fig:scaled-age-distribution), we see that the scaled age variabl
 render_image("images/modeling-okc-histogram-scaled-age.png", "Distribution of scaled age")
 ```
 
-Since some of the profile feature are multiple-select, we need to process them before we can build meaningful models. If we take a look at the ethnicity column, for example, we see that there are many different combinations:
+Since some of the profile feature are multiple-select, in other words, a person can choose to associate with multiple options for a variable, we need to process them before we can build meaningful models. If we take a look at the ethnicity column, for example, we see that there are many different combinations:
 
 ```{r}
 okc_train %>%
@@ -505,7 +505,7 @@ okc_train %>%
 ## # … with more rows
 ```
 
-For our model, we create dummy variables for each race, as follows:
+One way to proceed would be to treat each combination of races as a separate level, but that would lead to a very large number of levels which becomes problematic in many algorithms. To better encode this information, we can create dummy variables for each race, as follows:
 
 ```{r}
 ethnicities <- c("asian", "middle eastern", "black", "native american", "indian", 
@@ -555,6 +555,8 @@ okc_train <- okc_train %>%
 okc_train %>%
   dbplot_histogram(essay_length, bins = 50)
 ```
+
+We can see the distribution of the `essay_length` variable in Figure \@ref(fig:essay-length-distribution).
 
 ```{r essay-length-distribution, echo = FALSE, eval = TRUE, fig.cap='Distribution of essay length', fig.align = 'center'}
 render_image("images/modeling-okc-histogram-essay-length.png", "Distribution of essay length")
@@ -607,7 +609,7 @@ train_set <- scale_age(analysis_set)
 validation_set <- scale_age(assessment_set)
 ```
 
-For brevity, here we only show how to transform the `age` variable. In practice, however, you would want to normalize each one of your continuous predictors.
+For brevity, here we only show how to transform the `age` variable. In practice, however, you would want to normalize each one of your continuous predictors, such as the `essay_length` variable we derived in the previous section.
 
 Logistic regression is often a reasonable starting point for binary classification problems, so let us give it a try. Suppose also that our domain knowledge provides us with an initial set of predictors. We can then fit a model by using the formula interface:
 
