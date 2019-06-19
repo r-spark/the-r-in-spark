@@ -859,11 +859,11 @@ Up until now, we have not looked into the unstructured text in the essay fields 
 
 Along with speech, images, and videos, textual data is one of the components of the "big data" explosion. Prior to modern text mining techniques and the computational resources to support them, companies had little use for freeform text fields. Today, text is considered a rich source of insights, and can be found anywhere from physician's notes to customer complaints. In this section, we show some basic text analysis capabilities of sparklyr. If you would like more background on text mining techniques, we recommend checking out "Text Mining with R: A Tidy Approach" [@silge2017text].
 
-In this section, we show how to perform a basic topic modeling task on the essay data in the OKCupid dataset. Our plan is to concatenate the essay fields (of which there are 10) of each profile, and regard each profile as a document, then attempt to discover topics using Latent Dirichlet Allocation (LDA).
+In this section, we show how to perform a basic topic modeling task on the essay data in the OKCupid dataset. Our plan is to concatenate the essay fields (of which there are 10) of each profile, and regard each profile as a document, then attempt to discover *topics* (we will define these soon) using Latent Dirichlet Allocation (LDA).
 
 ### Data Prep
 
-As always, before analyzing a dataset (or a subset of one), we want to take a quick look to orient ourselves.
+As always, before analyzing a dataset (or a subset of one), we want to take a quick look at it to orient ourselves. In this case, we are interested in the freeform text that the users entered into their dating profiles.
 
 ```{r}
 essay_cols <- paste0("essay", 0:9)
@@ -895,6 +895,8 @@ Just from this output, we see that
 - The text contains the newline `\n` character, and
 - There are missing values in the data.
 
+The HTML tags and special characters pollute the data since they are not directly input by the user and do not provide interesting information. Similarly, since we have encoded missing character fields with the `"missing"` string, we will need to remove it. (Note that by doing this we are also removing instances of the word "missing" written by the users, but the information lost from this removal is likely to be small.)
+
 As you analyze your own text data, you will quickly come across and become familiar with the peculiarities of the specific dataset. Preoprocessing text data, like with tabular numerical data, is an iterative process, and after a few tries we have the following transformations:
 
 ```{r echo = FALSE}
@@ -913,11 +915,11 @@ essays <- essays %>%
   mutate(words = regexp_replace(words, "\\n|&nbsp;|<[^>]*>|[^A-Za-z|']", " "))
 ```
 
-Note here we are using `regex_replace()`, which is a Spark SQL function.
+Note here we are using `regex_replace()`, which is a Spark SQL function. Next, we will discuss LDA and how to apply it to our cleaned dataset.
 
 ### Topic Modeling
 
-LDA is a type of topic model for identifying abstract "topics" in a set of documents. It is an unsupervised algorithm in that we do not provide any labels, or topics, for the input documents. LDA posits that each document is a mixture of topics, and each topic is a mixture of words. During training, it attempts to estimate both of these simultaneously. A typical use case for topic models involves categorizing many documents, where the large number of documents renders manually approaches infeasible. The application domains range from GitHub issues to legal documents.
+LDA is a type of topic model for identifying abstract "topics" in a set of documents. It is an unsupervised algorithm in that we do not provide any labels, or topics, for the input documents. LDA posits that each document is a mixture of topics, and each topic is a mixture of words. During training, it attempts to estimate both of these simultaneously. A typical use case for topic models involves categorizing many documents, where the large number of documents renders manual approaches infeasible. The application domains range from GitHub issues to legal documents.
 
 Once we have a reasonably clean dataset following the workflow in the previous section, we can fit an LDA model with `ml_lda()`:
 
@@ -1004,7 +1006,7 @@ render_image("images/modeling-okc-betas-topics-1.png", "The terms that are most 
 render_image("images/modeling-okc-betas-topics-100.png", "The terms that are most common within each topic, 100 iterations")
 ```
 
-We can see that, at 100 iterations, we can see "topics" starting to emerge!
+We can see that, at 100 iterations, we can see "topics" starting to emerge. This could be interesting information in its own right if you were digging into a large collection of documents you aren't familiar with. The learned topics can also serve as features in a downstream supervised learning task; for example, we could consider using the topic number as a predictor in our model to predict employment status in our predictive modeling example.
 
 ## Conclusion
 
