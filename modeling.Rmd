@@ -15,7 +15,7 @@ sc <- spark_connect(master = "local", config = config)
 
 # Modeling {#modeling}
 
-In this chapter, we discover how Spark can be used to scale up machine learning workflows to big data. We build off of the ideas presented in the Analysis chapter and introduce the machine learning (ML) aspects. Spark MLlib is the component of Spark that allows one to write high level code to perform machine learning tasks on distributed data. Sparklyr provides an interface to the ML algorithms that should be familiar to R users. For example, you can run a logistic regression as follows:
+In the previous chapter, you learn how to scale up data analysis to large datasets with Spark. In this chapter, we build off of the ideas covered and discuss scaling up machine learning workflows. We'll explore MLlib, the component of Spark that allows you to write high level code to perform machine learning tasks on distributed data. Sparklyr provides an interface to the ML algorithms that should be familiar to R users, and we'll go into detail in the chapter. For example, you can run a logistic regression as follows:
 
 ```{r eval = FALSE}
 ml_logistic_regression(mtcars, am ~ .)
@@ -31,29 +31,27 @@ ml_logistic_regression(mtcars, am ~ .)
 ## -20.68143251  -9.52647833  -6.81113196  29.16524289   3.33862282 
 ```
 
-As can be seen in [List of ML functions](#functionlist), Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with "R for Data Science" [@intro-r-for-data-science] and "Feature Engineering and Selection: A Practical Approach for Predictive Models" [@kuhn-fes], from which we adopted for examples and visualizations in this chapter.
+As you can see in the [List of ML functions](#functionlist), Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with "R for Data Science" [@intro-r-for-data-science] and "Feature Engineering and Selection: A Practical Approach for Predictive Models" [@kuhn-fes], from which we adopted (sometimes verbatim) for examples and visualizations in this chapter.
 
-## Overview
-
-The tasks we focus on in this chapter involve machine learning, which is what Spark ML aims to enable, as opposed to statistical inference. This means that we are often more concerned about forecasting the future rather than inferring the process by which our data is generated [^2]. Machine learning can be categorized into supervised learning, or predictive modeling, and unsupervised learning. In supervised learning, we try to learn a function that will map from "X" to "Y", from a dataset of "(x, y)" examples. In unsupervised learning, we just have "X" and not the "Y" labels, so instead we try to learn something about the structure of "X". Some practical use cases for supervised learning include forecasting the weather tomorrow, determining whether a credit card transaction is fradulent, and coming up with a price for your car insurance policy. For unsupervised learning, examples include automated grouping of photos of individuals, segmenting customers based on their purchase history, and clustering of documents.
+The tasks we focus on in this chapter involve machine learning, which is what Spark ML aims to enable, as opposed to statistical inference. Machine learning is often more concerned about forecasting the future rather than inferring the process by which our data is generated [^2]. Machine learning can be categorized into supervised learning (predictive modeling) and unsupervised learning. In supervised learning, we try to learn a function that will map from "X" to "Y", from a dataset of "(x, y)" examples. In unsupervised learning, we just have "X" and not the "Y" labels, so instead we try to learn something about the structure of "X". Some practical use cases for supervised learning include forecasting tomorrow's weather, determining whether a credit card transaction is fradulent, and coming up with a price for your car insurance policy. With unsupervised learning, examples include automated grouping of photos of individuals, segmenting customers based on their purchase history, and clustering of documents.
 
 The ML interface in sparklyr has been designed to minimize the cognitive effort for moving from a local, in-memory, native R workflow to the cluster, and back. While the Spark ecosystem is very rich, there is still a tremendous number of packages from CRAN, with some implementing functionality that you may require for a project. Also, you may want to leverage your skills and experience working in R to maintain productivity. What we learned in the Analysis section also applis here --- it is important to keep track of where you are performing computations, and move between the cluster and your R session as appropriate.
 
-In the next section, we will introduce the dataset that will be used throughout the chapter. We then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We then move on to a topic modeling example that looks at some unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis.
+In the next section, we will introduce the dataset that will be used throughout the chapter. We then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We then move on to an unsupervised topic modeling example that looks at some unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis.
 
 [^2]: We acknowledge that the terms here may mean different things to different people, and that there is a continuum between the two approaches, however they are defined.
 
-## The Data
+## Example Data
 
-The examples in this chapter will utilize the OkCupid dataset, available at [^1]. The dataset consists of user profile data from an online dating site, and contains a diverse set of features, including biographical characteristics such as gender and profession, and free text fields related to personal interests. There are about 60,000 profiles in the dataset, which fits comfortably into memory on a modern laptop and wouldn't be considered "big data", so you can easily follow along running Spark local mode. In a later chapter, we'll discuss specific considerations for dealing with distributed datasets on clusters.
+The examples in this chapter will utilize the OkCupid dataset [@kim2015okcupid], available at [^1]. The dataset consists of user profile data from an online dating site, and contains a diverse set of features, including biographical characteristics such as gender and profession, and free text fields related to personal interests. There are about 60,000 profiles in the dataset, which fits comfortably into memory on a modern laptop and wouldn't be considered "big data", so you can easily follow along running Spark local mode.
 
 [^1]: [https://github.com/rudeboybert/JSE_OkCupid](https://github.com/rudeboybert/JSE_OkCupid)
+
+**Note:**  The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the ML algorithm. For example, you may want to use the ranger package instead of `ml_random_forest_classifier()`.
 
 To motivate the examples, we will consider the following problem:
 
 > Predict whether someone is actively working, i.e. not retired, a student, or unemployed.
-
-**Note:**  The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the ML algorithm. For example, you may want to use the ranger package instead of `ml_random_forest_classifier()`.
 
 Next up, we will look at the data.
 
@@ -61,7 +59,7 @@ Next up, we will look at the data.
 
 Exploratory data analysis (EDA), in the context of predictive modeling, is the exercise of looking at excerpts and summaries of the data. The specific goals of the EDA stage is informed by the business problem, but here are some common objectives:
 
-- Checking for data quality --- confirming meaning and prevalence of missing values and reconciling statistics against existing controls,
+- Check for data quality --- confirm meaning and prevalence of missing values and reconcile statistics against existing controls,
 - Understand univariate relationships between variables, and
 - Perform an initial assessment on what variables to include and what transformations need to be done on them.
 
@@ -189,7 +187,7 @@ sdf_describe(okc_train, cols = c("age", "income"))
 ## 5 max     110                1000000.0   
 ```
 
-Like we saw in the Analysis chapter, we can also utilize the dbplot package to plot distributions of these variables:
+Like we saw in the Analysis chapter, we can also utilize the dbplot package to plot distributions of these variables. In Figure \@ref(fig:age-histogram) we show a histogram of the distribution of the `age` variable.
 
 ```{r echo = FALSE}
 p <- okc_train %>% dbplot_histogram(age) + theme_bw()
@@ -205,7 +203,7 @@ okc_train %>%
 render_image("images/modeling-okc-histogram-age.png", "Distribution of age")
 ```
 
-A common EDA exercise is to look at the relationship between the response and the individual predictors. For example, we can explore the `religion` variable:
+A common EDA exercise is to look at the relationships between the response and the individual predictors. Often, you may have prior business knowledge on what these relationships should be, so this can serve as a data quality check. Also, unexpected trends can inform variable interactions you might want to include in the model. As an example, we can explore the `religion` variable:
 
 ```{r}
 prop_data <- okc_train %>%
@@ -243,7 +241,7 @@ saveRDS(prop_data, "data/modeling-okc-prop-data.rds")
 ## 10 catholicism   3769 0.0886 0.00458
 ```
 
-Note that `prop_data` is a small data frame that has been collected into memory in our R session, we can take advantage of ggplot2 to create an informative visualization.
+Note that `prop_data` is a small data frame that has been collected into memory in our R session, we can take advantage of ggplot2 to create an informative visualization in Figure \@ref(fig:religion-prop).
 
 ```{r, echo = FALSE}
 prop_data <- readRDS("data/modeling-okc-prop-data.rds")
@@ -256,8 +254,8 @@ p <- prop_data %>%
 ggsave("images/modeling-okc-prop.png", plot = p, device = "png", width = 10, height = 5)
 ```
 
-```{r religion-prop, echo = FALSE, eval = TRUE, fig.cap='Proportion of individuals not working by religion', fig.align = 'center'}
-render_image("images/modeling-okc-prop.png", "Proportion of individuals not working by religion")
+```{r religion-prop, echo = FALSE, eval = TRUE, fig.cap='Proportion of individuals not currently employed, by religion', fig.align = 'center'}
+render_image("images/modeling-okc-prop.png", "Proportion of individuals not currently employed, by religion")
 ```
 
 Next, we take a look at the relationship between a couple of predictors: alcohol use and drug use. We would expect there to be some correlation between them. You can compute a contingency table via `sdf_crosstab()`:
@@ -287,7 +285,23 @@ contingency_tbl
 saveRDS(contingency_tbl, "data/modeling-okc-contingency-table.rds")
 ```
 
-We can visualize this contingency table using a mosaic plot.
+We can visualize this contingency table using a mosaic plot, shown in Figure \@ref(fig:mosaic):
+
+```r
+contingency_tbl %>%
+  rename(drinks = drinks_drugs) %>%
+  gather("drugs", "count", missing:sometimes) %>%
+  mutate(
+    drinks = as_factor(drinks) %>% 
+      fct_relevel("missing", "not at all", "rarely", "socially", 
+                  "very often", "desperately"),
+    drugs = as_factor(drugs) %>%
+      fct_relevel("missing", "never", "sometimes", "often")
+  ) %>%
+  ggplot() +
+  geom_mosaic(aes(x = product(drinks, drugs), fill = drinks, 
+                  weight = count))
+```
 
 ```{r echo = FALSE}
 library(ggmosaic)
@@ -315,14 +329,51 @@ p <- contingency_tbl %>%
     # axis.text.y = element_text(angle = 45, vjust = 1, hjust = 1)
   )
 
-ggsave("images/modeling-okc-mosaic.png", plot = p, width = 5, height = 5)
+ggsave("images/modeling-okc-mosaic.png", plot = p, width = 6, height = 6)
 ```
 
 ```{r mosaic, echo = FALSE, eval = TRUE, fig.cap='Mosaic plot of drug and alcohol use', fig.align = 'center'}
 render_image("images/modeling-okc-mosaic.png", "Mosaic plot of drug and alcohol use")
 ```
 
-To further explore the relationship between this two variables, we can perform correspondence analysis using the FactoMineR package and visualize the results.
+To further explore the relationship between this two variables, we can perform correspondence analysis ([@greenacre2017correspondence]) using the FactoMineR package. This technique enables us to summarize the relationship between the high dimensional factor levels by mapping each level to a point on the plane. We first obtain the mapping using `FactoMineR::CA()` as follows:
+
+```r
+dd_obj <- contingency_tbl %>% 
+  column_to_rownames(var = "drinks_drugs") %>%
+  as.matrix() %>%
+  as.table() %>%
+  FactoMineR::CA(graph = FALSE)
+```
+
+We can then plot the results using ggplot:
+
+```r
+dd_drugs <-
+  dd_obj$row$coord %>%
+  as.data.frame() %>%
+  mutate(
+    label = gsub("_", " ", rownames(dd_obj$row$coord)),
+    Variable = "Drugs"
+  )
+
+dd_drinks <-
+  dd_obj$col$coord %>%
+  as.data.frame() %>%
+  mutate(
+    label = gsub("_", " ", rownames(dd_obj$col$coord)),
+    Variable = "Alcohol"
+  )
+  
+ca_coord <- rbind(dd_drugs, dd_drinks)
+  
+ggplot(ca_coord, aes(x = `Dim 1`, y = `Dim 2`, 
+                     col = Variable)) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0) +
+  geom_text(aes(label = label)) +
+  coord_equal()
+```
 
 ```{r echo = FALSE}
 # From FES
@@ -371,7 +422,7 @@ p <- ggplot(ca_coord, aes(x = `Dim 1`, y = `Dim 2`, col = Variable)) +
   coord_equal() +
   theme_bw()
 
-ggsave("images/modeling-okc-correspondence-analysis.png", plot = p, width = 5, height = 5)
+ggsave("images/modeling-okc-correspondence-analysis.png", plot = p, width = 6, height = 6)
 ```
 
 ```{r ca-pcs, echo = FALSE, eval = TRUE, fig.cap='Correspondence analysis principal coordinates for drugs and alcohol use', fig.align = 'center'}
@@ -379,7 +430,7 @@ render_image("images/modeling-okc-correspondence-analysis.png",
              "Correspondence analysis principal coordinates for drugs and alcohol use")
 ```
 
-Correspondence analysis transforms the factors into variables called *principal coordinates*, which correspond to the axes in the plot and represent how much information in the contingency table they contain. We can, for example, interpret the proximity of "drinking often" and "using drugs very often" as indicating association.
+In Figure \@ref(fig:ca-pcs), we see that the correspondence analysis procedure has transformed the factors into variables called *principal coordinates*, which correspond to the axes in the plot and represent how much information in the contingency table they contain. We can, for example, interpret the proximity of "drinking often" and "using drugs very often" as indicating association.
 
 This concludes our discussion on EDA, and we will now proceed to feature engineering.
 
@@ -387,7 +438,7 @@ This concludes our discussion on EDA, and we will now proceed to feature enginee
 
 The feature engineering exercise comprises transforming the data to increase the performance of the model. This can include things like centering and scaling numerical values and performing string manipulation to extract meaningful variables. It also often includes variable selection --- the process of selecting which predictors are used in the model.
 
-Let us start with scaling the `age` variable by removing the mean and scaling to unit variance. Some algorithms, especially neural networks, train faster if we normalize our inputs. We begin by calculating the mean and standard deviation of the variable:
+In Figure \@ref(fig:scaled-age-distribution) we see that the `age` variable has a range from 18 to over 60. Some algorithms, especially neural networks, train faster if we normalize our inputs so that they are of the same magnitude. Let's now normalize the `age` variable by removing the mean and scaling to unit variance, beginning by calculating its mean and standard deviation:
 
 ```{r}
 scale_values <- okc_train %>%
@@ -423,13 +474,13 @@ p <- okc_train %>%
 ggsave("images/modeling-okc-histogram-scaled-age.png", plot = p, device = "png", width = 10, height = 5)
 ```
 
-
+In Figure \@ref(fig:scaled-age-distribution), we see that the scaled age variable has values that are closer to zero. We now move on to discussing other types of transformations, but during your feature engineering workflow you may want to perform the normalization to all numeric variables you want to include in the model.
 
 ```{r scaled-age-distribution, echo = FALSE, eval = TRUE, fig.cap='Distribution of scaled age', fig.align = 'center'}
 render_image("images/modeling-okc-histogram-scaled-age.png", "Distribution of scaled age")
 ```
 
-Since some of the profile feature are multiple-select, we need to process them before we can build meaningful models. If we take a look at the ethnicity column, for example, we see that there are many different combinations:
+Since some of the profile feature are multiple-select, in other words, a person can choose to associate with multiple options for a variable, we need to process them before we can build meaningful models. If we take a look at the ethnicity column, for example, we see that there are many different combinations:
 
 ```{r}
 okc_train %>%
@@ -454,7 +505,7 @@ okc_train %>%
 ## # … with more rows
 ```
 
-For our model, we create indicator variables for each race, as follows:
+One way to proceed would be to treat each combination of races as a separate level, but that would lead to a very large number of levels which becomes problematic in many algorithms. To better encode this information, we can create dummy variables for each race, as follows:
 
 ```{r}
 ethnicities <- c("asian", "middle eastern", "black", "native american", "indian", 
@@ -505,6 +556,8 @@ okc_train %>%
   dbplot_histogram(essay_length, bins = 50)
 ```
 
+We can see the distribution of the `essay_length` variable in Figure \@ref(fig:essay-length-distribution).
+
 ```{r essay-length-distribution, echo = FALSE, eval = TRUE, fig.cap='Distribution of essay length', fig.align = 'center'}
 render_image("images/modeling-okc-histogram-essay-length.png", "Distribution of essay length")
 ```
@@ -513,9 +566,9 @@ Now that we have a few more features to work with, we can begin running some ML 
 
 ## Model Building
 
-Once we have a good grasp on our dataset, we can start building some models. Before we do so, however, we need to come up with a plan to tune and validate our candidate models. Since we are dealing with a binary classification problem, the metrics one can use include accuracy, precision, sensitivity, and area under the receiver operating characteristic (ROC) curve (AUC), among others. The metric you optimize depends on your specific business problem, but for this exercise, we will focus on the AUC.
+Once we have a good grasp on our dataset, we can start building some models. Before we do so, however, we need to come up with a plan to tune and validate the "candidate" models---the . Since we are dealing with a binary classification problem, the metrics one can use include accuracy, precision, sensitivity, and area under the receiver operating characteristic curve (ROC AUC), among others. The metric you optimize depends on your specific business problem, but for this exercise, we will focus on the ROC AUC.
 
-It is important that we don't peek at the testing holdout set until the very end. For tuning and validation, we will perform 10-fold cross validation. The scheme works as follows: We first divide our dataset into 10 approximately equal sized subsets. We take the 2nd to 10th sets together as the training set for an algorithm, and validate the resulting model on the 1st set. Next, we reserve the 2nd set as the validation set, and train the algorithm on the 1st and 3rd to 10th sets. In total, we train ten models and average the performance. If time and resources allow, you can also perform this procedure multiple times with different random partitions of the data. In our case, we will demonstrate how to perform the cross validation once.
+It is important that we don't peek at the testing holdout set until the very end, because any information we obtain may influence our modeling decisions which would in turn make our estimates of model performance less credible. For tuning and validation, we will perform 10-fold cross validation, which is a standard approach for model tuning. The scheme works as follows: We first divide our dataset into 10 approximately equal sized subsets. We take the 2nd to 10th sets together as the training set for an algorithm, and validate the resulting model on the 1st set. Next, we reserve the 2nd set as the validation set, and train the algorithm on the 1st and 3rd to 10th sets. In total, we train ten models and average the performance. If time and resources allow, you can also perform this procedure multiple times with different random partitions of the data. In our case, we will demonstrate how to perform the cross validation once. Hereinafter, we refer to the training set associated with each split as the *analysis* data, and the validation set as *assessment* data.
 
 Using the `sdf_partition()` function, we can create a list of subsets from our `okc_train` table:
 
@@ -527,18 +580,18 @@ vfolds <- sdf_partition(
 )
 ```
 
-We then create our first training/validation split as follows:
+We then create our first analysis/assessment split as follows:
 
 ```{r}
-train_set <- do.call(rbind, vfolds[2:10])
-validation_set <- vfolds[[1]]
+analysis_set <- do.call(rbind, vfolds[2:10])
+assessment_set <- vfolds[[1]]
 ```
 
-One item we need to carefully treat here is the scaling of variables. We need to make sure we do not leak any information from the validation set to the training set, so we calculate the mean and standard deviation on the training set only, and apply the same transformation to both sets. Here is how we would handle this for the `age` variable:
+One item we need to carefully treat here is the scaling of variables. We need to make sure we do not leak any information from the assessment set to the analysis set, so we calculate the mean and standard deviation on the analysis set only, and apply the same transformation to both sets. Here is how we would handle this for the `age` variable:
 
 ```{r}
-make_scale_age <- function(training) {
-  scale_values <- training %>%
+make_scale_age <- function(analysis_data) {
+  scale_values <- analysis_data %>%
     summarize(
       mean_age = mean(age, na.rm = TRUE),
       sd_age = sd(age)
@@ -551,16 +604,18 @@ make_scale_age <- function(training) {
   }
 }
 
-scale_age <- make_scale_age(train_set)
-train_set <- scale_age(train_set)
-validation_set <- scale_age(validation_set)
+scale_age <- make_scale_age(analysis_set)
+train_set <- scale_age(analysis_set)
+validation_set <- scale_age(assessment_set)
 ```
+
+For brevity, here we only show how to transform the `age` variable. In practice, however, you would want to normalize each one of your continuous predictors, such as the `essay_length` variable we derived in the previous section.
 
 Logistic regression is often a reasonable starting point for binary classification problems, so let us give it a try. Suppose also that our domain knowledge provides us with an initial set of predictors. We can then fit a model by using the formula interface:
 
 ```{r}
 lr <- ml_logistic_regression(
-  train_set, not_working ~ scaled_age + sex + drinks + drugs + essay_length
+  analysis_set, not_working ~ scaled_age + sex + drinks + drugs + essay_length
 )
 lr
 ```
@@ -579,10 +634,10 @@ lr
 ##      3.664964e-05 
 ```
 
-To obtain a summary of performance metrics on the validation set, we can use the `ml_evaluate()` function.
+To obtain a summary of performance metrics on the assessment set, we can use the `ml_evaluate()` function.
 
 ```{r}
-validation_summary <- ml_evaluate(lr, validation_set)
+validation_summary <- ml_evaluate(lr, assessment_set)
 ```
 
 You can print `validation_summary` to see the available metrics
@@ -640,7 +695,7 @@ ggsave("images/modeling-okc-roc1.png", plot = p, device = "png", width = 5, heig
 render_image("images/modeling-okc-roc1.png", "ROC curve for the logistic regression model")
 ```
 
-Recall that the ROC curve plots the true positive rate (sensitivity) against the false positive rate (1 - specificity) for varying values of the classification threshold. In practice, the business problem helps to determine where on the curve one sets the threshold for classification. The AUC is a summary measure for determining the quality of a model, and we can compute it by calling the `area_under_roc()` function.
+The ROC curve plots the true positive rate (sensitivity) against the false positive rate (1 - specificity) for varying values of the classification threshold. In practice, the business problem helps to determine where on the curve one sets the threshold for classification. The AUC is a summary measure for determining the quality of a model, and we can compute it by calling the `area_under_roc()` function.
 
 ```{r}
 validation_summary$area_under_roc()
@@ -652,21 +707,21 @@ validation_summary$area_under_roc()
 
 **Note:**  Spark only provides evaluation methods for generalized linear models (including linear models and logistic regression.) For other algorithms, you can use the evaluator functions (e.g. `ml_binary_classification_evaluator()` on the prediction data frame) or compute your own metrics.
 
-Now, we can easily repeat the logic we have above and apply it to each train/validation split:
+Now, we can easily repeat the logic we have above and apply it to each analysis/assessment split:
 
 ```{r}
 cv_results <- map_df(1:10, function(v) {
-  train_set <- do.call(rbind, vfolds[setdiff(1:10, v)])
-  validation_set <- vfolds[[v]]
+  analysis_set <- do.call(rbind, vfolds[setdiff(1:10, v)])
+  assessment_set <- vfolds[[v]]
   
-  scale_age <- make_scale_age(train_set)
-  train_set <- scale_age(train_set)
-  validation_set <- scale_age(validation_set)
+  scale_age <- make_scale_age(analysis_set)
+  train_set <- scale_age(analysis_set)
+  validation_set <- scale_age(assessment_set)
   
   model <- ml_logistic_regression(
-    train_set, not_working ~ scaled_age + sex + drinks + drugs + essay_length
+    analysis_set, not_working ~ scaled_age + sex + drinks + drugs + essay_length
   )
-  s <- ml_evaluate(model, validation_set)
+  s <- ml_evaluate(model, assessment_set)
   roc_df <- s$roc() %>% 
     collect()
   auc <- s$area_under_roc()
@@ -713,11 +768,11 @@ mean(cv_results$auc)
 
 ### Logistic Regression as a Generalized Linear Regression
 
-In Spark ML, you can also fit a logistic regression via the generalized linear regression interface by specifying `family = "binomial"`. Because the result is a regression model, the `ml_predict()` method does not give class probabilities. However, this interface may be of interest to those who are looking for generalized linear model (GLM) diagnostics, including confidence intervals for coefficient estimates.
+If you are interested in generalized linear model (GLM) diagnostics,you can also fit a logistic regression via the generalized linear regression interface by specifying `family = "binomial"`. Because the result is a regression model, the `ml_predict()` method does not give class probabilities. However, it includes confidence intervals for coefficient estimates.
 
 ```{r, echo = FALSE}
 glr <- ml_generalized_linear_regression(
-  train_set, 
+  analysis_set, 
   not_working ~ scaled_age + sex + drinks + drugs + essay_length, 
   family = "binomial"
 )
@@ -727,7 +782,7 @@ saveRDS(tidy_glr, "data/modeling-okc-tidy-glr.rds")
 
 ```{r}
 glr <- ml_generalized_linear_regression(
-  train_set, 
+  analysis_set, 
   not_working ~ scaled_age + sex + drinks + drugs, 
   family = "binomial"
 )
@@ -739,7 +794,19 @@ tidy_glr <- tidy(glr)
 tidy_glr <- readRDS("data/modeling-okc-tidy-glr.rds")
 ```
 
-We can extract the coefficient estimates into a tidy data frame, which we can then process further, for example, to create a coefficient plot.
+We can extract the coefficient estimates into a tidy data frame, which we can then process further, for example, to create a coefficient plot, as shown in \@ref(fig:glr-coefs).
+
+```r
+tidy_glr %>%
+  ggplot(aes(x = term, y = estimate)) +
+  geom_point() +
+  geom_errorbar(
+    aes(ymin = estimate - 1.96 * std.error, 
+       ymax = estimate + 1.96 * std.error, width = .1)
+  ) +
+  coord_flip() +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed")
+```
 
 ```{r echo = FALSE}
 p <- tidy_glr %>%
@@ -760,11 +827,11 @@ render_image("images/modeling-okc-glr-coefs.png", "Coefficient estimates with 95
 
 ### More Machine Learning Algorithms
 
-Beyond linear models, Spark ML supports many of the standard ML algorithms with the mechanism demonstrated above, you can try different algorithms and hyperparameters for your problem. You can find a list of supported ML related functions in the [Appendix](#ml-functionlist). The interfaces to access these functionalities are largely identical, so it is easy to experiment with them. For example, to fit a neural network model we can run:
+Beyond linear models, Spark ML supports many of the standard ML algorithms and you can try different algorithms and hyperparameters for your problem. You can find a list of supported ML related functions in the [Appendix](#ml-functionlist). The interfaces to access these functionalities are largely identical, so it is easy to experiment with them. For example, to fit a neural network model we can run:
 
 ```{r}
 nn <- ml_multilayer_perceptron_classifier(
-  train_set,
+  analysis_set,
   not_working ~ scaled_age + sex + drinks + drugs + essay_length, 
   layers = c(12, 64, 64, 2)
 )
@@ -773,7 +840,7 @@ nn <- ml_multilayer_perceptron_classifier(
 This gives us a feedforward neural network model with two hidden layers of 64 nodes each. Note that you have to specify the correct values for the input and output layers in the `layers` argument. We can obtain predictions on a validation set using `ml_predict()`
 
 ```{r}
-predictions <- ml_predict(nn, validation_set)
+predictions <- ml_predict(nn, assessment_set)
 ```
 
 then compute the AUC via `ml_binary_classification_evaluator()`
@@ -786,17 +853,17 @@ ml_binary_classification_evaluator(predictions)
 ## [1] 0.7812709
 ```
 
-Up until now, we have not look into the unstructured text in the essay fields apart from doing simple character counts. In the next section, we will explore the textual data in more depth. 
+Up until now, we have not looked into the unstructured text in the essay fields apart from doing simple character counts. In the next section, we will explore the textual data in more depth. 
 
 ## Working with Textual Data
 
-Along with speech, images, and videos, textual data is one of the components of the "big data" explosion. Prior to modern text mining techniques and the computational resources to support them, companies had little use for freeform text fields. Today, text is considered a rich source of insights, and can be found anywhere from physician's notes to customer complaints. In this section, we show some basic text analysis capabilities of sparklyr. If you would like more background on text mining techniques, we recommend checking out "Text Mining with R: A Tidy Approach". [@silge2017text]
+Along with speech, images, and videos, textual data is one of the components of the "big data" explosion. Prior to modern text mining techniques and the computational resources to support them, companies had little use for freeform text fields. Today, text is considered a rich source of insights, and can be found anywhere from physician's notes to customer complaints. In this section, we show some basic text analysis capabilities of sparklyr. If you would like more background on text mining techniques, we recommend checking out "Text Mining with R: A Tidy Approach" [@silge2017text].
 
-In this section, we show how to perform a basic topic modeling task on the essay data in the OKCupid dataset. Our plan is to concatenate the essay fields (of which there are 10) of each profile, and regard each profile as a document, then attempt to discover topics using Latent Dirichlet Allocation (LDA).
+In this section, we show how to perform a basic topic modeling task on the essay data in the OKCupid dataset. Our plan is to concatenate the essay fields (of which there are 10) of each profile, and regard each profile as a document, then attempt to discover *topics* (we will define these soon) using Latent Dirichlet Allocation (LDA).
 
 ### Data Prep
 
-As always, before analyzing a dataset (or a subset of one), we want to take a quick look to orient ourselves.
+As always, before analyzing a dataset (or a subset of one), we want to take a quick look at it to orient ourselves. In this case, we are interested in the freeform text that the users entered into their dating profiles.
 
 ```{r}
 essay_cols <- paste0("essay", 0:9)
@@ -828,6 +895,8 @@ Just from this output, we see that
 - The text contains the newline `\n` character, and
 - There are missing values in the data.
 
+The HTML tags and special characters pollute the data since they are not directly input by the user and do not provide interesting information. Similarly, since we have encoded missing character fields with the `"missing"` string, we will need to remove it. (Note that by doing this we are also removing instances of the word "missing" written by the users, but the information lost from this removal is likely to be small.)
+
 As you analyze your own text data, you will quickly come across and become familiar with the peculiarities of the specific dataset. Preoprocessing text data, like with tabular numerical data, is an iterative process, and after a few tries we have the following transformations:
 
 ```{r echo = FALSE}
@@ -846,11 +915,11 @@ essays <- essays %>%
   mutate(words = regexp_replace(words, "\\n|&nbsp;|<[^>]*>|[^A-Za-z|']", " "))
 ```
 
-Note here we are using `regex_replace()`, which is a Spark SQL function.
+Note here we are using `regex_replace()`, which is a Spark SQL function. Next, we will discuss LDA and how to apply it to our cleaned dataset.
 
 ### Topic Modeling
 
-LDA is a type of topic model for identifying abstract "topics" in a set of documents. It is an unsupervised algorithm in that we do not provide any labels, or topics, for the input documents. LDA posits that each document is a mixture of topics, and each topic is a mixture of words. During training, it attempts to estimate both of these simultaneously. A typical use case for topic models involves categorizing many documents, where the large number of documents renders manually approaches infeasible. The application domains range from GitHub issues to legal documents.
+LDA is a type of topic model for identifying abstract "topics" in a set of documents. It is an unsupervised algorithm in that we do not provide any labels, or topics, for the input documents. LDA posits that each document is a mixture of topics, and each topic is a mixture of words. During training, it attempts to estimate both of these simultaneously. A typical use case for topic models involves categorizing many documents, where the large number of documents renders manual approaches infeasible. The application domains range from GitHub issues to legal documents.
 
 Once we have a reasonably clean dataset following the workflow in the previous section, we can fit an LDA model with `ml_lda()`:
 
@@ -892,7 +961,7 @@ saveRDS(betas, "data/modeling-okc-betas-1.rds")
 ## # … with 256,982 more rows
 ```
 
-We can then visualize this output by looking at word probabilities by topic. In Fig. N we show the results at 1 iteration and 100 iterations.
+We can then visualize this output by looking at word probabilities by topic. In Figures \@ref(fig:betas-topics) and \@ref(fig:betas-topics-2) we show the results at 1 iteration and 100 iterations.
 
 ```{r echo = FALSE}
 lda_model <-  ml_lda(
@@ -937,7 +1006,7 @@ render_image("images/modeling-okc-betas-topics-1.png", "The terms that are most 
 render_image("images/modeling-okc-betas-topics-100.png", "The terms that are most common within each topic, 100 iterations")
 ```
 
-We can see that, at 100 iterations, we can see "topics" starting to emerge!
+We can see that, at 100 iterations, we can see "topics" starting to emerge. This could be interesting information in its own right if you were digging into a large collection of documents you aren't familiar with. The learned topics can also serve as features in a downstream supervised learning task; for example, we could consider using the topic number as a predictor in our model to predict employment status in our predictive modeling example.
 
 ## Conclusion
 
