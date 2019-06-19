@@ -33,25 +33,25 @@ ml_logistic_regression(mtcars, am ~ .)
 
 As you can see in the [List of ML functions](#functionlist), Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with "R for Data Science" [@intro-r-for-data-science] and "Feature Engineering and Selection: A Practical Approach for Predictive Models" [@kuhn-fes], from which we adopted (sometimes verbatim) for examples and visualizations in this chapter.
 
-The tasks we focus on in this chapter involve machine learning, which is what Spark ML aims to enable, as opposed to statistical inference. This means that we are often more concerned about forecasting the future rather than inferring the process by which our data is generated [^2]. Machine learning can be categorized into supervised learning, or predictive modeling, and unsupervised learning. In supervised learning, we try to learn a function that will map from "X" to "Y", from a dataset of "(x, y)" examples. In unsupervised learning, we just have "X" and not the "Y" labels, so instead we try to learn something about the structure of "X". Some practical use cases for supervised learning include forecasting the weather tomorrow, determining whether a credit card transaction is fradulent, and coming up with a price for your car insurance policy. For unsupervised learning, examples include automated grouping of photos of individuals, segmenting customers based on their purchase history, and clustering of documents.
+The tasks we focus on in this chapter involve machine learning, which is what Spark ML aims to enable, as opposed to statistical inference. Machine learning is often more concerned about forecasting the future rather than inferring the process by which our data is generated [^2]. Machine learning can be categorized into supervised learning (predictive modeling) and unsupervised learning. In supervised learning, we try to learn a function that will map from "X" to "Y", from a dataset of "(x, y)" examples. In unsupervised learning, we just have "X" and not the "Y" labels, so instead we try to learn something about the structure of "X". Some practical use cases for supervised learning include forecasting tomorrow's weather, determining whether a credit card transaction is fradulent, and coming up with a price for your car insurance policy. With unsupervised learning, examples include automated grouping of photos of individuals, segmenting customers based on their purchase history, and clustering of documents.
 
 The ML interface in sparklyr has been designed to minimize the cognitive effort for moving from a local, in-memory, native R workflow to the cluster, and back. While the Spark ecosystem is very rich, there is still a tremendous number of packages from CRAN, with some implementing functionality that you may require for a project. Also, you may want to leverage your skills and experience working in R to maintain productivity. What we learned in the Analysis section also applis here --- it is important to keep track of where you are performing computations, and move between the cluster and your R session as appropriate.
 
-In the next section, we will introduce the dataset that will be used throughout the chapter. We then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We then move on to a topic modeling example that looks at some unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis.
+In the next section, we will introduce the dataset that will be used throughout the chapter. We then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We then move on to an unsupervised topic modeling example that looks at some unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis.
 
 [^2]: We acknowledge that the terms here may mean different things to different people, and that there is a continuum between the two approaches, however they are defined.
 
-## The Data
+## Example Data
 
-The examples in this chapter will utilize the OkCupid dataset [@kim2015okcupid], available at [^1]. The dataset consists of user profile data from an online dating site, and contains a diverse set of features, including biographical characteristics such as gender and profession, and free text fields related to personal interests. There are about 60,000 profiles in the dataset, which fits comfortably into memory on a modern laptop and wouldn't be considered "big data", so you can easily follow along running Spark local mode. In a later chapter, we'll discuss specific considerations for dealing with distributed datasets on clusters.
+The examples in this chapter will utilize the OkCupid dataset [@kim2015okcupid], available at [^1]. The dataset consists of user profile data from an online dating site, and contains a diverse set of features, including biographical characteristics such as gender and profession, and free text fields related to personal interests. There are about 60,000 profiles in the dataset, which fits comfortably into memory on a modern laptop and wouldn't be considered "big data", so you can easily follow along running Spark local mode.
 
 [^1]: [https://github.com/rudeboybert/JSE_OkCupid](https://github.com/rudeboybert/JSE_OkCupid)
+
+**Note:**  The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the ML algorithm. For example, you may want to use the ranger package instead of `ml_random_forest_classifier()`.
 
 To motivate the examples, we will consider the following problem:
 
 > Predict whether someone is actively working, i.e. not retired, a student, or unemployed.
-
-**Note:**  The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the ML algorithm. For example, you may want to use the ranger package instead of `ml_random_forest_classifier()`.
 
 Next up, we will look at the data.
 
@@ -59,7 +59,7 @@ Next up, we will look at the data.
 
 Exploratory data analysis (EDA), in the context of predictive modeling, is the exercise of looking at excerpts and summaries of the data. The specific goals of the EDA stage is informed by the business problem, but here are some common objectives:
 
-- Checking for data quality --- confirming meaning and prevalence of missing values and reconciling statistics against existing controls,
+- Check for data quality --- confirm meaning and prevalence of missing values and reconcile statistics against existing controls,
 - Understand univariate relationships between variables, and
 - Perform an initial assessment on what variables to include and what transformations need to be done on them.
 
@@ -187,7 +187,7 @@ sdf_describe(okc_train, cols = c("age", "income"))
 ## 5 max     110                1000000.0   
 ```
 
-Like we saw in the Analysis chapter, we can also utilize the dbplot package to plot distributions of these variables:
+Like we saw in the Analysis chapter, we can also utilize the dbplot package to plot distributions of these variables. In Figure \@ref(fig:age-histogram) we show a histogram of the distribution of the `age` variable.
 
 ```{r echo = FALSE}
 p <- okc_train %>% dbplot_histogram(age) + theme_bw()
@@ -203,7 +203,7 @@ okc_train %>%
 render_image("images/modeling-okc-histogram-age.png", "Distribution of age")
 ```
 
-A common EDA exercise is to look at the relationship between the response and the individual predictors. For example, we can explore the `religion` variable:
+A common EDA exercise is to look at the relationships between the response and the individual predictors. Often, you may have prior business knowledge on what these relationships should be, so this can serve as a data quality check. Also, unexpected trends can inform variable interactions you might want to include in the model. As an example, we can explore the `religion` variable:
 
 ```{r}
 prop_data <- okc_train %>%
@@ -241,7 +241,7 @@ saveRDS(prop_data, "data/modeling-okc-prop-data.rds")
 ## 10 catholicism   3769 0.0886 0.00458
 ```
 
-Note that `prop_data` is a small data frame that has been collected into memory in our R session, we can take advantage of ggplot2 to create an informative visualization.
+Note that `prop_data` is a small data frame that has been collected into memory in our R session, we can take advantage of ggplot2 to create an informative visualization in Figure \@ref(fig:religion-prop).
 
 ```{r, echo = FALSE}
 prop_data <- readRDS("data/modeling-okc-prop-data.rds")
