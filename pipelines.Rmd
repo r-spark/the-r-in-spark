@@ -186,7 +186,7 @@ pipeline <- ml_pipeline(sc) %>%
 
 The first three stages index the `sex`, `drinks`, and `drugs` columns, which are character, into numeric indicies via `ft_string_indexer()`. This is necessary for the `ft_one_hot_encoder_estimator()` that comes next which requires numeric column inputs. Once all of our predictor variables are of numeric type (recall that `age` is numeric already), we can create our features vector using `ft_vector_assembler()` which concatenates all of its inputs together into one column of vectors. We can then use `ft_standard_scaler()` to normalize all elements of the features column (including the one-hot encoded 0/1 values of the categorical variables), and finally apply a logistic regression via `ml_logistic_regression()`.
 
-During prototyping, you may want to execute these transformations *eagerly* on a small subset of the data, by passing the data frame to the `ft_` and `ml_` functions, and inspecting the transformed data frame. For example, you can do the following:
+During prototyping, you may want to execute these transformations *eagerly* on a small subset of the data, by passing the data frame to the `ft_` and `ml_` functions, and inspecting the transformed data frame. The immediate feedback allows for rapid iteration of ideas; once you have arrived at the desired processing steps, you can roll them up into a pipeline. For example, you can do the following:
 
 ```{r}
 okc_train %>%
@@ -210,7 +210,7 @@ okc_train %>%
 ## 10           0
 ## # … with more rows
 ```
-Once you have found the right transformations for your dataset, you can then replace the data frame input with `ml_pipeline(sc)`, and the result will be a pipeline that you can apply to any data frame with the appropriate schema.
+Once you have found the right transformations for your dataset, you can then replace the data frame input with `ml_pipeline(sc)`, and the result will be a pipeline that you can apply to any data frame with the appropriate schema. In the next section, we'll see how pipelines can make it easier for us to test different model specifications.
 
 ### Hyperparameter Tuning
 
