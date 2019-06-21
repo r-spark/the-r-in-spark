@@ -69,7 +69,7 @@ scaler_model
 
 **Note:** In Spark ML, many algorithms and feature transformers require that the input be a vector column. The function `ft_vector_assembler()` performs this task. The function can also be used to initialize a transformer to be used in a pipeline.
 
-We see that the mean and standard deviation are very close to $0$ and $1$, respectively, which is what we expect. We can then use the transformer to *transform* a data frame, using the `ml_transform()` function:
+We see that the mean and standard deviation are very close to 0 and 1, respectively, which is what we expect. We can then use the transformer to *transform* a data frame, using the `ml_transform()` function:
 
 ```{r}
 scaler_model %>% 
@@ -86,9 +86,11 @@ scaler_model %>%
 ## $ features_scaled <list> [0.7502211, -0.8470762, 0.58999, -0.4…
 ```
 
+Now that we've seen basic examples of estimators and transformers, we can move on to pipelines.
+
 ## Pipelines and Pipeline Models
 
-A **pipeline** is simply a sequence of transformers and estimators, and a **pipeline model** is a pipeline that has been trained on data so all of its components have been converted to transformers. Note that Spark ML internals dictate that pipelines are always estimators, even if they comprise only of transformers.
+A **pipeline** is simply a sequence of transformers and estimators, and a **pipeline model** is a pipeline that has been trained on data so all of its components have been converted to transformers. 
 
 There are a couple ways to construct a pipeline in sparklyr, both of which uses the `ml_pipeline()` function.
 
@@ -148,6 +150,8 @@ pipeline_model
 ```
 pipeline 
 ```
+
+**Note:** As a result of the design of Spark ML, pipelines are always estimator objects, even if they comprise only of transformers. This means that if you have a pipeline with only transformers, you still need to call `ml_fit()` on it to obtain a transformer. The "fitting" procedure in this case wouldn't actually modify any of the transformers.
 
 ## Applying Pipelines to OKCupid Data
 
