@@ -827,7 +827,7 @@ render_image("images/modeling-okc-glr-coefs.png", "Coefficient estimates with 95
 
 ### More Machine Learning Algorithms
 
-Beyond linear models, Spark ML supports many of the standard ML algorithms and you can try different algorithms and hyperparameters for your problem. You can find a list of supported ML related functions in the [Appendix](#ml-functionlist). The interfaces to access these functionalities are largely identical, so it is easy to experiment with them. For example, to fit a neural network model we can run:
+Beyond linear models, Spark ML supports many of the standard ML algorithms and you can try different algorithms and hyperparameters (values that control the model fitting process) for your problem. You can find a list of supported ML related functions in the [Appendix](#ml-functionlist). The interfaces to access these functionalities are largely identical, so it is easy to experiment with them. For example, to fit a neural network model we can run:
 
 ```{r}
 nn <- ml_multilayer_perceptron_classifier(
@@ -930,7 +930,8 @@ stop_words <- ml_default_stop_words(sc) %>%
     "time", "things", "food", "really", "also", "movies"
   )
 
-lda_model <-  ml_lda(essays, ~ words, k = 6, max_iter = 1, min_token_length = 4, stop_words = stop_words, min_df = 5)
+lda_model <-  ml_lda(essays, ~ words, k = 6, max_iter = 1, min_token_length = 4, 
+                     stop_words = stop_words, min_df = 5)
 ```
 
 We are also including a `stop_words` vector consisting of commonly used English words and common words in our dataset, which tells the algorithm to ignore them. After the model is fit, we can use the `tidy()` function to extract the associated betas, which are the per-topic-per-word probabilities, from the model.
