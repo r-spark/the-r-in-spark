@@ -55,19 +55,35 @@ In order to support a broad variety of data source, Spark needs to be able to re
 
 ## Copying Data
 
+Previous chapters used `copy_to()` as a handy helper to copy data from R into Spark; however, `copy_to()` was designed to transfer only small datasets. There are two reasons behind this decision: first, if you are processing large-scale datasets, these datasets are already stored in large-scale storage like HDFS; second, there are already great tools to transfer huge dataset into distributed storage and there are multiple storage solution which complicates thing further. Therefore, transfering large dataset is left to specialized tools like the `hadoop` command line tool.
+
+When using the Hadoop File System as storage in your cluster, you can use `hadoop` to copy files into Spark from the terminal as follows:
+
+```{bash}
+hadoop fs -cp large-file.csv /path-in-hdfs/large-file.csv
+```
+
+You can then read the file as described in the [File Formats](#data-file-formats) section; for CSV files, you would run:
+
+```{r}
+large_file <- spark_read_csv("hdfs:///path-in-hdfs/large-file.csv")
+```
+
+More often than not, data will be already stored in the cluster which you can then read as we will describe next.
+
 ## Reading data
 
-If you are new to Spark and `sparklyr`, it is highly recommended to review this section before starting work with large data sets. We will introduce several techniques that improve the speed and efficiency of reading data. Each subsection will cover a specific way you can take advantage of how Spark reads files, such as the ability to treat entire folders as table sources, as well as being able to pass a file layout to accelerate the file read. 
+If you are new to Spark and `sparklyr`, it is highly recommended to review this section before starting work with large data sets. We will introduce several techniques that improve the speed and efficiency of reading data. Each subsection will cover a specific way you can take advantage of how Spark reads files, such as the ability to treat entire folders as datasets, as well as being able to pass a file layout to accelerate the file read. 
 
-### Folders as a table
+### Dataset Paths
 
-When analyzing data, loading multiple files into a single data object is a common scenario.  In R, we typically use a loop or functional programming to accomplish this.  That is because R has to load each file individually into the session.
+When analyzing data, loading multiple files into a single data object is a common scenario.  In R, we typically use a loop or functional programming to accomplish this. That is because R has to load each file individually into the session.
 
 ```{r}
 lapply(c("data-folder/file1.csv", "data-folder/file2.csv"), read.csv)
 ```
 
-In Spark, there is the notion of a folder as a table.  Instead of enumerating each file, simply pass the path the containing folder's path.  Spark assumes that every file in that folder is part of the same table.  This implies that the target folder should only be used for data purposes. 
+In Spark, there is the notion of a folder as a dataset.  Instead of enumerating each file, simply pass the path the containing folder's path.  Spark assumes that every file in that folder is part of the same dataset. This implies that the target folder should only be used for data purposes. 
 
 ```{r}
 spark_read_csv(sc, "my_data", path = "data-folder")
@@ -77,7 +93,7 @@ The "folder as a table" idea is found in other open source technologies as well.
 
 The following technique allows Spark to read file faster, as well as to reduce read failures, by passing a file layout. 
 
-### File layout
+### File Layout
 
 When reading data, Spark is able to determine the data source's column names and types.  This comes at a cost.  To determine the type Spark has to do an initial pass on the data, and then assign a type.  For large data, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size data loads.  For files that are read over and over again,  the additional read time accumulates over time.
 
@@ -123,23 +139,7 @@ col_spec_1
 ## "character"   "numeric" 
 ```
 
-The accepted variable types are: 
-
-- `integer`
-
-- `character` 
-
-- `logical`
-
-- `double`
-
-- `numeric`
-
-- `factor`
-
-- `Date`
-
-- `POSIXct`
+The accepted variable types are: `integer`, `character`, `logical`, `double`, `numeric`, `factor`, `Date` and `POSIXct`.
 
 In `spark_read_csv()`, `col_spec_1` is passed to the `columns` argument, and `infer_schema` is set to `FALSE`. We will try match the names and types of the original file.  Also, we will pass the column specification. Doing this will help with performance because Spark will not have to figure out the column types.
 
@@ -290,31 +290,9 @@ Spark writes the results locally, and transfers the results via a third-party ap
 
 It is best to recognize that Spark, R, and any other technology are tools.  No tool can do everything, nor should be expected to.  
 
-## File Formats and File Systems
+## File Formats {#data-file-formats}
 
-It may be challenging accessing data for the first time, particularly if you're working with new sources or file systems. 
-
-"Out-of-the-box", Spark is able to interact with several source types and file system.  Source types include: Comma separated values (CSV), Apache Parquet, and JDBC.  File system protocols include: local file system (Linux, Windows, Mac), and Hadoop file System (HDFS).  
-
-However, there is a way for Spark to interact with other source types and file systems, which will cover next. This chapter will also cover some of the most common source types and protocols.
-
-The section [Source types and file systems](#data-source-files) in the Appendix contains tips on how to read and write data from specific source types and file systems.
-
-### Default packages
-
-Spark is a very flexible computing platform.  It can add functionality by using extension programs, called packages. Accessing a new source type or file system can be done by using the appropriate package. 
-
-Packages need to be loaded into Spark at connection time.  To load the package, Spark needs its location, which could be inside the cluster, in a file share or the Internet.  
-
-In `sparklyr`, the package location is passed to `spark_connect()`.  All packages should be listed in the `defaultPackages` entry of the connection configuration. Here is an example that loads the package needed to access Amazon S3 buckets:
-
-```{r}
-conf <- spark_config()
-conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
-sc <- spark_connect(master = "local", config = conf)
-```
-
-### Source types
+"Out-of-the-box", Spark is able to interact with several filte formats and file system.  File formats include: Comma separated values (CSV), Apache Parquet, and JDBC.  File system protocols include: local file system (Linux, Windows, Mac), and Hadoop file System (HDFS).  
 
 Spark can read and write several source types.  In `sparklyr`, the source types are aligned to R functions.
 
@@ -328,6 +306,15 @@ Spark can read and write several source types.  In `sparklyr`, the source types 
 | Apache Parquet                                | `spark_read_parquet()` | `spark_write_parquet()` |
 | Text                                          | `spark_read_text()`    | `spark_write_text()`    |
 
+The section [File Formats](#appendix-file-formats) in the Appendix contains tips on how to read and write data from specific file formats.
+
+### Custom File Formats
+
+Spark is a very flexible computing platform.  It can add functionality by using extension programs, called packages. Accessing a new source type or file system can be done by using the appropriate package. 
+
+Packages need to be loaded into Spark at connection time.  To load the package, Spark needs its location, which could be inside the cluster, in a file share or the Internet.  
+
+In `sparklyr`, the package location is passed to `spark_connect()`.  All packages should be listed in the `defaultPackages` entry of the connection configuration. 
 
 It is possible to access data source types not listed above.  Loading the appropriate default package for Spark is the first of two steps  The second step is to actually read or write the data. The `spark_read_source()` and `spark_write_source()` functions do that.  They are generic functions that can use the libraries imported by a default package.
 
@@ -345,7 +332,7 @@ spark_read_source(
   )
 ```
 
-### File systems
+### File Systems {#data0file-systems}
 
 Spark will default to the file system that it is currently running on.  In a YARN managed cluster, the default file system will be HDFS. An example path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux folders.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
 
@@ -361,6 +348,8 @@ my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
 
 Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol requires loading a default package.  In some cases, the vendor providing the Spark environment could already be loading the package for you.  Please refer to your vendor's documentation to find out if that is the case.
+
+The section [File Systems](#appendix-file-systems) in the Appendix contains tips on how to read and write data from specific file systems
 
 ## Recap
 
