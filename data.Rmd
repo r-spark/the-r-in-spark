@@ -53,7 +53,7 @@ render_nomnoml("
 
 In order to support a broad variety of data source, Spark needs to be able to read and write data in several different file formats and access them while stored in also several storage systems, we will get to this later in the chapter; but first, we will start by presenting how to copy, read and write data using Spark.
 
-## Copying Data
+## Copying
 
 Previous chapters used `copy_to()` as a handy helper to copy data from R into Spark; however, `copy_to()` was designed to transfer only small datasets. There are two reasons behind this decision: first, if you are processing large-scale datasets, these datasets are already stored in large-scale storage like HDFS; second, there are already great tools to transfer huge dataset into distributed storage and there are multiple storage solution which complicates thing further. Therefore, transfering large dataset is left to specialized tools like the `hadoop` command line tool.
 
@@ -71,7 +71,7 @@ large_file <- spark_read_csv("hdfs:///path-in-hdfs/large-file.csv")
 
 More often than not, data will be already stored in the cluster which you can then read as we will describe next.
 
-## Reading Data
+## Reading
 
 If you are new to Spark and `sparklyr`, it is highly recommended to review this section before starting work with large data sets. We will introduce several techniques that improve the speed and efficiency of reading data. Each subsection will cover a specific way you can take advantage of how Spark reads files, such as the ability to treat entire folders as datasets, as well as being able to pass a file layout to accelerate the file read. 
 
@@ -93,7 +93,7 @@ The "folder as a table" idea is found in other open source technologies as well.
 
 The following technique allows Spark to read file faster, as well as to reduce read failures, by passing describing the structure of a dataset. 
 
-## Schema
+### Schema
 
 When reading data, Spark is able to determine the data source's column names and column types, also known as the **schema**. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess the schema, and then assign it. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size data loads. For files that are read over and over again,  the additional read time accumulates over time.
 
@@ -211,7 +211,7 @@ mapped_test %>%
 
 The next subsection covers a short technique to make it easier to carry the original field names of imported data. 
 
-### Column Names
+### Columns
 
 Spark version 1.6 required that column names be sanitized, so `sparklyr` does that by default.  There may be cases when you would like to keep the original names intact, and are also working with Spark version 2.0 or above.  To do that set the `sparklyr.sanitize.column.names` option to `FALSE`.
 
@@ -239,7 +239,7 @@ dplyr::copy_to(sc, iris, overwrite = TRUE)
 
 After reviewing how to read data into Spark in this section, the next section will cover how we can write data from our Spark session. 
 
-## Writing Data
+## Writing
 
 Some projects require that new data generated in Spark to be written back to a remote source. For example, the data could be new predicted values returned by a Spark model.  The job processes the mass generation of predictions, and the predictions need to be stored. This section will focus on when and where we should use Spark, and R, for moving the data from Spark into an external destination.
 
@@ -308,7 +308,7 @@ Spark can read and write several source types.  In `sparklyr`, the source types 
 
 The section [File Formats](#appendix-file-formats) in the Appendix contains tips on how to read and write data from specific file formats.
 
-### Custom File Formats
+### Custom
 
 Spark is a very flexible computing platform.  It can add functionality by using extension programs, called packages. Accessing a new source type or file system can be done by using the appropriate package. 
 
@@ -332,7 +332,7 @@ spark_read_source(
   )
 ```
 
-### File Systems {#data0file-systems}
+## File Systems {#data0file-systems}
 
 Spark will default to the file system that it is currently running on.  In a YARN managed cluster, the default file system will be HDFS. An example path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux folders.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
 
