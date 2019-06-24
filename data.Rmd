@@ -9,84 +9,51 @@ library(ggplot2)
 
 The previous chapter, Connections, presented how to connect to Spark clusters, either on-premise or in the cloud; with previous knowledge acquired from previous chapters, you are up to this point equiped to do data analisys and modeling at scale! However, so far we haven't really explained much about how to read data into Spark, we've used `copy_to()` to upload small datasets or functions like `spark_read_csv()` without explaining in detail how to load and write data in Spark.
 
-Therefore, in this chapter, you will learn how to read and write data using Spark; while this is important on it's own, you can't do much without being able to load the data you care about into Spark, this chapter will also present the exciting new world of data lakes -- a repository of data stored in its natural or raw format which provides various bennefits over existing storage architectures.
+Therefore, in this chapter, you will learn how to read and write data using Spark; while this is important on it's own, you can't do much without being able to load the data you care about into Spark, this chapter will also present the exciting new world of Data Lakess -- a repository of data stored in its natural or raw format which provides various bennefits over existing storage architectures.
 
-In addition, we will also present how to extend Spark's capabilities to work with data no accessible "out-of-the-box". and several recommendations focused on improving performance for writing or reading data. 
+In addition, we will also present how to extend Spark's capabilities to work with data no accessible "out-of-the-box" and several recommendations focused on improving performance for writing or reading data. 
 
 ## Overview
 
-## Source types and file systems
+In the Introduction chapter, you learned that beyond big data and big compute, you can also use Spark to improve velocity, variety and veracity in data tasks. While you can use the learnings of this chapter for any task requiring loading and storing data, it is particularily interesting to present this chapter in the context of dealing with a variety of data sources. To understand why, we should first take a quick detour understanding how data is currently processed in many organizations.
 
-It may be challenging accessing data for the first time, particularly if you're working with new sources or file systems. 
+For several years, it's been a common practice to store large datasets in a relational **Database**, a system first proposed in 1970 by Edgar F. Codd. You can think of a database as a collection of tables that are related to one another where each table is carefully designed to hold specific data types and relationships to other tables.  most relational database systems use SQL (Structured Query Language) for querying and maintaining the database. Databases are still wildly used today, with good reason! -- Databases store data reliably and consistently, your bank probably stores account balances in a database and that's a good practice!
 
-"Out-of-the-box", Spark is able to interact with several source types and file system.  Source types include: Comma separated values (CSV), Apache Parquet, and JDBC.  File system protocols include: local file system (Linux, Windows, Mac), and Hadoop file System (HDFS).  
+However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as **ETL** (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became a popular in the 1970s. Aside from databases, data is often also loaded into a **Data Warehouse**, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. However, changing a databse or data warehouse is usually a long and delicate process since data needs to be re-indexed and carefully designed transform data from multiple data sources into a common column or table that they can all share.
 
-However, there is a way for Spark to interact with other source types and file systems, which will cover next. This chapter will also cover some of the most common source types and protocols.
+Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a **Data Lake**, a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since the data in a Data Lakes is made available in it's raw format, it is easy for anyone to use it for analysis which adds significant flexibility to organizations. Spark can then be used to unify data processing from a Data Lakes, a database or a data warehouse. Some organization also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which falls beyond the scope of this book. We've marked this with dotted lines in Figure \@ref(fig:data-data-lake) to denote systems that are not always present when using Spark with Data Lakes.
 
-The section [Source types and file systems](#data-source-files) in the Appendix contains tips on how to read and write data from specific source types and file systems.
-
-### Default packages
-
-Spark is a very flexible computing platform.  It can add functionality by using extension programs, called packages. Accessing a new source type or file system can be done by using the appropriate package. 
-
-Packages need to be loaded into Spark at connection time.  To load the package, Spark needs its location, which could be inside the cluster, in a file share or the Internet.  
-
-In `sparklyr`, the package location is passed to `spark_connect()`.  All packages should be listed in the `defaultPackages` entry of the connection configuration. Here is an example that loads the package needed to access Amazon S3 buckets:
-
-```{r}
-conf <- spark_config()
-conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
-sc <- spark_connect(master = "local", config = conf)
+```{r data-data-lake, eval=TRUE, echo=FALSE, fig.cap='Sparl processing raw data from a Data Lake, Databases and Data Warehouses'}
+render_nomnoml("
+#spacing: 20
+#padding: 10
+[Data Lake|
+  [hdfs://data.csv]
+  [hdfs://data.json]
+  [s3://data.parquet]
+]
+[Data Lake]->[Spark|
+  [<note>spark_read_csv()
+  spark_read_json()
+  spark_read_parquet()
+  ...
+  spark_read_jdbc()
+  spark_write_jdbc()
+  ]
+]
+[Spark]->[Data Lake]
+[Data Lake]--->[Database]
+[Data Lake]--->[Data Warehouse]
+[Database]--->[Spark]
+[Spark]--->[Database]
+[Data Warehouse]--->[Spark]
+[Spark]--->[Data Warehouse]
+")
 ```
 
-### Source types
+In order to support a broad variety of data source, Spark needs to be able to read and write data in several different file formats and access them while stored in also several storage systems, we will get to this later in the chapter; but first, we will start by presenting how to copy, read and write data using Spark.
 
-Spark can read and write several source types.  In `sparklyr`, the source types are aligned to R functions.
-
-| Format                                        | Read                   | Write                   |
-|-----------------------------------------------|------------------------|-------------------------|
-| Comma separated values (CSV)                  | `spark_read_csv()`     | `spark_write_csv()`     |
-| JavaScript Object Notation (JSON)             | `spark_read_json()`    | `spark_write_json()`    |
-| Library for Support Vector Machines (LIBSVM)  | `spark_read_libsvm()`  | `spark_write_libsvm()`  |
-| Java Database Connectivity (JDBC)             | `spark_read_jdbc()`    | `spark_write_jdbc()`    |
-| Optimized Row Columnar (ORC)                  | `spark_read_orc()`     | `spark_write_orc()`     |
-| Apache Parquet                                | `spark_read_parquet()` | `spark_write_parquet()` |
-| Text                                          | `spark_read_text()`    | `spark_write_text()`    |
-
-
-It is possible to access data source types not listed above.  Loading the appropriate default package for Spark is the first of two steps  The second step is to actually read or write the data. The `spark_read_source()` and `spark_write_source()` functions do that.  They are generic functions that can use the libraries imported by a default package.
-
-The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source.
-
-```{r}
-con <- spark_config()
-conf$sparklyr.defaultPackages <- "datastax:spark-cassandra-connector:2.0.0-RC1-s_2.11"
-sc <- spark_connect(master = "local", config = conf)
-spark_read_source(
-  sc, 
-  name = "emp",
-  source = "org.apache.spark.sql.cassandra",
-  options = list(keyspace = "dev", table = "emp")
-  )
-```
-
-### File systems
-
-Spark will default to the file system that it is currently running on.  In a YARN managed cluster, the default file system will be HDFS. An example path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux folders.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
-
-The file system protocol can be changed when reading or writing.  It is done via the `path` argument of the `sparklyr` function.  For example, a full path of "file://home/user/file.csv" will force the use of the local Operating System's file system.
-
-There are other file system protocols,  is Amazon's S3 service for example.  Spark is does not know how to read the S3 protocol, so accessing the "s3a" protocol involves adding a package to the `defaultPackages` configuration variable passed at connection time.  
-
-```{r}
-conf <- spark_config()
-conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
-sc <- spark_connect(master = "local", config = conf)
-my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
-```
-
-Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol requires loading a default package.  In some cases, the vendor providing the Spark environment could already be loading the package for you.  Please refer to your vendor's documentation to find out if that is the case.
-
+## Copying Data
 
 ## Reading data
 
@@ -322,6 +289,78 @@ Spark writes the results locally, and transfers the results via a third-party ap
 : Spark could write the results into CSV files, and then have a separate job copy the files over via FTP.  In the target location, you would use a separate process to transfer the data into the target location.  
 
 It is best to recognize that Spark, R, and any other technology are tools.  No tool can do everything, nor should be expected to.  
+
+## File Formats and File Systems
+
+It may be challenging accessing data for the first time, particularly if you're working with new sources or file systems. 
+
+"Out-of-the-box", Spark is able to interact with several source types and file system.  Source types include: Comma separated values (CSV), Apache Parquet, and JDBC.  File system protocols include: local file system (Linux, Windows, Mac), and Hadoop file System (HDFS).  
+
+However, there is a way for Spark to interact with other source types and file systems, which will cover next. This chapter will also cover some of the most common source types and protocols.
+
+The section [Source types and file systems](#data-source-files) in the Appendix contains tips on how to read and write data from specific source types and file systems.
+
+### Default packages
+
+Spark is a very flexible computing platform.  It can add functionality by using extension programs, called packages. Accessing a new source type or file system can be done by using the appropriate package. 
+
+Packages need to be loaded into Spark at connection time.  To load the package, Spark needs its location, which could be inside the cluster, in a file share or the Internet.  
+
+In `sparklyr`, the package location is passed to `spark_connect()`.  All packages should be listed in the `defaultPackages` entry of the connection configuration. Here is an example that loads the package needed to access Amazon S3 buckets:
+
+```{r}
+conf <- spark_config()
+conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
+sc <- spark_connect(master = "local", config = conf)
+```
+
+### Source types
+
+Spark can read and write several source types.  In `sparklyr`, the source types are aligned to R functions.
+
+| Format                                        | Read                   | Write                   |
+|-----------------------------------------------|------------------------|-------------------------|
+| Comma separated values (CSV)                  | `spark_read_csv()`     | `spark_write_csv()`     |
+| JavaScript Object Notation (JSON)             | `spark_read_json()`    | `spark_write_json()`    |
+| Library for Support Vector Machines (LIBSVM)  | `spark_read_libsvm()`  | `spark_write_libsvm()`  |
+| Java Database Connectivity (JDBC)             | `spark_read_jdbc()`    | `spark_write_jdbc()`    |
+| Optimized Row Columnar (ORC)                  | `spark_read_orc()`     | `spark_write_orc()`     |
+| Apache Parquet                                | `spark_read_parquet()` | `spark_write_parquet()` |
+| Text                                          | `spark_read_text()`    | `spark_write_text()`    |
+
+
+It is possible to access data source types not listed above.  Loading the appropriate default package for Spark is the first of two steps  The second step is to actually read or write the data. The `spark_read_source()` and `spark_write_source()` functions do that.  They are generic functions that can use the libraries imported by a default package.
+
+The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source.
+
+```{r}
+con <- spark_config()
+conf$sparklyr.defaultPackages <- "datastax:spark-cassandra-connector:2.0.0-RC1-s_2.11"
+sc <- spark_connect(master = "local", config = conf)
+spark_read_source(
+  sc, 
+  name = "emp",
+  source = "org.apache.spark.sql.cassandra",
+  options = list(keyspace = "dev", table = "emp")
+  )
+```
+
+### File systems
+
+Spark will default to the file system that it is currently running on.  In a YARN managed cluster, the default file system will be HDFS. An example path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux folders.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
+
+The file system protocol can be changed when reading or writing.  It is done via the `path` argument of the `sparklyr` function.  For example, a full path of "file://home/user/file.csv" will force the use of the local Operating System's file system.
+
+There are other file system protocols,  is Amazon's S3 service for example.  Spark is does not know how to read the S3 protocol, so accessing the "s3a" protocol involves adding a package to the `defaultPackages` configuration variable passed at connection time.  
+
+```{r}
+conf <- spark_config()
+conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
+sc <- spark_connect(master = "local", config = conf)
+my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
+```
+
+Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol requires loading a default package.  In some cases, the vendor providing the Spark environment could already be loading the package for you.  Please refer to your vendor's documentation to find out if that is the case.
 
 ## Recap
 
