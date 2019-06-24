@@ -71,11 +71,11 @@ large_file <- spark_read_csv("hdfs:///path-in-hdfs/large-file.csv")
 
 More often than not, data will be already stored in the cluster which you can then read as we will describe next.
 
-## Reading data
+## Reading Data
 
 If you are new to Spark and `sparklyr`, it is highly recommended to review this section before starting work with large data sets. We will introduce several techniques that improve the speed and efficiency of reading data. Each subsection will cover a specific way you can take advantage of how Spark reads files, such as the ability to treat entire folders as datasets, as well as being able to pass a file layout to accelerate the file read. 
 
-### Dataset Paths
+### Paths
 
 When analyzing data, loading multiple files into a single data object is a common scenario.  In R, we typically use a loop or functional programming to accomplish this. That is because R has to load each file individually into the session.
 
@@ -91,11 +91,11 @@ spark_read_csv(sc, "my_data", path = "data-folder")
 
 The "folder as a table" idea is found in other open source technologies as well.  Under the hood, Hive tables work the same way.  When querying a Hive table, the mapping is done over multiple files inside the same folder. The folder's name usually match the name of the table visible to the user.  
 
-The following technique allows Spark to read file faster, as well as to reduce read failures, by passing a file layout. 
+The following technique allows Spark to read file faster, as well as to reduce read failures, by passing describing the structure of a dataset. 
 
-### File Layout
+## Schema
 
-When reading data, Spark is able to determine the data source's column names and types.  This comes at a cost.  To determine the type Spark has to do an initial pass on the data, and then assign a type.  For large data, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size data loads.  For files that are read over and over again,  the additional read time accumulates over time.
+When reading data, Spark is able to determine the data source's column names and column types, also known as the **schema**. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess the schema, and then assign it. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size data loads. For files that are read over and over again,  the additional read time accumulates over time.
 
 Spark allows the user to provide a column layout. If provided, Spark will bypass the step that it uses to determine the file's layout. In `sparklyr`, we can use the `column` argument to take advantage of this functionality. The `infer_schema` argument also needs to be set to `FALSE`.  This arguments is the switch that indicates if the `column` argument should be used.
 
@@ -189,7 +189,7 @@ In Spark, malformed entries can cause error during reading, specially for non-ch
 
 This subsection reviewed how we can read files faster and with less failures, which lets us start our analysis quicker.  Another way to accelerate our analysis, is by loading less data into Spark memory, the next subsection will cover how to do this.
 
-### Spark memory
+### Memory
 
 Spark copies the data into its distributed memory, which makes analyses and other processes very fast.  There are cases, such as when the data is too big, that loading all of the data may not be practical, or even necessary. For those cases, Spark can then just "map" the files without copying data into memory.  
 
