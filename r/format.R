@@ -1,8 +1,10 @@
 format_footnote_with_period <- function(groups, remaining) {
   footnote_name <- groups[1]
+  separator <- groups[2]
 
   paste(
-    ". [@",
+    separator,
+    " [@",
     footnote_name,
     "]",
     sep = ""
@@ -10,15 +12,11 @@ format_footnote_with_period <- function(groups, remaining) {
 }
 
 format_transformations <- list(
-  " \\[@([a-zA-Z0-9\\-]+)\\]\\." = format_footnote_with_period
+  " \\[@([a-zA-Z0-9\\-]+)\\]([.;])" = format_footnote_with_period
 )
 
 format_chapters <- list(
-  "preface",
-  "intro",
-  "starting",
-  "analysis",
-  "modeling"
+  "intro"
 )
 
 format_chapters_pattern <- paste(format_chapters, collapse = "|")
