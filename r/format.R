@@ -11,8 +11,22 @@ format_footnote_with_period <- function(groups, remaining) {
   )
 }
 
+format_remove_links_to_chapters <- function(groups, remaining) {
+  chapter_name <- groups[1]
+
+  paste(
+    " ",
+    chapter_name,
+    " ",
+    "chapter",
+    sep = ""
+  )
+}
+
+
 format_transformations <- list(
-  " \\[@([a-zA-Z0-9\\-]+)\\]([.;])" = format_footnote_with_period
+  " \\[@([a-zA-Z0-9\\-]+)\\]([.;])" = format_footnote_with_period,
+  " \\[([a-zA-Z ]+)\\]\\(#?[^)]+\\) chapter" = format_remove_links_to_chapters
 )
 
 format_chapters <- list(
