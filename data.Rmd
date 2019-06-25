@@ -7,33 +7,33 @@ library(ggplot2)
 
 # Data {#data}
 
-The previous chapter, Connections, presented how to connect to Spark clusters, either on-premise or in the cloud; with previous knowledge acquired from previous chapters, you are up to this point equiped to do data analisys and modeling at scale! However, so far we haven't really explained much about how to read data into Spark, we've used `copy_to()` to upload small datasets or functions like `spark_read_csv()` without explaining in detail how to load and write data in Spark.
+The previous chapter, Connections, presented how to connect to Spark clusters, either on-premise or in the cloud; with previous knowledge acquired from previous chapters, you are up to this point equipped to start doing analysis and modeling at scale! However, so far we haven't really explained much about how to read data into Spark, we've used `copy_to()` to upload small datasets or functions like `spark_read_csv()` without explaining in detail how to load and write.
 
-Therefore, in this chapter, you will learn how to read and write data using Spark; while this is important on it's own, you can't do much without being able to load the data you care about into Spark, this chapter will also present the exciting new world of data lakes -- a repository of data stored in its natural or raw format which provides various bennefits over existing storage architectures.
+Therefore, in this chapter, you will learn how to read and write data using Spark; while this is important on it's own, this chapter will also present the exciting new world of data lakes -- a repository of data stored in its natural or raw format which provides various benefits over existing storage architectures.
 
-In addition, we will also present how to extend Spark's capabilities to work with data no accessible "out-of-the-box" and several recommendations focused on improving performance for writing or reading data. 
+In addition, we will also present how to extend Spark's capabilities to work with data no accessible out-of-the-box and several recommendations focused on improving performance for writing or reading data. 
 
 ## Overview
 
-In the Introduction chapter, you learned that beyond big data and big compute, you can also use Spark to improve velocity, variety and veracity in data tasks. While you can use the learnings of this chapter for any task requiring loading and storing data, it is particularily interesting to present this chapter in the context of dealing with a variety of data sources. To understand why, we should first take a quick detour understanding how data is currently processed in many organizations.
+In the Introduction chapter, you learned that beyond big data and big compute, you can also use Spark to improve velocity, variety and veracity in data tasks. While you can use the learnings of this chapter for any task requiring loading and storing data, it is particularly interesting to present this chapter in the context of dealing with a variety of data sources. To understand why, we should first take a quick detour understanding how data is currently processed in many organizations.
 
-For several years, it's been a common practice to store large datasets in a relational **database**, a system first proposed in 1970 by Edgar F. Codd. You can think of a database as a collection of tables that are related to one another where each table is carefully designed to hold specific data types and relationships to other tables.  most relational database systems use SQL (Structured Query Language) for querying and maintaining the database. Databases are still wildly used today, with good reason! -- Databases store data reliably and consistently, your bank probably stores account balances in a database and that's a good practice!
+For several years, it's been a common practice to store large datasets in a relational **database**, a system first proposed in 1970 by Edgar F. Codd. [@data-codd-relational] You can think of a database as a collection of tables that are related to one another where each table is carefully designed to hold specific data types and relationships to other tables. Most relational database systems use **SQL** (Structured Query Language) for querying and maintaining the database. Databases are still widely used today, with good reason! -- Databases store data reliably and consistently, your bank probably stores account balances in a database and that's a good practice!
 
-However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as **ETL** (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became a popular in the 1970s. Aside from databases, data is often also loaded into a **data warehose**, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. However, changing a databse or data warehose is usually a long and delicate process since data needs to be re-indexed and carefully designed transform data from multiple data sources into a common column or table that they can all share.
+However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as **ETL** (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became popular in the 1970s. Aside from databases, data is often also loaded into a **data warehouse**, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. The challenge is that changing them, is usually a long and delicate process since data needs to be re-indexed and carefully designed transform data from multiple data sources into a common column or table that they can all share.
 
-Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a **data lake**, a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since the data in a data lakes is made available in it's raw format, it is easy for anyone to use it for analysis which adds significant flexibility to organizations. Spark can then be used to unify data processing from a data lakes, a database or a data warehose. Some organization also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book. We've marked this with dotted lines in Figure \@ref(fig:data-data-lake) to denote systems that are not always present when using Spark with data lakes.
+Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a **data lake** -- a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since data lakes make data available in its original format, it is easy for anyone to use it for analysis which adds significant flexibility over ETL that are often not maintained by data scientists. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure \@ref(fig:data-data-lake).
 
-```{r data-data-lake, eval=TRUE, echo=FALSE, fig.cap='Spark processing raw data from a data lake, databases and data warehoses'}
+```{r data-data-lake, eval=TRUE, echo=FALSE, fig.cap='Spark processing raw data from a data lakes, databases and data warehouses'}
 render_nomnoml("
 #spacing: 20
 #padding: 10
-[Data Lake|
+[Data Lakes|
   [hdfs://data.csv]
   [s3a://data.json]
   [dbfs://data.parquet]
   [wasbs://data.xml]
 ]
-[Data Lake]->[Spark|
+[Data Lakes]->[Spark|
   [<note>spark_read_csv()
   spark_read_json()
   spark_read_parquet()
@@ -51,7 +51,7 @@ render_nomnoml("
 ", "images/data-data-lake.png")
 ```
 
-In order to support a broad variety of data source, Spark needs to be able to read and write data in several different **file formats** (CSV, JSON, Parquet, etc), access them while stored in also several **file systems** (HDFS, S3, DBFS, etc) and, piotentially, interoperate with other **storage systems** (databases, data warehoses, etc); but first, we will start by presenting how to read, write and copy data using Spark.
+In order to support a broad variety of data source, Spark needs to be able to read and write data in several different **file formats** (CSV, JSON, Parquet, etc), access them while stored in also several **file systems** (HDFS, S3, DBFS, etc) and, potentially, interoperate with other **storage systems** (databases, data warehouses, etc) which this chapter will present; but first, we will start by presenting how to read, write and copy data using Spark.
 
 ## Read
 
@@ -475,7 +475,7 @@ bench::mark(
 render_image("images/data-file-format-benchmark.png")
 ```
 
-This concludes the introduction to some of the "out-of-the-box" supported file formats, we will present next how to deal with formats that require external packages and customization.
+This concludes the introduction to some of the out-of-the-box supported file formats, we will present next how to deal with formats that require external packages and customization.
 
 ### Others
 
@@ -537,9 +537,9 @@ The section [file systems](#appendix-file-systems) in the Appendix contains tips
 
 ## Storage Systems {#data-storage-systems}
 
-A data lake and Spark usually go hand-in-hand with optional access to storage systems like databases and data warehoses. Presenting all the different storage systems with approrpiate examples would be quite time consuming, so instead we will present some of the commonly used storage sytems.
+A data lake and Spark usually go hand-in-hand with optional access to storage systems like databases and data warehouses. Presenting all the different storage systems with approrpiate examples would be quite time consuming, so instead we will present some of the commonly used storage sytems.
 
-As a start, Apache **Hive** is a data warehose software that facilitates reading, writing, and managing large datasets residing in distributed storage using SQL. In fact, Spark has component from Hive built directly into Spark's sources and is very common to have installations of Spark or Hive side-by-side, so we will start by presenting Hive, followed by Cassandra and closing on JDBC connections.
+As a start, Apache **Hive** is a data warehouse software that facilitates reading, writing, and managing large datasets residing in distributed storage using SQL. In fact, Spark has component from Hive built directly into Spark's sources and is very common to have installations of Spark or Hive side-by-side, so we will start by presenting Hive, followed by Cassandra and closing on JDBC connections.
 
 ### Hive
 
