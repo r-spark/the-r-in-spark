@@ -16,7 +16,11 @@ format_transformations <- list(
 )
 
 format_chapters <- list(
-  "intro"
+  "preface",
+  "intro",
+  "starting",
+  "analysis",
+  "modeling"
 )
 
 format_chapters_pattern <- paste(format_chapters, collapse = "|")
