@@ -326,9 +326,7 @@ Since in most cases data will already be stored in the cluster, you should not h
 
 ## File Formats {#data-file-formats}
 
-"Out-of-the-box", Spark is able to interact with several file formats like: CSV, JSON, LIBSVM, ORC, Parquet and databases through JDBC.
-
-Spark can read and write several source types.  In `sparklyr`, the source types are aligned to R functions.
+"Out-of-the-box", Spark is able to interact with several file formats like: CSV, JSON, LIBSVM, ORC and Parquet. The following table maps the file format to the function you should use to read and write data in Spark:
 
 | Format                                        | Read                   | Write                   |
 |-----------------------------------------------|------------------------|-------------------------|
@@ -339,7 +337,7 @@ Spark can read and write several source types.  In `sparklyr`, the source types 
 | Apache Parquet                                | `spark_read_parquet()` | `spark_write_parquet()` |
 | Text                                          | `spark_read_text()`    | `spark_write_text()`    |
 
-The next following sections will describe special considerations particular to each file format.
+The following sections will describe special considerations particular to each file format and present some of the strengths and weaknesses of some of the popular file formats, starting with the well-known CSV file format.
 
 ### CSV
 
@@ -616,11 +614,31 @@ While is ideal to find Spark packages that support the remote storage system, th
 
 ### JDBC
 
-As mentioned at the begining of this chapter, 
-`spark_read_jdbc()` and `spark_write_jdbc()`.
+When a Spark package is not available to provide connectivity, a JDBC connection can be considered. **JDBC** stands for Java Database Connectivity, t's an interface for the programming language Java, which defines how a client may access a database.
+
+It is quite easy to connect to remote database with `spark_read_jdbc()` and `spark_write_jdbc()`; as long as you have access to the appropriate JDBC driveer, which at times is trivial and other times quite an adventure. To keep this simple, we can briefly consideer how a connection to a remote MySQL database could be accomplished.
+
+First, you would need to download the appropriate JDBC driver from the MySQL's developer portal and specify this additional driver as a `sparklyr.shell.driver-class-path` connection option. Since JDBC drivers are Java-based, the code is contained insidee a **JAR** (Java ARchive) file. Once connected to Spark with the appropiate driver, you can use the `jdbc://` protocol to access particular drivers and databases:
+
+```{r}
+sc <- spark_connect(master = "local", config = list(
+  "sparklyr.shell.driver-class-path" =
+    "~/Downloads/mysql-connector-java-5.1.41/mysql-connector-java-5.1.41-bin.jar"
+))
+
+spark_read_jdbc(sc, "person_jdbc",  options = list(
+  url = "jdbc:mysql://localhost:3306/sparklyr",
+  user = "root", password = "<password>",
+  dbtable = "person"))
+```
+
+If you are a customer of particular database vendors, making use of the vendor-provided resources is usually the best place to start looking for appropriate drivers.
 
 ## Recap
 
-This chapter covered how we can extend Spark's capabilities to access different kinds of source data and file formats.  We also covered several techniques to performance when reading files into Spark.  We also introduced practical principles to keep in mind when writing data from Spark.  In the next chapter, [Tuning], you will learn how Spark manages tasks and data across multiple machines, which will in turn allow you to further improve the performance of your analyses.
+This chapter expanded on how and why you should use Spark to connect and process a variety of data sources, through a new data storage model known as data lakes -- a storage pattern that provides more flexibility than standard ETL processes by enabling you to use raw datasets with, potentialy, more information to enrich data analysis and modeling.
+
+We then presented best-practices for reding, writing and copying data into and from Spark and came back to exploring the components of a data lake: file formats and file systems; the former representing how data is stored, and the latter where the data is stored. You then learned how to tackle file formats and storage systems that require additional Spark packages, reviewed some of the performance tradeoffs across file formats, and learned the concepts required to make use of storage systems (databases and warehouses) in Spark.
 
 
+While reading and wtitting data should come nature after this chapter, you might hit resource restrictions while reading and writting large-datasets. Therefore, in the next chapter you will learn how Spark manages tasks and data across multiple machines, which will in turn allow you to further improve the performance of your analysis and modeling tasks.
