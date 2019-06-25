@@ -35,7 +35,7 @@ for (chapter_file in dir(pattern = paste0(chapters_pattern, ".Rmd"))) {
   rmarkdown::pandoc_convert(
     input = normalizePath(paste0("mds/", chapter_name, ".md")),
     to = "asciidoc",
-    options = c("--columns=180"),
+    options = c("--columns=2000"),
     output = file.path("../ascii", paste0(chapter_name, ".asciidoc"))
   )
 
