@@ -5,51 +5,69 @@ source("r/render.R")
 
 # Appendix
 
-## Prerequisites {#appendix-prerequisites}
+## Preface
 
-### Installing R {#appendix-install-r}
+### Formatting {#appendix-ggplot2-theme}
 
-From [r-project.org](https://r-project.org/), download and launch the R installer for your platform, Windows, Macs or Linux available.
+The following `ggplot2` theme was use to format plots in this book:
 
-```{r appendix-r-download, eval=TRUE, echo=FALSE, fig.width=4, fig.align='center', fig.cap='The R Project for Statistical Computing'}
-render_image("images/appendix-download-r.png", "The R Project for Statistical Computing")
+```{r appendix-ggplot2-theme-code}
+plot_style <- function() {
+  font <- "Helvetica"
+
+  ggplot2::theme_classic() +
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(family = font,
+                                       size=14,
+                                       color = "#222222"),
+    plot.subtitle = ggplot2::element_text(family=font,
+                                          size=12,
+                                          color = "#666666"),
+
+    legend.position = "right",
+    legend.background = ggplot2::element_blank(),
+    legend.title = ggplot2::element_blank(),
+    legend.key = ggplot2::element_blank(),
+    legend.text = ggplot2::element_text(family=font,
+                                        size=14,
+                                        color="#222222"),
+
+    axis.title.y = ggplot2::element_text(
+      margin = ggplot2::margin(t = 0, r = 8, b = 0, l = 0),
+      size = 14,
+      color="#666666"),
+    axis.title.x = ggplot2::element_text(
+      margin = ggplot2::margin(t = -2, r = 0, b = 0, l = 0),
+      size = 14,
+      color = "#666666"),
+    axis.text = ggplot2::element_text(
+      family=font,
+      size=14,
+      color="#222222"),
+    axis.text.x = ggplot2::element_text(
+      margin = ggplot2::margin(5, b = 10)),
+    axis.ticks = ggplot2::element_blank(),
+    axis.line = ggplot2::element_blank(),
+
+    panel.grid.minor = ggplot2::element_blank(),
+    panel.grid.major.y = ggplot2::element_line(color = "#eeeeee"),
+    panel.grid.major.x = ggplot2::element_line(color = "#ebebeb"),
+
+    panel.background = ggplot2::element_blank(),
+
+    strip.background = ggplot2::element_rect(fill = "white"),
+    strip.text = ggplot2::element_text(size  = 20,  hjust = 0)
+  )
+}
 ```
 
-### Installing Java {#appendix-install-java}
+Which you can then active with:
 
-From [java.com/download](https://java.com/download), download and launch the installer for your platform, Windows, Macs or Linux are also available.
-
-```{r appendix-java-download, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Java Download Page'}
-render_image("images/appendix-download-java.png", "Java Download Page")
+```{r appendix-ggplot2-theme-activate}
+ggplot2::theme_set(plot_style())
 ```
 
-Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java Runtime Engine 8, or JRE 8 for short.
-
-**Note:** For advanced readers that are already using the Java Development Kit, JDK for short. Please notice that JDK 9+ is currently unsupported so you will need to downgrade to JDK 8 by uninstalling JDK 9+ or by setting `JAVA_HOME` appropiately.
-
-### Installing RStudio {#appendix-install-rstudio}
-
-While installing RStudio is not strictly required to work with Spark with R, it will make you much more productive and therefore, I would recommend you take the time to install RStudio from [rstudio.com/download](https://www.rstudio.com/download), then download and launch the installer for your platform: Windows, Macs or Linux.
-
-```{r appendix-rstudio-download, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Downloads Page'}
-render_image("images/appendix-rstudio.png", "RStudio Downloads Page")
-```
-
-After launching RStudio, you can use RStudio's console panel to execute the code provided in this chapter.
-
-### Using RStudio {#appendix-using-rstudio}
-
-If you are not familiar with RStudio, you should make note of the following panes:
-
-- **Console**: A standalone R console you can use to execute all the code presented in this book.
-- **Packages**: This pane allows you to install `sparklyr` with ease, check its version, navigate to the help contents, etc.
-- **Connections**: This pane allows you to connecto to Spark, manage your active connection and view the available datasets.
-
-```{r appendix-rstudio-overview, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Overview'}
-render_image("images/appendix-rstudio-overview.png", "RStudio Overview")
-```
-
-## Diagrams
+## Introduction
 
 ### Worlds Store Capacity {#appendix-storage-capacity}
 
@@ -88,284 +106,55 @@ ggplot(cran_downloads, aes(date, count)) +
   theme_light()
 ```
 
-### Google trends for mainframes, cloud computing and kubernetes {#appendix-cluster-trends}
+## Getting Started
 
-Data downloaded from [https://trends.google.com/trends/explore?date=all&q=cloud%20computing,mainframe,kubernetes](https://trends.google.com/trends/explore?date=all&q=cloud%20computing,mainframe,kubernetes).
+### Prerequisites {#appendix-prerequisites}
 
-```{r eval=FALSE}
-library(r2d3)
+#### Installing R {#appendix-install-r}
 
-lines <- readLines("data/clusters-trends.csv")
-lines <- gsub("<1", 0, lines)
-writeLines(lines, "data/clusters-trends.csv")
+From [r-project.org](https://r-project.org/), download and launch the R installer for your platform, Windows, Macs or Linux available.
 
-read.csv("data/clusters-trends.csv", skip = 2) %>%
-  mutate(year = as.Date(paste(Month, "-01", sep = ""))) %>%
-    mutate(`On-Premise` = `mainframe...Worldwide.`,
-           Cloud = `cloud.computing...Worldwide.`,
-           Kubernetes = `kubernetes...Worldwide.`) %>%
-    tidyr::gather(`On-Premise`, Cloud, Kubernetes, key = "trend", value = "popularity") %>%
-    ggplot(aes(x=year, y=popularity, group=trend)) +
-      geom_line(aes(linetype = trend, color = trend)) +
-      scale_x_date(date_breaks = "2 year", date_labels = "%Y") +
-      labs(title = "Cluster Computing Trends",
-           subtitle = "Search popularity for on-premise (mainframe), cloud computing and kubernetes ") +
-      scale_color_grey(start = 0.6, end = 0.2) +
-      geom_hline(yintercept = 0, size = 1, colour = "#333333")
+```{r appendix-r-download, eval=TRUE, echo=FALSE, fig.width=4, fig.align='center', fig.cap='The R Project for Statistical Computing'}
+render_image("images/appendix-download-r.png", "The R Project for Statistical Computing")
 ```
 
-## Formatting {#appendix-ggplot2-theme}
+#### Installing Java {#appendix-install-java}
 
-The following `ggplot2` theme was use to format plots in this book:
+From [java.com/download](https://java.com/download), download and launch the installer for your platform, Windows, Macs or Linux are also available.
 
-```{r appendix-ggplot2-theme-code}
-plot_style <- function() {
-  font <- "Helvetica"
-
-  ggplot2::theme_classic() +
-  ggplot2::theme(
-    plot.title = ggplot2::element_text(family = font,
-                                       size=14,
-                                       color = "#222222"),
-    plot.subtitle = ggplot2::element_text(family=font,
-                                          size=12,
-                                          color = "#666666"),
-
-    legend.position = "right",
-    legend.background = ggplot2::element_blank(),
-    legend.title = ggplot2::element_blank(),
-    legend.key = ggplot2::element_blank(),
-    legend.text = ggplot2::element_text(family=font,
-                                        size=14,
-                                        color="#222222"),
-
-    axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 8, b = 0, l = 0),
-                                size = 14,
-                                color="#666666"),
-    axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = -2, r = 0, b = 0, l = 0),
-                                size = 14,
-                                color = "#666666"),
-    axis.text = ggplot2::element_text(family=font,
-                                      size=14,
-                                      color="#222222"),
-    axis.text.x = ggplot2::element_text(margin = ggplot2::margin(5, b = 10)),
-    axis.ticks = ggplot2::element_blank(),
-    axis.line = ggplot2::element_blank(),
-
-    panel.grid.minor = ggplot2::element_blank(),
-    panel.grid.major.y = ggplot2::element_line(color = "#eeeeee"),
-    panel.grid.major.x = ggplot2::element_line(color = "#ebebeb"),
-
-    panel.background = ggplot2::element_blank(),
-
-    strip.background = ggplot2::element_rect(fill = "white"),
-    strip.text = ggplot2::element_text(size  = 20,  hjust = 0)
-  )
-}
+```{r appendix-java-download, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Java Download Page'}
+render_image("images/appendix-download-java.png", "Java Download Page")
 ```
 
-Which you can then active with:
+Starting with Spark 2.1, Java 8 is required; however, previous versions of Spark support Java 7. Regardless, we recommend installing Java Runtime Engine 8, or JRE 8 for short.
 
-```{r appendix-ggplot2-theme-activate}
-ggplot2::theme_set(plot_style())
+**Note:** For advanced readers that are already using the Java Development Kit, JDK for short. Please notice that JDK 9+ is currently unsupported so you will need to downgrade to JDK 8 by uninstalling JDK 9+ or by setting `JAVA_HOME` appropiately.
+
+#### Installing RStudio {#appendix-install-rstudio}
+
+While installing RStudio is not strictly required to work with Spark with R, it will make you much more productive and therefore, I would recommend you take the time to install RStudio from [rstudio.com/download](https://www.rstudio.com/download), then download and launch the installer for your platform: Windows, Macs or Linux.
+
+```{r appendix-rstudio-download, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Downloads Page'}
+render_image("images/appendix-rstudio.png", "RStudio Downloads Page")
 ```
 
-## File Systems {#appendix-file-systeems}
+After launching RStudio, you can use RStudio's console panel to execute the code provided in this chapter.
 
-This section will cover techniques to help you interface with some of the most popular file systems
+#### Using RStudio {#appendix-using-rstudio}
 
-### Amazon S3
+If you are not familiar with RStudio, you should make note of the following panes:
 
-Amazon Simple Storage Service, or S3, has become a common location to store file.  Spark is able to directly access S3.  This functionality can be used inside `sparklyr`.  There are three key items to have, or use, when working with data from an S3 bucket: 
+- **Console**: A standalone R console you can use to execute all the code presented in this book.
+- **Packages**: This pane allows you to install `sparklyr` with ease, check its version, navigate to the help contents, etc.
+- **Connections**: This pane allows you to connecto to Spark, manage your active connection and view the available datasets.
 
-- *AWS Credentials* - They are required by the S3 service, even for publicly accessible buckets.
-- *Hadoop-to-AWS package* - It is loaded at connection time.
-- *A bucket location* - The recommended file system to use is "s3a".
-
-There are multiple ways to set the credentials to use to access the bucket.  Please refer to the official documentation for more information. It is found in the Apache Spark official site [@data-spark-cloud-integration]. 
-
-The easiest way is to set the credentials using Environment variables.  Choose a secure way to load the values into variables in R, and then load them into the appropriate Environment variable name. In case show below, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
-
-```{r}
-Sys.setenv(AWS_ACCESS_KEY_ID = my_key_id)
-Sys.setenv(AWS_SECRET_ACCESS_KEY = my_secret_key)
+```{r appendix-rstudio-overview, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Overview'}
+render_image("images/appendix-rstudio-overview.png", "RStudio Overview")
 ```
 
-Spark requires an integration package in order to access Amazon S3 buckets. Interestingly, the package is not a Spark package, it is a Hadoop package.  This means that the selected version will be a Hadoop version.  After some experiments, it seems that with Spark versions 2, only up to Hadoop 2.7.7 will work.  That may change when Spark enters version 3.  If using a YARN managed cluster, the package may be different.  That would depend on the Hadoop vendor.  The official site for Apache based project is called Maven [@data-maven-home].  Please visit that site to find alternative package versions if the recommended one does not work. The recommended search term to use would be: "hadoop-aws".
+## Analysis
 
-```{r}
-conf <- spark_config()
-conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
-
-sc <- spark_connect(master = "local", config = conf)
-```
-
-For the file system prefix use "s3a".  There are other options, such as "s3" and "s3n".  As per the Hadoop documents, the "s3a" file system should be the default selection.
-
-```{r}
-my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
-```
-
-### SQL 
-
-The `sparklyr` package provides a DBI compliant interface [@data-r-dbi]. This means that DBI functions can be used to interact with data via Spark.  This includes non-SQL sources that are accessible via or cached in Spark.
-
-```{r}
-library(sparklyr)
-library(dplyr)
-sc <- spark_connect(master = "local")
-cars <- copy_to(sc, mtcars, "remote_mtcars")
-
-DBI::dbGetQuery(sc, "SELECT * FROM remote_mtcars LIMIT 5")
-```
-
-```
-##    mpg cyl disp  hp drat    wt  qsec vs am gear carb
-## 1 21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
-## 2 21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
-## 3 22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
-## 4 21.4   6  258 110 3.08 3.215 19.44  1  0    3    1
-## 5 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2
-```
-
-### Hive
-
-In YARN managed clusters, Spark provides a deeper integration with Apache Hive.  Hive tables are easily accessible after opening a Spark connection.
-
-```{r}
-sc <- spark_connect(master = "yarn-client", 
-                    spark_home = "/usr/lib/spark/",
-                    version = "2.1.0",
-                    config = conf)
-```
-
-Accessing a Hive table's data can be done with a simple reference.  Using `DBI`, a table can be referenced within a SQL statement.
-
-```{r}
-DBI::dbSendQuery(sc, "SELECT * FROM table limit 10")
-```
-
-Another way to reference a table is with `dplyr`.  The `tbl()` function, creates a pointer to the table.  
-
-```{r}
-library(dplyr)
-
-t <- tbl(sc, "table")
-```
-
-It is important to reiterate that no data is imported into R, the `tbl()` function creates only a reference.  The expectation is that there will be more `dplyr` verbs following the `tbl()` command.
-
-```{r}
-t %>%
-  group_by(field1) %>%
-  summarise(totals = sum(field2))
-```
-
-##### Database selection
-
-Hive table references assume a default database source.  Often, the table needed table is in a different database within the Metastore.  To access it using SQL, prefix the database name to the table.  Separate them using a period. 
-
-```{r eval=FALSE}
-DBI::dbSendQuery(sc, "SELECT * FROM databasename.table")
-```
-
-In `dplyr`, the `in_schema()` function can be used.  The function is used inside the `tbl()` call.
-
-```{r}
-tbl(sc, in_schema("databasename", "table"))
-```
-
-In `sparklyr`, the `tbl_change_db()` function sets the current session's default database.  Any subsequent call via `DBI` or `dplyr` will use the selected name as the default database.
-
-```{r eval=FALSE}
-tbl_change_db(sc, "databasename")
-```
-
-## List of ML Functions {#ml-functionlist}
-
-The following table exhibits the ML algorithms supported in sparklyr:
-
-### Classification
-
-Algorithm | Function
-----------|---------
-Decision Trees | ml_decision_tree_classifier()
-Gradient-Boosted Trees | ml_gbt_classifier()
-Linear Support Vector Machines | ml_linear_svc()
-Logistic Regression | ml_logistic_regression()
-Multilayer Perceptron | ml_multilayer_perceptron_classifier()
-Naive-Bayes | ml_naive_bayes()
-One vs Rest | ml_one_vs_rest()
-Random Forests | ml_random_forest_classifier()
-
-### Regression
-
-Algorithm | Function
-----------|---------
-Accelerated Failure Time Survival Regression | ml_aft_survival_regression()
-Decision Trees | ml_decision_tree_regressor()
-Generalized Linear Regression | ml_generalized_linear_regression()
-Gradient-Boosted Trees | ml_gbt_regressor()
-Isotonic Regression | ml_isotonic_regression()
-Linear Regression | ml_linear_regression()
-
-### Clustering
-
-Algorithm | Function
-----------|---------
-Bisecting K-Means Clustering | ml_bisecting_kmeans()
-Gaussian Mixture Clustering | ml_gaussian_mixture()
-K-Means Clustering | ml_kmeans()
-Latent Dirichlet Allocation | ml_lda()
-
-### Recommendation
-
-Algorithm | Function
-----------|---------
-Alternating Least Squares Factorization | ml_als()
-
-### Frequent Pattern Mining
-
-Algorithm | Function
-----------|---------
-FPGrowth | ml_fpgrowth()
-
-### Feature Transformers
-
-Transformer | Function
-------------|---------
-Binarizer | ft_binarizer()
-Bucketizer | ft_bucketizer()
-Chi-Squared Feature Selector | ft_chisq_selector()
-Vocabulary from Document Collections | ft_count_vectorizer()
-Discrete Cosine Transform  | ft_discrete_cosine_transform()
-Transformation using dplyr | ft_dplyr_transformer()
-Hadamard Product | ft_elementwise_product()
-Feature Hasher | ft_feature_hasher()
-Term Frequencies using Hashing | export(ft_hashing_tf)
-Inverse Document Frequency | ft_idf()
-Imputation for Missing Values | export(ft_imputer)
-Index to String | ft_index_to_string()
-Feature Interaction Transform | ft_interaction()
-Rescale to [-1, 1] Range | ft_max_abs_scaler()
-Rescale to [min, max] Range | ft_min_max_scaler()
-Locality Sensitive Hashing | ft_minhash_lsh()
-Converts to n-grams | ft_ngram()
-Normalize using the given P-Norm | ft_normalizer()
-One-Hot Encoding | ft_one_hot_encoder()
-Feature Expansion in Polynomial Space | ft_polynomial_expansion()
-Maps to Binned Categorical Features | ft_quantile_discretizer()
-SQL Transformation | ft_sql_transformer()
-Standardizes Features using Corrected STD | ft_standard_scaler()
-Filters out Stop Words | ft_stop_words_remover()
-Map to Label Indices | ft_string_indexer()
-Splits by White Spaces | ft_tokenizer()
-Combine Vectors to Row Vector | ft_vector_assembler()
-Indexing Categorical Feature | ft_vector_indexer()
-Subarray of the Original Feature | ft_vector_slicer()
-Transform Word into Code | ft_word2vec()
-
-## Hive Functions {#hive-functions}
+### Hive Functions {#hive-functions}
 
 Name |     Description
 -----|----------------
@@ -512,7 +301,122 @@ stack(int r,T1  V1,...,Tn/r Vn) | Breaks up n values V1,...,Vn into r rows. Each
 json_tuple(string jsonStr,string k1,...,string kn) | Takes JSON string and a set of n keys, and returns a tuple of n values. 
 parse_url_tuple(string urlStr,string p1,...,string pn) | Takes URL string and a set of n URL parts, and returns a tuple of n values. 
 
-## Kafka
+## Modeling
+
+### List of ML Functions {#ml-functionlist}
+
+The following table exhibits the ML algorithms supported in sparklyr:
+
+#### Classification
+
+Algorithm | Function
+----------|---------
+Decision Trees | ml_decision_tree_classifier()
+Gradient-Boosted Trees | ml_gbt_classifier()
+Linear Support Vector Machines | ml_linear_svc()
+Logistic Regression | ml_logistic_regression()
+Multilayer Perceptron | ml_multilayer_perceptron_classifier()
+Naive-Bayes | ml_naive_bayes()
+One vs Rest | ml_one_vs_rest()
+Random Forests | ml_random_forest_classifier()
+
+#### Regression
+
+Algorithm | Function
+----------|---------
+Accelerated Failure Time Survival Regression | ml_aft_survival_regression()
+Decision Trees | ml_decision_tree_regressor()
+Generalized Linear Regression | ml_generalized_linear_regression()
+Gradient-Boosted Trees | ml_gbt_regressor()
+Isotonic Regression | ml_isotonic_regression()
+Linear Regression | ml_linear_regression()
+
+#### Clustering
+
+Algorithm | Function
+----------|---------
+Bisecting K-Means Clustering | ml_bisecting_kmeans()
+Gaussian Mixture Clustering | ml_gaussian_mixture()
+K-Means Clustering | ml_kmeans()
+Latent Dirichlet Allocation | ml_lda()
+
+#### Recommendation
+
+Algorithm | Function
+----------|---------
+Alternating Least Squares Factorization | ml_als()
+
+#### Frequent Pattern Mining
+
+Algorithm | Function
+----------|---------
+FPGrowth | ml_fpgrowth()
+
+#### Feature Transformers
+
+Transformer | Function
+------------|---------
+Binarizer | ft_binarizer()
+Bucketizer | ft_bucketizer()
+Chi-Squared Feature Selector | ft_chisq_selector()
+Vocabulary from Document Collections | ft_count_vectorizer()
+Discrete Cosine Transform  | ft_discrete_cosine_transform()
+Transformation using dplyr | ft_dplyr_transformer()
+Hadamard Product | ft_elementwise_product()
+Feature Hasher | ft_feature_hasher()
+Term Frequencies using Hashing | export(ft_hashing_tf)
+Inverse Document Frequency | ft_idf()
+Imputation for Missing Values | export(ft_imputer)
+Index to String | ft_index_to_string()
+Feature Interaction Transform | ft_interaction()
+Rescale to [-1, 1] Range | ft_max_abs_scaler()
+Rescale to [min, max] Range | ft_min_max_scaler()
+Locality Sensitive Hashing | ft_minhash_lsh()
+Converts to n-grams | ft_ngram()
+Normalize using the given P-Norm | ft_normalizer()
+One-Hot Encoding | ft_one_hot_encoder()
+Feature Expansion in Polynomial Space | ft_polynomial_expansion()
+Maps to Binned Categorical Features | ft_quantile_discretizer()
+SQL Transformation | ft_sql_transformer()
+Standardizes Features using Corrected STD | ft_standard_scaler()
+Filters out Stop Words | ft_stop_words_remover()
+Map to Label Indices | ft_string_indexer()
+Splits by White Spaces | ft_tokenizer()
+Combine Vectors to Row Vector | ft_vector_assembler()
+Indexing Categorical Feature | ft_vector_indexer()
+Subarray of the Original Feature | ft_vector_slicer()
+Transform Word into Code | ft_word2vec()
+
+## Clusteers
+
+### Google trends for mainframes, cloud computing and kubernetes {#appendix-cluster-trends}
+
+Data downloaded from [https://trends.google.com/trends/explore?date=all&q=cloud%20computing,mainframe,kubernetes](https://trends.google.com/trends/explore?date=all&q=cloud%20computing,mainframe,kubernetes).
+
+```{r eval=FALSE}
+library(dplyr)
+
+read.csv("data/clusters-trends.csv", skip = 2) %>%
+  mutate(year = as.Date(paste(Month, "-01", sep = ""))) %>%
+    mutate(`On-Premise` = `mainframe...Worldwide.`,
+           Cloud = `cloud.computing...Worldwide.`,
+           Kubernetes = `kubernetes...Worldwide.`) %>%
+    tidyr::gather(`On-Premise`, Cloud, Kubernetes,
+                  key = "trend", value = "popularity") %>%
+    ggplot(aes(x=year, y=popularity, group=trend)) +
+      geom_line(aes(linetype = trend, color = trend)) +
+      scale_x_date(date_breaks = "2 year", date_labels = "%Y") +
+      labs(title = "Cluster Computing Trends",
+           subtitle = paste("Search popularity for on-premise (mainframe)",
+                            "cloud computing and kubernetes ")) +
+      scale_color_grey(start = 0.6, end = 0.2) +
+      geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+      theme(axis.title.x = element_blank())
+```
+
+## Streaming
+
+### Kafka
 
 This instructions were put together using information from the official Kafka site. Specifically from the Quickstart page, and at the time of writting this book.  Newer versions of Kafka undoubtely will be available when reading this book.  The idea is to "timestamp" the versions used in the example in the Streaming chapter. 
 

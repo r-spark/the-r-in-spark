@@ -29,7 +29,7 @@ render_nomnoml("
 #padding: 10
 [Data Lake|
   [hdfs://data.csv]
-  [s3://data.json]
+  [s3a://data.json]
   [dbfs://data.parquet]
   [wasbs://data.xml]
 ]
@@ -463,19 +463,29 @@ autoplot(benchmark) +
   theme(axis.line.x = element_line(colour = "#333333", size = 1, linetype = "solid")) +
   ggsave("images/data-file-format-benchmark.png", width = 10, height = 5)
 ```
+```{r}
+numeric <- copy_to(sc, data.frame(nums = runif(10^6)))
+bench::mark(
+  CSV = spark_write_csv(numeric, "data.csv", mode = "overwrite"),
+  JSON = spark_write_json(numeric, "data.json", mode = "overwrite"),
+  Parquet = spark_write_parquet(numeric, "data.parquet", mode = "overwrite"),
+  ORC = spark_write_parquet(numeric, "data.orc", mode = "overwrite"),
+  iterations = 20
+) + autoplot(benchmark)
+```
 ```{r data-file-format-benchmark, eval=TRUE, echo=FALSE, fig.cap="Small 1M rows write benchmark between CSV, JSON, Parquet and ORC", fig.align = 'center'}
 render_image("images/data-file-format-benchmark.png")
 ```
 
-
+This concludes the introduction to some of the "out-of-the-box" supported file formats, we will present next how to deal with formats that require external packages and customization.
 
 ### Custom
 
-Spark is a very flexible computing platform.  It can add functionality by using extension programs, called packages. Accessing a new source type or file system can be done by using the appropriate package. 
+Spark is a very flexible computing platform, it can add functionality by using extension programs, called packages. Accessing a new source type or file system can be done by using the appropriate package. 
 
 Packages need to be loaded into Spark at connection time.  To load the package, Spark needs its location, which could be inside the cluster, in a file share or the Internet.  
 
-In `sparklyr`, the package location is passed to `spark_connect()`.  All packages should be listed in the `defaultPackages` entry of the connection configuration. 
+In `sparklyr`, the package location is passed to `spark_connect()`.  All packages should be listed in the `sparklyr.connect.packages` entry of the connection configuration. 
 
 It is possible to access data source types not listed above. Loading the appropriate default package for Spark is the first of two steps  The second step is to actually read or write the data. The `spark_read_source()` and `spark_write_source()` functions do that.  They are generic functions that can use the libraries imported by a default package.
 
@@ -509,29 +519,87 @@ Spark will default to the file system that it is currently running on.  In a YAR
 
 The file system protocol can be changed when reading or writing.  It is done via the `path` argument of the `sparklyr` function.  For example, a full path of "file://home/user/file.csv" will force the use of the local Operating System's file system.
 
-There are other file system protocols,  is Amazon's S3 service for example.  Spark is does not know how to read the S3 protocol, so accessing the "s3a" protocol involves adding a package to the `defaultPackages` configuration variable passed at connection time.  
+There are many other file system protocols like: `dbfs://` for Databrick's file system, `s3a://` for Amazon's S3 service, `wasb://` for Microsoft Azure storage, `gs://` for Google storage, etc.
+
+Spark does not provide support for all them directly; instead, they are configured as needed. For instance, accessing the "s3a" protocol requires adding a package to the `sparklyr.connect.packages` configuration setting while connecting and appropriate credentials might need to be specified using the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
 
 ```{r}
-conf <- spark_config()
-conf$sparklyr.defaultPackages <- "org.apache.hadoop:hadoop-aws:2.7.7"
-sc <- spark_connect(master = "local", config = conf)
+Sys.setenv(AWS_ACCESS_KEY_ID = my_key_id)
+Sys.setenv(AWS_SECRET_ACCESS_KEY = my_secret_key)
+
+sc <- spark_connect(master = "local", config = list(
+  sparklyr.connect.packages = "org.apache.hadoop:hadoop-aws:2.7.7"))
+
 my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
 
-Currently, only "file://" and "hdfs://" file protocols are supported when used in their respective environments.  Accessing a different file protocol requires loading a default package.  In some cases, the vendor providing the Spark environment could already be loading the package for you.  Please refer to your vendor's documentation to find out if that is the case.
+Accessing other file protocol requires loading different packages; althpugh, in some cases, the vendor providing the Spark environment might loading the package for you. Please refer to your vendor's documentation to find out if that is the case.
 
 The section [File Systems](#appendix-file-systems) in the Appendix contains tips on how to read and write data from specific File Systems.
 
 ## Storage Systems {#data-storage-systems}
 
-`spark_read_jdbc()` and `spark_write_jdbc()`.
+
+
+### Hive
+
+In YARN managed clusters, Spark provides a deeper integration with Apache Hive.  Hive tables are easily accessible after opening a Spark connection.
+
+```{r}
+sc <- spark_connect(master = "yarn-client", 
+                    spark_home = "/usr/lib/spark/",
+                    version = "2.1.0",
+                    config = conf)
+```
+
+Accessing a Hive table's data can be done with a simple reference.  Using `DBI`, a table can be referenced within a SQL statement.
+
+```{r}
+DBI::dbSendQuery(sc, "SELECT * FROM table limit 10")
+```
+
+Another way to reference a table is with `dplyr`.  The `tbl()` function, creates a pointer to the table.  
+
+```{r}
+library(dplyr)
+
+t <- tbl(sc, "table")
+```
+
+It is important to reiterate that no data is imported into R, the `tbl()` function creates only a reference.  The expectation is that there will be more `dplyr` verbs following the `tbl()` command.
+
+```{r}
+t %>%
+  group_by(field1) %>%
+  summarise(totals = sum(field2))
+```
+
+Hive table references assume a default database source.  Often, the table needed table is in a different database within the Metastore.  To access it using SQL, prefix the database name to the table.  Separate them using a period. 
+
+```{r eval=FALSE}
+DBI::dbSendQuery(sc, "SELECT * FROM databasename.table")
+```
+
+In `dplyr`, the `in_schema()` function can be used.  The function is used inside the `tbl()` call.
+
+```{r}
+tbl(sc, in_schema("databasename", "table"))
+```
+
+In `sparklyr`, the `tbl_change_db()` function sets the current session's default database.  Any subsequent call via `DBI` or `dplyr` will use the selected name as the default database.
+
+```{r eval=FALSE}
+tbl_change_db(sc, "databasename")
+```
+
+### Cassandra
 
 The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source.
 
 ```{r}
-con <- spark_config()
-conf$sparklyr.defaultPackages <- "datastax:spark-cassandra-connector:2.0.0-RC1-s_2.11"
-sc <- spark_connect(master = "local", config = conf)
+sc <- spark_connect(master = "local", config = list(
+  sparklyr.connect.packages = "datastax:spark-cassandra-connector:2.0.0-RC1-s_2.11"))
+
 spark_read_source(
   sc, 
   name = "emp",
@@ -539,6 +607,11 @@ spark_read_source(
   options = list(keyspace = "dev", table = "emp")
   )
 ```
+
+### Databases
+
+As mentioned at the begining of this chapter, 
+`spark_read_jdbc()` and `spark_write_jdbc()`.
 
 ## Recap
 
