@@ -24,13 +24,24 @@ However, if a Spark cluster and R environment have been made available to you, y
 sc <- spark_connect(master = "<cluster-master>")
 ```
 
+## Overview
+
 ## Prerequisites {#starting-prerequisites}
 
 R can run in many platforms and environments; therfore, whether you use Windows, Mac or Linux, the first step is to install R from the [r-project.org](https://r-project.org/), detailed instructions are provided in the [Installing R](#appendix-install-r) appendix.
 
 Most people use programming languages with tools to make them more productive; for R, RStudio would be such tool. Strictly speaking, RStudio is an Integrated Development Environment (or IDE), which also happens to support many platforms and environments. We strongly recommend you get RStudio installed if you haven't done so already, see details under the [Installing RStudio](#appendix-install-rstudio) appendix.
 
-Additionally, since Spark is built in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java 8 in your system. It is likely that your system already has Java installed, but you should still check the version and update or downgrade as described in the [Installing Java](#appendix-install-java) appendix.
+Additionally, since Spark is built in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java 8 in your system. It is likely that your system already has Java installed, but you should still check the version and update or downgrade as described in the [Installing Java](#appendix-install-java) appendix. You can use the following R command to check which version is installed installed:
+
+```{r}
+system("java -version")
+```
+```
+java version "1.8.0_201"
+Java(TM) SE Runtime Environment (build 1.8.0_201-b09)
+Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)
+```
 
 ## Installing sparklyr {#starting-install-sparklyr}
 
@@ -38,13 +49,6 @@ As many other R packages, `sparkylr` is available to be installed from [CRAN](ht
 
 ```{r starting-install-sparklyr, eval=FALSE}
 install.packages("sparklyr")
-```
-
-The CRAN release of `sparklyr` contains the most stable version and it's the recommended version to use; however, to try out features being developed in `sparklyr`, you can install directly from GitHub using the `devtools` package. First, install the `devtools` package and then install `sparklyr` as follows:
-
-```{r starting-install-sparklyr-devel, eval=FALSE}
-install.packages("remotes")
-remotes::install_github("rstudio/sparklyr")
 ```
 
 The examples in this book assume you are using the latest version of `sparklyr`, you can verify your version is as new as the one we are using by running:
