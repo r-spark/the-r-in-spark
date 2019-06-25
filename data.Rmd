@@ -51,25 +51,7 @@ render_nomnoml("
 ")
 ```
 
-In order to support a broad variety of data source, Spark needs to be able to read and write data in several different file formats and access them while stored in also several storage systems, we will get to this later in the chapter; but first, we will start by presenting how to copy, read and write data using Spark.
-
-## Copying
-
-Previous chapters used `copy_to()` as a handy helper to copy data from R into Spark; however, `copy_to()` was designed to transfer only small datasets. There are two reasons behind this decision: first, if you are processing large-scale datasets, these datasets are already stored in large-scale storage like HDFS; second, there are already great tools to transfer huge dataset into distributed storage and there are multiple storage solution which complicates thing further. Therefore, transfering large dataset is left to specialized tools like the `hadoop` command line tool.
-
-When using the Hadoop File System as storage in your cluster, you can use `hadoop` to copy files into Spark from the terminal as follows:
-
-```{bash}
-hadoop fs -cp large-file.csv /path-in-hdfs/large-file.csv
-```
-
-You can then read the file as described in the [File Formats](#data-file-formats) section; for CSV files, you would run:
-
-```{r}
-large_file <- spark_read_csv("hdfs:///path-in-hdfs/large-file.csv")
-```
-
-More often than not, data will be already stored in the cluster which you can then read as we will describe next.
+In order to support a broad variety of data source, Spark needs to be able to read and write data in several different file formats and access them while stored in also several storage systems, we will get to this later in the chapter; but first, we will start by presenting how to read, write and copy data using Spark.
 
 ## Reading
 
@@ -241,19 +223,17 @@ After reviewing how to read data into Spark in this section, the next section wi
 
 ## Writing
 
-Some projects require that new data generated in Spark to be written back to a remote source. For example, the data could be new predicted values returned by a Spark model.  The job processes the mass generation of predictions, and the predictions need to be stored. This section will focus on when and where we should use Spark, and R, for moving the data from Spark into an external destination.
-
-### Spark, not R, as pass-through
+Some projects require that new data generated in Spark to be written back to a remote source. For example, the data could be new predicted values returned by a Spark model. The job processes the mass generation of predictions, and the predictions need to be stored. This section will focus on when and where we should use Spark, and R, for moving the data from Spark into an external destination.
 
 Many new users start by downloading Spark data into R, to then upload it to a target. Figure \@ref(fig:data-avoid-approach)  illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones.  The data typically grows in size to the point that it is no longer feasible for R to be the middle point. 
 
-```{r data-avoid-approach, echo=FALSE,  fig.cap='Avoid using R as a pass through', fig.align = 'center', eval = TRUE}
+```{r data-avoid-approach, echo=FALSE,  fig.cap='Avoid using R to write large datasets', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #arrowSize: 0.4
 #lineWidth: 1
 #spacing:90
-[Avoid this...| 
+[Avoid Writing from R| 
 [Source] -> [Spark | Process] 
 [Spark]collect() -> [R]
 [R] -> [Target]
@@ -265,7 +245,7 @@ All efforts should be made to have Spark connect to the target location.  This w
 
 As figure \@ref(fig:data-recommended-approach) shows, a better approach is to use Spark to read, process, and write to the target.  This approach is able to scale as big as the Spark cluster allows, and prevents using R as a choke point.
 
-```{r data-recommended-approach, echo=FALSE,  fig.cap='Spark as a pass through', fig.align = 'center', eval = TRUE}
+```{r data-recommended-approach, echo=FALSE,  fig.cap='Use Spark to write large datasets', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #arrowSize: 0.4
@@ -280,15 +260,69 @@ Consider the following scenario: A Spark job just processed predictions for a la
 
 Back to our scenario, we have a large dataset in Spark that needs to be saved.  In this case, Spark and the target Hive table are in the same cluster.  Copying the results is not a problem, since the data transfer is between RAM and disk of the same cluster. 
 
-But what to do if the target is not Hive? In other words, Spark and the target location are not in the same cluster.  There are two options, choosing one will depend on the size of the data, and network speed:  
+But what to do if the target is not Hive? In other words, Spark and the target location are not in the same cluster. There are two options, choosing one will depend on the size of the data, and network speed:  
 
-Spark connects to the remote target location, and copy the new data
+Spark connects to the remote target location, and copies the new data
 : If this is done within the same Data Center, or cloud provider, the data transfer could be fast enough to have Spark write the data directly.  
 
 Spark writes the results locally, and transfers the results via a third-party application
-: Spark could write the results into CSV files, and then have a separate job copy the files over via FTP.  In the target location, you would use a separate process to transfer the data into the target location.  
+: Spark could write the results as files, and then have a separate job copy the files over. In the target location, you would use a separate process to transfer the data into the target location.
 
-It is best to recognize that Spark, R, and any other technology are tools.  No tool can do everything, nor should be expected to.  
+It is best to recognize that Spark, R, and any other technology are tools. No tool can do everything, nor should be expected to. Next we will describe how to copy data into Spark or collect large datasets that don't fit in-memory.
+
+## Copying
+
+Previous chapters used `copy_to()` as a handy helper to copy data into Spark; however, `copy_to()` can only be used to transfer in-memory datasets that are already loaded in memory; this dataset tend to be much smaller than the kind of datasets you would want to copy into Spark.
+
+FOr instance, suppose that we have a 10GB generated as follows, please consider skipping this exercise if you don't have 10GB free to spare.
+
+```{r}
+for (i in 1:10^2)
+  write.table(matrix(rnorm(6 * 10^6), ncol = 6) , "large-file.txt", append = T, col.names = F, row.names = F)
+```
+
+If we only had 2GB of memory in the driver node, we would not be able to load this 10GB file into memory to use `copy_to()`. Instead, when using the Hadoop File System as storage in your cluster, you can use `hadoop` to copy files from disk into Spark from the terminal as follows:
+
+```{bash}
+hadoop fs -copyFromLocal large-file.txt large-file.txt
+```
+
+You can then read the uploaded file as described in the [File Formats](#data-file-formats) section; for text files, you would run:
+
+```{r}
+spark_read_text(sc, "large-file.txt", memory = FALSE)
+```
+```
+# Source: spark<largefile> [?? x 1]
+   line                                                                                           
+   <chr>                                                                                          
+ 1 2.22915990048427 -0.751300322410523 1.50335086310599 0.942952304730545 -0.45635164630794 0.288…
+ 2 0.228991867633462 1.16010454995414 0.640434186995658 0.117977945874947 1.19056919789055 0.9088…
+ 3 -0.445538772866474 0.394738051630893 -0.117715444264061 0.198629317507736 1.01608719040123 -0.…
+ 4 -1.85412076569947 -1.16790451863855 -0.125337529817688 2.27575857254252 -0.959749634495476 0.5…
+ 5 -0.926000568810982 0.685026681135839 0.338987735756166 0.0410026384268559 1.24919967496763 -1.…
+ 6 -1.47083284717391 0.46469533950513 0.91440834672717 0.607404405425841 0.38069114223894 0.54313…
+ 7 -1.21654002373859 0.868008761206347 2.21517023301723 -1.52756952555848 1.11386028028205 -0.932…
+ 8 -0.220151773718668 1.94232643071767 -1.2031718025536 -0.918773888980239 -0.420790286116946 -2.…
+ 9 -0.814688544522668 -0.128353504869735 -1.22237317012823 -1.69567734449631 0.11608449215945 0.7…
+10 -0.629974783817445 1.01151978562673 -0.998990775688591 -0.323199582145582 1.21506113412837 -0.…
+# … with more rows
+```
+
+`collect()` has a similar limitation, it can only collect datasets that fit your driver memory; however, if you had to extract a large dataset from Spark into the driver's storage, you could use specialized tools provided by the distributed storage, for HDFS:
+
+```{bash}
+hadoop fs -copyToLocal large-file.txt large-file.txt
+```
+
+Alternatevely, you can also collect datasets that don't fit in-memory by providing a callback to `collect()`. A callback is just an R function that will be called over each Spark partition, you can then write this dataset to disk. The following code will crete 10K files adding up to 10GB even if the driver node collecting this dataseet had less than 10GB of memory. That said, as e3xplained in the [Analysis](#analysis) chapter, you should avoid collecting large datasets into a single machine.
+
+```{r}
+spark_read_text(sc, "large-file.txt", memory = FALSE) %>%
+  collect(callback = function(df, idx) writeLines(df$line, paste0("large-", idx, ".txt")))
+```
+
+Since in most cases data will already be stored in the cluster, you should not have to worry about copying large-datasets; instead, you can usually focus on reading and wrtting different file formats, which we will describe next.
 
 ## File Formats {#data-file-formats}
 
