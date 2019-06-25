@@ -79,7 +79,7 @@ The following technique allows Spark to read file faster, as well as to reduce r
 
 When reading data, Spark is able to determine the data source's column names and column types, also known as the **schema**. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess the schema, and then assign it. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size data loads. For files that are read over and over again,  the additional read time accumulates over time.
 
-Spark allows the user to provide a column layout. If provided, Spark will bypass the step that it uses to determine the file's layout. In `sparklyr`, we can use the `column` argument to take advantage of this functionality. The `infer_schema` argument also needs to be set to `FALSE`.  This arguments is the switch that indicates if the `column` argument should be used.
+Spark allows the user to provide a column layout. If provided, Spark will bypass the step that it uses to determine the file's layout. In `sparklyr`, we can use the `column` argument to take advantage of this functionality. The `infer_schema` argument also needs to be set to `FALSE`.  This argument is the switch that indicates if the `column` argument should be used.
 
 ```{r, echo = FALSE}
 x <- data.frame(x = letters, y = 1:length(letters))
@@ -98,7 +98,7 @@ names(col_spec) <- c("x", "y")
 
 ```
 
-For example, lets take a file called *test.csv*, and load it to Spark. This is its layout:
+For example, let's take a file called *test.csv*, and load it to Spark. This is its layout:
 
 ```
 "x","y"
@@ -123,7 +123,7 @@ col_spec_1
 
 The accepted variable types are: `integer`, `character`, `logical`, `double`, `numeric`, `factor`, `Date` and `POSIXct`.
 
-In `spark_read_csv()`, `col_spec_1` is passed to the `columns` argument, and `infer_schema` is set to `FALSE`. We will try match the names and types of the original file.  Also, we will pass the column specification. Doing this will help with performance because Spark will not have to figure out the column types.
+In `spark_read_csv()`, `col_spec_1` is passed to the `columns` argument, and `infer_schema` is set to `FALSE`. We will try to match the names and types of the original file.  Also, we will pass the column specification. Doing this will help with performance because Spark will not have to figure out the column types.
 
 ```{r}
 sc <- spark_connect(master = "local")
@@ -167,7 +167,7 @@ test_2
  5 e         5    
 ```
 
-In Spark, malformed entries can cause error during reading, specially for non-character fields.  To prevent such errors, we can use a file spec that imports them as character, and then use `dplyr` to coerce the field into the desired type.
+In Spark, malformed entries can cause errors during reading, specially for non-character fields.  To prevent such errors, we can use a file spec that imports them as character, and then use `dplyr` to coerce the field into the desired type.
 
 This subsection reviewed how we can read files faster and with less failures, which lets us start our analysis quicker.  Another way to accelerate our analysis, is by loading less data into Spark memory, the next subsection will cover how to do this.
 
@@ -183,7 +183,7 @@ In `sparklyr`, that is controlled by the `memory` argument of its read functions
 mapped_test <- spark_read_csv(sc, "test","test.csv", memory = FALSE)
 ```
 
-There are good use cases for this method. One of them is when not all columns of a table are needed.  For example, take a very large file that contain many columns. This is not first time we interact with this data. We know what columns are needed for the analysis.  The files can be read using `memory = FALSE`, and then select the needed columns with `dplyr`. The resulting `dplyr` variable can then be cached into memory, using the `compute()` function.  This will make Spark query the file(s), pull the selected fields, and copy only that data into memory. The result is a in-memory table that took comparatively less time to ingest.
+There are good use cases for this method, one of them is when not all columns of a table are needed. For example, take a very large file that contains many columns, assuming this is not first time you interact with this data, you would know what columns are needed for the analysis. When know which columns you need, the files can be read using `memory = FALSE`, and then select the needed columns with `dplyr`. The resulting `dplyr` variable can then be cached into memory, using the `compute()` function.  This will make Spark query the file(s), pull the selected fields, and copy only that data into memory. The result is a in-memory table that took comparatively less time to ingest.
 
 ```{r}
 mapped_test %>%
@@ -225,15 +225,15 @@ After reviewing how to read data into Spark in this section, the next section wi
 
 Some projects require that new data generated in Spark to be written back to a remote source. For example, the data could be new predicted values returned by a Spark model. The job processes the mass generation of predictions, and the predictions need to be stored. This section will focus on when and where we should use Spark, and R, for moving the data from Spark into an external destination.
 
-Many new users start by downloading Spark data into R, to then upload it to a target. Figure \@ref(fig:data-avoid-approach)  illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones.  The data typically grows in size to the point that it is no longer feasible for R to be the middle point. 
+Many new users start by downloading Spark data into R, to then upload it to a target. Figure \@ref(fig:data-avoid-approach) illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones.  The data typically grows in size to the point that it is no longer feasible for R to be the middle point. 
 
-```{r data-avoid-approach, echo=FALSE,  fig.cap='Avoid using R to write large datasets', fig.align = 'center', eval = TRUE}
+```{r data-avoid-approach, echo=FALSE,  fig.cap='Incorrect use of Spark when writing large datasets', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #arrowSize: 0.4
 #lineWidth: 1
 #spacing:90
-[Avoid Writing from R| 
+[Avoid writing data from R!| 
 [Source] -> [Spark | Process] 
 [Spark]collect() -> [R]
 [R] -> [Target]
@@ -245,7 +245,7 @@ All efforts should be made to have Spark connect to the target location.  This w
 
 As figure \@ref(fig:data-recommended-approach) shows, a better approach is to use Spark to read, process, and write to the target.  This approach is able to scale as big as the Spark cluster allows, and prevents using R as a choke point.
 
-```{r data-recommended-approach, echo=FALSE,  fig.cap='Use Spark to write large datasets', fig.align = 'center', eval = TRUE}
+```{r data-recommended-approach, echo=FALSE,  fig.cap='Correct use of Spark when writing large datasets', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #arrowSize: 0.4
@@ -258,17 +258,16 @@ render_nomnoml("
 
 Consider the following scenario: A Spark job just processed predictions for a large data set, resulting in a considerably large set of predictions. Choosing a method to write results will depend on the technology infrastructure you are working on. More specifically, it will depend on Spark and the target running, or not, in the same cluster.
 
-Back to our scenario, we have a large dataset in Spark that needs to be saved.  In this case, Spark and the target Hive table are in the same cluster.  Copying the results is not a problem, since the data transfer is between RAM and disk of the same cluster. 
+Back to our scenario, we have a large dataset in Spark that needs to be saved.  When Spark and the target are in the same cluster, copying the results is not a problem, the data transfer is between RAM and disk of the same cluster or efficiently shuffled through a high-bandthwidth connecetion.
 
-But what to do if the target is not Hive? In other words, Spark and the target location are not in the same cluster. There are two options, choosing one will depend on the size of the data, and network speed:  
+But what to do if the target is not within the Spark cluster? There are two options, choosing one will depend on the size of the data, and network speed:  
 
-Spark connects to the remote target location, and copies the new data
-: If this is done within the same Data Center, or cloud provider, the data transfer could be fast enough to have Spark write the data directly.  
+Spark Transfer
+: In this case, Spark connects to the remote target location, and copies the new data. If this is done within the same Data Center, or cloud provider, the data transfer could be fast enough to have Spark write the data directly.  
+External Transfer
+: Otherwise, Spark can write the results to disk, and transfers them via a third-party application. Spark writes the results as files, and then a separate job copies the files over. In the target location, you would use a separate process to transfer the data into the target location.
 
-Spark writes the results locally, and transfers the results via a third-party application
-: Spark could write the results as files, and then have a separate job copy the files over. In the target location, you would use a separate process to transfer the data into the target location.
-
-It is best to recognize that Spark, R, and any other technology are tools. No tool can do everything, nor should be expected to. Next we will describe how to copy data into Spark or collect large datasets that don't fit in-memory.
+It is best to recognize that Spark, R, and any other technology are tools. No tool can do everything, nor should be expected to. Next we will describe how to copy data into Spark or collect large datasets that don't fit in-memory, this can be used to transfer data across clusters, or help initialize your distributed datasets.
 
 ## Copy
 
@@ -277,8 +276,12 @@ Previous chapters used `copy_to()` as a handy helper to copy data into Spark; ho
 FOr instance, suppose that we have a 10GB generated as follows, please consider skipping this exercise if you don't have 10GB free to spare.
 
 ```{r}
-for (i in 1:10^2)
-  write.table(matrix(rnorm(6 * 10^6), ncol = 6) , "large-file.txt", append = T, col.names = F, row.names = F)
+for (i in 1:10^2) {
+  write.table(
+    matrix(rnorm(6 * 10^6), ncol = 6) ,
+    "large-file.txt", append = T,
+    col.names = F, row.names = F)
+}
 ```
 
 If we only had 2GB of memory in the driver node, we would not be able to load this 10GB file into memory to use `copy_to()`. Instead, when using the Hadoop file system as storage in your cluster, you can use `hadoop` to copy files from disk into Spark from the terminal as follows:
@@ -309,24 +312,28 @@ spark_read_text(sc, "large-file.txt", memory = FALSE)
 # … with more rows
 ```
 
-`collect()` has a similar limitation, it can only collect datasets that fit your driver memory; however, if you had to extract a large dataset from Spark into the driver's storage, you could use specialized tools provided by the distributed storage, for HDFS:
+`collect()` has a similar limitation, it can only collect datasets that fit your driver memory; however, if you had to extract a large dataset from Spark through the driver node, you could use specialized tools provided by the distributed storage, for HDFS:
 
 ```{bash}
 hadoop fs -copyToLocal large-file.txt large-file.txt
 ```
 
-Alternatevely, you can also collect datasets that don't fit in-memory by providing a callback to `collect()`. A callback is just an R function that will be called over each Spark partition, you can then write this dataset to disk. The following code will crete 10K files adding up to 10GB even if the driver node collecting this dataseet had less than 10GB of memory. That said, as e3xplained in the [Analysis](#analysis) chapter, you should avoid collecting large datasets into a single machine.
+Alternatively, you can also collect datasets that don't fit in-memory by providing a callback to `collect()`. A callback is just an R function that will be called over each Spark partition, you can then write this dataset to disk or push to other clusters over the network.
+
+The following code will crete 10K files adding up to 10GB even if the driver node collecting this dataset had less than 10GB of memory. That said, as explained in the [Analysis](#analysis) chapter, you should avoid collecting large datasets into a single machine since this usually creates a significant performance bottleneck.
 
 ```{r}
 spark_read_text(sc, "large-file.txt", memory = FALSE) %>%
-  collect(callback = function(df, idx) writeLines(df$line, paste0("large-", idx, ".txt")))
+  collect(callback = function(df, idx) {
+    writeLines(df$line, paste0("large-", idx, ".txt"))
+  })
 ```
 
-Since in most cases data will already be stored in the cluster, you should not have to worry about copying large-datasets; instead, you can usually focus on reading and wrtting different file formats, which we will describe next.
+Since in most cases data will already be stored in the cluster, you should not have to worry about copying large-datasets; instead, you can usually focus on reading and writing different file formats, which we will describe next.
 
 ## File Formats {#data-file-formats}
 
-"Out-of-the-box", Spark is able to interact with several file formats like: CSV, JSON, LIBSVM, ORC and Parquet. The following table maps the file format to the function you should use to read and write data in Spark:
+Out-of-the-box, Spark is able to interact with several file formats like: CSV, JSON, LIBSVM, ORC and Parquet. The following table maps the file format to the function you should use to read and write data in Spark:
 
 | Format                                        | Read                   | Write                   |
 |-----------------------------------------------|------------------------|-------------------------|
@@ -341,7 +348,7 @@ The following sections will describe special considerations particular to each f
 
 ### CSV
 
-The CSV format may be the most common file type in use today, which is defined by a text file separated by a given character, usually a comma. It should be pretty straightforward to read CSV files; however, it's worth mentioning a couple of techniques that can help you process CSVs that are not fully compliant with a well-formed CSV file. Spark offers the following modes for addressing parsing issues:
+The CSV format may be the most common file type in use today, which is defined by a text file separated by a given character, usually a comma. It should be pretty straightforward to read CSV files; however, it's worth mentioning a couple techniques that can help you process CSVs that are not fully compliant with a well-formed CSV file. Spark offers the following modes for addressing parsing issues:
 
 - **Permissive**: `NULL`s are inserted for missing tokens.
 
@@ -375,7 +382,7 @@ spark_read_csv(
 ## 3     3
 ```
 
-Spark 2 provides an issue tracking column.  The column is hidden by default.  To enable it, add `_corrupt_record` to the `columns` list. This can be combines with the use of the *PERMISIVE* mode.  All rows will be imported, invalid entries will receive an `NA`, and the issue tracked in the `_corrupt_record` column.
+Spark 2 provides an issue tracking column.  The column is hidden by default.  To enable it, add `_corrupt_record` to the `columns` list. This can be combined with the use of the *PERMISIVE* mode.  All rows will be imported, invalid entries will receive an `NA`, and the issue tracked in the `_corrupt_record` column.
 
 ```{r eval=FALSE}
 spark_read_csv(
@@ -397,11 +404,11 @@ spark_read_csv(
 ## 4    NA broken  
 ```
 
-Reading and storing data as CSVs is quite common and supported across most systems; so for tabular datasets, is still a popular option; for datasets containing nested strucuteres and non-tabular data, JSON is usually prefered.
+Reading and storing data as CSVs is quite common and supported across most systems; so for tabular datasets, is still a popular option; for datasets containing nested structures and non-tabular data, JSON is usually preferred
 
 ### JSON
 
-JSON is a file format originally derived from JavaScript which has grown to be language-independent and very popular due to its flexibility and ubiquitous support. Reading and writing JSON files is quite straighforward,
+JSON is a file format originally derived from JavaScript which has grown to be language-independent and very popular due to its flexibility and ubiquitous support. Reading and writing JSON files is quite straightforward,
 
 ```{r}
 writeLines("{'a':1, 'b': {'f1': 2, 'f3': 3}}", "data.json")
@@ -415,7 +422,7 @@ simple_json
 1     1 <list [2]>
 ```
 
-However, when you deal with dataset containing nested fields like the one from this example; it is worth pointing out how to extrac nested fields. One approach is to use a JSON Path, which is a domain specific syntax commonly used to extrac and query JSON files, you can use a combination of `get_json_object()` and `to_json()` to specify the JSON path you aree interested in, to extract `f1` you would run the following transformation:
+However, when you deal with dataset containing nested fields like the one from this example; it is worth pointing out how to extract nested fields. One approach is to use a JSON Path, which is a domain specific syntax commonly used to extract and query JSON files, you can use a combination of `get_json_object()` and `to_json()` to specify the JSON path you are interested in, to extract `f1` you would run the following transformation:
 
 ```{r}
 simple_json %>% dplyr::transmute(z = get_json_object(to_json(b), '$.f1'))
@@ -439,11 +446,13 @@ sparklyr.nested::sdf_unnest(simple_json, "b")
 1     1     2     3
 ```
 
-That said, when working with JSON is common to find nested structures like column `b` which contains a nested list. While JSON and CSVs are quite simple to use and versatile, they are not optimized for performance, Parquet is.
+While JSON and CSVs are quite simple to use and versatile, they are not optimized for performance; but other formats like ORC, AVRO and Parquet are.
 
 ### Parquet
 
-Apache Parquet, Apache ORC and Apache AVRO are all file formats designed with performance in mind. Parquet and ORC happen to store data in columnar format while AVRO is row-based, all of them are binary file formats which reduces storage space and improve performance. This at the cost of making them a bit harder to read by external systems and libraries; however, this is usually not an issue when used as intermediate data storage. A quick one-million-rows write-speed benchmark is displated in Figure \@ref(fig:data-file-format-benchmark) using the `bench` package, please use your own benchmarks over meaningful datasets when deciding which formats fits best your needs.
+Apache Parquet, Apache ORC and Apache AVRO are all file formats designed with performance in mind. Parquet and ORC happen to store data in columnar format while AVRO is row-based, all of them are binary file formats which reduces storage space and improve performance. This at the cost of making them a bit harder to read by external systems and libraries; however, this is usually not an issue when used as intermediate data storage within Spark.
+
+To illustrate this, Figure \@ref(fig:data-file-format-benchmark) plots the result of running a one-million-rows write-speed benchmark using the `bench` package, please use your own benchmarks over meaningful datasets when deciding which formats fits best your needs.
 
 ```{r echo=FALSE}
 numeric <- copy_to(sc, data.frame(nums = runif(10^6)))
@@ -471,7 +480,7 @@ bench::mark(
   iterations = 20
 ) + autoplot(benchmark)
 ```
-```{r data-file-format-benchmark, eval=TRUE, echo=FALSE, fig.cap="Small 1M rows write benchmark between CSV, JSON, Parquet and ORC", fig.align = 'center'}
+```{r data-file-format-benchmark, eval=TRUE, echo=FALSE, fig.cap="One million rows write benchmark between CSV, JSON, Parquet and ORC", fig.align = 'center'}
 render_image("images/data-file-format-benchmark.png")
 ```
 
@@ -487,7 +496,7 @@ In `sparklyr`, the package location is passed to `spark_connect()`.  All package
 
 It is possible to access data source types not listed above. Loading the appropriate default package for Spark is the first of two steps  The second step is to actually read or write the data. The `spark_read_source()` and `spark_write_source()` functions do that.  They are generic functions that can use the libraries imported by a default package.
 
-For intance, we can read XML files as follows:
+For instance, we can read XML files as follows:
 
 ```{r}
 sc <- spark_connect(master = "local", config = list(
@@ -509,7 +518,7 @@ Which you can also write back to XML with ease as follows,
 tbl(sc, "simple_xml") %>% spark_write_source("xml", options = list(path = "data.xml"))
 ```
 
-In addition, there are a few extensions developed by the R community to load additional file formats, to mention a few: `sparklyr.nested` to assist with nested data, `spark.sas7bdat` to read data from SAS, `sparkavro` to read data in AVRO format and `sparkwarc` to read WARC files which use extensibility mechanisms introduced in the [Extensions](#extensions) chapter. The [Distributed R](#distributed) chapter will present techniques to use R packages to load additional file formats and the [Contributing](#contributing) chapter presents teechniques to use Java libraries to complent this further. But first, lets explore how to retrieve and store files from different kinds of file systems.
+In addition, there are a few extensions developed by the R community to load additional file formats, to mention a few: `sparklyr.nested` to assist with nested data, `spark.sas7bdat` to read data from SAS, `sparkavro` to read data in AVRO format and `sparkwarc` to read WARC files which use extensibility mechanisms introduced in the [Extensions](#extensions) chapter. The [Distributed R](#distributed) chapter will present techniques to use R packages to load additional file formats and the [Contributing](#contributing) chapter presents techniques to use Java libraries to complement this further. But first, let's explore how to retrieve and store files from several different file systems.
 
 ## File Systems {#data-file-systems}
 
@@ -517,7 +526,7 @@ Spark will default to the file system that it is currently running on.  In a YAR
 
 The file system protocol can be changed when reading or writing.  It is done via the `path` argument of the `sparklyr` function.  For example, a full path of "file://home/user/file.csv" will force the use of the local Operating System's file system.
 
-There are many other file system protocols like: `dbfs://` for Databrick's file system, `s3a://` for Amazon's S3 service, `wasb://` for Microsoft Azure storage, `gs://` for Google storage, etc.
+There are many other file system protocols like: `dbfs://` for Databricks' file system, `s3a://` for Amazon's S3 service, `wasb://` for Microsoft Azure storage, `gs://` for Google storage, etc.
 
 Spark does not provide support for all them directly; instead, they are configured as needed. For instance, accessing the "s3a" protocol requires adding a package to the `sparklyr.connect.packages` configuration setting while connecting and appropriate credentials might need to be specified using the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
 
@@ -531,13 +540,13 @@ sc <- spark_connect(master = "local", config = list(
 my_file <- spark_read_csv(sc, "my-file", path =  "s3a://my-bucket/my-file.csv")
 ```
 
-Accessing other file protocol requires loading different packages; althpugh, in some cases, the vendor providing the Spark environment might loading the package for you. Please refer to your vendor's documentation to find out if that is the case.
+Accessing other file protocol requires loading different packages; although, in some cases, the vendor providing the Spark environment might loading the package for you. Please refer to your vendor's documentation to find out if that is the case.
 
 The section [file systems](#appendix-file-systems) in the Appendix contains tips on how to read and write data from specific file systems.
 
 ## Storage Systems {#data-storage-systems}
 
-A data lake and Spark usually go hand-in-hand with optional access to storage systems like databases and data warehouses. Presenting all the different storage systems with approrpiate examples would be quite time consuming, so instead we will present some of the commonly used storage sytems.
+A data lake and Spark usually go hand-in-hand with optional access to storage systems like databases and data warehouses. Presenting all the different storage systems with appropriate examples would be quite time consuming, so instead we will present some of the commonly used storage systems
 
 As a start, Apache **Hive** is a data warehouse software that facilitates reading, writing, and managing large datasets residing in distributed storage using SQL. In fact, Spark has component from Hive built directly into Spark's sources and is very common to have installations of Spark or Hive side-by-side, so we will start by presenting Hive, followed by Cassandra and closing on JDBC connections.
 
@@ -592,7 +601,7 @@ tbl_change_db(sc, "databasename")
 
 ### Cassandra
 
-Apache Cassandra is a free and open-source, distributed, wide column store, NoSQL database management system designed to handle large amounts of data across many commodity servers. While there are many other database systems beyond Cassandra, taking a quick look at how Cassandra can be used form Spark will also inform how to make use of other Database and storage systems like Solr, Amazon Redshift, Databrick's Delta Lake, etc.
+Apache **Cassandra** is a free and open-source, distributed, wide column store, NoSQL database management system designed to handle large amounts of data across many commodity servers. While there are many other database systems beyond Cassandra, taking a quick look at how Cassandra can be used form Spark will also inform how to make use of other Database and storage systems like Solr, Redshift, Delta Lake, etc.
 
 The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source.
 
@@ -608,7 +617,7 @@ spark_read_source(
   memory = FALSE)
 ```
 
-One of the most useful feature of Spark when dealing with external databases and data warehouses is that, Spark can push down computation to the Database, this is known as **pushdown predicates**; in a nutshell, it improves performance by asking remote databses smart questions. If we were executing a query that contains the `filter(age > 20)` expression againast a remote table referenced through `spark_read_source()` and not loaded in-memory, rather than bringing the entire table into Spark, a **pushdown filter** would get passed to the remote database and only a subset of the remote table would be retrieved.
+One of the most useful features of Spark when dealing with external databases and data warehouses is that, Spark can push down computation to the Database, this is known as **pushdown predicates**; in a nutshell, it improves performance by asking remote databases smart questions. When you execute a query that contains the `filter(age > 20)` expression against a remote table referenced through `spark_read_source()` and not loaded in-memory, rather than bringing the entire table into Spark, it will get passed to the remote database and only a subset of the remote table is retrieved.
 
 While is ideal to find Spark packages that support the remote storage system, there will be times when a package is not available and vendor JDBC drivers need to be considered.
 
@@ -616,9 +625,9 @@ While is ideal to find Spark packages that support the remote storage system, th
 
 When a Spark package is not available to provide connectivity, a JDBC connection can be considered. **JDBC** stands for Java Database Connectivity, t's an interface for the programming language Java, which defines how a client may access a database.
 
-It is quite easy to connect to remote database with `spark_read_jdbc()` and `spark_write_jdbc()`; as long as you have access to the appropriate JDBC driveer, which at times is trivial and other times quite an adventure. To keep this simple, we can briefly consideer how a connection to a remote MySQL database could be accomplished.
+It is quite easy to connect to a remote database with `spark_read_jdbc()` and `spark_write_jdbc()`; as long as you have access to the appropriate JDBC driver, which at times is trivial and other times quite an adventure. To keep this simple, we can briefly consider how a connection to a remote MySQL database could be accomplished.
 
-First, you would need to download the appropriate JDBC driver from the MySQL's developer portal and specify this additional driver as a `sparklyr.shell.driver-class-path` connection option. Since JDBC drivers are Java-based, the code is contained insidee a **JAR** (Java ARchive) file. Once connected to Spark with the appropiate driver, you can use the `jdbc://` protocol to access particular drivers and databases:
+First, you would need to download the appropriate JDBC driver from the MySQL's developer portal and specify this additional driver as a `sparklyr.shell.driver-class-path` connection option. Since JDBC drivers are Java-based, the code is contained inside a **JAR** (Java ARchive) file. Once connected to Spark with the appropriate driver, you can use the `jdbc://` protocol to access particular drivers and databases:
 
 ```{r}
 sc <- spark_connect(master = "local", config = list(
@@ -636,9 +645,8 @@ If you are a customer of particular database vendors, making use of the vendor-p
 
 ## Recap
 
-This chapter expanded on how and why you should use Spark to connect and process a variety of data sources, through a new data storage model known as data lakes -- a storage pattern that provides more flexibility than standard ETL processes by enabling you to use raw datasets with, potentialy, more information to enrich data analysis and modeling.
+This chapter expanded on how and why you should use Spark to connect and process a variety of data sources, through a new data storage model known as data lakes -- a storage pattern that provides more flexibility than standard ETL processes by enabling you to use raw datasets with, potentially, more information to enrich data analysis and modeling.
 
-We then presented best-practices for reding, writing and copying data into and from Spark and came back to exploring the components of a data lake: file formats and file systems; the former representing how data is stored, and the latter where the data is stored. You then learned how to tackle file formats and storage systems that require additional Spark packages, reviewed some of the performance tradeoffs across file formats, and learned the concepts required to make use of storage systems (databases and warehouses) in Spark.
+We then presented best-practices for reading, writing and copying data into and from Spark and came back to exploring the components of a data lake: file formats and file systems; the former representing how data is stored, and the latter where the data is stored. You then learned how to tackle file formats and storage systems that require additional Spark packages, reviewed some of the performance tradeoffs across file formats, and learned the concepts required to make use of storage systems (databases and warehouses) in Spark.
 
-
-While reading and wtitting data should come nature after this chapter, you might hit resource restrictions while reading and writting large-datasets. Therefore, in the next chapter you will learn how Spark manages tasks and data across multiple machines, which will in turn allow you to further improve the performance of your analysis and modeling tasks.
+While reading and writing data should come nature after this chapter, you might hit resource restrictions while reading and writing large-datasets. Therefore, in the next chapter you will learn how Spark manages tasks and data across multiple machines, which will in turn allow you to further improve the performance of your analysis and modeling tasks.
