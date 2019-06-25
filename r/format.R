@@ -34,7 +34,17 @@ format_chapters <- list(
   "intro",
   "starting",
   "analysis",
-  "modeling"
+  "modeling",
+  "pipelines",
+  "clusters",
+  "connections",
+  "data",
+  "tuning",
+  "extensions",
+  "distributed-r",
+  "streaming",
+  "contributing",
+  "appendix"
 )
 
 format_chapters_pattern <- paste(format_chapters, collapse = "|")
@@ -43,6 +53,7 @@ format_chapters_files <- dir(pattern = paste0(format_chapters_pattern, ".Rmd"))
 # Apply editorial formatting rules
 format_all_chapters <- function() {
   for (chapter_file in format_chapters_files) {
+    message("Processing ", chapter_file)
     lines <- readLines(chapter_file)
     all_lines <- paste(lines, collapse = "\n")
 
@@ -82,3 +93,4 @@ format_all_chapters <- function() {
     writeLines(all_lines, chapter_file)
   }
 }
+
