@@ -326,7 +326,7 @@ Since in most cases data will already be stored in the cluster, you should not h
 
 ## File Formats {#data-file-formats}
 
-"Out-of-the-box", Spark is able to interact with several filte formats and file system.  File formats include: Comma separated values (CSV), Apache Parquet, and JDBC.  File system protocols include: local file system (Linux, Windows, Mac), and Hadoop file System (HDFS).  
+"Out-of-the-box", Spark is able to interact with several filte formats and file system.  File formats include: Comma separated values (CSV), Apache Parquet, and JDBC.
 
 Spark can read and write several source types.  In `sparklyr`, the source types are aligned to R functions.
 
@@ -340,7 +340,63 @@ Spark can read and write several source types.  In `sparklyr`, the source types 
 | Apache Parquet                                | `spark_read_parquet()` | `spark_write_parquet()` |
 | Text                                          | `spark_read_text()`    | `spark_write_text()`    |
 
-The section [File Formats](#appendix-file-formats) in the Appendix contains tips on how to read and write data from specific file formats.
+### CSV
+
+The CSV format may be the most common file type in use today. It should be pretty straightforward to read CSV files; however, it's worth mentioning a couple of techniques that can help you process CSVs that are not fully compliant with a well-formed CSV file. Spark offers the following modes for addressing parsing issues:
+
+- **PERMISSIVE**: `NULL`s are inserted for missing tokens.
+
+- **DROPMALFORMED**: Drops lines which are malformed.
+
+- **FAILFAST**: Aborts if encounters any malformed line.
+
+These can be used in `sparklyr` by passing them inside the `options` argument.  The following example creates a file with a broken entry.  It then shows how it can be read into Spark.
+
+```{r}
+library(sparklyr)
+sc <- spark_connect(master = "local")
+
+## Creates bad test file
+writeLines(c("bad", 1, 2, 3, "broken"), "bad.csv")
+
+spark_read_csv(
+  sc,
+  "bad3",
+  "bad.csv",
+  columns = list(foo = "integer"),
+  infer_schema = FALSE,
+  options = list(mode = "DROPMALFORMED"))
+```
+```
+## # Source: spark<bad3> [?? x 1]
+##     foo
+##   <int>
+## 1     1
+## 2     2
+## 3     3
+```
+
+Spark 2 provides an issue tracking column.  The column is hidden by default.  To enable it, add `_corrupt_record` to the `columns` list. This can be combines with the use of the *PERMISIVE* mode.  All rows will be imported, invalid entries will receive an `NA`, and the issue tracked in the `_corrupt_record` column.
+
+```{r eval=FALSE}
+spark_read_csv(
+  sc,
+  "bad2",
+  "bad.csv",
+  columns = list(foo = "integer", "_corrupt_record" = "character"),
+  infer_schema = FALSE,
+  options = list(mode = "PERMISIVE")
+)
+```
+```
+## # Source: spark<bad2> [?? x 2]
+##     foo `_corrupt_record`
+##   <int> <chr>            
+## 1     1 NA               
+## 2     2 NA               
+## 3     3 NA               
+## 4    NA broken  
+```
 
 ### Custom
 

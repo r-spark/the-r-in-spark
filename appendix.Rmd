@@ -172,7 +172,7 @@ ggplot2::theme_set(plot_style())
 
 ## File Systems {#appendix-file-systeems}
 
-This section will cover techniques to help you interface with some of the most popular file formats.
+This section will cover techniques to help you interface with some of the most popular file systems
 
 ### Amazon S3
 
@@ -280,69 +280,6 @@ In `sparklyr`, the `tbl_change_db()` function sets the current session's default
 ```{r eval=FALSE}
 tbl_change_db(sc, "databasename")
 ```
-
-## File Formats {#appendix-file-formats}
-
-### Comma Delimited Values (CSV)
-
-The CSV format may be the most common file type in use today.  Spark offers a couple of techniques to help you troubleshoot issues when reading these kinds of files. 
-
-Spark offers the following modes for addressing parsing issues:
-
-- **PERMISSIVE**: `NULL`s are inserted for missing tokens.
-
-- **DROPMALFORMED**: Drops lines which are malformed.
-
-- **FAILFAST**: Aborts if encounters any malformed line.
-
-These can be used in `sparklyr` by passing them inside the `options` argument.  The following example creates a file with a broken entry.  It then shows how it can be read into Spark.
-
-```{r}
-library(sparklyr)
-sc <- spark_connect(master = "local")
-
-## Creates bad test file
-writeLines(c("bad", 1, 2, 3, "broken"), "bad.csv")
-
-spark_read_csv(
-  sc,
-  "bad3",
-  "bad.csv",
-  columns = list(foo = "integer"),
-  infer_schema = FALSE,
-  options = list(mode = "DROPMALFORMED"))
-```
-```
-## # Source: spark<bad3> [?? x 1]
-##     foo
-##   <int>
-## 1     1
-## 2     2
-## 3     3
-```
-
-Spark 2 provides an issue tracking column.  The column is hidden by default.  To enable it, add `_corrupt_record` to the `columns` list. This can be combines with the use of the *PERMISIVE* mode.  All rows will be imported, invalid entries will receive an `NA`, and the issue tracked in the `_corrupt_record` column.
-
-```{r eval=FALSE}
-spark_read_csv(
-  sc,
-  "bad2",
-  "bad.csv",
-  columns = list(foo = "integer", "_corrupt_record" = "character"),
-  infer_schema = FALSE,
-  options = list(mode = "PERMISIVE")
-)
-```
-```
-## # Source: spark<bad2> [?? x 2]
-##     foo `_corrupt_record`
-##   <int> <chr>            
-## 1     1 NA               
-## 2     2 NA               
-## 3     3 NA               
-## 4    NA broken  
-```
-
 
 ## List of ML Functions {#ml-functionlist}
 
