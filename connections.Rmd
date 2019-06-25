@@ -19,7 +19,7 @@ The previous chapter, [Clusters](#clusters), presented the major cluster computi
 
 In addition, this chapter provides various troubleshooting connection techniques. While we hope you won't need to use these, this chapter will prepare you to use them as effective techniques to resolve connectivity issues.
 
-While this chapter might feel a bit dry -- connecting and troubleshooting connections is definetely not the most exciting part of large-scale data analysis -- it will introduce the components of a Spark cluster and how they interact, often known as the architecture of Apache Spark. This chapter, in addition to the [Data](#data) and [Tuning](#tuning) chapters, will provide a detailed view of how Spark works, which will help you move towards becoming an intermediate Spark user that can go beyond analysis into the exciting world of distributed computing, using Apache Spark.
+While this chapter might feel a bit dry -- connecting and troubleshooting connections is definetely not the most exciting part of large-scale data analysis -- it will introduce the components of a Spark cluster and how they interact, often known as the architecture of Apache Spark. This chapter, in addition to the [Data](#data) and Tuning chapters, will provide a detailed view of how Spark works, which will help you move towards becoming an intermediate Spark user that can go beyond analysis into the exciting world of distributed computing, using Apache Spark.
 
 ## Overview {#connections-overview}
 
@@ -39,7 +39,7 @@ render_nomnoml("
 ", "images/connections-spark-architecture.png", "Apache Spark Architecture", styles)
 ```
 
-If you already have a Spark cluster in your organization, you should request the connection information to this cluster from your cluster administrator, read their usage policies carefully and follow their advice. Since a cluster may be shared among many users, you want to make sure you only request the compute resources you need -- we will cover how to request resources in the [Tuning](#tuning) chapter. Your system administrator will describe if it's an **on-premise** vs **cloud** cluster, the **cluster manager** being used, supported **connections** and supported **tools**. You can use this information to jump directly to [Local](#connections-local), [Standalone](#connections-standalone), [YARN](#connections-yarn), [Mesos](#connections-mesos), [Livy](#connections-livy) or [Kubernetes](#connections-kubernetes) based on the information provided to you.
+If you already have a Spark cluster in your organization, you should request the connection information to this cluster from your cluster administrator, read their usage policies carefully and follow their advice. Since a cluster may be shared among many users, you want to make sure you only request the compute resources you need -- we will cover how to request resources in the Tuning chapter. Your system administrator will describe if it's an **on-premise** vs **cloud** cluster, the **cluster manager** being used, supported **connections** and supported **tools**. You can use this information to jump directly to [Local](#connections-local), [Standalone](#connections-standalone), [YARN](#connections-yarn), [Mesos](#connections-mesos), [Livy](#connections-livy) or [Kubernetes](#connections-kubernetes) based on the information provided to you.
 
 **Note:** Once connected is performed with `spark_connect()`, you can use all techniques described in previous chapters using the `sc` connection; for instance, you can do [data analysis](#analysis) or [modeling](#modeling) with the same code previous chapters presented.
 
@@ -107,7 +107,7 @@ render_nomnoml("
 ]", "images/connections-spark-local.png", "Local Connection Diagram", styles)
 ```
 
-Notice that in the local connections diagram, there is no cluster manager nor worker process since, in local mode, everything runs inside the driver application. It's also worth noting that `sparklyr` starts the Spark Context through `spark-submit`, a script available in every Spark installation to enable users to submit custom application to Spark which, `sparklyr` makes use of to submit itself to Spark. For the curious reader, the [Contributing](#contributing) chapter explains the internal processes that takes place in `sparklyr` to submit this application and connect properly from R.
+Notice that in the local connections diagram, there is no cluster manager nor worker process since, in local mode, everything runs inside the driver application. It's also worth noting that `sparklyr` starts the Spark Context through `spark-submit`, a script available in every Spark installation to enable users to submit custom application to Spark which, `sparklyr` makes use of to submit itself to Spark. For the curious reader, the Contributing chapter explains the internal processes that takes place in `sparklyr` to submit this application and connect properly from R.
 
 To perform this local connection, we can connect with the following familiar code used in previous chapters:
 
@@ -554,7 +554,7 @@ The parameter `8880` represents the default port to use in `sparklyr` while `42 
 
 If this first connection step fails, it means that the cluster can't accept the application. This usually means that there are not enough resources, there are permission restrictions, etc.
 
-The second step is to connect from R as follows -- notice that there is a 60 seconds timeout, so you'll have to run the R command after running the terminal command. If needed, this timeout can be configured as described in the [Tuning](#tuning) chapter.
+The second step is to connect from R as follows -- notice that there is a 60 seconds timeout, so you'll have to run the R command after running the terminal command. If needed, this timeout can be configured as described in the Tuning chapter.
 
 ```{r connections-manual-submit-}
 library(sparklyr)

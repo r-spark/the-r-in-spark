@@ -19,7 +19,7 @@ library(cowplot)
 
 # Distributed R {#distributed}
 
-In previous chapters you learned how to perform data analysis and modeling in local Spark instances and proper Spark clusters and the previous [Extensions](#extensions) chapter described how to make use of additional functionality provided by the Spark and R communities at large. In most cases, the combination of Spark functionality and extensions is more than enough to perform almost any computation. However, for those cases where functionality is lacking in Spark and their extensions, you should consider distributing R computations to worker nodes yourself. %% while leveraging any existing R package.
+In previous chapters you learned how to perform data analysis and modeling in local Spark instances and proper Spark clusters and the previous Extensions chapter described how to make use of additional functionality provided by the Spark and R communities at large. In most cases, the combination of Spark functionality and extensions is more than enough to perform almost any computation. However, for those cases where functionality is lacking in Spark and their extensions, you should consider distributing R computations to worker nodes yourself. %% while leveraging any existing R package.
 
 You can run arbitrary R code in each worker node to run any computation -- you can run simulations, crawl content from the web, transform data and so on. In addition, you can also make use of any package available in CRAN and private packages available in your organization, this reduces the amount of code you need to write to help you keep productive.
 
@@ -27,7 +27,7 @@ If you are already a familiar R user, you might be tempted to use this approach 
 
 ## Overview
 
-The [Introduction](#intro) chapter introduced MapReduce as a technique capable of processing large-scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The [Tuning](#tuning) chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually, this is illustrated in Figure \@ref(fig:distributed-times-ten).
+The Introduction chapter introduced MapReduce as a technique capable of processing large-scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The Tuning chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually, this is illustrated in Figure \@ref(fig:distributed-times-ten).
 
 ```{r distributed-times-ten, echo=FALSE, eval=TRUE, fig.cap='Map Operation when Multiplying by Ten', fig.align='center'}
 render_nomnoml("
@@ -70,7 +70,7 @@ render_nomnoml("
 ", "images/distributed-r-spark-apply-input-output.png", "Expected Function Signature in spark_apply() Mappings", styles)
 ```
 
-We can refer back to the orginal MapReduce example from the [Introduction](#intro) chapter, where the map operation was defined to split sentences into words and then, the total unique words were counted as the reduce operation. In R, we could make use of the `unnest_tokens()` function in the `tidytext` R package, combining the functionality of `tidytext` with `spark_apply()` would allow us to tokenize those sentences into a table of words as follows:
+We can refer back to the orginal MapReduce example from the Introduction chapter, where the map operation was defined to split sentences into words and then, the total unique words were counted as the reduce operation. In R, we could make use of the `unnest_tokens()` function in the `tidytext` R package, combining the functionality of `tidytext` with `spark_apply()` would allow us to tokenize those sentences into a table of words as follows:
 
 ```{r}
 sentences <- copy_to(sc, data_frame(text = c("I like apples", "I like bananas")))
@@ -126,7 +126,7 @@ Transform
 : You can make use of R's rich data transformation capabilities to complement Spark. We will present a use case of evaluating data by external systems and use R to interoperate with them by calling them through a **web API**.
 
 Compute
-: When you need to perform large-scale computation in R, or big-compute as described in the [Introduction](#intro) chapter, Spark is ideal to distribute this computation. We will present **distributed rendering** as a particular use case for large-scale computing in R.
+: When you need to perform large-scale computation in R, or big-compute as described in the Introduction chapter, Spark is ideal to distribute this computation. We will present **distributed rendering** as a particular use case for large-scale computing in R.
 
 We will now explore each use case in detail and provide a working example to help you understand how you use `spark_apply()` effectevely.
 
@@ -427,7 +427,7 @@ We've covered some of the common use cases for `spark_apply()`, but you are cert
 
 ## Partitions
 
-Most Spark operations, say to analyze data with `dplyr` or model with MLlib, do not require understanding how Spark partitions data, it works automatically -- this is not the case for distributed R computations. Instead, you will have to learn and understand how exactly Spark is partitioning your data and provide transformations that are compatible with them. This is required since `spark_apply()` receives each partition and allows you to perform any transformation, not the entire dataset. You can refresh concepts like partitioning and transformations using the diagrams and examples from the [Tuning](#tuning) chapter. 
+Most Spark operations, say to analyze data with `dplyr` or model with MLlib, do not require understanding how Spark partitions data, it works automatically -- this is not the case for distributed R computations. Instead, you will have to learn and understand how exactly Spark is partitioning your data and provide transformations that are compatible with them. This is required since `spark_apply()` receives each partition and allows you to perform any transformation, not the entire dataset. You can refresh concepts like partitioning and transformations using the diagrams and examples from the Tuning chapter. 
 
 To help us understand how partitions are represented in `spark_apply()`, consider the following code. Should we expect the output to be the total number of rows?
 
@@ -752,7 +752,7 @@ render_nomnoml("
 
 This transformation from rows to columns needs to happen for each partition. In addition, data also needs to be transformed from Scala's internal representation to R's internal representation. These transformations wastes a lot of CPU cycles, Apache Arrow reduces these transformations.
 
-Apache Arrow is a cross-language development platform for in-memory data. In Spark, it speeds up transfering data between Scala and R by defining a common data format compatible with many programming languages -- instead of having to transform between Scala's internal representation and R's, the same structure can be used for both languages. In addition, transforming data from row based storage to columnar storage, is performed in parallel in Spark, which can be further optimized by using the columnar storage formats presented in the [Data](#data) chapter. The improved transformation are available in Figure \@ref(fig:distributed-r-transformation).
+Apache Arrow is a cross-language development platform for in-memory data. In Spark, it speeds up transfering data between Scala and R by defining a common data format compatible with many programming languages -- instead of having to transform between Scala's internal representation and R's, the same structure can be used for both languages. In addition, transforming data from row based storage to columnar storage, is performed in parallel in Spark, which can be further optimized by using the columnar storage formats presented in the Data chapter. The improved transformation are available in Figure \@ref(fig:distributed-r-transformation).
 
 ```{r distributed-r-using-arrow, eval=TRUE, echo=FALSE, fig.cap='Data Transformation between Spark and R using Arrow'}
 render_nomnoml("
@@ -1022,7 +1022,7 @@ Debugging spark_apply(), connect to worker debugging session as follows:
 
 As the instructions indicate, you will need to connect "as the worker node" from a different R session and then step through the code. This method is not as straightforward as previous ones, since you will also need to step through some lines of `sparklyr` code; so this is something we only recommend as a last resort.
 
-You can also use the online resources that were described in in the [Getting Started](#starting-resources) chapter. Lets now wrap up this chapter with a brief recap of all the functionality that was presented.
+You can also use the online resources that were described in in the Getting Started chapter. Lets now wrap up this chapter with a brief recap of all the functionality that was presented.
 
 ## Recap
 

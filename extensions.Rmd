@@ -9,15 +9,15 @@ library(ggplot2)
 
 In the previous chapter, [Tuning](tuning), you learned how Spark processes data at large-scale by allowing users to configure the cluster resources, partition data implicitly or explicitly, execute commands across distributed compute nodes, shuffle data across them when needed, cache data to improve performance and serialize data efficiently over the network. You also learned how to configure the different Spark settings used while connecting, submitting a job, running and application and particular settings applicable only to R and R extensions that we will present in this chapter.
 
-The [Analysis](#analysis), [Modeling](#modeling) and [Data](#data) chapters provided a foundation to read and understand most datasets. However, the functionality that was presented was scoped to Spark's built-in features and tabular datasets. This chapter will go beyond tabular data and explore how to analyze and model networks of interconnected objects through graph processing, read genomics datasets, prepare data for deep learning, analyze geographic datasets and use advanced modeling libraries like H2O and XGBoost over large-scale datasets.
+The [Analysis](#analysis), [Modeling](#modeling) and Data chapters provided a foundation to read and understand most datasets. However, the functionality that was presented was scoped to Spark's built-in features and tabular datasets. This chapter will go beyond tabular data and explore how to analyze and model networks of interconnected objects through graph processing, read genomics datasets, prepare data for deep learning, analyze geographic datasets and use advanced modeling libraries like H2O and XGBoost over large-scale datasets.
 
 The combination of all the content presented in all the previous chapters should take care of most of your large-scale computing needs. However, for those few use cases where functionality is still lacking, the following chapters will teach you provide the tools to extend Spark yourself; either, through custom R transformation, custom Scala code or through recent new execution mode in Spark that enable analyzing realtime datasets. Although, before reinventing the wheel, we will present all the extensions available when using Spark with R.
 
 ## Overview
 
-In the [Introduction](#intro) chapter we presented the R community as a vibrant group of individuals collaborating with each other in many ways, one of them, by moving open science forward by creating R packages that can be installed from CRAN. In a similar way, but in a much smaller scale, the R community has contributed extensions that increase the functionality initially supported in Spark and R. Spark itself also provides support for creating Spark extensions and, in-fact, many R extensions make use of Spark extensions.
+In the Introduction chapter we presented the R community as a vibrant group of individuals collaborating with each other in many ways, one of them, by moving open science forward by creating R packages that can be installed from CRAN. In a similar way, but in a much smaller scale, the R community has contributed extensions that increase the functionality initially supported in Spark and R. Spark itself also provides support for creating Spark extensions and, in-fact, many R extensions make use of Spark extensions.
 
-Extensions are constantly being created so this section will be outdated at any given point in time, in addition, we might not be even aware of many Spark and R extensions; however, at the very least we can track the extensions that are available in CRAN by looking at the "reverse imports" for `sparklyr` in CRAN [@extensions-sparklyr-cran]. Extensions and R packages published in CRAN tend to be the most stable since when a package is published in CRAN, it will go through a review process which increases the overall quality of a contribution.
+Extensions are constantly being created so this section will be outdated at any given point in time, in addition, we might not be even aware of many Spark and R extensions; however, at the very least we can track the extensions that are available in CRAN by looking at the "reverse imports" for `sparklyr` in CRAN. [@extensions-sparklyr-cran] Extensions and R packages published in CRAN tend to be the most stable since when a package is published in CRAN, it will go through a review process which increases the overall quality of a contribution.
 
 While we wish we could present all the extensions, we will present next the extensions that should be the most interesting to most readers. You can find additional ones under the [github.com/r-spark](https://github.com/r-spark) organization or by searching repos in GitHub with the `sparklyr` tag.
 
@@ -545,7 +545,7 @@ $ probability_No  <dbl> 0.8439275, 0.8439275, 0.8439275, 0.8439275, 0.8439275,â€
 $ probability_Yes <dbl> 0.1560725, 0.1560725, 0.1560725, 0.1560725, 0.1560725,â€¦
 ```
 
-Notice that the columns must be numeric so you will have to manually convert them with feature transformin techniques presented in the [Modeling](#modeling) chapter. It is natural to try to add more layers to classify more complex datasets; however, adding too many layers will cause the gradient to vanish and other techniques will have to use these deep layered networds also known as, deep learning models.
+Notice that the columns must be numeric so you will have to manually convert them with feature transformin techniques presented in the Modeling chapter. It is natural to try to add more layers to classify more complex datasets; however, adding too many layers will cause the gradient to vanish and other techniques will have to use these deep layered networds also known as, deep learning models.
 
 Deep learning models solve the vanishing gradient problem by making use of special activation functions, dropout, data augmentation and graphic processing units (GPUs). You can use Spark to retrieve and preprocess large datasets into numerical-only datasets that can fit in a GPU for deep learning training. Tensorflow is one of the most popular deep learning frameworks and supports a binary format known as TensorFlow Records.
 
@@ -571,7 +571,7 @@ copy_to(sc, iris) %>%
   spark_write_tfrecord(path = "tfrecord")
 ```
 
-Once trained, you can use the `tfdatasets` package to load the dataset followed by training with `keras` or `tensorflow`. To learn more about training deep learning models with Keras we recommend reading "Deep Learning with R" [@extensions-chollet-jj].
+Once trained, you can use the `tfdatasets` package to load the dataset followed by training with `keras` or `tensorflow`. To learn more about training deep learning models with Keras we recommend reading "Deep Learning with R". [@extensions-chollet-jj]
 
 ```{r}
 tfdatasets::tfrecord_dataset("tfrecord/part-r-00000")
@@ -618,7 +618,7 @@ Training large-scale deep learning models is possible in Spark and TensorFlow th
 
 ## Genomics
 
-The human genome consists of two copies of about three billion base pairs of DNA within the 23 chromosome pairs, Figure \@ref(fig:extensions-genomics-diagram) shows the organization of the genome into chromosomes. DNA strands are composed of nucleotides, each composed of one of four nitrogen-containing nucleobases: cytosine (C), guanine (G), adenine (A) or thymine (T) [@extensions-genomics-wikipedia]. Since the DNA of all humans is nearly identical, we only need to store the differences from the reference genome in the form of a Variant Call Format (VCF) file.
+The human genome consists of two copies of about three billion base pairs of DNA within the 23 chromosome pairs, Figure \@ref(fig:extensions-genomics-diagram) shows the organization of the genome into chromosomes. DNA strands are composed of nucleotides, each composed of one of four nitrogen-containing nucleobases: cytosine (C), guanine (G), adenine (A) or thymine (T). [@extensions-genomics-wikipedia] Since the DNA of all humans is nearly identical, we only need to store the differences from the reference genome in the form of a Variant Call Format (VCF) file.
 
 ```{r extensions-genomics-diagram, eval=TRUE, echo=FALSE, fig.cap='The idealized human diploid karyotype showing the organization of the genome into chromosomes', fig.align = 'center'}
 render_image("images/extensions-genomics-diagram.png")

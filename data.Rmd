@@ -320,7 +320,7 @@ hadoop fs -copyToLocal large-file.txt large-file.txt
 
 Alternatively, you can also collect datasets that don't fit in-memory by providing a callback to `collect()`. A callback is just an R function that will be called over each Spark partition, you can then write this dataset to disk or push to other clusters over the network.
 
-The following code will crete 10K files adding up to 10GB even if the driver node collecting this dataset had less than 10GB of memory. That said, as explained in the [Analysis](#analysis) chapter, you should avoid collecting large datasets into a single machine since this usually creates a significant performance bottleneck.
+The following code will crete 10K files adding up to 10GB even if the driver node collecting this dataset had less than 10GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this usually creates a significant performance bottleneck.
 
 ```{r}
 spark_read_text(sc, "large-file.txt", memory = FALSE) %>%
@@ -518,7 +518,7 @@ Which you can also write back to XML with ease as follows,
 tbl(sc, "simple_xml") %>% spark_write_source("xml", options = list(path = "data.xml"))
 ```
 
-In addition, there are a few extensions developed by the R community to load additional file formats, to mention a few: `sparklyr.nested` to assist with nested data, `spark.sas7bdat` to read data from SAS, `sparkavro` to read data in AVRO format and `sparkwarc` to read WARC files which use extensibility mechanisms introduced in the [Extensions](#extensions) chapter. The [Distributed R](#distributed) chapter will present techniques to use R packages to load additional file formats and the [Contributing](#contributing) chapter presents techniques to use Java libraries to complement this further. But first, let's explore how to retrieve and store files from several different file systems.
+In addition, there are a few extensions developed by the R community to load additional file formats, to mention a few: `sparklyr.nested` to assist with nested data, `spark.sas7bdat` to read data from SAS, `sparkavro` to read data in AVRO format and `sparkwarc` to read WARC files which use extensibility mechanisms introduced in the Extensions chapter. The Distributed R chapter will present techniques to use R packages to load additional file formats and the Contributing chapter presents techniques to use Java libraries to complement this further. But first, let's explore how to retrieve and store files from several different file systems.
 
 ## File Systems {#data-file-systems}
 

@@ -9,7 +9,7 @@ source("r/render.R")
 
 In previous chapters we've assumed that computation within a Spark cluster works efficiently. While this is true in some cases, it is often necessary to have some knowledge of the operations Spark runs internally to fine tune configuration settings that will make computations run efficiently. This chapter will explain how Spark computes data over large datasets and provide details on how to fine-tune its operations.
 
-For instance, you will learn how to request more compute nodes and increase the amount of memory which, if you remember from the [Getting Started](#starting) chapter, defaults to only 2GB in local instances. You will learn how Spark unifies computation through partioning, shuffling and caching. As mentioned a few chapters back, this is the last chapter describing the internals of Spark; once you complete this chapter, we believe that you will have the intermediate Spark skills necessary to be productive at using Spark.
+For instance, you will learn how to request more compute nodes and increase the amount of memory which, if you remember from the Getting Started chapter, defaults to only 2GB in local instances. You will learn how Spark unifies computation through partioning, shuffling and caching. As mentioned a few chapters back, this is the last chapter describing the internals of Spark; once you complete this chapter, we believe that you will have the intermediate Spark skills necessary to be productive at using Spark.
 
 In subsequent chapters, Extensions, Distributed R and Streaming, you will learn exciting techniques to deal with specific modeling, scaling and computation problems. However, we must first understand how spark performs internal computations, what pieces we can control, and why.
 
@@ -295,13 +295,13 @@ knitr::kable(spark_config_settings())
 
 ## Partitioning {#tuning-partitioning}
 
-As mentioned in the [introduction](#intro-background) chapter, MapReduce and Spark were designed with the purpose of performing computations against data stored across many machines. The subset of the data available for computation over each compute instance is known as a **partition**.
+As mentioned in the Introduction chapter, MapReduce and Spark were designed with the purpose of performing computations against data stored across many machines. The subset of the data available for computation over each compute instance is known as a **partition**.
 
 By default, Spark will compute over each existing **implicit** partition since it's more effective to run computations were the data is already located. However, there are cases where you will want to set an **explicit** partition to help Spark use more efficient use of your cluster resources.
 
 ### Implicit
 
-You learned in the [Data](#data) chapter that Spark can read data stored in many formats and different storage systems; however, since shuffling data is an expensive operations, Spark executes tasks reusing the partitions in the storage system. Therefore, these partitions are implicit to Spark since they are already well defined and expensive to rearrange.
+You learned in the Data chapter that Spark can read data stored in many formats and different storage systems; however, since shuffling data is an expensive operations, Spark executes tasks reusing the partitions in the storage system. Therefore, these partitions are implicit to Spark since they are already well defined and expensive to rearrange.
 
 There is always an implicit partition for every computation in Spark defined by the distributed storage system, by creating a dataset or by copying datasets into Spark.
 

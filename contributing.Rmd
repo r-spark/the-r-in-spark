@@ -132,9 +132,9 @@ While calling the Spark API can be useful in some cases, most of the funtionalit
 
 Before we get started with this section, consider navigating to [spark-packages.org](https://spark-packages.org/) -- a site that tracks Spark extensions provided by the Spark community. Using the same techniques presented in the previous section, you can make use of these extensions from R.
 
-For instance, Apache Solr is a "blazing-fast, open source enterprise search platform built on Apache Lucene" [@contributing-solr]. Solr is a system designed to perform full text search over large datasets which Apache Spark currently does not support natevely. Also, as of this writting, there is no extension for R to support Solr. So let's try to solve this using an Spark extension.
+For instance, Apache Solr is a "blazing-fast, open source enterprise search platform built on Apache Lucene". [@contributing-solr] Solr is a system designed to perform full text search over large datasets which Apache Spark currently does not support natevely. Also, as of this writting, there is no extension for R to support Solr. So let's try to solve this using an Spark extension.
 
-First, you would want to search "spark-packages.org" to find out that there is a Solr extension, you should be able to find `spark-solr` [@contributing-spark-solr]. The extension "How to" mentioned that the `com.lucidworks.spark:spark-solr:2.0.1` should be loaded. We can accomplish this in R using the `sparklyr.shell.packages` configuration option:
+First, you would want to search "spark-packages.org" to find out that there is a Solr extension, you should be able to find `spark-solr`. [@contributing-spark-solr] The extension "How to" mentioned that the `com.lucidworks.spark:spark-solr:2.0.1` should be loaded. We can accomplish this in R using the `sparklyr.shell.packages` configuration option:
 
 ```{r}
 config <- spark_config()
@@ -193,7 +193,7 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
 
 The `onLoad` function will be automatically called by R when you library loads, it should call `register_extension()` which will then call back `spark_dependencies()` to allow your extension to provide additional dependencies. The example above supports Spark 2.4 but you should also support a map of Spark and Scala versions to the correct Spark extension version.
 
-There are about 450 Spark extensions you can use; in addition, you can also use any Java library from a Maven repository where Maven Central has over 3M artifacts [@contributing-maven-libraries]. While not all the Maven Central libraries might be relevant to Spark, the combination of Spark extensions and Maven repositories certainly opens many interesting possibilities for you to consider!
+There are about 450 Spark extensions you can use; in addition, you can also use any Java library from a Maven repository where Maven Central has over 3M artifacts. [@contributing-maven-libraries] While not all the Maven Central libraries might be relevant to Spark, the combination of Spark extensions and Maven repositories certainly opens many interesting possibilities for you to consider!
 
 However, for those cases where no Spark extension is available, the next section will teach you how to use custom Scala code from your own R package.
 
@@ -258,7 +258,7 @@ Since the JARs are compiled by default into the `inst/` package path, when build
 
 This last chapter introduced you to an entire new set of tools you can use to expand Spark functionality beyond what R and R packages currently support, this vast new space of libraries includes over 450 spark extensions and millions of Java artifacts you can use in Spark from R. Beyond these resources, you also learned how to build your own Java artifacts using Scala code that can be easily embeded and compiled from R. 
 
-This bring us back to purpose of this book presented in [Introduction](#intro) chapter, while we know that in this chapter and previous ones you've learned how to perform large-scale compuring using Spark in R; we are also confident that you have acquired the knowledged required to help other community members through Spark extensions -- we can't wait to see your new creations, which will surely help grow the Spark and R communities at large.
+This bring us back to purpose of this book presented in Introduction chapter, while we know that in this chapter and previous ones you've learned how to perform large-scale compuring using Spark in R; we are also confident that you have acquired the knowledged required to help other community members through Spark extensions -- we can't wait to see your new creations, which will surely help grow the Spark and R communities at large.
 
 To close and recap on the entire book, we hope the first chapters gave you a easy intro to Spark and R, followed by the Analysis and Modeling chapters which gave you the foundations for using Spark from the familiarity of R package you know and love. You moved then to learned how to perform large-scale computation in proper Spark clusters. The last third of this book focused on advanced topics on using extensions, distributing R code, processing realtime data and finally, contributing back Spark extensions using R and potentially, also Scala code.
 
