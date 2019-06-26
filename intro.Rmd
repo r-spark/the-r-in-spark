@@ -8,11 +8,11 @@ library(sparklyr)
 
 # Introduction {#intro}
 
-With information growing at exponential rates, it's no surprise that historians are referring to this period of history as the Information Age. The increasing speed at which data is being collected has created new opportunities and is certainly staged to create even more. This chapter presents the tools that have been used to solve large-scale data challenges and introduces Apache Spark as a leading tool that is democratizing our ability to process data at large-scale. We will then introduce the R computing language, which was specifically designed to simplify data analysis. It is then natural to ask what the outcome would be from combining the ease of use provided by R, with the compute power available through Apache Spark. This will lead us to introduce sparklyr, a project merging R and Spark into a powerful tool that is easily accessible to all.
+With information growing at exponential rates, it's no surprise that historians are referring to this period of history as the Information Age. The increasing speed at which data is being collected has created new opportunities and is certainly staged to create even more. This chapter presents the tools that have been used to solve large-scale data challenges and introduces Apache Spark as a leading tool that is democratizing our ability to process large datasets. We will then introduce the R computing language, which was specifically designed to simplify data analysis. It is then natural to ask what the outcome would be from combining the ease of use provided by R, with the compute power available through Apache Spark. This will lead us to introduce sparklyr, a project merging R and Spark into a powerful tool that is easily accessible to all.
 
 The next chapter, Getting Started, will present the prerequisites, tools and steps you will need to perform to get Spark and R working in your personal computer. You will learn how to install Spark, initialize Spark, get introduced to common operations and help you get your very first data processing and modeling task done. It is the goal of that chapter to help anyone grasp the concepts and tools required to start tackling large-scale data challenges which, until recently, were only accessible to just a few organizations.
 
-You will then move on into learning how to analyze large-scale data, followed by building models capable of predicting trends and discover information hidden in vasts amounts of information. At which point, you will have the tools required to perform data analysis and modeling at scale. Subsequent chapters will help you move away from your local computer into computing clusters required to solve many real world problems. The last chapters will present additional topics, like real time data processing and graph analysis, which you will need to truly master the art of analyzing data at any scale. The last chapter of this book will give you tools and inspiration to consider contributing back to this project and many others.
+You will then move on into learning how to analyze large-scale data, followed by building models capable of predicting trends and discover information hidden in vasts amounts of information. At which point, you will have the tools required to perform data analysis and modeling at scale. Subsequent chapters will help you move away from your local computer into computing clusters required to solve many real world problems. The last chapters will present additional topics, like real time data processing and graph analysis, which you will need to truly master the art of analyzing data at any scale. The last chapter of this book will give you tools and inspiration to consider contributing back to the Spark and R communities.
 
 We hope this is a journey you will enjoy, that will help you solve problems in your professional career to nudge the world into taking better decisions that can benefit us all.
 
@@ -22,7 +22,7 @@ As humans, we have been storing, retrieving, manipulating, and communicating inf
 
 Mathematician George Stibitz used the word *digital* to describe fast electric pulses back in 1942 [@intro-computing-concise-history] and, to this day, we describe information stored electronically as digital information. In contrast, *analog* information represents everything we have stored by any non-electronic means such as hand written notes, books, newspapers, and so on. [@intro-webster2006merriam]
 
-The world bank report on digital development provides an estimate of digital and analog information stored over the last decades. [@intro-data-revolution] This report noted that digital information surpassed analog information around 2003. At that time, there were about 10 million terabytes of digital information, which is roughly about 10 million computer drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at exponential rates. Figure \@ref(fig:intro-store-capacity) shows the findings of this report, notice that every other year, the worlds information has grown tenfold.
+The world bank report on digital development provides an estimate of digital and analog information stored over the last decades. [@intro-data-revolution] This report noted that digital information surpassed analog information around 2003. At that time, there were about 10 million terabytes of digital information, which is roughly about 10 million storage drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at exponential rates. Figure \@ref(fig:intro-store-capacity) shows the findings of this report, notice that every other year, the worlds information has grown tenfold.
 
 ```{r intro-store-capacity-code, echo=FALSE}
 suppressMessages(library(tidyverse))
@@ -60,7 +60,7 @@ One year later, Google published a new paper describing how to perform operation
 
 For example, as illustrated in Figure \@ref(fig:intro-mapreduce-example), we can use MapReduce to count words in two different text files stored in different machines. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files.
 
-```{r intro-mapreduce-example, eval=TRUE, echo=FALSE, fig.cap='A simple MapReduce example'}
+```{r intro-mapreduce-example, eval=TRUE, echo=FALSE, fig.cap='MapReduce example counting words across files'}
 render_nomnoml("
 #spacing: 80
 #direction: right
@@ -83,7 +83,7 @@ render_nomnoml("
 
 Counting words is often the most basic MapReduce example, but it can be also used for much more sophisticated and interesting applications. For instance, MapReduce can be used to rank web pages in Google's *PageRank* algorithm, which assigns ranks to web pages based on the count of hyperlinks linking to a web page and the rank of the page linking to it.
 
-After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as *Hadoop* with the Google File System implemented as the Hadoop File System, or *HDFS* for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations which enabled them to make use of MapReduce beyond web data processing.
+After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as *Hadoop* with the Google File System implemented as the Hadoop File System, or *HDFS* for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations, making MapReduce useful beyond web data processing.
 
 While Hadoop provided support to perform MapReduce operations over a distributed file system, it still required MapReduce operations to be written with code every time a data analysis was run. To improve over this tedious process, the *Hive* project released in 2008 by Facebook, brought Structured Query Language (*SQL*) support to Hadoop. This meant that data analysis could now be performed at large-scale without the need to write code for each MapReduce operation; instead, one could write generic data analysis statements in SQL that are much easier to understand and write.
 
@@ -100,7 +100,7 @@ data.frame(
   ggplot(aes(x = iteration, y = seconds, fill = cluster)) +
     labs(title = "Hadoop vs Spark",
          subtitle = "Logistic regression execution time") +
-    scale_color_grey(start = 0.6, end = 0.2) +
+    scale_fill_grey(start = 0.6, end = 0.2) +
     geom_bar(stat = "identity", position = position_dodge()) +
     labs(y = "seconds") +
     geom_hline(yintercept = 0, size = 1, color = "#333333") +
@@ -116,7 +116,7 @@ data.frame(
 render_image("images/intro-hadoop-spark-logistic-regression.png")
 ```
 
-While Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. For instance, Spark has set new records in large-scale sorting [@intro-sort-benchmark], where data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU's cache to dramatically improve performance. If you need to sort large amounds of data, at the time, there was no other system in the world faster than Spark.
+While Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. For instance, Spark has set new records in large-scale sorting [@intro-sort-benchmark], where data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU's cache to dramatically improve performance. If you needed to sort large amounts of data, there was no other system in the world faster than Spark.
 
 To give you a sense of how much fasteer and efficient Spark is, you can sort 100 terabytes of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23 minutes using Spark [@intro-spark-record-sorting]. In addition, Spark holds the cloud sorting benchmark [@intro-spark-record-cloudsort], which made Spark the most cost effective solution for sort large-datasets in the cloud.
 
@@ -131,37 +131,37 @@ To give you a sense of how much fasteer and efficient Spark is, you can sort 100
 | Sort rate        | 1.42 TB/min   | 4.27 TB/min   |
 | Sort rate / node | 0.67 GB/min   | 20.7 GB/min   |
 
-In addition, Spark is much more simple to use than Hadoop; for instance, the word count MapReducee example takes about fifty lines of code in Hadoop, but it only takes two lines of code in Spark -- Spark is much faster, efficient and easier to use than Hadoop.
+Spark is also easier to use than Hadoop; for instance, the word-count MapReduce example takes about fifty lines of code in Hadoop, but it only takes two lines of code in Spark -- Spark is much faster, efficient and easier to use than Hadoop.
 
-In 2010, Spark was released as an open source project and then donated to the Apache Software Foundation in 2013. Spark is licensed under the [Apache 2.0](https://en.wikipedia.org/wiki/Apache_License), which allows you to freely use, modify, and distribute it. In 2015, Spark reaches more than 1000 contributors, making it one of the most active projects in the Apache Software Foundation.
+In 2010, Spark was released as an open source project and then donated to the Apache Software Foundation in 2013. Spark is licensed under the [Apache 2.0](https://en.wikipedia.org/wiki/Apache_License), which allows you to freely use, modify, and distribute it. Spark then reached over 1000 contributors, making it one of the most active projects in the Apache Software Foundation.
 
 This gives an overview of how Spark came to be, which we can now use to formally introduce Apache Spark as follows:
 
-> "Apache Spark is a unified analytics engine for large-scale data processing    is a fast and general engine for large-scale data processing."
+> "Apache Spark is a unified analytics engine for large-scale data processing."
 >
 > --- [spark.apache.org](http://spark.apache.org/)
 
 To help us understand this definition of Apache Spark, we will break it down as follows:
 
 Unified
-: Spark supports many libraries, clusters technologies and storage systems with ease.
+: Spark supports many libraries, clusters technologies and storage systems.
 
 Analytics
-: Analytics is the discovery and interpretation of data to produce and communicate meaningful information.
+: Analytics is the discovery and interpretation of data to produce and communicate information.
 
 Engine
-: An engine is expected to be efficient and generic.
+: Spark is expected to be efficient and generic.
 
 Large-Scale
-: One can interpret this as *cluster*-scale, as in, a set of connected computers working together to accomplish specific goals.
+: One can interpret large-scale as *cluster*-scale, a set of connected computers working together.
 
-The definition describes Spark as an _engine_, since it optimizes and executes generic code; there are no restrictions as to what type of code one can write in Spark. Spark is also quite efficient, as we mentioned, it's much faster than its predecessor by making efficient use of memory, network and CPUs to speed data processing algorithms in computing clusters.
+Spark is described as an _engine_ since it's feneric and efficient, it optimizes and executes generic code; there are no restrictions as to what type of code one can write in Spark. It is also quite efficient, as we mentioned, Spark is much faster than other technologies by making efficient use of memory, network and CPUs to speed data processing algorithms in computing clusters.
 
-Therefore, Spark is used in many _analytics_ projects, like ranking movies at Netflix [@intro-spark-relevance], aligning protein sequences [@intro-spark-bioinformatics] or analyzing high energy physics at CERN. [@intro-spark-cern] 
+This makes Spark ideal in many _analytics_ projects like ranking movies at Netflix [@intro-spark-relevance], aligning protein sequences [@intro-spark-bioinformatics] or analyzing high energy physics at CERN. [@intro-spark-cern] 
 
-As _unified_ platform, Spark is expected to support many cluster technologies and multiple data sources, which you will learn about in the Clusters and Data chapters. It is also expected to support many different libraries like Spark SQL, MLlib, GraphX and Spark Streaming; libraries which you can use for analysis, modeling, graph processing and real-time data processing respectevely. You can think of Spark as a platform providing access to clusters, data sources and libraries for large-scale computing as illustrated in Figure \@ref(fig:intro-spark-unified).
+As a _unified_ platform, Spark is expected to support many cluster technologies and multiple data sources, which you will learn about in the Clusters and Data chapters. It is also expected to support many different libraries like Spark SQL, MLlib, GraphX and Spark Streaming; libraries which you can use for analysis, modeling, graph processing and real-time data processing respectevely. You can think of Spark as a platform providing access to clusters, data sources and libraries for large-scale computing as illustrated in Figure \@ref(fig:intro-spark-unified).
 
-```{r intro-spark-unified, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark as a unified analytics engine for large-scale data processing', fig.align = 'center'}
+```{r intro-spark-unified, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark as a unified analytics engine for large-scale data processing', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: down
 #fontSize: 16
