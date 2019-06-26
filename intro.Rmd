@@ -129,33 +129,65 @@ While Spark is well known for its in-memory performance, Spark was designed to b
 | Sort rate        | 1.42 TB/min   | 4.27 TB/min   |
 | Sort rate / node | 0.67 GB/min   | 20.7 GB/min   |
 
+In addition, Spark is much more simple to use than Hadoop; for instance, the word count MapReducee example takes about fifty lines of code in Hadoop, but it only takes two lines of code in Spark -- Spark is much faster, efficient and easier to use than Hadoop.
+
 In 2010, Spark was released as an open source project and then donated to the Apache Software Foundation in 2013. Spark is licensed under the [Apache 2.0](https://en.wikipedia.org/wiki/Apache_License), which allows you to freely use, modify, and distribute it. In 2015, Spark reaches more than 1000 contributors, making it one of the most active projects in the Apache Software Foundation.
 
 This gives an overview of how Spark came to be, which we can now use to formally introduce Apache Spark as follows:
 
-> "Apache Spark is a fast and general engine for large-scale data processing."
+> "Apache Spark is a unified analytics engine for large-scale data processing    is a fast and general engine for large-scale data processing."
 >
 > --- [spark.apache.org](http://spark.apache.org/)
 
 To help us understand this definition of Apache Spark, we will break it down as follows:
 
-Data Processing
-: Data processing is the collection and manipulation of items of data to produce meaningful information. [@intro-data-processing]
+Unified
+: Spark supports many libraries, clusters technologies and storage systems with ease.
 
-General
-: Spark optimizes and executes parallel generic code, as in, there are no restrictions as to what type of code one can write in Spark.
+Analytics
+: Analytics is the discovery and interpretation of data to produce and communicate meaningful information.
+
+Engine
+: An engine is expected to be efficient and generic.
 
 Large-Scale
 : One can interpret this as *cluster*-scale, as in, a set of connected computers working together to accomplish specific goals.
 
-Fast
-: Spark is much faster than its predecessor by making efficient use of memory, network and CPUs to speed data processing algorithms in computing clusters.
+The definition describes Spark as an _engine_, since it optimizes and executes generic code; there are no restrictions as to what type of code one can write in Spark. Spark is also quite efficient, as we mentioned, it's much faster than its predecessor by making efficient use of memory, network and CPUs to speed data processing algorithms in computing clusters.
 
-Since Spark is _general_, you can use Spark to solve many problems, from calculating averages to approximating the value of Pi, predicting customer churn [@intro-spark-churn-prediction], aligning protein sequences [@intro-spark-bioinformatics] or analyzing high energy physics at CERN. [@intro-spark-cern]
+Therefore, Spark is used in many _analytics_ projects, like ranking movies at Netflix [@intro-spark-churn-prediction], aligning protein sequences [@intro-spark-bioinformatics] or analyzing high energy physics at CERN. [@intro-spark-cern] 
 
-Describing Spark as _large_ _scale_ implies that a good use case for Spark is tackling problems that can be solved with multiple machines. For instance, when data does not fit in a single disk driver or does not fit into memory, Spark is a good candidate to consider.
+As _unified_ platform, Spark is expected to support many cluster technologies and multiple data sources, which you will learn about in the Clusters and Data chapters. It is also expected to support many different libraries like Spark SQL, MLlib, GraphX and Spark Streaming; libraries which are used for analysis, modeling, graph processing and real-time data processing respectevely. Conceptually, you can think of the unified funcitonality Spark provides through Figure \ref(@intro-spark-unified).
 
-Since Spark is _fast_, it is worth considering for problems that may not be large-scale, but where using multiple processors could speed up computation. For instance, sorting large datasets or CPU intensive models could also bennefit from running in Spark.
+```{r intro-spark-unified, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark as a unified analytics engine for large-scale data processing', fig.align = 'center', eval = eval_code}
+render_nomnoml("
+#direction: down
+#fontSize: 16
+#padding: 16
+[Spark |
+  [libraries|
+  [<note>Spark SQL
+         Spark Streaming
+         MLlib
+         GraphX
+         ...]]
+  [clusters|
+  [<note>Standalone
+         YARN
+         Mesos
+         Kubernetes
+         ...]]
+  [sources|
+  [<note>HDFS
+         Cassandra
+         HBase
+         Hive
+         ...]]
+]
+", "images/intro-spark-capabilities.png")
+```
+
+Describing Spark as _large scale_ implies that a good use case for Spark is tackling problems that can be solved with multiple machines. For instance, when data does not fit in a single disk driver or does not fit into memory, Spark is a good candidate to consider. However, it can also be considereed for problems that may not be large-scale, but where using multiple computers could speed up computation. For instance, CPU intensive models or scientific simulations also bennefit from running in Spark.
 
 Therefore, Spark is good at tackling large-scale data processing problems, this usually known as *big data* (datasets that are more voluminous and complex that traditional ones [@intro-spark-big-data]) but also is good at tackling large-scale computation problems, known as *big compute* ([tools and approaches using a large amount of CPU and memory resources in a coordinated way [@intro-spark-big-compute]). Big data often requires big compute and big compute requires big data [@intro-spark-big-compute-big-data] but it's not necessarily always the case.
 
