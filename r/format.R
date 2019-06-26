@@ -23,10 +23,21 @@ format_remove_links_to_chapters <- function(groups, remaining) {
   )
 }
 
+format_bold_to_italics <- function(groups, remaining) {
+  to_italics <- groups[1]
+
+  paste(
+    "*",
+    to_italics,
+    "*",
+    sep = ""
+  )
+}
 
 format_transformations <- list(
   " \\[@([a-zA-Z0-9\\-]+)\\]([.;])" = format_footnote_with_period,
-  " \\[([a-zA-Z ]+)\\]\\(#?[^)]+\\) chapter" = format_remove_links_to_chapters
+  " \\[([a-zA-Z ]+)\\]\\(#?[^)]+\\) chapter" = format_remove_links_to_chapters,
+  "\\*\\*([a-zA-Z ]+)\\*\\*" = format_bold_to_italics
 )
 
 format_chapters <- list(
