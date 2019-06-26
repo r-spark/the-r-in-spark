@@ -72,26 +72,20 @@ render_image("images/clusters-spark-standalone.png", "Spark Standalone Site")
 
 However, since Spark Standalone is contained within a Spark installation; then, by completing the Getting Started chapter, you have now a Spark installation available that you can use to initialize a local Spark Standalone cluster in your own machine. In practice, you would want to start the worker nodes in different machines but, for simplicity, we will present the code to start a standalone cluster in a single machine.
 
-First, retrieve the `SPARK_HOME` directory by running `spark_home_dir()` then, run `start-master.sh` and `start-slave.sh` as follows:
+First, retrieve the `SPARK_HOME` directory by running `spark_home_dir()` then starting the mastet node and a worker node as follows:
 
-```{r clusters-start, message=FALSE}
+```{r clusters-start-master, message=FALSE}
 # Retrieve the Spark installation directory
 spark_home <- spark_home_dir()
 
-# Build path to start-master.sh
-start_master <- file.path(spark_home, "sbin", "start-master.sh")
+# Build paths and classes
+spark_path <- file.path(spark_home, "bin", "spark-class")
 
-# Execute start-master.sh to start the cluster manager master node
-system2(start_master)
-
-# Build path to start-slave
-start_slave <- file.path(spark_home, "sbin", "start-slave.sh")
-
-# Execute start-slave.sh to start a worker and register in master node
-system2(start_slave, paste0("spark://", system2("hostname", stdout = TRUE), ":7077"))
+# Start cluster manager master node
+system2(spark_path, "org.apache.spark.deploy.master.Master", wait = FALSE)
 ```
 
-The previous command initialized the master node and a worker node, the master node interface can be accessed under [localhost:8080](http://localhost:8080) as captured in Figure \@ref(fig:clusters-spark-standalone-web):
+The previous command initialized the master node, the master node interface can be accessed under [localhost:8080](http://localhost:8080) as captured in Figure \@ref(fig:clusters-spark-standalone-web). Please note the Spark master URL is specified as `spark://address:port`, you will need this URL to initialize worker nodes.
 
 ```{r clusters-spark-standalone-web-code, echo=FALSE}
 invisible(webshot::webshot(
@@ -104,6 +98,14 @@ invisible(webshot::webshot(
 ```
 ```{r clusters-spark-standalone-web, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Spark Standalone Web Interface.'}
 render_image("images/clusters-spark-standalone-web-ui.png")
+```
+
+We can then initialize a sinfle worker using the master URL; although, a similar approach could be used to initialize multiple workers by running the code multiple times and, potentially, acrosss different machines.
+
+```{r clusters-start-worker}
+# Start worker node, find master URL at http://localhost:8080/
+system2(spark_path, c("org.apache.spark.deploy.worker.Worker",
+                      "spark://192.168.0.10:7077"), wait = FALSE)
 ```
 
 Notice that there is one worker register in Spark standalone, you can follow the link to this worker node to see, Figure \@ref(fig:clusters-spark-standalone-webui), details for this particular worker like available memory and cores.
@@ -121,19 +123,11 @@ invisible(webshot::webshot(
 render_image("images/clusters-spark-standalone-web-ui-worker.png")
 ```
 
-Once you are done performing computations in this cluster, you can simply stop all the running nodes in this local cluster by running:
+Once you are done performing computations in this cluster, you can simply restart your R session which will in-turn, stop all the subprocesses associated to it; including the process for the master and worker nodes.
 
-```{r clusters-stop, message=FALSE}
-# Build path to stop-all
-stop_all <- file.path(spark_home, "sbin", "stop-all.sh")
+A similar approach can be followed to configure a cluster by the initialization code over each machine in the cluster.
 
-# Execute stop-all.sh to stop the workers and master nodes
-system2(stop_all)
-```
-
-A similar approach can be followed to configure a cluster by running each `start-slave.sh` command over each machine in the cluster.
-
-**Note:** When running on a Mac, if you hit: `ssh: connect to host localhost port 22: Connection refused`, you will need to manually turn off the workers using `system2("jps")` to list the running Java process and then, `system2("kill", c("-9", "<process id>"))` to stop the specific workers.
+**Warning:** While is possible to initialize a simple standalone cluster, configuring a proper Spark standalone cluster that can recover from computer restarts, failures, supports multiple users, permissions, etc. is usually a much longer process that falls way beyond the scope of this book. Many organization choose instead Spark cloud distributions or partner with vendors that can help reduce this overhead.
 
 #### Yarn
 
