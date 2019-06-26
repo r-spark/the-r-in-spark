@@ -17,11 +17,11 @@ In addition, we will also present how to extend Spark's capabilities to work wit
 
 In the Introduction chapter, you learned that beyond big data and big compute, you can also use Spark to improve velocity, variety and veracity in data tasks. While you can use the learnings of this chapter for any task requiring loading and storing data, it is particularly interesting to present this chapter in the context of dealing with a variety of data sources. To understand why, we should first take a quick detour understanding how data is currently processed in many organizations.
 
-For several years, it's been a common practice to store large datasets in a relational **database**, a system first proposed in 1970 by Edgar F. Codd. [@data-codd-relational] You can think of a database as a collection of tables that are related to one another where each table is carefully designed to hold specific data types and relationships to other tables. Most relational database systems use **SQL** (Structured Query Language) for querying and maintaining the database. Databases are still widely used today, with good reason! -- Databases store data reliably and consistently, your bank probably stores account balances in a database and that's a good practice!
+For several years, it's been a common practice to store large datasets in a relational *database*, a system first proposed in 1970 by Edgar F. Codd. [@data-codd-relational] You can think of a database as a collection of tables that are related to one another where each table is carefully designed to hold specific data types and relationships to other tables. Most relational database systems use *SQL* (Structured Query Language) for querying and maintaining the database. Databases are still widely used today, with good reason! -- Databases store data reliably and consistently, your bank probably stores account balances in a database and that's a good practice!
 
-However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as **ETL** (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became popular in the 1970s. Aside from databases, data is often also loaded into a **data warehouse**, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. The challenge is that changing them, is usually a long and delicate process since data needs to be re-indexed and carefully designed transform data from multiple data sources into a common column or table that they can all share.
+However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as *ETL* (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became popular in the 1970s. Aside from databases, data is often also loaded into a *data warehouse*, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. The challenge is that changing them, is usually a long and delicate process since data needs to be re-indexed and carefully designed transform data from multiple data sources into a common column or table that they can all share.
 
-Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a **data lake** -- a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since data lakes make data available in its original format, it is easy for anyone to use it for analysis which adds significant flexibility over ETL that are often not maintained by data scientists. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure \@ref(fig:data-data-lake).
+Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a *data lake* -- a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since data lakes make data available in its original format, it is easy for anyone to use it for analysis which adds significant flexibility over ETL that are often not maintained by data scientists. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure \@ref(fig:data-data-lake).
 
 ```{r data-data-lake, eval=TRUE, echo=FALSE, fig.cap='Spark processing raw data from a data lakes, databases and data warehouses'}
 render_nomnoml("
@@ -51,7 +51,7 @@ render_nomnoml("
 ", "images/data-data-lake.png")
 ```
 
-In order to support a broad variety of data source, Spark needs to be able to read and write data in several different **file formats** (CSV, JSON, Parquet, etc), access them while stored in also several **file systems** (HDFS, S3, DBFS, etc) and, potentially, interoperate with other **storage systems** (databases, data warehouses, etc) which this chapter will present; but first, we will start by presenting how to read, write and copy data using Spark.
+In order to support a broad variety of data source, Spark needs to be able to read and write data in several different *file formats* (CSV, JSON, Parquet, etc), access them while stored in also several *file systems* (HDFS, S3, DBFS, etc) and, potentially, interoperate with other *storage systems* (databases, data warehouses, etc) which this chapter will present; but first, we will start by presenting how to read, write and copy data using Spark.
 
 ## Read
 
@@ -77,7 +77,7 @@ The following technique allows Spark to read file faster, as well as to reduce r
 
 ### Schema
 
-When reading data, Spark is able to determine the data source's column names and column types, also known as the **schema**. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess the schema, and then assign it. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size data loads. For files that are read over and over again,  the additional read time accumulates over time.
+When reading data, Spark is able to determine the data source's column names and column types, also known as the *schema*. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess the schema, and then assign it. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size data loads. For files that are read over and over again,  the additional read time accumulates over time.
 
 Spark allows the user to provide a column layout. If provided, Spark will bypass the step that it uses to determine the file's layout. In `sparklyr`, we can use the `column` argument to take advantage of this functionality. The `infer_schema` argument also needs to be set to `FALSE`.  This argument is the switch that indicates if the `column` argument should be used.
 
@@ -350,11 +350,11 @@ The following sections will describe special considerations particular to each f
 
 The CSV format may be the most common file type in use today, which is defined by a text file separated by a given character, usually a comma. It should be pretty straightforward to read CSV files; however, it's worth mentioning a couple techniques that can help you process CSVs that are not fully compliant with a well-formed CSV file. Spark offers the following modes for addressing parsing issues:
 
-- **Permissive**: `NULL`s are inserted for missing tokens.
+- *Permissive*: `NULL`s are inserted for missing tokens.
 
-- **Drop Malformed**: Drops lines which are malformed.
+- *Drop Malformed*: Drops lines which are malformed.
 
-- **Fail Fast**: Aborts if encounters any malformed line.
+- *Fail Fast*: Aborts if encounters any malformed line.
 
 These can be used in `sparklyr` by passing them inside the `options` argument.  The following example creates a file with a broken entry.  It then shows how it can be read into Spark.
 
@@ -548,7 +548,7 @@ The section file systems in the Appendix contains tips on how to read and write 
 
 A data lake and Spark usually go hand-in-hand with optional access to storage systems like databases and data warehouses. Presenting all the different storage systems with appropriate examples would be quite time consuming, so instead we will present some of the commonly used storage systems
 
-As a start, Apache **Hive** is a data warehouse software that facilitates reading, writing, and managing large datasets residing in distributed storage using SQL. In fact, Spark has component from Hive built directly into Spark's sources and is very common to have installations of Spark or Hive side-by-side, so we will start by presenting Hive, followed by Cassandra and closing on JDBC connections.
+As a start, Apache *Hive* is a data warehouse software that facilitates reading, writing, and managing large datasets residing in distributed storage using SQL. In fact, Spark has component from Hive built directly into Spark's sources and is very common to have installations of Spark or Hive side-by-side, so we will start by presenting Hive, followed by Cassandra and closing on JDBC connections.
 
 ### Hive
 
@@ -601,7 +601,7 @@ tbl_change_db(sc, "databasename")
 
 ### Cassandra
 
-Apache **Cassandra** is a free and open-source, distributed, wide column store, NoSQL database management system designed to handle large amounts of data across many commodity servers. While there are many other database systems beyond Cassandra, taking a quick look at how Cassandra can be used form Spark will also inform how to make use of other Database and storage systems like Solr, Redshift, Delta Lake, etc.
+Apache *Cassandra* is a free and open-source, distributed, wide column store, NoSQL database management system designed to handle large amounts of data across many commodity servers. While there are many other database systems beyond Cassandra, taking a quick look at how Cassandra can be used form Spark will also inform how to make use of other Database and storage systems like Solr, Redshift, Delta Lake, etc.
 
 The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source.
 
@@ -617,17 +617,17 @@ spark_read_source(
   memory = FALSE)
 ```
 
-One of the most useful features of Spark when dealing with external databases and data warehouses is that, Spark can push down computation to the Database, this is known as **pushdown predicates**; in a nutshell, it improves performance by asking remote databases smart questions. When you execute a query that contains the `filter(age > 20)` expression against a remote table referenced through `spark_read_source()` and not loaded in-memory, rather than bringing the entire table into Spark, it will get passed to the remote database and only a subset of the remote table is retrieved.
+One of the most useful features of Spark when dealing with external databases and data warehouses is that, Spark can push down computation to the Database, this is known as *pushdown predicates*; in a nutshell, it improves performance by asking remote databases smart questions. When you execute a query that contains the `filter(age > 20)` expression against a remote table referenced through `spark_read_source()` and not loaded in-memory, rather than bringing the entire table into Spark, it will get passed to the remote database and only a subset of the remote table is retrieved.
 
 While is ideal to find Spark packages that support the remote storage system, there will be times when a package is not available and vendor JDBC drivers need to be considered.
 
 ### JDBC
 
-When a Spark package is not available to provide connectivity, a JDBC connection can be considered. **JDBC** stands for Java Database Connectivity, t's an interface for the programming language Java, which defines how a client may access a database.
+When a Spark package is not available to provide connectivity, a JDBC connection can be considered. *JDBC* stands for Java Database Connectivity, t's an interface for the programming language Java, which defines how a client may access a database.
 
 It is quite easy to connect to a remote database with `spark_read_jdbc()` and `spark_write_jdbc()`; as long as you have access to the appropriate JDBC driver, which at times is trivial and other times quite an adventure. To keep this simple, we can briefly consider how a connection to a remote MySQL database could be accomplished.
 
-First, you would need to download the appropriate JDBC driver from the MySQL's developer portal and specify this additional driver as a `sparklyr.shell.driver-class-path` connection option. Since JDBC drivers are Java-based, the code is contained inside a **JAR** (Java ARchive) file. Once connected to Spark with the appropriate driver, you can use the `jdbc://` protocol to access particular drivers and databases:
+First, you would need to download the appropriate JDBC driver from the MySQL's developer portal and specify this additional driver as a `sparklyr.shell.driver-class-path` connection option. Since JDBC drivers are Java-based, the code is contained inside a *JAR* (Java ARchive) file. Once connected to Spark with the appropriate driver, you can use the `jdbc://` protocol to access particular drivers and databases:
 
 ```{r}
 sc <- spark_connect(master = "local", config = list(

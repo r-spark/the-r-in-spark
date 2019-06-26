@@ -12,7 +12,7 @@ For those of you who already have a Spark cluster in your organization, you coul
 
 ## Overview {#clusters-overview}
 
-There are three major trends in cluster computing worth discussing: **On-Premise**, **Cloud** computing, and **Kubernetes**. Framing these trends over time will help us understand how they came to be, what they are, and what their future might be. To illustrate this, Figure \@ref(fig:clusters-trends) plots these trends over time using data from Google trends.
+There are three major trends in cluster computing worth discussing: **On-Premise**, *Cloud* computing, and *Kubernetes*. Framing these trends over time will help us understand how they came to be, what they are, and what their future might be. To illustrate this, Figure \@ref(fig:clusters-trends) plots these trends over time using data from Google trends.
 
 ```{r clusters-trends-code, echo=FALSE}
 library(dplyr)
@@ -41,11 +41,11 @@ For **on-premise** clusters, yourself or someone in your organization purchased 
 
 There is nothing preventing you from building our own data center and in fact, many organizations have followed this path. For instance, Amazon started as an online book store, over the years Amazon grew to sell much more than just books and, with its online store growth, their data centers also grew in size. In 2002, Amazon considered [renting servers in their data centers to the public](https://en.wikipedia.org/wiki/Amazon_Web_Services#History), two year laters, Amazon Web Services launched as a way to let anyone rent servers in their data centers on-demand, meaning that, one did not have to purchase, configure, maintain nor teardown it's own clusters but could rather rent them from Amazon directly.
 
-This on-demand compute model is what we know today as **Cloud Computing**. In the cloud, the cluster you use is not owned by you and it's neither in your physical building, but rather, it's a data center owned and managed by someone else. Today, there are many cloud providers in this space ranging from Amazon, Databricks, IBM, Google, Microsoft and many others. Most cloud computing platforms provide a user interface either through a web application and command line to request and manage resources.
+This on-demand compute model is what we know today as *Cloud Computing*. In the cloud, the cluster you use is not owned by you and it's neither in your physical building, but rather, it's a data center owned and managed by someone else. Today, there are many cloud providers in this space ranging from Amazon, Databricks, IBM, Google, Microsoft and many others. Most cloud computing platforms provide a user interface either through a web application and command line to request and manage resources.
 
-While the benefits of processing data in the _cloud_ were obvious for many years, picking a cloud provider had the unintended side-effect of locking organizations with one particular provider, making it hard to switch between providers or back to on-premise clusters. **Kubernetes**, announced by Google in 2014, is an [open source system for managing containerized applications across multiple hosts](https://github.com/kubernetes/kubernetes/). In practice, it makes it easier to deploy across multiple cloud providers and on-premise as well.
+While the benefits of processing data in the _cloud_ were obvious for many years, picking a cloud provider had the unintended side-effect of locking organizations with one particular provider, making it hard to switch between providers or back to on-premise clusters. *Kubernetes*, announced by Google in 2014, is an [open source system for managing containerized applications across multiple hosts](https://github.com/kubernetes/kubernetes/). In practice, it makes it easier to deploy across multiple cloud providers and on-premise as well.
 
-In summary, we have seen a transition from on-premise, to cloud computing and more recently Kubernetes which have been also described as the **private cloud**, the **public cloud** and the **hybrid cloud** respectevely. This chapter will walk you through each cluster computing trend in the context of Spark and R.
+In summary, we have seen a transition from on-premise, to cloud computing and more recently Kubernetes which have been also described as the *private cloud*, the *public cloud* and the *hybrid cloud* respectevely. This chapter will walk you through each cluster computing trend in the context of Spark and R.
 
 ## On-Premise
 
@@ -53,18 +53,18 @@ As mentioned in the overview section, on-premise clusters represent a set of com
 
 When using On-Premise Spark clusters, there are two concepts you should consider:
 
-- **Cluster Manager**: In a similar way as to how an Operating Systems (like Windows os OS X) allows you to run multiple applications in the same computer; a cluster manager allows multiple applications to be run in the same cluster. You will have to choose one yourself when working with On-Premise clusters.
-- **Spark Distribution**: While you can install Spark from the Apache Spark site, many companies partner with companies that can provide support and enhancements to Apache Spark which we often reffer as, Spark distributions.
+- *Cluster Manager*: In a similar way as to how an Operating Systems (like Windows os OS X) allows you to run multiple applications in the same computer; a cluster manager allows multiple applications to be run in the same cluster. You will have to choose one yourself when working with On-Premise clusters.
+- *Spark Distribution*: While you can install Spark from the Apache Spark site, many companies partner with companies that can provide support and enhancements to Apache Spark which we often reffer as, Spark distributions.
 
 ### Managers {#clusters-manager}
 
-In order to run Spark within a computing cluster, you will need to run software capable of initializing Spark over each pyshical machine and register all the available computing nodes, this software is known as a [cluster manager](https://en.wikipedia.org/wiki/Cluster_manager). The available cluster managers in Spark are: **Spark Standalone**, **YARN**, **Mesos** and **Kubernetes**.
+In order to run Spark within a computing cluster, you will need to run software capable of initializing Spark over each pyshical machine and register all the available computing nodes, this software is known as a [cluster manager](https://en.wikipedia.org/wiki/Cluster_manager). The available cluster managers in Spark are: *Spark Standalone*, *YARN*, *Mesos* and *Kubernetes*.
 
 **Note:** In distributed systems and clusters literature, we often refer to each physical machine as a compute instance, compute node, instance or node.
 
 #### Standalone {#clusters-standalone}
 
-In **Spark Standalone**, Spark uses itself as its own cluster manager, which allows you to use Spark without installing additional software in your cluster. This can be useful if you are planning to use your cluster to only run Spark applications; if this cluster is not dedicated to Spark, a generic cluster manager like YARN, Mesos or Kubernetes would be more suitable. The Spark Standalone documentation is available under [spark.apache.org](https://spark.apache.org/docs/latest/spark-standalone.html) [@clusters-spark-standalone-mode] and contains detailed information on configuring, launching, monitoring and enabling high-availability, see Figure \@ref(fig:clusters-spark-standalone).
+In *Spark Standalone*, Spark uses itself as its own cluster manager, which allows you to use Spark without installing additional software in your cluster. This can be useful if you are planning to use your cluster to only run Spark applications; if this cluster is not dedicated to Spark, a generic cluster manager like YARN, Mesos or Kubernetes would be more suitable. The Spark Standalone documentation is available under [spark.apache.org](https://spark.apache.org/docs/latest/spark-standalone.html) [@clusters-spark-standalone-mode] and contains detailed information on configuring, launching, monitoring and enabling high-availability, see Figure \@ref(fig:clusters-spark-standalone).
 
 ```{r clusters-spark-standalone, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Spark Standalone Site'}
 render_image("images/clusters-spark-standalone.png", "Spark Standalone Site")
@@ -141,7 +141,7 @@ YARN for short, or Hadoop YARN, is the resource manager of the Hadoop project. I
 
 One advantage of YARN, is that it is likely to be already installed in many existing clusters that support Hadoop; which means that you can easily use Spark with many existing Hadoop clusters without requesting any major changes to the existing cluster infrastructure. It is also very common to find Spark deployed in YARN clusters since many started out as Hadoop clusters that were eventually upgraded to also support Spark.
 
-YARN applications can be submitted in two modes: **yarn-client** and **yarn-cluster**. In yarn-cluster mode the driver is running remotely (potentially), while in yarn-client mode, the driver is running locally, both modes are supported and are explained further in the Connections chapter.
+YARN applications can be submitted in two modes: **yarn-client* and *yarn-cluster**. In yarn-cluster mode the driver is running remotely (potentially), while in yarn-client mode, the driver is running locally, both modes are supported and are explained further in the Connections chapter.
 
 YARN provides a resource management user interface useful to access logs, monitor available resources, terminate applications, etc. Once connecting to Spark from R, you will be able to manage the running application in YARN, this is shown in Figure \@ref(fig:clusters-hadoop-yarn-site).
 
@@ -167,11 +167,11 @@ Mesos is an Apache project with its documentation available under [mesos.apache.
 
 ### Distributions
 
-One can use a cluster manager in on-premise clusters as described in the previous section; however, many organizations choose to partner with companies providing additional management software, services and resources to help manage applications in their cluster; including, but not limited to, Apache Spark. Some of the on-premise cluster providers include: **Cloudera**, **Hortonworks** and **MapR** to mention a few which we will be briefly introduce next. 
+One can use a cluster manager in on-premise clusters as described in the previous section; however, many organizations choose to partner with companies providing additional management software, services and resources to help manage applications in their cluster; including, but not limited to, Apache Spark. Some of the on-premise cluster providers include: *Cloudera*, *Hortonworks* and *MapR* to mention a few which we will be briefly introduce next. 
 
-**Cloudera**, Inc. is a United States-based software company that provides Apache Hadoop and Apache Spark-based software, support and services, and training to business customers. Cloudera's hybrid open-source Apache Hadoop distribution, CDH (Cloudera Distribution Including Apache Hadoop), targets enterprise-class deployments of that technology. Cloudera donates more than 50% of its engineering output to the various Apache-licensed open source projects (Apache Hive, Apache Avro, Apache HBase, and so on) that combine to form the Apache Hadoop platform. Cloudera is also a sponsor of the Apache Software Foundation. [@clusters-cloudera-wikipedia]
+*Cloudera*, Inc. is a United States-based software company that provides Apache Hadoop and Apache Spark-based software, support and services, and training to business customers. Cloudera's hybrid open-source Apache Hadoop distribution, CDH (Cloudera Distribution Including Apache Hadoop), targets enterprise-class deployments of that technology. Cloudera donates more than 50% of its engineering output to the various Apache-licensed open source projects (Apache Hive, Apache Avro, Apache HBase, and so on) that combine to form the Apache Hadoop platform. Cloudera is also a sponsor of the Apache Software Foundation. [@clusters-cloudera-wikipedia]
 
-Cloudera clusters make use of **parcels**, which are binary distributions containing program files and metadata [@clusters-cloudera-parcel], Spark happens to be installed as a parcel in Cloudera. It's beyond the scope of this book to present how to configure Cloudera clusters, resources and documentation can be found under [cloudera.com](https://www.cloudera.com/products/open-source/apache-hadoop/apache-spark.html), and ["Introducing sparklyr, an R Interface for Apache Spark"](https://blog.cloudera.com/blog/2016/09/introducing-sparklyr-an-r-interface-for-apache-spark/) [@clusters-cloudera-engineering-blog] under Cloudera's Engineering Blog.
+Cloudera clusters make use of *parcels*, which are binary distributions containing program files and metadata [@clusters-cloudera-parcel], Spark happens to be installed as a parcel in Cloudera. It's beyond the scope of this book to present how to configure Cloudera clusters, resources and documentation can be found under [cloudera.com](https://www.cloudera.com/products/open-source/apache-hadoop/apache-spark.html), and ["Introducing sparklyr, an R Interface for Apache Spark"](https://blog.cloudera.com/blog/2016/09/introducing-sparklyr-an-r-interface-for-apache-spark/) [@clusters-cloudera-engineering-blog] under Cloudera's Engineering Blog.
 
 Cloudera provides the Cloudera Manager web interface to manage resource, services, parcels, diagnostics, etc. Figure \@ref(fig:clusters-cloudera-manager-spark) shows a Spark parcel running in Cloduera Manager which you can later use to connect from R.
 
@@ -187,11 +187,11 @@ render_image("images/clusters-cloudera-manager.png")
 | CDH5.9           | sparklyr  | 0.6     | HDFS, Spark | Yes      |
 | CDH5.9           | sparklyr  | 0.7     | HDFS, Spark | Yes      |
 
-**Hortonworks** is a big data software company based in Santa Clara, California. The company develops, supports, and provides expertise on an expansive set of entirely open source software designed to manage data and processing for everything from IOT, to advanced analytics and machine learning. Hortonworks believes it is a data management company bridging the cloud and the datacenter. [@clusters-hortonworks-wikipedia]
+*Hortonworks* is a big data software company based in Santa Clara, California. The company develops, supports, and provides expertise on an expansive set of entirely open source software designed to manage data and processing for everything from IOT, to advanced analytics and machine learning. Hortonworks believes it is a data management company bridging the cloud and the datacenter. [@clusters-hortonworks-wikipedia]
 
 Hortonworks partnered with Microsoft [@clusters-hortonworks-microsoft] to improve support in Microsoft Windows for Hadoop and Spark, this used to be a differentiation point; however, comparing Hortonworks and Cloudera is less relevant today since both companies are merging in 2019. [@clusters-hortonworks-cloudera] While the companies are merging, support for the Cloudera and Hortonworks Spark distributions are still available. Additional resources to configure Spark under Hortonworks are available under [hortonworks.com](https://hortonworks.com/apache/spark/).
 
-**MapR** is a business software company headquartered in Santa Clara, California. MapR provides access to a variety of data sources from a single computer cluster, including big data workloads such as Apache Hadoop and Apache Spark, a distributed file system, a multi-model database management system, and event stream processing, combining analytics in real-time with operational applications. Its technology runs on both commodity hardware and public cloud computing services. [@clusters-mapr-wikipedia]
+*MapR* is a business software company headquartered in Santa Clara, California. MapR provides access to a variety of data sources from a single computer cluster, including big data workloads such as Apache Hadoop and Apache Spark, a distributed file system, a multi-model database management system, and event stream processing, combining analytics in real-time with operational applications. Its technology runs on both commodity hardware and public cloud computing services. [@clusters-mapr-wikipedia]
 
 ## Cloud
 

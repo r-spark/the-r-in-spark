@@ -23,9 +23,9 @@ While this chapter might feel a bit dry -- connecting and troubleshooting connec
 
 ## Overview {#connections-overview}
 
-The overall connection architecture for a Spark cluster is composed of three type of compute instances: the **driver node**, the **worker nodes** and the **cluster manager**. A cluster manager is a service that allows Spark to be executed in the cluster, this was detailed in the previous chapter under the [cluster managers](#clusters-manager) section. The **worker nodes** (also referred to as **executors**) execute compute tasks over partitioned data and communicate intermediate results to other workers or back to the driver node. The **driver node** is tasked with delegating work to the worker nodes, but also for aggregating their results and controlling computation flow. For the most part, aggregation happens in the worker nodes; however, even after the nodes aggregate data, it is often the case that the driver node would have to collect the worker's results. Therefore, the driver node usually has at least, but often much more, compute resources (memory, CPUs, local storage, etc.) than the worker node.
+The overall connection architecture for a Spark cluster is composed of three type of compute instances: the *driver node*, the *worker nodes* and the *cluster manager*. A cluster manager is a service that allows Spark to be executed in the cluster, this was detailed in the previous chapter under the [cluster managers](#clusters-manager) section. The *worker nodes* (also referred to as *executors*) execute compute tasks over partitioned data and communicate intermediate results to other workers or back to the driver node. The *driver node* is tasked with delegating work to the worker nodes, but also for aggregating their results and controlling computation flow. For the most part, aggregation happens in the worker nodes; however, even after the nodes aggregate data, it is often the case that the driver node would have to collect the worker's results. Therefore, the driver node usually has at least, but often much more, compute resources (memory, CPUs, local storage, etc.) than the worker node.
 
-Strictly speaking, the driver node and worker nodes are just names assigned to machines with particular roles, while the actual computation in the driver node is performed by the **spark context**. The Spark context is the main entry point for Spark functionality [@connections-spark-context-scala] since it's tasked with scheduling tasks, managing storage, tracking execution status, access configuration settings, canceling jobs and so on. In the worker nodes, the actual computation is performed under a **spark executor**, which is a Spark component tasked with executing subtasks against specific data partition.
+Strictly speaking, the driver node and worker nodes are just names assigned to machines with particular roles, while the actual computation in the driver node is performed by the *spark context*. The Spark context is the main entry point for Spark functionality [@connections-spark-context-scala] since it's tasked with scheduling tasks, managing storage, tracking execution status, access configuration settings, canceling jobs and so on. In the worker nodes, the actual computation is performed under a *spark executor*, which is a Spark component tasked with executing subtasks against specific data partition.
 
 We can illustrate this concepts in Figure \@ref(fig:connections-architecture), where the driver node orchestrates worker's work through the cluster manager.
 
@@ -39,13 +39,13 @@ render_nomnoml("
 ", "images/connections-spark-architecture.png", "Apache Spark Architecture", styles)
 ```
 
-If you already have a Spark cluster in your organization, you should request the connection information to this cluster from your cluster administrator, read their usage policies carefully and follow their advice. Since a cluster may be shared among many users, you want to make sure you only request the compute resources you need -- we will cover how to request resources in the Tuning chapter. Your system administrator will describe if it's an **on-premise** vs **cloud** cluster, the **cluster manager** being used, supported **connections** and supported **tools**. You can use this information to jump directly to [Local](#connections-local), [Standalone](#connections-standalone), [YARN](#connections-yarn), [Mesos](#connections-mesos), [Livy](#connections-livy) or [Kubernetes](#connections-kubernetes) based on the information provided to you.
+If you already have a Spark cluster in your organization, you should request the connection information to this cluster from your cluster administrator, read their usage policies carefully and follow their advice. Since a cluster may be shared among many users, you want to make sure you only request the compute resources you need -- we will cover how to request resources in the Tuning chapter. Your system administrator will describe if it's an **on-premise* vs *cloud** cluster, the *cluster manager* being used, supported *connections* and supported *tools*. You can use this information to jump directly to [Local](#connections-local), [Standalone](#connections-standalone), [YARN](#connections-yarn), [Mesos](#connections-mesos), [Livy](#connections-livy) or [Kubernetes](#connections-kubernetes) based on the information provided to you.
 
 **Note:** Once connected is performed with `spark_connect()`, you can use all techniques described in previous chapters using the `sc` connection; for instance, you can do [data analysis](#analysis) or [modeling](#modeling) with the same code previous chapters presented.
 
 ### Edge Nodes {#connections-spark-edge-nodes}
 
-Computing clusters are configured to enable high-bandwidth and fast network connectivity between nodes. To optimize network connectivity, the nodes in the cluster are configured to trust each other and to disable security features. This improves performance but requires the cluster to be secured by closing all external network communication, making the entire cluster secure as a whole. Except for a few cluster machines that are carefully configured to accept connections from outside the cluster; conceptually, these machines are located in the "edge" of the cluster and are known as **edge nodes**.
+Computing clusters are configured to enable high-bandwidth and fast network connectivity between nodes. To optimize network connectivity, the nodes in the cluster are configured to trust each other and to disable security features. This improves performance but requires the cluster to be secured by closing all external network communication, making the entire cluster secure as a whole. Except for a few cluster machines that are carefully configured to accept connections from outside the cluster; conceptually, these machines are located in the "edge" of the cluster and are known as *edge nodes*.
 
 Therefore, before connecting to Apache Spark, it is likely you will first have to connect to an edge node in your cluster. There are two methods to connect:
 
@@ -53,7 +53,7 @@ Terminal
 : Using a [computer terminal](https://en.wikipedia.org/wiki/Computer_terminal) application, one can use a [secure shell](https://en.wikipedia.org/wiki/Secure_Shell) to establish a remote connection into the cluster, once you connect into the cluster, you can launch R and then use `sparklyr`. However, a terminal can be cumbersome for some tasks, like exploratory data analysis, so it's often only used while configuring the cluster or troubleshooting issues.
 
 Web Browser
-: While using `sparklyr` from a terminal is possible, it is usually more productive to install a **web server** in an edge node that provides access to run R with `sparklyr` from a web browser. Most likely, you will want to consider using [RStudio](RStudio Server) or Jupyter rather than connecting from the terminal.
+: While using `sparklyr` from a terminal is possible, it is usually more productive to install a *web server* in an edge node that provides access to run R with `sparklyr` from a web browser. Most likely, you will want to consider using [RStudio](RStudio Server) or Jupyter rather than connecting from the terminal.
 
 Figure \@ref(fig:connections-spark-edge) explains these concepts visually. The left block is usually your web browser, the right block is the edge node, client and edge node communicate over HTTP when using a web browser or SSH when using the terminal.
 
@@ -215,7 +215,7 @@ Cluster mode assumes that the node running `spark_connect()` is properly configu
 
 ## Livy {#connections-livy}
 
-As opposed to other connection methods which require using an edge node in the cluster, [Livy](#clusters-livy) provides a **Web API** that makes the Spark cluster accessible from outside the cluster and does not require a Spark installation in the client. Once connected through the Web API, the **Livy Service** starts the Spark context by requesting resources from the cluster manager and distributing work as usual. Figure \@ref(fig:connections-livy-diagram) illustrates a Livy connection, notice that the client connects remotely to the driver through a web API.
+As opposed to other connection methods which require using an edge node in the cluster, [Livy](#clusters-livy) provides a *Web API* that makes the Spark cluster accessible from outside the cluster and does not require a Spark installation in the client. Once connected through the Web API, the *Livy Service* starts the Spark context by requesting resources from the cluster manager and distributing work as usual. Figure \@ref(fig:connections-livy-diagram) illustrates a Livy connection, notice that the client connects remotely to the driver through a web API.
 
 ```{r connections-livy-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='Livy Connection Diagram'}
 render_nomnoml("
@@ -344,26 +344,26 @@ system2("kubectl", "cluster-info")
 
 ## Cloud
 
-When working with cloud providers, there are a few connection differences. For instance, connecting from **Databricks** requires the following connection method:
+When working with cloud providers, there are a few connection differences. For instance, connecting from *Databricks* requires the following connection method:
 
 ```{r connections-clusters-databricks}
 sc <- spark_connect(method = "databricks")
 ```
 
-Since Amazon **EMR** makes use of YARN, you can connect using `master = "yarn"`:
+Since Amazon *EMR* makes use of YARN, you can connect using `master = "yarn"`:
 
 ```{r connections-clusters-emr}
 sc <- spark_connect(master = "yarn")
 ```
 
-Connections to Spark when using IBM's **Watson Studio** requires you to retrieve a configuration object through a `load_spark_kernels()` function IBM provides:
+Connections to Spark when using IBM's *Watson Studio* requires you to retrieve a configuration object through a `load_spark_kernels()` function IBM provides:
 
 ```{r connections-clusters-ibm}
 kernels <- load_spark_kernels()
 sc <- spark_connect(config = kernels[2])
 ```
 
-Under Microsoft Azure **HDInsights** and when using ML Services (R Server), creating an `sparklyr` connection gets initialized through:
+Under Microsoft Azure *HDInsights* and when using ML Services (R Server), creating an `sparklyr` connection gets initialized through:
 
 ```{r connections-clusters-azure}
 library(RevoScaleR)
@@ -371,7 +371,7 @@ cc <- rxSparkConnect(reset = TRUE, interop = "sparklyr")
 sc <- rxGetSparklyrConnection(cc)
 ```
 
-Connecting from **Qubole** requires using the `qubole` connection method:
+Connecting from *Qubole* requires using the `qubole` connection method:
 
 ```{r connections-clusters-qubole}
 sc <- spark_connect(method = "qubole")
@@ -425,7 +425,7 @@ You can customize your script by passing additional command line arguments to `s
 
 When connecting to a Spark Cluster using tools like Jupyter and RStudio, you can run the same connection parameters presented in this chapater. However, since many cloud providers make use of a web proxy to secure Spark's web interface, in order to use `spark_web()` or the RStudio connections pane extension, you will need to properly configure the `sparklyr.web.spark` setting which you would then pass to `spark_config()` through the `config` parameter.
 
-For instance, when using Amazon **EMR**, you can configure `sparklyr.web.spark` and `sparklyr.web.yarn` by dinamically retrieving the YARN application and building the EMR proxy URL:
+For instance, when using Amazon *EMR*, you can configure `sparklyr.web.spark` and `sparklyr.web.yarn` by dinamically retrieving the YARN application and building the EMR proxy URL:
 
 ```{r connections-amazon-emr}
 domain <- "http://ec2-12-345-678-9.us-west-2.compute.amazonaws.com"
@@ -468,7 +468,7 @@ spark_disconnect_all()
 
 ## Troubleshooting {#connections-troubleshooting}
 
-Last but not least, we will introduce the following troubleshooting techniques: **Logging**, **Spark Submit** and **Windows**. When in doubt of where to start, start with the Windows section when using Windows systems, followed by Logging and closing with Spark Submit. This techniques are useful when running `spark_connect()` fails with an error message.
+Last but not least, we will introduce the following troubleshooting techniques: *Logging*, *Spark Submit* and *Windows*. When in doubt of where to start, start with the Windows section when using Windows systems, followed by Logging and closing with Spark Submit. This techniques are useful when running `spark_connect()` fails with an error message.
 
 ### Logging
 

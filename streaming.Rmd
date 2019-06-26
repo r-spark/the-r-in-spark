@@ -23,11 +23,11 @@ The next section will breakdown how Spark Streams work, and how `sparklyr` inter
 
 In practice, a Spark Stream update is a three stage operation. This is the breakdown of the three stages:
 
-1. **Read** - The stream is expected to append new files in a specified folder. Those new files contain the most recent information from the stream.  Spark monitors the folder, and reads the data from the files. The following file formats are supported: CSV, text, JSON, parquet, and orc. 
+1. *Read* - The stream is expected to append new files in a specified folder. Those new files contain the most recent information from the stream.  Spark monitors the folder, and reads the data from the files. The following file formats are supported: CSV, text, JSON, parquet, and orc. 
 
-1. **Transform** - Spark applies the desired operations on top of the data. No special `sparklyr` functions are needed to transform stream data.  You can use same `dplyr` verbs, Spark transformers and even native R code (via `spark_apply()`).
+1. *Transform* - Spark applies the desired operations on top of the data. No special `sparklyr` functions are needed to transform stream data.  You can use same `dplyr` verbs, Spark transformers and even native R code (via `spark_apply()`).
 
-1. **Write** - The results of the transformed input are saved in a different folder.  The following file formats are supported: CSV, text, JSON, parquet, and orc.
+1. *Write* - The results of the transformed input are saved in a different folder.  The following file formats are supported: CSV, text, JSON, parquet, and orc.
 
 Figure \@ref(fig:streaming-working) provides a visual aid to what each stage does and how they connect:
 
@@ -463,7 +463,7 @@ In this section we will cover how Kafka integrates with Spark, and how we can us
 
 ### Kafka Workflow
 
-A most basic Kafka workflow is illustrated on Figure \@ref(fig:streaming-kafka-apis). An application that streams data into Kafka is called a **Producer**.  Kafka stores the stream as records. Each record has a key, a value and a timestamp. Kafka can handle multiple streams that contain different information, to properly categorize each stream, Kafka uses a mechanism called topic. A topic is a alpha-numeric identifier of the stream.  A **Consumer** is an app that is external to Kafka that reads what is stored in Kafka for a given topic. The Consumer app is constantly monitoring the topic, that is called a subscription. 
+A most basic Kafka workflow is illustrated on Figure \@ref(fig:streaming-kafka-apis). An application that streams data into Kafka is called a *Producer*.  Kafka stores the stream as records. Each record has a key, a value and a timestamp. Kafka can handle multiple streams that contain different information, to properly categorize each stream, Kafka uses a mechanism called topic. A topic is a alpha-numeric identifier of the stream.  A *Consumer* is an app that is external to Kafka that reads what is stored in Kafka for a given topic. The Consumer app is constantly monitoring the topic, that is called a subscription. 
 
 ```{r streaming-kafka-apis, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Basic workflow', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -502,7 +502,7 @@ Spark Streaming enables the integration of Spark with Kafka.  Spark is able to b
 Unless there is a very specific need, using Spark as a Producer does not make much sense.  That is because Spark Streaming reacts to a stream, it doesn't generate it.  
 Use Spark to read (Consumer) from one, or several, topics and then reactively write (Producer) to a different topic with the results of the analysis, all within the same Kafka cluster. This effectively makes Spark a Stream Processor.
 
-There are nuances on how the Spark-to-Kafka write-back modes works, so it is important for us to offer some clarification.  There are three modes available: **complete**, **update** and **append**.  The **complete** mode will provide the totals for every group every time there is a new batch.  The **update** mode will provide totals for only the groups that have updates in the latest batch.  The **append** mode is able to add raw records to the target topic.  This mode is not meant for aggregates, but works well for passing a filtered subset to the target topic. 
+There are nuances on how the Spark-to-Kafka write-back modes works, so it is important for us to offer some clarification.  There are three modes available: *complete*, *update* and *append*.  The *complete* mode will provide the totals for every group every time there is a new batch.  The *update* mode will provide totals for only the groups that have updates in the latest batch.  The *append* mode is able to add raw records to the target topic.  This mode is not meant for aggregates, but works well for passing a filtered subset to the target topic. 
 
 The next step is to review how we can integrate R with Kafka and Spark Streaming. 
 
@@ -541,11 +541,11 @@ stream_read_kafka(
 
 In this example, we will setup a Producer, and a Kafka engine outside of R. Inside R, we will start a Spark Stream Processor and a Consumer. 
 
-The **Producer** will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". 
+The *Producer* will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". 
 
-A **Stream Processor** will be built in Spark by having it read the "letters" topic, and then produce the count by unique letter passed through the stream.  The count will be passed back to Kafka in separate topic called "totals". 
+A *Stream Processor* will be built in Spark by having it read the "letters" topic, and then produce the count by unique letter passed through the stream.  The count will be passed back to Kafka in separate topic called "totals". 
 
-To see the results, the same Spark connection will be used to setup a **Consumer** that reads the "totals" topic. Figure \@ref(fig:streaming-kafka-example) is a diagram of how this example will work. 
+To see the results, the same Spark connection will be used to setup a *Consumer* that reads the "totals" topic. Figure \@ref(fig:streaming-kafka-example) is a diagram of how this example will work. 
 
 ```{r streaming-kafka-example, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Kafka example', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -584,7 +584,7 @@ render_nomnoml("
 ", "images/streaming-kafka-processor.png")
 ```
 
-The **infrastructure** used for this example was a local, single node Kafka cluster.  The external Producer uses the Kafka command line interface (CLI) to send the stream of letters. The installation instructions that were used can be found in the Appendix under the Kafka section. 
+The *infrastructure* used for this example was a local, single node Kafka cluster.  The external Producer uses the Kafka command line interface (CLI) to send the stream of letters. The installation instructions that were used can be found in the Appendix under the Kafka section. 
 
 #### Example steps
 

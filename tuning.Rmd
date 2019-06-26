@@ -17,12 +17,12 @@ In subsequent chapters, Extensions, Distributed R and Streaming, you will learn 
 
 Spark performs distributed computation by configuring, partitioning, executing, shuffling, caching and serializing data, tasks and resources across multiple machines:
 
-- [**Configuring**](#tuning-configuring) requests the cluster manager for resources: total machines, memory, etc.
-- [**Partitioning**](#tuning-configuring) splits the data among various machines. Partitions can be either implicit or explicit.
-- [**Executing**](#tuning-configuring) means running an arbitrary transformation over each partition.
-- [**Shuffling**](#tuning-configuring) redistributes data to the correct machine.
-- [**Caching**](#tuning-configuring) preserves data in-memory across different computation cycles.
-- [**Serializing**](#tuning-serializing) transforms data to be sent over the network to other workers or back to the driver node.
+- [*Configuring*](#tuning-configuring) requests the cluster manager for resources: total machines, memory, etc.
+- [*Partitioning*](#tuning-configuring) splits the data among various machines. Partitions can be either implicit or explicit.
+- [*Executing*](#tuning-configuring) means running an arbitrary transformation over each partition.
+- [*Shuffling*](#tuning-configuring) redistributes data to the correct machine.
+- [*Caching*](#tuning-configuring) preserves data in-memory across different computation cycles.
+- [*Serializing*](#tuning-serializing) transforms data to be sent over the network to other workers or back to the driver node.
 
 To illustrate each concept, we will create three partitions with unordered integers and then sort them with `arrange()`:
 
@@ -40,11 +40,11 @@ data <- copy_to(sc,
 data %>% arrange(id) %>% collect()
 ```
 
-The diagram in Figure \@ref(fig:tuning-overview) shows how this sorting **job** would conceptually work across a cluster of machines. First, Spark would **configure** the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the **data** is already partitioned, each worker node loads this implicit **partition**; for instance, `4,9,1` is loaded in the first worker node. Afterwards, a *task* is distributed to each worker to apply a transformation to each data partition in each worker node, this task is denoted by `f(x)`. In this example, `f(x)` **executes** a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed.
+The diagram in Figure \@ref(fig:tuning-overview) shows how this sorting *job* would conceptually work across a cluster of machines. First, Spark would *configure* the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the *data* is already partitioned, each worker node loads this implicit *partition*; for instance, `4,9,1` is loaded in the first worker node. Afterwards, a *task* is distributed to each worker to apply a transformation to each data partition in each worker node, this task is denoted by `f(x)`. In this example, `f(x)` *executes* a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed.
 
-The result is then **shuffled** to the correct machine to finish the sorting operation across the entire dataset, this completes a stage. A **stage** is a set of operations that Spark can execute without shuffling data between machines. Once the data is sorted across the cluster, the sorted results can be optionally **cached** in memory to avoid rerunning this computation multiple times. 
+The result is then *shuffled* to the correct machine to finish the sorting operation across the entire dataset, this completes a stage. A *stage* is a set of operations that Spark can execute without shuffling data between machines. Once the data is sorted across the cluster, the sorted results can be optionally *cached* in memory to avoid rerunning this computation multiple times. 
 
-Finally, a small subset of the results is **serialized**, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.
+Finally, a small subset of the results is *serialized*, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.
 
 ```{r tuning-overview-code, echo=FALSE}
 r2d3::r2d3(
@@ -60,15 +60,15 @@ render_image("images/tuning-spark-overview.png", "Sorting Distributed Data with 
 
 Notice that while Figure \@ref(fig:tuning-overview) describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, most of these lower level operations are not exposed in `sparklyr`; instead, `sparklyr` makes those operations available through higher level commands provided by data [analysis](#analysis) tools like `dplyr` or `DBI`, [modeling](#modeling), and by using many [extensions](#extensions). For those few cases where you might need to implement lowe-level operations, you can always use the Spark's Scala API through an `sparklyr` [extensions](#extension) or run custom [distributed R](#distributed) code.
 
-In order to effectively tune Spark, we will start by getting familiar with Spark's computation [**graph**](#tuning-graph-visualization) and Spark's event [**timeline**](#tuning-event-timeline). Both are accessible through [Spark's web interface](#starting-spark-web-interface).
+In order to effectively tune Spark, we will start by getting familiar with Spark's computation [*graph*](#tuning-graph-visualization) and Spark's event [*timeline*](#tuning-event-timeline). Both are accessible through [Spark's web interface](#starting-spark-web-interface).
 
 ### Graph {#tuning-graph-visualization}
 
 Spark describes all computation steps using a Directed Acyclic Graph (DAG), which means that all computations in Spark move computation forward without repeating previous steps, this helps Spark optimize computations effectively.
 
-The best way to understand Spark's computation graph for a given operation, sorting for our example, is to open the last **completed query** under the **SQL** tab in [Spark's web interface](#starting-spark-web-interface). Figure \@ref(fig:tuning-graph-sql-render) show the resulting graph for this sorting operation, this graph contains the following operations:
+The best way to understand Spark's computation graph for a given operation, sorting for our example, is to open the last *completed query* under the *SQL* tab in [Spark's web interface](#starting-spark-web-interface). Figure \@ref(fig:tuning-graph-sql-render) show the resulting graph for this sorting operation, this graph contains the following operations:
 
-- **WholeStageCodegen:** This block describes that the operations it contains were used to generate computer code that was efficiently translated to **byte code**. There is usually a small cost associated with translating operations into byte code, but this is a small cost to pay since then the operations can be execute much faster from Spark. In general, you can ignore this blog and focus on the blocks that it contains.
+- **WholeStageCodegen:* This block describes that the operations it contains were used to generate computer code that was efficiently translated to *byte code**. There is usually a small cost associated with translating operations into byte code, but this is a small cost to pay since then the operations can be execute much faster from Spark. In general, you can ignore this blog and focus on the blocks that it contains.
 - **InMemoryTableScan:** This means that the original dataset `data` was stored in-memory and traversed row-by-row once.
 - **Exchange:** Partitions were exchanged, read shuffled, across executors in your cluster.
 - **Sort:** Once the records arrived at the right executor, they were sorted in this final stage.
@@ -101,7 +101,7 @@ Next, we will dive into a Spark stage and explore its event timeline.
 
 ### Timeline {#tuning-event-timeline}
 
-The **event timeline** is a great summary of how Spark is spending computation cycles over each stage. Ideally, you want to see this timeline consisting of mostly CPU usage since other tasks can be considered overhead. You also want to see Spark using all the CPUs across all the cluster nodes available to you.
+The *event timeline* is a great summary of how Spark is spending computation cycles over each stage. Ideally, you want to see this timeline consisting of mostly CPU usage since other tasks can be considered overhead. You also want to see Spark using all the CPUs across all the cluster nodes available to you.
 
 Select the first stage in the current job and expand the "Event Timeline", you should see a timeline similar to Figure \@ref(fig:tuning-timeline-simple). Notice that we explicitly requested three partitions, which is represented by three lanes in this visualization.
 
@@ -198,10 +198,10 @@ When using YARN in Cluster mode, `sparklyr.shell.driver-cores` can be used to co
 
 There are a few types of configuration settings:
 
-- **Connect** settings are set as parameters to `spark_connect()`, they are common settings used while connecting.
-- **Submit** settings are set while `sparklyr` is being submitted to Spark through `spark-submit`, some dependent on the cluster manager being used.
-- **Runtime** settings configure Spark when the Spark session is created, these settings are independent to the cluster manager and specific to Spark.
-- **sparklyr** settings configure `sparklyr` behaviour, these settings are independent to the cluster manager and particular to R.
+- *Connect* settings are set as parameters to `spark_connect()`, they are common settings used while connecting.
+- *Submit* settings are set while `sparklyr` is being submitted to Spark through `spark-submit`, some dependent on the cluster manager being used.
+- *Runtime* settings configure Spark when the Spark session is created, these settings are independent to the cluster manager and specific to Spark.
+- *sparklyr* settings configure `sparklyr` behaviour, these settings are independent to the cluster manager and particular to R.
 
 The following subsections present extensive lists of all the available settings. It is not required to fully understand them all while tuning Spark, but skimming through them could prove useful in the future while troubleshooting issues. You can also consider skipping the following settings subsections and use them instead as reference material as needed.
 
@@ -260,7 +260,7 @@ In general, any `spark-submit` setting is configured through `sparklyr.shell.X`,
 
 ### Runtime Settings
 
-As mentioned, some **Spark** settings configure the session runtime. The runtime settings are a superset of the [submit settings](#submit-settings) since is usually helpful to retrieve the current configuration even if a setting can't be changed.
+As mentioned, some *Spark* settings configure the session runtime. The runtime settings are a superset of the [submit settings](#submit-settings) since is usually helpful to retrieve the current configuration even if a setting can't be changed.
 
 To list the Spark settings set in your current Spark session, you can run:
 
@@ -295,9 +295,9 @@ knitr::kable(spark_config_settings())
 
 ## Partitioning {#tuning-partitioning}
 
-As mentioned in the Introduction chapter, MapReduce and Spark were designed with the purpose of performing computations against data stored across many machines. The subset of the data available for computation over each compute instance is known as a **partition**.
+As mentioned in the Introduction chapter, MapReduce and Spark were designed with the purpose of performing computations against data stored across many machines. The subset of the data available for computation over each compute instance is known as a *partition*.
 
-By default, Spark will compute over each existing **implicit** partition since it's more effective to run computations were the data is already located. However, there are cases where you will want to set an **explicit** partition to help Spark use more efficient use of your cluster resources.
+By default, Spark will compute over each existing *implicit* partition since it's more effective to run computations were the data is already located. However, there are cases where you will want to set an *explicit* partition to help Spark use more efficient use of your cluster resources.
 
 ### Implicit
 
@@ -318,7 +318,7 @@ While in most cases the default partitions works just fine, there are cases wher
 
 ### Explicit
 
-There will be times when you have many more compute instances than data partitions, or much less compute instances than the number of partitions in your data. In both cases, it can help to **repartition** data to match your cluster resources.
+There will be times when you have many more compute instances than data partitions, or much less compute instances than the number of partitions in your data. In both cases, it can help to *repartition* data to match your cluster resources.
 
 Various [data](#data) functions, like `spark_read_csv()`, already support a `repartition` parameter to request Spark to repartition data appropriately. For instance, we can create a sequence of 10 numbers partitioned by 10 as follows:
 
@@ -376,7 +376,7 @@ The results show that sorting data with two partitions is almost twice as fast; 
 
 ## Caching {#tuning-caching}
 
-Recall from the [introduction](Intro) that Spark was designed to be faster than its predecessors by using memory instead of disk to store data. This is formally known as a Spark **RDD** and stands for resilient distributed dataset. An RDD distributes copies of the same data across many machines, such that, if one machine fails other can complete the task -- hence the resilient name. Resiliency is important in distributed systems since, while things will usually work in one machine, when running over thousands of machines the likelihood of something failing is much higher. When a failure happens, it is preferable to be fault tolerant to avoid losing the work of all the other machines. RDDs accomplish this by tracking data lineage information to rebuild lost data automatically on failure.
+Recall from the [introduction](Intro) that Spark was designed to be faster than its predecessors by using memory instead of disk to store data. This is formally known as a Spark *RDD* and stands for resilient distributed dataset. An RDD distributes copies of the same data across many machines, such that, if one machine fails other can complete the task -- hence the resilient name. Resiliency is important in distributed systems since, while things will usually work in one machine, when running over thousands of machines the likelihood of something failing is much higher. When a failure happens, it is preferable to be fault tolerant to avoid losing the work of all the other machines. RDDs accomplish this by tracking data lineage information to rebuild lost data automatically on failure.
 
 In `sparklyr`, you can control when an RDD gets loaded or unloaded from memory using `tbl_cache()` and `tbl_uncache()`.
 
@@ -434,7 +434,7 @@ Memory in Spark is categorized into reserved, user, execution or storage:
 - **Execution:** Execution memory is used to execute code by Spark, mostly, to process the results from the partition and perform shuffling.
 - **Storage:** Storage memory is used to cache RDDs, for instance, when using `tbl_cache()` in `sparklyr`.
 
-As part of tuning execution, you can consider tweaking the amount of memory allocated for **user**, **execution** and **storage** by creating a Spark connection with different values than the defaults provided in Spark:
+As part of tuning execution, you can consider tweaking the amount of memory allocated for *user*, *execution* and *storage* by creating a Spark connection with different values than the defaults provided in Spark:
 
 ```{r tuning-memory-fraction}
 config <- spark_config()

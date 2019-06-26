@@ -117,16 +117,16 @@ The rest of this chapter will explain in detail use cases, features, caveats, co
 In the overview section we presented an example to help you understand how `spark_apply()` works; this section will cover a few practical use case for `spark_apply()`:
 
 Import
-: You can consider using R to import data from external data sources and formats. For example, when a file format is not natevely supported in Spark or its extensions, you can consider using R code to implement a distributed **custom parser** using R packages.
+: You can consider using R to import data from external data sources and formats. For example, when a file format is not natevely supported in Spark or its extensions, you can consider using R code to implement a distributed *custom parser* using R packages.
 
 Model
-: It is natural to use the rich modeling capabilities already available in R with Spark. In most cases, R models can't be used across large data; however, we will present two particular use cases where R models can be useful at scale. For instance, when data fits into a single machine you can make use of **grid search** to optimize their parameters in parallel. In cases where the data can be partitioned to create several models over subsets of the data you can use **partitioned modeling** in R to compute models across partitions.
+: It is natural to use the rich modeling capabilities already available in R with Spark. In most cases, R models can't be used across large data; however, we will present two particular use cases where R models can be useful at scale. For instance, when data fits into a single machine you can make use of *grid search* to optimize their parameters in parallel. In cases where the data can be partitioned to create several models over subsets of the data you can use *partitioned modeling* in R to compute models across partitions.
 
 Transform
-: You can make use of R's rich data transformation capabilities to complement Spark. We will present a use case of evaluating data by external systems and use R to interoperate with them by calling them through a **web API**.
+: You can make use of R's rich data transformation capabilities to complement Spark. We will present a use case of evaluating data by external systems and use R to interoperate with them by calling them through a *web API*.
 
 Compute
-: When you need to perform large-scale computation in R, or big-compute as described in the Introduction chapter, Spark is ideal to distribute this computation. We will present **distributed rendering** as a particular use case for large-scale computing in R.
+: When you need to perform large-scale computation in R, or big-compute as described in the Introduction chapter, Spark is ideal to distribute this computation. We will present *distributed rendering* as a particular use case for large-scale computing in R.
 
 We will now explore each use case in detail and provide a working example to help you understand how you use `spark_apply()` effectevely.
 
@@ -613,7 +613,7 @@ The `context` parameter will proof to be extremely useful; for instance, the nex
 
 ## Functions
 
-Previous sections presented `spark_apply()` as an operation to perform custom transformations using a function or expression, in programming literature functions with a context are also reffered as a **closure**.
+Previous sections presented `spark_apply()` as an operation to perform custom transformations using a function or expression, in programming literature functions with a context are also reffered as a *closure*.
 
 Expressions are useful to define short transformations, like `~ 10 * .x`. For an expression, `.x` contains a partition and `.y` the context, when available. However, it can be hard to define an expression for complex code that spans multiple lines, for those cases, functions are more appropriate.
 
@@ -695,7 +695,7 @@ Lets take a look at each requirement to make sure you properly consider the trad
 
 ### Installing R
 
-Starting with the first requirement, the R Runtime is expected to be pre-installed in **every** node in the cluster, this is a requirement specific to `spark_apply()`. 
+Starting with the first requirement, the R Runtime is expected to be pre-installed in *every* node in the cluster, this is a requirement specific to `spark_apply()`. 
 
 Failure to install R in every node will trigger a `Cannot run program, no such file or directory` error while attempting to use `spark_apply()`.
 
@@ -726,7 +726,7 @@ Microsoft HDInsight
 : R is pre-installed and no additional steps are needed.
 
 Livy
-: Livy connections **do not** support distributing packages since the client machine where the libraries are precompiled might not have the same processor architecture, nor operating systems than the cluster machines.
+: Livy connections *do not* support distributing packages since the client machine where the libraries are precompiled might not have the same processor architecture, nor operating systems than the cluster machines.
 
 Strictly speaking, this completes the last requirement for your cluster. However, we strongly recommend you use Apache Arrow with `spark_apply()` to support large-scale computation with minimal overhead.
 
