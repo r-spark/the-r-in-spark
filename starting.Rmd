@@ -422,14 +422,9 @@ write.csv(mtcars, "input/cars_1.csv", row.names = F)
 Then we will define a stream that processes incoming data from the `input/` folder, performs a custom transformation in R and, pushes the output into an `output/` folder
 
 ```{r}
-stream_read_csv(sc, "input/") %>%
-  spark_apply(~sapply(.x, jitter)) %>%
+stream <- stream_read_csv(sc, "input/") %>%
+    select(mpg, cyl, disp) %>%
   stream_write_csv("output/")
-```
-```
-Stream: 720aac2a-d4aa-4e6c-828d-325d8b017fdb
-Status: Waiting for next trigger
-Active: TRUE
 ```
 
 As soon as the stream of realtime data starts, the `input/` folder is processed and turned into a set of new files under the `output/` folder containing the new transformed files. Since the input contained only one file, the output folder will also contain a single file resulting from applying the custom `spark_apply()` transformation.
@@ -446,16 +441,23 @@ Up to this point, this resembles static data processing; however, we can keep ad
 ```{r}
 # Write more data into the stream source
 write.csv(mtcars, "input/cars_2.csv", row.names = F)
+```
 
-# Wait for the input stream to be processed
-Sys.sleep(1)
+Wait a few seconds and validate that the data gets processed by the Spark stream,
 
+```{r}
 # Check the contents of the stream destination
 dir("output", pattern = ".csv")
 ```
 ```
 [1] "part-00000-2d8e5c07-a2eb-449d-a535-8a19c671477d-c000.csv"
 [2] "part-00000-eece04d8-7cfa-4231-b61e-f1aef8edeb97-c000.csv"
+```
+
+You should then stop the stream,
+
+```{r}
+stream_stop(stream)
 ```
 
 You can use `dplyr`, SQL, Spark models or distributed R to analyze streams in realtime, we will properly introduce you to all the interesting transformations you can perform to analyze realtime data during the Streaming chapter.
