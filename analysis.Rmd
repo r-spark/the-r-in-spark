@@ -119,7 +119,7 @@ The environment is ready to be used, so our next task is to import data that we 
 
 ## Import
 
-The step of importing data is to be approached differently when using Spark with R, as opposed to R alone.  Usually, importing means that R will read files and save the information into memory.  But when used with Spark, it is important to only focus in importing results into R.  The data is either imported, or accessed by Spark. Notice how in Figure \@ref(fig:analysis-access) the Data Source is connected to Spark, and not R. 
+Importing data is to be approached differently when using Spark with R. Usually, importing means that R will read files and load them into memory; when using Spark, the data is imported into Spark, not R. Notice how in Figure \@ref(fig:analysis-access) the data source is connected to Spark insted of being connected to R. 
 
 ```{r analysis-access, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Import Data to Spark not R', fig.align = 'center', eval = eval_code}
 render_nomnoml("
@@ -130,16 +130,16 @@ render_nomnoml("
 [Push Compute]->[Spark]
 [R]<-[<label>Collect Results]
 [Collect Results]<-[Spark]
-[Spark]<-[<label> Import / Access]
-[Import / Access]<-[Data Source]
+[Spark]<-[<label> Import]
+[Import]<-[Data Source]
 ", "images/analysis-import-data-to-spark.png")
 ```
 
-Most organization will use Spark inside a YARN managed cluster.  For those cases the vast majority of the necessary data is already available in the cluster's Hadoop File System (HDFS).  It is made available to users via Hive tables, or by accessing the file system directly.  Because the Spark session is initiated inside the same server hosts as the rest of the cluster, it is much easier to transfer large amounts of data between the HDFS and Spark memory.
+**Note:** When you doing analysis over large-scale datasets, the vast majority of the necessary data will be already available in your Spark cluster (which is usually made available to users via Hive tables, or by accessing the file system directly), the Data chapter will cover this extensively.
 
-The decision of having Spark either access the data source, or to import data into memory is mostly a decisions based on speed and performance.  Importing all of the data into the Spark session will incur an up-front cost of time. That is because we would have to wait for the data to be loaded before analyzing. Accessing the data incurs cost with every query sent to the cluster via Spark.  That is because we depend on the cluster's in-disk data, which has to be retrieved before it is analyzed. More will be covered in the Tuning chapter.
+Rather tham importing all data into Spark, you can also request Spark to access the data source without importing it, this is a decisions based on speed and performance. Importing all of the data into the Spark session will incur a up-front cost, once; since Spark needs to wait for the data to be loaded before analyzing it. If the data is not imported, you usually inccur a cost with every Spark operation since Spark needs to retrieve a subset from the cluster's storage, which is usually disk drives that happen to be much slower than reading from Spark's memory. More will be covered in the Tuning chapter.
 
-The exercise's Spark session does not have any data.  So the next step is to prime the session with data, in this case `mtcars`. The `copy_to()` command from `dplyr` can be used for that. The mechanics of this operation is explained in the Getting Started chapter. 
+Let's prime the session with some data by importing `mtcars` into Spark using `copy_to()`; you can also import data from distributed files in many different file formats, which you'll learn in the Data chapter.
 
 ```{r, eval = FALSE}
 cars <- copy_to(sc, mtcars, "mtcars_remote")
@@ -147,7 +147,7 @@ cars <- copy_to(sc, mtcars, "mtcars_remote")
 
 **Note:** In an enterprise setting, `copy_to()` should only be used to transfer small tables from R, such as a look up value table. Large data transfers should be performed by more formal data transfer or ETL tools. 
 
-The data is now accessible to Spark and R. Transformations can now be applied to the data.  The next section will cover how to wrangle data by running transformations inside Spark. 
+The data is now accessible to Spark and transformations can now be applied with ease; the next section will cover how to wrangle data by running transformations inside Spark, using `dplyr`.
 
 ## Wrangle
 
