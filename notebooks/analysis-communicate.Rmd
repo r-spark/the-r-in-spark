@@ -1,0 +1,36 @@
+---
+title: "mtcars analysis"
+output:
+  html_document: 
+    fig_width: 6 
+    fig_height: 3
+---
+```{r, setup, include = FALSE}
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local", version = "2.3")
+cars <- copy_to(sc, mtcars)
+```
+
+## Visualize
+Aggregate data in Spark, visualize in R.
+```{r fig.align='center', warning=FALSE}
+library(ggplot2)
+cars %>%
+  group_by(cyl) %>% summarise(mpg = mean(mpg)) %>%
+  ggplot(aes(cyl, mpg)) + geom_bar(stat="identity")
+```
+
+## Model
+The selected model was a simple linear regression that 
+uses the weight as the predictor of MPG
+
+```{r}
+cars %>%
+  ml_linear_regression(wt ~ mpg) %>%
+  summary()
+```
+```{r, include = FALSE}
+spark_disconnect(sc)
+```

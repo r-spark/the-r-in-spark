@@ -39,7 +39,7 @@ When working with not-large-scale datasets, as in datasets that fit in memory; w
 
 For data analysis, the ideal approach  is to let Spark do what its good at. Spark is a parallel computation engine that works at a large-scale and provides a SQL engine and modeling libraries. These can be used to perform most of the same operations R performs. Such operations include data selection, transformation, and modeling.  Additionally, Spark includes Graph analysis and Streaming libraries and many other; for now, we will skip  those non-rectangular datasets and present them in later chapters.
 
-Data *import*, *wrangling*, and *modeling* can be performed inside Spark. *Visualization* can also partly be done by Spark, we will cover that later in this chapter. The idea is to use R to tell Spark what data operations to run, and then bring only the results into R. As illustrated in Figured \@ref(fig:analysis-approach), the ideal method *pushes compute* to the Spark cluster, and then *collects results* into R.
+Data *import*, *wrangling*, and *modeling* can be performed inside Spark. *Visualization* can also partly be done by Spark, we will cover that later in this chapter. The idea is to use R to tell Spark what data operations to run, and then bring only the results into R. As illustrated in Figure \@ref(fig:analysis-approach), the ideal method *pushes compute* to the Spark cluster, and then *collects results* into R.
 
 ```{r analysis-approach, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark computes while R collects results', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -447,7 +447,7 @@ render_image("images/analysis-visualizations-histogram.png")
 
 Histograms provide a great way to analyze a single variable. To analyze two variables, a scatter or raster plot is commonly used. 
 
-Scatter plots are used to compare the relationship between two continuous variables. For example, a scatter plot will display the relationship between the weight of a car and its gas consumption.  The plot will show that the higher the weight, the higher the gas consumption because the dots clump together into almost a line that goes from the top left towards the bottom right. See Figure  \@ref(fig:analysis-point) for an example of the plot. 
+Scatter plots are used to compare the relationship between two continuous variables. For example, a scatter plot will display the relationship between the weight of a car and its gas consumption.  The plot will show that the higher the weight, the higher the gas consumption because the dots clump together into almost a line that goes from the top left towards the bottom right. See Figure \@ref(fig:analysis-point) for an example of the plot. 
 
 ```{r, eval = FALSE}
 ggplot(aes(mpg, wt), data = mtcars) + 
@@ -496,87 +496,82 @@ While visualizations are indispensable, you can complement data analysis using s
 
 ## Model
 
-An analysis project focuses on going through as many transformations and models to find the answer.  The ideal data analysis framework enables the user to quickly complete each iteration. [Modeling](#modeling) will dive deeper into how to prepare and run models.  The focus of this section will be how to properly, and easily, transition from wrangling to modeling.
+The next two chapters will focus entirely on modeling, so rather than introducing modeling with too much detail in this chapter, we want to present how to interact with models while doing data analysis.
 
-There are some steps needed for Spark to run even the most simple models.  The modeling functions in `sparklyr` already cover those steps in order to make them easier to use.  Transitioning from data wrangling to model prototyping is as easy as piping the transformed code right into the a `sparklyr` modeling function. Consider the following example:
+First, an analysis project goes through as many transformations and models to find the answer. That's why the first data analysis diagram we introduced in Figure \@ref(fig:analysis-approach), illustrates a cycle between: visualizing, wrangling and modeling -- we know you don't end with modeling, not in R and neither when using Spark.
+
+Therefore, the ideal data analysis language enables you to quickly adjust over each wrangle-visualize-model iteration. Fortunately, this is the case when using Spark and R.
+
+To illustrate how easy it is to iterate over wrangling and modeling in Spark, consider the following example. We will start by performing a linear regression against all features and predict MPG:
 
 ```{r, eval = FALSE}
 cars %>% 
-  mutate(cyl = paste0("cyl_", cyl)) %>%
-  ml_linear_regression(wt ~ .) %>%
+  ml_linear_regression(mpg ~ .) %>%
   summary()
 ```
-
-```
-## Deviance Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.36805 -0.18275 -0.01221  0.11616  0.56768 
-## 
-## Coefficients:
-##  (Intercept)          mpg  cyl_cyl_8.0  cyl_cyl_4.0         disp 
-## -0.241536145 -0.046030695  0.085662905  0.193862495  0.006621045 
-##           hp         drat         qsec           vs           am 
-## -0.004654348 -0.126435269  0.189135280  0.017628206  0.037101380 
-##         gear         carb 
-## -0.081473252  0.281287273 
-```
-
-The *cyl* field is converted into a character variable, and then the `ml_linear_regression()` function is applied to the resulting data set.  This is a very straight forward thing to do inside R, but it is not so in Spark.  Firstly, Spark does not run models without a Spark PipelineModel. Secondly, it does not create Dummy Variables by default. The `ml_linear_regression()` already encases all of the needed Scala code to complete those steps and run the Pipeline model, which is then returned looking as a standard fitted model in R. 
-
-At this point it is very easy to experiment with different formulas, as shows in the code below:
-
-```{r, eval = FALSE}
-cars %>%
-  ml_linear_regression(wt ~ mpg) %>%
-  summary()
-```
-
 ```
 ## Deviance Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -0.6516 -0.3490 -0.1381  0.3190  1.3684 
+## -3.4506 -1.6044 -0.1196  1.2193  4.6271 
 ## 
 ## Coefficients:
-## (Intercept)         mpg 
-##    6.047255   -0.140862 
+## (Intercept)         cyl        disp          hp        drat          wt  
+## 12.30337416 -0.11144048  0.01333524 -0.02148212  0.78711097 -3.71530393
+##       qsec          vs          am        gear        carb 
+## 0.82104075  0.31776281  2.52022689  0.65541302 -0.19941925 
 ## 
-## R-Squared: 0.7528
-## Root Mean Squared Error: 0.4788
+## R-Squared: 0.869
+## Root Mean Squared Error: 2.147
 ```
 
-Additionally, it is also very easy to try out other kinds of models.  The following code shows a Generalized Linear model using the `ml_generalized_linear_regression()` function:
+At this point it is very easy to experiment with different features, we can simply change the R formula from `mpg ~ .` to say `mpg ~ hp + cyl` to only use HP and cylinders as features:
 
 ```{r, eval = FALSE}
-cars %>%
-  ml_generalized_linear_regression(am ~ .) %>%
+cars %>% 
+  ml_linear_regression(mpg ~ hp + cyl) %>%
   summary()
 ```
-
 ```
-Deviance Residuals:
-     Min       1Q   Median       3Q      Max 
--0.46909 -0.16762 -0.00578  0.18601  0.35635 
-
-Coefficients:
-  (Intercept)           mpg           cyl          disp            hp 
- 1.6345144901  0.0264792061 -0.1207285158 -0.0005715857  0.0010378347 
-         drat            wt          qsec            vs          gear 
- 0.0952244996  0.0172804532 -0.1125888981 -0.2087047973  0.1952457664 
-         carb 
--0.0180502642 
-
-(Dispersion paramter for gaussian family taken to be 0.0737941)
-
-   Null  deviance: 7.71875 on 31 degress of freedom
-Residual deviance: 1.54968 on 21 degrees of freedom
-AIC: 17.926
+## Deviance Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -4.4948 -2.4901 -0.1828  1.9777  7.2934 
+## 
+## Coefficients:
+## (Intercept)          hp         cyl 
+##  36.9083305  -0.0191217  -2.2646936 
+## 
+## R-Squared: 0.7407
+## Root Mean Squared Error: 3.021
 ```
 
-It is recommended that data used to fit a model be inside Spark memory.  The reasons and explanation will be covered in the next section.
+Additionally, it is also very easy to iterate with other kinds of models. The following one replaces the linear model with a generalized linear model:
 
-### Cache model data
+```{r, eval = FALSE}
+cars %>% 
+  ml_generalized_linear_regression(mpg ~ hp + cyl) %>%
+  summary()
+```
+```
+## Deviance Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -4.4948 -2.4901 -0.1828  1.9777  7.2934 
+## 
+## Coefficients:
+## (Intercept)          hp         cyl 
+##  36.9083305  -0.0191217  -2.2646936 
+## 
+## (Dispersion paramter for gaussian family taken to be 10.06809)
+## 
+##    Null  deviance: 1126.05 on 31 degress of freedom
+## Residual deviance: 291.975 on 29 degrees of freedom
+## AIC: 169.56
+```
 
-The examples in this chapter are built using a very small data set.  In real-life scenarios, large amounts of data are used for models. If the data needs to be transformed first, the volume of the data  could exact a heavy toll on the Spark session. Before fitting the models, it is a good idea to save the results of all the transformations in a new table inside Spark memory.
+Usually, before fitting a model you would have to use multiple `dplyr` transformations to get it ready to be consumed by a model; to make sure the model can be fitted as efficiently as possible, you should cache your dataset before fitting it.
+
+### Caching
+
+The examples in this chapter are built using a very small data set. In real-life scenarios, large amounts of data are used for models. If the data needs to be transformed first, the volume of the data could exact a heavy toll on the Spark session. Before fitting the models, it is a good idea to save the results of all the transformations in a new table inside Spark memory.
 
 The `compute()` command can take the end of a `dplyr` piped command set and save the results to Spark memory.
 
@@ -606,7 +601,7 @@ cached_cars %>%
 ## Root Mean Squared Error: 2.041
 ```
 
-As more insights are gained from the data, more questions may be raised.  That is why we expect to iterate through data *wrangle*, *visualize*, and *model* multiple times.  Each iteration should provide incremental insights of what the data is "telling us".  There will be a point where we reach a satisfactory level of understanding.  It is at this point that we will be ready to share the results of the analysis, this is the topic of the next section.
+As more insights are gained from the data, more questions may be raised.  That is why we expect to iterate through data *wrangle*, *visualize*, and *model* multiple times.  Each iteration should provide incremental insights of what the data is "telling us". There will be a point where we reach a satisfactory level of understanding.  It is at this point that we will be ready to share the results of the analysis, this is the topic of the next section.
 
 ## Communicate
 
@@ -620,16 +615,23 @@ Most of these outputs are available in the core R packages of R Markdown: `knitr
 
 In R Markdown, one type of artifact could potentially be rendered in different formats. For example, the same report could be rendered in HTML, or as a PDF file by changing a setting within the report itself.  Conversely, multiple types of artifacts could be rendered as the same output. For example, a presentation deck and a report could be rendered in HTML.
 
-### Reports
+Creating a new R Markdown report which uses Spark as a computer engine is easy! At the top, R Markdown expect a YAML header. The first and last line are three consecutive dashes (`---`).  The content in between the dashes vary depending on the type of document. The only required one is the `output` value. R Markdown needs to know what kind of output it needs to render your report into. This YAML header is called Front Matter. Following the Front Matter are sections of code, called code chunks. These code chunks can be interlaced with the narratives. There is nothing particularily interesting to note when using Spark with R Markdown, except that is just business as usual.
 
-Creating a new R Markdown report which uses Spark as a computer engine is ease! At the top, R Markdown expect a YAML header. The first and last line are three consecutive dashes (`---`).  The content in between the dashes vary depending on the type of document. The only required one is the `output` value. R Markdown needs to know what kind of output it needs to render your report into. This YAML header is called Front Matter. Following the Front Matter are sections of code, called code chunks. These code chunks can be interlaced with the narratives. There is nothing particularily interesting to note when using Spark with R Markdown, except that is just business as usual.
+Since an R Markdown document is self-ciontained and meant to be reproducible, before rendering documents we should first disconeect from Spark to freee resources:
+
+```{r}
+spark_disconnect(sc)
+```
 
 The following example shows how easy it is to create a fully reproducible report that uses Spark to process large-scale datasets. The narrative, code and, most importantly, the output of the code is recorded inside the resulting HTML file. You can copy and paste this following code in a file. Save the file with a `.Rmd` extension, and choose whatever name you would like.  
 
 ````markdown
 ---
 title: "mtcars analysis"
-output: html_document
+output:
+  html_document: 
+    fig_width: 6 
+    fig_height: 3
 ---
 `r ''````{r, setup, include = FALSE}
 library(sparklyr)
@@ -641,7 +643,7 @@ cars <- copy_to(sc, mtcars)
 
 ## Visualize
 Aggregate data in Spark, visualize in R.
-`r ''````{r, eval = FALSE}
+`r ''````{r  fig.align='center', warning=FALSE}
 library(ggplot2)
 cars %>%
   group_by(cyl) %>% summarise(mpg = mean(mpg)) %>%
@@ -652,7 +654,7 @@ cars %>%
 The selected model was a simple linear regression that 
 uses the weight as the predictor of MPG
 
-`r ''````{r, eval = FALSE}
+`r ''````{r}
 cars %>%
   ml_linear_regression(wt ~ mpg) %>%
   summary()
@@ -661,64 +663,33 @@ cars %>%
 spark_disconnect(sc)
 ```
 ````
-If using the RStudio IDE, click on the *Knit* button at the top of the document to run it. The HTML output should look like this:
 
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
+To knit this report, save the contents into a `report.Rmd` file and run `render()` from R. The output should look like this the one in Figure \@(fig:visualize-analysis-communicate).
+
+```{r}
+rmarkdown::render("report.Rmd")
+```
+```{r visualize-analysis-communicate, eval = TRUE, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-rmarkdown.png")
 ```
 
-This report can now be sent to stakeholders.  The stakeholders will not need Spark or even R to be able to read the report.  All of the needed output from your Spark session was captured in the HTML document.
+This report can now be easily shared, viewers of this report won't need Spark and neither R to read and consume its contents, it's just a self-contained HTML file trivial to open in any browser.
 
-### Presentation decks
-
-It is common to distill insights of a long report into a presentation deck.  This artifact is sometimes easier to digest than a long form because it segments the information into discrete slides.  
-
-In R Markdown, switching from an HTML output, to a PowerPoint output is as easy as changing a single option.  In the top Front Matter, change the `output` option to `powerpoint_presentation`.
+It is also common to distill insights of a report into many other output formats. Switching is quite easy, in the top Front Matter, change the `output` option to `powerpoint_presentation`, `pdf_document`, `word_document`, etc. Or you can even produce multiple output formats from the same report:
 
 ```
 ---
 title: "mtcars analysis"
-output: powerpoint_presentation
+output:
+  word_document: default
+  pdf_document: default
+  powerpoint_presentation: deefault
 ---
 ```
 
-The result will be a PowerPoint presentation with all of the same information that was displayed in the HTML report.  There will be a need to edit the PowerPoint template or the output of the code chunks.  This minimal example show how easy it is to go from one format to another.  Of course, it will take some more editing on the R user side to make sure the slides contain only the pertinent information. The main point is to highlight that it does not require to learn a different markup, or code conventions, to switch from one artifact to another. 
+The result will be a PowerPoint presentation, a Word document and a PRD! All of the same information that was displayed in the original HTML report, computed in Spark and rendered in R.
 
-The `xaringan` package enhances R Markdown presentaions.  It provides a self contained HTML5 presentation deck.  This may be a better option when not everyone in the organization has PowerPoint.  Converting the original R Markdown report to a `xaringan` deck is easy.  Only make sure to include a tripple dash needs to indicate where a new slide begins, and update the `output` value of in the Front Matter to `xaringan::moon_reader`.  
-
-````markdown
----
-title: "mtcars analysis"
-output: xaringan::moon_reader
----
-`r ''````{r, setup, include = FALSE}
-library(sparklyr)
-```
-
-## Setup Spark environment
-A local Spark environment is setup and the `mtcars` dataset preloaded
-`r ''````{r, eval = FALSE}
-sc <- spark_connect(master = "local")
-cars <- copy_to(sc, mtcars)
-cars
-```
----
-## Visualize
-A histogram was run over the `mpg` data
-`r ''````{r, fig.height = 6}
-library(dbplot)
-cars %>%
-  dbplot_histogram(mpg, binwidth = 3)
-```
-`r ''````{r, include = FALSE}
-spark_disconnect(sc)
-```
-````
-Here is what the first full slide should look like:
-
-```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
-render_image("images/analysis-xaringan.png")
-```
+There will be a need to edit the PowerPoint template or the output of the code chunks. This minimal example show how easy it is to go from one format to another.  Of course, it will take some more editing on the R user side to make sure the slides contain only the pertinent information. The main point is to highlight that it does not require to learn a different markup, or code conventions, to switch from one artifact to another. 
 
 ## Recap
 
