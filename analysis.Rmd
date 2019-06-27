@@ -359,7 +359,7 @@ library(ggplot2)
 ggplot(aes(as.factor(cyl), mpg), data = mtcars) + geom_col()
 ```
 
-In this case, the `mtcars` raw data was *automatically* transformed into three discrete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn, see  figure \@ref(fig:analysis-mtcars-plot). As R users, all of the stages of building the plot are conveniently abstracted for us.
+In this case, the `mtcars` raw data was *automatically* transformed into three discrete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn, see  Figure \@ref(fig:analysis-mtcars-plot). As R users, all of the stages of building the plot are conveniently abstracted for us.
 
 ```{r analysis-mtcars-plot, echo=FALSE, out.width='100%', out.height='200pt', fig.cap='R plotting function', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -378,7 +378,7 @@ render_nomnoml("
 
 ### Recommended approach
 
-In essence, the approach for visualizing is the same as in wrangling, push the computation to Spark, and then collect the results in R for plotting.  As illustrated in figure \@ref(fig:analysis-spark-plot), the heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, use a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins. 
+In essence, the approach for visualizing is the same as in wrangling, push the computation to Spark, and then collect the results in R for plotting.  As illustrated in Figure \@ref(fig:analysis-spark-plot), the heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, use a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins. 
 
 ```{r analysis-spark-plot, echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark and R', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -437,7 +437,7 @@ render_image("images/analysis-visualizations-1.png")
 
 The `dbplot` package provides helper functions for plotting with remote data.  The R code `dbplot` uses to transform the data is written so that it can be translated by `sparklyr` into SQL.  It then uses those results to create a graph using the `ggplot2` package.  The data transformation, and the plotting are both triggered by a single `dbplot` function.  
 
-The `dbplot_histogram()` function will have Spark calculate the bins and the count per bin, and then outputs a `ggplot` object.  It accepts a `binwidth` argument.  The resulting plot is in figure \@ref(fig:analysis-viz3).
+The `dbplot_histogram()` function will have Spark calculate the bins and the count per bin, and then outputs a `ggplot` object.  It accepts a `binwidth` argument.  The resulting plot is in Figure \@ref(fig:analysis-viz3).
 
 ```{r, eval = FALSE}
 library(dbplot)
@@ -457,7 +457,7 @@ cars %>%
 render_image("images/analysis-visualizations-3.png")
 ```
 
-Because it is a `ggplot` object, it can be further refined by adding more steps to the plot object.  In the example on figure \@ref(fig:analysis-viz4), we added a title to the plot, after it was created by `dbplot`.
+Because it is a `ggplot` object, it can be further refined by adding more steps to the plot object.  In the example on Figure \@ref(fig:analysis-viz4), we added a title to the plot, after it was created by `dbplot`.
 
 ```{r, eval = FALSE}
 cars %>%
@@ -500,7 +500,7 @@ Histograms provide a great way to analyze a single variable.  To analyze two var
 
 ### Scatter vs Raster Plots
 
-Scatter plots are used to compare the relationship between two continuous variables. For example, a scatter plot will display the relationship between the weight of a car and its gas consumption.  The plot will show that the higher the weight, the higher the gas consumption because the dots clump together into almost a line that goes from the top left towards the bottom right. See figure  \@ref(fig:analysis-point) for an example of the plot. 
+Scatter plots are used to compare the relationship between two continuous variables. For example, a scatter plot will display the relationship between the weight of a car and its gas consumption.  The plot will show that the higher the weight, the higher the gas consumption because the dots clump together into almost a line that goes from the top left towards the bottom right. See Figure  \@ref(fig:analysis-point) for an example of the plot. 
 
 ```{r, eval = FALSE}
 ggplot(aes(mpg, wt), data = mtcars) + 
@@ -546,7 +546,7 @@ cars %>%
 render_image("images/analysis-visualizations-5.png")
 ```
 
-As shown in figure \@ref(fig:analysis-raster1), the plot returns a grid no bigger than 5x5.  This limits the number of records that need to be collected into R to 25.  
+As shown in Figure \@ref(fig:analysis-raster1), the plot returns a grid no bigger than 5x5.  This limits the number of records that need to be collected into R to 25.  
 
 If the user prefers to either visualize, or simply obtain the result data, the `db_compute_raster()` and `db_compute_raster2()` functions return the data.  The `db_compute_raster2()` includes the upper and lower bounds of each square.
 
