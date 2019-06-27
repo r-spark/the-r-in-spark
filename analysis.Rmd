@@ -110,6 +110,8 @@ install.packages("rmarkdown")
 First, load the `sparklyr` and `dplyr` packages, and open a new *local* connection.
 ```{r}
 library(sparklyr)
+library(dplyr)
+
 sc <- spark_connect(master = "local")
 ```
 
@@ -140,7 +142,6 @@ The decision of having Spark either access the data source, or to import data in
 The exercise's Spark session does not have any data.  So the next step is to prime the session with data, in this case `mtcars`. The `copy_to()` command from `dplyr` can be used for that. The mechanics of this operation is explained in the Getting Started chapter. 
 
 ```{r, eval = FALSE}
-library(dplyr)
 cars <- copy_to(sc, mtcars, "mtcars_remote")
 ```
 
