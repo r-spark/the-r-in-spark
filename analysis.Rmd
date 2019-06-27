@@ -12,13 +12,13 @@ eval_code <- TRUE
 
 Previous chapters focused on introducing Spark with R, they got you up to speed and encouraged you to try basic data analysis workflows. However, they have not properly introduced what such data analysis means, specially while running in Spark. They presented the tools you need throughout this book, to help you spend more time learning and hopefully, less time troublehsooting.
 
-This chapter, Analysis, will introduce tools to perform data analysis in R; which, spoiler alert, are the same tools you will use when using Spark with R! This is not accidental coincidence, but rather, we want data scientist to live in a world where technology is hidden from them, where you can use the R packages you know and love, and where they simply happen to just work across! Now, we are not quite there yet, but we are also not that far. This chapter will present the obvious tools to do data analysis in R that also apply to Spark: `dplyr`, `ggplot2`, formulas, `rmarkdown` and so on.
+This chapter, Analysis, will introduce tools to perform data analysis in R; which, spoiler alert, are the same tools you will use when using Spark with R! This is not accidental coincidence, but rather, we want data scientist to live in a world where technology is hidden from them, where you can use the R packages you know and love, and where they simply happen to just work across! Now, we are not quite there yet, but we are also not that far. This chapter will present widely used R packages and practices to do data analysis in R, which also happen to Spark work in Spark, like: `dplyr`, `ggplot2`, formulas, `rmarkdown` and so on.
 
-The next chapter, Modeling, will focus on creating statistical models to predict, estimate and describe datasets; but first, lets get out data analysis going!
+The next chapter, Modeling, will focus on creating statistical models to predict, estimate and describe datasets; but first, lets get started with analysis!
 
 ## Overview {#analysis-overview}
 
-In a data analysis project, the main goal is to understand what the data is trying to “tell us”. The hope is that the data provides an answer to a specific question, the question is typically poised by stakeholders of the analysis. Most data analysis projects follow a set of steps outlined in Figure \@ref(fig:analysis-steps). 
+In a data analysis project, the main goal is to understand what the data is trying to “tell us”, hoping that it provides an answer to a specific question. Most data analysis projects follow a set of steps outlined in Figure \@ref(fig:analysis-steps). 
 
 ```{r analysis-steps, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='General steps of a data analysis', fig.align = 'center', eval = eval_code}
 render_nomnoml("
@@ -37,7 +37,7 @@ render_nomnoml("
 ", "images/analysis-overview-diagram.png")
 ```
 
-As the diagram illustrates, we first *import* data into our analysis stem, then *wrangled* by trying different data transformations, such as aggregations, and then *visualized* to help us perceive relationships and trends. In order to get deeper insight, one or multiple statistical *models* can be fitted against sample data. This will help in finding out if the patterns hold true when new data is applied to them. And lastly, the results are *communicated* to stakeholders. 
+As the diagram illustrates, we first *import* data into our analysis stem, then *wrangled* by trying different data transformations, such as aggregations, and then *visualized* to help us perceive relationships and trends. In order to get deeper insight, one or multiple statistical *models* can be fitted against sample data. This will help in finding out if the patterns hold true when new data is applied to them. And lastly, the results are *communicated* publicly or privately to colleagues and stakeholders. 
 
 Commonly, in R all of the steps are performed in local memory.  But that approach has to change when the analysis adds the use of Spark.
 
@@ -589,7 +589,7 @@ We use statistical models to gain even deeper insights into our data.  The next 
 
 ## Model
 
-An analysis project focuses on going through as many transformations and models to find the answer.  The ideal data analysis framework enables the user to quickly complete each iteration. The transition from an analysis to a deployment project occurs after the model is selected, and findings are presented to the stakeholders. [Modeling](#modeling) will dive deeper into how to prepare and run models.  The focus of this section will be how to properly, and easily, transition from wrangling to modeling.
+An analysis project focuses on going through as many transformations and models to find the answer.  The ideal data analysis framework enables the user to quickly complete each iteration. [Modeling](#modeling) will dive deeper into how to prepare and run models.  The focus of this section will be how to properly, and easily, transition from wrangling to modeling.
 
 There are some steps needed for Spark to run even the most simple models.  The modeling functions in `sparklyr` already cover those steps in order to make them easier to use.  Transitioning from data wrangling to model prototyping is as easy as piping the transformed code right into the a `sparklyr` modeling function. Consider the following example:
 
@@ -699,27 +699,19 @@ cached_cars %>%
 ## Root Mean Squared Error: 2.041
 ```
 
-As more insights are gained from the data, more questions may be raised.  That is why we expect to iterate through data *wrangle*, *visualize*, and *model* multiple times.  Each iteration should provide incremental insights of what the data is "telling us".  There will be a point where we reach a satisfactory level of understanding.  It is at this point that we will be ready to share the results with the stakeholders of the analysis.  How to do this is the topic of the next section.
+As more insights are gained from the data, more questions may be raised.  That is why we expect to iterate through data *wrangle*, *visualize*, and *model* multiple times.  Each iteration should provide incremental insights of what the data is "telling us".  There will be a point where we reach a satisfactory level of understanding.  It is at this point that we will be ready to share the results of the analysis, this is the topic of the next section.
 
 ## Communicate
 
-It is important to clearly communicate the analysis results to the stakeholders. It is as important as the analysis work itself. The stakeholders need to understand what you found out, and how you found it out. 
+It is important to clearly communicate the analysis results -- as important as the analysis work itself! The public, colleagues or stakeholders need to understand what you found out and how. 
 
-To communicate effectively we need to use artifacts, such as reports and presentation decks. These are common output formats that we can create in R, using R Markdown.
+To communicate effectively we need to use artifacts, such as reports and presentations; these are common output formats that we can create in R, using R Markdown.
 
-R Markdown documents allow weave narrative text and code together.  The amount of output formats provides a very compelling reason to learn and use R Markdown.  The available output formats  include: 
-
-* Hypertext Markup Language (HTML)
-* Portable Document Format (PDF)
-* Microsoft PowerPoint
-* Microsoft Word
-* Presentation slides
-* Websites 
-* Books
+R Markdown documents allow weave narrative text and code together.  The amount of output formats provides a very compelling reason to learn and use R Markdown.  There are many available output formats like HTML, PDF, PowerPoint, Word, web slides, Websites, books and so on.
 
 Most of these outputs are available in the core R packages of R Markdown: `knitr` and `rmarkdown`.  R Markdown can be extended by other R packages. For example, this book was written using R Markdown thanks to an extension provided by the `bookdown` package.  The best resource to delve deeper into R Markdown is the official book. [@r-markdown-the-definite-guide]
 
-In R Markdown, one type of artifact could potentially be rendered in different formats.  For example, the same report could be rendered in HTML, or as a PDF file by changing a setting within the report itself.  Conversely, multiple types of artifacts could be rendered as the same output.  For example, a presentation deck and a report could be rendered in HTML.
+In R Markdown, one type of artifact could potentially be rendered in different formats. For example, the same report could be rendered in HTML, or as a PDF file by changing a setting within the report itself.  Conversely, multiple types of artifacts could be rendered as the same output. For example, a presentation deck and a report could be rendered in HTML.
 
 ### Reports
 
