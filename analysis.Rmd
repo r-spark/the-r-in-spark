@@ -112,7 +112,7 @@ First, load the `sparklyr` and `dplyr` packages, and open a new *local* connecti
 library(sparklyr)
 library(dplyr)
 
-sc <- spark_connect(master = "local")
+sc <- spark_connect(master = "local", version = "2.3")
 ```
 
 The environment is ready to be used, so our next task is to import data that we can later analyze.
@@ -142,7 +142,7 @@ Rather tham importing all data into Spark, you can also request Spark to access 
 Let's prime the session with some data by importing `mtcars` into Spark using `copy_to()`; you can also import data from distributed files in many different file formats, which you'll learn in the Data chapter.
 
 ```{r, eval = FALSE}
-cars <- copy_to(sc, mtcars, "mtcars_remote")
+cars <- copy_to(sc, mtcars)
 ```
 
 **Note:** In an enterprise setting, `copy_to()` should only be used to transfer small tables from R, such as a look up value table. Large data transfers should be performed by more formal data transfer or ETL tools. 
@@ -151,59 +151,51 @@ The data is now accessible to Spark and transformations can now be applied with 
 
 ## Wrangle
 
-Data wrangling uses transformations to understand the data. A data *transformation* can be interpreted as a *change* performed to the data.
+Data wrangling uses transformations to understand the data, it is often referred as the process of transforming data from one "raw" data form into another format with the intent of making it more appropriate for data analysis.
 
-Malformed or missing values and columns with multiple attributes are common data issues.  These issues prevent us from understanding the activity reflected in the data.  For example, a "name" field contains the last and first name of a customer. There are two attributes (first & last name) in a single column. In order to be usable, we need to *transform* the "name" field, by *changing* it into a "first_name" and "last_name" fields.  
+Malformed or missing values and columns with multiple attributes are common data problems you might need to fix, since they prevent you from understanding your dataset. For example, a "name" field contains the last and first name of a customer. There are two attributes (first and last name) in a single column. In order to be usable, we need to *transform* the "name" field, by *changing* it into "first_name" and "last_name" fields.  
 
-After the data is cleaned, there is still the task to try and understand the basics about its content.  Other transformations, such as aggregations, can help with this task.  For example, the result of requesting the average balance of all customers will return a single row and column. The value will be the average of all customers.  That information will give us context when we see individual, or grouped, customer balances.  
+After the data is cleaned, you still need to understand the basics about its content. Other transformations, such as aggregations, can help with this task. For example, the result of requesting the average balance of all customers will return a single row and column. The value will be the average of all customers. That information will give us context when we see individual, or grouped, customer balances.  
 
-The main goal is to write the data transformations using R syntax as much as possible. This saves us from the cognitive cost of having to switch between multiple computer languages to accomplish a single task. In this case, it is better to take advantage of `sparklyr`'s `dplyr` back-end interface, instead of writing Spark SQL statements for data exploration,  
+The main goal is to write the data transformations using R syntax as much as possible. This saves us from the cognitive cost of having to switch between multiple computer technologies to accomplish a single task. In this case, it is better to take advantage of `dplyr`, instead of writing Spark SQL statements for data exploration.  
 
-In the R environment, *cars* can be treated as if it is a local data frame, so `dplyr` verbs can be used, and in a piped fashion.
-
-```{r, eval = FALSE}
-cars %>%
-  group_by(am) %>%
-  summarise(mpg_mean = mean(mpg, na.rm = TRUE))
-```
-```
-## # Source: spark<?> [?? x 2]
-##      am mpg_mean
-##   <dbl>    <dbl>
-## 1     0     17.1
-## 2     1     24.4
-```
-
-Instead of importing the *mtcars_remote* data set from Spark, and then performing the aggregation, `dplyr` converts the verbs into SQL statements that are then sent to Spark.  The `show_query()` command makes it possible to peer into the SQL statement that `sparklyr` and `dplyr` created and sent to Spark.
+In the R environment, *cars* can be treated as if it is a local data frame, so `dplyr` verbs can be used, and in a piped fashion using `%>%`. For instance, we can find out the mean of all columns as with `summarise_all()`:
 
 ```{r, eval = FALSE}
-cars %>%
-  group_by(am) %>%
-  summarise(mpg_mean = mean(mpg, na.rm = TRUE)) %>%
+summarize_all(cars, mean)
+```
+```
+# Source: spark<?> [?? x 11]
+    mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+1  20.1  6.19  231.  147.  3.60  3.22  17.8 0.438 0.406  3.69  2.81
+```
+
+While this code is exactly the same as the code you would run when using `dplyr` without Spark, a lot is happening under the hood! The data is NOT being imported into R; instead,`dplyr` converts this task into SQL statements that are then sent to Spark. The `show_query()` command makes it possible to peer into the SQL statement that `sparklyr` and `dplyr` created and sent to Spark. We can also use this time to introduce the pipe (`%>%`) operator, a custom operator from the `magrittr` package that takes pipes a computation into the first argument of the next function, making your data analysis much easier to read.
+
+```{r, eval = FALSE}
+summarize_all(cars, mean) %>%
   show_query()
 ```
 ```
-## <SQL>
-## SELECT `am`, AVG(`mpg`) AS `mpg_mean`
-## FROM `mtcars_remote`
-## GROUP BY `am`
+<SQL>
+SELECT AVG(`mpg`) AS `mpg`, AVG(`cyl`) AS `cyl`, AVG(`disp`) AS `disp`, AVG(`hp`) AS `hp`, AVG(`drat`) AS `drat`, AVG(`wt`) AS `wt`, AVG(`qsec`) AS `qsec`, AVG(`vs`) AS `vs`, AVG(`am`) AS `am`, AVG(`gear`) AS `gear`, AVG(`carb`) AS `carb`
+FROM `mtcars`
 ```
-As it is evident, it will not be necessary to have to see the resulting query every time `dplyr` verbs are being used. The focus can remain on obtaining insights from the data, as opposed to figuring out how to express a given set of transformation in SQL.
+As it is evident, `dplyr` is much more concise than SQL; but reast assured, you will not have to see nor understand SQL when using `dplyr`. Your focus can remain on obtaining insights from the data, as opposed to figuring out how to express a given set of transformation in SQL. Here is another example that groups the cars datasetr by "transmision" type
 
 ```{r, eval = FALSE}
 cars %>%
-  group_by(am) %>%
-  summarise(
-    wt_mean = mean(wt, na.rm = TRUE),
-    mpg_mean = mean(mpg, na.rm = TRUE)
-  )
+  mutate(transmission = ifelse(am == 0, "automatic", "manual")) %>%
+  group_by(transmission) %>%
+  summarise_all(mean)
 ```
 ```
-## # Source: spark<?> [?? x 3]
-##      am wt_mean mpg_mean
-##   <dbl>   <dbl>    <dbl>
-## 1     0    3.77     17.1
-## 2     1    2.41     24.4
+# Source: spark<?> [?? x 12]
+  transmission   mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+  <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+1 automatic     17.1  6.95  290.  160.  3.29  3.77  18.2 0.368     0  3.21  2.74
+2 manmual       24.4  5.08  144.  127.  4.05  2.41  17.4 0.538     1  4.38  2.92
 ```
 
 Most of the data transformation made available by `dplyr` to work with local data frames are also available to use with a Spark connection.  This means that a general approach to learning `dplyr` can be taken in order to gain more proficiency with data exploration and preparation with Spark.  The chapter on Data Transformation in the R for Data Science [@intro-r-for-data-science] book should be a great help with this.  If proficiency with `dplyr` is not an issue for you, then please take some time to experiment with different `dplyr` functions against the *cars* table.
