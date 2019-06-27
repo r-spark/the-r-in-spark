@@ -9,22 +9,23 @@ library(ggplot2)
 
 # Getting Started {#starting}
 
-From R, getting started with Spark using `sparklyr` and a local cluster is as easy as installing and loading the `sparklyr` package followed by running:
+After reading the Introduction chapter, you should now be familiar with the kind of problems that Spark can help you solve; it should be clear that Spark solves problems by making use of multiple computers when data does not fit in a single machine or when computation is too slow. For those newer to R, it should also be clear that combining Spark with data science tools, like `ggplot2` for visualization and `dplyr` to perform data transformations, brings a promising landscape for doing data science at scale. We also hope you are excited to become profficient in large-scale computing.
 
-```{r starting-connect}
-spark_install()
-sc <- spark_connect(master = "local")
-```
+This chapter, Getting Started, will walk you through the tools you'll need to become profficient in Spark. We encourage you to walk through the code in this chapter since it will force you to go through the motions of analyzing, modeling, reading and writing data. Read, you will have to do some wax-on, wax-off, repeat; before you get fully inmersed in the world of Spark.
 
-To make sure we can all run the code above and understand it, this section will walk you through the prerequisites, installing `sparklyr` and Spark, connecting to a local Spark cluster and briefly explaining how to use Spark.
-
-However, if a Spark cluster and R environment have been made available to you, you do not need to install the [prerequisites](#starting-prerequisites) nor install Spark yourself. Instead, you should ask for the Spark `master` parameter and connect as follows; this parameter will be formally introduced under the Connections chapter.
-
-```{r starting-connect-master}
-sc <- spark_connect(master = "<cluster-master>")
-```
+The next chapter, Analysis, will dive into this topic followed by Modeling; which will present examples using a single-cluster machine, your personal computer. Subsequent chapters will properly introduce cluster computing and the concepts and techniques you'll need to succesfully run code across multiple machines.
 
 ## Overview
+
+From R, getting started with Spark using `sparklyr` and a local cluster is as easy as installing and loading the `sparklyr` package followed by installing Spark using `sparklyr`; however, we will assume you are starting with a brand new computer running Windows, OS X or Linux and walk you through the prerequisites you'll need before connecting to a local Spark cluster.
+
+While this chapter is designed to help you get ready to use Spark in your personal computer, it's also likely that some readers will already have a Spark cluster available or might preffer to get started with an online Spark cluster. For instance, Databricks hosts a free community edition [@starting-databricks-community] of Spark that can be easily accessed from your web browser. If you end up choosing this path, skip to the prerequisites section of this chapter but make sure you consult the proper resources for your existing or online Spark cluster.
+
+Either way, once you are done with the prerequisites, you will first learn how to connect to Spark.  We will then present the most important tools and operations that you'll use through the rest of this book. Less emphasis is placed on teaching concepts or how to use them, we can't possibly explain modeling or streaming in a single paragraph; however, going through this chapter should give you a brief glimpse of what to expect and confidence that you have the tools correctly configured to tackle harder problems later on.
+
+The tools you'll use are mostly divided into R code and the Spark web interface. All Spark operations are run from R; however, monitoring execution of distributed operations is performed from Sparks web interface; a web interface that you can load from any web browser. We will then disconnect from this local cluster, which is easy to forget to do but hightly recommended while working with local clusters -- and in shared Spark clusters as well!
+
+We will close this chapter by walking you through some of the features that make using Spark with Rstudio easier; more specifically, we will present the RStudio extensions that `sparklyr` implements. However, if you are inclined to use Jupyter notebooks, or if your cluster is already equiped with a different R user interface, rest assured that you can use Spark with R through plain R code. Let's move along and get your prerequisites properly configured.
 
 ## Prerequisites {#starting-prerequisites}
 
