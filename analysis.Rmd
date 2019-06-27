@@ -198,21 +198,18 @@ cars %>%
 2 manmual       24.4  5.08  144.  127.  4.05  2.41  17.4 0.538     1  4.38  2.92
 ```
 
-Most of the data transformation made available by `dplyr` to work with local data frames are also available to use with a Spark connection.  This means that a general approach to learning `dplyr` can be taken in order to gain more proficiency with data exploration and preparation with Spark.  The chapter on Data Transformation in the R for Data Science [@intro-r-for-data-science] book should be a great help with this.  If proficiency with `dplyr` is not an issue for you, then please take some time to experiment with different `dplyr` functions against the *cars* table.
+Most of the data transformation made available by `dplyr` to work with local data frames are also available to use with a Spark connection.  This means that you can focus on learning `dplyr` first, and then reuse that skill when working with Spark. The Data Transformation chaopter from the "R for Data Science" [@intro-r-for-data-science] book is a great resource to learn in-depth `dplyr`.  If proficiency with `dplyr` is not an issue for you, then please take some time to experiment with different `dplyr` functions against the *cars* table.
 
-Sometimes we may need to perform an operation not yet available through `dplyr` and `sparklyr`.  Instead of downloading the data into R so that we can perform the operation, there may be a way to use a Hive function within Spark to accomplish what we need.  The next section will cover this scenario.
+Sometimes we may need to perform an operation not yet available through `dplyr` and `sparklyr`. Instead of downloading the data into R, there is usually a Hive function within Spark to accomplish what we need. The next section will cover this scenario.
 
 ### Hive Built-in Functions
 
-Spark SQL is based on Hive's SQL conventions and functions.  It is possible to call Hive query functions within the `dplyr` interface. This means that we can use Hive functions to accomplish operations that may not be available via `dplyr`.  The Hive functions can be accesses ed within the `dplyr` verb, by calling them as if they were R functions.  Instead of failing, `dplyr` passes functions it does not recognize "as-is" to the query engine.  This gives us a lot of flexibility on the function we can use from Hive SQL.  
+Spark SQL is based on Hive's SQL conventions and functions and it is possible to call all these functions using `dplyr` as well. This means that we can use any Spark SQL functions to accomplish operations that may not be available via `dplyr`. The functions can be accessesed by calling them as if they were R functions. Instead of failing, `dplyr` passes functions it does not recognize "as-is" to the query engine. This gives us a lot of flexibility on the function we can use! 
 
-The Hive SQL's *percentile* function returns the exact percentile of a column in a group.  The function expects a column name, and either a single percentile value, or an array of multiple percentile values. 
+For instance, the *percentile* function returns the exact percentile of a column in a group. The function expects a column name, and either a single percentile value, or an array of multiple percentile values. We can use this Spark SQL function from `dplyr` as follows:
 
 ```{r}
-cars %>%
-  summarise(
-    mpg_percentile = percentile(mpg, 0.25)
-    )
+summarise(cars, mpg_percentile = percentile(mpg, 0.25))
 ```
 
 ```
@@ -225,13 +222,9 @@ cars %>%
 There is no `percentile()` function in R, so `dplyr` passes the that portion of the code, "as-is", to the resulting SQL query.
 
 ```{r}
-cars %>%
-  summarise(
-    mpg_percentile = percentile(mpg, 0.25)
-    ) %>%
+summarise(cars, mpg_percentile = percentile(mpg, 0.25)) %>%
   show_query()
 ```
-
 ```
 <SQL>
 SELECT percentile(`mpg`, 0.25) AS `mpg_percentile`
@@ -241,12 +234,8 @@ FROM `mtcars_remote`
 To pass multiple values to *percentile*, we can call another Hive function called *array*. In this case, *array* would work similarly to R's `list()` function.  We can pass multiple values separated by commas. The output from Spark is an array variable, which is imported into R as a list variable column.
 
 ```{r}
-cars %>%
-  summarise(
-    mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75))
-    )
+summarise(cars, mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75)))
 ```
-
 ```
 ## # Source: spark<?> [?? x 1]
 ##   mpg_percentile
@@ -257,13 +246,9 @@ cars %>%
 The *explode* function can be used to separate the Spark's array value results into their own record.  To do this, use *explode* within a `mutate()` command, and pass the variable containing the results of the percentile operation. 
 
 ```{r}
-cars %>%
-  summarise(
-    mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75))
-    ) %>%
+summarise(cars, mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75))) %>%
   mutate(mpg_percentile = explode(mpg_percentile))
 ```
-
 ```
 ## # Source: spark<?> [?? x 1]
 ##   mpg_percentile
@@ -273,7 +258,7 @@ cars %>%
 ## 3           22.8
 ```
 
-We have included a comprehensive list of all the Hive functions. It is available in the Appendix, under [Hive functions](#hive-functions)
+We have included a comprehensive list of all the Hive functions in the Appendix under [Hive functions](#hive-functions), make sure you glance over them to get a sense of the wide range of operations you can accomplish with them.
 
 ### Correlations
 
