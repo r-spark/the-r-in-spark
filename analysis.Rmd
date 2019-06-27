@@ -198,7 +198,7 @@ Most of the data transformation made available by `dplyr` to work with local dat
 
 Sometimes we may need to perform an operation not yet available through `dplyr` and `sparklyr`. Instead of downloading the data into R, there is usually a Hive function within Spark to accomplish what we need. The next section will cover this scenario.
 
-### Hive Built-in Functions
+### Built-in Functions
 
 Spark SQL is based on Hive's SQL conventions and functions and it is possible to call all these functions using `dplyr` as well. This means that we can use any Spark SQL functions to accomplish operations that may not be available via `dplyr`. The functions can be accessesed by calling them as if they were R functions. Instead of failing, `dplyr` passes functions it does not recognize "as-is" to the query engine. This gives us a lot of flexibility on the function we can use! 
 
@@ -337,9 +337,9 @@ Visualizations are a vital tool to help us find patterns in the data.  It is eas
 
 R is great at data visualizations. Its capabilities for creating plots is extended by the many R packages that focus on this analysis step.   Unfortunately, the vast majority of R functions that create plots depend on the data already being in local memory within R, so they fail when using a remote table inside Spark. 
 
-It is possible to create visualizations in R from data source from Spark. To understand how to do this, let's first break down how computer programs build plots:  It takes the raw data and performs some sort of transformation.  The transformed data is then mapped to a set of coordinates.  Finally, the mapped values are drawn in a plot. Figure \@ref(fig:analysis-plot) summarizes each of the steps.
+It is possible to create visualizations in R from data source from Spark. To understand how to do this, let's first break down how computer programs build plots:  It takes the raw data and performs some sort of transformation.  The transformed data is then mapped to a set of coordinates. Finally, the mapped values are drawn in a plot. Figure \@ref(fig:analysis-plot) summarizes each of the steps.
 
-```{r analysis-plot, echo=FALSE, out.width='100%', out.height='100pt', fig.cap='Stages of a plot', fig.align = 'center', eval = TRUE}
+```{r analysis-plot, echo=FALSE, out.width='100%', out.height='100pt', fig.cap='Stages of an R plot', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -351,32 +351,6 @@ render_nomnoml("
 [Map data to coordinates] -> [Draw plot]
 ", "images/analysis-stages-of-a-plot.png")
 ```
-
-For example, to create a bar plot in R, we simply call a function:
-
-```{r, eval = TRUE, out.width='500pt', out.height='400pt', fig.cap='Plotting inside R', fig.align = 'center'}
-library(ggplot2)
-ggplot(aes(as.factor(cyl), mpg), data = mtcars) + geom_col()
-```
-
-In this case, the `mtcars` raw data was *automatically* transformed into three discrete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn, see  Figure \@ref(fig:analysis-mtcars-plot). As R users, all of the stages of building the plot are conveniently abstracted for us.
-
-```{r analysis-mtcars-plot, echo=FALSE, out.width='100%', out.height='200pt', fig.cap='R plotting function', fig.align = 'center', eval = TRUE}
-render_nomnoml("
-#direction: right
-#edgeMargin: 4
-#padding: 25
-#fontSize: 18
-
-[R |
-  [mtcars] -> [Total mpg for each cyl]
-  [Total mpg for each cyl] -> [x = cyl, y = mpg]
-  [x = cyl, y = mpg] -> [Draw plot]
-]
-", "images/analysis-r-plotting-function.png")
-```
-
-### Recommended approach
 
 In essence, the approach for visualizing is the same as in wrangling, push the computation to Spark, and then collect the results in R for plotting.  As illustrated in Figure \@ref(fig:analysis-spark-plot), the heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, use a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins. 
 
@@ -396,17 +370,28 @@ render_nomnoml("
 ", "images/analysis-plotting-with-spark-and-r.png")
 ```
 
-There are a couple of key steps when codifying the "push compute, collect results" approach.  First, ensure that the transformation operations happen inside Spark. In the example below, `group_by()` and `summarise()` will run as SQL inside the Spark session.  The second is to bring the results back into R after the data has been transformed.  Make sure to transform and then collect, in that order, because if `collect()` is run first, then all R will try to ingest the entire data set from Spark. Depending on the size of the data, collecting all of the data will slow down or may even bring down your system.
+Using this conceptual model, lets apply this when using `ggplort2`.
+
+### Using ggplot2
+
+To create a bar plot using `ggplot2`, we simply call a function:
+
+```{r, eval = TRUE, out.width='500pt', out.height='400pt', fig.cap='Plotting inside R', fig.align = 'center'}
+library(ggplot2)
+ggplot(aes(as.factor(cyl), mpg), data = mtcars) + geom_col()
+```
+
+In this case, the `mtcars` raw data was *automatically* transformed into three discrete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn. As R users, all of the stages of building the plot are conveniently abstracted for us.
+
+In Spark, there are a couple of key steps when codifying the "push compute, collect results" approach. First, ensure that the transformation operations happen inside Spark. In the example below, `group_by()` and `summarise()` will run as inside Spark. The second is to bring the results back into R after the data has been transformed.  Make sure to transform and then collect, in that order; if `collect()` is run first, then R will try to ingest the entire data set from Spark. Depending on the size of the data, collecting all of the data will slow down or may even bring down your system.
 
 ```{r, eval = FALSE}
 car_group <- cars %>%
   group_by(cyl) %>%
   summarise(mpg = sum(mpg, na.rm = TRUE)) %>%
-  collect()
-
-car_group
+  collect() %>%
+  print()
 ```
-
 ```
 ## # A tibble: 3 x 2
 ##     cyl   mpg
@@ -420,85 +405,47 @@ In this example, now that the data has been pre-aggregated and collected into R,
 
 ```{r, eval = FALSE}
 ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
-  geom_col() 
+  geom_col(fill = "#999999") + coord_flip()
 ```
-
 ```{r, eval = FALSE, echo = FALSE}
 ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
-  geom_col() + 
-  ggsave("images/analysis-visualizations-1.png", width = 10, height = 5)
+  geom_col(fill = "#878787") +
+  coord_flip() +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  ggsave("images/analysis-visualizations-1.png", width = 10, height = 3)
 ```
-
-```{r analysis-viz1, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+```{r analysis-viz1, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot with aggregation in Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-1.png")
 ```
 
+Any other `ggplot2` visualization can be made to work using this approach; however, is beyond the scope of the book to teach this. Instead, we recommend you use the "R graphics cookbook: practical recipes for visualizing data" [@r-graphics-cookbook] to learn additional visulization techniques applicable to Spark. Now, to ease this transformation step before visualizing, the `dbplot` package provides a few read-to-use visualizations that automate aggregation in Spark.
+
 ### Using dbplot
 
-The `dbplot` package provides helper functions for plotting with remote data.  The R code `dbplot` uses to transform the data is written so that it can be translated by `sparklyr` into SQL.  It then uses those results to create a graph using the `ggplot2` package.  The data transformation, and the plotting are both triggered by a single `dbplot` function.  
+The `dbplot` package provides helper functions for plotting with remote data.  The R code `dbplot` uses to transform the data is written so that it can be translated into Spark.  It then uses those results to create a graph using the `ggplot2` package where data transformation and plotting are both triggered by a single function.  
 
-The `dbplot_histogram()` function will have Spark calculate the bins and the count per bin, and then outputs a `ggplot` object.  It accepts a `binwidth` argument.  The resulting plot is in Figure \@ref(fig:analysis-viz3).
+The `dbplot_histogram()` function makes Spark calculate the bins and the count per bin and outputs a `ggplot` object which can be further refined by adding more steps to the plot object. `dbplot_histogram()` also accepts a `binwidth` argument to control the range used to compute the bins, the resulting plot is in Figure \@ref(fig:analysis-visualizations-histogram).
 
 ```{r, eval = FALSE}
 library(dbplot)
 
-cars %>%
-  dbplot_histogram(mpg, binwidth = 3)
+db_compute_bins(cars, mpg, binwidth = 3) %>%
+  ggplot() + geom_col(aes(mpg, count)) +
+  labs(title = "Cars by Miles Per Galon", subtitle = "Histogram over miles per gallon")
 ```
-
 ```{r, eval = FALSE, echo = FALSE}
-library(dbplot)
-cars %>%
-  dbplot_histogram(mpg, binwidth = 3) +
-  ggsave("images/analysis-visualizations-3.png", width = 10, height = 5)
+db_compute_bins(cars, mpg, binwidth = 3) %>%
+  ggplot() +
+  geom_col(aes(mpg, count), fill = "#878787") +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  labs(title = "Cars by Miles Per Galon", subtitle = "Histogram over miles per gallon") +
+  ggsave("images/analysis-visualizations-histogram.png", width = 10, height = 5)
+```
+```{r analysis-visualizations-histogram, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Histogram created by dbplot', fig.align = 'center', echo = FALSE}
+render_image("images/analysis-visualizations-histogram.png")
 ```
 
-```{r analysis-viz3, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Histogram created by dbplot', fig.align = 'center', echo = FALSE}
-render_image("images/analysis-visualizations-3.png")
-```
-
-Because it is a `ggplot` object, it can be further refined by adding more steps to the plot object.  In the example on Figure \@ref(fig:analysis-viz4), we added a title to the plot, after it was created by `dbplot`.
-
-```{r, eval = FALSE}
-cars %>%
-  dbplot_histogram(mpg, binwidth = 3) +
-  labs(title = "Histogram of Miles Per Galon")
-```
-
-```{r, eval = FALSE, echo = FALSE}
-cars %>%
-  dbplot_histogram(mpg, binwidth = 3) +
-  labs(title = "Histogram of Miles Per Galon") +
-  ggsave("images/analysis-visualizations-4.png", width = 10, height = 5)
-```
-
-```{r analysis-viz4, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Refined Histogram', fig.align = 'center', echo = FALSE}
-render_image("images/analysis-visualizations-4.png")
-```
-
-The package also provides a way to obtain the raw results via the `db_compute_bins()` package.
-
-```{r, eval = FALSE}
-cars %>%
-  db_compute_bins(mpg, binwidth = 3) 
-```
-
-```
-## # A tibble: 7 x 2
-##     mpg count
-##   <dbl> <dbl>
-## 1  19.4     6
-## 2  22.4     3
-## 3  13.4     8
-## 4  10.4     3
-## 5  16.4     6
-## 6  28.4     4
-## 7  25.4     2
-```
-
-Histograms provide a great way to analyze a single variable.  To analyze two variables, a scatter or raster plot is commonly used.  The next section will discuss how to do that with `dbplot`.
-
-### Scatter vs Raster Plots
+Histograms provide a great way to analyze a single variable. To analyze two variables, a scatter or raster plot is commonly used. 
 
 Scatter plots are used to compare the relationship between two continuous variables. For example, a scatter plot will display the relationship between the weight of a car and its gas consumption.  The plot will show that the higher the weight, the higher the gas consumption because the dots clump together into almost a line that goes from the top left towards the bottom right. See Figure  \@ref(fig:analysis-point) for an example of the plot. 
 
@@ -506,72 +453,46 @@ Scatter plots are used to compare the relationship between two continuous variab
 ggplot(aes(mpg, wt), data = mtcars) + 
   geom_point()
 ```
-
 ```{r, eval = FALSE, echo = FALSE}
 ggplot(aes(mpg, wt), data = mtcars) + 
   geom_point() +
+  labs(title = "Weigth over MPG", subtitle = "A scatter plot visualizing car weigth over miles per gallon") +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  scale_y_continuous(breaks = 0:5) +
   ggsave("images/analysis-point.png", width = 10, height = 5)
 ```
-
-```{r analysis-point, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Scatter plot example', fig.align = 'center', echo = FALSE}
+```{r analysis-point, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Scatter plot example in Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-point.png")
 ```
 
-The problems that arise when trying to use this visualization with a large amount of data are:
+However, for scatter plots, no amount of "pushing the computation" to Spark will help with this problem because the data has to be plotted in individual dots.  
 
-Performance problems 
-: Too many single dots have to be calculated and drawn.
+The best alternative is to find a plot type that represents the x/y relationship and concentration in a way that it is easy to perceive and to "physically" plot.  The *raster* plot may be the best answer.  It returns a grid of x/y positions and the results of a given aggregation usually represented by the color of the square.
 
-Perception problems
-: It becomes hard to see the true amount of dots in a single area.
-
-No amount of "pushing the computation" to Spark will help with this problem because the data has to be plotted in individual dots.  
-
-The best alternative is to find a plot type that represents the x/y relationship and concentration in a way that it is easy to perceive and to "physically" plot.  The *raster* plot may be the best answer.  It returns a grid of x/y positions and the results of a given aggregation usually represented by the color of the square.  
-
-The `dbplot` package provides functionality that helps with this kind of plotting.  The first one is `dbplot_raster()`.  It is the way to quickly run a visualization of this kind.
+You can use `dbplot_raster()` to create a scatter-like plot in Spark, while only retrieving a small subset of the remote dataset:
 
 ```{r, eval = FALSE}
-cars %>%
-  dbplot_raster(mpg, wt, resolution = 5)
+dbplot_raster(cars, mpg, wt, resolution = 16)
 ```
-
 ```{r, eval = FALSE, echo = FALSE}
-cars %>%
-  dbplot_raster(mpg, wt, resolution = 5) +
-  ggsave("images/analysis-visualizations-5.png", width = 10, height = 5)
+db_compute_raster2(cars, mpg, wt, resolution = 16) %>%
+  ggplot() +
+  scale_fill_gradientn(colours = grey.colors(10, start = 0.6, end = 0.2)) +
+  geom_raster(aes(mpg, wt, fill = `n()`)) +
+  scale_y_continuous(breaks = 0:5) +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  labs(title = "Weigth over MPG", subtitle = "A raster plot visualizing car weigth over miles per gallon using Spark") +
+  ggsave("images/analysis-visualizations-raster.png", width = 10, height = 5)
+```
+```{r analysis-visualizations-raster, eval = TRUE, fig.width=10, fig.height=5, fig.cap='A raster plot using Spark', fig.align = 'center', echo = FALSE}
+render_image("images/analysis-visualizations-raster.png")
 ```
 
-```{r analysis-raster1, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Using dbplot_raster()', fig.align = 'center', echo = FALSE}
-render_image("images/analysis-visualizations-5.png")
-```
+As shown in Figure \@ref(fig:analysis-visualizations-raster), the plot returns a grid no bigger than 5x5.  This limits the number of records that need to be collected into R to 25.
 
-As shown in Figure \@ref(fig:analysis-raster1), the plot returns a grid no bigger than 5x5.  This limits the number of records that need to be collected into R to 25.  
+**Tip:** YOu can also use `dbplot` to retrieve the raw data and visualize by other means; to retrieve the aggregates but not the plots use: `db_compute_bins()`, `db_compute_count()`, `db_compute_raster()` and `db_compute_boxplot()`.
 
-If the user prefers to either visualize, or simply obtain the result data, the `db_compute_raster()` and `db_compute_raster2()` functions return the data.  The `db_compute_raster2()` includes the upper and lower bounds of each square.
-
-```{r, eval = FALSE}
-cars %>%
-  db_compute_raster2(mpg, wt, resolution = 5)
-```
-```
-## # A tibble: 9 x 5
-##     mpg    wt `n()` mpg_2  wt_2
-##   <dbl> <dbl> <dbl> <dbl> <dbl>
-## 1  19.8  2.30     5  24.5  3.08
-## 2  19.8  3.08     3  24.5  3.86
-## 3  15.1  3.08    10  19.8  3.86
-## 4  10.4  3.08     3  15.1  3.86
-## 5  15.1  3.86     1  19.8  4.64
-## 6  10.4  4.64     3  15.1  5.42
-## 7  29.2  1.51     4  33.9  2.30
-## 8  24.5  1.51     2  29.2  2.30
-## 9  15.1  2.30     1  19.8  3.08
-```
-
-As we covered in this section, `dbplot` offers the convenience of pushing the calculations to Spark, and also to automatically plot the results.  If desired, `ggplot2` functions can be used directly, the plot's calculations would have to be coded by you.  For small and local data sets, either `dbplot` or `ggplot2` will perform well. 
-
-We use statistical models to gain even deeper insights into our data.  The next section will cover how we can prepare and run models within Spark.  
+While visualizations are indispensable, you can complement data analysis using statistical models to gain even deeper insights into our data. The next section will present how we can prepare data for modeling with Spark.  
 
 ## Model
 
