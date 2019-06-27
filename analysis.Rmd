@@ -39,11 +39,11 @@ render_nomnoml("
 
 As the diagram illustrates, we first *import* data into our analysis stem, then *wrangled* by trying different data transformations, such as aggregations, and then *visualized* to help us perceive relationships and trends. In order to get deeper insight, one or multiple statistical *models* can be fitted against sample data. This will help in finding out if the patterns hold true when new data is applied to them. And lastly, the results are *communicated* publicly or privately to colleagues and stakeholders. 
 
-Commonly, in R all of the steps are performed in local memory.  But that approach has to change when the analysis adds the use of Spark.
+When working with not-large-scale datasets, as in datasets that fit in memory; we can perform all those steps from R, without using Spark. However, when data does not fit in memory or computation is simply too-slow, whe can slightly motify this approach by incorporating Spark, but how?
 
-For data analysis, the ideal approach  is to let Spark do what its good at. Spark is a parallel computation engine that works at a large-scale. Spark includes a SQL Engine and Machine Learning libraries.  These can be used to perform most of the same operations R performs. Such operations include data selection, transformation, and modeling.  Additionally, Spark include Graph analysis and Streaming libraries that extend the R user's capabilities.  Figure \@ref(fig:analysis-features) lists the four main capabilities available to data analysts in Spark.
+For data analysis, the ideal approach  is to let Spark do what its good at. Spark is a parallel computation engine that works at a large-scale and provides a SQL engine and modeling libraries. These can be used to perform most of the same operations R performs. Such operations include data selection, transformation, and modeling.  Additionally, Spark includes Graph analysis and Streaming libraries and many other; for now, we will skip  those non-rectangular datasets and present them in later chapters.
 
-The data *import*, *wrangling*, and *modeling* can be performed inside Spark. *Visualization* can also partly be done by Spark, we will cover that later in this chapter. The idea is to use R to tell Spark what data operations to run, and then bring only the results into R. As illustrated in Figured \@ref(fig:analysis-approach), the ideal method *pushes compute* to the Spark cluster, and then *collects results* into R.
+Data *import*, *wrangling*, and *modeling* can be performed inside Spark. *Visualization* can also partly be done by Spark, we will cover that later in this chapter. The idea is to use R to tell Spark what data operations to run, and then bring only the results into R. As illustrated in Figured \@ref(fig:analysis-approach), the ideal method *pushes compute* to the Spark cluster, and then *collects results* into R.
 
 ```{r analysis-approach, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark computes while R collects results', fig.align = 'center', eval = eval_code}
 render_nomnoml("
@@ -69,9 +69,9 @@ rmarkdown]]->[<label> Push Compute]
 ", "images/analysis-r-interface-to-spark-sql.png")
 ```
 
-The `sparklyr` package aids in using the "push compute, collect results" principle. Most of its functions are mainly wrappers on top of Spark API calls. This allows us to take advantage of Spark's analysis components, instead of R's. For example, an analyst needs to fit a Linear Regression model. The data is available in Spark. Instead of using the familiar `lm()` function, the analyst would use `ml_linear_regression()`. This R function will run the Scala code that uses the Spark's API model. This specific example is illustrated in Figure \@ref(fig:analysis-scala).
+The `sparklyr` package aids in using the "push compute, collect results" principle. Most of its functions are mainly wrappers on top of Spark API calls. This allows us to take advantage of Spark's analysis components, instead of R's. For example, when you need to fit a linear regression model; instead of using R's familiar `lm()` function, you would use Spark's `ml_linear_regression()`. This R function thencalls Spark to create this model, this specific example is illustrated in Figure \@ref(fig:analysis-scala).
 
-```{r analysis-scala, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R functions call Scala functions', fig.align = 'center', eval = eval_code}
+```{r analysis-scala, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R functions call Spark functionality', fig.align = 'center', eval = eval_code}
 render_nomnoml("
 #direction: right
 #padding: 12
@@ -83,7 +83,7 @@ render_nomnoml("
 ", "images/analysis-r-interface-to-spark-scala.png")
 ```
 
-For more common data manipulation tasks, `sparklyr` provides a back-end for `dplyr`.  This means that already familiar `dplyr` verbs can be used in R, and then `sparklyr` and `dplyr` will translate those actions into Spark SQL statements.
+For more common data manipulation tasks, `sparklyr` provides a back-end for `dplyr`. This means that already familiar `dplyr` verbs can be used in R, and then `sparklyr` and `dplyr` will translate those actions into Spark SQL statements, which are alsmost certainly much more compact and easieer to read than SQL staments. So, if you are already familiar with R and `dplyr`, there is nothing new to learn! This might feel a bit anticlimactic, it is indeed, but it's also great since you can focus that energy on learning other skills required to do large-scalee computing.
 
 ```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='dplyr writes SQL', fig.align = 'center', eval = eval_code}
 render_nomnoml("
@@ -96,15 +96,24 @@ render_nomnoml("
 ", "images/analysis-dplyr-sql-translation.png")
 ```
 
-In order to practice as you learn, the rest of this chapter's code will use a single exercise that runs in the *local* Spark master. This way, the code can be replicated in your personal computer. Please, make sure to already have `sparklyr` and a local copy of Spark installed. The installation of Spark can be done by using the utility that comes with the package.  For more information on how to do that please see the Local section in the Connections chapter.
+In order to practice as you learn, the rest of this chapter's code will use a single exercise that runs in the *local* Spark master. This way, the code can be replicated in your personal computer. Please, make sure to already have `sparklyr` working, this should already be the case if you completed the Getting Started chapter.
+
+This chapter will make use of pakages that you might not have installed; so first, make sure the following packages are installed by running:
+
+```{r}
+install.packages("ggplot2")
+install.packages("corrr")
+install.packages("dbplot")
+install.packages("rmarkdown")
+```
 
 First, load the `sparklyr` and `dplyr` packages, and open a new *local* connection.
-```{r, eval = FALSE}
+```{r}
 library(sparklyr)
 sc <- spark_connect(master = "local")
 ```
 
-The environment is ready to be used.  The next step is to add data that we can analyze. 
+The environment is ready to be used, so our next task is to import data that we can later analyze.
 
 ## Import
 
@@ -726,11 +735,8 @@ output: html_document
 ---
 `r ''````{r, setup, include = FALSE}
 library(sparklyr)
-```
+library(dplyr)
 
-## Setup Spark environment
-A local Spark environment is setup and the `mtcars` data set preloaded
-`r ''````{r, eval = FALSE}
 sc <- spark_connect(master = "local")
 cars <- copy_to(sc, mtcars)
 ```
@@ -738,7 +744,7 @@ cars <- copy_to(sc, mtcars)
 ## Visualize
 Aggregate data in Spark, visualize in R.
 `r ''````{r, eval = FALSE}
-library(tidyverse)
+library(ggplot2)
 cars %>%
   group_by(cyl) %>% summarise(mpg = mean(mpg)) %>%
   ggplot(aes(cyl, mpg)) + geom_bar(stat="identity")
@@ -818,6 +824,6 @@ render_image("images/analysis-xaringan.png")
 
 ## Recap
 
-R and Spark are a very powerful combination.  Being able to use a powerful computing platform, along with an incredibly robust ecosystem of packages makes up for an ideal analysis platform.  Remember to push computation to Spark, and focus on collecting results in R.  The result can then be used for further data manipulation or for plotting.  The results can then be shared with stakeholders in a variety of outputs.  A a learner of R, hopefully this chapter also encouraged you to learn more about the `tidyverse` as well as R Markdown.  
+R and Spark are a very powerful combination.  Being able to use a powerful computing platform, along with an incredibly robust ecosystem of packages makes up for an ideal analysis platform.  Remember to push computation to Spark, and focus on collecting results in R.  The result can then be used for further data manipulation or for plotting.  The results can then be shared with stakeholders in a variety of outputs.  A a learner of R, hopefully this chapter also encouraged you to learn more about `dplyr`, `ggplot2` and R Markdown.  
 
 The next chapter will dive deeper into how to expand the models created during analysis into Machine Learning workflows that can be used in Production.
