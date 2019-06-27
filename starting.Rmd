@@ -113,15 +113,18 @@ spark_uninstall(version = "1.6.3", hadoop = "2.6")
 
 **Note:** The default installation paths are `~/spark` for OS X and Linux and, `%LOCALAPPDATA%/spark` for Windows. To customize the installation path you can run `options(spark.install.dir = "<installation-path>")` before `spark_install()` and `spark_connect()`.
 
-## Connecting to Spark {#starting-connect-to-spark}
+## Connecting {#starting-connect-to-spark}
 
 It's important to mention that, so far, we've only installed a local Spark cluster. A local cluster is really helpful to get started, test code and troubleshoot with ease. Further chapters will explain where to find, install and connect to real Spark clusters with many machines, but for the first few chapters, we will focus on using local clusters.
 
 To connect to this local cluster we simply run:
 
 ```{r starting-connect-local}
+library(sparklyr)
 sc <- spark_connect(master = "local")
 ```
+
+**Note:** If you are using your own or online Spark cluster, make sure to connect as specified by your cluster administrator or the online documentation. If you need some pointers, you can take a quick pick at the Connections chater which will explain in detail how to connect to any Spark cluster.
 
 The `master` parameter identifies which is the "main" machine from the Spark cluster; this machine is often called the driver node. While working with real clusters using many machines, most machines will be worker machines and one will be the master. Since we only have a local cluster with only one machine, we will default to use `"local"` for now.
 
@@ -290,7 +293,15 @@ While data analysis can take you quite far when understanding data, building a m
 For instance, we can use a linear model to approximate the relationship between fuel efficiency and horse power:
 
 ```{r}
-model <- ml_linear_regression(cars, mpg ~ hp)
+model <- ml_linear_regression(cars, mpg ~ hp) %>%
+  print()
+```
+```
+Formula: mpg ~ hp
+
+Coefficients:
+(Intercept)          hp 
+30.09886054 -0.06822828
 ```
 
 This model can now be used to predict values that are not in the original datset. For instance, we can add entries for cars with horse power beyond 250 and also visualize the predicted values as shown in Figure \@ref(fig:starting-cars-hp-vs-mpg-prediction).
@@ -323,19 +334,6 @@ model %>%
 ```
 ```{r starting-cars-hp-vs-mpg-prediction, eval=TRUE, echo=FALSE, fig.cap='Horse power vs miles per gallon with predictions', fig.align = 'center'}
 render_image("images/starting-cars-hp-vs-mpg-prediction.png", "Horse power vs miles per gallon with predictions")
-```
-
-In addition, we can refine our insights using the `broom` package to retrive additional statistics from our model that can help us asses it's quality.
-
-```{r}
-broom::glance(model)
-```
-```
-# A tibble: 1 x 5
-  explained.varia… mean.absolute.e… mean.squared.er… r.squared
-             <dbl>            <dbl>            <dbl>     <dbl>
-1             21.2             2.91             14.0     0.602
-# … with 1 more variable: root.mean.squared.error <dbl>
 ```
 
 While the previous example lacks many of the appropriate techniques you should use while modeling, it's also a simple example to briefly introduce the modeling capabilities of Spark. All the Spark models, techniques and best practices will be properly introduced in the Modeling chapter.
