@@ -723,9 +723,9 @@ In R Markdown, one type of artifact could potentially be rendered in different f
 
 ### Reports
 
-Creating a new R Markdown report is easy.  At the top, R Markdown expect a YAML header. The first and last line are three consecutive dashes (`---`).  The content in between the dashes vary depending on the type of document.  The only required one is the `output` value.  R Markdown needs to know what kind of output it needs to render your report into.  This YAML header is called Front Matter. Following the Front Matter are sections of code, called code chunks. These code chunks can be interlaced with the narratives.
+Creating a new R Markdown report which uses Spark as a computer engine is ease! At the top, R Markdown expect a YAML header. The first and last line are three consecutive dashes (`---`).  The content in between the dashes vary depending on the type of document. The only required one is the `output` value. R Markdown needs to know what kind of output it needs to render your report into. This YAML header is called Front Matter. Following the Front Matter are sections of code, called code chunks. These code chunks can be interlaced with the narratives. There is nothing particularily interesting to note when using Spark with R Markdown, except that is just business as usual.
 
-The following example shows how easy it is to create a fully reproducible report.  The narrative, code and, most importantly, the output of the code is recorded inside the resulting HTML file.  You can copy and paste this following code in a file. Save the file with a `.Rmd` extension, and choose whatever name you would like.  
+The following example shows how easy it is to create a fully reproducible report that uses Spark to process large-scale datasets. The narrative, code and, most importantly, the output of the code is recorded inside the resulting HTML file. You can copy and paste this following code in a file. Save the file with a `.Rmd` extension, and choose whatever name you would like.  
 
 ````markdown
 ---
@@ -734,26 +734,22 @@ output: html_document
 ---
 `r ''````{r, setup, include = FALSE}
 library(sparklyr)
-conf <- spark_config()
-conf$`sparklyr.cores.local` <- 4
-conf$`sparklyr.shell.driver-memory` <- "1G"
-conf$spark.memory.fraction <- 0.9
 ```
 
 ## Setup Spark environment
 A local Spark environment is setup and the `mtcars` data set preloaded
 `r ''````{r, eval = FALSE}
-sc <- spark_connect(master = "local", config = conf)
-cars <- copy_to(sc, mtcars, "mtcars_remote")
-cars
+sc <- spark_connect(master = "local")
+cars <- copy_to(sc, mtcars)
 ```
 
 ## Visualize
-A histogram was run over the `mpg` data
+Aggregate data in Spark, visualize in R.
 `r ''````{r, eval = FALSE}
-library(dbplot)
+library(tidyverse)
 cars %>%
-  dbplot_histogram(mpg, binwidth = 3)
+  group_by(cyl) %>% summarise(mpg = mean(mpg)) %>%
+  ggplot(aes(cyl, mpg)) + geom_bar(stat="identity")
 ```
 
 ## Model
@@ -801,17 +797,13 @@ output: xaringan::moon_reader
 ---
 `r ''````{r, setup, include = FALSE}
 library(sparklyr)
-conf <- spark_config()
-conf$`sparklyr.cores.local` <- 4
-conf$`sparklyr.shell.driver-memory` <- "1G"
-conf$spark.memory.fraction <- 0.9
 ```
 
 ## Setup Spark environment
 A local Spark environment is setup and the `mtcars` dataset preloaded
 `r ''````{r, eval = FALSE}
-sc <- spark_connect(master = "local", config = conf)
-cars <- copy_to(sc, mtcars, "mtcars_remote")
+sc <- spark_connect(master = "local")
+cars <- copy_to(sc, mtcars)
 cars
 ```
 ---
