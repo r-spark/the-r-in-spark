@@ -128,6 +128,8 @@ sc <- spark_connect(master = "local", version = "2.3")
 
 The `master` parameter identifies which is the "main" machine from the Spark cluster; this machine is often called the driver node. While working with real clusters using many machines, most machines will be worker machines and one will be the master. Since we only have a local cluster with only one machine, we will default to use `"local"` for now.
 
+After a connection is stablished, `spark_connect()` retrieves an active Spark connection which most code usually names `sc`; you will then make use of `sc` to execute Spark commands.
+
 If connection fails, the Connections chapter contains a [troubleshooting](#connections-troubleshooting) section which can help you resolve your connection issue.
 
 ## Using Spark {#starting-sparklyr-hello-world}
@@ -367,7 +369,7 @@ Then we can use this extension to group all the horse power data points over the
 ```{r}
 sparklyr.nested::sdf_nest(cars, hp) %>%
   group_by(cyl) %>%
-  summarize(data = collect_list(data))
+  summarise(data = collect_list(data))
 ```
 ```
 # Source: spark<?> [?? x 2]

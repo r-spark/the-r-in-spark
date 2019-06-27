@@ -4,10 +4,6 @@ source("r/render.R")
 knitr::opts_chunk$set(eval = FALSE)
 ```
 
-```{r, echo = FALSE, eval = TRUE}
-eval_code <- TRUE
-```
-
 # Analysis {#analysis}
 
 Previous chapters focused on introducing Spark with R, they got you up to speed and encouraged you to try basic data analysis workflows. However, they have not properly introduced what such data analysis means, specially while running in Spark. They presented the tools you need throughout this book, to help you spend more time learning and hopefully, less time troublehsooting.
@@ -20,7 +16,7 @@ The next chapter, Modeling, will focus on creating statistical models to predict
 
 In a data analysis project, the main goal is to understand what the data is trying to “tell us”, hoping that it provides an answer to a specific question. Most data analysis projects follow a set of steps outlined in Figure \@ref(fig:analysis-steps). 
 
-```{r analysis-steps, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='General steps of a data analysis', fig.align = 'center', eval = eval_code}
+```{r analysis-steps, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='General steps of a data analysis', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -45,7 +41,7 @@ For data analysis, the ideal approach  is to let Spark do what its good at. Spar
 
 Data *import*, *wrangling*, and *modeling* can be performed inside Spark. *Visualization* can also partly be done by Spark, we will cover that later in this chapter. The idea is to use R to tell Spark what data operations to run, and then bring only the results into R. As illustrated in Figured \@ref(fig:analysis-approach), the ideal method *pushes compute* to the Spark cluster, and then *collects results* into R.
 
-```{r analysis-approach, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark computes while R collects results', fig.align = 'center', eval = eval_code}
+```{r analysis-approach, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark computes while R collects results', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #arrowSize: 0.4
@@ -71,7 +67,7 @@ rmarkdown]]->[<label> Push Compute]
 
 The `sparklyr` package aids in using the "push compute, collect results" principle. Most of its functions are mainly wrappers on top of Spark API calls. This allows us to take advantage of Spark's analysis components, instead of R's. For example, when you need to fit a linear regression model; instead of using R's familiar `lm()` function, you would use Spark's `ml_linear_regression()`. This R function thencalls Spark to create this model, this specific example is illustrated in Figure \@ref(fig:analysis-scala).
 
-```{r analysis-scala, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R functions call Spark functionality', fig.align = 'center', eval = eval_code}
+```{r analysis-scala, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R functions call Spark functionality', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 12
@@ -85,7 +81,7 @@ render_nomnoml("
 
 For more common data manipulation tasks, `sparklyr` provides a back-end for `dplyr`. This means that already familiar `dplyr` verbs can be used in R, and then `sparklyr` and `dplyr` will translate those actions into Spark SQL statements, which are alsmost certainly much more compact and easieer to read than SQL staments. So, if you are already familiar with R and `dplyr`, there is nothing new to learn! This might feel a bit anticlimactic, it is indeed, but it's also great since you can focus that energy on learning other skills required to do large-scalee computing.
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='dplyr writes SQL', fig.align = 'center', eval = eval_code}
+```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='dplyr writes SQL', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 12
@@ -121,7 +117,7 @@ The environment is ready to be used, so our next task is to import data that we 
 
 Importing data is to be approached differently when using Spark with R. Usually, importing means that R will read files and load them into memory; when using Spark, the data is imported into Spark, not R. Notice how in Figure \@ref(fig:analysis-access) the data source is connected to Spark insted of being connected to R. 
 
-```{r analysis-access, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Import Data to Spark not R', fig.align = 'center', eval = eval_code}
+```{r analysis-access, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Import Data to Spark not R', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 14
@@ -262,11 +258,10 @@ We have included a comprehensive list of all the Hive functions in the Appendix 
 
 ### Correlations
 
-A very common exploration technique is to calculate and visualize correlations. We often calculate correlations to find out what kind of statistical relationship are between paired sets of variables.  The Spark API provides an internal function that calculates correlations across the entire data set.  The results are then returned to R as a `data.frame` object. 
+A very common exploration technique is to calculate and visualize correlations. We often calculate correlations to find out what kind of statistical relationship are between paired sets of variables. Spark provides functions that calculate correlations across the entire data set.  The results are then returned to R as a `data.frame` object. 
 
 ```{r, eval = FALSE}
-ml_corr(cars) %>%
-  as_tibble()
+ml_corr(cars)
 ```
 
 ```
@@ -293,8 +288,7 @@ The `corrr` R package specializes in correlations.  It contains friendly functio
 ```{r, eval = FALSE}
 library(corrr)
 
-cars %>%
-  correlate(use = "pairwise.complete.obs", method = "pearson") 
+correlate(cars, use = "pairwise.complete.obs", method = "pearson") 
 ```
 
 ```
@@ -316,21 +310,26 @@ cars %>%
 ## #   am <dbl>, gear <dbl>, carb <dbl>
 ```
 
-We can pipe the results to other `corrr` functions. For example, the `shave()` functions turns all of the duplicated results into `NA`’s.  Additionally, the results can be easily visualized using the `rplot()` function, it returns a `ggplot` object. Figure \@ref(fig:analysis-rplot) is an example the plot resulting of combining these two functions. 
+We can pipe the results to other `corrr` functions. For example, the `shave()` functions turns all of the duplicated results into `NA`’s. Again, while this feels like standard R code using existing R packages, Spark is being used under the hood to perform the correlation!
 
-```{r, eval = FALSE}
-cars %>%
-  correlate(use = "pairwise.complete.obs", method = "pearson") %>%
+Additionally, the results can be easily visualized using the `rplot()` function; Figure \@ref(fig:analysis-corrr-rplot) is an example the plot resulting of combining these two functions. 
+
+```{r}
+correlate(cars, use = "pairwise.complete.obs", method = "pearson") %>%
   shave() %>%
   rplot()
 ```
-
-```{r analysis-rplot, eval = eval_code, out.width='800pt', out.height='400pt', fig.align = 'center', fig.cap = 'Using rplot() to visualize correlations', echo = FALSE}
-render_image("images/analysis-wrangling-1.png")
+```{r analysis-corrr-rplot-code, echo=FALSE}
+correlate(cars, use = "pairwise.complete.obs", method = "pearson") %>%
+  shave() %>%
+  rplot(colours = c("#333333", "#999999")) +
+    ggsave("images/analysis-corrr-rplot.png", width = 10, height = 5)
+```
+```{r analysis-corrr-rplot, eval = TRUE, out.width='800pt', out.height='400pt', fig.align = 'center', fig.cap = 'Using rplot() to visualize correlations', echo = FALSE}
+render_image("images/analysis-corrr-rplot.png")
 ```
 
-It is much easier to see which relationships are positive or negative. Positive relationships are in blue, and negative relationships are in red. The size of the circle indicates how significant their relationship is. The power of a visualizing data is in how much easier it makes it for us to understand results.  The next section will expand on this step of the process.
-
+It is much easier to see which relationships are positive or negative. Positive relationships are in grey, and negative relationships are black. The size of the circle indicates how significant their relationship is. The power of visualizing data is in how much easier it makes it for us to understand results.  The next section will expand on this step of the process.
 
 ## Visualize
 
@@ -340,7 +339,7 @@ R is great at data visualizations. Its capabilities for creating plots is extend
 
 It is possible to create visualizations in R from data source from Spark. To understand how to do this, let's first break down how computer programs build plots:  It takes the raw data and performs some sort of transformation.  The transformed data is then mapped to a set of coordinates.  Finally, the mapped values are drawn in a plot. Figure \@ref(fig:analysis-plot) summarizes each of the steps.
 
-```{r analysis-plot, echo=FALSE, out.width='100%', out.height='100pt', fig.cap='Stages of a plot', fig.align = 'center', eval = eval_code}
+```{r analysis-plot, echo=FALSE, out.width='100%', out.height='100pt', fig.cap='Stages of a plot', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -355,14 +354,14 @@ render_nomnoml("
 
 For example, to create a bar plot in R, we simply call a function:
 
-```{r, eval = eval_code, out.width='500pt', out.height='400pt', fig.cap='Plotting inside R', fig.align = 'center', eval = eval_code}
+```{r, eval = TRUE, out.width='500pt', out.height='400pt', fig.cap='Plotting inside R', fig.align = 'center'}
 library(ggplot2)
 ggplot(aes(as.factor(cyl), mpg), data = mtcars) + geom_col()
 ```
 
 In this case, the `mtcars` raw data was *automatically* transformed into three discrete aggregated numbers, then each result was mapped into an `x` and `y` plane, and then the plot was drawn, see  figure \@ref(fig:analysis-mtcars-plot). As R users, all of the stages of building the plot are conveniently abstracted for us.
 
-```{r analysis-mtcars-plot, echo=FALSE, out.width='100%', out.height='200pt', fig.cap='R plotting function', fig.align = 'center', eval = eval_code}
+```{r analysis-mtcars-plot, echo=FALSE, out.width='100%', out.height='200pt', fig.cap='R plotting function', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -381,7 +380,7 @@ render_nomnoml("
 
 In essence, the approach for visualizing is the same as in wrangling, push the computation to Spark, and then collect the results in R for plotting.  As illustrated in figure \@ref(fig:analysis-spark-plot), the heavy lifting of preparing the data, such as in aggregating the data by groups or bins, can be done inside Spark, and then collect the much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, the bins are calculated in Spark, and then in R, use a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins. 
 
-```{r analysis-spark-plot, echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark and R', fig.align = 'center', eval = eval_code}
+```{r analysis-spark-plot, echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark and R', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -430,7 +429,7 @@ ggplot(aes(as.factor(cyl), mpg), data = car_group) +
   ggsave("images/analysis-visualizations-1.png", width = 10, height = 5)
 ```
 
-```{r analysis-viz1, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
+```{r analysis-viz1, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Plot from Spark', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-1.png")
 ```
 
@@ -454,7 +453,7 @@ cars %>%
   ggsave("images/analysis-visualizations-3.png", width = 10, height = 5)
 ```
 
-```{r analysis-viz3, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Histogram created by dbplot', fig.align = 'center', echo = FALSE}
+```{r analysis-viz3, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Histogram created by dbplot', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-3.png")
 ```
 
@@ -473,7 +472,7 @@ cars %>%
   ggsave("images/analysis-visualizations-4.png", width = 10, height = 5)
 ```
 
-```{r analysis-viz4, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Refined Histogram', fig.align = 'center', echo = FALSE}
+```{r analysis-viz4, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Refined Histogram', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-4.png")
 ```
 
@@ -514,7 +513,7 @@ ggplot(aes(mpg, wt), data = mtcars) +
   ggsave("images/analysis-point.png", width = 10, height = 5)
 ```
 
-```{r analysis-point, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Scatter plot example', fig.align = 'center', echo = FALSE}
+```{r analysis-point, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Scatter plot example', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-point.png")
 ```
 
@@ -543,7 +542,7 @@ cars %>%
   ggsave("images/analysis-visualizations-5.png", width = 10, height = 5)
 ```
 
-```{r analysis-raster1, eval = eval_code, fig.width=10, fig.height=5, fig.cap='Using dbplot_raster()', fig.align = 'center', echo = FALSE}
+```{r analysis-raster1, eval = TRUE, fig.width=10, fig.height=5, fig.cap='Using dbplot_raster()', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-visualizations-5.png")
 ```
 
@@ -743,7 +742,7 @@ spark_disconnect(sc)
 ````
 If using the RStudio IDE, click on the *Knit* button at the top of the document to run it. The HTML output should look like this:
 
-```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
+```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-rmarkdown.png")
 ```
 
@@ -796,7 +795,7 @@ spark_disconnect(sc)
 ````
 Here is what the first full slide should look like:
 
-```{r, eval = eval_code, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
+```{r, eval = TRUE, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
 render_image("images/analysis-xaringan.png")
 ```
 
