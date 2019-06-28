@@ -15,7 +15,11 @@ sc <- spark_connect(master = "local", config = config)
 
 # Modeling {#modeling}
 
-In the previous chapter, you learn how to scale up data analysis to large datasets with Spark. In this chapter, we build off of the ideas covered and discuss scaling up machine learning workflows. We'll explore MLlib, the component of Spark that allows you to write high level code to perform machine learning tasks on distributed data. Sparklyr provides an interface to the ML algorithms that should be familiar to R users, and we'll go into detail in the chapter. For example, you can run a logistic regression as follows:
+In the previous chapter, you learn how to scale up data analysis to large datasets with Spark. In this chapter, we build off of the ideas covered and discuss scaling up machine learning workflows. We'll explore MLlib, the component of Spark that allows you to write high level code to perform machine learning tasks on distributed data. 
+
+## Overview
+
+Sparklyr provides an interface to the ML algorithms that should be familiar to R users, and we'll go into detail in the chapter. For example, you can run a logistic regression as follows:
 
 ```{r eval = FALSE}
 ml_logistic_regression(mtcars, am ~ .)
@@ -40,8 +44,6 @@ The ML interface in sparklyr has been designed to minimize the cognitive effort 
 In the next section, we will introduce the dataset that will be used throughout the chapter. We then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We then move on to an unsupervised topic modeling example that looks at some unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis.
 
 [^2]: We acknowledge that the terms here may mean different things to different people, and that there is a continuum between the two approaches, however they are defined.
-
-## Example Data
 
 The examples in this chapter will utilize the OkCupid dataset [@kim2015okcupid], available at [^1]. The dataset consists of user profile data from an online dating site, and contains a diverse set of features, including biographical characteristics such as gender and profession, and free text fields related to personal interests. There are about 60,000 profiles in the dataset, which fits comfortably into memory on a modern laptop and wouldn't be considered "big data", so you can easily follow along running Spark local mode.
 
@@ -565,7 +567,7 @@ render_image("images/modeling-okc-histogram-essay-length.png", "Distribution of 
 
 Now that we have a few more features to work with, we can begin running some ML algorithms!
 
-## Model Building
+## Building Models
 
 Once we have a good grasp on our dataset, we can start building some models. Before we do so, however, we need to come up with a plan to tune and validate the "candidate" models---the . Since we are dealing with a binary classification problem, the metrics one can use include accuracy, precision, sensitivity, and area under the receiver operating characteristic curve (ROC AUC), among others. The metric you optimize depends on your specific business problem, but for this exercise, we will focus on the ROC AUC.
 
@@ -767,7 +769,7 @@ mean(cv_results$auc)
 ## [1] 0.7715102
 ```
 
-### Logistic Regression as a Generalized Linear Regression
+### Generalized Linear Regression
 
 If you are interested in generalized linear model (GLM) diagnostics,you can also fit a logistic regression via the generalized linear regression interface by specifying `family = "binomial"`. Because the result is a regression model, the `ml_predict()` method does not give class probabilities. However, it includes confidence intervals for coefficient estimates.
 
@@ -826,7 +828,7 @@ render_image("images/modeling-okc-glr-coefs.png", "Coefficient estimates with 95
 
 **Note:**  Both `ml_logistic_regression()` and `ml_linear_regression()` support elastic net regularization [@zou2005regularization] through the `reg_param` and `elastic_net_param` parameters. `reg_param` corresponds to $\lambda$ whereas `elastic_net_param` correspond to $\alpha$. `ml_generalized_linear_regression()` supports only `reg_param`.
 
-### More Machine Learning Algorithms
+### Neural Networks
 
 Beyond linear models, Spark ML supports many of the standard ML algorithms and you can try different algorithms and hyperparameters (values that control the model fitting process) for your problem. You can find a list of supported ML related functions in the Appendix. The interfaces to access these functionalities are largely identical, so it is easy to experiment with them. For example, to fit a neural network model we can run:
 
@@ -862,7 +864,7 @@ Along with speech, images, and videos, textual data is one of the components of 
 
 In this section, we show how to perform a basic topic modeling task on the essay data in the OKCupid dataset. Our plan is to concatenate the essay fields (of which there are 10) of each profile, and regard each profile as a document, then attempt to discover *topics* (we will define these soon) using Latent Dirichlet Allocation (LDA).
 
-### Data Prep
+### Data Preparation
 
 As always, before analyzing a dataset (or a subset of one), we want to take a quick look at it to orient ourselves. In this case, we are interested in the freeform text that the users entered into their dating profiles.
 
@@ -1010,6 +1012,6 @@ render_image("images/modeling-okc-betas-topics-100.png")
 
 We can see that, at 100 iterations, we can see "topics" starting to emerge. This could be interesting information in its own right if you were digging into a large collection of documents you aren't familiar with. The learned topics can also serve as features in a downstream supervised learning task; for example, we could consider using the topic number as a predictor in our model to predict employment status in our predictive modeling example.
 
-## Conclusion
+## Recap
 
 In this chapter, we cover the basics of building preditive models with sparklyr. You should now have the knowledge to begin applying machine learning to your own large datasets. In the next chapter on pipelines and deployment, we will look at ways to make your workflow more flexible for the advanced use cases.
