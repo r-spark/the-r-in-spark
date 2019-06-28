@@ -175,7 +175,7 @@ We can quickly look at the distribution of our response variable:
 okc_train %>%
   group_by(not_working) %>%
   tally() %>%
-  mutate(frac = n / sum(n, na.rm = TRUE))
+  mutate(frac = n / sum(n))
 ```
 
 ```r
@@ -229,8 +229,8 @@ prop_data <- okc_train %>%
   tally() %>%
   group_by(religion) %>%
   summarize(
-    count = sum(n, na.rm = TRUE),
-    prop = sum(not_working * n, na.rm = TRUE) / sum(n, na.rm = TRUE)
+    count = sum(n),
+    prop = sum(not_working * n) / sum(n)
   ) %>%
   mutate(se = sqrt(prop * (1 - prop) / count)) %>%
   collect()
@@ -465,7 +465,7 @@ In Figure \@ref(fig:scaled-age-distribution) we see that the `age` variable has 
 ```{r}
 scale_values <- okc_train %>%
   summarize(
-    mean_age = mean(age, na.rm = TRUE),
+    mean_age = mean(age),
     sd_age = sd(age)
   ) %>%
   collect()
@@ -616,7 +616,7 @@ One item we need to carefully treat here is the scaling of variables. We need to
 make_scale_age <- function(analysis_data) {
   scale_values <- analysis_data %>%
     summarize(
-      mean_age = mean(age, na.rm = TRUE),
+      mean_age = mean(age),
       sd_age = sd(age)
     ) %>%
     collect()
