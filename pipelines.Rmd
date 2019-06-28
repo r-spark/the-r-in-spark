@@ -388,8 +388,7 @@ model_2 <- ml_load(sc, model_dir)
 Let us see if we can retrieve the logistic regression stage from this pipeline model:
 
 ```{r}
-model_2 %>% 
-  ml_stage("logistic_regression")
+ml_stage(model_2, "logistic_regression")
 ```
 ```r
 ## LogisticRegressionModel (Transformer)
@@ -448,7 +447,7 @@ score_spark <- function(age, sex, drinks, drugs, essay_length) {
   )
   new_data_tbl <- copy_to(sc, new_data, overwrite = TRUE)
   
-  ml_transform(spark_model, pred_data_tbl) %>%
+  ml_transform(spark_model, new_data_tbl) %>%
     dplyr::pull(prediction)
 }
 ```
@@ -470,12 +469,11 @@ This should start the web service locally and emit a message similar to
 In a separate R session, we can try to query the service with new data to be scored:
 
 ```{r}
-httr::POST(
+httr::content(httr::POST(
   "http://127.0.0.1:8000/predict",
   body = '{"age": [42], "sex": "m", "drinks": "not at all", 
            "drugs": "never", "essay_length": [99]}'
-) %>%
-  httr::content()
+))
 ```
 
 ```r
