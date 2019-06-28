@@ -501,7 +501,7 @@ For real-time production, we want to keep dependencies as light as possible so w
 Since `mleap` is a sparklyr extension and an R package, first we need to install it from CRAN:
 
 ```{r}
-spark_disconnect_all()
+install.packages("mleap")
 ```
 
 It then must be loaded when `spark_connect()` is called; so lets restart your R session, establish a new Spark connection[^4], and load the pipeline model that we previously saved.
@@ -533,12 +533,10 @@ sample_input_tbl <- copy_to(sc, sample_input)
 ml_write_bundle(spark_model, sample_input = sample_input_tbl, path = "mleap_model.zip")
 ```
 
-The artifact we just created, `mleap_model.zip`, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark. To test this model, we can create a new plumber API to expose it. The script `plumber/mleap-plumber.R` is very similar to the previous example:
+The artifact we just created, `mleap_model.zip`, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! To test this model, we can create a new plumber API to expose it. The script `plumber/mleap-plumber.R` is very similar to the previous example:
 
 ```{r}
 library(mleap)
-# install_maven()
-# install_mleap()
 
 mleap_model <- mleap_load_bundle("mleap_model.zip")
 
@@ -554,6 +552,13 @@ score_spark <- function(age, sex, drinks, drugs, essay_length) {
   )
   mleap_transform(mleap_model, new_data)$prediction
 }
+```
+
+However, before we launch this web API, make sure the runtime dependencies are installed:
+
+```{r}
+install_maven()
+install_mleap()
 ```
 
 And the way we launch the service is exactly the same:
