@@ -595,9 +595,9 @@ It is important that we don't peek at the testing holdout set until the very end
 Using the `sdf_partition()` function, we can create a list of subsets from our `okc_train` table:
 
 ```{r}
-vfolds <- sdf_partition(
+vfolds <- sdf_random_split(
   okc_train,
-  weights = set_names(rep(0.1, 10), paste0("fold", 1:10)),
+  weights = purrr::set_names(rep(0.1, 10), paste0("fold", 1:10)),
   seed = 42
 )
 ```
