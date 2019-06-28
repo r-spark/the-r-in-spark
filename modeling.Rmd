@@ -89,7 +89,10 @@ okc <- spark_read_csv(
     height = as.numeric(height),
     income = ifelse(income == "-1", NA, as.numeric(income))
   ) %>%
-  mutate_if(is.character, list(~ ifelse(is.na(.), "missing", .)))
+  mutate(sex = ifelse(is.na(sex), "missing", sex)) %>%
+  mutate(drinks = ifelse(is.na(drinks), "missing", drinks)) %>%
+  mutate(drugs = ifelse(is.na(drugs), "missing", drugs)) %>%
+  mutate(job = ifelse(is.na(job), "missing", job))
 ```
 
 We specify `escape = "\""` and `options = list(multiline = TRUE)` here to accommodate for embedded quote characters and newlines in the essay fields. We also convert the `height` and `income` columns to numeric types, and recode missing values in the string columns. Note that it may very well take a few tries of specifying different parameters to get the initial data ingest correct, and sometimes you may have to revisit this step after you learn more about the data during modeling.
