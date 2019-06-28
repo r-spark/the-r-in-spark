@@ -929,18 +929,12 @@ The HTML tags and special characters pollute the data since they are not directl
 
 As you analyze your own text data, you will quickly come across and become familiar with the peculiarities of the specific dataset. Preoprocessing text data, like with tabular numerical data, is an iterative process, and after a few tries we have the following transformations:
 
-```{r echo = FALSE}
-url_pattern <- "(?i)\\\\b((?:https?://|www\\\\d{0,3}[.]|[a-z0-9.\\\\-]+[.][a-z]{2,4}/)(?:[^\\\\s()<>]+|\\\\(([^\\\\s()<>]+|(\\\\([^\\\\s()<>]+\\\\)))*\\\\))+(?:\\\\(([^\\\\s()<>]+|(\\\\([^\\\\s()<>]+\\\\)))*\\\\)|[^\\\\s`!()\\\\[\\\\]{};:]))"
-```
-
 ```{r}
 essays <- essays %>%
   # Replace `missing` with empty string.
   mutate_all(list(~ ifelse(. == "missing", "", .))) %>%
   # Concatenate the columns.
   mutate(essay = paste(!!!syms(essay_cols))) %>%
-  # Replace URLs with the "URL" string
-  mutate(words = regexp_replace(essay, !!re2, "URL")) %>%
   # Remove miscellaneous characters and HTML tags
   mutate(words = regexp_replace(words, "\\n|&nbsp;|<[^>]*>|[^A-Za-z|']", " "))
 ```
@@ -992,7 +986,20 @@ saveRDS(betas, "data/modeling-okc-betas-1.rds")
 ## # … with 256,982 more rows
 ```
 
-We can then visualize this output by looking at word probabilities by topic. In Figures \@ref(fig:betas-topics) and \@ref(fig:betas-topics-2) we show the results at 1 iteration and 100 iterations.
+We can then visualize this output by looking at word probabilities by topic. In Figure \@ref(fig:betas-topics) and Figure \@ref(fig:betas-topics-2) we show the results at 1 iteration and 100 iterations. The code that generates Figure \@ref(fig:betas-topics) follows; in order to generate Figure \@ref(fig:betas-topics-2), you would need to set `max_iter = 100` when running `ml_lda()`, but beware that this can take a really long time in a single machine -- this is a the kind of big-compute problem that a propeer Spark cluster would be able to easily tackle!
+
+```r
+betas %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~ topic, scales = "free") +
+    coord_flip()
+```
 
 ```{r echo = FALSE}
 lda_model <-  ml_lda(
@@ -1005,19 +1012,17 @@ saveRDS(betas, "data/modeling-okc-betas-100.rds")
 
 ```{r echo = FALSE}
 plot_betas <- function(betas) {
-  okc_otp_terms <- betas %>%
-  group_by(topic) %>%
-  top_n(10, beta) %>%
-  ungroup() %>%
-  arrange(topic, -beta)
-
-okc_otp_terms %>%
-  mutate(term = reorder(term, beta)) %>%
-  ggplot(aes(term, beta, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  coord_flip() +
-  theme_bw()
+  betas %>%
+    group_by(topic) %>%
+    top_n(10, beta) %>%
+    ungroup() %>%
+    arrange(topic, -beta) %>%
+    mutate(term = reorder(term, beta)) %>%
+    ggplot(aes(term, beta, fill = factor(topic))) +
+      geom_col(show.legend = FALSE) +
+      facet_wrap(~ topic, scales = "free") +
+      scale_fill_grey() +
+      coord_flip()
 }
 
 betas <- readRDS("data/modeling-okc-betas-1.rds")
