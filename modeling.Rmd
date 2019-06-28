@@ -203,15 +203,16 @@ sdf_describe(okc_train, cols = c("age", "income"))
 Like we saw in the Analysis chapter, we can also utilize the dbplot package to plot distributions of these variables. In Figure \@ref(fig:age-histogram) we show a histogram of the distribution of the `age` variable.
 
 ```{r echo = FALSE}
-p <- okc_train %>% dbplot_histogram(age) + theme_bw()
-ggsave("images/modeling-okc-histogram-age.png", plot = p, device = "png", width = 10, height = 5)
+db_compute_bins(okc_train, age) %>%
+  ggplot() +
+  geom_col(aes(age, count), fill = "#878787") +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  labs(title = "Distribution of Age", subtitle = "Age histogram in OKCupid dataset") +
+  ggsave("images/modeling-okc-histogram-age.png", width = 10, height = 5)
 ```
-
 ```r
-okc_train %>%
-  dbplot_histogram(age)
+dbplot_histogram(okc_train, age)
 ```
-
 ```{r age-histogram, eval=TRUE, echo=FALSE, fig.cap='Distribution of age', fig.align = 'center'}
 render_image("images/modeling-okc-histogram-age.png", "Distribution of age")
 ```
@@ -258,15 +259,21 @@ Note that `prop_data` is a small data frame that has been collected into memory 
 
 ```{r, echo = FALSE}
 prop_data <- readRDS("data/modeling-okc-prop-data.rds")
-p <- prop_data %>%
+prop_data %>%
   ggplot(aes(x = religion, y = prop)) + 
+  theme(axis.text.x = element_text(size = 12)) +
   geom_errorbar(aes(ymin = prop - 1.96 * se, ymax = prop + 1.96 * se), width = .1) +
   geom_point(size = 2) +
-  geom_hline(yintercept = sum(prop_data$prop * prop_data$count) / sum(prop_data$count), linetype = "dashed", color = "red") +
-  theme_bw()
-ggsave("images/modeling-okc-prop.png", plot = p, device = "png", width = 10, height = 5)
+  
+  geom_hline(yintercept = sum(prop_data$prop * prop_data$count) / sum(prop_data$count), linetype = "dashed", color = "#888888") +
+  ggsave("images/modeling-okc-prop.png", device = "png", width = 10, height = 5)
 ```
-
+```{r}
+prop_data %>%
+  ggplot(aes(x = religion, y = prop)) + geom_point(size = 2) +
+  geom_errorbar(aes(ymin = prop - 1.96 * se, ymax = prop + 1.96 * se), width = .1) +
+  geom_hline(yintercept = sum(prop_data$prop * prop_data$count) / sum(prop_data$count))
+```
 ```{r religion-prop, echo = FALSE, eval = TRUE, fig.cap='Proportion of individuals not currently employed, by religion', fig.align = 'center'}
 render_image("images/modeling-okc-prop.png", "Proportion of individuals not currently employed, by religion")
 ```
@@ -301,6 +308,10 @@ saveRDS(contingency_tbl, "data/modeling-okc-contingency-table.rds")
 We can visualize this contingency table using a mosaic plot, shown in Figure \@ref(fig:mosaic):
 
 ```r
+library(ggmosaic)
+library(forcats)
+library(tidyr)
+
 contingency_tbl %>%
   rename(drinks = drinks_drugs) %>%
   gather("drugs", "count", missing:sometimes) %>%
@@ -318,6 +329,7 @@ contingency_tbl %>%
 
 ```{r echo = FALSE}
 library(ggmosaic)
+library(forcats)
 library(tidyr)
 
 contingency_tbl <- readRDS("data/modeling-okc-contingency-table.rds")
@@ -327,22 +339,19 @@ p <- contingency_tbl %>%
   gather("drugs", "count", missing:sometimes) %>%
   mutate(
     drinks = as_factor(drinks) %>% 
-      fct_relevel("missing", "not at all", "rarely", "socially", "very often", "desperately"),
+      forcats::fct_relevel("missing", "not at all", "rarely", "socially", "very often", "desperately"),
     drugs = as_factor(drugs) %>%
-      fct_relevel("missing", "never", "sometimes", "often")
+      forcats::fct_relevel("missing", "never", "sometimes", "often")
   ) %>%
-  ggplot() +
+  ggplot() + guides(fill = FALSE) +
   geom_mosaic(aes(x = product(drinks, drugs), fill = drinks, weight = count)) +
-  theme_bw() + 
-  guides(fill = FALSE) +
-  xlab("Drugs") +
-  ylab("Drinks") +
+  xlab("Drugs") + ylab("Drinks") +
+  scale_fill_grey(start = 0.6, end = 0.2) +
+  labs(title = "Drinks vs Drugs", subtitle = "Mosaic plot of drug and alcohol use") +
   theme(
-    axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)#,
-    # axis.text.y = element_text(angle = 45, vjust = 1, hjust = 1)
+    axis.text.x = element_text(vjust = 1, hjust = 1)
   )
-
-ggsave("images/modeling-okc-mosaic.png", plot = p, width = 6, height = 6)
+  ggsave("images/modeling-okc-mosaic.png", width = 10, height = 5)
 ```
 
 ```{r mosaic, echo = FALSE, eval = TRUE, fig.cap='Mosaic plot of drug and alcohol use', fig.align = 'center'}
@@ -353,7 +362,7 @@ To further explore the relationship between this two variables, we can perform c
 
 ```r
 dd_obj <- contingency_tbl %>% 
-  column_to_rownames(var = "drinks_drugs") %>%
+  tibble::column_to_rownames(var = "drinks_drugs") %>%
   as.matrix() %>%
   as.table() %>%
   FactoMineR::CA(graph = FALSE)
@@ -426,21 +435,18 @@ ca_coord <- rbind(dd_drugs, dd_drinks)
 
 # ------------------------------------------------------------------------------
 
-p <- ggplot(ca_coord, aes(x = `Dim 1`, y = `Dim 2`, col = Variable)) +
+ggplot(ca_coord, aes(x = `Dim 1`, y = `Dim 2`, col = Variable)) +
+  scale_color_grey(start = 0.6, end = 0.2) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   geom_text(aes(label = label)) +
   xlim(dd_rng) + ylim(dd_rng) +
   xlab(dd_x) + ylab(dd_y) +
-  coord_equal() +
-  theme_bw()
-
-ggsave("images/modeling-okc-correspondence-analysis.png", plot = p, width = 6, height = 6)
+  ggsave("images/modeling-okc-correspondence-analysis.png", width = 10, height = 5)
 ```
 
 ```{r ca-pcs, echo = FALSE, eval = TRUE, fig.cap='Correspondence analysis principal coordinates for drugs and alcohol use', fig.align = 'center'}
-render_image("images/modeling-okc-correspondence-analysis.png", 
-             "Correspondence analysis principal coordinates for drugs and alcohol use")
+render_image("images/modeling-okc-correspondence-analysis.png")
 ```
 
 In Figure \@ref(fig:ca-pcs), we see that the correspondence analysis procedure has transformed the factors into variables called *principal coordinates*, which correspond to the axes in the plot and represent how much information in the contingency table they contain. We can, for example, interpret the proximity of "drinking often" and "using drugs very often" as indicating association.
