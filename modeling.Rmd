@@ -36,7 +36,23 @@ The examples in this chapter will utilize the OkCupid dataset [@kim2015okcupid],
 
 [^1]: [https://github.com/rudeboybert/JSE_OkCupid](https://github.com/rudeboybert/JSE_OkCupid)
 
+You can download this dataset as follows:
+
+```{r}
+download.file("https://github.com/rudeboybert/JSE_OkCupid/raw/master/profiles.csv.zip", "okcupid.zip")
+unzip("okcupid.zip", exdir = "data")
+```
+
 **Note:**  The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the ML algorithm. For example, you may want to use the ranger package instead of `ml_random_forest_classifier()`.
+
+In addition, to follow along, you will need to install a few additional packages:
+
+```{r}
+install.packages("ggmosaic")
+install.packages("forcats")
+install.packages("tidyr")
+install.packages("FactoMineR")
+```
 
 To motivate the examples, we will consider the following problem:
 
@@ -52,9 +68,16 @@ Exploratory data analysis (EDA), in the context of predictive modeling, is the e
 - Understand univariate relationships between variables, and
 - Perform an initial assessment on what variables to include and what transformations need to be done on them.
 
-We'll first read in the data, assuming `profiles.csv` is in the `data/` folder.
+We'll first connect to Spark, load libraries and read in the data.
 
 ```{r}
+library(sparklyr)
+library(ggplot2)
+library(dbplot)
+library(dplyr)
+
+sc <- spark_connect(master = "local", version = "2.3")
+
 okc <- spark_read_csv(
   sc, 
   "data/profiles.csv", 
