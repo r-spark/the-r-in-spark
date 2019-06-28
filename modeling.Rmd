@@ -336,7 +336,7 @@ library(tidyr)
 
 contingency_tbl <- readRDS("data/modeling-okc-contingency-table.rds")
 
-p <- contingency_tbl %>%
+contingency_tbl %>%
   rename(drinks = drinks_drugs) %>%
   gather("drugs", "count", missing:sometimes) %>%
   mutate(
@@ -349,10 +349,10 @@ p <- contingency_tbl %>%
   geom_mosaic(aes(x = product(drinks, drugs), fill = drinks, weight = count)) +
   xlab("Drugs") + ylab("Drinks") +
   scale_fill_grey(start = 0.6, end = 0.2) +
-  labs(title = "Drinks vs Drugs", subtitle = "Mosaic plot of drug and alcohol use") +
+  labs(title = "Contingency Table", subtitle = "Mosaic plot of drug and alcohol use") +
   theme(
     axis.text.x = element_text(vjust = 1, hjust = 1)
-  )
+  ) +
   ggsave("images/modeling-okc-mosaic.png", width = 10, height = 5)
 ```
 
@@ -444,6 +444,7 @@ ggplot(ca_coord, aes(x = `Dim 1`, y = `Dim 2`, col = Variable)) +
   geom_text(aes(label = label)) +
   xlim(dd_rng) + ylim(dd_rng) +
   xlab(dd_x) + ylab(dd_y) +
+  labs(title = "Correspondence Analysis", subtitle = "Principal coordinates for drugs and alcohol use") +
   ggsave("images/modeling-okc-correspondence-analysis.png", width = 10, height = 5)
 ```
 
@@ -485,21 +486,23 @@ We can then use these to transform the dataset:
 okc_train <- okc_train %>%
   mutate(scaled_age = (age - !!scale_values$mean_age) /
            !!scale_values$sd_age)
-okc_train %>%
-  dbplot_histogram(scaled_age)
 ```
-
+```{r}
+dbplot_histogram(okc_train, scaled_age)
+```
 ```{r echo = FALSE}
-p <- okc_train %>%
-  dbplot_histogram(scaled_age) +
-  theme_bw()
-ggsave("images/modeling-okc-histogram-scaled-age.png", plot = p, device = "png", width = 10, height = 5)
+db_compute_bins(okc_train, scaled_age) %>%
+  ggplot() +
+  geom_col(aes(scaled_age, count), fill = "#878787") +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  labs(title = "Distribution of Scaled Age", subtitle = "Scaled age histogram in OKCupid dataset") +
+  ggsave("images/modeling-okc-histogram-scaled-age.png", width = 10, height = 5)
 ```
 
 In Figure \@ref(fig:scaled-age-distribution), we see that the scaled age variable has values that are closer to zero. We now move on to discussing other types of transformations, but during your feature engineering workflow you may want to perform the normalization to all numeric variables you want to include in the model.
 
 ```{r scaled-age-distribution, echo = FALSE, eval = TRUE, fig.cap='Distribution of scaled age', fig.align = 'center'}
-render_image("images/modeling-okc-histogram-scaled-age.png", "Distribution of scaled age")
+render_image("images/modeling-okc-histogram-scaled-age.png")
 ```
 
 Since some of the profile feature are multiple-select, in other words, a person can choose to associate with multiple options for a variable, we need to process them before we can build meaningful models. If we take a look at the ethnicity column, for example, we see that there are many different combinations:
@@ -533,8 +536,8 @@ One way to proceed would be to treat each combination of races as a separate lev
 ethnicities <- c("asian", "middle eastern", "black", "native american", "indian", 
                  "pacific islander", "hispanic / latin", "white", "other")
 ethnicity_vars <- ethnicities %>% 
-  map(~ expr(ifelse(like(ethnicity, !!.x), 1, 0))) %>%
-  set_names(paste0("ethnicity_", gsub("\\s|/", "", ethnicities)))
+  purrr::map(~ expr(ifelse(like(ethnicity, !!.x), 1, 0))) %>%
+  purrr::set_names(paste0("ethnicity_", gsub("\\s|/", "", ethnicities)))
 okc_train <- mutate(okc_train, !!!ethnicity_vars)
 okc_train %>% 
   select(starts_with("ethnicity_")) %>%
@@ -556,26 +559,24 @@ okc_train %>%
 ## $ ethnicity_other           <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
 ```
 
-For the free text fields, a straightforward way to extract features is counting the total number of characters.
-
-```{r echo = FALSE}
-okc_train <- okc_train %>%
-  mutate(
-    essay_length = char_length(paste(!!!syms(paste0("essay", 0:9))))
-  )
-p <- okc_train %>%
-  dbplot_histogram(essay_length, bins = 50) +
-  theme_bw()
-ggsave("images/modeling-okc-histogram-essay-length.png", plot = p, device = "png", width = 10, height = 5)
-```
+For the free text fields, a straightforward way to extract features is counting the total number of characters. We will store the train dataset in Spark's memory with `compute()` to speed up computation.
 
 ```{r}
 okc_train <- okc_train %>%
   mutate(
     essay_length = char_length(paste(!!!syms(paste0("essay", 0:9))))
-  )
-okc_train %>%
-  dbplot_histogram(essay_length, bins = 50)
+  ) %>% compute()
+```
+```{r echo = FALSE}
+db_compute_bins(okc_train, essay_length, bins = 100) %>%
+  ggplot() +
+  geom_col(aes(essay_length, count), fill = "#878787") +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  labs(title = "Distribution of Essay Length", subtitle = "Essay length histogram in OKCupid dataset")
+  ggsave("images/modeling-okc-histogram-essay-length.png", width = 10, height = 5)
+```
+```{r}
+dbplot_histogram(okc_train, essay_length, bins = 100)
 ```
 
 We can see the distribution of the `essay_length` variable in Figure \@ref(fig:essay-length-distribution).
@@ -602,7 +603,7 @@ vfolds <- sdf_random_split(
 )
 ```
 
-We then create our first analysis/assessment split as follows:
+We then create our first analysis/assessment split as follows,
 
 ```{r}
 analysis_set <- do.call(rbind, vfolds[2:10])
@@ -735,8 +736,8 @@ validation_summary$area_under_roc()
 Now, we can easily repeat the logic we have above and apply it to each analysis/assessment split:
 
 ```{r}
-cv_results <- map_df(1:10, function(v) {
-  analysis_set <- do.call(rbind, vfolds[setdiff(1:10, v)])
+cv_results <- purrr::map_df(1:10, function(v) {
+  analysis_set <- do.call(rbind, vfolds[setdiff(1:10, v)]) %>% compute()
   assessment_set <- vfolds[[v]]
   
   scale_age <- make_scale_age(analysis_set)
@@ -752,7 +753,7 @@ cv_results <- map_df(1:10, function(v) {
   auc <- s$area_under_roc()
   
   tibble(
-    Resample = paste0("Fold", str_pad(v, width = 2, pad = "0")),
+    Resample = paste0("Fold", stringr::str_pad(v, width = 2, pad = "0")),
     roc_df = list(roc_df),
     auc = auc
   )
@@ -761,24 +762,30 @@ cv_results <- map_df(1:10, function(v) {
 
 This gives us 10 ROC curves:
 
+```{r}
+unnest(cv_results, roc_df) %>%
+  ggplot(aes(x = FPR, y = TPR, color = Resample)) +
+  geom_line() + geom_abline(lty = "dashed")
+```
 ```{r echo = FALSE}
 cv_roc <- cv_results %>% 
   unnest(roc_df)
 saveRDS(cv_roc, "data/modeling-okc-cv-roc.rds")
 ```
-
 ```{r echo = FALSE}
 cv_roc <- readRDS("data/modeling-okc-cv-roc.rds")
-p <- cv_roc %>%
+cv_roc %>%
   ggplot(aes(x = FPR, y = TPR, color = Resample)) +
   geom_line() + 
-  geom_abline(color = "red", lty = "dashed") +
-  theme_bw()
-ggsave("images/modeling-okc-roc2.png", plot = p, device = "png", width = 8, height = 5)
+  geom_abline( lty = "dashed") +
+  scale_color_grey() +
+  labs(title = "ROC Curves", subtitle = "Cross-validated ROC curves for the logistic regression model") +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  ggsave("images/modeling-okc-roc2.png", device = "png", width = 10, height = 5)
 ```
 
 ```{r roc2, echo = FALSE, eval = TRUE, fig.cap='Cross-validated ROC curves for the logistic regression model', fig.align = 'center'}
-render_image("images/modeling-okc-roc2.png", "Cross-validated ROC curves for the logistic regression model")
+render_image("images/modeling-okc-roc2.png")
 ```
 
 and we can obtain the average AUC metric:
@@ -804,7 +811,6 @@ glr <- ml_generalized_linear_regression(
 tidy_glr <- tidy(glr)
 saveRDS(tidy_glr, "data/modeling-okc-tidy-glr.rds")
 ```
-
 ```{r}
 glr <- ml_generalized_linear_regression(
   analysis_set, 
@@ -814,7 +820,6 @@ glr <- ml_generalized_linear_regression(
 
 tidy_glr <- tidy(glr)
 ```
-
 ```{r, echo = FALSE}
 tidy_glr <- readRDS("data/modeling-okc-tidy-glr.rds")
 ```
@@ -830,22 +835,22 @@ tidy_glr %>%
        ymax = estimate + 1.96 * std.error, width = .1)
   ) +
   coord_flip() +
-  geom_hline(yintercept = 0, color = "red", linetype = "dashed")
+  geom_hline(yintercept = 0, linetype = "dashed")
 ```
 
 ```{r echo = FALSE}
-p <- tidy_glr %>%
+tidy_glr %>%
   ggplot(aes(x = term, y = estimate)) +
   geom_point() +
   geom_errorbar(aes(ymin = estimate - 1.96 * std.error, ymax = estimate + 1.96 * std.error, width = .1)) +
   coord_flip() +
-  theme_bw() +
-  geom_hline(yintercept = 0, color = "red", linetype = "dashed")
-ggsave("images/modeling-okc-glr-coefs.png", plot = p, width = 10, height = 5)
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "Confidence Intervals", subtitle = "Coefficient estimates with 95% confidence intervals") +
+  ggsave("images/modeling-okc-glr-coefs.png", width = 10, height = 5)
 ```
 
 ```{r glr-coefs, eval=TRUE, echo=FALSE, fig.cap='Coefficient estimates with 95% confidence intervals', fig.align = 'center'}
-render_image("images/modeling-okc-glr-coefs.png", "Coefficient estimates with 95% confidence intervals")
+render_image("images/modeling-okc-glr-coefs.png")
 ```
 
 **Note:**  Both `ml_logistic_regression()` and `ml_linear_regression()` support elastic net regularization [@zou2005regularization] through the `reg_param` and `elastic_net_param` parameters. `reg_param` corresponds to $\lambda$ whereas `elastic_net_param` correspond to $\alpha$. `ml_generalized_linear_regression()` supports only `reg_param`.
