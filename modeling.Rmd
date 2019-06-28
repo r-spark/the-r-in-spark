@@ -15,11 +15,15 @@ sc <- spark_connect(master = "local", config = config)
 
 # Modeling {#modeling}
 
-In the previous chapter, you learn how to scale up data analysis to large datasets with Spark. In this chapter, we build off of the ideas covered and discuss scaling up machine learning workflows. We'll explore MLlib, the component of Spark that allows you to write high level code to perform machine learning tasks on distributed data. 
+In the previous chapter, Analysis, you learn how to scale up data analysis to large-datasets using Spark. In this chapter, we will detail the steps required to build prediction models in Spark. We'll explore MLlib, the component of Spark that allows you to write high level code to perform predictive modeling on distributed data and use data wrangling in the context of feature engineering and exploratory data analysis.
+
+We will start this chapter by introducing modeling in the context of Spark and the dataset you will use throughout the chapter. We will then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We will then move on to an unsupervised topic modeling example using unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis. There is also many models available in Spark that won't be covered in this chapter, but by the end of the chapter, you will have the right tools to experiment with additional ones on your own.
+
+While predicting datasets manually is often a reasonable approach, by manually we mean, importing a dataset into Spark and using a fitted model to enrich or predict values; it does bring up the queestion -- could we automate this process into systems that just work? Like the original example about automatically classifying email as spam, without having to manually analyze and model specific datasets, the next chapter, Pipelines; will present the tools to fully automate a data analysis and modeling pipeline. To get there, we need to first understand how to train models, "by-hand". 
 
 ## Overview
 
-Sparklyr provides an interface to the ML algorithms that should be familiar to R users, and we'll go into detail in the chapter. For example, you can run a logistic regression as follows:
+Sparklyr provides an interface to the modeling algorithms that should be familiar to R users, and we'll go into detail in the chapter. For example, you can run a logistic regression as follows:
 
 ```{r eval = FALSE}
 ml_logistic_regression(mtcars, am ~ .)
@@ -35,13 +39,13 @@ ml_logistic_regression(mtcars, am ~ .)
 ## -20.68143251  -9.52647833  -6.81113196  29.16524289   3.33862282 
 ```
 
-As you can see in the [List of ML functions](#functionlist), Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with "R for Data Science" [@intro-r-for-data-science] and "Feature Engineering and Selection: A Practical Approach for Predictive Models" [@kuhn-fes], from which we adopted (sometimes verbatim) for examples and visualizations in this chapter.
+Please take a moment to gland at the list of MLlib Functions included in the Appendix of this book; otherwise, let us at least give you a quick glance of some of the models Spark supports: Decision Trees, Gradient-Boosted Trees, Accelerated Failure Time Survival Regression, Isotonic Regression, K-Means Clustering, Gaussian Mixture Clustering and so on! You can count about fifty different models and feature transformrs.
 
-The tasks we focus on in this chapter involve machine learning, which is what Spark ML aims to enable, as opposed to statistical inference. Machine learning is often more concerned about forecasting the future rather than inferring the process by which our data is generated [^2]. Machine learning can be categorized into supervised learning (predictive modeling) and unsupervised learning. In supervised learning, we try to learn a function that will map from "X" to "Y", from a dataset of "(x, y)" examples. In unsupervised learning, we just have "X" and not the "Y" labels, so instead we try to learn something about the structure of "X". Some practical use cases for supervised learning include forecasting tomorrow's weather, determining whether a credit card transaction is fradulent, and coming up with a price for your car insurance policy. With unsupervised learning, examples include automated grouping of photos of individuals, segmenting customers based on their purchase history, and clustering of documents.
+As you can see, Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with "R for Data Science" [@intro-r-for-data-science] and "Feature Engineering and Selection: A Practical Approach for Predictive Models" [@kuhn-fes], from which we adopted (sometimes verbatim) for examples and visualizations in this chapter.
+
+Instead, this chapter focuses on predictive modeling, since Spark aims to enable machine learning, as opposed to statistical inference. Machine learning is often more concerned about forecasting the future rather than inferring the process by which our data is generated [^2] which is then used to create automated systems. Machine learning can be categorized into supervised learning (predictive modeling) and unsupervised learning. In supervised learning, we try to learn a function that will map from "X" to "Y", from a dataset of "(x, y)" examples. In unsupervised learning, we just have "X" and not the "Y" labels, so instead we try to learn something about the structure of "X". Some practical use cases for supervised learning include forecasting tomorrow's weather, determining whether a credit card transaction is fradulent, and coming up with a price for your car insurance policy. With unsupervised learning, examples include automated grouping of photos of individuals, segmenting customers based on their purchase history, and clustering of documents.
 
 The ML interface in sparklyr has been designed to minimize the cognitive effort for moving from a local, in-memory, native R workflow to the cluster, and back. While the Spark ecosystem is very rich, there is still a tremendous number of packages from CRAN, with some implementing functionality that you may require for a project. Also, you may want to leverage your skills and experience working in R to maintain productivity. What we learned in the Analysis section also applis here --- it is important to keep track of where you are performing computations, and move between the cluster and your R session as appropriate.
-
-In the next section, we will introduce the dataset that will be used throughout the chapter. We then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We then move on to an unsupervised topic modeling example that looks at some unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis.
 
 [^2]: We acknowledge that the terms here may mean different things to different people, and that there is a continuum between the two approaches, however they are defined.
 
@@ -828,9 +832,9 @@ render_image("images/modeling-okc-glr-coefs.png", "Coefficient estimates with 95
 
 **Note:**  Both `ml_logistic_regression()` and `ml_linear_regression()` support elastic net regularization [@zou2005regularization] through the `reg_param` and `elastic_net_param` parameters. `reg_param` corresponds to $\lambda$ whereas `elastic_net_param` correspond to $\alpha$. `ml_generalized_linear_regression()` supports only `reg_param`.
 
-### Neural Networks
+### MLlib Models
 
-Beyond linear models, Spark ML supports many of the standard ML algorithms and you can try different algorithms and hyperparameters (values that control the model fitting process) for your problem. You can find a list of supported ML related functions in the Appendix. The interfaces to access these functionalities are largely identical, so it is easy to experiment with them. For example, to fit a neural network model we can run:
+Spark supports many of the standard modeling algorithms and it's easy to apply these models and hyperparameters (values that control the model fitting process) for your particular problem. You can find a list of supported ML related functions in the Appendix. The interfaces to access these functionalities are largely identical, so it is easy to experiment with them. For example, to fit a neural network model we can run:
 
 ```{r}
 nn <- ml_multilayer_perceptron_classifier(
@@ -1010,7 +1014,7 @@ render_image("images/modeling-okc-betas-topics-1.png")
 render_image("images/modeling-okc-betas-topics-100.png")
 ```
 
-We can see that, at 100 iterations, we can see "topics" starting to emerge. This could be interesting information in its own right if you were digging into a large collection of documents you aren't familiar with. The learned topics can also serve as features in a downstream supervised learning task; for example, we could consider using the topic number as a predictor in our model to predict employment status in our predictive modeling example.
+We can see that, at one hundred iterations, we can see "topics" starting to emerge. This could be interesting information in its own right if you were digging into a large collection of documents you aren't familiar with. The learned topics can also serve as features in a downstream supervised learning task; for example, we could consider using the topic number as a predictor in our model to predict employment status in our predictive modeling example.
 
 ## Recap
 
