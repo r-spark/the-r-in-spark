@@ -4,14 +4,6 @@ knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 source("r/render.R")
 ```
-```{r echo=FALSE}
-library(tidyverse)
-library(sparklyr)
-library(dbplot)
-config <- spark_config()
-config["sparklyr.shell.driver-memory"] <- "4G"
-sc <- spark_connect(master = "local", config = config)
-```
 
 # Pipelines {#pipelines}
 
@@ -21,7 +13,7 @@ sc <- spark_connect(master = "local", config = config)
 
 In the Modeling chapter, we learned how to build predictive models using the high-level functions Spark provides and well-known R packages that work well together with Spark. You learned about supervised methods first and finished the chapter with an unsupervised method over raw text.
 
-In this chapter, we dive into Spark Pipelines, which is the engine that powers the features we demonstrated in the Modeling chapter. So for instance, when you invoke an MLlib function via the formula interface in R, for example `ml_logistic_regression(cars, am ~ .)`, `sparklyr` actually constructs a *pipeline* for you under the hood. Therefore, Pipelines also allow you to make use of advanced data processing and modeling workflows. In addition, pipeline also facilitates collaboration across data science and engineering teams by allowing you to *deploy* pipelines into production systems, web applications, mobile applications and so on. This chapter will present first the concepts we will need before we move into constructing machine learning workflows with pipelines.
+In this chapter, we dive into Spark Pipelines, which is the engine that powers the features we demonstrated in the Modeling chapter. So for instance, when you invoke an MLlib function via the formula interface in R, for example `ml_logistic_regression(cars, am ~ .)`, `sparklyr` actually constructs a *pipeline* for you under the hood. Therefore, Pipelines also allow you to make use of advanced data processing and modeling workflows. In addition, pipeline also facilitates collaboration across data science and engineering teams by allowing you to *deploy* pipelines into production systems, web applications, mobile applications and so on.
 
 This chapter also happens to be the last chapter that encourages using your local computer as a Spark cluster, you are just one chapter away from getting properly introduced to cluster computing, and be able to perform data science or machine learning that can scale to the most demanding computation problems.
 
@@ -32,12 +24,16 @@ The building blocks of pipelines are objects called transformers and estimators,
 Here is an example of how to define an estimator:
 
 ```{r}
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local", version = "2.3")
+
 scaler <- ft_standard_scaler(
   sc,
   input_col = "features",
   output_col = "features_scaled",
-  with_mean = TRUE
-)
+  with_mean = TRUE)
 
 scaler
 ```
@@ -59,8 +55,7 @@ We can now create some data (for which we know the mean and standard deviation) 
 df <- copy_to(sc, data.frame(value = rnorm(100000))) %>% 
   ft_vector_assembler(input_cols = "value", output_col = "features")
 
-scaler_model <- scaler %>% 
-  ml_fit(df)
+scaler_model <- ml_fit(scaler, df)
 scaler_model
 ```
 
@@ -96,7 +91,7 @@ scaler_model %>%
 
 Now that we've seen basic examples of estimators and transformers, we can move on to pipelines.
 
-## Creating Pipelines
+## Creation
 
 A *pipeline* is simply a sequence of transformers and estimators, and a *pipeline model* is a pipeline that has been trained on data so all of its components have been converted to transformers. 
 
@@ -109,8 +104,7 @@ ml_pipeline(sc) %>%
   ft_standard_scaler(
     input_col = "features",
     output_col = "features_scaled", 
-    with_mean = TRUE
-  )
+    with_mean = TRUE)
 ```
 
 ```r
@@ -136,8 +130,7 @@ pipeline <- ml_pipeline(scaler)
 We fit a pipeline as we would fit an estimator:
 
 ```{r}
-pipeline_model <- pipeline %>% 
-  ml_fit(df)
+pipeline_model <- ml_fit(pipeline, df)
 pipeline_model
 ```
 
@@ -161,13 +154,15 @@ pipeline
 
 **Note:** As a result of the design of Spark ML, pipelines are always estimator objects, even if they comprise only of transformers. This means that if you have a pipeline with only transformers, you still need to call `ml_fit()` on it to obtain a transformer. The "fitting" procedure in this case wouldn't actually modify any of the transformers.
 
-## Using Pipelines
+## Use Cases
 
 Now that we have an understanding of the rudimentary concepts for ML Pipelines, let us apply them to the predictive modeling problem from the previous chapter, where we are trying to predict whether people are currently employed by looking at their profiles. Our starting point is the `okc_train` data frame with the relevant columns.
 
 ```{r}
+okc_train <- spark_read_parquet(sc, "data/okc-train.parquet")
+
 okc_train <- okc_train %>% 
-  select(not_working, age, sex, drinks, drugs, essay1:essay9)
+  select(not_working, age, sex, drinks, drugs, essay1:essay9, essay_length)
 ```
 
 We first exhibit the pipeline, which includes feature engineering and modeling steps, then walk through it.
@@ -236,8 +231,7 @@ cv <- ml_cross_validator(
     )
   ),
   evaluator = ml_binary_classification_evaluator(sc, label_col = "not_working"),
-  num_folds = 10
-)
+  num_folds = 10)
 ```
 
 The `estimator` argument is simply the estimator we want to tune, and in this case it is the `pipeline` that we defined. We provide the hyperparameter values we are interested in via the `estimator_param_maps` parameter, which takes a nested named list. The names at the first level correspond to UIDs, which are unique identifiers associated with each pipeline stage object, of the stages we want to tune (if a partial UID is provided sparklyr will attempt to match it to a pipeline stage) and the names at the second level correspond to parameters of each stage. In the snippet above, we are specifying that we want to test
@@ -270,8 +264,7 @@ cv
 As with any other estimator, we can fit the cross validator using `ml_fit()`
 
 ```{r}
-cv_model <- cv %>%
-  ml_fit(okc_train)
+cv_model <- ml_fit(cv, okc_train)
 ```
 
 and inspect the results:
@@ -355,20 +348,21 @@ We can dive into a couple of the files to see what type of data was saved.
 
 ```{r}
 spark_read_json(sc, file.path(
-  model_dir, "stages/1_string_indexer_5b423192b89f/metadata"
+  file.path(dir(file.path(model_dir, "stages"),
+                pattern = "1_string_indexer.*",
+                full.names = TRUE), "metadata")
 )) %>% 
   glimpse()
 ```
 ```r
 ## Observations: ??
-## Variables: 6
+## Variables: 5
 ## Database: spark_connection
-## $ class           <chr> "org.apache.spark.ml.feature.StringIndexerModel"
-## $ defaultParamMap <list> [["error", "string_indexer_5b423192b89f__output", "frequencyDesc"]]
-## $ paramMap        <list> [["error", "drinks", "drinks_indexed", "frequencyDesc"]]
-## $ sparkVersion    <chr> "2.4.0"
-## $ timestamp       <dbl> 1.559467e+12
-## $ uid             <chr> "string_indexer_5b423192b89f"
+## $ class        <chr> "org.apache.spark.ml.feature.StringIndexerModel"
+## $ paramMap     <list> [["error", "drinks", "drinks_indexed", "frequencyDesc"]]
+## $ sparkVersion <chr> "2.3.2"
+## $ timestamp    <dbl> 1.561763e+12
+## $ uid          <chr> "string_indexer_ce05afa9899"
 ```
 
 ```{r}
@@ -437,7 +431,7 @@ In the batch scoring use case, we simply initiate a Spark connection and load th
 
 ```{r}
 library(sparklyr)
-sc <- spark_connect(master = "local", version = "2.3.0")
+sc <- spark_connect(master = "local", version = "2.3")
 spark_model <- ml_load(sc, "spark_model")
 
 #* @post /predict
@@ -501,7 +495,7 @@ Since mleap is a sparklyr extension, it must be loaded when `spark_connect()` is
 ```{r}
 library(sparklyr)
 library(mleap)
-sc <- spark_connect(master = "local", version = "2.3.0")
+sc <- spark_connect(master = "local", version = "2.3")
 
 spark_model <- ml_load(sc, "spark_model")
 ```
