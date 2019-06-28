@@ -25,7 +25,7 @@ In this chapter, we dive into Spark Pipelines, which is the engine that powers t
 
 This chapter also happens to be the last chapter that encourages using your local computer as a Spark cluster, you are just one chapter away from getting properly introduced to cluster computing, and be able to perform data science or machine learning that can scale to the most demanding computation problems.
 
-## Estimators and Transformers
+## Overview
 
 The building blocks of pipelines are objects called transformers and estimators, which are collectively referred to as *pipeline stages*. A *transformer* can be used to apply transformations to a data frame and return another data frame; the resulting data frame often comprises the original data frame with new columns appended to it. An *estimator*, on the other hand, can be used to create a transformer giving some training data. Consider the following example to illustrate this relationship: a "center and scale" estimator can learn the mean and standard deviation of some data and store the statistics in a resulting transformer object; this transformer can then be used to normalize the data it was trained on and also any new, yet unseen, data.
 
@@ -96,7 +96,7 @@ scaler_model %>%
 
 Now that we've seen basic examples of estimators and transformers, we can move on to pipelines.
 
-## Pipelines and Pipeline Models
+## Creating Pipelines
 
 A *pipeline* is simply a sequence of transformers and estimators, and a *pipeline model* is a pipeline that has been trained on data so all of its components have been converted to transformers. 
 
@@ -161,7 +161,7 @@ pipeline
 
 **Note:** As a result of the design of Spark ML, pipelines are always estimator objects, even if they comprise only of transformers. This means that if you have a pipeline with only transformers, you still need to call `ml_fit()` on it to obtain a transformer. The "fitting" procedure in this case wouldn't actually modify any of the transformers.
 
-## Applying Pipelines to OKCupid Data
+## Using Pipelines
 
 Now that we have an understanding of the rudimentary concepts for ML Pipelines, let us apply them to the predictive modeling problem from the previous chapter, where we are trying to predict whether people are currently employed by looking at their profiles. Our starting point is the `okc_train` data frame with the relevant columns.
 
@@ -295,7 +295,7 @@ ml_validation_metrics(cv_model) %>%
 
 Now that we have seen the pipelines API in action, let's talk more formally about how they behave in various contexts.
 
-## Operating Modes of Pipelines Functions
+## Operating Modes
 
 By now, you have likely noticed that the pipeline stage functions, such as `ft_string_indexer()` and `ml_logistic_regression()` return different types of objects depending on the first argument passed to them. The full pattern is:
 
@@ -319,7 +319,7 @@ The formula interface approach is what we studied in the [Modeling](#modeling) s
 
 With the basics of pipelines down, we are now ready to discuss the collaboration and model deployment aspects hinted at in the introduction of this chapter. 
 
-## Model Persistence and Interoperability
+## Interoperability
 
 One of the most powerful aspects of pipelines is that they can be serialized to disk and are fully interoperable with the other Spark APIs, such as Python and Scala. This means they can be easily shared among users of Spark working in different languages, which may include other data scientists, data engineers, and delopyment engineers. To save a pipeline model, call `ml_save()` and provide a path.
 
@@ -419,7 +419,7 @@ Note that the exported JSON and parquet files are agnostic of the API that expor
 
 **Note:** When `ml_save()` is called for sparklyr ML models (created using the formula interface), the associated pipeline model is saved, but any sparklyr specific metadata, such as index labels, are not. In other words, saving a sparklyr `ml_model` object then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. What we gain from this tradeoff of loss information is interoperability with other languages.
 
-## Model Deployment
+## Deployment
 
 What we have just demonstrated bears emphasizing: by collaborating within the framework of ML pipelines, we reduce friction among different personas in a data science team. In particular, we can cut down on the time from modeling to deployment.
 
@@ -427,7 +427,7 @@ In many cases, a data science project does not end with just a slide deck with i
 
 The nightly portfolio risk and credit application scoring examples we mention above represent two modes of ML deployment known as *batch* and *real-time*. Loosely, batch processing implies processing many records at the same time and that execution time is not important as long it is reasonable (often on the scale of minutes to hours.) On the other hand, real-time processing implies scoring one or a few records at a time but the latency is crucial (on the scale of <1 second.) We will now see how we can take our OKCupid pipeline model to "production."
 
-### Batch Scoring With ML Pipelines
+### Batch Scoring
 
 For both the batch and real-time cases, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The plumber[^1] R package enables us to do this very easily by annotating our prediction function.
 
@@ -489,7 +489,7 @@ httr::POST(
 
 If we were to time this operation (e.g. with `system.time()`), we see that the latency is on the order of hundreds of milliseconds, which may be appropriate for batch applications but insufficient for real-time. The main bottleneck is the serialization of the R data frame to a Spark data frame and back. Also, it also requires an active Spark session which is a heavy runtime requirement. To ameliorate these issues, we discuss next a deployment method more suitable for real time deployment.
 
-### Real-Time Scoring with MLeap
+### Real-Time Scoring
 
 For real-time production, we want to keep dependencies as light as possible so we can target more platforms for deployment. We now show how we can use the mleap[^2] package, which provides an interface to the MLeap[^3] library, to serialize and serve Spark ML models. MLeap is open source (Apache License 2.0) and supports a wide range, though not all, of Spark ML transformers. At run time, the only prerequisites for the environment are the Java Virtual Machine (JVM) and the MLeap runtime library. This avoids both the Spark binaries and expensive overhead in converting data to and from Spark data frames.
 
@@ -573,7 +573,7 @@ httr::POST(
 
 If we were to time this operation, we will see that the service now returns predictions in tens of milliseconds!
 
-## Conclusion
+## Recap
 
 In this chapter, we discuss the Spark ML Pipelines API which is the engine behind the modeling functions covered in the previous chapter. We show how to tidy up our sparklyr predictive modeling workflow by organize data processing and machine learning routines into pipelines. Pipelines also facilitate collaboration among members of a multilingual data science and engineering team by sharing a language agnostic serialization format. Model deployment is examined, and paths to productionization for both batch and real-time settings are demonstrated.
 
