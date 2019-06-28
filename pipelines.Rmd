@@ -414,6 +414,14 @@ Note that the exported JSON and parquet files are agnostic of the API that expor
 
 **Note:** When `ml_save()` is called for sparklyr ML models (created using the formula interface), the associated pipeline model is saved, but any sparklyr specific metadata, such as index labels, are not. In other words, saving a sparklyr `ml_model` object then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. What we gain from this tradeoff of loss information is interoperability with other languages.
 
+Before we move on to discuss how to run pipelines in production, make sure you disconnect from Spark,
+
+```{r}
+spark_disconnect(sc)
+```
+
+That way, we will start from a brand new new environment; which is also expected when deploying pipelines to production.
+
 ## Deployment
 
 What we have just demonstrated bears emphasizing: by collaborating within the framework of ML pipelines, we reduce friction among different personas in a data science team. In particular, we can cut down on the time from modeling to deployment.
@@ -490,7 +498,13 @@ For real-time production, we want to keep dependencies as light as possible so w
 [^2]: [https://github.com/rstudio/mleap](https://github.com/rstudio/mleap)
 [^3]: [https://github.com/combust/mleap](https://github.com/combust/mleap)
 
-Since mleap is a sparklyr extension, it must be loaded when `spark_connect()` is called. We can start a new R session and establish a new Spark connection[^4], and load the pipeline model that we previously saved.
+Since `mleap` is a sparklyr extension and an R package, first we need to install it from CRAN:
+
+```{r}
+spark_disconnect_all()
+```
+
+It then must be loaded when `spark_connect()` is called; so lets restart your R session, establish a new Spark connection[^4], and load the pipeline model that we previously saved.
 
 ```{r}
 library(sparklyr)
