@@ -8,9 +8,6 @@ source("r/render.R")
 library(tidyverse)
 library(sparklyr)
 library(dbplot)
-config <- spark_config()
-config["sparklyr.shell.driver-memory"] <- "4G"
-sc <- spark_connect(master = "local", config = config)
 ```
 
 # Modeling {#modeling}
@@ -76,6 +73,7 @@ okc <- spark_read_csv(
   sc, 
   "data/profiles.csv", 
   escape = "\"", 
+  memory = FALSE,
   options = list(multiline = TRUE)
 ) %>%
   mutate(
