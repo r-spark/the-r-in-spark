@@ -50,7 +50,6 @@ In addition, to follow along, you will need to install a few additional packages
 ```{r}
 install.packages("ggmosaic")
 install.packages("forcats")
-install.packages("tidyr")
 install.packages("FactoMineR")
 ```
 
@@ -704,18 +703,21 @@ roc <- validation_summary$roc() %>%
   collect()
 saveRDS(roc, "data/modeling-okc-roc-1.rds")
 ```
-
+```{r}
+ggplot(roc, aes(x = FPR, y = TPR)) +
+  geom_line() + geom_abline(lty = "dashed")
+```
 ```{r, echo = FALSE}
 roc <- readRDS("data/modeling-okc-roc-1.rds")
-p <- ggplot(roc, aes(x = FPR, y = TPR)) +
+ggplot(roc, aes(x = FPR, y = TPR)) +
   geom_line() +
-  geom_abline(color = "red", lty = "dashed") +
-  theme_bw()
-ggsave("images/modeling-okc-roc1.png", plot = p, device = "png", width = 5, height = 5)
+  geom_abline(lty = "dashed") +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  labs(title = "ROC Curve", subtitle = "Receiver operating characteristic curve for the logistic regression model") +
+  ggsave("images/modeling-okc-roc1.png", device = "png", width = 10, height = 5)
 ```
-
 ```{r roc1, echo = FALSE, eval = TRUE, fig.cap='ROC curve for the logistic regression model', fig.align = 'center'}
-render_image("images/modeling-okc-roc1.png", "ROC curve for the logistic regression model")
+render_image("images/modeling-okc-roc1.png")
 ```
 
 The ROC curve plots the true positive rate (sensitivity) against the false positive rate (1 - specificity) for varying values of the classification threshold. In practice, the business problem helps to determine where on the curve one sets the threshold for classification. The AUC is a summary measure for determining the quality of a model, and we can compute it by calling the `area_under_roc()` function.
