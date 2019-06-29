@@ -63,16 +63,49 @@ If you are new to Spark, it is highly recommended to review this section before 
 
 ### Paths
 
-When analyzing data, loading multiple files into a single data object is a common scenario. In R, we typically use a loop or a functional programming direective to accomplish this. That is because R has to load each file individually into your R session.
+When analyzing data, loading multiple files into a single data object is a common scenario. In R, we typically use a loop or a functional programming directive to accomplish this. That is because R has to load each file individually into your R session. Let's create a few CSV files inside a folder and read them with R first,
 
 ```{r}
-lapply(c("data-folder/file1.csv", "data-folder/file2.csv"), read.csv)
+letters <- data.frame(x = letters, y = 1:length(letters))
+
+dir.create("data-csv")
+write.csv(letters[1:3, ], "data-csv/letters1.csv", row.names = FALSE)
+write.csv(letters[1:3, ], "data-csv/letters2.csv", row.names = FALSE)
+
+do.call("rbind", lapply(dir("data-csv", full.names = TRUE), read.csv))
+```
+```
+  x y
+1 a 1
+2 b 2
+3 c 3
+4 a 1
+5 b 2
+6 c 3
 ```
 
 In Spark, there is the notion of a folder as a dataset. Instead of enumerating each file, simply pass the path the containing all the files. Spark assumes that every file in that folder is part of the same dataset. This implies that the target folder should only be used for data purposes. This is specially important since storage systems like HDFS, store files across multiple machines but conceptually, they are stored in the same folder; when Spark reads the files from this folder, is actually exeecuting distributed code to read each file inside each machine -- no data is transfered between machines when distributed files are read!
 
 ```{r}
-spark_read_csv(sc, "my_data", path = "data-folder")
+library(sparklyr)
+sc <- spark_connect(master = "local", version = "2.3")
+
+spark_read_csv(sc, "data-csv")
+```
+```
+# Source: spark<datacsv> [?? x 2]
+   x         y
+   <chr> <int>
+ 1 a         1
+ 2 b         2
+ 3 c         3
+ 4 d         4
+ 5 e         5
+ 6 a         1
+ 7 b         2
+ 8 c         3
+ 9 d         4
+10 e         5
 ```
 
 The "folder as a table" idea is found in other open source technologies as well. Under the hood, Hive tables work the same way. When querying a Hive table, the mapping is done over multiple files inside the same folder. The folder's name usually match the name of the table visible to the user.  
@@ -86,47 +119,23 @@ When reading data, Spark is able to determine the data source's column names and
 To avoid this, Spark allows you to provide a column definition py providing a `columns` argument to describe your dataset. This argument is the switch that indicates if the `column` argument should be used.
 
 ```{r, echo = FALSE}
-x <- data.frame(x = letters, y = 1:length(letters))
-write.csv(x, "data/test.csv", row.names = FALSE)
-rx <- readr::read_csv("data/test.csv", n_max = 10)
-readr::spec(rx)
-
-top_rows <- read.csv("data/test.csv", nrows = 5)
-file_columns <- top_rows %>% 
-  purrr::map(function(x)"character")
-
-purrr::map(rx, class)
-
-col_spec <- c("character", "numeric")
-names(col_spec) <- c("x", "y")
-
-```
-
-For example, let's create the following `test.csv` file with as follows:
-
-```{r}
-write.csv(data.frame(
-  x = c("a", "b", "c", "d", "e"), y = 1:5),
-  "data/test.csv", row.names = FALSE)
+spec_with_r <- sapply(read.csv("data-csv/letters1.csv", nrows = 10), class)
+spec_with_r
 ```
 ```
-"x","y"
-"a",1
-"b",2
-"c",3
-"d",4
-"e",5
+        x         y 
+ "factor" "integer" 
 ```
 
 You can set the column specification to a vector containing the column types. The vector's values are named to match the field names. 
 
 ```{r}
-col_spec_1 <- c(x = "character", y = "numeric")
-col_spec_1
+spec_explicit <- c(x = "character", y = "numeric")
+spec_explicit
 ```
 ```
-##           x           y 
-## "character"   "numeric" 
+          x           y 
+"character"   "numeric" 
 ```
 
 The accepted variable types are: `integer`, `character`, `logical`, `double`, `numeric`, `factor`, `Date` and `POSIXct`.
@@ -134,42 +143,38 @@ The accepted variable types are: `integer`, `character`, `logical`, `double`, `n
 Then, when reading using `spark_read_csv()`, you can pass `col_spec_1` to the `columns` argument to match the names and types of the original file. This helps improve performance since Spark will not have to figure out the column types.
 
 ```{r}
-sc <- spark_connect(master = "local")
-test_1 <- spark_read_csv(sc, "test1","data/test.csv", 
-                         columns = col_spec_1)
-test_1
+spark_read_csv(sc, "data-csv", columns = spec_with_r)
 ```
-
 ```
-## # Source: spark<test1> [?? x 2]
-##    x         y
-##    <chr> <dbl>
-##  1 a         1
-##  2 b         2
-##  3 c         3
-##  4 d         4
-##  5 e         5
+# Source: spark<datacsv> [?? x 2]
+  x         y
+  <chr> <int>
+1 a         1
+2 b         2
+3 c         3
+4 a         1
+5 b         2
+6 c         3
 ```
 
 The following example shows how to set the field type to something different. However, the new field type needs to be a compatible type in the original dataset. For example, a `character` field can not be set to `numeric`. If an incompatible type is used, the file read will fail with an error. Additionally, the following example also changes the names of the original fields.
 
 ```{r}
-col_spec_2 <- c(my_letter = "character", my_number = "character")
+spec_compatible <- c(my_letter = "character", my_number = "character")
 
-test_2 <- spark_read_csv(sc, "test2","data/test.csv", 
-                         columns = col_spec_2)
-test_2
+spark_read_csv(sc, "data-csv", columns = spec_compatible)
 ```
 
 ```
-# Source: spark<test2> [?? x 2]
-   my_letter my_number
-   <chr>     <chr>    
- 1 a         1        
- 2 b         2        
- 3 c         3        
- 4 d         4        
- 5 e         5    
+# Source: spark<datacsv> [?? x 2]
+  my_letter my_number
+  <chr>     <chr>    
+1 a         1        
+2 b         2        
+3 c         3        
+4 a         1        
+5 b         2        
+6 c         3    
 ```
 
 In Spark, malformed entries can cause errors during reading, specially for non-character fields.  To prevent such errors, we can use a file spec that imports them as character, and then use `dplyr` to coerce the field into the desired type.
