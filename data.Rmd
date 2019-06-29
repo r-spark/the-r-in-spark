@@ -13,7 +13,7 @@ library(ggplot2)
 
 The previous chapter, Connections, presented how to connect to Spark clusters, either on-premise or in the cloud; with previous knowledge acquired in previous chapters, you are now equipped to start doing analysis and modeling at scale! However, so far we haven't really explained much about how to read data into Spark, we've used `copy_to()` to upload small datasets or functions like `spark_read_csv()` or `spark_write_csv()` without explaining in detail how and why.
 
-So, we are about to learn how to read and write data using Spark; while this is important on it's own, this chapter will also present introduce you to data lakes -- a repository of data stored in its natural or raw format which provides various benefits over existing storage architectures.
+So, we are about to learn how to read and write data using Spark; while this is important on it's own, this chapter will also introduce you to data lakes -- a repository of data stored in its natural or raw format which provides various benefits over existing storage architectures.
 
 In addition, we will also present how to extend Spark's capabilities to work with data not accessible out-of-the-box and several recommendations focused on improving performance for reading and writing data.
 
@@ -21,11 +21,11 @@ In addition, we will also present how to extend Spark's capabilities to work wit
 
 In the Introduction chapter, you learned that beyond big data and big compute, you can also use Spark to improve velocity, variety and veracity in data tasks. While you can use the learnings of this chapter for any task requiring loading and storing data, it is particularly interesting to present this chapter in the context of dealing with a variety of data sources. To understand why, we should first take a quick detour understanding how data is currently processed in many organizations.
 
-For several years, it's been a common practice to store large datasets in a relational *database*, a system first proposed in 1970 by Edgar F. Codd. [@data-codd-relational] You can think of a database as a collection of tables that are related to one another where each table is carefully designed to hold specific data types and relationships to other tables. Most relational database systems use *SQL* (Structured Query Language) for querying and maintaining the database. Databases are still widely used today, with good reason! -- Databases store data reliably and consistently, your bank probably stores account balances in a database and that's a good practice!
+For several years, it's been a common practice to store large datasets in a relational *database*, a system first proposed in 1970 by Edgar F. Codd. [@data-codd-relational] You can think of a database as a collection of tables that are related to one another where each table is carefully designed to hold specific data types and relationships to other tables. Most relational database systems use *SQL* (Structured Query Language) for querying and maintaining the database. Databases are still widely used today, with good reason -- Databases store data reliably and consistently, your bank probably stores account balances in a database and that's a good practice!
 
-However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as *ETL* (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became popular in the 1970s. Aside from databases, data is often also loaded into a *data warehouse*, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. The challenge is that changing them, is usually a long and delicate process since data needs to be re-indexed and carefully designed transform data from multiple data sources into a common column or table that they can all share.
+However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as *ETL* (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became popular in the 1970s. Aside from databases, data is often also loaded into a *data warehouse*, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. The challenge is that, changing databases and data warehouses is usually a long and delicate process since data needs to be re-indexed and the data from multiple data sources needs to be carefully transformed into single tables that can share across data sources.
 
-Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a *data lake* -- a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since data lakes make data available in its original format, it is easy for anyone to use it for analysis which adds significant flexibility over ETL that are often not maintained by data scientists. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure \@ref(fig:data-data-lake).
+Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a *data lake* -- a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since data lakes make data available in its original format there is no need to carefully transform it in advance, anyone can use it for analysis which adds significant flexibility over ETL. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure \@ref(fig:data-data-lake).
 
 ```{r data-data-lake, eval=TRUE, echo=FALSE, fig.cap='Spark processing raw data from a data lakes, databases and data warehouses'}
 render_nomnoml("
@@ -55,35 +55,35 @@ render_nomnoml("
 ", "images/data-data-lake.png")
 ```
 
-In order to support a broad variety of data source, Spark needs to be able to read and write data in several different *file formats* (CSV, JSON, Parquet, etc), access them while stored in also several *file systems* (HDFS, S3, DBFS, etc) and, potentially, interoperate with other *storage systems* (databases, data warehouses, etc) which this chapter will present; but first, we will start by presenting how to read, write and copy data using Spark.
+In order to support a broad variety of data source, Spark needs to be able to read and write data in several different *file formats* (CSV, JSON, Parquet, etc), access them while stored in several *file systems* (HDFS, S3, DBFS, etc) and, potentially, interoperate with other *storage systems* (databases, data warehouses, etc). We will get to all of that; but first, we will start by presenting how to read, write and copy data using Spark.
 
 ## Read
 
-If you are new to Spark and `sparklyr`, it is highly recommended to review this section before starting work with large data sets. We will introduce several techniques that improve the speed and efficiency of reading data. Each subsection will cover a specific way you can take advantage of how Spark reads files, such as the ability to treat entire folders as datasets, as well as being able to pass a file layout to accelerate the file read. 
+If you are new to Spark, it is highly recommended to review this section before you start working with large datasets. We will introduce several techniques that improve the speed and efficiency of reading data. Each subsection will present specific ways to take advantage of how Spark reads files, such as the ability to treat entire folders as datasets, as well as being able to describe them to accelerate this operation. 
 
 ### Paths
 
-When analyzing data, loading multiple files into a single data object is a common scenario.  In R, we typically use a loop or functional programming to accomplish this. That is because R has to load each file individually into the session.
+When analyzing data, loading multiple files into a single data object is a common scenario. In R, we typically use a loop or a functional programming direective to accomplish this. That is because R has to load each file individually into your R session.
 
 ```{r}
 lapply(c("data-folder/file1.csv", "data-folder/file2.csv"), read.csv)
 ```
 
-In Spark, there is the notion of a folder as a dataset.  Instead of enumerating each file, simply pass the path the containing folder's path.  Spark assumes that every file in that folder is part of the same dataset. This implies that the target folder should only be used for data purposes. 
+In Spark, there is the notion of a folder as a dataset. Instead of enumerating each file, simply pass the path the containing all the files. Spark assumes that every file in that folder is part of the same dataset. This implies that the target folder should only be used for data purposes. This is specially important since storage systems like HDFS, store files across multiple machines but conceptually, they are stored in the same folder; when Spark reads the files from this folder, is actually exeecuting distributed code to read each file inside each machine -- no data is transfered between machines when distributed files are read!
 
 ```{r}
 spark_read_csv(sc, "my_data", path = "data-folder")
 ```
 
-The "folder as a table" idea is found in other open source technologies as well.  Under the hood, Hive tables work the same way.  When querying a Hive table, the mapping is done over multiple files inside the same folder. The folder's name usually match the name of the table visible to the user.  
+The "folder as a table" idea is found in other open source technologies as well. Under the hood, Hive tables work the same way. When querying a Hive table, the mapping is done over multiple files inside the same folder. The folder's name usually match the name of the table visible to the user.  
 
-The following technique allows Spark to read file faster, as well as to reduce read failures, by passing describing the structure of a dataset. 
+Next we will present a technique that allows Spark to read file faster, as well as to reduce read failures, by describing the structure of a dataset in advance.
 
 ### Schema
 
-When reading data, Spark is able to determine the data source's column names and column types, also known as the *schema*. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess the schema, and then assign it. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size data loads. For files that are read over and over again,  the additional read time accumulates over time.
+When reading data, Spark is able to determine the data source's column names and column types, also known as the *schema*. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess what it is. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size datasets. For files that are read over and over again, the additional read time accumulates over time.
 
-Spark allows the user to provide a column layout. If provided, Spark will bypass the step that it uses to determine the file's layout. In `sparklyr`, we can use the `column` argument to take advantage of this functionality. The `infer_schema` argument also needs to be set to `FALSE`.  This argument is the switch that indicates if the `column` argument should be used.
+To avoid this, Spark allows you to provide a column definition py providing a `columns` argument to describe your dataset. This argument is the switch that indicates if the `column` argument should be used.
 
 ```{r, echo = FALSE}
 x <- data.frame(x = letters, y = 1:length(letters))
@@ -127,13 +127,12 @@ col_spec_1
 
 The accepted variable types are: `integer`, `character`, `logical`, `double`, `numeric`, `factor`, `Date` and `POSIXct`.
 
-In `spark_read_csv()`, `col_spec_1` is passed to the `columns` argument, and `infer_schema` is set to `FALSE`. We will try to match the names and types of the original file.  Also, we will pass the column specification. Doing this will help with performance because Spark will not have to figure out the column types.
+In `spark_read_csv()`, `col_spec_1` is passed to the `columns` argument. We will try to match the names and types of the original file.  Also, we will pass the column specification. Doing this will help with performance because Spark will not have to figure out the column types.
 
 ```{r}
 sc <- spark_connect(master = "local")
 test_1 <- spark_read_csv(sc, "test1","test.csv", 
-                         columns = col_spec_1, 
-                         infer_schema = FALSE)
+                         columns = col_spec_1)
 test_1
 ```
 
@@ -155,8 +154,7 @@ col_spec_2 <- c("character", "character")
 names(col_spec_2) <- c("my_letter", "my_number")
 
 test_2 <- spark_read_csv(sc, "test2","test.csv", 
-                         columns = col_spec_2, 
-                         infer_schema = FALSE)
+                         columns = col_spec_2)
 test_2
 ```
 
@@ -374,7 +372,6 @@ spark_read_csv(
   "bad3",
   "bad.csv",
   columns = list(foo = "integer"),
-  infer_schema = FALSE,
   options = list(mode = "DROPMALFORMED"))
 ```
 ```
@@ -394,7 +391,6 @@ spark_read_csv(
   "bad2",
   "bad.csv",
   columns = list(foo = "integer", "_corrupt_record" = "character"),
-  infer_schema = FALSE,
   options = list(mode = "PERMISIVE")
 )
 ```
