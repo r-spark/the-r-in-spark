@@ -87,11 +87,11 @@ To avoid this, Spark allows you to provide a column definition py providing a `c
 
 ```{r, echo = FALSE}
 x <- data.frame(x = letters, y = 1:length(letters))
-write.csv(x, "test.csv", row.names = FALSE)
-rx <- readr::read_csv("test.csv", n_max = 10)
+write.csv(x, "data/test.csv", row.names = FALSE)
+rx <- readr::read_csv("data/test.csv", n_max = 10)
 readr::spec(rx)
 
-top_rows <- read.csv("test.csv", nrows = 5)
+top_rows <- read.csv("data/test.csv", nrows = 5)
 file_columns <- top_rows %>% 
   purrr::map(function(x)"character")
 
@@ -102,8 +102,13 @@ names(col_spec) <- c("x", "y")
 
 ```
 
-For example, let's take a file called *test.csv*, and load it to Spark. This is its layout:
+For example, let's create the following `test.csv` file with as follows:
 
+```{r}
+write.csv(data.frame(
+  x = c("a", "b", "c", "d", "e"), y = 1:5),
+  "data/test.csv", row.names = FALSE)
+```
 ```
 "x","y"
 "a",1
@@ -113,11 +118,10 @@ For example, let's take a file called *test.csv*, and load it to Spark. This is 
 "e",5
 ```
 
-The column spec is started with a vector containing the column types. The vector's values are named to match the field names. 
+You can set the column specification to a vector containing the column types. The vector's values are named to match the field names. 
 
 ```{r}
-col_spec_1 <- c("character", "numeric")
-names(col_spec_1) <- c("x", "y")
+col_spec_1 <- c(x = "character", y = "numeric")
 col_spec_1
 ```
 ```
@@ -127,11 +131,11 @@ col_spec_1
 
 The accepted variable types are: `integer`, `character`, `logical`, `double`, `numeric`, `factor`, `Date` and `POSIXct`.
 
-In `spark_read_csv()`, `col_spec_1` is passed to the `columns` argument. We will try to match the names and types of the original file.  Also, we will pass the column specification. Doing this will help with performance because Spark will not have to figure out the column types.
+Then, when reading using `spark_read_csv()`, you can pass `col_spec_1` to the `columns` argument to match the names and types of the original file. This helps improve performance since Spark will not have to figure out the column types.
 
 ```{r}
 sc <- spark_connect(master = "local")
-test_1 <- spark_read_csv(sc, "test1","test.csv", 
+test_1 <- spark_read_csv(sc, "test1","data/test.csv", 
                          columns = col_spec_1)
 test_1
 ```
@@ -147,13 +151,12 @@ test_1
 ##  5 e         5
 ```
 
-The following example shows how to set the field type to something different. However, the new field type needs a compatible type from the original. For example, a `character` field could not be set to `numeric`. If an incompatible type is used, the file read will fail with an error. Additionally, the example also changes the names of the fields.
+The following example shows how to set the field type to something different. However, the new field type needs to be a compatible type in the original dataset. For example, a `character` field can not be set to `numeric`. If an incompatible type is used, the file read will fail with an error. Additionally, the following example also changes the names of the original fields.
 
 ```{r}
-col_spec_2 <- c("character", "character")
-names(col_spec_2) <- c("my_letter", "my_number")
+col_spec_2 <- c(my_letter = "character", my_number = "character")
 
-test_2 <- spark_read_csv(sc, "test2","test.csv", 
+test_2 <- spark_read_csv(sc, "test2","data/test.csv", 
                          columns = col_spec_2)
 test_2
 ```
@@ -182,7 +185,7 @@ The mapping creates a sort of "virtual" table in Spark memory.  The implication 
 In `sparklyr`, that is controlled by the `memory` argument of its read functions. Setting it to `FALSE` prevents the data copy.  It defaults to `TRUE`.
 
 ```{r}
-mapped_test <- spark_read_csv(sc, "test","test.csv", memory = FALSE)
+mapped_test <- spark_read_csv(sc, "test","data/test.csv", memory = FALSE)
 ```
 
 There are good use cases for this method, one of them is when not all columns of a table are needed. For example, take a very large file that contains many columns, assuming this is not first time you interact with this data, you would know what columns are needed for the analysis. When know which columns you need, the files can be read using `memory = FALSE`, and then select the needed columns with `dplyr`. The resulting `dplyr` variable can then be cached into memory, using the `compute()` function.  This will make Spark query the file(s), pull the selected fields, and copy only that data into memory. The result is a in-memory table that took comparatively less time to ingest.
