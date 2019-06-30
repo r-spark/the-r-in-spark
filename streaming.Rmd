@@ -97,22 +97,23 @@ stream <- stream_read_text(sc, "source/") %>%
 
 The streams starts running with `stream_write_*()`; once executed, the stream will monitor the `source` path and process data into the `destination/` path as it arrives.
 
-We can use `stream_generate_test()` to produce a file every second containing lines of text that follow overlapping binomial distributions, you can read more about this in the Appendix. In practice, you would connect to existing sources without having to generate data artificially. We can use `view_stream()` to track the **rows per second (rps)** being processed in the source, destination and their latest values over time:
+We can use `stream_generate_test()` to produce a file every second containing lines of text that follow overlapping binomial distributions, you can read more about this in the Appendix. In practice, you would connect to existing sources without having to generate data artificially. We can then use `view_stream()` to track the **rows per second (rps)** being processed in the source, destination and their latest values over time. The result is shown in Figure .
 
 ```{r streaming-overview-test, eval=FALSE}
-invisible(future::future(stream_generate_test()))
-
+future::future(stream_generate_test(interval = 0.5))
 stream_view(stream)
+```
+
+```{r streaming-view-stream, eval=TRUE, fig.align='center', echo=FALSE, fig.cap='Monitoring a stream generating rows following a binomial distribution'}
+render_image("images/streaming-stream-view.png")
 ```
 
 Notice that the rows-per-second in the destination stream are higher than the rows-per-second in the source stream; this is expected and desireable since Spark measures incoming rates from the source, but actual row processing times in the destination stream. For example, if 10 rows-per-second are written to the `source/` path, the incoming rate is 10 RPS. However, if it takes Spark only 0.01 seconds to write all those 10 rows, the output rate is 100 RPS.
 
-Use `stream_stop()` to properly stop processing data from this stream, good time to clear the folders the stream created to allow you to rerun this code.
+Use `stream_stop()` to properly stop processing data from this stream.
 
 ```{r streaming-overview-stop, eval=FALSE}
 stream_stop(stream)
-
-unlink(c("source", "destination"))
 ```
 
 This exercise introduced how we can easily start a Spark stream that reads and writes data based on a simulated stream, let's do something more interesting than just copying data with proper transformations.
@@ -129,36 +130,34 @@ Each sub-section will cover an option provided by `sparklyr` to perform transfor
 
 ### Analysis
 
-`dplyr` verbs and SQL using `DBI` can be used on top of a Spark Stream.  The following example shows how easy it is to filter rows and add columns to data from an input folder.
+You can an analyze streams with `dplyr` verbs and SQL using `DBI`, as a quick example, we will filter rows and add columns over a stream. We won't explicitly call `stream_generate_test()`, but you can call it on your own through the `later` package if you feel the urge to verify that data is being processed continuosly.
 
 ```{r}
-sc <- spark_connect(master = "local")
-if(file.exists("source")) unlink("source", TRUE)
-
-stream_generate_test(iterations = 5)
+library(dplyr)
 
 stream_read_csv(sc, "source") %>%
   filter(x > 700) %>%
   mutate(y = round(x / 100))
 ```
 ```
-## # Source: spark<?> [inf x 2]
-##        x     y
-##    <int> <dbl>
-##  1   701     7
-##  2   702     7
-##  3   703     7
-##  4   704     7
-##  5   705     7
-##  6   706     7
-##  7   707     7
-##  8   708     7
-##  9   709     7
-## 10   710     7
-## # ... with more rows
+# Source: spark<?> [inf x 2]
+       x     y
+   <int> <dbl>
+ 1   701     7
+ 2   702     7
+ 3   703     7
+ 4   704     7
+ 5   705     7
+ 6   706     7
+ 7   707     7
+ 8   708     7
+ 9   709     7
+10   710     7
+# … with more rows
 ```
 
 It also is possible to perform aggregations over the entire history of the stream.  The history could be filtered or not.
+
 ```{r}
 stream_read_csv(sc, "source") %>%
   filter(x > 700) %>%
@@ -166,13 +165,13 @@ stream_read_csv(sc, "source") %>%
   count(y) 
 ```
 ```
-## # Source: spark<?> [inf x 2]
-##       y     n
-##   <dbl> <dbl>
-## 1     8   200
-## 2     9   200
-## 3    10   102
-## 4     7    98
+# Source: spark<?> [inf x 2]
+      y     n
+  <dbl> <dbl>
+1     8 25902
+2     9 25902
+3    10 13210
+4     7 12692
 ```
 
 Grouped aggregations of the latest data in the stream require a time stamp.  The time stamp will be of when reading function, in this case `stream_read_csv()` , first "saw" that specific record. In Spark stream terms, that time stamp is called a "watermark".  The `spark_watermark()` function is used to add the time stamp.  For this exercise, the watermark will be the same for all records, since the five files were read by the stream after they were created.  Please note that only Kafka and memory *outputs* support watermarks.  
@@ -181,22 +180,21 @@ Grouped aggregations of the latest data in the stream require a time stamp.  The
 stream_read_csv(sc, "source") %>%
   stream_watermark()
 ```
-
 ```
-## # Source: spark<?> [inf x 2]
-##        x timestamp          
-##    <int> <dttm>             
-##  1   630 2019-04-07 15:44:50
-##  2   631 2019-04-07 15:44:50
-##  3   632 2019-04-07 15:44:50
-##  4   633 2019-04-07 15:44:50
-##  5   634 2019-04-07 15:44:50
-##  6   635 2019-04-07 15:44:50
-##  7   636 2019-04-07 15:44:50
-##  8   637 2019-04-07 15:44:50
-##  9   638 2019-04-07 15:44:50
-## 10   639 2019-04-07 15:44:50
-## # ... with more rows
+# Source: spark<?> [inf x 2]
+       x timestamp          
+   <int> <dttm>             
+ 1   276 2019-06-30 07:14:21
+ 2   277 2019-06-30 07:14:21
+ 3   278 2019-06-30 07:14:21
+ 4   279 2019-06-30 07:14:21
+ 5   280 2019-06-30 07:14:21
+ 6   281 2019-06-30 07:14:21
+ 7   282 2019-06-30 07:14:21
+ 8   283 2019-06-30 07:14:21
+ 9   284 2019-06-30 07:14:21
+10   285 2019-06-30 07:14:21
+# … with more rows
 ```
 
 After the watermark is created, it can be used in the `group_by()` verb.  It can then be piped into a `summarise()` function to get some stats of the stream.
@@ -212,15 +210,19 @@ stream_read_csv(sc, "source") %>%
   ) 
 ```
 ```
-## # Source: spark<?> [inf x 4]
-##   timestamp           max_x min_x count
-##   <dttm>              <int> <int> <dbl>
-## 1 2019-04-07 15:45:59  1000     1  2122
+# Source: spark<?> [inf x 4]
+  timestamp           max_x min_x  count
+  <dttm>              <int> <int>  <dbl>
+1 2019-06-30 07:14:55  1000     1 259332
 ```
 
 ### Modeling
 
-Spark feature transformer functions can also be used to modify a stream. They can also be combined with the regular `dplyr` functions.  
+Spark streams currently do not support training on reael-time datasets, aside from the technical challenges; even if it were possible, it would be quite challenging to train models since the model itself would have to adapt over time, this is known as *online learning* and perhaps something that Spark will support in the future.
+
+That said, there are other modeling concepts we can use with streams, like feature transformers and scoring, lets try out a feature transformer with streams and leave scoring for the next section since we will need to train a model.
+
+The next example makes use of the `ft_bucketizer()` feature transformer to modify the stream followed by regular `dplyr` functions which you can use just as you would with static datasets.
 
 ```{r}
 stream_read_csv(sc, "source") %>%
@@ -229,100 +231,104 @@ stream_read_csv(sc, "source") %>%
   count(buckets)  %>%
   arrange(buckets)
 ```
-
 ```
-## # Source:     spark<?> [inf x 2]
-## # Ordered by: buckets
-##    buckets     n
-##      <dbl> <dbl>
-##  1       0   299
-##  2       1   220
-##  3       2   200
-##  4       3   200
-##  5       4   200
-##  6       5   200
-##  7       6   201
-##  8       7   200
-##  9       8   200
-## 10       9   202
+# Source:     spark<?> [inf x 2]
+# Ordered by: buckets
+   buckets     n
+     <dbl> <dbl>
+ 1       0 25747
+ 2       1 26008
+ 3       2 25992
+ 4       3 25908
+ 5       4 25905
+ 6       5 25903
+ 7       6 25904
+ 8       7 25901
+ 9       8 25902
+10       9 26162
 ```
 
 ### Pipelines
 
 Spark pipelines can be used for scoring streams, but not to train over streaming data. The former is fully supported while the latter is a feature under active development by the Spark community.
 
-The following example shows how to 
+In order to score a stream, it is necessary to first create a our model. So lets build, fit and save a simple pipeline.
 
-1. In order to try  scoring data in a stream, it is necessary to first create a Pipeline Model.  The following build, fits and saves a simple pipeline. It also opens and closes the Spark connection.
-    ```{r}
-    sc <- spark_connect(master = "local")
-    cars <- copy_to(sc, mtcars, "mtcars_remote")
-    sc %>%
-      ml_pipeline() %>%
-      ft_binarizer("mpg", "over_30",30) %>%
-      ft_r_formula(over_30 ~ wt) %>%
-      ml_logistic_regression() %>%
-      ml_fit(cars) %>%
-      ml_save("cars_model")
-    spark_disconnect(sc)
-    ```
+```{r}
+cars <- copy_to(sc, mtcars)
 
-1. A new connection of Spark is opened.  The saved model is loaded into the new connection.  
-    ```{r}
-    sc <- spark_connect(master = "local")
-    model <- ml_load(sc, "cars_model")
-    ```
+model <- ml_pipeline(sc) %>%
+  ft_binarizer("mpg", "over_30", 30) %>%
+  ft_r_formula(over_30 ~ wt) %>%
+  ml_logistic_regression() %>%
+  ml_fit(cars)
+```
 
-1. Data that can be used for predictions is needed.  The `stream_generate_test()` can be used for this as well.  Instead of relying on the default output, the *mtcars* variable is passed to it.  
-    ```{r}
-    if(file.exists("source")) unlink("source", TRUE)
-    stream_generate_test(mtcars, iterations = 5)
-    ```
+**Tip:** If you choose to, you can make use of other concepts presented in the Pipelines chapter, like saving and reloading pipelines through `ml_save()` and `ml_load()` before scoring streams.
 
-1. The `ml_transform()` function can now be used on top of the stream. Because the function expects the model as the first function, the piping works a little different. Instead of starting with reading the stream, we start with the model, and use the stream input as the argument on `ml_transform()`
-    ```{r}
-    model %>%
-      ml_transform(stream_read_csv(sc, "source"))
-    ```
+We can then generate a stream based on `mtcars` using `stream_generate_test()` and score the model using `ml_transform()`:
 
-    ```
-    ## # Source: spark<?> [inf x 17]
-    ##      mpg   cyl  disp    hp  drat    wt  qsec    vs    am
-    ##    <dbl> <int> <dbl> <int> <dbl> <dbl> <dbl> <int> <int>
-    ##  1  15.5     8 318     150  2.76  3.52  16.9     0     0
-    ##  2  15.2     8 304     150  3.15  3.44  17.3     0     0
-    ##  3  13.3     8 350     245  3.73  3.84  15.4     0     0
-    ##  4  19.2     8 400     175  3.08  3.84  17.0     0     0
-    ##  5  27.3     4  79      66  4.08  1.94  18.9     1     1
-    ##  6  26       4 120.     91  4.43  2.14  16.7     0     1
-    ##  7  30.4     4  95.1   113  3.77  1.51  16.9     1     1
-    ##  8  15.8     8 351     264  4.22  3.17  14.5     0     1
-    ##  9  19.7     6 145     175  3.62  2.77  15.5     0     1
-    ## 10  15       8 301     335  3.54  3.57  14.6     0     1
-    ## # ... with more rows, and 8 more variables: gear <int>,
-    ## #   carb <int>, over_30 <dbl>, features <list>,
-    ## #   label <dbl>, rawPrediction <list>,
-    ## #   probability <list>, prediction <dbl>
-    ```
+```{r}
+future::future(stream_generate_test(mtcars, "cars-stream", iterations = 5))
 
-This section covered the different ways to perform transformations on a stream.  Unless we are working with Kafka, there will always be a need to generate an output stream with the results of the transformations.   The next section will cover an alternative unique to `sparklyr` and R.
+ml_transform(model, stream_read_csv(sc, "cars-stream"))
+```
+```
+# Source: spark<?> [inf x 17]
+     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb over_30
+   <dbl> <int> <dbl> <int> <dbl> <dbl> <dbl> <int> <int> <int> <int>   <dbl>
+ 1  15.5     8 318     150  2.76  3.52  16.9     0     0     3     2       0
+ 2  15.2     8 304     150  3.15  3.44  17.3     0     0     3     2       0
+ 3  13.3     8 350     245  3.73  3.84  15.4     0     0     3     4       0
+ 4  19.2     8 400     175  3.08  3.84  17.0     0     0     3     2       0
+ 5  27.3     4  79      66  4.08  1.94  18.9     1     1     4     1       0
+ 6  26       4 120.     91  4.43  2.14  16.7     0     1     5     2       0
+ 7  30.4     4  95.1   113  3.77  1.51  16.9     1     1     5     2       1
+ 8  15.8     8 351     264  4.22  3.17  14.5     0     1     5     4       0
+ 9  19.7     6 145     175  3.62  2.77  15.5     0     1     5     6       0
+10  15       8 301     335  3.54  3.57  14.6     0     1     5     8       0
+# … with more rows, and 5 more variables: features <list>, label <dbl>,
+#   rawPrediction <list>, probability <list>, prediction <dbl>
+```
+
+Eventhough the example this example was put together with a few lines of code, it is actually quite impressive what we just accomplished: You copied data into Spark, performed feature engineering, traineed a model and scored the model over a real-time dataset, with seven lines of code! -- Let's try now to use custom transformations, in real-time.
 
 ### Distributed R {streaming-r-code}
 
-Arbitrary R code can also be used to transform a stream with the use of `spark_apply()`. Following the same principles from executing R code over Spark data frames, for structured streams, `spark_apply()` runs R code over each executor in the cluster where data is available, this enables processing high-throughput streams and fulfill low-latency requirements.
+Arbitrary R code can also be used to transform a stream with the use of `spark_apply()`. This approach follows the same principles discussed in the Distributed R chapter, as in, `spark_apply()` runs R code over each executor in the cluster where data is available, this enables processing high-throughput streams and fulfill low-latency requirements.
 
 ```{r}
-stream_read_csv(sc, "source") %>%
-  spark_apply(~ nrow(.x), list(n="integer"))
+stream_read_csv(sc, "cars-stream") %>%
+  select(mpg) %>%
+  spark_apply(~ round(.x), mpg = "integer") %>%
+  stream_write_csv("cars-round")
+```
+
+Which as you would expect, processes data from `cars-stream` into `cars-round` by running the custom `round()` R function, lets pick into the output sink:
+
+```{r}
+spark_read_csv(sc, "cars-round")
 ```
 ```
-## # Source: spark<?> [inf x 1]
-##       n
-##   <int>
-## 1  1962
-## 2   148
-## 3    12
+# Source: spark<carsround> [?? x 1]
+     mpg
+   <dbl>
+ 1    16
+ 2    15
+ 3    13
+ 4    19
+ 5    27
+ 6    26
+ 7    30
+ 8    16
+ 9    20
+10    15
+# … with more rows
 ```
+
+Again, make sure you apply the concepts you already know about `spark_apply()` when using streams; for instance, you should consider using `arrow` to significantly improve performance. 
+
+This was our last transformation for streams, you will now learn how to use Spark streams with Shiny, a package that makes it easy to build interactive web applications from R.
 
 ## Shiny
 
@@ -336,7 +342,7 @@ library(shiny)
 # Open a Spark connection and generate a test stream
 sc <- spark_connect(master = "local")
 if(file.exists("source")) unlink("source", TRUE)
-invisible(future(stream_generate_test(interval = 0.2, iterations = 10)))
+invisible(future::future(stream_generate_test(interval = 0.2, iterations = 10)))
 ```
 
 ```{r}
