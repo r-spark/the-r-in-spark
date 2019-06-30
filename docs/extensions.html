@@ -471,12 +471,12 @@ FIGURE 10.1: H2O components with Spark and R
 <pre class="sourceCode r"><code class="sourceCode r">rsparkling<span class="op">::</span><span class="kw">h2o_release_table</span>() <span class="op">%&gt;%</span>
 <span class="st">  </span>dplyr<span class="op">::</span><span class="kw">filter</span>(H2O_Version <span class="op">==</span><span class="st"> </span><span class="op">!!</span><span class="kw">as.character</span>(<span class="kw">packageVersion</span>(<span class="st">&quot;h2o&quot;</span>)))</code></pre>
 <pre><code># A tibble: 4 x 5
-  Spark_Version Sparkling_Water_V… H2O_Version H2O_Release_Name H2O_Release_Patch…
-          &lt;dbl&gt; &lt;fct&gt;              &lt;fct&gt;       &lt;fct&gt;                         &lt;int&gt;
-1           2.4 2.4.5              3.22.1.3    rel-xu                            3
-2           2.3 2.3.23             3.22.1.3    rel-xu                            3
-3           2.2 2.2.34             3.22.1.3    rel-xu                            3
-4           2.1 2.1.48             3.22.1.3    rel-xu                            3</code></pre>
+  Spark_Version Sparkling_Water… H2O_Version H2O_Release_Name H2O_Release_Patch…
+          &lt;dbl&gt; &lt;fct&gt;            &lt;fct&gt;       &lt;fct&gt;                         &lt;int&gt;
+1           2.4 2.4.5            3.22.1.3    rel-xu                            3
+2           2.3 2.3.23           3.22.1.3    rel-xu                            3
+3           2.2 2.2.34           3.22.1.3    rel-xu                            3
+4           2.1 2.1.48           3.22.1.3    rel-xu                            3</code></pre>
 <p>We can then connect with the supported Spark versions as follows, you will have to adjust the <code>master</code> parameter for your particular cluster.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rsparkling)
 <span class="kw">library</span>(sparklyr)
@@ -537,13 +537,13 @@ AIC :156.2425</code></pre>
                      <span class="dt">seed =</span> <span class="dv">1</span>)</code></pre>
 <p>For this particular dataset, H2O finds out that XGBoost is a better fit than GLM. Specifically, the H2O explored using XGBoost, Deep Learning, GLM and a Stacked Ensemble.</p>
 <pre class="sourceCode r"><code class="sourceCode r">automl</code></pre>
-<pre><code>model_id              mean_residual_deviance     rmse      mse      mae     rmsle
-1 XGBoost_1_...       6.627278               2.574350 6.627278 2.066412 0.1329469
-2 DeepLearning_...    6.945850               2.635498 6.945850 2.209201 0.1258008
-3 XGBoost_grid_1_...  7.025614               2.650587 7.025614 2.192791 0.1339280
-4 XGBoost_grid_1_...  7.266691               2.695680 7.266691 2.167930 0.1331849
-5 GLM_grid_...        7.416367               2.723301 7.416367 2.184664 0.1269808
-6 StackedEnsemble...  7.596133               2.756108 7.596133 2.029900 0.1340302</code></pre>
+<pre><code>model_id              mean_residual_dev…     rmse      mse      mae     rmsle
+1 XGBoost_1_...       6.627278           2.574350 6.627278 2.066412 0.1329469
+2 DeepLearning_...    6.945850           2.635498 6.945850 2.209201 0.1258008
+3 XGBoost_grid_1_...  7.025614           2.650587 7.025614 2.192791 0.1339280
+4 XGBoost_grid_1_...  7.266691           2.695680 7.266691 2.167930 0.1331849
+5 GLM_grid_...        7.416367           2.723301 7.416367 2.184664 0.1269808
+6 StackedEnsemble...  7.596133           2.756108 7.596133 2.029900 0.1340302</code></pre>
 <p>Many additional examples are available under <a href="http://spark.rstudio.com/guides/h2o/">spark.rstudio.com/guides/h2o</a>, you can also request help from <a href="https://github.com/h2oai/sparkling-water/tree/master/r">github.com/h2oai/sparkling-water/tree/master/r</a>, the official GitHub repository for the <code>rsparkling</code> package.</p>
 <p>The next extension, <code>graphframes</code>, will allow you to process large-scale relational datasets; however, before you start using it, make make sure to disconnect with <code>spark_disconnect(sc)</code> and restart your R session since using a different extensions requires you to reconnect to Spark and reload <code>sparklyr</code>.</p>
 </div>
@@ -840,7 +840,8 @@ hipster_vcf &lt;-<span class="st"> </span><span class="kw">vs_read_vcf</span>(vs
 hipster_labels &lt;-<span class="st"> </span><span class="kw">vs_read_csv</span>(vsc, <span class="kw">file.path</span>(vsc_data, <span class="st">&quot;hipster_labels.txt&quot;</span>))
 labels &lt;-<span class="st"> </span><span class="kw">vs_read_labels</span>(vsc, <span class="kw">file.path</span>(vsc_data, <span class="st">&quot;hipster_labels.txt&quot;</span>))</code></pre>
 <p>VariantSpark uses Random Forest to assign an Importance score to each tested variant reflecting its association to the interest phenotype. A variant with higher Importance score implies it is more strongly associated with the phenotype of interest. You can compute the Importance and transform it into a Spark table as follows,</p>
-<pre class="sourceCode r"><code class="sourceCode r">importance_tbl &lt;-<span class="st"> </span><span class="kw">vs_importance_analysis</span>(vsc, hipster_vcf, labels, <span class="dt">n_trees =</span> <span class="dv">100</span>) <span class="op">%&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r">importance_tbl &lt;-<span class="st"> </span><span class="kw">vs_importance_analysis</span>(vsc, hipster_vcf, 
+                                         labels, <span class="dt">n_trees =</span> <span class="dv">100</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">importance_tbl</span>()
 
 importance_tbl</code></pre>

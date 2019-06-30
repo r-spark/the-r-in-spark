@@ -791,7 +791,9 @@ spark_model &lt;-<span class="st"> </span><span class="kw">ml_load</span>(sc, <s
 
 sample_input_tbl &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, sample_input)
 
-<span class="kw">ml_write_bundle</span>(spark_model, <span class="dt">sample_input =</span> sample_input_tbl, <span class="dt">path =</span> <span class="st">&quot;mleap_model.zip&quot;</span>)</code></pre>
+<span class="kw">ml_write_bundle</span>(
+  spark_model,
+  <span class="dt">sample_input =</span> sample_input_tbl, <span class="dt">path =</span> <span class="st">&quot;mleap_model.zip&quot;</span>)</code></pre>
 <p>The artifact we just created, <code>mleap_model.zip</code>, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! To test this model, we can create a new plumber API to expose it. The script <code>plumber/mleap-plumber.R</code> is very similar to the previous example:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mleap)
 

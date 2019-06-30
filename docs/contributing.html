@@ -478,7 +478,8 @@ textFile.<span class="fu">count</span>()</code></pre>
 <p>First, you would want to search “spark-packages.org” to find out that there is a Solr extension, you should be able to find <code>spark-solr</code>. <span class="citation">(“Spark-Solr Spark Package” <a href="#ref-contributing-spark-solr">2019</a>)</span> The extension “How to” mentioned that the <code>com.lucidworks.spark:spark-solr:2.0.1</code> should be loaded. We can accomplish this in R using the <code>sparklyr.shell.packages</code> configuration option:</p>
 <pre class="sourceCode r"><code class="sourceCode r">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()
 config[<span class="st">&quot;sparklyr.shell.packages&quot;</span>] &lt;-<span class="st"> &quot;com.lucidworks.spark:spark-solr:3.6.3&quot;</span>
-config[<span class="st">&quot;sparklyr.shell.repositories&quot;</span>] &lt;-<span class="st"> &quot;http://repo.spring.io/plugins-release/,http://central.maven.org/maven2/&quot;</span>
+config[<span class="st">&quot;sparklyr.shell.repositories&quot;</span>] &lt;-<span class="st"> </span>
+<span class="st">  &quot;http://repo.spring.io/plugins-release/,http://central.maven.org/maven2/&quot;</span>
   
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> config)</code></pre>
 <p>While specifying the <code>sparklyr.shell.packages</code> parameter is usually enough, for this particular extension, dependencies failed to download from the Spark Packages repository. For the failed dependencies, you would have to manually find them in the Maven repo (<a href="https://mvnrepository.com">mvnrepository.com</a>) and add additional repositories under the <code>sparklyr.shell.repositories</code> parameter.</p>

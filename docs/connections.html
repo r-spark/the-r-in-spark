@@ -456,7 +456,7 @@ FIGURE 7.2: Connecting to Sparks Edge Node
 <p>If your cluster provider or cluster administrator already provided <code>SPARK_HOME</code> for you, the following code should return a path instead of an empty string.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">Sys.getenv</span>(<span class="st">&quot;SPARK_HOME&quot;</span>)</code></pre>
 <p>If the code above returns an empty string, this would mean the <code>SPARK_HOME</code> environment vatiable is not set in your cluster, so you will have to specify <code>SPARK_HOME</code> while using <code>spark_connect()</code> as follows:</p>
-<pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;&lt;cluster-master&gt;&quot;</span>, <span class="dt">spark_home =</span> <span class="st">&quot;local/path/to/spark&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;&lt;master&gt;&quot;</span>, <span class="dt">spark_home =</span> <span class="st">&quot;local/path/to/spark&quot;</span>)</code></pre>
 <p>Where <code>&lt;cluster-master&gt;</code> is set to the correct cluster manager master for <a href="connections.html#connections-standalone">Spark Standalone</a>, <a href="connections.html#connections-yarn">YARN</a>, <a href="connections.html#connections-mesos">Mesos</a>, <a href="connections.html#connections-kubernetes">Kubernetes</a> or <a href="connections.html#connections-livy">Livy</a>.</p>
 </div>
 </div>
@@ -557,8 +557,9 @@ FIGURE 7.8: Mesos Connection Diagram
 <pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;mesos://host:port&quot;</span>)</code></pre>
 <p>The <code>MESOS_NATIVE_JAVA_LIBRARY</code> environment variable needs to be set by your system administrator, or manually set when running mesos on your local machine. For instance, in OS X, you can install and initialize Mesos from a terminal, followed by manually setting the mesos library and connecting with <code>spark_connect()</code>:</p>
 <pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">brew</span> install mesos
-<span class="ex">/usr/local/Cellar/mesos/1.6.1/sbin/mesos-master</span> --registry=in_memory --ip=127.0.0.1
-<span class="va">MESOS_WORK_DIR=</span>. <span class="ex">/usr/local/Cellar/mesos/1.6.1/sbin/mesos-slave</span> --master=127.0.0.1:5050</code></pre>
+<span class="ex">/usr/local/Cellar/mesos/1.6.1/sbin/mesos-master</span> --registry=in_memory
+  <span class="ex">--ip</span>=127.0.0.1 MESOS_WORK_DIR=. /usr/local/Cellar/mesos/1.6.1/sbin/mesos-slave
+  <span class="ex">--master</span>=127.0.0.1:5050</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">Sys.setenv</span>(<span class="dt">MESOS_NATIVE_JAVA_LIBRARY =</span> <span class="st">&quot;/usr/local/Cellar/mesos/1.6.1/lib/libmesos.dylib&quot;</span>)
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;mesos://localhost:5050&quot;</span>, <span class="dt">spark_home =</span> <span class="kw">spark_home_dir</span>())</code></pre>
 </div>
@@ -640,10 +641,10 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <h2><span class="header-section-number">7.11</span> Multiple</h2>
 <p>It is common to connect once, and only once, to Spark. However, you can also open multiple connections to Spark by connecting to different clusters or by specifying the <code>app_name</code> parameter. This can be helpful to compare Spark versions or validate your analysis before submitting to the cluster. The following example opens connections to Spark 1.6.3, 2.3.0 and Spark Standalone:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Connect to local Spark 1.6.3</span>
-sc_<span class="dv">1</span>_<span class="dv">6</span>_<span class="dv">3</span> &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;1.6.3&quot;</span>)
+sc_<span class="dv">16</span> &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;1.6&quot;</span>)
 
 <span class="co"># Connect to local Spark 2.3.0</span>
-sc_<span class="dv">2</span>_<span class="dv">3</span>_<span class="dv">0</span> &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3.0&quot;</span>, <span class="dt">appName =</span> <span class="st">&quot;Spark23&quot;</span>)
+sc_<span class="dv">23</span> &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">appName =</span> <span class="st">&quot;Spark23&quot;</span>)
 
 <span class="co"># Connect to local Spark Standalone</span>
 sc_standalone &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;spark://host:port&quot;</span>)</code></pre>

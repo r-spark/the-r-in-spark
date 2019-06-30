@@ -941,13 +941,14 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sdf_len</span>(sc, <span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="kw">stop</span>(<span class="st">&quot;force an error&quot;</span>))</code></pre>
 <pre><code>Error in force(code) : 
   sparklyr worker rscript failure, check worker logs for details
-    Log: /var/folders/ks/wm_bx4cn70s6h0r5vgqpsldm0000gn/T//Rtmpob83LD/file2aac1a6188_spark.log
+    Log: wm_bx4cn70s6h0r5vgsldm0000gn/T/Rtmpob83LD/file2aac1a6188_spark.log
 
 ---- Output Log ----
-19/03/11 14:12:24 INFO sparklyr: Worker (8057) completed wait using lock for RScript</code></pre>
+19/03/11 14:12:24 INFO sparklyr: Worker (1) completed wait using lock for RScript</code></pre>
 <p>Notice that the error message points out to inspect the logs. When running in local mode, you can simply run:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_log</span>(sc, <span class="dt">filter =</span> <span class="st">&quot;terminated unexpectedly&quot;</span>)</code></pre>
-<pre><code>19/03/11 14:12:24 ERROR sparklyr: RScript (8057) terminated unexpectedly: force an error </code></pre>
+<pre><code>19/03/11 14:12:24 ERROR sparklyr: RScript (1) terminated unexpectedly:
+                                              force an error </code></pre>
 <p>Which points out to the artifial <code>stop("force an error")</code> error we introduced ourselves. However, if you are not working in local mode, you will have to retrieve the worker logs from your cluster manager. Since this can be cumbersome, one alternative is to rerun <code>spark_apply()</code> but return the error message yourself:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sdf_len</span>(sc, <span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="kw">tryCatch</span>(
     <span class="kw">stop</span>(<span class="st">&quot;force an error&quot;</span>),
@@ -972,7 +973,8 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 1     1</code></pre>
 <p>When running locally, we can filter the log entries for the worker as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_log</span>(sc, <span class="dt">filter =</span> <span class="st">&quot;sparklyr: RScript&quot;</span>)</code></pre>
-<pre><code>18/12/18 11:33:47 INFO sparklyr: RScript (3513) the first column in the dataframe is named id 
+<pre><code>18/12/18 11:33:47 INFO sparklyr: RScript (3513) the first column in the dataframe
+                                                is named id 
 18/12/18 11:33:47 INFO sparklyr: RScript (3513) computed closure 
 18/12/18 11:33:47 INFO sparklyr: RScript (3513) updating 1 rows 
 18/12/18 11:33:47 INFO sparklyr: RScript (3513) updated 1 rows 
@@ -990,7 +992,8 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_log</span>(sc)</code></pre>
 <p>This will show an entry containing the error and the callstack:</p>
 <pre><code>18/12/18 11:26:47 INFO sparklyr: RScript (1860) computing closure 
-18/12/18 11:26:47 ERROR sparklyr: RScript (1860) terminated unexpectedly: force an error 
+18/12/18 11:26:47 ERROR sparklyr: RScript (1860) terminated unexpectedly:
+                                                 force an error 
 18/12/18 11:26:47 ERROR sparklyr: RScript (1860) collected callstack: 
 11: stop(&quot;force and error&quot;)
 10: (function (df) 
@@ -1005,7 +1008,8 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <p>When running with several hundred executors, it becomes more likely that some tasks will hang indefinetely. You might be in this situation if most of the tasks in your job complete successfully, but a handful of them are still running and do not fail nor succeed.</p>
 <p>Suppose that we need to calculate the size of many web pages, we could use <code>spark_apply()</code> with something similar to:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sdf_len</span>(sc, <span class="dv">3</span>, <span class="dt">repartition =</span> <span class="dv">3</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="st"> </span><span class="kw">download.file</span>(<span class="st">&quot;https://google.com&quot;</span>, <span class="st">&quot;index.html&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">file.size</span>(<span class="st">&quot;index.html&quot;</span>))</code></pre>
+<span class="st">  </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="st"> </span><span class="kw">download.file</span>(<span class="st">&quot;https://google.com&quot;</span>, <span class="st">&quot;index.html&quot;</span>) <span class="op">+</span>
+<span class="st">                </span><span class="kw">file.size</span>(<span class="st">&quot;index.html&quot;</span>))</code></pre>
 <p>Some web pages might not exist or take too long to download. In which case, most tasks will succeed, but a few will hang. To prevent a few tasks from blocking all computations, you can use the <code>spark.speculation</code> Spark setting. When this setting is enabled, once 75% of all tasks succeed, Spark will look for tasks taking longer than the median task execution time and retry this tasks. You can use the <code>spark.speculation.multiplier</code> setting to configure the time multiplier used to consider a task slow.</p>
 <p>Therefore, for the previous example, you can consider configuring Spark to retry tasks that take two times longer than the median as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()
@@ -1020,11 +1024,12 @@ config[<span class="st">&quot;spark.speculation.multiplier&quot;</span>] &lt;-<s
     <span class="co"># your code</span>
 })</code></pre>
 <p>This will add an entry similar to:</p>
-<pre><code>18/11/03 14:48:32 INFO sparklyr: RScript (2566) processing f35b1c321df0162e3f914adfb70b5416 partition </code></pre>
+<pre><code>18/11/03 14:48:32 INFO sparklyr: RScript (2566) processing f35b1c321df0162e3f
+                                                partition </code></pre>
 <p>When executing this in your cluster, you will have to look in the logs for the task that is not finishing, once you have that digest, you can cancel the job.</p>
 <p>Then you can use that digest to retrieve that specific data frame to R with something like:</p>
 <pre class="sourceCode r"><code class="sourceCode r">broken_partition &lt;-<span class="st"> </span><span class="kw">sdf_len</span>(sc, <span class="dv">3</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="cf">function</span>(x) {
-    <span class="cf">if</span> (<span class="kw">identical</span>(digest<span class="op">::</span><span class="kw">digest</span>(x), <span class="st">&quot;f35b1c321df0162e3f914adfb70b5416&quot;</span>)) x <span class="cf">else</span> x[<span class="dv">0</span>,]
+    <span class="cf">if</span> (<span class="kw">identical</span>(digest<span class="op">::</span><span class="kw">digest</span>(x), <span class="st">&quot;f35b1c321df0162e3f&quot;</span>)) x <span class="cf">else</span> x[<span class="dv">0</span>,]
 }) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>()</code></pre>
 <p>Which you can then run in R to troubleshoot further.</p>
 </div>
@@ -1035,9 +1040,10 @@ config[<span class="st">&quot;spark.speculation.multiplier&quot;</span>] &lt;-<s
   <span class="kw">stop</span>(<span class="st">&quot;Error!&quot;</span>)
 }, <span class="dt">debug =</span> <span class="ot">TRUE</span>)</code></pre>
 <pre><code>Debugging spark_apply(), connect to worker debugging session as follows:
-  1. Find the workers &lt;sessionid&gt; and &lt;port&gt; in the worker logs, from RStudio click
-     &#39;Log&#39; under the connection, look for the last entry with contents:
-     &#39;Session (&lt;sessionid&gt;) is waiting for sparklyr client to connect to port &lt;port&gt;&#39;
+  1. Find the workers &lt;sessionid&gt; and &lt;port&gt; in the worker logs, from RStudio
+     click &#39;Log&#39; under the connection, look for the last entry with contents:
+     &#39;Session (&lt;sessionid&gt;) is waiting for sparklyr client to connect to
+      port &lt;port&gt;&#39;
   2. From a new R session run:
      debugonce(sparklyr:::spark_worker_main)
      sparklyr:::spark_worker_main(&lt;sessionid&gt;, &lt;port&gt;)</code></pre>

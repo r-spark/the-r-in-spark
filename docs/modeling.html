@@ -425,7 +425,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The ML interface in sparklyr has been designed to minimize the cognitive effort for moving from a local, in-memory, native R workflow to the cluster, and back. While the Spark ecosystem is very rich, there is still a tremendous number of packages from CRAN, with some implementing functionality that you may require for a project. Also, you may want to leverage your skills and experience working in R to maintain productivity. What we learned in the Analysis section also applis here — it is important to keep track of where you are performing computations, and move between the cluster and your R session as appropriate.</p>
 <p>The examples in this chapter will utilize the OkCupid dataset <span class="citation">(Kim and Escobedo-Land <a href="#ref-kim2015okcupid">2015</a>)</span>, available at.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> The dataset consists of user profile data from an online dating site, and contains a diverse set of features, including biographical characteristics such as gender and profession, and free text fields related to personal interests. There are about 60,000 profiles in the dataset, which fits comfortably into memory on a modern laptop and wouldn’t be considered “big data”, so you can easily follow along running Spark local mode.</p>
 <p>You can download this dataset as follows:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">download.file</span>(<span class="st">&quot;https://github.com/rudeboybert/JSE_OkCupid/raw/master/profiles.csv.zip&quot;</span>, <span class="st">&quot;okcupid.zip&quot;</span>)
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">download.file</span>(
+  <span class="st">&quot;https://github.com/rudeboybert/JSE_OkCupid/raw/master/profiles.csv.zip&quot;</span>,
+  <span class="st">&quot;okcupid.zip&quot;</span>)
+
 <span class="kw">unzip</span>(<span class="st">&quot;okcupid.zip&quot;</span>, <span class="dt">exdir =</span> <span class="st">&quot;data&quot;</span>)</code></pre>
 <p><strong>Note:</strong> The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the ML algorithm. For example, you may want to use the ranger package instead of <code>ml_random_forest_classifier()</code>.</p>
 <p>In addition, to follow along, you will need to install a few additional packages:</p>
@@ -891,7 +894,7 @@ FIGURE 4.8: Cross-validated ROC curves for the logistic regression model
 )
 
 tidy_glr &lt;-<span class="st"> </span><span class="kw">tidy</span>(glr)</code></pre>
-<p>We can extract the coefficient estimates into a tidy data frame, which we can then process further, for example, to create a coefficient plot, as shown in <a href="modeling.html#fig:glr-coefs">4.9</a>.</p>
+<p>We can extract the coefficient estimates into a tidy data frame, which we can then process further, for example, to create a coefficient plot, as shown in Figure <a href="modeling.html#fig:glr-coefs">4.9</a>.</p>
 <pre class="sourceCode r"><code class="sourceCode r">tidy_glr <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> term, <span class="dt">y =</span> estimate)) <span class="op">+</span>
 <span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span>

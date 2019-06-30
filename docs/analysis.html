@@ -653,9 +653,10 @@ FIGURE 3.10: Plot with aggregation in Spark
 <p>The <code>dbplot_histogram()</code> function makes Spark calculate the bins and the count per bin and outputs a <code>ggplot</code> object which can be further refined by adding more steps to the plot object. <code>dbplot_histogram()</code> also accepts a <code>binwidth</code> argument to control the range used to compute the bins, the resulting plot is in Figure <a href="analysis.html#fig:analysis-visualizations-histogram">3.11</a>.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dbplot)
 
-<span class="kw">db_compute_bins</span>(cars, mpg, <span class="dt">binwidth =</span> <span class="dv">3</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">ggplot</span>() <span class="op">+</span><span class="st"> </span><span class="kw">geom_col</span>(<span class="kw">aes</span>(mpg, count)) <span class="op">+</span>
-<span class="st">  </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Cars by Miles Per Galon&quot;</span>, <span class="dt">subtitle =</span> <span class="st">&quot;Histogram over miles per gallon&quot;</span>)</code></pre>
+cars <span class="op">%&gt;%</span>
+<span class="kw">dbplot_histogram</span>(mpg, <span class="dt">binwidth =</span> <span class="dv">3</span>) <span class="op">+</span>
+<span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Cars by Miles Per Galon&quot;</span>,
+     <span class="dt">subtitle =</span> <span class="st">&quot;Histogram over miles per gallon&quot;</span>)</code></pre>
 <div class="figure" style="text-align: center"><span id="fig:analysis-visualizations-histogram"></span>
 <img src="images/analysis-visualizations-histogram-resized.png" alt="Histogram created by dbplot" width="1500" />
 <p class="caption">
