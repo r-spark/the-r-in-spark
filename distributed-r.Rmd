@@ -850,10 +850,10 @@ sdf_len(sc, 1) %>% spark_apply(~stop("force an error"))
 ```
 Error in force(code) : 
   sparklyr worker rscript failure, check worker logs for details
-    Log: /var/folders/ks/wm_bx4cn70s6h0r5vgqpsldm0000gn/T//Rtmpob83LD/file2aac1a6188_spark.log
+    Log: wm_bx4cn70s6h0r5vgsldm0000gn/T/Rtmpob83LD/file2aac1a6188_spark.log
 
 ---- Output Log ----
-19/03/11 14:12:24 INFO sparklyr: Worker (8057) completed wait using lock for RScript
+19/03/11 14:12:24 INFO sparklyr: Worker (1) completed wait using lock for RScript
 ```
 
 Notice that the error message points out to inspect the logs. When running in local mode, you can simply run:
@@ -862,7 +862,8 @@ Notice that the error message points out to inspect the logs. When running in lo
 spark_log(sc, filter = "terminated unexpectedly")
 ```
 ```
-19/03/11 14:12:24 ERROR sparklyr: RScript (8057) terminated unexpectedly: force an error 
+19/03/11 14:12:24 ERROR sparklyr: RScript (1) terminated unexpectedly:
+                                              force an error 
 ```
 
 Which points out to the artifial `stop("force an error")` error we introduced ourselves. However, if you are not working in local mode, you will have to retrieve the worker logs from your cluster manager. Since this can be cumbersome, one alternative is to rerun `spark_apply()` but return the error message yourself:
@@ -908,7 +909,8 @@ spark_log(sc, filter = "sparklyr: RScript")
 ```
 
 ```
-18/12/18 11:33:47 INFO sparklyr: RScript (3513) the first column in the dataframe is named id 
+18/12/18 11:33:47 INFO sparklyr: RScript (3513) the first column in the dataframe
+                                                is named id 
 18/12/18 11:33:47 INFO sparklyr: RScript (3513) computed closure 
 18/12/18 11:33:47 INFO sparklyr: RScript (3513) updating 1 rows 
 18/12/18 11:33:47 INFO sparklyr: RScript (3513) updated 1 rows 
@@ -943,7 +945,8 @@ This will show an entry containing the error and the callstack:
 
 ```
 18/12/18 11:26:47 INFO sparklyr: RScript (1860) computing closure 
-18/12/18 11:26:47 ERROR sparklyr: RScript (1860) terminated unexpectedly: force an error 
+18/12/18 11:26:47 ERROR sparklyr: RScript (1860) terminated unexpectedly:
+                                                 force an error 
 18/12/18 11:26:47 ERROR sparklyr: RScript (1860) collected callstack: 
 11: stop("force and error")
 10: (function (df) 
@@ -963,7 +966,8 @@ Suppose that we need to calculate the size of many web pages, we could use `spar
 
 ```{r}
 sdf_len(sc, 3, repartition = 3) %>%
-  spark_apply(~ download.file("https://google.com", "index.html") + file.size("index.html"))
+  spark_apply(~ download.file("https://google.com", "index.html") +
+                file.size("index.html"))
 ```
 
 Some web pages might not exist or take too long to download. In which case, most tasks will succeed, but a few will hang. To prevent a few tasks from blocking all computations, you can use the `spark.speculation` Spark setting. When this setting is enabled, once 75% of all tasks succeed, Spark will look for tasks taking longer than the median task execution time and retry this tasks. You can use the `spark.speculation.multiplier` setting to configure the time multiplier used to consider a task slow.
@@ -990,7 +994,8 @@ sdf_len(sc, 3) %>% spark_apply(function(x) {
 This will add an entry similar to:
 
 ```
-18/11/03 14:48:32 INFO sparklyr: RScript (2566) processing f35b1c321df0162e3f914adfb70b5416 partition 
+18/11/03 14:48:32 INFO sparklyr: RScript (2566) processing f35b1c321df0162e3f
+                                                partition 
 ```
 
 When executing this in your cluster, you will have to look in the logs for the task that is not finishing, once you have that digest, you can cancel the job.
@@ -999,7 +1004,7 @@ Then you can use that digest to retrieve that specific data frame to R with some
 
 ```{r distributed-worker-partitions-collect}
 broken_partition <- sdf_len(sc, 3) %>% spark_apply(function(x) {
-    if (identical(digest::digest(x), "f35b1c321df0162e3f914adfb70b5416")) x else x[0,]
+    if (identical(digest::digest(x), "f35b1c321df0162e3f")) x else x[0,]
 }) %>% collect()
 ```
 
@@ -1016,9 +1021,10 @@ sdf_len(sc, 1) %>% spark_apply(function() {
 ```
 ```
 Debugging spark_apply(), connect to worker debugging session as follows:
-  1. Find the workers <sessionid> and <port> in the worker logs, from RStudio click
-     'Log' under the connection, look for the last entry with contents:
-     'Session (<sessionid>) is waiting for sparklyr client to connect to port <port>'
+  1. Find the workers <sessionid> and <port> in the worker logs, from RStudio
+     click 'Log' under the connection, look for the last entry with contents:
+     'Session (<sessionid>) is waiting for sparklyr client to connect to
+      port <port>'
   2. From a new R session run:
      debugonce(sparklyr:::spark_worker_main)
      sparklyr:::spark_worker_main(<sessionid>, <port>)

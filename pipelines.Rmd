@@ -530,7 +530,9 @@ sample_input <- data.frame(
 
 sample_input_tbl <- copy_to(sc, sample_input)
 
-ml_write_bundle(spark_model, sample_input = sample_input_tbl, path = "mleap_model.zip")
+ml_write_bundle(
+  spark_model,
+  sample_input = sample_input_tbl, path = "mleap_model.zip")
 ```
 
 The artifact we just created, `mleap_model.zip`, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! To test this model, we can create a new plumber API to expose it. The script `plumber/mleap-plumber.R` is very similar to the previous example:

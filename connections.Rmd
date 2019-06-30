@@ -93,7 +93,7 @@ Sys.getenv("SPARK_HOME")
 If the code above returns an empty string, this would mean the `SPARK_HOME` environment vatiable is not set in your cluster, so you will have to specify `SPARK_HOME` while using `spark_connect()` as follows:
 
 ```{r connections-spark-home}
-sc <- spark_connect(master = "<cluster-master>", spark_home = "local/path/to/spark")
+sc <- spark_connect(master = "<master>", spark_home = "local/path/to/spark")
 ```
 
 Where `<cluster-master>` is set to the correct cluster manager master for [Spark Standalone](#connections-standalone), [YARN](#connections-yarn), [Mesos](#connections-mesos), [Kubernetes](#connections-kubernetes) or [Livy](#connections-livy).
@@ -297,8 +297,9 @@ The `MESOS_NATIVE_JAVA_LIBRARY` environment variable needs to be set by your sys
 
 ```{bash}
 brew install mesos
-/usr/local/Cellar/mesos/1.6.1/sbin/mesos-master --registry=in_memory --ip=127.0.0.1
-MESOS_WORK_DIR=. /usr/local/Cellar/mesos/1.6.1/sbin/mesos-slave --master=127.0.0.1:5050
+/usr/local/Cellar/mesos/1.6.1/sbin/mesos-master --registry=in_memory
+  --ip=127.0.0.1 MESOS_WORK_DIR=. /usr/local/Cellar/mesos/1.6.1/sbin/mesos-slave
+  --master=127.0.0.1:5050
 ```
 ```{r}
 Sys.setenv(MESOS_NATIVE_JAVA_LIBRARY = "/usr/local/Cellar/mesos/1.6.1/lib/libmesos.dylib")
@@ -449,10 +450,10 @@ It is common to connect once, and only once, to Spark. However, you can also ope
 
 ```{r connections-multiple}
 # Connect to local Spark 1.6.3
-sc_1_6_3 <- spark_connect(master = "local", version = "1.6.3")
+sc_16 <- spark_connect(master = "local", version = "1.6")
 
 # Connect to local Spark 2.3.0
-sc_2_3_0 <- spark_connect(master = "local", version = "2.3.0", appName = "Spark23")
+sc_23 <- spark_connect(master = "local", version = "2.3", appName = "Spark23")
 
 # Connect to local Spark Standalone
 sc_standalone <- spark_connect(master = "spark://host:port")

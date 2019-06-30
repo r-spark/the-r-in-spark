@@ -17,33 +17,26 @@ plot_style <- function() {
 
   ggplot2::theme_classic() +
   ggplot2::theme(
-    plot.title = ggplot2::element_text(family = font,
-                                       size=14,
-                                       color = "#222222"),
-    plot.subtitle = ggplot2::element_text(family=font,
-                                          size=12,
-                                          color = "#666666"),
+    plot.title = ggplot2::element_text(
+      family = font, size=14, color = "#222222"),
+    plot.subtitle = ggplot2::element_text(
+      family=font, size=12, color = "#666666"),
 
     legend.position = "right",
     legend.background = ggplot2::element_blank(),
     legend.title = ggplot2::element_blank(),
     legend.key = ggplot2::element_blank(),
-    legend.text = ggplot2::element_text(family=font,
-                                        size=14,
-                                        color="#222222"),
+    legend.text = ggplot2::element_text(
+      family=font, size=14, color="#222222"),
 
     axis.title.y = ggplot2::element_text(
       margin = ggplot2::margin(t = 0, r = 8, b = 0, l = 0),
-      size = 14,
-      color="#666666"),
+      size = 14, color="#666666"),
     axis.title.x = ggplot2::element_text(
       margin = ggplot2::margin(t = -2, r = 0, b = 0, l = 0),
-      size = 14,
-      color = "#666666"),
+      size = 14, color = "#666666"),
     axis.text = ggplot2::element_text(
-      family=font,
-      size=14,
-      color="#222222"),
+      family=font, size=14, color="#222222"),
     axis.text.x = ggplot2::element_text(
       margin = ggplot2::margin(5, b = 10)),
     axis.ticks = ggplot2::element_blank(),
@@ -71,6 +64,8 @@ ggplot2::theme_set(plot_style())
 
 ### Worlds Store Capacity {#appendix-storage-capacity}
 
+The following script was used to generate the worlds store capacity diagram:
+
 ```{r eval=FALSE}
 library(tidyverse)
 read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
@@ -89,6 +84,8 @@ read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
 
 ### Daily downloads of CRAN packages {#appendix-cran-downloads}
 
+The CRAN downloads chart was generated through:
+
 ```{r eval=FALSE}
 downloads_csv <- "data/01-intro-r-cran-downloads.csv"
 if (!file.exists(downloads_csv)) {
@@ -99,11 +96,17 @@ if (!file.exists(downloads_csv)) {
 cran_downloads <- readr::read_csv(downloads_csv)
 
 ggplot(cran_downloads, aes(date, count)) + 
+  labs(title = "CRAN Packages",
+       subtitle = "Total daily downloads over time") +
   geom_point(colour="black", pch = 21, size = 1) +
-  scale_x_date() +
-  xlab("") +
-  ylab("") +
-  theme_light()
+  scale_x_date() + xlab("year") + ylab("downloads") +
+  scale_x_date(date_breaks = "1 year",
+               labels = function(x) substring(x, 1, 4)) +
+  scale_y_continuous(
+      limits = c(0, 3.5 * 10^6),
+      breaks = c(0.5 * 10^6, 10^6, 1.5 * 10^6, 2 * 10^6, 2.5 * 10^6, 3 * 10^6, 3.5 * 10^6),
+      labels = c("", "1M", "", "2M", "", "3M", "")
+    )
 ```
 
 ## Getting Started {#appendix-starting}
@@ -391,7 +394,7 @@ Transform Word into Code | ft_word2vec()
 
 ### Google trends for mainframes, cloud computing and kubernetes {#appendix-cluster-trends}
 
-Data downloaded from [https://trends.google.com/trends/explore?date=all&q=cloud%20computing,mainframe,kubernetes](https://trends.google.com/trends/explore?date=all&q=cloud%20computing,mainframe,kubernetes).
+Data downloaded from [https://bit.ly/2YnHkNI](https://bit.ly/2YnHkNI).
 
 ```{r eval=FALSE}
 library(dplyr)

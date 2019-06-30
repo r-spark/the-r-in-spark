@@ -432,9 +432,10 @@ The `dbplot_histogram()` function makes Spark calculate the bins and the count p
 ```{r, eval = FALSE}
 library(dbplot)
 
-db_compute_bins(cars, mpg, binwidth = 3) %>%
-  ggplot() + geom_col(aes(mpg, count)) +
-  labs(title = "Cars by Miles Per Galon", subtitle = "Histogram over miles per gallon")
+cars %>%
+dbplot_histogram(mpg, binwidth = 3) +
+labs(title = "Cars by Miles Per Galon",
+     subtitle = "Histogram over miles per gallon")
 ```
 ```{r, eval = FALSE, echo = FALSE}
 db_compute_bins(cars, mpg, binwidth = 3) %>%
