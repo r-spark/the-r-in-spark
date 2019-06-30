@@ -328,165 +328,100 @@ This was our last transformation for streams, you will now learn how to use Spar
 
 ## Kafka
 
-Apache Kafka is to streaming as what Hadoop is to data storage/retrieval. Hadoop provides a a distributed, resilient and reliable architecture for large-scale data storage. Kafka does the same, but for large-scale streaming applications.
+Apache Kafka is an open-source stream-processing software platform developed by LinkedIn and donated to the Apache Software Foundation, written in Scala and Java. As an analogy. Kafka is to real-time storage as what Hadoop is to static storage.
 
-The most basic Kafka workflow is illustrated on Figure \@ref(fig:streaming-kafka-apis). An application that streams data into Kafka is called a *Producer*.  Kafka stores the stream as records. Each record has a key, a value and a timestamp. Kafka can handle multiple streams that contain different information, to properly categorize each stream, Kafka uses a mechanism called topic. A topic is a alpha-numeric identifier of the stream.  A *Consumer* is an app that is external to Kafka that reads what is stored in Kafka for a given topic. The Consumer app is constantly monitoring the topic, that is called a subscription. 
+Kafka stores the stream as records which consist of a key, a value and a timestamp. Kafka can handle multiple streams that contain different information by categorizing them into topic. Kafka is commonly used to connect multiple realtime applications, a *producer* is an application that streams data into Kafka, while a *consumer* is the one that reads from Kafka; in Kafka terminology, a consumer application subscribes to topics. Therefore, the most basic workflow we can accomplish with Kafka is one with a single producer and a single consumer, illustrated in Figure \@ref(fig:streaming-kafka-apis).
 
 ```{r streaming-kafka-apis, echo=FALSE, fig.cap='Basic workflow', fig.align = 'center', eval = TRUE}
 render_nomnoml("
-#direction: right
+#leading: 4
 #padding: 10
-#fontSize: 14
-#leading: 2
-[Producer | Stream topic A] -> [Kafka | Store topic A]
-[Kafka] -> [Consumer | Subscribe to topic A]
+#arrowSize: 0.3
+[<sender>Producer]-[<label>Stream]
+[Stream]->[<transceiver>Kafka]
+[Kafka] - [<label>Subscribe]
+[Subscribe]->[<receiver>Consumer]
 ", "images/streaming-kafka-apis.png")
 ```
 
-Kafka also allows for an application to read from one topic, process its data, and then write the results to a different topic. That is called a *Stream Processor*. In Figure \@ref(fig:streaming-kafka-two-outputs), the Stream Processor reads topic A, and then writes results to topic B. This allows for a given *Consumer* application to read results instead of “raw” feed data.
+If you ar enew to Kafka, we don't recommend you try to run the code from this section; but if you are really motivated to follow along , first you will need to install Kafka as explainede in the Appendix or deploy Kafka in your cluster.
 
-```{r streaming-kafka-two-outputs, echo=FALSE, fig.cap='Kafka workflow', fig.align = 'center', eval = TRUE}
-render_nomnoml("
-#direction: right
-#padding: 10
-#fontSize: 14
-#leading: 2
+Using Kafka also requires the Kafka package wheh connecting to Spark, make sure is specified in your connection `config`:
 
-[Producer | Stream topic A] -> [Kafka | Store topics A & B]
-[Kafka] <-> [Stream Processor | Subscribes to topic A
-Results to topic B]
-[Kafka] -> [Consumer | Subscribe to topic B]
+```{r}
+library(sparklyr)
+library(dplyr)
 
-", "images/streaming-kafka-two-outputs.png")
+config$
+sc <- spark_connect(master = "local", config = list(
+  sparklyr.shell.packages = "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
+))
 ```
 
-Spark Streaming enables the integration of Spark with Kafka.  Spark is able to both, read from and write into Kafka topics.  This means that Spark could be a Consumer, Stream Processor or Producer application of a Kafka implementation.  
-Unless there is a very specific need, using Spark as a Producer does not make much sense.  That is because Spark Streaming reacts to a stream, it doesn't generate it.  
-Use Spark to read (Consumer) from one, or several, topics and then reactively write (Producer) to a different topic with the results of the analysis, all within the same Kafka cluster. This effectively makes Spark a Stream Processor.
-
-There are nuances on how the Spark-to-Kafka write-back modes works, so it is important for us to offer some clarification.  There are three modes available: *complete*, *update* and *append*.  The *complete* mode will provide the totals for every group every time there is a new batch.  The *update* mode will provide totals for only the groups that have updates in the latest batch.  The *append* mode is able to add raw records to the target topic. This mode is not meant for aggregates, but works well for passing a filtered subset to the target topic.
-
-The additional parameters are passed via the `options` argument.  The contents of the `options` argument are passed down to Kafka as-is. This means that the same Kafka options used in your other applications can be reused here. There are three basic Kafka options to keep in mind: `kafka.bootstrap.server`, `topic` and `subscribe`.  The former expects a list of the of one or more hosts from the Kafka cluster.  The other two set the topic that the function is either reading from or writing to.  One is used at the exclusion of the other.  For reading the `subscribe` option is used, and for writing, `topic` is used. 
+Once connected, it's straightforward to read data from a stream:
     
 ```{r}
 stream_read_kafka(
   sc, 
   options = list(
     kafka.bootstrap.server = "host1:9092, host2:9092", 
-    subscribe = "topic"
+    subscribe = "<topic-name>"
     )
   ) 
 ```
 
-In this example, we will setup a Producer, and a Kafka engine outside of R. Inside R, we will start a Spark Stream Processor and a Consumer. 
+However, notice that you need to properly configure the `options` list; `kafka.bootstrap.server` expects a list of Kafka hosts, `topic` and `subscribe` define which topic should be used when writing or readring from Kafka respeectevely.
 
-The *Producer* will stream random, single letters of the alphabet into Kafka. The topic will be called "letters". 
+While we started by presenting first a simple single-producer and single-consumer use case; Kafka also allows much more complex interactions. Next we will read from one topic, process its data and then write the results to a different topic -- systems that are producers and consumers from the same topic are referred as, *stream processors*. In Figure \@ref(fig:streaming-kafka-two-outputs), the stream processor reads topic A, and then writes results to topic B. This allows for a given *consumer* application to read results instead of “raw” feed data.
 
-A *Stream Processor* will be built in Spark by having it read the "letters" topic, and then produce the count by unique letter passed through the stream.  The count will be passed back to Kafka in separate topic called "totals". 
-
-To see the results, the same Spark connection will be used to setup a *Consumer* that reads the "totals" topic. Figure \@ref(fig:streaming-kafka-example) is a diagram of how this example will work. 
-
-```{r streaming-kafka-example, echo=FALSE, fig.cap='Kafka example', fig.align = 'center', eval = TRUE}
+```{r streaming-kafka-two-outputs, echo=FALSE, fig.cap='Kafka workflow', fig.align = 'center', eval = TRUE}
 render_nomnoml("
-#direction: right
-#padding: 10
-#fontSize: 14
-#leading: 2
-
-[Producer | Streams 'letters'] -> [Kafka | Stores 'letters' & 'totals']
-[Kafka] <-> [Stream Processor 
-(Spark)| Subscribes to 'letters'
-Writes results to 'totals']
-[Kafka] -> [Consumer
-(Spark) | Subscribes to 'totals']
-
-", "images/streaming-kafka-example.png")
+#padding: 20
+#spacing: 80
+#arrowSize: 0.3
+[<sender>Producer]-> [Kafka]
+[Kafka]->[Stream Processor]
+[Stream Processor]->[Kafka]
+[Kafka]->[<receiver>Consumer]
+", "images/streaming-kafka-two-outputs.png")
 ```
 
-The example will use the `update` mode for writing back into Kafka.  This means that only the totals of the letters that changed will be sent to the "totals" topic.  The change in totals is determined after each batch from the "letters" topic is received. Figure \@ref(fig:streaming-kafka-processor) offers an deeper look of what the **Stream Processor (Spark)** process is supposed to do. 
+There are three modes available when processing Kafka streams in Spark: *complete*, *update* and *append*. The *complete* mode will provide the totals for every group every time there is a new batch, *update* provides totals for only the groups that have updates in the latest batch, *append* adds raw records to the target topic. This *append* mode is not meant for aggregates, but works well for passing a filtered subset to the target topic.
 
-```{r streaming-kafka-processor, echo=FALSE, fig.cap='Stream Processor - Update mode', fig.align = 'center', eval = TRUE}
-render_nomnoml("
-#direction: right
-#padding: 10
-#fontSize: 14
-#leading: 2
-
-['totals' topic |
-[timestamp 1 | A B A A B C ]
-[timestamp 2 | B B C C B C ]
-] -> [Stream Processor | Spark Streaming]
-[Stream Processor] -> ['totals' topic | 
-[timestamp 1 | A=3 B=2 C=1 ] 
-[timestamp 2 | B=5 C=4 ]
-]
-", "images/streaming-kafka-processor.png")
-```
-
-The *infrastructure* used for this example was a local, single node Kafka cluster.  The external Producer uses the Kafka command line interface (CLI) to send the stream of letters. The installation instructions that were used can be found in the Appendix under the Kafka section. 
+In our next example, the *producer* will stream random letters into Kafka under a `letters` topic. Then Spark will act as the *stream processor* reading the `letters` topic and computing unique letter which are then writteen back to Kafka under the `totals` topic. We will use the `update` mode when writing back into Kafka, only the totals that changed will be sent to Kafka. This change is determined after each batch from the `letters` topic.
 
 ```{r}
-library(sparklyr)
-library(dplyr)
-
-config <- spark_config()
-config$sparklyr.shell.packages <- "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
-sc <- spark_connect(master = "local", config = config)
-
-# The local Kafka cluster is served on port 9092, by default.
 hosts  <- "localhost:9092"
 
 read_options <- list(kafka.bootstrap.servers = hosts, subscribe = "letters")
 write_options <- list(kafka.bootstrap.servers = hosts, topic = "totals")
 
 stream_read_kafka(sc, options = read_options) %>%
-  mutate(value = as.character(value)) %>%     # coerce into a character
-  count(value) %>%                            # group and count letters
-  mutate(value = paste0(value, "=", n)) %>%   # value field expected in Kafka
-  stream_write_kafka(mode = "update", options = write_options)
+  mutate(value = as.character(value)) %>%         # coerce into a character
+  count(value) %>%                                # group and count letters
+  mutate(value = paste0(value, "=", n)) %>%       # kafka expecet a value field
+  stream_write_kafka(mode = "update",
+                     options = write_options)
 ```
 
-The last step starts a Spark job which will remain active until stopped or until you disconnect form Spark. At this point, there is no visible output, even if there was an active Producer sending letters over.  
-
-A simple Shiny application can be used as a *Consumer* app. It will read the "totals" topic, select the latest count for a given letter, and then display the results on a table. 
+You can take a quick look at totals by reading from Kafka,
 
 ```{r}
-library(shiny)
-ui <- function() tableOutput("table")
-server <- function(input, output, session){
-  totals_options  <- list(kafka.bootstrap.servers = hosts, subscribe = "totals")
-  ps <- stream_read_kafka(sc, options = totals_options) %>%
-    mutate(value = as.character(value),
-           letter = substr(value, 1,1),
-           total = as.numeric(substr(value, 3, 100))
-           ) %>%
-    group_by(letter) %>%
-    summarise(total = max(total, na.rm = TRUE)) %>%
-    arrange(letter) %>%
-    reactiveSpark()  
-  output$table <- renderTable(ps())
-}
-runGadget(ui, server)
+stream_read_kafka(sc, options = totals_options)
 ```
 
-A new terminal session is started. Kafka's CLI provides a simple Producer program that runs in the console.  Using that program, we can manually write a single letter, and then press enter.  
+Using a new terminal session, use Kafka's command line tool to manually write single letter into the `letters` topic.
 
 ```
-user@laptop:~/kafka_2.12-2.2.0$ bin/kafka-console-producer.sh --broker-list localhost:9092 --topic letters
+kafka-console-producer.sh --broker-list localhost:9092 --topic letters
 >A
 >B
 >C
->A
->A
->C
->D
 ```
 
-The Shiny reactive function will poll and refresh the results as the letters are being entered.  This is shown in figure 11.8.
+The letters that you input are pushed to Kaka, read by Spark, aggregated within Spark and pushed back into Kafka and then, finally, consumed by Spark again to give you a glimpse into `totals` topic. This was quite a setup, but also a realistic configuration which is common to find in real-time processing projects.
 
-```{r streaming-shiny-kafka, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny with Kafka', echo = FALSE}
-render_image("images/streaming-shiny-kafka.png")
-```
+Next, we will use the Shiny framework to visualize streams, in real-time!
 
 ## Shiny
 
