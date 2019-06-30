@@ -21,10 +21,6 @@ Instead, we need to introduce a different kind of dataset, one that is not stati
 
 We know how to work with large-scale static datasets, all the previous chapters dealt with them; but how should we reason about large-scale real-time datasets? We will define as *streams* -- datasets with an infinite amount entries, as illustrated in Figure 1.1.
 
-```{r}
-
-```
-
 For instance, if we wanted to do real-time scoring using a pre-trained topic model, the enries would be lines of text for static datasets; for real-time datasets, we would perform the same scoring over an infinite amount of lines of text. Now, in practice, you will never process an infinite amount of records, you will eventually stop the stream -- or this universe might end, whatever comes first -- regardless, thinking of them as infinite datasets makes it so much easier to reason about them.
 
 Streams are most relevant when processing real time data; for example, when analyzing a Twitter feed or stock prices. Both examples have well defined columns, like 'tweet' or 'price', but there are always new rows of data to be analyzed.
@@ -328,56 +324,7 @@ spark_read_csv(sc, "cars-round")
 
 Again, make sure you apply the concepts you already know about `spark_apply()` when using streams; for instance, you should consider using `arrow` to significantly improve performance. 
 
-This was our last transformation for streams, you will now learn how to use Spark streams with Shiny, a package that makes it easy to build interactive web applications from R.
-
-## Shiny
-
-Shiny's reactive framework is well suited to support streaming information. The idea is that your Shiny application can automatically display the latest results as fast as Spark can process them.  The `reactiveSpark()` function provides that integration. It lets us circumvent the need for writing an output.
-
-This section's example will result in a Shiny app. It will start to accumulate and display the current and historical results. The app's output is shown on Figure \@ref(fig:streaming-shiny-app).
-
-```{r}
-library(shiny)
-
-# Open a Spark connection and generate a test stream
-sc <- spark_connect(master = "local")
-if(file.exists("source")) unlink("source", TRUE)
-invisible(future::future(stream_generate_test(interval = 0.2, iterations = 10)))
-```
-
-```{r}
-# Create a simple *UI* function with one table output.
-ui <- function() tableOutput("table")
-
-# The *server* function contains a `reactiveSpark()` function.  This function reads the stream, adds the watermark and then performs the aggregation.  The results are then rendered via the *table* output.
-server <- function(input, output, session){
-  ps <- stream_read_csv(sc, "source")  %>%
-    stream_watermark() %>%
-    group_by(timestamp) %>%
-    summarise(
-      max_x = max(x, na.rm = TRUE),
-      min_x = min(x, na.rm = TRUE),
-      count = n()) %>%
-    reactiveSpark()  # Spark stream reactive
-  output$table <- renderTable(
-    ps() %>%
-      mutate(timestamp = as.character(timestamp))
-  )}
-```
-
-The Shiny app can be activated with `runApp()`.
-
-```{r}
-shiny::runApp(ui, server)
-```
-
-```{r streaming-shiny-app, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny reactive', echo = FALSE}
-render_image("images/streaming-shiny-app.png")
-```
-
-This section showed how easy it is to create a Shiny app that can be used for several purposes, such as monitoring, and dashboarding.  
-
-In a more complex implementation, the source would more likely be a Kafka stream.  The next section will cover how to integrate Kafka, Spark Stream and `sparklyr`.
+This was our last transformation for streams, you will now learn how to use Spark streams with Shiny, a package that makes it easy to build interactive web applications from R. 
 
 ## Kafka
 
@@ -414,7 +361,6 @@ Results to topic B]
 ```
 
 Spark Streaming enables the integration of Spark with Kafka.  Spark is able to both, read from and write into Kafka topics.  This means that Spark could be a Consumer, Stream Processor or Producer application of a Kafka implementation.  
-
 Unless there is a very specific need, using Spark as a Producer does not make much sense.  That is because Spark Streaming reacts to a stream, it doesn't generate it.  
 Use Spark to read (Consumer) from one, or several, topics and then reactively write (Producer) to a different topic with the results of the analysis, all within the same Kafka cluster. This effectively makes Spark a Stream Processor.
 
@@ -540,6 +486,82 @@ The Shiny reactive function will poll and refresh the results as the letters are
 
 ```{r streaming-shiny-kafka, eval = TRUE,  fig.align = 'center', fig.cap = 'Shiny with Kafka', echo = FALSE}
 render_image("images/streaming-shiny-kafka.png")
+```
+
+## Shiny
+
+Shiny's reactive framework is well suited to support streaming information which you can use to display real-time data from Spark using the `reactiveSpark()`, reactive. There is much to learn about Shiny which we can possibly present; however, if you are already familiar with Shiny, this example should be quite easy to undeerstand.
+
+We have a modified verson of the k-means Shiny example which, instead of getting the data from the static `iris` dataset, gets generated with `stream_generate_test()`, consumed by Spark and retrieved to Shiny through `reactiveSpark()` and displayed as captured in Figure \@ref(fig:streaming-shiny-app), enjoy!
+
+```{r}
+options(sparklyr.sanitize.column.names = FALSE)
+library(sparklyr)
+library(shiny)
+
+# Connect to Spark, only required to create a proper Shiny app
+sc <- spark_connect(master = "local", version = "2.3")
+
+ui <- pageWithSidebar(
+  headerPanel('Iris k-means clustering from Spark stream'),
+  sidebarPanel(
+    selectInput('xcol', 'X Variable', names(iris)),
+    selectInput('ycol', 'Y Variable', names(iris),
+                selected=names(iris)[[2]]),
+    numericInput('clusters', 'Cluster count', 3,
+                 min = 1, max = 9)
+  ),
+  mainPanel(plotOutput('plot1'))
+)
+
+server <- function(input, output, session) {
+  iris <- stream_read_csv(sc, "shiny-stream") %>%
+    reactiveSpark()
+  
+  selectedData <- reactive({
+    iris()[, c(input$xcol, input$ycol)]
+  })
+
+  clusters <- reactive({
+    kmeans(selectedData(), input$clusters)
+  })
+
+  output$plot1 <- renderPlot({
+    par(mar = c(5.1, 4.1, 0, 1))
+    plot(selectedData(),
+         col = clusters()$cluster,
+         pch = 20, cex = 3)
+    points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
+  })
+}
+
+app <- shinyApp(ui, server)
+```
+
+The Shiny app can be activated with `runApp()` and the test stream with `stream_generate_test()` using a constant distribution this time.
+
+```{r}
+unlink("shiny-stream", recursive = TRUE)
+future::future(stream_generate_test(iris, "shiny-stream", rep(5, 10^3)))
+
+runApp(app)
+```
+
+```{r streaming-shiny-app, eval = TRUE,  fig.align = 'center', fig.cap = 'Progreession of Spark reactive loading data into Shiny app', echo = FALSE}
+render_image("images/streaming-shiny-app.png")
+```
+
+This section showed how easy it is to create a Shiny app that can be used for several purposes, such as monitoring, and dashboarding.  
+
+In a more complex implementation, the source would more likely be a Kafka stream.  The next section will cover how to integrate Kafka, Spark Stream and `sparklyr`. 
+
+Before we transition, disconnect from Spark and clear the folders that we used:
+
+```{r}
+spark_disconnect(sc)
+
+unlink(c("source", "destination", "cars-stream",
+         "car-round", "shiny-stream"), recursive = TRUE)
 ```
 
 ## Recap
