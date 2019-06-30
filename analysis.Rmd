@@ -213,10 +213,10 @@ summarise(cars, mpg_percentile = percentile(mpg, 0.25))
 ```
 
 ```
-## # Source: spark<?> [?? x 1]
-##   mpg_percentile
-##            <dbl>
-## 1           15.4
+# Source: spark<?> [?? x 1]
+  mpg_percentile
+           <dbl>
+1           15.4
 ```
 
 There is no `percentile()` function in R, so `dplyr` passes the that portion of the code, "as-is", to the resulting SQL query.
@@ -237,10 +237,10 @@ To pass multiple values to *percentile*, we can call another Hive function calle
 summarise(cars, mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75)))
 ```
 ```
-## # Source: spark<?> [?? x 1]
-##   mpg_percentile
-##   <list>        
-## 1 <list [3]>   
+# Source: spark<?> [?? x 1]
+  mpg_percentile
+  <list>        
+1 <list [3]>   
 ```
 
 The *explode* function can be used to separate the Spark's array value results into their own record.  To do this, use *explode* within a `mutate()` command, and pass the variable containing the results of the percentile operation. 
@@ -250,12 +250,12 @@ summarise(cars, mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75))) %>%
   mutate(mpg_percentile = explode(mpg_percentile))
 ```
 ```
-## # Source: spark<?> [?? x 1]
-##   mpg_percentile
-##            <dbl>
-## 1           15.4
-## 2           19.2
-## 3           22.8
+# Source: spark<?> [?? x 1]
+  mpg_percentile
+           <dbl>
+1           15.4
+2           19.2
+3           22.8
 ```
 
 We have included a comprehensive list of all the Hive functions in the Appendix under [Hive functions](#hive-functions), make sure you glance over them to get a sense of the wide range of operations you can accomplish with them.
@@ -269,22 +269,22 @@ ml_corr(cars)
 ```
 
 ```
-## # A tibble: 11 x 11
-##       mpg    cyl   disp     hp    drat     wt    qsec
-##     <dbl>  <dbl>  <dbl>  <dbl>   <dbl>  <dbl>   <dbl>
-##  1  1     -0.852 -0.848 -0.776  0.681  -0.868  0.419 
-##  2 -0.852  1      0.902  0.832 -0.700   0.782 -0.591 
-##  3 -0.848  0.902  1      0.791 -0.710   0.888 -0.434 
-##  4 -0.776  0.832  0.791  1     -0.449   0.659 -0.708 
-##  5  0.681 -0.700 -0.710 -0.449  1      -0.712  0.0912
-##  6 -0.868  0.782  0.888  0.659 -0.712   1     -0.175 
-##  7  0.419 -0.591 -0.434 -0.708  0.0912 -0.175  1     
-##  8  0.664 -0.811 -0.710 -0.723  0.440  -0.555  0.745 
-##  9  0.600 -0.523 -0.591 -0.243  0.713  -0.692 -0.230 
-## 10  0.480 -0.493 -0.556 -0.126  0.700  -0.583 -0.213 
-## 11 -0.551  0.527  0.395  0.750 -0.0908  0.428 -0.656 
-## # ... with 4 more variables: vs <dbl>, am <dbl>,
-## #   gear <dbl>, carb <dbl>
+# A tibble: 11 x 11
+      mpg    cyl   disp     hp    drat     wt    qsec
+    <dbl>  <dbl>  <dbl>  <dbl>   <dbl>  <dbl>   <dbl>
+ 1  1     -0.852 -0.848 -0.776  0.681  -0.868  0.419 
+ 2 -0.852  1      0.902  0.832 -0.700   0.782 -0.591 
+ 3 -0.848  0.902  1      0.791 -0.710   0.888 -0.434 
+ 4 -0.776  0.832  0.791  1     -0.449   0.659 -0.708 
+ 5  0.681 -0.700 -0.710 -0.449  1      -0.712  0.0912
+ 6 -0.868  0.782  0.888  0.659 -0.712   1     -0.175 
+ 7  0.419 -0.591 -0.434 -0.708  0.0912 -0.175  1     
+ 8  0.664 -0.811 -0.710 -0.723  0.440  -0.555  0.745 
+ 9  0.600 -0.523 -0.591 -0.243  0.713  -0.692 -0.230 
+10  0.480 -0.493 -0.556 -0.126  0.700  -0.583 -0.213 
+11 -0.551  0.527  0.395  0.750 -0.0908  0.428 -0.656 
+# ... with 4 more variables: vs <dbl>, am <dbl>,
+#   gear <dbl>, carb <dbl>
 ```
 
 The `corrr` R package specializes in correlations.  It contains friendly functions to prepare and visualize the results.  Included inside the package is a back-end for `sparklyr` table objects, so it will not return an error if a non local table is passed to it.  In the background, the `correlate()` function runs `ml_corr()`, so there is no need to collect any data into R prior running the command.
@@ -295,22 +295,22 @@ correlate(cars, use = "pairwise.complete.obs", method = "pearson")
 ```
 
 ```
-## # A tibble: 11 x 12
-##    rowname     mpg     cyl    disp      hp     drat      wt
-##    <chr>     <dbl>   <dbl>   <dbl>   <dbl>    <dbl>   <dbl>
-##  1 mpg      NA      -0.852  -0.848  -0.776   0.681   -0.868
-##  2 cyl      -0.852  NA       0.902   0.832  -0.700    0.782
-##  3 disp     -0.848   0.902  NA       0.791  -0.710    0.888
-##  4 hp       -0.776   0.832   0.791  NA      -0.449    0.659
-##  5 drat      0.681  -0.700  -0.710  -0.449  NA       -0.712
-##  6 wt       -0.868   0.782   0.888   0.659  -0.712   NA    
-##  7 qsec      0.419  -0.591  -0.434  -0.708   0.0912  -0.175
-##  8 vs        0.664  -0.811  -0.710  -0.723   0.440   -0.555
-##  9 am        0.600  -0.523  -0.591  -0.243   0.713   -0.692
-## 10 gear      0.480  -0.493  -0.556  -0.126   0.700   -0.583
-## 11 carb     -0.551   0.527   0.395   0.750  -0.0908   0.428
-## # ... with 5 more variables: qsec <dbl>, vs <dbl>,
-## #   am <dbl>, gear <dbl>, carb <dbl>
+# A tibble: 11 x 12
+   rowname     mpg     cyl    disp      hp     drat      wt
+   <chr>     <dbl>   <dbl>   <dbl>   <dbl>    <dbl>   <dbl>
+ 1 mpg      NA      -0.852  -0.848  -0.776   0.681   -0.868
+ 2 cyl      -0.852  NA       0.902   0.832  -0.700    0.782
+ 3 disp     -0.848   0.902  NA       0.791  -0.710    0.888
+ 4 hp       -0.776   0.832   0.791  NA      -0.449    0.659
+ 5 drat      0.681  -0.700  -0.710  -0.449  NA       -0.712
+ 6 wt       -0.868   0.782   0.888   0.659  -0.712   NA    
+ 7 qsec      0.419  -0.591  -0.434  -0.708   0.0912  -0.175
+ 8 vs        0.664  -0.811  -0.710  -0.723   0.440   -0.555
+ 9 am        0.600  -0.523  -0.591  -0.243   0.713   -0.692
+10 gear      0.480  -0.493  -0.556  -0.126   0.700   -0.583
+11 carb     -0.551   0.527   0.395   0.750  -0.0908   0.428
+# ... with 5 more variables: qsec <dbl>, vs <dbl>,
+#   am <dbl>, gear <dbl>, carb <dbl>
 ```
 
 We can pipe the results to other `corrr` functions. For example, the `shave()` functions turns all of the duplicated results into `NA`’s. Again, while this feels like standard R code using existing R packages, Spark is being used under the hood to perform the correlation!
@@ -396,12 +396,12 @@ car_group <- cars %>%
   print()
 ```
 ```
-## # A tibble: 3 x 2
-##     cyl   mpg
-##   <dbl> <dbl>
-## 1     6  138.
-## 2     4  293.
-## 3     8  211.
+# A tibble: 3 x 2
+    cyl   mpg
+  <dbl> <dbl>
+1     6  138.
+2     4  293.
+3     8  211.
 ```
 
 In this example, now that the data has been pre-aggregated and collected into R, only three records are passed to the plotting function.  Figure \@ref(fig:analysis-viz1) shows the resulting plot.
@@ -513,18 +513,18 @@ cars %>%
   summary()
 ```
 ```
-## Deviance Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -3.4506 -1.6044 -0.1196  1.2193  4.6271 
-## 
-## Coefficients:
-## (Intercept)         cyl        disp          hp        drat          wt  
-## 12.30337416 -0.11144048  0.01333524 -0.02148212  0.78711097 -3.71530393
-##       qsec          vs          am        gear        carb 
-## 0.82104075  0.31776281  2.52022689  0.65541302 -0.19941925 
-## 
-## R-Squared: 0.869
-## Root Mean Squared Error: 2.147
+Deviance Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.4506 -1.6044 -0.1196  1.2193  4.6271 
+
+Coefficients:
+(Intercept)         cyl        disp          hp        drat          wt  
+12.30337416 -0.11144048  0.01333524 -0.02148212  0.78711097 -3.71530393
+      qsec          vs          am        gear        carb 
+0.82104075  0.31776281  2.52022689  0.65541302 -0.19941925 
+
+R-Squared: 0.869
+Root Mean Squared Error: 2.147
 ```
 
 At this point it is very easy to experiment with different features, we can simply change the R formula from `mpg ~ .` to say `mpg ~ hp + cyl` to only use HP and cylinders as features:
@@ -535,16 +535,16 @@ cars %>%
   summary()
 ```
 ```
-## Deviance Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -4.4948 -2.4901 -0.1828  1.9777  7.2934 
-## 
-## Coefficients:
-## (Intercept)          hp         cyl 
-##  36.9083305  -0.0191217  -2.2646936 
-## 
-## R-Squared: 0.7407
-## Root Mean Squared Error: 3.021
+Deviance Residuals:
+    Min      1Q  Median      3Q     Max 
+-4.4948 -2.4901 -0.1828  1.9777  7.2934 
+
+Coefficients:
+(Intercept)          hp         cyl 
+ 36.9083305  -0.0191217  -2.2646936 
+
+R-Squared: 0.7407
+Root Mean Squared Error: 3.021
 ```
 
 Additionally, it is also very easy to iterate with other kinds of models. The following one replaces the linear model with a generalized linear model:
@@ -555,19 +555,19 @@ cars %>%
   summary()
 ```
 ```
-## Deviance Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -4.4948 -2.4901 -0.1828  1.9777  7.2934 
-## 
-## Coefficients:
-## (Intercept)          hp         cyl 
-##  36.9083305  -0.0191217  -2.2646936 
-## 
-## (Dispersion paramter for gaussian family taken to be 10.06809)
-## 
-##    Null  deviance: 1126.05 on 31 degress of freedom
-## Residual deviance: 291.975 on 29 degrees of freedom
-## AIC: 169.56
+Deviance Residuals:
+    Min      1Q  Median      3Q     Max 
+-4.4948 -2.4901 -0.1828  1.9777  7.2934 
+
+Coefficients:
+(Intercept)          hp         cyl 
+ 36.9083305  -0.0191217  -2.2646936 
+
+(Dispersion paramter for gaussian family taken to be 10.06809)
+
+   Null  deviance: 1126.05 on 31 degress of freedom
+Residual deviance: 291.975 on 29 degrees of freedom
+AIC: 169.56
 ```
 
 Usually, before fitting a model you would have to use multiple `dplyr` transformations to get it ready to be consumed by a model; to make sure the model can be fitted as efficiently as possible, you should cache your dataset before fitting it.
@@ -590,18 +590,18 @@ cached_cars %>%
   summary()
 ```
 ```
-## Deviance Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -3.47339 -1.37936 -0.06554  1.05105  4.39057 
-## 
-## Coefficients:
-## (Intercept) cyl_cyl_8.0 cyl_cyl_4.0        disp          hp        drat
-## 16.15953652  3.29774653  1.66030673  0.01391241 -0.04612835  0.02635025
-##           wt        qsec          vs          am       gear        carb 
-##  -3.80624757  0.64695710  1.74738689  2.61726546 0.76402917  0.50935118  
-## 
-## R-Squared: 0.8816
-## Root Mean Squared Error: 2.041
+Deviance Residuals:
+     Min       1Q   Median       3Q      Max 
+-3.47339 -1.37936 -0.06554  1.05105  4.39057 
+
+Coefficients:
+(Intercept) cyl_cyl_8.0 cyl_cyl_4.0        disp          hp        drat
+16.15953652  3.29774653  1.66030673  0.01391241 -0.04612835  0.02635025
+          wt        qsec          vs          am       gear        carb 
+ -3.80624757  0.64695710  1.74738689  2.61726546 0.76402917  0.50935118  
+
+R-Squared: 0.8816
+Root Mean Squared Error: 2.041
 ```
 
 As more insights are gained from the data, more questions may be raised.  That is why we expect to iterate through data *wrangle*, *visualize*, and *model* multiple times.  Each iteration should provide incremental insights of what the data is "telling us". There will be a point where we reach a satisfactory level of understanding.  It is at this point that we will be ready to share the results of the analysis, this is the topic of the next section.
