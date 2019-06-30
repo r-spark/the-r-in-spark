@@ -117,6 +117,7 @@ library(sparklyr)
 library(h2o)
 
 sc <- spark_connect(master = "local", version = "2.3")
+
 cars <- copy_to(sc, mtcars)
 ```
 
@@ -186,7 +187,7 @@ h2o.predict(model, predictions)
 [1 row x 1 column]
 ```
 
-H2O can also be used to perform automatic training and tuning of many models; meaning that, H2O can choose which model to use for you using `h2o.automl`:
+H2O can also be used to perform automatic training and tuning of many models; meaning that, H2O can choose which model to use for you using AutoML. [@extensions-h2o-automl]
 
 ```{r}
 automl <- h2o.automl(x = c("wt", "cyl"), y = "mpg",
@@ -800,7 +801,7 @@ sc <- spark_connect(master = "local", config = config)
 In addition, you should know that [Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility, simplicity, and is used by Apache Spark while installing extensions. When the connection fails while using an extension, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
 
 ```{r extensions-rsparkling-cache}
-unlink("~/.ivy2/cache", recursive = TRUE)
+unlink("~/.ivy2", recursive = TRUE)
 ```
 
 In addition, you can also consider opening GitHub issues from the following extensions repos to get help from the extension authors:
