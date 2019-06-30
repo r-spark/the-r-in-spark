@@ -416,7 +416,52 @@ read.csv("data/clusters-trends.csv", skip = 2) %>%
 
 ## Streaming {#appendix-streaming}
 
-### Kafka {#appendix-kafka}
+### Stream Generator {#appendix-streaming-generator}
+
+The `stream_generate_test()` function creates a local test stream.  This function works independently from a Spark connection. The following example will create five files in sub-folder called "source".  The files will be created one second apart from the previous file's creation. 
+
+```{r}
+library(sparklyr)
+
+stream_generate_test(iterations = 5, path = "source", interval = 1)
+```
+
+After the function completes, all of the files should show up in the "source" folder. Notice that the file size vary.  This is so that it simulates what a true stream would do.  
+
+```{r}
+file.info(file.path("source", list.files("source")))[1] 
+```
+```
+##                     size
+## source/stream_1.csv   44
+## source/stream_2.csv  121
+## source/stream_3.csv  540
+## source/stream_4.csv 2370
+## source/stream_5.csv 7236
+```
+The `stream_generate_test()` by default will create a single numeric variable data frame.  
+
+```{r}
+readr::read_csv("source/stream_5.csv")
+```
+```
+## # A tibble: 1,489 x 1
+##        x
+##    <dbl>
+##  1   630
+##  2   631
+##  3   632
+##  4   633
+##  5   634
+##  6   635
+##  7   636
+##  8   637
+##  9   638
+## 10   639
+## # ... with 1,479 more rows
+```
+
+### Installing Kafka {#appendix-streaming-kafka}
 
 This instructions were put together using information from the official Kafka site. Specifically from the Quickstart page, and at the time of writing this book.  Newer versions of Kafka undoubtely will be available when reading this book.  The idea is to "timestamp" the versions used in the example in the Streaming chapter. 
 
