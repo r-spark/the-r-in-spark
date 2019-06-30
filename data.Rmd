@@ -183,33 +183,32 @@ This subsection reviewed how we can read files faster and with less failures, wh
 
 ### Memory
 
-Spark copies the data into its distributed memory, which makes analyses and other processes very fast.  There are cases, such as when the data is too big, that loading all of the data may not be practical, or even necessary. For those cases, Spark can then just "map" the files without copying data into memory.  
+By default, when using Spark with R, when you read data is is copiede into Sparks distributed memory -- making data analysis and other operations very fast. There are cases, such as when the data is too big, where loading all the data may not be practical, or even necessary. For those cases, Spark can then just "map" the files without copying data into memory.  
 
-The mapping creates a sort of "virtual" table in Spark memory.  The implication is that when a query runs against that table, Spark has to read the data from the files at that time.  Any consecutive read after that will do the same.  In effect, Spark becomes a pass-through for the data. The advantage of this method is that there is almost no up-front time cost to "reading" the file,  the mapping is very fast. The downside is that running queries that actually extract data will take longer. 
+The mapping creates a sort of "virtual" table in Spark. The implication is that when a query runs against that table, Spark has to read the data from the files at that time. Any consecutive reads after that will do the same.  In effect, Spark becomes a pass-through for the data. The advantage of this method is that there is almost no up-front time cost to "reading" the file, the mapping is very fast. The downside is that running queries that actually extract data will take longer. 
 
-In `sparklyr`, that is controlled by the `memory` argument of its read functions. Setting it to `FALSE` prevents the data copy.  It defaults to `TRUE`.
+This is controlled by the `memory` argument of the read functions. Setting it to `FALSE` prevents the data copy.  It defaults to `TRUE`.
 
 ```{r}
-mapped_test <- spark_read_csv(sc, "test","data/test.csv", memory = FALSE)
+mapped_test <- spark_read_csv(sc, "data-csv/", memory = FALSE)
 ```
 
 There are good use cases for this method, one of them is when not all columns of a table are needed. For example, take a very large file that contains many columns, assuming this is not first time you interact with this data, you would know what columns are needed for the analysis. When know which columns you need, the files can be read using `memory = FALSE`, and then select the needed columns with `dplyr`. The resulting `dplyr` variable can then be cached into memory, using the `compute()` function.  This will make Spark query the file(s), pull the selected fields, and copy only that data into memory. The result is a in-memory table that took comparatively less time to ingest.
 
 ```{r}
 mapped_test %>%
-  select(y) %>%
-  compute("test")
+  dplyr::select(y) %>%
+  dplyr::compute("test")
 ```
 
 The next subsection covers a short technique to make it easier to carry the original field names of imported data. 
-
 ### Columns
 
-Spark version 1.6 required that column names be sanitized, so `sparklyr` does that by default.  There may be cases when you would like to keep the original names intact, and are also working with Spark version 2.0 or above.  To do that set the `sparklyr.sanitize.column.names` option to `FALSE`.
+Spark 1.6 required that column names be sanitized, so R does that by default. There may be cases when you would like to keep the original names intact, and are also working with Spark version 2.0 or above.  To do that set the `sparklyr.sanitize.column.names` option to `FALSE`.
 
 ```{r eval=FALSE}
 options(sparklyr.sanitize.column.names = FALSE)
-dplyr::copy_to(sc, iris, overwrite = TRUE)
+copy_to(sc, iris, overwrite = TRUE)
 ```
 ```
 # Source:   table<iris> [?? x 5]
@@ -233,9 +232,9 @@ After reviewing how to read data into Spark in this section, the next section wi
 
 ## Write
 
-Some projects require that new data generated in Spark to be writen back to a remote source. For example, the data could be new predicted values returned by a Spark model. The job processes the mass generation of predictions, and the predictions need to be stored. This section will focus on when and where we should use Spark, and R, for moving the data from Spark into an external destination.
+Some projects require that new data generated in Spark to be writen back to a remote source. For example, the data could be new predicted values returned by a Spark model. The job processes the mass generation of predictions, but then the predictions need to be stored. This section will focus on how we should use Spark for moving the data from Spark into an external destination.
 
-Many new users start by downloading Spark data into R, to then upload it to a target. Figure \@ref(fig:data-avoid-approach) illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones.  The data typically grows in size to the point that it is no longer feasible for R to be the middle point. 
+Many new users start by downloading Spark data into R, to then upload it to a target. Figure \@ref(fig:data-avoid-approach) illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones. The data typically grows in size to the point that it is no longer feasible for R to be the middle point. 
 
 ```{r data-avoid-approach, echo=FALSE,  fig.cap='Incorrect use of Spark when writing large datasets', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -251,9 +250,9 @@ render_nomnoml("
 ", "images/data-r-pass-through.png")
 ```
 
-All efforts should be made to have Spark connect to the target location.  This way, reading, processing and writing happens within the same Spark session.  
+All efforts should be made to have Spark connect to the target location. This way, reading, processing and writing happens within the same Spark session.  
 
-As figure \@ref(fig:data-recommended-approach) shows, a better approach is to use Spark to read, process, and write to the target.  This approach is able to scale as big as the Spark cluster allows, and prevents using R as a choke point.
+As figure \@ref(fig:data-recommended-approach) shows, a better approach is to use Spark to read, process, and write to the target. This approach is able to scale as big as the Spark cluster allows, and prevents using R as a choke point.
 
 ```{r data-recommended-approach, echo=FALSE,  fig.cap='Correct use of Spark when writing large datasets', fig.align = 'center', eval = TRUE}
 render_nomnoml("
@@ -266,9 +265,9 @@ render_nomnoml("
 ", "images/data-spark-pass-through.png")
 ```
 
-Consider the following scenario: A Spark job just processed predictions for a large data set, resulting in a considerably large set of predictions. Choosing a method to write results will depend on the technology infrastructure you are working on. More specifically, it will depend on Spark and the target running, or not, in the same cluster.
+Consider the following scenario: A Spark job just processed predictions for a large data set, resulting in a considerably amount of predictions. Choosing a method to write results will depend on the technology infrastructure you are working on. More specifically, it will depend on Spark and the target running, or not, in the same cluster.
 
-Back to our scenario, we have a large dataset in Spark that needs to be saved.  When Spark and the target are in the same cluster, copying the results is not a problem, the data transfer is between RAM and disk of the same cluster or efficiently shuffled through a high-bandthwidth connecetion.
+Back to our scenario, we have a large dataset in Spark that needs to be saved. When Spark and the target are in the same cluster, copying the results is not a problem, the data transfer is between RAM and disk of the same cluster or efficiently shuffled through a high-bandthwidth connecetion.
 
 But what to do if the target is not within the Spark cluster? There are two options, choosing one will depend on the size of the data, and network speed:  
 
@@ -283,7 +282,7 @@ It is best to recognize that Spark, R, and any other technology are tools. No to
 
 Previous chapters used `copy_to()` as a handy helper to copy data into Spark; however, `copy_to()` can only be used to transfer in-memory datasets that are already loaded in memory; this dataset tend to be much smaller than the kind of datasets you would want to copy into Spark.
 
-FOr instance, suppose that we have a 10GB generated as follows, please consider skipping this exercise if you don't have 10GB free to spare.
+For instance, suppose that we have a 10GB generated as follows, please consider skipping this exercise if you don't have 10GB free to spare.
 
 ```{r}
 for (i in 1:10^2) {
@@ -294,7 +293,7 @@ for (i in 1:10^2) {
 }
 ```
 
-If we only had 2GB of memory in the driver node, we would not be able to load this 10GB file into memory to use `copy_to()`. Instead, when using the Hadoop file system as storage in your cluster, you can use `hadoop` to copy files from disk into Spark from the terminal as follows:
+If we only had 2GB of memory in the driver node, we would not be able to load this 10GB file into memory using `copy_to()`. Instead, when using the Hadoop file system as storage in your cluster, you can use the `hadoop` command line tool to copy files from disk into Spark from the terminal as follows. Please notice that the following code will only work in clusters using HDFS, not in local environments.
 
 ```{bash}
 hadoop fs -copyFromLocal large-file.txt large-file.txt
@@ -322,7 +321,7 @@ spark_read_text(sc, "large-file.txt", memory = FALSE)
 # … with more rows
 ```
 
-`collect()` has a similar limitation, it can only collect datasets that fit your driver memory; however, if you had to extract a large dataset from Spark through the driver node, you could use specialized tools provided by the distributed storage, for HDFS:
+`collect()` has a similar limitation, it can only collect datasets that fit your driver memory; however, if you had to extract a large dataset from Spark through the driver node, you could use specialized tools provided by the distributed storage, for HDFS you would run,
 
 ```{bash}
 hadoop fs -copyToLocal large-file.txt large-file.txt
@@ -391,7 +390,7 @@ spark_read_csv(
 ## 3     3
 ```
 
-Spark 2 provides an issue tracking column.  The column is hidden by default.  To enable it, add `_corrupt_record` to the `columns` list. This can be combined with the use of the *PERMISIVE* mode.  All rows will be imported, invalid entries will receive an `NA`, and the issue tracked in the `_corrupt_record` column.
+Spark provides an issue tracking column which hidden by default. To enable it, add `_corrupt_record` to the `columns` list. This can be combined with the use of the *PERMISIVE* mode.  All rows will be imported, invalid entries will receive an `NA`, and the issue tracked in the `_corrupt_record` column.
 
 ```{r eval=FALSE}
 spark_read_csv(
@@ -562,34 +561,27 @@ As a start, Apache *Hive* is a data warehouse software that facilitates reading,
 
 In YARN managed clusters, Spark provides a deeper integration with Apache Hive. Hive tables are easily accessible after opening a Spark connection.
 
-```{r}
-sc <- spark_connect(master = "yarn-client", 
-                    spark_home = "/usr/lib/spark/",
-                    version = "2.1.0",
-                    config = conf)
-```
-
-Accessing a Hive table's data can be done with a simple reference.  Using `DBI`, a table can be referenced within a SQL statement.
+Accessing a Hive table's data can be done using `DBI`, by referencing a table in a SQL statement.
 
 ```{r}
-DBI::dbSendQuery(sc, "SELECT * FROM table limit 10")
+DBI::dbGetQuery(sc, "SELECT * FROM test limit 10")
 ```
 
-Another way to reference a table is with `dplyr`.  The `tbl()` function, creates a pointer to the table.  
+Another way to reference a table is with `dplyr` using the `tbl()` function, which retrieves a reference to the table.  
 
 ```{r}
-table <- tbl(sc, "table")
+dplyr::tbl(sc, "test")
 ```
 
-It is important to reiterate that no data is imported into R, the `tbl()` function creates only a reference.  The expectation is that there will be more `dplyr` verbs following the `tbl()` command.
+It is important to reiterate that no data is imported into R, the `tbl()` function only creates a reference. You can then pipe more `dplyr` verbs following the `tbl()` command.
 
 ```{r}
-table %>%
-  group_by(field1) %>%
-  summarise(totals = sum(field2))
+dplyr::tbl(sc, "test") %>%
+  dplyr::group_by(y) %>%
+  dplyr::summarise(totals = sum(y))
 ```
 
-Hive table references assume a default database source.  Often, the table needed table is in a different database within the Metastore.  To access it using SQL, prefix the database name to the table.  Separate them using a period. 
+Hive table references assume a default database source. Often, the table needed table is in a different database within the Metastore. To access it using SQL, prefix the database name to the table.  Separate them using a period. 
 
 ```{r eval=FALSE}
 DBI::dbSendQuery(sc, "SELECT * FROM databasename.table")
@@ -601,21 +593,29 @@ In `dplyr`, the `in_schema()` function can be used.  The function is used inside
 tbl(sc, in_schema("databasename", "table"))
 ```
 
-In `sparklyr`, the `tbl_change_db()` function sets the current session's default database.  Any subsequent call via `DBI` or `dplyr` will use the selected name as the default database.
+You can also use the `tbl_change_db()` function to set the current session's default database.  Any subsequent call via `DBI` or `dplyr` will use the selected name as the default database.
 
 ```{r eval=FALSE}
 tbl_change_db(sc, "databasename")
 ```
 
+The following examples require additional Spark packages and database which might be hard to follow unless you happen to have a JDBC driver or Cassandra database accesible to you; therefore, lets disconnect from Spark:
+
+```{r}
+spark_disconnect(sc)
+```
+
+Nest we will explore a less structured storage system, often reffered as NoSQL database.
+
 ### Cassandra
 
 Apache *Cassandra* is a free and open-source, distributed, wide column store, NoSQL database management system designed to handle large amounts of data across many commodity servers. While there are many other database systems beyond Cassandra, taking a quick look at how Cassandra can be used form Spark will also inform how to make use of other Database and storage systems like Solr, Redshift, Delta Lake, etc.
 
-The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source.
+The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source. Unless you have a Cassandra database, skip executing the following stateement.
 
 ```{r}
-sc <- spark_connect(master = "local", config = list(
-  sparklyr.connect.packages = "datastax:spark-cassandra-connector:2.0.0-RC1-s_2.11"))
+sc <- spark_connect(master = "local", version = "2.3.0", config = list(
+  sparklyr.connect.packages = "datastax:spark-cassandra-connector:2.3.1-s_2.11"))
 
 spark_read_source(
   sc, 
@@ -635,10 +635,10 @@ When a Spark package is not available to provide connectivity, a JDBC connection
 
 It is quite easy to connect to a remote database with `spark_read_jdbc()` and `spark_write_jdbc()`; as long as you have access to the appropriate JDBC driver, which at times is trivial and other times quite an adventure. To keep this simple, we can briefly consider how a connection to a remote MySQL database could be accomplished.
 
-First, you would need to download the appropriate JDBC driver from the MySQL's developer portal and specify this additional driver as a `sparklyr.shell.driver-class-path` connection option. Since JDBC drivers are Java-based, the code is contained inside a *JAR* (Java ARchive) file. Once connected to Spark with the appropriate driver, you can use the `jdbc://` protocol to access particular drivers and databases:
+First, you would need to download the appropriate JDBC driver from the MySQL's developer portal and specify this additional driver as a `sparklyr.shell.driver-class-path` connection option. Since JDBC drivers are Java-based, the code is contained inside a *JAR* (Java ARchive) file. Once connected to Spark with the appropriate driver, you can use the `jdbc://` protocol to access particular drivers and databases. Unless you are willing to download and configure MySQL on your own, skip executing the following stateement.
 
 ```{r}
-sc <- spark_connect(master = "local", config = list(
+sc <- spark_connect(master = "local", version = "2.3", config = list(
   "sparklyr.shell.driver-class-path" =
     "~/Downloads/mysql-connector-java-5.1.41/mysql-connector-java-5.1.41-bin.jar"
 ))
