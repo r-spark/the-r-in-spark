@@ -499,7 +499,6 @@ options(sparklyr.sanitize.column.names = FALSE)
 library(sparklyr)
 library(shiny)
 
-# Connect to Spark, only required to create a proper Shiny app
 sc <- spark_connect(master = "local", version = "2.3")
 
 ui <- pageWithSidebar(
@@ -515,22 +514,14 @@ ui <- pageWithSidebar(
 )
 
 server <- function(input, output, session) {
-  iris <- stream_read_csv(sc, "shiny-stream") %>%
-    reactiveSpark()
+  iris <- reactiveSpark(stream_read_csv(sc, "shiny-stream"))
   
-  selectedData <- reactive({
-    iris()[, c(input$xcol, input$ycol)]
-  })
-
-  clusters <- reactive({
-    kmeans(selectedData(), input$clusters)
-  })
-
+  selectedData <- reactive(iris()[, c(input$xcol, input$ycol)])
+  clusters <- reactive(kmeans(selectedData(), input$clusters))
+  
   output$plot1 <- renderPlot({
     par(mar = c(5.1, 4.1, 0, 1))
-    plot(selectedData(),
-         col = clusters()$cluster,
-         pch = 20, cex = 3)
+    plot(selectedData(), col = clusters()$cluster, pch = 20, cex = 3)
     points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
   })
 }
