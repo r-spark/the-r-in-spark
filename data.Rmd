@@ -7,7 +7,7 @@ library(ggplot2)
 
 # Data {#data}
 
-> "Has it occurred to you she might not've been a reliable source of information?"
+> "Has it occurred to you that she might not have been a reliable source of information?"
 >
 > --- Jon Snow
 
@@ -25,7 +25,7 @@ For several years, it's been a common practice to store large datasets in a rela
 
 However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as *ETL* (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became popular in the 1970s. Aside from databases, data is often also loaded into a *data warehouse*, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. The challenge is that, changing databases and data warehouses is usually a long and delicate process since data needs to be re-indexed and the data from multiple data sources needs to be carefully transformed into single tables that can share across data sources.
 
-Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a *data lake* -- a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since data lakes make data available in its original format there is no need to carefully transform it in advance, anyone can use it for analysis which adds significant flexibility over ETL. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure \@ref(fig:data-data-lake).
+Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a *data lake* -- a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since data lakes make data available in its original format, there is no need to carefully transform it in advance, anyone can use it for analysis which adds significant flexibility over ETL. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure \@ref(fig:data-data-lake).
 
 ```{r data-data-lake, eval=TRUE, echo=FALSE, fig.cap='Spark processing raw data from a data lakes, databases and data warehouses'}
 render_nomnoml("
@@ -84,7 +84,7 @@ do.call("rbind", lapply(dir("data-csv", full.names = TRUE), read.csv))
 6 c 3
 ```
 
-In Spark, there is the notion of a folder as a dataset. Instead of enumerating each file, simply pass the path the containing all the files. Spark assumes that every file in that folder is part of the same dataset. This implies that the target folder should only be used for data purposes. This is specially important since storage systems like HDFS, store files across multiple machines but conceptually, they are stored in the same folder; when Spark reads the files from this folder, is actually exeecuting distributed code to read each file inside each machine -- no data is transfered between machines when distributed files are read!
+In Spark, there is the notion of a folder as a dataset. Instead of enumerating each file, simply pass the path containing all the files. Spark assumes that every file in that folder is part of the same dataset. This implies that the target folder should only be used for data purposes. This is specially important since storage systems like HDFS, store files across multiple machines but conceptually, they are stored in the same folder; when Spark reads the files from this folder, is actually executing distributed code to read each file inside each machine -- no data is transferred between machines when distributed files are read!
 
 ```{r}
 library(sparklyr)
@@ -182,7 +182,7 @@ This subsection reviewed how we can read files faster and with less failures, wh
 
 ### Memory
 
-By default, when using Spark with R, when you read data is is copiede into Sparks distributed memory -- making data analysis and other operations very fast. There are cases, such as when the data is too big, where loading all the data may not be practical, or even necessary. For those cases, Spark can then just "map" the files without copying data into memory.  
+By default, when using Spark with R, when you read data is copied into Sparks distributed memory -- making data analysis and other operations very fast. There are cases, such as when the data is too big, where loading all the data may not be practical, or even necessary. For those cases, Spark can then just "map" the files without copying data into memory.  
 
 The mapping creates a sort of "virtual" table in Spark. The implication is that when a query runs against that table, Spark has to read the data from the files at that time. Any consecutive reads after that will do the same.  In effect, Spark becomes a pass-through for the data. The advantage of this method is that there is almost no up-front time cost to "reading" the file, the mapping is very fast. The downside is that running queries that actually extract data will take longer. 
 
@@ -192,7 +192,7 @@ This is controlled by the `memory` argument of the read functions. Setting it to
 mapped_csv <- spark_read_csv(sc, "data-csv/", memory = FALSE)
 ```
 
-There are good use cases for this method, one of them is when not all columns of a table are needed. For example, take a very large file that contains many columns, assuming this is not first time you interact with this data, you would know what columns are needed for the analysis. When know which columns you need, the files can be read using `memory = FALSE`, and then select the needed columns with `dplyr`. The resulting `dplyr` variable can then be cached into memory, using the `compute()` function.  This will make Spark query the file(s), pull the selected fields, and copy only that data into memory. The result is a in-memory table that took comparatively less time to ingest.
+There are good use cases for this method, one of them is when not all columns of a table are needed. For example, take a very large file that contains many columns, assuming this is not the first time you interact with this data, you would know what columns are needed for the analysis. When know which columns you need, the files can be read using `memory = FALSE`, and then select the needed columns with `dplyr`. The resulting `dplyr` variable can then be cached into memory, using the `compute()` function.  This will make Spark query the file(s), pull the selected fields, and copy only that data into memory. The result is a in-memory table that took comparatively less time to ingest.
 
 ```{r}
 mapped_csv %>%
@@ -231,7 +231,7 @@ After reviewing how to read data into Spark in this section, the next section wi
 
 ## Write
 
-Some projects require that new data generated in Spark to be writen back to a remote source. For example, the data could be new predicted values returned by a Spark model. The job processes the mass generation of predictions, but then the predictions need to be stored. This section will focus on how we should use Spark for moving the data from Spark into an external destination.
+Some projects require that new data generated in Spark to be written back to a remote source. For example, the data could be new predicted values returned by a Spark model. The job processes the mass generation of predictions, but then the predictions need to be stored. This section will focus on how we should use Spark for moving the data from Spark into an external destination.
 
 Many new users start by downloading Spark data into R, to then upload it to a target. Figure \@ref(fig:data-avoid-approach) illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones. The data typically grows in size to the point that it is no longer feasible for R to be the middle point. 
 
@@ -266,7 +266,7 @@ render_nomnoml("
 
 Consider the following scenario: A Spark job just processed predictions for a large data set, resulting in a considerably amount of predictions. Choosing a method to write results will depend on the technology infrastructure you are working on. More specifically, it will depend on Spark and the target running, or not, in the same cluster.
 
-Back to our scenario, we have a large dataset in Spark that needs to be saved. When Spark and the target are in the same cluster, copying the results is not a problem, the data transfer is between RAM and disk of the same cluster or efficiently shuffled through a high-bandthwidth connecetion.
+Back to our scenario, we have a large dataset in Spark that needs to be saved. When Spark and the target are in the same cluster, copying the results is not a problem, the data transfer is between RAM and disk of the same cluster or efficiently shuffled through a high-bandwidth connection.
 
 But what to do if the target is not within the Spark cluster? There are two options, choosing one will depend on the size of the data, and network speed:  
 
@@ -387,7 +387,7 @@ spark_read_csv(
 3     3
 ```
 
-Spark provides an issue tracking column which hidden by default. To enable it, add `_corrupt_record` to the `columns` list. This can be combined with the use of the *PERMISIVE* mode.  All rows will be imported, invalid entries will receive an `NA`, and the issue tracked in the `_corrupt_record` column.
+Spark provides an issue tracking column which was hidden by default. To enable it, add `_corrupt_record` to the `columns` list. This can be combined with the use of the *PERMISSIVE* mode.  All rows will be imported, invalid entries will receive an `NA`, and the issue tracked in the `_corrupt_record` column.
 
 ```{r eval=FALSE}
 spark_read_csv(
@@ -395,7 +395,7 @@ spark_read_csv(
   "bad2",
   "bad.csv",
   columns = list(foo = "integer", "_corrupt_record" = "character"),
-  options = list(mode = "PERMISIVE")
+  options = list(mode = "PERMISSIVE")
 )
 ```
 ```
@@ -597,19 +597,19 @@ You can also use the `tbl_change_db()` function to set the current session's def
 tbl_change_db(sc, "databasename")
 ```
 
-The following examples require additional Spark packages and database which might be hard to follow unless you happen to have a JDBC driver or Cassandra database accesible to you; therefore, lets disconnect from Spark:
+The following examples require additional Spark packages and database which might be hard to follow unless you happen to have a JDBC driver or Cassandra database accessible to you; therefore, lets disconnect from Spark:
 
 ```{r}
 spark_disconnect(sc)
 ```
 
-Nest we will explore a less structured storage system, often reffered as NoSQL database.
+Nest we will explore a less structured storage system, often reffered to as NoSQL database.
 
 ### Cassandra
 
 Apache *Cassandra* is a free and open-source, distributed, wide column store, NoSQL database management system designed to handle large amounts of data across many commodity servers. While there are many other database systems beyond Cassandra, taking a quick look at how Cassandra can be used form Spark will also inform how to make use of other Database and storage systems like Solr, Redshift, Delta Lake, etc.
 
-The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source. Unless you have a Cassandra database, skip executing the following stateement.
+The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source. Unless you have a Cassandra database, skip executing the following statement.
 
 ```{r}
 sc <- spark_connect(master = "local", version = "2.3", config = list(
@@ -633,7 +633,7 @@ When a Spark package is not available to provide connectivity, a JDBC connection
 
 It is quite easy to connect to a remote database with `spark_read_jdbc()` and `spark_write_jdbc()`; as long as you have access to the appropriate JDBC driver, which at times is trivial and other times quite an adventure. To keep this simple, we can briefly consider how a connection to a remote MySQL database could be accomplished.
 
-First, you would need to download the appropriate JDBC driver from the MySQL's developer portal and specify this additional driver as a `sparklyr.shell.driver-class-path` connection option. Since JDBC drivers are Java-based, the code is contained inside a *JAR* (Java ARchive) file. Once connected to Spark with the appropriate driver, you can use the `jdbc://` protocol to access particular drivers and databases. Unless you are willing to download and configure MySQL on your own, skip executing the following stateement.
+First, you would need to download the appropriate JDBC driver from the MySQL's developer portal and specify this additional driver as a `sparklyr.shell.driver-class-path` connection option. Since JDBC drivers are Java-based, the code is contained inside a *JAR* (Java ARchive) file. Once connected to Spark with the appropriate driver, you can use the `jdbc://` protocol to access particular drivers and databases. Unless you are willing to download and configure MySQL on your own, skip executing the following statement.
 
 ```{r}
 sc <- spark_connect(master = "local", version = "2.3", config = list(
@@ -655,4 +655,4 @@ This chapter expanded on how and why you should use Spark to connect and process
 
 We then presented best-practices for reading, writing and copying data into and from Spark and came back to exploring the components of a data lake: file formats and file systems; the former representing how data is stored, and the latter where the data is stored. You then learned how to tackle file formats and storage systems that require additional Spark packages, reviewed some of the performance tradeoffs across file formats, and learned the concepts required to make use of storage systems (databases and warehouses) in Spark.
 
-While reading and writing data should come nature after this chapter, you might hit resource restrictions while reading and writing large-datasets. Therefore, in the next chapter you will learn how Spark manages tasks and data across multiple machines, which will in turn allow you to further improve the performance of your analysis and modeling tasks.
+While reading and writing dataset should come naturally to you, you might still hit resource restrictions while reading and writing large-datasets. Therefore, in the next chapter you will learn how Spark manages tasks and data across multiple machines, which will in turn allow you to further improve the performance of your analysis and modeling tasks.
