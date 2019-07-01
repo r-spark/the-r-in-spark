@@ -413,9 +413,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>“First lesson, stick them with the pointy end.”</p>
 <p>— Jon Snow</p>
 </blockquote>
-<p>Previous chapters focused on introducing Spark with R, they got you up to speed and encouraged you to try basic data analysis workflows. However, they have not properly introduced what such data analysis means, specially while running in Spark. They presented the tools you need throughout this book, to help you spend more time learning and hopefully, less time troublehsooting.</p>
+<p>Previous chapters focused on introducing Spark with R, they got you up to speed and encouraged you to try basic data analysis workflows. However, they have not properly introduced what such data analysis means, especially while running in Spark. They presented the tools you need throughout this book, to help you spend more time learning and hopefully, less time troubleshooting.</p>
 <p>This chapter, Analysis, will introduce tools to perform data analysis in R; which, spoiler alert, are the same tools you will use when using Spark with R! This is not accidental coincidence, but rather, we want data scientist to live in a world where technology is hidden from them, where you can use the R packages you know and love, and where they simply happen to just work across! Now, we are not quite there yet, but we are also not that far. This chapter will present widely used R packages and practices to do data analysis in R, which also happen to Spark work in Spark, like: <code>dplyr</code>, <code>ggplot2</code>, formulas, <code>rmarkdown</code> and so on.</p>
-<p>The next chapter, Modeling, will focus on creating statistical models to predict, estimate and describe datasets; but first, lets get started with analysis!</p>
+<p>The next chapter, Modeling, will focus on creating statistical models to predict, estimate and describe datasets; but first, let’s get started with analysis!</p>
 <div id="analysis-overview" class="section level2">
 <h2><span class="header-section-number">3.1</span> Overview</h2>
 <p>In a data analysis project, the main goal is to understand what the data is trying to “tell us”, hoping that it provides an answer to a specific question. Most data analysis projects follow a set of steps outlined in Figure <a href="analysis.html#fig:analysis-steps">3.1</a>.</p>
@@ -426,23 +426,23 @@ FIGURE 3.1: General steps of a data analysis
 </p>
 </div>
 <p>As the diagram illustrates, we first <em>import</em> data into our analysis stem, then <em>wrangled</em> by trying different data transformations, such as aggregations, and then <em>visualized</em> to help us perceive relationships and trends. In order to get deeper insight, one or multiple statistical <em>models</em> can be fitted against sample data. This will help in finding out if the patterns hold true when new data is applied to them. And lastly, the results are <em>communicated</em> publicly or privately to colleagues and stakeholders.</p>
-<p>When working with not-large-scale datasets, as in datasets that fit in memory; we can perform all those steps from R, without using Spark. However, when data does not fit in memory or computation is simply too-slow, whe can slightly motify this approach by incorporating Spark, but how?</p>
+<p>When working with not-large-scale datasets, as in datasets that fit in memory; we can perform all those steps from R, without using Spark. However, when data does not fit in memory or computation is simply too-slow, we can slightly modify this approach by incorporating Spark, but how?</p>
 <p>For data analysis, the ideal approach is to let Spark do what its good at. Spark is a parallel computation engine that works at a large-scale and provides a SQL engine and modeling libraries. These can be used to perform most of the same operations R performs. Such operations include data selection, transformation, and modeling. Additionally, Spark includes Graph analysis and Streaming libraries and many other; for now, we will skip those non-rectangular datasets and present them in later chapters.</p>
-<p>Data <em>import</em>, <em>wrangling</em>, and <em>modeling</em> can be performed inside Spark. <em>Visualization</em> can also partly be done by Spark, we will cover that later in this chapter. The idea is to use R to tell Spark what data operations to run, and then bring only the results into R. As illustrated in Figure <a href="analysis.html#fig:analysis-approach">3.2</a>, the ideal method <em>pushes compute</em> to the Spark cluster, and then <em>collects results</em> into R.</p>
+<p>Data <em>import</em>, <em>wrangling</em>, and <em>modeling</em> can be performed inside Spark. <em>Visualization</em> can also partly be done by Spark, we will cover that later in this chapter. The idea is to use R to tell Spark what data operations to run, and then only bring the results into R. As illustrated in Figure <a href="analysis.html#fig:analysis-approach">3.2</a>, the ideal method <em>pushes compute</em> to the Spark cluster, and then <em>collects results</em> into R.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-approach"></span>
 <img src="the-r-in-spark_files/figure-html/analysis-approach-1.png" alt="Spark computes while R collects results" width="100%" height="220pt" />
 <p class="caption">
 FIGURE 3.2: Spark computes while R collects results
 </p>
 </div>
-<p>The <code>sparklyr</code> package aids in using the “push compute, collect results” principle. Most of its functions are mainly wrappers on top of Spark API calls. This allows us to take advantage of Spark’s analysis components, instead of R’s. For example, when you need to fit a linear regression model; instead of using R’s familiar <code>lm()</code> function, you would use Spark’s <code>ml_linear_regression()</code>. This R function thencalls Spark to create this model, this specific example is illustrated in Figure <a href="analysis.html#fig:analysis-scala">3.3</a>.</p>
+<p>The <code>sparklyr</code> package aids in using the “push compute, collect results” principle. Most of its functions are mainly wrappers on top of Spark API calls. This allows us to take advantage of Spark’s analysis components, instead of R’s. For example, when you need to fit a linear regression model; instead of using R’s familiar <code>lm()</code> function, you would use Spark’s <code>ml_linear_regression()</code>. This R function then calls Spark to create this model, this specific example is illustrated in Figure <a href="analysis.html#fig:analysis-scala">3.3</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-scala"></span>
 <img src="the-r-in-spark_files/figure-html/analysis-scala-1.png" alt="R functions call Spark functionality" width="100%" height="220pt" />
 <p class="caption">
 FIGURE 3.3: R functions call Spark functionality
 </p>
 </div>
-<p>For more common data manipulation tasks, <code>sparklyr</code> provides a back-end for <code>dplyr</code>. This means that already familiar <code>dplyr</code> verbs can be used in R, and then <code>sparklyr</code> and <code>dplyr</code> will translate those actions into Spark SQL statements, which are alsmost certainly much more compact and easieer to read than SQL staments. So, if you are already familiar with R and <code>dplyr</code>, there is nothing new to learn! This might feel a bit anticlimactic, it is indeed, but it’s also great since you can focus that energy on learning other skills required to do large-scalee computing.</p>
+<p>For more common data manipulation tasks, <code>sparklyr</code> provides a back-end for <code>dplyr</code>. This means that already familiar <code>dplyr</code> verbs can be used in R, and then <code>sparklyr</code> and <code>dplyr</code> will translate those actions into Spark SQL statements, which are almost certainly much more compact and easier to read than SQL statements. So, if you are already familiar with R and <code>dplyr</code>, there is nothing new to learn! This might feel a bit anticlimactic, it is indeed, but it’s also great since you can focus that energy on learning other skills required to do large-scale computing.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-23"></span>
 <img src="the-r-in-spark_files/figure-html/unnamed-chunk-23-1.png" alt="dplyr writes SQL" width="100%" height="220pt" />
 <p class="caption">
@@ -450,7 +450,7 @@ FIGURE 3.4: dplyr writes SQL
 </p>
 </div>
 <p>In order to practice as you learn, the rest of this chapter’s code will use a single exercise that runs in the <em>local</em> Spark master. This way, the code can be replicated in your personal computer. Please, make sure to already have <code>sparklyr</code> working, this should already be the case if you completed the Getting Started chapter.</p>
-<p>This chapter will make use of pakages that you might not have installed; so first, make sure the following packages are installed by running:</p>
+<p>This chapter will make use of packages that you might not have installed; so first, make sure the following packages are installed by running:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;ggplot2&quot;</span>)
 <span class="kw">install.packages</span>(<span class="st">&quot;corrr&quot;</span>)
 <span class="kw">install.packages</span>(<span class="st">&quot;dbplot&quot;</span>)
@@ -464,7 +464,7 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 </div>
 <div id="import" class="section level2">
 <h2><span class="header-section-number">3.2</span> Import</h2>
-<p>Importing data is to be approached differently when using Spark with R. Usually, importing means that R will read files and load them into memory; when using Spark, the data is imported into Spark, not R. Notice how in Figure <a href="analysis.html#fig:analysis-access">3.5</a> the data source is connected to Spark insted of being connected to R.</p>
+<p>Importing data is to be approached differently when using Spark with R. Usually, importing means that R will read files and load them into memory; when using Spark, the data is imported into Spark, not R. Notice how in Figure <a href="analysis.html#fig:analysis-access">3.5</a> the data source is connected to Spark instead of being connected to R.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-access"></span>
 <img src="the-r-in-spark_files/figure-html/analysis-access-1.png" alt="Import Data to Spark not R" width="100%" height="220pt" />
 <p class="caption">
@@ -472,15 +472,15 @@ FIGURE 3.5: Import Data to Spark not R
 </p>
 </div>
 <p><strong>Note:</strong> When you doing analysis over large-scale datasets, the vast majority of the necessary data will be already available in your Spark cluster (which is usually made available to users via Hive tables, or by accessing the file system directly), the Data chapter will cover this extensively.</p>
-<p>Rather tham importing all data into Spark, you can also request Spark to access the data source without importing it, this is a decisions based on speed and performance. Importing all of the data into the Spark session will incur a up-front cost, once; since Spark needs to wait for the data to be loaded before analyzing it. If the data is not imported, you usually inccur a cost with every Spark operation since Spark needs to retrieve a subset from the cluster’s storage, which is usually disk drives that happen to be much slower than reading from Spark’s memory. More will be covered in the Tuning chapter.</p>
+<p>Rather than importing all data into Spark, you can also request Spark to access the data source without importing it – this is a decision you should make based on speed and performance. Importing all of the data into the Spark session will incur a up-front cost, once; since Spark needs to wait for the data to be loaded before analyzing it. If the data is not imported, you usually incur a cost with every Spark operation since Spark needs to retrieve a subset from the cluster’s storage, which is usually disk drives that happen to be much slower than reading from Spark’s memory. More will be covered in the Tuning chapter.</p>
 <p>Let’s prime the session with some data by importing <code>mtcars</code> into Spark using <code>copy_to()</code>; you can also import data from distributed files in many different file formats, which you’ll learn in the Data chapter.</p>
 <pre class="sourceCode r"><code class="sourceCode r">cars &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, mtcars)</code></pre>
-<p><strong>Note:</strong> In an enterprise setting, <code>copy_to()</code> should only be used to transfer small tables from R, such as a look up value table. Large data transfers should be performed by more formal data transfer or ETL tools.</p>
+<p><strong>Note:</strong> In an enterprise setting, <code>copy_to()</code> should only be used to transfer small tables from R, large data transfers should be performed with specialized data transfer tools.</p>
 <p>The data is now accessible to Spark and transformations can now be applied with ease; the next section will cover how to wrangle data by running transformations inside Spark, using <code>dplyr</code>.</p>
 </div>
 <div id="wrangle" class="section level2">
 <h2><span class="header-section-number">3.3</span> Wrangle</h2>
-<p>Data wrangling uses transformations to understand the data, it is often referred as the process of transforming data from one “raw” data form into another format with the intent of making it more appropriate for data analysis.</p>
+<p>Data wrangling uses transformations to understand the data, it is often referred to as the process of transforming data from one “raw” data form into another format with the intent of making it more appropriate for data analysis.</p>
 <p>Malformed or missing values and columns with multiple attributes are common data problems you might need to fix, since they prevent you from understanding your dataset. For example, a “name” field contains the last and first name of a customer. There are two attributes (first and last name) in a single column. In order to be usable, we need to <em>transform</em> the “name” field, by <em>changing</em> it into “first_name” and “last_name” fields.</p>
 <p>After the data is cleaned, you still need to understand the basics about its content. Other transformations, such as aggregations, can help with this task. For example, the result of requesting the average balance of all customers will return a single row and column. The value will be the average of all customers. That information will give us context when we see individual, or grouped, customer balances.</p>
 <p>The main goal is to write the data transformations using R syntax as much as possible. This saves us from the cognitive cost of having to switch between multiple computer technologies to accomplish a single task. In this case, it is better to take advantage of <code>dplyr</code>, instead of writing Spark SQL statements for data exploration.</p>
@@ -496,7 +496,7 @@ FIGURE 3.5: Import Data to Spark not R
 <pre><code>&lt;SQL&gt;
 SELECT AVG(`mpg`) AS `mpg`, AVG(`cyl`) AS `cyl`, AVG(`disp`) AS `disp`, AVG(`hp`) AS `hp`, AVG(`drat`) AS `drat`, AVG(`wt`) AS `wt`, AVG(`qsec`) AS `qsec`, AVG(`vs`) AS `vs`, AVG(`am`) AS `am`, AVG(`gear`) AS `gear`, AVG(`carb`) AS `carb`
 FROM `mtcars`</code></pre>
-<p>As it is evident, <code>dplyr</code> is much more concise than SQL; but reast assured, you will not have to see nor understand SQL when using <code>dplyr</code>. Your focus can remain on obtaining insights from the data, as opposed to figuring out how to express a given set of transformation in SQL. Here is another example that groups the cars datasetr by “transmision” type</p>
+<p>As it is evident, <code>dplyr</code> is much more concise than SQL; but rest assured, you will not have to see nor understand SQL when using <code>dplyr</code>. Your focus can remain on obtaining insights from the data, as opposed to figuring out how to express a given set of transformation in SQL. Here is another example that groups the cars dataset by “transmission” type.</p>
 <pre class="sourceCode r"><code class="sourceCode r">cars <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">transmission =</span> <span class="kw">ifelse</span>(am <span class="op">==</span><span class="st"> </span><span class="dv">0</span>, <span class="st">&quot;automatic&quot;</span>, <span class="st">&quot;manual&quot;</span>)) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">group_by</span>(transmission) <span class="op">%&gt;%</span>
@@ -506,11 +506,11 @@ FROM `mtcars`</code></pre>
   &lt;chr&gt;        &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 1 automatic     17.1  6.95  290.  160.  3.29  3.77  18.2 0.368     0  3.21  2.74
 2 manmual       24.4  5.08  144.  127.  4.05  2.41  17.4 0.538     1  4.38  2.92</code></pre>
-<p>Most of the data transformation made available by <code>dplyr</code> to work with local data frames are also available to use with a Spark connection. This means that you can focus on learning <code>dplyr</code> first, and then reuse that skill when working with Spark. The Data Transformation chaopter from the “R for Data Science” <span class="citation">(Wickham and Grolemund <a href="#ref-intro-r-for-data-science">2016</a>)</span> book is a great resource to learn in-depth <code>dplyr</code>. If proficiency with <code>dplyr</code> is not an issue for you, then please take some time to experiment with different <code>dplyr</code> functions against the <em>cars</em> table.</p>
+<p>Most of the data transformation made available by <code>dplyr</code> to work with local data frames are also available to use with a Spark connection. This means that you can focus on learning <code>dplyr</code> first, and then reuse that skill when working with Spark. The Data Transformation chapter from the “R for Data Science” <span class="citation">(Wickham and Grolemund <a href="#ref-intro-r-for-data-science">2016</a>)</span> book is a great resource to learn in-depth <code>dplyr</code>. If proficiency with <code>dplyr</code> is not an issue for you, then please take some time to experiment with different <code>dplyr</code> functions against the <em>cars</em> table.</p>
 <p>Sometimes we may need to perform an operation not yet available through <code>dplyr</code> and <code>sparklyr</code>. Instead of downloading the data into R, there is usually a Hive function within Spark to accomplish what we need. The next section will cover this scenario.</p>
 <div id="built-in-functions" class="section level3">
 <h3><span class="header-section-number">3.3.1</span> Built-in Functions</h3>
-<p>Spark SQL is based on Hive’s SQL conventions and functions and it is possible to call all these functions using <code>dplyr</code> as well. This means that we can use any Spark SQL functions to accomplish operations that may not be available via <code>dplyr</code>. The functions can be accessesed by calling them as if they were R functions. Instead of failing, <code>dplyr</code> passes functions it does not recognize “as-is” to the query engine. This gives us a lot of flexibility on the function we can use!</p>
+<p>Spark SQL is based on Hive’s SQL conventions and functions and it is possible to call all these functions using <code>dplyr</code> as well. This means that we can use any Spark SQL functions to accomplish operations that may not be available via <code>dplyr</code>. The functions can be accessed by calling them as if they were R functions. Instead of failing, <code>dplyr</code> passes functions it does not recognize “as-is” to the query engine. This gives us a lot of flexibility on the function we can use!</p>
 <p>For instance, the <em>percentile</em> function returns the exact percentile of a column in a group. The function expects a column name, and either a single percentile value, or an array of multiple percentile values. We can use this Spark SQL function from <code>dplyr</code> as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summarise</span>(cars, <span class="dt">mpg_percentile =</span> <span class="kw">percentile</span>(mpg, <span class="fl">0.25</span>))</code></pre>
 <pre><code># Source: spark&lt;?&gt; [?? x 1]
@@ -542,7 +542,7 @@ FROM `mtcars_remote`</code></pre>
 </div>
 <div id="correlations" class="section level3">
 <h3><span class="header-section-number">3.3.2</span> Correlations</h3>
-<p>A very common exploration technique is to calculate and visualize correlations. We often calculate correlations to find out what kind of statistical relationship are between paired sets of variables. Spark provides functions that calculate correlations across the entire data set. The results are then returned to R as a <code>data.frame</code> object.</p>
+<p>A very common exploration technique is to calculate and visualize correlations, which we often calculate to find out what kind of statistical relationship exists between paired sets of variables. Spark provides functions to calculate correlations across the entire data set and returns the results to R as a data frame object.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ml_corr</span>(cars)</code></pre>
 <pre><code># A tibble: 11 x 11
       mpg    cyl   disp     hp    drat     wt    qsec
@@ -580,7 +580,7 @@ FROM `mtcars_remote`</code></pre>
 # ... with 5 more variables: qsec &lt;dbl&gt;, vs &lt;dbl&gt;,
 #   am &lt;dbl&gt;, gear &lt;dbl&gt;, carb &lt;dbl&gt;</code></pre>
 <p>We can pipe the results to other <code>corrr</code> functions. For example, the <code>shave()</code> functions turns all of the duplicated results into <code>NA</code>’s. Again, while this feels like standard R code using existing R packages, Spark is being used under the hood to perform the correlation!</p>
-<p>Additionally, the results can be easily visualized using the <code>rplot()</code> function; Figure <a href="analysis.html#fig:analysis-corrr-rplot">3.6</a> is an example the plot resulting of combining these two functions.</p>
+<p>Additionally, as shown in Figure <a href="analysis.html#fig:analysis-corrr-rplot">3.6</a>, the results can be easily visualized using the <code>rplot()</code> function.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">correlate</span>(cars, <span class="dt">use =</span> <span class="st">&quot;pairwise.complete.obs&quot;</span>, <span class="dt">method =</span> <span class="st">&quot;pearson&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">shave</span>() <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">rplot</span>()</code></pre>
@@ -611,7 +611,7 @@ FIGURE 3.7: Stages of an R plot
 FIGURE 3.8: Plotting with Spark and R
 </p>
 </div>
-<p>Using this conceptual model, lets apply this when using <code>ggplort2</code>.</p>
+<p>Using this conceptual model, let’s apply this when using <code>ggplot2</code>.</p>
 <div id="using-ggplot2" class="section level3">
 <h3><span class="header-section-number">3.4.1</span> Using ggplot2</h3>
 <p>To create a bar plot using <code>ggplot2</code>, we simply call a function:</p>
@@ -645,7 +645,7 @@ FIGURE 3.9: Plotting inside R
 FIGURE 3.10: Plot with aggregation in Spark
 </p>
 </div>
-<p>Any other <code>ggplot2</code> visualization can be made to work using this approach; however, is beyond the scope of the book to teach this. Instead, we recommend you use the “R graphics cookbook: practical recipes for visualizing data” <span class="citation">(Chang <a href="#ref-r-graphics-cookbook">2012</a>)</span> to learn additional visulization techniques applicable to Spark. Now, to ease this transformation step before visualizing, the <code>dbplot</code> package provides a few read-to-use visualizations that automate aggregation in Spark.</p>
+<p>Any other <code>ggplot2</code> visualization can be made to work using this approach; however, is beyond the scope of the book to teach this. Instead, we recommend you use the “R graphics cookbook: practical recipes for visualizing data” <span class="citation">(Chang <a href="#ref-r-graphics-cookbook">2012</a>)</span> to learn additional visualization techniques applicable to Spark. Now, to ease this transformation step before visualizing, the <code>dbplot</code> package provides a few read-to-use visualizations that automate aggregation in Spark.</p>
 </div>
 <div id="using-dbplot" class="section level3">
 <h3><span class="header-section-number">3.4.2</span> Using dbplot</h3>
@@ -655,7 +655,7 @@ FIGURE 3.10: Plot with aggregation in Spark
 
 cars <span class="op">%&gt;%</span>
 <span class="kw">dbplot_histogram</span>(mpg, <span class="dt">binwidth =</span> <span class="dv">3</span>) <span class="op">+</span>
-<span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Cars by Miles Per Galon&quot;</span>,
+<span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;MPG Distribution&quot;</span>,
      <span class="dt">subtitle =</span> <span class="st">&quot;Histogram over miles per gallon&quot;</span>)</code></pre>
 <div class="figure" style="text-align: center"><span id="fig:analysis-visualizations-histogram"></span>
 <img src="images/analysis-visualizations-histogram-resized.png" alt="Histogram created by dbplot" width="1500" />
@@ -735,7 +735,7 @@ Coefficients:
 (Intercept)          hp         cyl 
  36.9083305  -0.0191217  -2.2646936 
 
-(Dispersion paramter for gaussian family taken to be 10.06809)
+(Dispersion parameter for gaussian family taken to be 10.06809)
 
    Null  deviance: 1126.05 on 31 degress of freedom
 Residual deviance: 291.975 on 29 degrees of freedom
@@ -773,8 +773,8 @@ Root Mean Squared Error: 2.041</code></pre>
 <p>R Markdown documents allow weave narrative text and code together. The amount of output formats provides a very compelling reason to learn and use R Markdown. There are many available output formats like HTML, PDF, PowerPoint, Word, web slides, Websites, books and so on.</p>
 <p>Most of these outputs are available in the core R packages of R Markdown: <code>knitr</code> and <code>rmarkdown</code>. R Markdown can be extended by other R packages. For example, this book was written using R Markdown thanks to an extension provided by the <code>bookdown</code> package. The best resource to delve deeper into R Markdown is the official book. <span class="citation">(Xie <a href="#ref-r-markdown-the-definite-guide">2018</a>)</span></p>
 <p>In R Markdown, one type of artifact could potentially be rendered in different formats. For example, the same report could be rendered in HTML, or as a PDF file by changing a setting within the report itself. Conversely, multiple types of artifacts could be rendered as the same output. For example, a presentation deck and a report could be rendered in HTML.</p>
-<p>Creating a new R Markdown report which uses Spark as a computer engine is easy! At the top, R Markdown expect a YAML header. The first and last line are three consecutive dashes (<code>---</code>). The content in between the dashes vary depending on the type of document. The only required one is the <code>output</code> value. R Markdown needs to know what kind of output it needs to render your report into. This YAML header is called Front Matter. Following the Front Matter are sections of code, called code chunks. These code chunks can be interlaced with the narratives. There is nothing particularily interesting to note when using Spark with R Markdown, except that is just business as usual.</p>
-<p>Since an R Markdown document is self-ciontained and meant to be reproducible, before rendering documents we should first disconeect from Spark to freee resources:</p>
+<p>Creating a new R Markdown report which uses Spark as a computer engine is easy! At the top, R Markdown expect a YAML header. The first and last line are three consecutive dashes (<code>---</code>). The content in between the dashes vary depending on the type of document. The only required one is the <code>output</code> value. R Markdown needs to know what kind of output it needs to render your report into. This YAML header is called Front Matter. Following the Front Matter are sections of code, called code chunks. These code chunks can be interlaced with the narratives. There is nothing particularly interesting to note when using Spark with R Markdown, except that is just business as usual.</p>
+<p>Since an R Markdown document is self-contained and meant to be reproducible, before rendering documents we should first disconnect from Spark to free resources:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)</code></pre>
 <p>The following example shows how easy it is to create a fully reproducible report that uses Spark to process large-scale datasets. The narrative, code and, most importantly, the output of the code is recorded inside the resulting HTML file. You can copy and paste this following code in a file. Save the file with a <code>.Rmd</code> extension, and choose whatever name you would like.</p>
 <pre class="sourceCode markdown"><code class="sourceCode markdown">---
@@ -813,7 +813,7 @@ uses the weight as the predictor of MPG
 <span class="bn">```{r, include = FALSE}</span>
 <span class="bn">spark_disconnect(sc)</span>
 <span class="bn">```</span></code></pre>
-<p>To knit this report, save the contents into a <code>report.Rmd</code> file and run <code>render()</code> from R. The output should look like this the one in Figure @(fig:visualize-analysis-communicate).</p>
+<p>To knit this report, save the contents into a <code>report.Rmd</code> file and run <code>render()</code> from R. The output should look like the one in Figure @(fig:visualize-analysis-communicate).</p>
 <pre class="sourceCode r"><code class="sourceCode r">rmarkdown<span class="op">::</span><span class="kw">render</span>(<span class="st">&quot;report.Rmd&quot;</span>)</code></pre>
 <div class="figure" style="text-align: center"><span id="fig:visualize-analysis-communicate"></span>
 <img src="images/analysis-rmarkdown-resized.png" alt="R Markdown HTML output" width="1500" />
@@ -828,14 +828,14 @@ title: &quot;mtcars analysis&quot;
 output:
   word_document: default
   pdf_document: default
-  powerpoint_presentation: deefault
+  powerpoint_presentation: default
 ---</code></pre>
 <p>The result will be a PowerPoint presentation, a Word document and a PRD! All of the same information that was displayed in the original HTML report, computed in Spark and rendered in R.</p>
-<p>There will be a need to edit the PowerPoint template or the output of the code chunks. This minimal example show how easy it is to go from one format to another. Of course, it will take some more editing on the R user side to make sure the slides contain only the pertinent information. The main point is to highlight that it does not require to learn a different markup, or code conventions, to switch from one artifact to another.</p>
+<p>There will be a need to edit the PowerPoint template or the output of the code chunks. This minimal example shows how easy it is to go from one format to another. Of course, it will take some more editing on the R user side to make sure the slides contain only the pertinent information. The main point is to highlight that it does not require to learn a different markup, or code conventions, to switch from one artifact to another.</p>
 </div>
 <div id="recap" class="section level2">
 <h2><span class="header-section-number">3.7</span> Recap</h2>
-<p>This chapteer presented a solif introduction to data analyhsis with R and Spark; many of the techniques presented looked quite similar to using just R and no Spark; which while anticlimactic, it’s the right design to help users already familiar with R to easily transition to Spark. For users unfamiliar with R, this chapter also served as a very brief introduction to some of the most popular (and useful!) packages available in R.</p>
+<p>This chapter presented a solid introduction to data analysis with R and Spark; many of the techniques presented looked quite similar to using just R and no Spark; which while anticlimactic, it’s the right design to help users already familiar with R to easily transition to Spark. For users unfamiliar with R, this chapter also served as a very brief introduction to some of the most popular (and useful!) packages available in R.</p>
 <p>It should now be quite obvious that together, R and Spark, are a powerful combination – a large-scale computing platform, along with an incredibly robust ecosystem of R packages, makes up for an ideal analysis platform.</p>
 <p>While doing analysis in Spark with R, remember to push computation to Spark, focus on collecting results in R. Which you can then use for further data manipulation, visualization and communication by sharing your results in a variety of outputs.</p>
 <p>The next chapter, Modeling, will dive deeper into how to build statistical models in Spark using a much more interesting dataset, what’s more interesting than dating datasets? You will also learn many more techniques we did not even mention in the brief modeling section from this chapter.</p>

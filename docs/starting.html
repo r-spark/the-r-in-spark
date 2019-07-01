@@ -413,28 +413,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>“I always wanted to be a wizard.”</p>
 <p>— Samwell Tarly</p>
 </blockquote>
-<p>After reading the Introduction chapter, you should now be familiar with the kind of problems that Spark can help you solve; it should be clear that Spark solves problems by making use of multiple computers when data does not fit in a single machine or when computation is too slow. For those newer to R, it should also be clear that combining Spark with data science tools, like <code>ggplot2</code> for visualization and <code>dplyr</code> to perform data transformations, brings a promising landscape for doing data science at scale. We also hope you are excited to become profficient in large-scale computing.</p>
-<p>This chapter, Getting Started, will walk you through the tools you’ll need to become profficient in Spark. We encourage you to walk through the code in this chapter since it will force you to go through the motions of analyzing, modeling, reading and writing data. Read, you will have to do some wax-on, wax-off, repeat; before you get fully inmersed in the world of Spark.</p>
-<p>The next chapter, Analysis, will dive into this topic followed by Modeling; which will present examples using a single-cluster machine, your personal computer. Subsequent chapters will properly introduce cluster computing and the concepts and techniques you’ll need to succesfully run code across multiple machines.</p>
+<p>After reading the Introduction chapter, you should now be familiar with the kind of problems that Spark can help you solve; it should be clear that Spark solves problems by making use of multiple computers when data does not fit in a single machine or when computation is too slow. For those newer to R, it should also be clear that combining Spark with data science tools, like <code>ggplot2</code> for visualization and <code>dplyr</code> to perform data transformations, brings a promising landscape for doing data science at scale. We also hope you are excited to become proficient in large-scale computing.</p>
+<p>This chapter, Getting Started, will walk you through the tools you’ll need to become proficient in Spark. We encourage you to walk through the code in this chapter since it will force you to go through the motions of analyzing, modeling, reading and writing data. Read, you will have to do some wax-on, wax-off, repeat; before you get fully immersed in the world of Spark.</p>
+<p>The next chapter, Analysis, will dive into this topic followed by Modeling; which will present examples using a single-cluster machine, your personal computer. Subsequent chapters will properly introduce cluster computing and the concepts and techniques you’ll need to successfully run code across multiple machines.</p>
 <div id="overview" class="section level2">
 <h2><span class="header-section-number">2.1</span> Overview</h2>
 <p>From R, getting started with Spark using <code>sparklyr</code> and a local cluster is as easy as installing and loading the <code>sparklyr</code> package followed by installing Spark using <code>sparklyr</code>; however, we will assume you are starting with a brand new computer running Windows, OS X or Linux and walk you through the prerequisites you’ll need before connecting to a local Spark cluster.</p>
-<p>While this chapter is designed to help you get ready to use Spark in your personal computer, it’s also likely that some readers will already have a Spark cluster available or might preffer to get started with an online Spark cluster. For instance, Databricks hosts a free community edition <span class="citation">(“Databricks Community Edition” <a href="#ref-starting-databricks-community">2019</a>)</span> of Spark that can be easily accessed from your web browser. If you end up choosing this path, skip to the prerequisites section of this chapter but make sure you consult the proper resources for your existing or online Spark cluster.</p>
+<p>While this chapter is designed to help you get ready to use Spark in your personal computer, it’s also likely that some readers will already have a Spark cluster available or might prefer to get started with an online Spark cluster. For instance, Databricks hosts a free community edition <span class="citation">(“Databricks Community Edition” <a href="#ref-starting-databricks-community">2019</a>)</span> of Spark that can be easily accessed from your web browser. If you end up choosing this path, skip to the prerequisites section of this chapter but make sure you consult the proper resources for your existing or online Spark cluster.</p>
 <p>Either way, once you are done with the prerequisites, you will first learn how to connect to Spark. We will then present the most important tools and operations that you’ll use through the rest of this book. Less emphasis is placed on teaching concepts or how to use them, we can’t possibly explain modeling or streaming in a single paragraph; however, going through this chapter should give you a brief glimpse of what to expect and confidence that you have the tools correctly configured to tackle harder problems later on.</p>
-<p>The tools you’ll use are mostly divided into R code and the Spark web interface. All Spark operations are run from R; however, monitoring execution of distributed operations is performed from Sparks web interface; a web interface that you can load from any web browser. We will then disconnect from this local cluster, which is easy to forget to do but hightly recommended while working with local clusters – and in shared Spark clusters as well!</p>
-<p>We will close this chapter by walking you through some of the features that make using Spark with Rstudio easier; more specifically, we will present the RStudio extensions that <code>sparklyr</code> implements. However, if you are inclined to use Jupyter notebooks, or if your cluster is already equiped with a different R user interface, rest assured that you can use Spark with R through plain R code. Let’s move along and get your prerequisites properly configured.</p>
+<p>The tools you’ll use are mostly divided into R code and the Spark web interface. All Spark operations are run from R; however, monitoring execution of distributed operations is performed from Sparks web interface; a web interface that you can load from any web browser. We will then disconnect from this local cluster, which is easy to forget to do but highly recommended while working with local clusters – and in shared Spark clusters as well!</p>
+<p>We will close this chapter by walking you through some of the features that make using Spark with Rstudio easier; more specifically, we will present the RStudio extensions that <code>sparklyr</code> implements. However, if you are inclined to use Jupyter notebooks, or if your cluster is already equipped with a different R user interface, rest assured that you can use Spark with R through plain R code. Let’s move along and get your prerequisites properly configured.</p>
 </div>
 <div id="starting-prerequisites" class="section level2">
 <h2><span class="header-section-number">2.2</span> Prerequisites</h2>
-<p>R can run in many platforms and environments; therfore, whether you use Windows, Mac or Linux, the first step is to install R from the <a href="https://r-project.org/">r-project.org</a>, detailed instructions are provided in the Installing R appendix.</p>
-<p>Most people use programming languages with tools to make them more productive; for R, RStudio would be such tool. Strictly speaking, RStudio is an Integrated Development Environment (or IDE), which also happens to support many platforms and environments. We strongly recommend you get RStudio installed if you haven’t done so already, see details under the Installing RStudio appendix.</p>
+<p>R can run in many platforms and environments; therefore, whether you use Windows, Mac or Linux, the first step is to install R from the <a href="https://r-project.org/">r-project.org</a>, detailed instructions are provided in the Installing R appendix.</p>
+<p>Most people use programming languages with tools to make them more productive; for R, RStudio would be such a tool. Strictly speaking, RStudio is an Integrated Development Environment (or IDE), which also happens to support many platforms and environments. We strongly recommend you get RStudio installed if you haven’t done so already, see details under the Installing RStudio appendix.</p>
 <p><strong>Tip:</strong> When using Windows, we recommend using avoiding directories with spaces in their path. If running <code>getwd()</code> form R returns a path with spaces, consider switching to a path with no spaces using <code>setwd("&lt;path&gt;")</code> or by creating an RStudio project in path with no spaces.</p>
 <p>Additionally, since Spark is built in the Scala programming language which is run by the Java Virtual Machine, you also need to install Java 8 in your system. It is likely that your system already has Java installed, but you should still check the version and update or downgrade as described in the Installing Java appendix. You can use the following R command to check which version is installed installed:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">system</span>(<span class="st">&quot;java -version&quot;</span>)</code></pre>
 <pre><code>java version &quot;1.8.0_201&quot;
 Java(TM) SE Runtime Environment (build 1.8.0_201-b09)
 Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)</code></pre>
-<p>You can also use the <code>JAVA_HOME</code> environment variable to point to an specific Java version by running <code>Sys.setenv(JAVA_HOME = "&lt;path-to-java-8&gt;")</code>; either way, before moving on to installing <code>sparklyr</code>, make sure that Java 8 is the version available for R.</p>
+<p>You can also use the <code>JAVA_HOME</code> environment variable to point to a specific Java version by running <code>Sys.setenv(JAVA_HOME = "&lt;path-to-java-8&gt;")</code>; either way, before moving on to installing <code>sparklyr</code>, make sure that Java 8 is the version available for R.</p>
 <div id="starting-install-sparklyr" class="section level3">
 <h3><span class="header-section-number">2.2.1</span> Installing sparklyr</h3>
 <p>As many other R packages, <code>sparkylr</code> is available to be installed from <a href="https://CRAN.R-project.org/package=sparklyr">CRAN</a> and can be easily installed as follows:</p>
@@ -447,8 +447,8 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)</code></pre>
 <h3><span class="header-section-number">2.2.2</span> Installing Spark</h3>
 <p>Start by loading <code>sparklyr</code>,</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)</code></pre>
-<p>This will makes all <code>sparklyr</code> functions available in R, which is really helpful; otherwise, we would have to run each <code>sparklyr</code> command prefixed with <code>sparklyr::</code>.</p>
-<p>Spark can be easily installed by running <code>spark_install()</code>; this will download, install and configure the latest version of Spark locally in your computer; however, since we’ve written this book with Spark 2.3, you should also install this version to make sure you can follow all the exmaples provided without any unexpected suprises.</p>
+<p>This makes all <code>sparklyr</code> functions available in R, which is really helpful; otherwise, we would have to run each <code>sparklyr</code> command prefixed with <code>sparklyr::</code>.</p>
+<p>Spark can be easily installed by running <code>spark_install()</code>; this will download, install and configure the latest version of Spark locally in your computer; however, since we’ve written this book with Spark 2.3, you should also install this version to make sure you can follow all the examples provided without any unexpected surprises.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_install</span>(<span class="st">&quot;2.3&quot;</span>)</code></pre>
 <p>All the versions of Spark that are available for installation can be displayed by running:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_available_versions</span>()</code></pre>
@@ -466,7 +466,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)</code></pre>
 <pre><code>  spark hadoop                              dir
 7 2.3.1    2.7 /spark/spark-2.3.1-bin-hadoop2.7</code></pre>
 <p>The path where Spark is installed is referenced as Spark’s home, which is defined in R code and system configuration settings with the <code>SPARK_HOME</code> identifier. When using a local Spark cluster installed with <code>sparklyr</code>, this path is already known and no additional configuration needs to take place.</p>
-<p>Finally, in order to uninstall an specific version of Spark you can run <code>spark_uninstall()</code> by specifying the Spark and Hadoop versions, for instance:</p>
+<p>Finally, in order to uninstall a specific version of Spark you can run <code>spark_uninstall()</code> by specifying the Spark and Hadoop versions, for instance:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_uninstall</span>(<span class="dt">version =</span> <span class="st">&quot;1.6.3&quot;</span>, <span class="dt">hadoop =</span> <span class="st">&quot;2.6&quot;</span>)</code></pre>
 <p><strong>Note:</strong> The default installation paths are <code>~/spark</code> for OS X and Linux and, <code>%LOCALAPPDATA%/spark</code> for Windows. To customize the installation path you can run <code>options(spark.install.dir = "&lt;installation-path&gt;")</code> before <code>spark_install()</code> and <code>spark_connect()</code>.</p>
 </div>
@@ -479,7 +479,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)</code></pre>
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)</code></pre>
 <p><strong>Note:</strong> If you are using your own or online Spark cluster, make sure to connect as specified by your cluster administrator or the online documentation. If you need some pointers, you can take a quick pick at the Connections chapter which will explain in detail how to connect to any Spark cluster.</p>
 <p>The <code>master</code> parameter identifies which is the “main” machine from the Spark cluster; this machine is often called the driver node. While working with real clusters using many machines, most machines will be worker machines and one will be the master. Since we only have a local cluster with only one machine, we will default to use <code>"local"</code> for now.</p>
-<p>After a connection is stablished, <code>spark_connect()</code> retrieves an active Spark connection which most code usually names <code>sc</code>; you will then make use of <code>sc</code> to execute Spark commands.</p>
+<p>After a connection is established, <code>spark_connect()</code> retrieves an active Spark connection which most code usually names <code>sc</code>; you will then make use of <code>sc</code> to execute Spark commands.</p>
 <p>If connection fails, the Connections chapter contains a <a href="connections.html#connections-troubleshooting">troubleshooting</a> section which can help you resolve your connection issue.</p>
 </div>
 <div id="starting-sparklyr-hello-world" class="section level2">
@@ -503,7 +503,7 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 10  19.2     6  168.   123  3.92  3.44  18.3     1     0     4     4
 # … with more rows</code></pre>
 <p><strong>Congrats!</strong> You have successfully connected and loaded your first dataset into Spark.</p>
-<p>Let’s explain what’s going on in <code>copy_to()</code>. The first parameter, <code>sc</code>, gives the function a reference to the active Spark Connection that was earlier created with <code>spark_connect()</code>. The second parameter specifies a dataset to load into Spark. Now, <code>copy_to()</code> returns a reference to the dataset in Spark which R automatically prints. Whenever a Spark dataset is printed, Spark will <em>collect</em> some of the records and display them for you. In this particular case, that dataset contains only a few rows describing automobile models and some of their specifications like Horse Power and expected Miles per Gallon.</p>
+<p>Let’s explain what’s going on in <code>copy_to()</code>. The first parameter, <code>sc</code>, gives the function a reference to the active Spark Connection that was earlier created with <code>spark_connect()</code>. The second parameter specifies a dataset to load into Spark. Now, <code>copy_to()</code> returns a reference to the dataset in Spark which R automatically prints. Whenever a Spark dataset is printed, Spark will <em>collect</em> some of the records and display them for you. In this particular case, that dataset contains only a few rows describing automobile models and some of their specifications like Horsepower and expected Miles per Gallon.</p>
 <div id="starting-spark-web-interface" class="section level3">
 <h3><span class="header-section-number">2.4.1</span> Web Interface</h3>
 <p>Most of the Spark commands are executed from the R console; however, monitoring and analyzing execution is done through Spark’s web interface, see Figure <a href="starting.html#fig:starting-spark-web">2.1</a>. This interface is a web application provided by Spark which can be accessed by running:</p>
@@ -545,7 +545,7 @@ FIGURE 2.4: Apache Spark Web Interface - Environment Tab
 <span class="kw">dbGetQuery</span>(sc, <span class="st">&quot;SELECT count(*) FROM mtcars&quot;</span>)</code></pre>
 <pre><code>  count(1)
 1       32</code></pre>
-<p>When using <code>dplyr</code>, you write less code and it’s often much easier to write than SQL; which is why we won’t make use SQL in this book; however, if you are profficient in SQL, this is a viable option to you. For instance, counting records in <code>dplyr</code> is more compact and easier to understand.</p>
+<p>When using <code>dplyr</code>, you write less code and it’s often much easier to write than SQL; which is why we won’t make use SQL in this book; however, if you are proficient in SQL, this is a viable option to you. For instance, counting records in <code>dplyr</code> is more compact and easier to understand.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
 <span class="kw">count</span>(cars)</code></pre>
 <pre><code># Source: spark&lt;?&gt; [?? x 1]
@@ -558,17 +558,17 @@ FIGURE 2.4: Apache Spark Web Interface - Environment Tab
 <span class="st">  </span><span class="kw">collect</span>() <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">plot</span>()</code></pre>
 <div class="figure" style="text-align: center"><span id="fig:starting-cars-hp-vs-mpg"></span>
-<img src="images/starting-cars-hp-vs-mpg-resized.png" alt="Horse Power vs Miles per Gallon" width="1500" />
+<img src="images/starting-cars-hp-vs-mpg-resized.png" alt="Horsepower vs Miles per Gallon" width="1500" />
 <p class="caption">
-FIGURE 2.5: Horse Power vs Miles per Gallon
+FIGURE 2.5: Horsepower vs Miles per Gallon
 </p>
 </div>
-<p>The plot in Figure <a href="starting.html#fig:starting-cars-hp-vs-mpg">2.5</a>, shows that as we increase the horse power in a vehicle, their fuel efficiency measured in miles per gallon gets reduced. While this is insightful, it’s hard to predict numerically how increased horse power would affect fuel effiency, modeling can help us overcome this.</p>
+<p>The plot in Figure <a href="starting.html#fig:starting-cars-hp-vs-mpg">2.5</a>, shows that as we increase the horsepower in a vehicle, their fuel efficiency measured in miles per gallon gets reduced. While this is insightful, it’s hard to predict numerically how increased horsepower would affect fuel efficiency, modeling can help us overcome this.</p>
 </div>
 <div id="starting-modeling" class="section level3">
 <h3><span class="header-section-number">2.4.3</span> Modeling</h3>
 <p>While data analysis can take you quite far when understanding data, building a mathematical model that describes and generalizes the dataset is quite powerful. In the Introduction chapter you learned that the fields of machine learning and data science make use of mathematical models to perform predictions and find additional insights.</p>
-<p>For instance, we can use a linear model to approximate the relationship between fuel efficiency and horse power:</p>
+<p>For instance, we can use a linear model to approximate the relationship between fuel efficiency and horsepower:</p>
 <pre class="sourceCode r"><code class="sourceCode r">model &lt;-<span class="st"> </span><span class="kw">ml_linear_regression</span>(cars, mpg <span class="op">~</span><span class="st"> </span>hp) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">print</span>()</code></pre>
 <pre><code>Formula: mpg ~ hp
@@ -576,7 +576,7 @@ FIGURE 2.5: Horse Power vs Miles per Gallon
 Coefficients:
 (Intercept)          hp 
 30.09886054 -0.06822828</code></pre>
-<p>This model can now be used to predict values that are not in the original datset. For instance, we can add entries for cars with horse power beyond 250 and also visualize the predicted values as shown in Figure <a href="starting.html#fig:starting-cars-hp-vs-mpg-prediction">2.6</a>.</p>
+<p>This model can now be used to predict values that are not in the original dataset. For instance, we can add entries for cars with horsepower beyond 250 and also visualize the predicted values as shown in Figure <a href="starting.html#fig:starting-cars-hp-vs-mpg-prediction">2.6</a>.</p>
 <pre class="sourceCode r"><code class="sourceCode r">model <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ml_predict</span>(<span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">hp =</span> <span class="dv">250</span> <span class="op">+</span><span class="st"> </span><span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">10</span>))) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">transmute</span>(<span class="dt">hp =</span> hp, <span class="dt">mpg =</span> prediction) <span class="op">%&gt;%</span>
@@ -584,9 +584,9 @@ Coefficients:
 <span class="st">  </span><span class="kw">collect</span>() <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">plot</span>()</code></pre>
 <div class="figure" style="text-align: center"><span id="fig:starting-cars-hp-vs-mpg-prediction"></span>
-<img src="images/starting-cars-hp-vs-mpg-prediction-resized.png" alt="Horse power vs miles per gallon with predictions" width="1500" />
+<img src="images/starting-cars-hp-vs-mpg-prediction-resized.png" alt="Horsepower vs miles per gallon with predictions" width="1500" />
 <p class="caption">
-FIGURE 2.6: Horse power vs miles per gallon with predictions
+FIGURE 2.6: Horsepower vs miles per gallon with predictions
 </p>
 </div>
 <p>While the previous example lacks many of the appropriate techniques you should use while modeling, it’s also a simple example to briefly introduce the modeling capabilities of Spark. All the Spark models, techniques and best practices will be properly introduced in the Modeling chapter.</p>
@@ -600,10 +600,10 @@ FIGURE 2.6: Horse power vs miles per gallon with predictions
 </div>
 <div id="starting-extensions" class="section level3">
 <h3><span class="header-section-number">2.4.5</span> Extensions</h3>
-<p>In the same way that R is known for it’s vibrant community of package authors, at a smaller scale, many extensions for Spark and R have been written and are available to you. The Extensions chapter will introduce many interesting ones to perform advanced modeling, graph analysis, preprocess datasets for deep learning, etc.</p>
+<p>In the same way that R is known for its vibrant community of package authors, at a smaller scale, many extensions for Spark and R have been written and are available to you. The Extensions chapter will introduce many interesting ones to perform advanced modeling, graph analysis, preprocess datasets for deep learning, etc.</p>
 <p>For instance, the <code>sparkly.nested</code> extension is an R package that extends <code>sparklyr</code> to help you manage values that contain nested information. A common use case arises while dealing with JSON files which contain nested lists that require preprocessing before doing meaningful data analysis. To use this extension, we have to first install it as follows:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;sparklyr.nested&quot;</span>)</code></pre>
-<p>Then we can use this extension to group all the horse power data points over the number of cylinders:</p>
+<p>Then we can use this extension to group all the horsepower data points over the number of cylinders:</p>
 <pre class="sourceCode r"><code class="sourceCode r">sparklyr.nested<span class="op">::</span><span class="kw">sdf_nest</span>(cars, hp) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">summarise</span>(<span class="dt">data =</span> <span class="kw">collect_list</span>(data))</code></pre>
@@ -617,7 +617,7 @@ FIGURE 2.6: Horse power vs miles per gallon with predictions
 </div>
 <div id="starting-distributed-r" class="section level3">
 <h3><span class="header-section-number">2.4.6</span> Distributed R</h3>
-<p>For those few cases where a particular functionality is not available in Spark and no extension has been developed, you can consider distributing your own R code across the Spark cluster. This is a powerful tools but comes with additional complexity that you should only use as a last resort option.</p>
+<p>For those few cases where a particular functionality is not available in Spark and no extension has been developed, you can consider distributing your own R code across the Spark cluster. This is a powerful tool but comes with additional complexity that you should only use as a last resort option.</p>
 <p>Suppose that we need to round all the values across all the columns in our dataset, one approach would be running custom R code making use of R’s <code>round()</code> function:</p>
 <pre class="sourceCode r"><code class="sourceCode r">cars <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="kw">round</span>(.x))</code></pre>
 <pre><code># Source: spark&lt;?&gt; [?? x 11]
@@ -634,11 +634,11 @@ FIGURE 2.6: Horse power vs miles per gallon with predictions
  9    23     4   141    95     4     3    23     1     0     4     2
 10    19     6   168   123     4     3    18     1     0     4     4
 # … with more rows</code></pre>
-<p>If you are a profficient R user, it can be quite tempting to use <code>spark_apply()</code> for everything, but please, don’t! <code>spark_apply()</code> was designed for advanced use cases where Spark falls short; instead, you will learn how to do proper data analysis and modeling without having to distribute custom R code across your cluster.</p>
+<p>If you are a proficient R user, it can be quite tempting to use <code>spark_apply()</code> for everything, but please, don’t! <code>spark_apply()</code> was designed for advanced use cases where Spark falls short; instead, you will learn how to do proper data analysis and modeling without having to distribute custom R code across your cluster.</p>
 </div>
 <div id="starting-streaming" class="section level3">
 <h3><span class="header-section-number">2.4.7</span> Streaming</h3>
-<p>While processing large static datasets is the most typical use case for Spark, processing dynamic datasets in real-time is also possible and for some applications, a requirement. You can think of a streaming dataset as a static data source with new data arriving continously, like stock market quotes. Streaming data is usually read from Kafka (an open-source stream-processing software platform) or from distributed storage that receives new data continuously.</p>
+<p>While processing large static datasets is the most typical use case for Spark, processing dynamic datasets in real-time is also possible and for some applications, a requirement. You can think of a streaming dataset as a static data source with new data arriving continuously, like stock market quotes. Streaming data is usually read from Kafka (an open-source stream-processing software platform) or from distributed storage that receives new data continuously.</p>
 <p>To try out streaming, lets first create an <code>input/</code> folder with some data that we will use as the input for this stream:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dir.create</span>(<span class="st">&quot;input&quot;</span>)
 <span class="kw">write.csv</span>(mtcars, <span class="st">&quot;input/cars_1.csv&quot;</span>, <span class="dt">row.names =</span> F)</code></pre>
@@ -663,7 +663,7 @@ FIGURE 2.6: Horse power vs miles per gallon with predictions
 </div>
 <div id="starting-logs" class="section level3">
 <h3><span class="header-section-number">2.4.8</span> Logs</h3>
-<p>Logging is definetely less interesting that real-time data processing; however, it’s a tool you should be familiar with. A log is just a text file where Spark will append information relevant to the execution of tasks in the cluster. For local clusters, we can retrieve all the recent log by running:</p>
+<p>Logging is definitely less interesting that real-time data processing; however, it’s a tool you should be familiar with. A log is just a text file where Spark will append information relevant to the execution of tasks in the cluster. For local clusters, we can retrieve all the recent log by running:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_log</span>(sc)</code></pre>
 <pre><code>18/10/09 19:41:46 INFO Executor: Finished task 0.0 in stage 5.0 (TID 5)...
 18/10/09 19:41:46 INFO TaskSetManager: Finished task 0.0 in stage 5.0...
@@ -684,14 +684,14 @@ FIGURE 2.6: Horse power vs miles per gallon with predictions
 <h2><span class="header-section-number">2.5</span> Disconnecting</h2>
 <p>For local clusters (really, any cluster) once you are done processing data you should disconnect by running:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)</code></pre>
-<p>This will terminate the connection to the cluster as well as the cluster tasks . If multiple Spark connections are active, or if the conneciton instance <code>sc</code> is no longer available, you can also disconnect all your Spark connections by running:</p>
+<p>This will terminate the connection to the cluster as well as the cluster tasks . If multiple Spark connections are active, or if the connection instance <code>sc</code> is no longer available, you can also disconnect all your Spark connections by running:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect_all</span>()</code></pre>
 <p>Notice that exiting R, RStudio or restarting your R session will also cause the Spark connection to terminate, which in turn terminates the Spark cluster and cached data that is not explicitly persisted.</p>
 </div>
 <div id="starting-using-spark-from-rstudio" class="section level2">
 <h2><span class="header-section-number">2.6</span> Using RStudio</h2>
 <p>Since it’s very common to use RStudio with R, <code>sparklyr</code> provides RStudio extensions to help simplify your workflows and increase your productivity while using Spark in RStudio. If you are not familiar with RStudio, take a quick look at the Using RStudio appendix section. Otherwise, there are a couple extensions worth highlighting.</p>
-<p>First, instead of starging a new connections using <code>spark_connect()</code> from RStudio’s R console, you can use the <em>new connection</em> action from the <em>connections pane</em> and then, select the Spark connection which will open the dialog shown in Figure <a href="starting.html#fig:starting-rstudio-new-connection">2.7</a>. You can then customize the versions and connect to Spark which will simply generate the right <code>spark_connect()</code> command and execute this in the R console for you.</p>
+<p>First, instead of starting a new connections using <code>spark_connect()</code> from RStudio’s R console, you can use the <em>new connection</em> action from the <em>connections pane</em> and then, select the Spark connection which will open the dialog shown in Figure <a href="starting.html#fig:starting-rstudio-new-connection">2.7</a>. You can then customize the versions and connect to Spark which will simply generate the right <code>spark_connect()</code> command and execute this in the R console for you.</p>
 <div class="figure" style="text-align: center"><span id="fig:starting-rstudio-new-connection"></span>
 <img src="images/starting-rstudio-new-spark-connection-resized.png" alt="RStudio New Spark Connection" width="1500" />
 <p class="caption">
@@ -723,11 +723,11 @@ FIGURE 2.8: RStudio Connections Pane
 <dd>Disconnects from Spark, a shortcut to <code>spark_disconnect(sc)</code>.
 </dd>
 </dl>
-<p>The rest of this book will use plain R code, it is up to you to execute this code in the R console, RStudio, Jupyter Notebooks or any other tool that support executing R code since, the code provided in this book executes in any R environment.</p>
+<p>The rest of this book will use plain R code, it is up to you to execute this code in the R console, RStudio, Jupyter Notebooks or any other tool that support executing R code since the code provided in this book executes in any R environment.</p>
 </div>
 <div id="starting-resources" class="section level2">
 <h2><span class="header-section-number">2.7</span> Resources</h2>
-<p>While we’ve put significant effort into simplifying the onboarding process, there are many additional resources that can help you troubleshoot particular issues while getting started and, in general, introduce you to the broader Spark and R communities to help you get specific answers, discuss topics and get connected with many users actevely using Spark with R.</p>
+<p>While we’ve put significant effort into simplifying the onboarding process, there are many additional resources that can help you troubleshoot particular issues while getting started and, in general, introduce you to the broader Spark and R communities to help you get specific answers, discuss topics and get connected with many users actively using Spark with R.</p>
 <ul>
 <li><em>Documentation</em>: The documentation site hosted in the <a href="https://spark.rstudio.com">RStudio’s Spark website</a> should be your first stop to learn more about Spark when using R. The documentation is kept up to date with examples, reference functions and many more relevant resources.</li>
 <li><em>Blog</em>: To keep up to date with major <code>sparklyr</code> announcements, you can follow the <a href="https://blog.rstudio.com/tags/sparklyr">RStudio blog</a>.</li>
@@ -740,7 +740,7 @@ FIGURE 2.8: RStudio Connections Pane
 <div id="starting-recap" class="section level2">
 <h2><span class="header-section-number">2.8</span> Recap</h2>
 <p>In this chapter you learned about the prerequisites required to work with Spark, how to connect to Spark using <code>spark_connect()</code>, install a local cluster using <code>spark_install()</code>, load a simple dataset, launch the web interface and display logs using <code>spark_web(sc)</code> and <code>spark_log(sc)</code> respectively, disconnect from RStudio using <code>spark_disconnect()</code> and we closed this chapter presenting the RStudio extensions <code>sparklyr</code> provides.</p>
-<p>It is our hope that this chapter will help anyone interested in learning cluster computing using Spark and R getting started, ready to experiment on your own and ready to tackle actual data analysis and modeling problems which, the next two chapters will introduce you. The next chapter, <a href="analysis.html#analysis">Analysis</a>, will present data analysis as the process to inspect, clean, and transform data with the goal of discovering useful information. Modeling can be considered part of data analysis; however, it deserves it’s own chapter to truly understand and take advantage of the modeling functionality available in Spark.</p>
+<p>It is our hope that this chapter will help anyone interested in learning cluster computing using Spark and R getting started, ready to experiment on your own and ready to tackle actual data analysis and modeling problems which, the next two chapters will introduce you. The next chapter, <a href="analysis.html#analysis">Analysis</a>, will present data analysis as the process of inspecting, cleaning, and transforming data with the goal of discovering useful information. Modeling can be considered part of data analysis; however, it deserves it’s own chapter to truly understand and take advantage of the modeling functionality available in Spark.</p>
 
 </div>
 </div>
