@@ -13,7 +13,7 @@ source("r/render.R")
 
 In previous chapters we've assumed that computation within a Spark cluster works efficiently. While this is true in some cases, it is often necessary to have some knowledge of the operations Spark runs internally to fine tune configuration settings that will make computations run efficiently. This chapter will explain how Spark computes data over large datasets and provide details on how to fine-tune its operations.
 
-For instance, you will learn how to request more compute nodes and increase the amount of memory which, if you remember from the Getting Started chapter, defaults to only 2GB in local instances. You will learn how Spark unifies computation through partioning, shuffling and caching. As mentioned a few chapters back, this is the last chapter describing the internals of Spark; once you complete this chapter, we believe that you will have the intermediate Spark skills necessary to be productive at using Spark.
+For instance, you will learn how to request more compute nodes and increase the amount of memory which, if you remember from the Getting Started chapter, defaults to only 2GB in local instances. You will learn how Spark unifies computation through partitioning, shuffling and caching. As mentioned a few chapters back, this is the last chapter describing the internals of Spark; once you complete this chapter, we believe that you will have the intermediate Spark skills necessary to be productive at using Spark.
 
 In subsequent chapters, Extensions, Distributed R and Streaming, you will learn exciting techniques to deal with specific modeling, scaling and computation problems. However, we must first understand how spark performs internal computations, what pieces we can control, and why.
 
@@ -62,7 +62,7 @@ r2d3::r2d3(
 render_image("images/tuning-spark-overview.png", "Sorting Distributed Data with Apache Spark")
 ```
 
-Notice that while Figure \@ref(fig:tuning-overview) describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, most of these lower level operations are not exposed in `sparklyr`; instead, `sparklyr` makes those operations available through higher level commands provided by data [analysis](#analysis) tools like `dplyr` or `DBI`, [modeling](#modeling), and by using many [extensions](#extensions). For those few cases where you might need to implement lowe-level operations, you can always use the Spark's Scala API through an `sparklyr` [extensions](#extension) or run custom [distributed R](#distributed) code.
+Notice that while Figure \@ref(fig:tuning-overview) describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, most of these lower level operations are not exposed in `sparklyr`; instead, `sparklyr` makes those operations available through higher level commands provided by data [analysis](#analysis) tools like `dplyr` or `DBI`, [modeling](#modeling), and by using many [extensions](#extensions). For those few cases where you might need to implement low-level operations, you can always use the Spark's Scala API through an `sparklyr` [extensions](#extension) or run custom [distributed R](#distributed) code.
 
 In order to effectively tune Spark, we will start by getting familiar with Spark's computation [*graph*](#tuning-graph-visualization) and Spark's event [*timeline*](#tuning-event-timeline). Both are accessible through [Spark's web interface](#starting-spark-web-interface).
 
@@ -70,9 +70,9 @@ In order to effectively tune Spark, we will start by getting familiar with Spark
 
 Spark describes all computation steps using a Directed Acyclic Graph (DAG), which means that all computations in Spark move computation forward without repeating previous steps, this helps Spark optimize computations effectively.
 
-The best way to understand Spark's computation graph for a given operation, sorting for our example, is to open the last *completed query* under the *SQL* tab in [Spark's web interface](#starting-spark-web-interface). Figure \@ref(fig:tuning-graph-sql-render) show the resulting graph for this sorting operation, this graph contains the following operations:
+The best way to understand Spark's computation graph for a given operation, sorting for our example, is to open the last *completed query* under the *SQL* tab in [Spark's web interface](#starting-spark-web-interface). Figure \@ref(fig:tuning-graph-sql-render) shows the resulting graph for this sorting operation, this graph contains the following operations:
 
-- **WholeStageCodegen:* This block describes that the operations it contains were used to generate computer code that was efficiently translated to *byte code**. There is usually a small cost associated with translating operations into byte code, but this is a small cost to pay since then the operations can be execute much faster from Spark. In general, you can ignore this blog and focus on the blocks that it contains.
+- **WholeStageCodegen:* This block describes that the operations it contains were used to generate computer code that was efficiently translated to *byte code**. There is usually a small cost associated with translating operations into byte code, but this is a small cost to pay since then the operations can be executed much faster from Spark. In general, you can ignore this blog and focus on the blocks that it contains.
 - **InMemoryTableScan:** This means that the original dataset `data` was stored in-memory and traversed row-by-row once.
 - **Exchange:** Partitions were exchanged, read shuffled, across executors in your cluster.
 - **Sort:** Once the records arrived at the right executor, they were sorted in this final stage.
@@ -127,7 +127,7 @@ webshot::webshot(
 render_image("images/tuning-spark-event-timeline.png", "Spark event timeline")
 ```
 
-Since our machine is equiped with four CPUs, we can parallelize this computation even further by explicitly repartition data using `sdf_repartition()`:
+Since our machine is equipped with four CPUs, we can parallelize this computation even further by explicitly repartition data using `sdf_repartition()`:
 
 ```{r tuning-timeline-sort-repartition}
 data %>% sdf_repartition(4) %>% arrange(id) %>% collect()
@@ -150,7 +150,7 @@ webshot::webshot(
 render_image("images/tuning-spark-event-timeline-repartition.png", "Spark Event Timeline with Additional Partitions")
 ```
 
-Figure \@ref(fig:tuning-timeline-repartition) now shows four execution lanes with most time spent under "Executor Computing Time", which shows us that this particular operation is making better use of our compute resources. When working with clusters, requesting more compute nodes from your cluster should shorten computation time. In contrast, for timelines that show significant time spent shuffling, requesting more compute nodes might not shorten time and might actualy makes everything slower. There is no concrete set of rules to follow to optimize a stage; however, as you gain experience understanding this timeline over multiple operations -- you will develop insights as to how to properly optimize Spark operations.
+Figure \@ref(fig:tuning-timeline-repartition) now shows four execution lanes with most time spent under "Executor Computing Time", which shows us that this particular operation is making better use of our compute resources. When working with clusters, requesting more compute nodes from your cluster should shorten computation time. In contrast, for timelines that show significant time spent shuffling, requesting more compute nodes might not shorten time and might actually makes everything slower. There is no concrete set of rules to follow to optimize a stage; however, as you gain experience understanding this timeline over multiple operations -- you will develop insights as to how to properly optimize Spark operations.
 
 ## Configuring {#tuning-configuring}
 
@@ -211,12 +211,12 @@ The following subsections present extensive lists of all the available settings.
 
 ### Connect Settings {#connect-settings}
 
-The following parameters can be used with `spark_connect()`, they configure high-level settings that define the connection method, Spark's intallation path and the version of Spark to use.
+The following parameters can be used with `spark_connect()`, they configure high-level settings that define the connection method, Spark's installation path and the version of Spark to use.
 
 | name            | value                                                       |
 |-----------------|-------------------------------------------------------------|
 | master          | Spark cluster url to connect to. Use "local" to connect to a local instance of Spark installed via `spark_install()`. |
-| spark_home      | The path to a Spark installation. Defaults to the path provided by the SPARK_HOME environment variable. If SPARK_HOME is defined, it will be always be used unless the version parameter is specified to force the use of a locally installed version. |
+| spark_home      | The path to a Spark installation. Defaults to the path provided by the SPARK_HOME environment variable. If SPARK_HOME is defined, it will always be used unless the version parameter is specified to force the use of a locally installed version. |
 | method          | The method used to connect to Spark. Default connection method is "shell" to connect using spark-submit, use "livy" to perform remote connections using HTTP, or "databricks" when using a Databricks clusters.                |
 | app_name        | The application name to be used while running in the Spark cluster.                    |
 | version         | The version of Spark to use. Only applicable to "local" Spark connections.             |
@@ -284,7 +284,7 @@ saveRDS(data.frame(name = names(settings), value = unlist(unname(cleaned))), "da
 knitr::kable(readRDS("data/tuning-runtime-config.rds"))
 ```
 
-However, there are many more configuration settings available in Spark as described in the "Spark Configuration" [@tuning-spark-configuration] guide. It is not in the scope of this book to describe them all so, if possible, take some time to identify the ones that might be of interest to your paritcular use cases.
+However, there are many more configuration settings available in Spark as described in the "Spark Configuration" [@tuning-spark-configuration] guide. It is not in the scope of this book to describe them all so, if possible, take some time to identify the ones that might be of interest to your particular use cases.
 
 ### sparklyr Settings
 
@@ -522,4 +522,4 @@ You can also specify an alternate config file name or location by setting the `f
 
 This chapter provided a broad overview of Spark internals and a detailed configuration settings to help you speed up computation and enable high computation loads. It provided the foundations to understand bottlenecks and guidance on common configuration considerations; however, fine-tuning Spark is a broad topic that would require many more chapters to cover extensively. Therefore, while troubleshooting Spark's performance and scalability, searching the web and consulting online communities it is often necessary to fine-tune your particular environment.
 
-The next chapter, [Extensions](#extensions), introduces the ecosystem of Spark extensions available in R. Most extensions are highly-specialized, but they will prove to be extremly useful in specific cases and readers with particular needs. For instance, they can process nested data, perform graph analysis or use different modeling libraries like `rsparkling` from H20. Not only that, but the next few chapters introduce many advanced data analysis and modeling topics that are required to master large-scale computing in R.
+The next chapter, [Extensions](#extensions), introduces the ecosystem of Spark extensions available in R. Most extensions are highly-specialized, but they will prove to be extremely useful in specific cases and readers with particular needs. For instance, they can process nested data, perform graph analysis or use different modeling libraries like `rsparkling` from H20. Not only that, but the next few chapters introduce many advanced data analysis and modeling topics that are required to master large-scale computing in R.
