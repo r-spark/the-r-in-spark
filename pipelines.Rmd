@@ -290,7 +290,7 @@ Now that we have seen the pipelines API in action, let's talk more formally abou
 
 ## Operating Modes
 
-By now, you have likely noticed that the pipeline stage functions, such as `ft_string_indexer()` and `ml_logistic_regression()` return different types of objects depending on the first argument passed to them. The full pattern is:
+By now, you have likely noticed that the pipeline stage functions, such as `ft_string_indexer()` and `ml_logistic_regression()`, return different types of objects depending on the first argument passed to them. The full pattern is:
 
 | First argument                | Returns                         | Example                                          |
 |-------------------------------|---------------------------------|--------------------------------------------------|
@@ -299,7 +299,7 @@ By now, you have likely noticed that the pipeline stage functions, such as `ft_s
 | Data frame, without formula   | Data frame                      | `ft_string_indexer(iris, "Species", "indexed")`  |
 | Data frame, with formula      | sparklyr ML model object        | `ml_logistic_regression(iris, Species ~ .)`      |
 
-These functions are implemented using S3[^1], which is the most popular objected oriented programming paradigm provided by R. For our purposes, it suffices to know that the behavior of an `ml_` or `ft_` function is dictated by the class of the first argument provided. This allows us to provide a wide range of features without to introduce additional function names. The table above (TODO: reference) summarizes the following:
+These functions are implemented using S3[^1], which is the most popular object oriented programming paradigm provided by R. For our purposes, it suffices to know that the behavior of an `ml_` or `ft_` function is dictated by the class of the first argument provided. This allows us to provide a wide range of features without introducing additional function names. We can now summarize the behavior of these functions:
 
 - If a Spark connection is provided, the function returns a transformer or estimator object, which can be utilized directly using `ml_fit()` or `ml_transform()` or be included in a pipeline.
 - If a pipeline is provided, the function returns a pipeline object with the stage appended to it.
@@ -314,7 +314,7 @@ With the basics of pipelines down, we are now ready to discuss the collaboration
 
 ## Interoperability
 
-One of the most powerful aspects of pipelines is that they can be serialized to disk and are fully interoperable with the other Spark APIs, such as Python and Scala. This means they can be easily shared among users of Spark working in different languages, which may include other data scientists, data engineers, and delopyment engineers. To save a pipeline model, call `ml_save()` and provide a path.
+One of the most powerful aspects of pipelines is that they can be serialized to disk and are fully interoperable with the other Spark APIs, such as Python and Scala. This means they can be easily shared among users of Spark working in different languages, which may include other data scientists, data engineers, and deployment engineers. To save a pipeline model, call `ml_save()` and provide a path.
 
 ```{r}
 model_dir <- file.path("spark_model")
@@ -426,13 +426,13 @@ That way, we will start from a brand new new environment; which is also expected
 
 What we have just demonstrated bears emphasizing: by collaborating within the framework of ML pipelines, we reduce friction among different personas in a data science team. In particular, we can cut down on the time from modeling to deployment.
 
-In many cases, a data science project does not end with just a slide deck with insights and recommendations. Instead, the business problem at hand may require scoring new data points on a schedule or on-demand in real time. For example, a bank might want to evaluate its mortgage portfolio risk nightly, or to provide instant decisions on credit card applications. This process of taking a model and turning it into a service that others can consume is usually referred to as *deployment* or *productionization*. Historically, there was a large gap between the analyst who built the model and the engineer who deployed it: the former might work in R and develop extensive documentation on the scoring mechanism, so the latter can re-implement the model in C++ or Java. This practice, which may easily take months in some organizations, is less prevalent today, but is almost always unnecessary in Spark ML workflows.
+In many cases, a data science project does not end with just a slide deck with insights and recommendations. Instead, the business problem at hand may require scoring new data points on a schedule or on-demand in real time. For example, a bank might want to evaluate its mortgage portfolio risk nightly, or to provide instant decisions on credit card applications. This process of taking a model and turning it into a service that others can consume is usually referred to as *deployment* or *productionisation*. Historically, there was a large gap between the analyst who built the model and the engineer who deployed it: the former might work in R and develop extensive documentation on the scoring mechanism, so the latter can re-implement the model in C++ or Java. This practice, which may easily take months in some organizations, is less prevalent today, but is almost always unnecessary in Spark ML workflows.
 
 The nightly portfolio risk and credit application scoring examples we mention above represent two modes of ML deployment known as *batch* and *real-time*. Loosely, batch processing implies processing many records at the same time and that execution time is not important as long it is reasonable (often on the scale of minutes to hours.) On the other hand, real-time processing implies scoring one or a few records at a time but the latency is crucial (on the scale of <1 second.) We will now see how we can take our OKCupid pipeline model to "production."
 
 ### Batch Scoring
 
-For both the batch and real-time cases, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The plumber[^1] R package enables us to do this very easily by annotating our prediction function.
+For both scoring methods, batch and real-time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The plumber[^1] R package enables us to do this very easily by annotating our prediction function.
 
 [^1]: https://www.rplumber.io/
 
@@ -504,7 +504,7 @@ Since `mleap` is a sparklyr extension and an R package, first we need to install
 install.packages("mleap")
 ```
 
-It then must be loaded when `spark_connect()` is called; so lets restart your R session, establish a new Spark connection[^4], and load the pipeline model that we previously saved.
+It then must be loaded when `spark_connect()` is called; so let's restart your R session, establish a new Spark connection[^4], and load the pipeline model that we previously saved.
 
 ```{r}
 library(sparklyr)
@@ -590,8 +590,8 @@ If we were to time this operation, we will see that the service now returns pred
 
 ## Recap
 
-In this chapter, we discussede Spark Pipelines, which is the engine behind the modeling functions introduced in the previous chapter. We learned how to tidy up our predictive modeling workflows by organizing data processing and modeling algorithms into pipelines. You learned that pipelines also facilitate collaboration among members of a multilingual data science and engineering team by sharing a language agnostic serialization format -- you can export a Spark pipeline from R and let others reload your pipeline into Spark using Python or Scala, which allows them to collaborate without changing their language we choice.
+In this chapter, we discussed Spark Pipelines, which is the engine behind the modeling functions introduced in the previous chapter. We learned how to tidy up our predictive modeling workflows by organizing data processing and modeling algorithms into pipelines. You learned that pipelines also facilitate collaboration among members of a multilingual data science and engineering team by sharing a language agnostic serialization format -- you can export a Spark pipeline from R and let others reload your pipeline into Spark using Python or Scala, which allows them to collaborate without changing their language of choice.
 
-You also learned how to deploy pipelines using `mleap`, a Java runtime which provides another path to productionize Spark models -- you can export a pipeline and integrate it to Java-enabled environments without requiring the targeet environment to support Spark nor R.
+You also learned how to deploy pipelines using `mleap`, a Java runtime which provides another path to productionize Spark models -- you can export a pipeline and integrate it to Java-enabled environments without requiring the target environment to support Spark nor R.
 
-You probably noticed that some algorithms, specially the unsupervised learning kind, where slow even for the OKCupid dataset which can be loaded into memory. If we had access to a proper Spark cluster, we could spend more time modeling and less time waiting! Not only that, but we could use cluster resources to run broader hyperparameter-tuning jobs and process larger datasets. To get there, the next chapter will present what exactly a computing cluster is and explain you various options you can consider; like building your own, or using cloud clusters on-demand.
+You probably noticed that some algorithms, especially the unsupervised learning kind, where slow even for the OKCupid dataset which can be loaded into memory. If we had access to a proper Spark cluster, we could spend more time modeling and less time waiting! Not only that, but we could use cluster resources to run broader hyperparameter-tuning jobs and process large-datasets. To get there, the next chapter will present what exactly a computing cluster is and explain you various options you can consider; like building your own, or using cloud clusters on-demand.
