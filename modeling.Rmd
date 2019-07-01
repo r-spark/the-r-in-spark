@@ -18,9 +18,9 @@ library(dbplot)
 
 In the previous chapter, Analysis, you learn how to scale up data analysis to large-datasets using Spark. In this chapter, we will detail the steps required to build prediction models in Spark. We'll explore MLlib, the component of Spark that allows you to write high level code to perform predictive modeling on distributed data and use data wrangling in the context of feature engineering and exploratory data analysis.
 
-We will start this chapter by introducing modeling in the context of Spark and the dataset you will use throughout the chapter. We will then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We will then move on to an unsupervised topic modeling example using unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis. There is also many models available in Spark that won't be covered in this chapter, but by the end of the chapter, you will have the right tools to experiment with additional ones on your own.
+We will start this chapter by introducing modeling in the context of Spark and the dataset you will use throughout the chapter. We will then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We will then move on to an unsupervised topic modeling example using unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis. There are also many other models available in Spark that won't be covered in this chapter, but by the end of the chapter, you will have the right tools to experiment with additional ones on your own.
 
-While predicting datasets manually is often a reasonable approach, by manually we mean, importing a dataset into Spark and using a fitted model to enrich or predict values; it does bring up the queestion -- could we automate this process into systems that just work? Like the original example about automatically classifying email as spam, without having to manually analyze and model specific datasets, the next chapter, Pipelines; will present the tools to fully automate a data analysis and modeling pipeline. To get there, we need to first understand how to train models, "by-hand". 
+While predicting datasets manually is often a reasonable approach, by manually we mean, importing a dataset into Spark and using the fitted model to enrich or predict values; it does bring up the question -- could we automate this process into systems that just work? Like the original example about automatically classifying email as spam, without having to manually analyze and model specific datasets, the next chapter, Pipelines; presents the tools to automate data analysis and modeling with pipelines. To get there, we need to first understand how to train models, “by-hand”.
 
 ## Overview
 
@@ -30,9 +30,9 @@ Take a moment to glance at the long list of MLlib Functions included in the Appe
 
 As you can see, Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with "R for Data Science" [@intro-r-for-data-science] and "Feature Engineering and Selection: A Practical Approach for Predictive Models" [@kuhn-fes], from which we adopted (sometimes verbatim) for examples and visualizations in this chapter.
 
-Instead, this chapter focuses on predictive modeling, since Spark aims to enable machine learning, as opposed to statistical inference. Machine learning is often more concerned about forecasting the future rather than inferring the process by which our data is generated [^2] which is then used to create automated systems. Machine learning can be categorized into supervised learning (predictive modeling) and unsupervised learning. In supervised learning, we try to learn a function that will map from "X" to "Y", from a dataset of "(x, y)" examples. In unsupervised learning, we just have "X" and not the "Y" labels, so instead we try to learn something about the structure of "X". Some practical use cases for supervised learning include forecasting tomorrow's weather, determining whether a credit card transaction is fradulent, and coming up with a price for your car insurance policy. With unsupervised learning, examples include automated grouping of photos of individuals, segmenting customers based on their purchase history, and clustering of documents.
+Instead, this chapter focuses on predictive modeling, since Spark aims to enable machine learning, as opposed to statistical inference. Machine learning is often more concerned about forecasting the future rather than inferring the process by which our data is generated [^2] which is then used to create automated systems. Machine learning can be categorized into supervised learning (predictive modeling) and unsupervised learning. In supervised learning, we try to learn a function that will map from "X" to "Y", from a dataset of "(x, y)" examples. In unsupervised learning, we just have "X" and not the "Y" labels, so instead we try to learn something about the structure of "X". Some practical use cases for supervised learning include forecasting tomorrow's weather, determining whether a credit card transaction is fraudulent, and coming up with a price for your car insurance policy. With unsupervised learning, examples include automated grouping of photos of individuals, segmenting customers based on their purchase history, and clustering of documents.
 
-The ML interface in sparklyr has been designed to minimize the cognitive effort for moving from a local, in-memory, native R workflow to the cluster, and back. While the Spark ecosystem is very rich, there is still a tremendous number of packages from CRAN, with some implementing functionality that you may require for a project. Also, you may want to leverage your skills and experience working in R to maintain productivity. What we learned in the Analysis section also applis here --- it is important to keep track of where you are performing computations, and move between the cluster and your R session as appropriate.
+The ML interface in sparklyr has been designed to minimize the cognitive effort for moving from a local, in-memory, native R workflow to the cluster, and back. While the Spark ecosystem is very rich, there is still a tremendous number of packages from CRAN, with some implementing functionality that you may require for a project. Also, you may want to leverage your skills and experience working in R to maintain productivity. What we learned in the Analysis section also applies here --- it is important to keep track of where you are performing computations, and move between the cluster and your R session as appropriate.
 
 [^2]: We acknowledge that the terms here may mean different things to different people, and that there is a continuum between the two approaches, however they are defined.
 
@@ -50,7 +50,7 @@ download.file(
 unzip("okcupid.zip", exdir = "data")
 ```
 
-**Note:**  The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the ML algorithm. For example, you may want to use the ranger package instead of `ml_random_forest_classifier()`.
+**Note:**  The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the modeling algorithm. For example, you may want to use the ranger package instead of `ml_random_forest_classifier()`.
 
 In addition, to follow along, you will need to install a few additional packages:
 
@@ -367,7 +367,7 @@ contingency_tbl %>%
 render_image("images/modeling-okc-mosaic.png", "Mosaic plot of drug and alcohol use")
 ```
 
-To further explore the relationship between this two variables, we can perform correspondence analysis ([@greenacre2017correspondence]) using the FactoMineR package. This technique enables us to summarize the relationship between the high dimensional factor levels by mapping each level to a point on the plane. We first obtain the mapping using `FactoMineR::CA()` as follows:
+To further explore the relationship between these two variables, we can perform correspondence analysis ([@greenacre2017correspondence]) using the FactoMineR package. This technique enables us to summarize the relationship between the high dimensional factor levels by mapping each level to a point on the plane. We first obtain the mapping using `FactoMineR::CA()` as follows:
 
 ```r
 dd_obj <- contingency_tbl %>% 
@@ -512,7 +512,7 @@ In Figure \@ref(fig:scaled-age-distribution), we see that the scaled age variabl
 render_image("images/modeling-okc-histogram-scaled-age.png")
 ```
 
-Since some of the profile feature are multiple-select, in other words, a person can choose to associate with multiple options for a variable, we need to process them before we can build meaningful models. If we take a look at the ethnicity column, for example, we see that there are many different combinations:
+Since some of the profile features are multiple-select, in other words, a person can choose to associate with multiple options for a variable, we need to process them before we can build meaningful models. If we take a look at the ethnicity column, for example, we see that there are many different combinations:
 
 ```{r}
 okc_train %>%
@@ -592,7 +592,7 @@ We can see the distribution of the `essay_length` variable in Figure \@ref(fig:e
 render_image("images/modeling-okc-histogram-essay-length.png", "Distribution of essay length")
 ```
 
-We will be using this dataset in the Pipelines chapter, so lets save it first as Parquet -- an efficient file format ideal for numeric data.
+We will be using this dataset in the Pipelines chapter, so let's save it first as Parquet -- an efficient file format ideal for numeric data.
 
 ```{r}
 spark_write_parquet(okc_train, "data/okc-train.parquet")
@@ -934,13 +934,13 @@ $ essay9 <chr> "you want to be swept off your feet!<br />\nyou are …
 
 Just from this output, we see that
 
-- The text contain HTML tags,
+- The text contains HTML tags,
 - The text contains the newline `\n` character, and
 - There are missing values in the data.
 
 The HTML tags and special characters pollute the data since they are not directly input by the user and do not provide interesting information. Similarly, since we have encoded missing character fields with the `"missing"` string, we will need to remove it. (Note that by doing this we are also removing instances of the word "missing" written by the users, but the information lost from this removal is likely to be small.)
 
-As you analyze your own text data, you will quickly come across and become familiar with the peculiarities of the specific dataset. Preoprocessing text data, like with tabular numerical data, is an iterative process, and after a few tries we have the following transformations:
+As you analyze your own text data, you will quickly come across and become familiar with the peculiarities of the specific dataset. Preprocessing text data, like with tabular numerical data, is an iterative process, and after a few tries we have the following transformations:
 
 ```{r}
 essays <- essays %>%
@@ -999,7 +999,7 @@ saveRDS(betas, "data/modeling-okc-betas-1.rds")
 # … with 256,982 more rows
 ```
 
-We can then visualize this output by looking at word probabilities by topic. In Figure \@ref(fig:betas-topics) and Figure \@ref(fig:betas-topics-2) we show the results at 1 iteration and 100 iterations. The code that generates Figure \@ref(fig:betas-topics) follows; in order to generate Figure \@ref(fig:betas-topics-2), you would need to set `max_iter = 100` when running `ml_lda()`, but beware that this can take a really long time in a single machine -- this is a the kind of big-compute problem that a propeer Spark cluster would be able to easily tackle!
+We can then visualize this output by looking at word probabilities by topic. In Figure \@ref(fig:betas-topics) and Figure \@ref(fig:betas-topics-2) we show the results at 1 iteration and 100 iterations. The code that generates Figure \@ref(fig:betas-topics) follows; in order to generate Figure \@ref(fig:betas-topics-2), you would need to set `max_iter = 100` when running `ml_lda()`, but beware that this can take a really long time in a single machine -- this is the kind of big-compute problem that a proper Spark cluster would be able to easily tackle!
 
 ```r
 betas %>%
@@ -1065,8 +1065,8 @@ spark_disconnect(sc)
 
 ## Recap
 
-In this chapter, we cover the basics of building preditive models in Spark with R by presenting the topics of EDA, feature engineering and building supervised models, where we explored using logistic regression and neural networks -- just to pick a few from dozens of models available models available in Spark through MLlib.
+In this chapter, we cover the basics of building predictive models in Spark with R by presenting the topics of EDA, feature engineering and building supervised models, where we explored using logistic regression and neural networks -- just to pick a few from dozens of models available models available in Spark through MLlib.
 
-We then moved to learn about about unsuperevised learning to process raw text, where you were able to create a topic model that automatically grouped the profiles into six categories. Interestingly, we found out that building the topic model can take a significant amount of time using a single machine, almost perfect timing to introduce full-size computing clusters! BUt hold on to that thought, we first need to consider quite relevant before getting there.
+We then moved to learn about unsupervised learning to process raw text, where you were able to create a topic model that automatically grouped the profiles into six categories. Interestingly, we found out that building the topic model can take a significant amount of time using a single machine, almost perfect timing to introduce full-size computing clusters! BUt hold on to that thought, we first need to consider quite relevant before getting there.
 
-As we mentioned when introducing this chapter, enphasis was placee on predictive modeling -- Spark can help with data science at scale, but also in productionizing data science workflows into automated processes, known by many as machine learning. The next chapter, Pipelines, will present the tools we will need to take our predictive models, and even our entire training workflows, into automated environments that can run continuously or be exported and consumed in web applications, mobile applications and so on!
+As we mentioned when introducing this chapter, emphasis was placed on predictive modeling -- Spark can help with data science at scale, but also in productionizing data science workflows into automated processes, known by many as machine learning. The next chapter, Pipelines, will present the tools we will need to take our predictive models, and even our entire training workflows, into automated environments that can run continuously or be exported and consumed in web applications, mobile applications and so on!
