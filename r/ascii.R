@@ -4,7 +4,7 @@ ascii_add_footnotes <- function(groups, books_bib, remaining) {
 
   paste(
     "footnote:[",
-    format(books_bib[[book_name]]),
+    format(gsub("\n", " ", books_bib[[book_name]])),
     "]",
     sep = ""
   )
