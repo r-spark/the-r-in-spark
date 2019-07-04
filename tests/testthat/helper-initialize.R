@@ -14,6 +14,10 @@ for (rmd in dir("sources", pattern = "*.Rmd", full.names = TRUE)) {
 
   if (length(comments) > 0) {
     start <- comments[[1]]
-    writeLines(lines[start:length(lines)], rmd)
+    writeLines(c(
+      "```{r include=FALSE}",
+      "source(\"r/render.R\")",
+      "```",
+      lines[start:length(lines)]), rmd)
   }
 }
