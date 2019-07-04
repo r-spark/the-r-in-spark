@@ -439,9 +439,7 @@ render_nomnoml("
 
 While a decision tree representation is quite easy to understand and to interpret, finding out the decisions in the tree requires mathematical techniques like gradient descent to find a local minimum. Gradient descent takes steps proportional to the negative of the gradient of the function at the current point. The gradient is represented by $\nabla$, the learning rate by $\gamma$ and one simply starts from a given state $a_n$ and compute the next iteration $a_{n+1}$ by simply following the direction of the gradient:
 
-$$
-a_{n+1} = a_n - \gamma \nabla F(a_n)
-$$
+$a_{n+1} = a_n - \gamma \nabla F(a_n)$
 
 XGBoost is an open-source software library which provides a gradient boosting framework. It aims to provide a scalable, portable and distributed gradient boosting for training gradient-boosted decision trees (GBDT) and gradient-boosted regression trees (GBDT). Gradient-boosted means xgboost uses gradient descent and boostrin, which is a technique that chooses each predictor sequentially.
 
@@ -521,15 +519,9 @@ XGBoost became well known in the competition circles after its use in the winnin
 
 ## Deep Learning
 
-A perceptron is a mathematical model introduced by Rosenblatt [@extensions-rosenblatt-perceptron] who developed it as a theory for a hypothetical nervous system. The perceptron tries to mimic a neuron by mapping stimuli to numeric inputs that are weighted into a threshold function that activates only when enough stimuli is present, mathematically:
+A perceptron is a mathematical model introduced by Rosenblatt [@extensions-rosenblatt-perceptron] who developed it as a theory for a hypothetical nervous system. The perceptron maps stimuli to numeric inputs that are weighted into a threshold function that activates only when enough stimuli is present, mathematically:
 
-$$
-f(x) =
-\begin{cases}
-1 & \sum_{i=1}^m w_i x_i + b > 0\\
-0 & \text{otherwise}
-\end{cases}
-$$
+$f(x) = \begin{cases} 1 & \sum_{i=1}^m w_i x_i + b > 0\\ 0 & \text{otherwise} \end{cases}$
 
 Minsky found out that a single perceptron can only classify datasets that are linearly separable; however, he also presented in his perceptrons book [@extensions-minsky-perceptrons] that layering perceptrons would bring additional classification capabilities, the original diagram showcasing a multi-layered perceptron is presented in Figure \@ref(fig:extensions-minsky-layered).
 
@@ -537,7 +529,7 @@ Minsky found out that a single perceptron can only classify datasets that are li
 render_image("images/extensions-minsky-multi-layers.png")
 ```
 
-Using Spark we can create a multi-layer perceptron classifier with `ml_multilayer_perceptron_classifier()` to classify and predict over large datasets. This technique was introduced by Hinton [@extensions-hinton-layered] and like XGBoost, it also makes use of gradient descent. Let's try it out, why we are on it, let's also install `sparkxgb` which we are also about to introduce.
+Using Spark we can create a multi-layer perceptron classifier with `ml_multilayer_perceptron_classifier()` and gradient descent to classify and predict over large datasets. Gradient descent was introduced to layered perceptrons by Geoff Hinton [@extensions-hinton-layered] and like XGBoost, it also makes use of gradient descent. Let's try it out, why we are on it, let's also install `sparktf` which we are also about to introduce.
 
 ```{r}
 install.packages("sparktf")
@@ -552,7 +544,8 @@ attrition <- copy_to(sc, rsample::attrition)
 nn_model <- ml_multilayer_perceptron_classifier(
   attrition,
   Attrition ~ Age + DailyRate + DistanceFromHome + MonthlyIncome,
-  layers = c(4, 3, 2))
+  layers = c(4, 3, 2),
+  solver = "gd")
 
 nn_model %>%
   ml_predict(attrition) %>%
