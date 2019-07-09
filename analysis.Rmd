@@ -141,7 +141,7 @@ Rather than importing all data into Spark, you can also request Spark to access 
 
 Let's prime the session with some data by importing `mtcars` into Spark using `copy_to()`; you can also import data from distributed files in many different file formats, which you'll learn in the Data chapter.
 
-```{r analysis-copy-to, eval = FALSE}
+```{r analysis-copy-to}
 cars <- copy_to(sc, mtcars)
 ```
 
@@ -184,7 +184,7 @@ FROM `mtcars`
 ```
 As it is evident, `dplyr` is much more concise than SQL; but rest assured, you will not have to see nor understand SQL when using `dplyr`. Your focus can remain on obtaining insights from the data, as opposed to figuring out how to express a given set of transformation in SQL. Here is another example that groups the cars dataset by "transmission" type.
 
-```{r analysis-group-summarize, eval = FALSE}
+```{r analysis-group-summarize}
 cars %>%
   mutate(transmission = ifelse(am == 0, "automatic", "manual")) %>%
   group_by(transmission) %>%
@@ -264,7 +264,7 @@ We have included a comprehensive list of all the Hive functions in the Appendix 
 
 A very common exploration technique is to calculate and visualize correlations, which we often calculate to find out what kind of statistical relationship exists between paired sets of variables. Spark provides functions to calculate correlations across the entire data set and returns the results to R as a data frame object. 
 
-```{r analysis-corrr-cars, eval = FALSE}
+```{r analysis-corrr-cars}
 ml_corr(cars)
 ```
 
@@ -289,7 +289,7 @@ ml_corr(cars)
 
 The `corrr` R package specializes in correlations.  It contains friendly functions to prepare and visualize the results.  Included inside the package is a back-end for `sparklyr` table objects, so it will not return an error if a non local table is passed to it.  In the background, the `correlate()` function runs `ml_corr()`, so there is no need to collect any data into R prior running the command.
 
-```{r analysis-corrr-pairwise, eval = FALSE}
+```{r analysis-corrr-pairwise}
 library(corrr)
 correlate(cars, use = "pairwise.complete.obs", method = "pearson") 
 ```
@@ -406,7 +406,7 @@ car_group <- cars %>%
 
 In this example, now that the data has been pre-aggregated and collected into R, only three records are passed to the plotting function.  Figure \@ref(fig:analysis-viz1) shows the resulting plot.
 
-```{r analysis-ggplot2-groups, eval = FALSE}
+```{r analysis-ggplot2-groups}
 ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
   geom_col(fill = "#999999") + coord_flip()
 ```
@@ -429,7 +429,7 @@ The `dbplot` package provides helper functions for plotting with remote data.  T
 
 The `dbplot_histogram()` function makes Spark calculate the bins and the count per bin and outputs a `ggplot` object which can be further refined by adding more steps to the plot object. `dbplot_histogram()` also accepts a `binwidth` argument to control the range used to compute the bins, the resulting plot is in Figure \@ref(fig:analysis-visualizations-histogram).
 
-```{r  analysis-dbplot-simple, eval = FALSE}
+```{r  analysis-dbplot-simple}
 library(dbplot)
 
 cars %>%
