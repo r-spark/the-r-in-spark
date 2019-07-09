@@ -100,7 +100,7 @@ In order to practice as you learn, the rest of this chapter's code will use a si
 
 This chapter will make use of packages that you might not have installed; so first, make sure the following packages are installed by running:
 
-```{r}
+```{r eval=FALSE}
 install.packages("ggplot2")
 install.packages("corrr")
 install.packages("dbplot")
@@ -141,7 +141,7 @@ Rather than importing all data into Spark, you can also request Spark to access 
 
 Let's prime the session with some data by importing `mtcars` into Spark using `copy_to()`; you can also import data from distributed files in many different file formats, which you'll learn in the Data chapter.
 
-```{r, eval = FALSE}
+```{r analysis-copy-to, eval = FALSE}
 cars <- copy_to(sc, mtcars)
 ```
 
@@ -161,7 +161,7 @@ The main goal is to write the data transformations using R syntax as much as pos
 
 In the R environment, *cars* can be treated as if it is a local data frame, so `dplyr` verbs can be used, and in a piped fashion using `%>%`. For instance, we can find out the mean of all columns as with `summarise_all()`:
 
-```{r, eval = FALSE}
+```{r analysis-summarize-all, eval = FALSE}
 summarize_all(cars, mean)
 ```
 ```
@@ -173,7 +173,7 @@ summarize_all(cars, mean)
 
 While this code is exactly the same as the code you would run when using `dplyr` without Spark, a lot is happening under the hood! The data is NOT being imported into R; instead,`dplyr` converts this task into SQL statements that are then sent to Spark. The `show_query()` command makes it possible to peer into the SQL statement that `sparklyr` and `dplyr` created and sent to Spark. We can also use this time to introduce the pipe (`%>%`) operator, a custom operator from the `magrittr` package that takes pipes a computation into the first argument of the next function, making your data analysis much easier to read.
 
-```{r, eval = FALSE}
+```{r analysis-summarize-show-query, eval = FALSE}
 summarize_all(cars, mean) %>%
   show_query()
 ```
@@ -184,7 +184,7 @@ FROM `mtcars`
 ```
 As it is evident, `dplyr` is much more concise than SQL; but rest assured, you will not have to see nor understand SQL when using `dplyr`. Your focus can remain on obtaining insights from the data, as opposed to figuring out how to express a given set of transformation in SQL. Here is another example that groups the cars dataset by "transmission" type.
 
-```{r, eval = FALSE}
+```{r analysis-group-summarize, eval = FALSE}
 cars %>%
   mutate(transmission = ifelse(am == 0, "automatic", "manual")) %>%
   group_by(transmission) %>%
@@ -208,7 +208,7 @@ Spark SQL is based on Hive's SQL conventions and functions and it is possible to
 
 For instance, the *percentile* function returns the exact percentile of a column in a group. The function expects a column name, and either a single percentile value, or an array of multiple percentile values. We can use this Spark SQL function from `dplyr` as follows:
 
-```{r}
+```{r analysis-percentile}
 summarise(cars, mpg_percentile = percentile(mpg, 0.25))
 ```
 
@@ -221,7 +221,7 @@ summarise(cars, mpg_percentile = percentile(mpg, 0.25))
 
 There is no `percentile()` function in R, so `dplyr` passes the that portion of the code, "as-is", to the resulting SQL query.
 
-```{r}
+```{r analysis-percentile-query}
 summarise(cars, mpg_percentile = percentile(mpg, 0.25)) %>%
   show_query()
 ```
@@ -233,7 +233,7 @@ FROM `mtcars_remote`
 
 To pass multiple values to *percentile*, we can call another Hive function called *array*. In this case, *array* would work similarly to R's `list()` function.  We can pass multiple values separated by commas. The output from Spark is an array variable, which is imported into R as a list variable column.
 
-```{r}
+```{r analysis-percentile-rename}
 summarise(cars, mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75)))
 ```
 ```
@@ -245,7 +245,7 @@ summarise(cars, mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75)))
 
 The *explode* function can be used to separate the Spark's array value results into their own record.  To do this, use *explode* within a `mutate()` command, and pass the variable containing the results of the percentile operation. 
 
-```{r}
+```{r analysis-percentile-mutate}
 summarise(cars, mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75))) %>%
   mutate(mpg_percentile = explode(mpg_percentile))
 ```
@@ -264,7 +264,7 @@ We have included a comprehensive list of all the Hive functions in the Appendix 
 
 A very common exploration technique is to calculate and visualize correlations, which we often calculate to find out what kind of statistical relationship exists between paired sets of variables. Spark provides functions to calculate correlations across the entire data set and returns the results to R as a data frame object. 
 
-```{r, eval = FALSE}
+```{r analysis-corrr-cars, eval = FALSE}
 ml_corr(cars)
 ```
 
@@ -289,7 +289,7 @@ ml_corr(cars)
 
 The `corrr` R package specializes in correlations.  It contains friendly functions to prepare and visualize the results.  Included inside the package is a back-end for `sparklyr` table objects, so it will not return an error if a non local table is passed to it.  In the background, the `correlate()` function runs `ml_corr()`, so there is no need to collect any data into R prior running the command.
 
-```{r, eval = FALSE}
+```{r analysis-corrr-pairwise, eval = FALSE}
 library(corrr)
 correlate(cars, use = "pairwise.complete.obs", method = "pearson") 
 ```
@@ -317,7 +317,7 @@ We can pipe the results to other `corrr` functions. For example, the `shave()` f
 
 Additionally, as shown in Figure \@ref(fig:analysis-corrr-rplot), the results can be easily visualized using the `rplot()` function. 
 
-```{r}
+```{r analysis-corrr-show}
 correlate(cars, use = "pairwise.complete.obs", method = "pearson") %>%
   shave() %>%
   rplot()
@@ -379,7 +379,7 @@ Using this conceptual model, let's apply this when using `ggplot2`.
 
 To create a bar plot using `ggplot2`, we simply call a function:
 
-```{r, eval = TRUE, out.width='500pt', out.height='400pt', fig.cap='Plotting inside R', fig.align = 'center'}
+```{r analysis-ggplot2-simple, eval = TRUE, out.width='500pt', out.height='400pt', fig.cap='Plotting inside R', fig.align = 'center'}
 library(ggplot2)
 ggplot(aes(as.factor(cyl), mpg), data = mtcars) + geom_col()
 ```
@@ -388,7 +388,7 @@ In this case, the `mtcars` raw data was *automatically* transformed into three d
 
 In Spark, there are a couple of key steps when codifying the "push compute, collect results" approach. First, ensure that the transformation operations happen inside Spark. In the example below, `group_by()` and `summarise()` will run as inside Spark. The second is to bring the results back into R after the data has been transformed.  Make sure to transform and then collect, in that order; if `collect()` is run first, then R will try to ingest the entire data set from Spark. Depending on the size of the data, collecting all of the data will slow down or may even bring down your system.
 
-```{r, eval = FALSE}
+```{r analysis-ggplot2-simmarise}
 car_group <- cars %>%
   group_by(cyl) %>%
   summarise(mpg = sum(mpg, na.rm = TRUE)) %>%
@@ -406,7 +406,7 @@ car_group <- cars %>%
 
 In this example, now that the data has been pre-aggregated and collected into R, only three records are passed to the plotting function.  Figure \@ref(fig:analysis-viz1) shows the resulting plot.
 
-```{r, eval = FALSE}
+```{r analysis-ggplot2-groups, eval = FALSE}
 ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
   geom_col(fill = "#999999") + coord_flip()
 ```
@@ -429,7 +429,7 @@ The `dbplot` package provides helper functions for plotting with remote data.  T
 
 The `dbplot_histogram()` function makes Spark calculate the bins and the count per bin and outputs a `ggplot` object which can be further refined by adding more steps to the plot object. `dbplot_histogram()` also accepts a `binwidth` argument to control the range used to compute the bins, the resulting plot is in Figure \@ref(fig:analysis-visualizations-histogram).
 
-```{r, eval = FALSE}
+```{r  analysis-dbplot-simple, eval = FALSE}
 library(dbplot)
 
 cars %>%
@@ -437,7 +437,7 @@ dbplot_histogram(mpg, binwidth = 3) +
 labs(title = "MPG Distribution",
      subtitle = "Histogram over miles per gallon")
 ```
-```{r, eval = FALSE, echo = FALSE}
+```{r analysis-dbplot-simple-plot, eval = FALSE, echo = FALSE}
 db_compute_bins(cars, mpg, binwidth = 3) %>%
   ggplot() +
   geom_col(aes(mpg, count), fill = "#878787") +
@@ -641,7 +641,7 @@ output:
 library(sparklyr)
 library(dplyr)
 
-sc <- spark_connect(master = "local")
+sc <- spark_connect(master = "local", version = "2.3)
 cars <- copy_to(sc, mtcars)
 ```
 
