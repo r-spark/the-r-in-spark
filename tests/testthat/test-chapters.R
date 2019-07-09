@@ -10,6 +10,11 @@ test_that("can knit starting", {
   expect_true(file.exists("output/starting.html"))
 })
 
+test_that("can knit analysis", {
+  rmarkdown::render("sources/analysis.Rmd", output_dir = "output")
+  expect_true(file.exists("output/analysis.html"))
+})
+
 test_that("can knit extensions", {
   skip("TODO")
 
