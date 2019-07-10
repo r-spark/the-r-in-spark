@@ -52,7 +52,7 @@ unzip("okcupid.zip", exdir = "data")
 ```{r modeling-sample-data, echo=FALSE}
 # reduce dataset in travis
 profiles <- readLines("data/profiles.csv")
-writeLines(c(profiles[1], sample(profiles, 10^4)), "data/profiles.csv")
+writeLines(c(profiles[1], sample(profiles, 10^5)), "data/profiles.csv")
 ```
 
 **Note:**  The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the modeling algorithm. For example, you may want to use the ranger package instead of `ml_random_forest_classifier()`.
@@ -316,7 +316,7 @@ saveRDS(contingency_tbl, "data/modeling-okc-contingency-table.rds")
 
 We can visualize this contingency table using a mosaic plot, shown in Figure \@ref(fig:modeling-eda-mosaic):
 
-```
+```{r modeling-eda-contingency-code}
 library(ggmosaic)
 library(forcats)
 library(tidyr)
@@ -895,15 +895,14 @@ In this section, we show how to perform a basic topic modeling task on the essay
 
 As always, before analyzing a dataset (or a subset of one), we want to take a quick look at it to orient ourselves. In this case, we are interested in the freeform text that the users entered into their dating profiles.
 
-```{r}
+```{r modeling-unsuper-glimpse}
 essay_cols <- paste0("essay", 0:9)
 essays <- okc %>%
   select(!!essay_cols)
 essays %>% 
   glimpse()
 ```
-
-```r
+```
 Observations: ??
 Variables: 10
 Database: spark_connection
@@ -929,7 +928,7 @@ The HTML tags and special characters pollute the data since they are not directl
 
 As you analyze your own text data, you will quickly come across and become familiar with the peculiarities of the specific dataset. Preprocessing text data, like with tabular numerical data, is an iterative process, and after a few tries we have the following transformations:
 
-```{r}
+```{r modeling-unsuper-words}
 essays <- essays %>%
   # Replace `missing` with empty string.
   mutate_all(list(~ ifelse(. == "missing", "", .))) %>%
@@ -947,7 +946,7 @@ LDA is a type of topic model for identifying abstract "topics" in a set of docum
 
 Once we have a reasonably clean dataset following the workflow in the previous section, we can fit an LDA model with `ml_lda()`:
 
-```{r}
+```{r modeling-unsuper-lda}
 stop_words <- ml_default_stop_words(sc) %>%
   c(
     "like", "love", "good", "music", "friends", "people", "life",
@@ -960,16 +959,15 @@ lda_model <-  ml_lda(essays, ~ words, k = 6, max_iter = 1, min_token_length = 4,
 
 We are also including a `stop_words` vector consisting of commonly used English words and common words in our dataset, which tells the algorithm to ignore them. After the model is fit, we can use the `tidy()` function to extract the associated betas, which are the per-topic-per-word probabilities, from the model.
 
-```{r}
+```{r modeling-unsuper-lda-tidy}
 betas <- tidy(lda_model)
 betas
 ```
 
-```{r echo = FALSE}
+```{r modeling-unsuper-lda-save, echo=FALSE}
 saveRDS(betas, "data/modeling-okc-betas-1.rds")
 ```
-
-```r
+```
 # A tibble: 256,992 x 3
    topic term      beta
    <int> <chr>    <dbl>
@@ -986,9 +984,9 @@ saveRDS(betas, "data/modeling-okc-betas-1.rds")
 # … with 256,982 more rows
 ```
 
-We can then visualize this output by looking at word probabilities by topic. In Figure \@ref(fig:betas-topics) and Figure \@ref(fig:betas-topics-2) we show the results at 1 iteration and 100 iterations. The code that generates Figure \@ref(fig:betas-topics) follows; in order to generate Figure \@ref(fig:betas-topics-2), you would need to set `max_iter = 100` when running `ml_lda()`, but beware that this can take a really long time in a single machine -- this is the kind of big-compute problem that a proper Spark cluster would be able to easily tackle!
+We can then visualize this output by looking at word probabilities by topic. In Figure \@ref(fig:modeling-unsuper-lda-betas-topics) and Figure \@ref(fig:modeling-unsuper-lda-betas-topics-2) we show the results at 1 iteration and 100 iterations. The code that generates Figure \@ref(fig:modeling-unsuper-lda-betas-topics) follows; in order to generate Figure \@ref(fig:modeling-unsuper-lda-betas-topics-2), you would need to set `max_iter = 100` when running `ml_lda()`, but beware that this can take a really long time in a single machine -- this is the kind of big-compute problem that a proper Spark cluster would be able to easily tackle!
 
-```r
+```{r modeling-unsuper-lda-betas}
 betas %>%
   group_by(topic) %>%
   top_n(10, beta) %>%
@@ -1000,8 +998,7 @@ betas %>%
     facet_wrap(~ topic, scales = "free") +
     coord_flip()
 ```
-
-```{r echo = FALSE}
+```{r modeling-unsuper-lda-betas-save, echo=FALSE}
 lda_model <-  ml_lda(
   essays, ~ words, 
   k = 6, max_iter = 100, min_token_length = 4, stop_words = stop_words, min_df = 5
@@ -1009,8 +1006,7 @@ lda_model <-  ml_lda(
 betas <- tidy(lda_model)
 saveRDS(betas, "data/modeling-okc-betas-100.rds")
 ```
-
-```{r echo = FALSE}
+```{r modeling-unsuper-lda-betas-plot, echo=FALSE}
 plot_betas <- function(betas) {
   betas %>%
     group_by(topic) %>%
@@ -1034,11 +1030,11 @@ p <- plot_betas(betas)
 ggsave("images/modeling-okc-betas-topics-100.png", plot = p, width = 10, height = 5)
 ```
 
-```{r betas-topics, eval=TRUE, echo=FALSE, fig.cap='The most common terms per topic in the first iteration', fig.align = 'center'}
+```{r modeling-unsuper-lda-betas-topics, eval=TRUE, echo=FALSE, fig.cap='The most common terms per topic in the first iteration', fig.align = 'center'}
 render_image("images/modeling-okc-betas-topics-1.png")
 ```
 
-```{r betas-topics-2, eval=TRUE, echo=FALSE, fig.cap='The most common terms per topic after one hundred iterations', fig.align = 'center'}
+```{r modeling-unsuper-lda-betas-topics-2, eval=TRUE, echo=FALSE, fig.cap='The most common terms per topic after one hundred iterations', fig.align = 'center'}
 render_image("images/modeling-okc-betas-topics-100.png")
 ```
 
@@ -1046,7 +1042,7 @@ We can see that, at one hundred iterations, we can see "topics" starting to emer
 
 Finally, to conclude this chapter you should disconnect from Spark; the next chapter will also make use the OKCupid dataset, but we will provide instructions to reload it from scratch.
 
-```{r}
+```{r modeling-unsuper-disconnect}
 spark_disconnect(sc)
 ```
 
