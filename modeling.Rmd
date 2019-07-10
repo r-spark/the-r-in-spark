@@ -51,8 +51,9 @@ unzip("okcupid.zip", exdir = "data")
 ```
 ```{r modeling-sample-data, echo=FALSE}
 # reduce dataset in travis
-profiles <- readLines("data/profiles.csv")
-writeLines(c(profiles[1], sample(profiles, 10^5)), "data/profiles.csv")
+profiles <- read.csv("data/profiles.csv")
+write.csv(profiles[sample(1:nrow(profiles), 10^3),],
+          "data/profiles.csv", row.names = FALSE)
 ```
 
 **Note:**  The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the modeling algorithm. For example, you may want to use the ranger package instead of `ml_random_forest_classifier()`.
@@ -163,7 +164,6 @@ okc %>%
   group_by(not_working) %>% 
   tally()
 ```
-
 ```
 # Source: spark<?> [?? x 2]
   not_working     n
