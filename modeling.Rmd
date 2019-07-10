@@ -114,7 +114,6 @@ We can now take a quick look at our data with `glimpse()`:
 ```{r modeling-eda-glimpse}
 glimpse(okc)
 ```
-
 ```
 Observations: ??
 Variables: 31
@@ -368,7 +367,7 @@ render_image("images/modeling-okc-mosaic.png", "Mosaic plot of drug and alcohol 
 
 To further explore the relationship between these two variables, we can perform correspondence analysis ([@greenacre2017correspondence]) using the FactoMineR package. This technique enables us to summarize the relationship between the high dimensional factor levels by mapping each level to a point on the plane. We first obtain the mapping using `FactoMineR::CA()` as follows:
 
-```{r modeling-eda-factominer-map}
+```{r modeling-eda-factominer-map, eval=FALSE}
 dd_obj <- contingency_tbl %>% 
   tibble::column_to_rownames(var = "drinks_drugs") %>%
   as.matrix() %>%
@@ -378,7 +377,7 @@ dd_obj <- contingency_tbl %>%
 
 We can then plot the results using ggplot:
 
-```{r modeling-eda-factominer-code}
+```{r modeling-eda-factominer-code, eval=FALSE}
 dd_drugs <-
   dd_obj$row$coord %>%
   as.data.frame() %>%
@@ -404,10 +403,10 @@ ggplot(ca_coord, aes(x = `Dim 1`, y = `Dim 2`,
   geom_text(aes(label = label)) +
   coord_equal()
 ```
-```{r modeling-eda-factominer-plot, echo=FALSE}
+```{r modeling-eda-factominer-plot, echo=FALSE, eval=FALSE}
 # From FES
 dd_obj <- contingency_tbl %>% 
-  column_to_rownames(var = "drinks_drugs") %>%
+  tibble::column_to_rownames(var = "drinks_drugs") %>%
   as.matrix() %>%
   as.table() %>%
   FactoMineR::CA(graph = FALSE)
