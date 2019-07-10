@@ -5,6 +5,7 @@ if (!dir.exists("sources")) dir.create("sources")
 
 file.copy(dir("../../", pattern = "*.Rmd", full.names = TRUE), "sources/", recursive = TRUE)
 file.copy("../../rmds/report.Rmd", "sources/", recursive = TRUE)
+file.copy("../../plumber/", "sources/", recursive = TRUE)
 file.copy("../../r/", "sources/", recursive = TRUE)
 file.copy("../../data/", "sources/", recursive = TRUE)
 file.copy("../../images/", "sources/", recursive = TRUE)
