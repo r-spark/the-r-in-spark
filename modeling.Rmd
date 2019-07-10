@@ -934,7 +934,7 @@ essays <- essays %>%
   # Concatenate the columns.
   mutate(essay = paste(!!!syms(essay_cols))) %>%
   # Remove miscellaneous characters and HTML tags
-  mutate(words = regexp_replace(words, "\\n|&nbsp;|<[^>]*>|[^A-Za-z|']", " "))
+  mutate(words = regexp_replace(essay, "\\n|&nbsp;|<[^>]*>|[^A-Za-z|']", " "))
 ```
 
 Note here we are using `regex_replace()`, which is a Spark SQL function. Next, we will discuss LDA and how to apply it to our cleaned dataset.
@@ -962,7 +962,6 @@ We are also including a `stop_words` vector consisting of commonly used English 
 betas <- tidy(lda_model)
 betas
 ```
-
 ```{r modeling-unsuper-lda-save, echo=FALSE}
 saveRDS(betas, "data/modeling-okc-betas-1.rds")
 ```
