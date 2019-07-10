@@ -11,13 +11,11 @@ test_that("can knit starting", {
 })
 
 test_that("can knit analysis", {
-  skip("disable while testing")
   rmarkdown::render("sources/analysis.Rmd", output_dir = "output")
   expect_true(file.exists("output/analysis.html"))
 })
 
 test_that("can knit modeling", {
-  skip("disable while testing")
   rmarkdown::render("sources/modeling.Rmd", output_dir = "output")
   expect_true(file.exists("output/modeling.html"))
 })
