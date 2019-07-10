@@ -42,24 +42,24 @@ The examples in this chapter will utilize the OkCupid dataset [@kim2015okcupid],
 
 You can download this dataset as follows:
 
-```{r}
+```{r modeling-download-data}
 download.file(
   "https://github.com/rudeboybert/JSE_OkCupid/raw/master/profiles.csv.zip",
   "okcupid.zip")
 
 unzip("okcupid.zip", exdir = "data")
 ```
-```{r echo=FALSE}
+```{r modeling-sample-data, echo=FALSE}
 # reduce dataset in travis
 profiles <- readLines("data/profiles.csv")
-writeLines(profiles[1:10^4], "data/profiles.csv")
+writeLines(sample(profiles, 1:10^4), "data/profiles.csv")
 ```
 
 **Note:**  The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the modeling algorithm. For example, you may want to use the ranger package instead of `ml_random_forest_classifier()`.
 
 In addition, to follow along, you will need to install a few additional packages:
 
-```{r}
+```{r modeling-install-packages, eval=FALSE}
 install.packages("ggmosaic")
 install.packages("forcats")
 install.packages("FactoMineR")
@@ -81,7 +81,7 @@ Exploratory data analysis (EDA), in the context of predictive modeling, is the e
 
 We'll first connect to Spark, load libraries and read in the data.
 
-```{r}
+```{r modeling-connect}
 library(sparklyr)
 library(ggplot2)
 library(dbplot)
@@ -110,11 +110,11 @@ We specify `escape = "\""` and `options = list(multiline = TRUE)` here to accomm
 
 We can now take a quick look at our data with `glimpse()`:
 
-```{r}
+```{r modeling-eda-glimpse}
 glimpse(okc)
 ```
 
-```r
+```
 Observations: ??
 Variables: 31
 Database: spark_connection
@@ -153,7 +153,7 @@ $ status      <chr> "single", "single", "available", "single",…
 
 Now we will add our response variable as a column in the dataset and look at its distribution
 
-```{r}
+```{r modeling-eda-tally}
 okc <- okc %>%
   mutate(
     not_working = ifelse(job %in% c("student", "unemployed", "retired"), 1 , 0)
@@ -164,7 +164,7 @@ okc %>%
   tally()
 ```
 
-```r
+```
 # Source: spark<?> [?? x 2]
   not_working     n
         <dbl> <dbl>
@@ -174,7 +174,7 @@ okc %>%
 
 Before we proceed further, let us perform an initial split of our data into a training set and a testing set and put away the latter. In practice, this is a crucial step because we would like to have a holdout set that we set aside at the end of the modeling process to evaluate model performance. If we were to include the entire dataset during EDA, information from the testing set could "leak" into the visualizations and summary statistics, and bias our model building process even though the data is not used directly in a learning algorithm. This would undermine the credibility of our performance metrics. Splitting the data can be done easily by using the `sdf_partition()` function:
 
-```{r}
+```{r modeling-eda-splits}
 data_splits <- sdf_random_split(okc, training = 0.8, testing = 0.2, seed = 42)
 okc_train <- data_splits$training
 okc_test <- data_splits$testing
@@ -182,14 +182,13 @@ okc_test <- data_splits$testing
 
 We can quickly look at the distribution of our response variable:
 
-```{r}
+```{r modeling-eda-dist}
 okc_train %>%
   group_by(not_working) %>%
   tally() %>%
   mutate(frac = n / sum(n))
 ```
-
-```r
+```
 # Source: spark<?> [?? x 3]
   not_working     n   frac
         <dbl> <dbl>  <dbl>
@@ -199,11 +198,10 @@ okc_train %>%
 
 Using the `sdf_describe()` function, we can obtain numerical summaries of specific columns:
 
-```{r}
+```{r modeling-describe}
 sdf_describe(okc_train, cols = c("age", "income"))
 ```
-
-```r
+```
 # Source: spark<?> [?? x 3]
   summary age                income            
   <chr>   <chr>              <chr>             
@@ -216,7 +214,7 @@ sdf_describe(okc_train, cols = c("age", "income"))
 
 Like we saw in the Analysis chapter, we can also utilize the dbplot package to plot distributions of these variables. In Figure \@ref(fig:age-histogram) we show a histogram of the distribution of the `age` variable.
 
-```{r echo = FALSE}
+```{r modeling-eda-bins, echo=FALSE}
 db_compute_bins(okc_train, age) %>%
   ggplot() +
   geom_col(aes(age, count), fill = "#878787") +
@@ -224,7 +222,7 @@ db_compute_bins(okc_train, age) %>%
   labs(title = "Distribution of Age", subtitle = "Age histogram in OKCupid dataset") +
   ggsave("images/modeling-okc-histogram-age.png", width = 10, height = 5)
 ```
-```r
+```{r modeling-eda-hist}
 dbplot_histogram(okc_train, age)
 ```
 ```{r age-histogram, eval=TRUE, echo=FALSE, fig.cap='Distribution of age', fig.align = 'center'}
@@ -233,7 +231,7 @@ render_image("images/modeling-okc-histogram-age.png", "Distribution of age")
 
 A common EDA exercise is to look at the relationships between the response and the individual predictors. Often, you may have prior business knowledge on what these relationships should be, so this can serve as a data quality check. Also, unexpected trends can inform variable interactions you might want to include in the model. As an example, we can explore the `religion` variable:
 
-```{r}
+```{r modeling-eda-prop}
 prop_data <- okc_train %>%
   mutate(religion = regexp_extract(religion, "^\\\\w+", 0)) %>% 
   group_by(religion, not_working) %>%
@@ -248,12 +246,10 @@ prop_data <- okc_train %>%
 
 prop_data
 ```
-
-```{r echo = FALSE}
+```{r modeling-eda-save-prop, echo = FALSE}
 saveRDS(prop_data, "data/modeling-okc-prop-data.rds")
 ```
-
-```r
+```
 # A tibble: 10 x 4
    religion     count   prop      se
    <chr>        <dbl>  <dbl>   <dbl>
@@ -269,9 +265,9 @@ saveRDS(prop_data, "data/modeling-okc-prop-data.rds")
 10 catholicism   3769 0.0886 0.00458
 ```
 
-Note that `prop_data` is a small data frame that has been collected into memory in our R session, we can take advantage of ggplot2 to create an informative visualization in Figure \@ref(fig:religion-prop).
+Note that `prop_data` is a small data frame that has been collected into memory in our R session, we can take advantage of ggplot2 to create an informative visualization in Figure \@ref(fig:modeling-eda-prop-render).
 
-```{r, echo = FALSE}
+```{r modeling-eda-prop-plot, echo=FALSE}
 prop_data <- readRDS("data/modeling-okc-prop-data.rds")
 prop_data %>%
   ggplot(aes(x = religion, y = prop)) + 
@@ -282,27 +278,26 @@ prop_data %>%
   geom_hline(yintercept = sum(prop_data$prop * prop_data$count) / sum(prop_data$count), linetype = "dashed", color = "#888888") +
   ggsave("images/modeling-okc-prop.png", device = "png", width = 10, height = 5)
 ```
-```{r}
+```{r modeling-eda-prop-code}
 prop_data %>%
   ggplot(aes(x = religion, y = prop)) + geom_point(size = 2) +
   geom_errorbar(aes(ymin = prop - 1.96 * se, ymax = prop + 1.96 * se), width = .1) +
   geom_hline(yintercept = sum(prop_data$prop * prop_data$count) / sum(prop_data$count))
 ```
-```{r religion-prop, echo = FALSE, eval = TRUE, fig.cap='Proportion of individuals not currently employed, by religion', fig.align = 'center'}
+```{r modeling-eda-prop-render, echo = FALSE, eval = TRUE, fig.cap='Proportion of individuals not currently employed, by religion', fig.align = 'center'}
 render_image("images/modeling-okc-prop.png", "Proportion of individuals not currently employed, by religion")
 ```
 
 Next, we take a look at the relationship between a couple of predictors: alcohol use and drug use. We would expect there to be some correlation between them. You can compute a contingency table via `sdf_crosstab()`:
 
-```{r}
+```{r modeling-eda-contingency}
 contingency_tbl <- okc_train %>% 
   sdf_crosstab("drinks", "drugs") %>%
   collect()
 
 contingency_tbl
 ```
-
-```r
+```
 # A tibble: 7 x 5
   drinks_drugs missing never often sometimes
   <chr>          <dbl> <dbl> <dbl>     <dbl>
@@ -315,13 +310,13 @@ contingency_tbl
 7 rarely           613  3689    35       445
 ```
 
-```{r echo = FALSE}
+```{r modeling-eda-contingency-save, echo = FALSE}
 saveRDS(contingency_tbl, "data/modeling-okc-contingency-table.rds")
 ```
 
-We can visualize this contingency table using a mosaic plot, shown in Figure \@ref(fig:mosaic):
+We can visualize this contingency table using a mosaic plot, shown in Figure \@ref(fig:modeling-eda-mosaic):
 
-```r
+```
 library(ggmosaic)
 library(forcats)
 library(tidyr)
@@ -341,7 +336,7 @@ contingency_tbl %>%
                   weight = count))
 ```
 
-```{r echo = FALSE}
+```{r modeling-eda-contingency-plot, echo=FALSE}
 library(ggmosaic)
 library(forcats)
 library(tidyr)
@@ -367,14 +362,13 @@ contingency_tbl %>%
   ) +
   ggsave("images/modeling-okc-mosaic.png", width = 10, height = 5)
 ```
-
-```{r mosaic, echo = FALSE, eval = TRUE, fig.cap='Mosaic plot of drug and alcohol use', fig.align = 'center'}
+```{r modeling-eda-mosaic, echo = FALSE, eval = TRUE, fig.cap='Mosaic plot of drug and alcohol use', fig.align = 'center'}
 render_image("images/modeling-okc-mosaic.png", "Mosaic plot of drug and alcohol use")
 ```
 
 To further explore the relationship between these two variables, we can perform correspondence analysis ([@greenacre2017correspondence]) using the FactoMineR package. This technique enables us to summarize the relationship between the high dimensional factor levels by mapping each level to a point on the plane. We first obtain the mapping using `FactoMineR::CA()` as follows:
 
-```r
+```{r modeling-eda-factominer-map}
 dd_obj <- contingency_tbl %>% 
   tibble::column_to_rownames(var = "drinks_drugs") %>%
   as.matrix() %>%
@@ -384,7 +378,7 @@ dd_obj <- contingency_tbl %>%
 
 We can then plot the results using ggplot:
 
-```r
+```{r modeling-eda-factominer-code}
 dd_drugs <-
   dd_obj$row$coord %>%
   as.data.frame() %>%
@@ -410,8 +404,7 @@ ggplot(ca_coord, aes(x = `Dim 1`, y = `Dim 2`,
   geom_text(aes(label = label)) +
   coord_equal()
 ```
-
-```{r echo = FALSE}
+```{r modeling-eda-factominer-plot, echo=FALSE}
 # From FES
 dd_obj <- contingency_tbl %>% 
   column_to_rownames(var = "drinks_drugs") %>%
@@ -459,12 +452,11 @@ ggplot(ca_coord, aes(x = `Dim 1`, y = `Dim 2`, col = Variable)) +
   labs(title = "Correspondence Analysis", subtitle = "Principal coordinates for drugs and alcohol use") +
   ggsave("images/modeling-okc-correspondence-analysis.png", width = 10, height = 5)
 ```
-
-```{r ca-pcs, echo = FALSE, eval = TRUE, fig.cap='Correspondence analysis principal coordinates for drugs and alcohol use', fig.align = 'center'}
+```{r modeling-eda-pcs, echo = FALSE, eval = TRUE, fig.cap='Correspondence analysis principal coordinates for drugs and alcohol use', fig.align = 'center'}
 render_image("images/modeling-okc-correspondence-analysis.png")
 ```
 
-In Figure \@ref(fig:ca-pcs), we see that the correspondence analysis procedure has transformed the factors into variables called *principal coordinates*, which correspond to the axes in the plot and represent how much information in the contingency table they contain. We can, for example, interpret the proximity of "drinking often" and "using drugs very often" as indicating association.
+In Figure \@ref(fig:modeling-eda-pcs), we see that the correspondence analysis procedure has transformed the factors into variables called *principal coordinates*, which correspond to the axes in the plot and represent how much information in the contingency table they contain. We can, for example, interpret the proximity of "drinking often" and "using drugs very often" as indicating association.
 
 This concludes our discussion on EDA, and we will now proceed to feature engineering.
 
@@ -474,7 +466,7 @@ The feature engineering exercise comprises transforming the data to increase the
 
 In Figure \@ref(fig:scaled-age-distribution) we see that the `age` variable has a range from 18 to over 60. Some algorithms, especially neural networks, train faster if we normalize our inputs so that they are of the same magnitude. Let's now normalize the `age` variable by removing the mean and scaling to unit variance, beginning by calculating its mean and standard deviation:
 
-```{r}
+```{r modeling-eda-scale}
 scale_values <- okc_train %>%
   summarize(
     mean_age = mean(age),
@@ -484,8 +476,7 @@ scale_values <- okc_train %>%
 
 scale_values
 ```
-
-```r
+```
 # A tibble: 1 x 2
   mean_age sd_age
      <dbl>  <dbl>
@@ -494,15 +485,15 @@ scale_values
 
 We can then use these to transform the dataset:
 
-```{r}
+```{r modeling-eda-scale-age}
 okc_train <- okc_train %>%
   mutate(scaled_age = (age - !!scale_values$mean_age) /
            !!scale_values$sd_age)
 ```
-```{r}
+```{r modeling-eda-scale-code}
 dbplot_histogram(okc_train, scaled_age)
 ```
-```{r echo = FALSE}
+```{r modeling-eda-scale-plot, echo=FALSE}
 db_compute_bins(okc_train, scaled_age) %>%
   ggplot() +
   geom_col(aes(scaled_age, count), fill = "#878787") +
@@ -511,21 +502,20 @@ db_compute_bins(okc_train, scaled_age) %>%
   ggsave("images/modeling-okc-histogram-scaled-age.png", width = 10, height = 5)
 ```
 
-In Figure \@ref(fig:scaled-age-distribution), we see that the scaled age variable has values that are closer to zero. We now move on to discussing other types of transformations, but during your feature engineering workflow you may want to perform the normalization to all numeric variables you want to include in the model.
+In Figure \@ref(fig:modeling-eda-scaled-dist), we see that the scaled age variable has values that are closer to zero. We now move on to discussing other types of transformations, but during your feature engineering workflow you may want to perform the normalization to all numeric variables you want to include in the model.
 
-```{r scaled-age-distribution, echo = FALSE, eval = TRUE, fig.cap='Distribution of scaled age', fig.align = 'center'}
+```{r modeling-eda-scaled-dist, echo = FALSE, eval = TRUE, fig.cap='Distribution of scaled age', fig.align = 'center'}
 render_image("images/modeling-okc-histogram-scaled-age.png")
 ```
 
 Since some of the profile features are multiple-select, in other words, a person can choose to associate with multiple options for a variable, we need to process them before we can build meaningful models. If we take a look at the ethnicity column, for example, we see that there are many different combinations:
 
-```{r}
+```{r modeling-eda-ethnicity}
 okc_train %>%
   group_by(ethnicity) %>%
   tally()
 ```
-
-```r
+```
 # Source: spark<?> [?? x 2]
    ethnicity                                     n
    <chr>                                     <dbl>
@@ -544,7 +534,7 @@ okc_train %>%
 
 One way to proceed would be to treat each combination of races as a separate level, but that would lead to a very large number of levels which becomes problematic in many algorithms. To better encode this information, we can create dummy variables for each race, as follows:
 
-```{r}
+```{r modeling-eda-ethnicity-glimpse}
 ethnicities <- c("asian", "middle eastern", "black", "native american", "indian", 
                  "pacific islander", "hispanic / latin", "white", "other")
 ethnicity_vars <- ethnicities %>% 
@@ -555,8 +545,7 @@ okc_train %>%
   select(starts_with("ethnicity_")) %>%
   glimpse()
 ```
-
-```r
+```
 Observations: ??
 Variables: 9
 Database: spark_connection
@@ -573,13 +562,13 @@ $ ethnicity_other           <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
 
 For the free text fields, a straightforward way to extract features is counting the total number of characters. We will store the train dataset in Spark's memory with `compute()` to speed up computation.
 
-```{r}
+```{r modeling-eda-essay-compute}
 okc_train <- okc_train %>%
   mutate(
     essay_length = char_length(paste(!!!syms(paste0("essay", 0:9))))
   ) %>% compute()
 ```
-```{r echo = FALSE}
+```{r modeling-eda-essay-plot, echo=FALSE}
 db_compute_bins(okc_train, essay_length, bins = 100) %>%
   ggplot() +
   geom_col(aes(essay_length, count), fill = "#878787") +
@@ -587,19 +576,19 @@ db_compute_bins(okc_train, essay_length, bins = 100) %>%
   labs(title = "Distribution of Essay Length", subtitle = "Essay length histogram in OKCupid dataset")
   ggsave("images/modeling-okc-histogram-essay-length.png", width = 10, height = 5)
 ```
-```{r}
+```{r modeling-eda-essay-render}
 dbplot_histogram(okc_train, essay_length, bins = 100)
 ```
 
-We can see the distribution of the `essay_length` variable in Figure \@ref(fig:essay-length-distribution).
+We can see the distribution of the `essay_length` variable in Figure \@ref(fig:modeling-essay-length-distribution).
 
-```{r essay-length-distribution, echo = FALSE, eval = TRUE, fig.cap='Distribution of essay length', fig.align = 'center'}
+```{r modeling-essay-length-distribution, echo=FALSE, eval=TRUE, fig.cap='Distribution of essay length', fig.align = 'center'}
 render_image("images/modeling-okc-histogram-essay-length.png", "Distribution of essay length")
 ```
 
 We will be using this dataset in the Pipelines chapter, so let's save it first as Parquet -- an efficient file format ideal for numeric data.
 
-```{r}
+```{r modeling-eda-write-parquet}
 spark_write_parquet(okc_train, "data/okc-train.parquet")
 ```
 
@@ -613,7 +602,7 @@ It is important that we don't peek at the testing holdout set until the very end
 
 Using the `sdf_partition()` function, we can create a list of subsets from our `okc_train` table:
 
-```{r}
+```{r modeling-super-split}
 vfolds <- sdf_random_split(
   okc_train,
   weights = purrr::set_names(rep(0.1, 10), paste0("fold", 1:10)),
@@ -623,14 +612,14 @@ vfolds <- sdf_random_split(
 
 We then create our first analysis/assessment split as follows,
 
-```{r}
+```{r modeling-super-split-analysis}
 analysis_set <- do.call(rbind, vfolds[2:10])
 assessment_set <- vfolds[[1]]
 ```
 
 One item we need to carefully treat here is the scaling of variables. We need to make sure we do not leak any information from the assessment set to the analysis set, so we calculate the mean and standard deviation on the analysis set only, and apply the same transformation to both sets. Here is how we would handle this for the `age` variable:
 
-```{r}
+```{r modeling-super-scale-age}
 make_scale_age <- function(analysis_data) {
   scale_values <- analysis_data %>%
     summarize(
@@ -654,14 +643,13 @@ For brevity, here we only show how to transform the `age` variable. In practice,
 
 Logistic regression is often a reasonable starting point for binary classification problems, so let us give it a try. Suppose also that our domain knowledge provides us with an initial set of predictors. We can then fit a model by using the formula interface:
 
-```{r}
+```{r modeling-supeer-logistic}
 lr <- ml_logistic_regression(
   analysis_set, not_working ~ scaled_age + sex + drinks + drugs + essay_length
 )
 lr
 ```
-
-```r
+```
 Formula: not_working ~ scaled_age + sex + drinks + drugs + essay_length
 
 Coefficients:
@@ -677,16 +665,15 @@ drinks_very often       drugs_never     drugs_missing   drugs_sometimes
 
 To obtain a summary of performance metrics on the assessment set, we can use the `ml_evaluate()` function.
 
-```{r}
+```{r modeling-super-logistic-eval}
 validation_summary <- ml_evaluate(lr, assessment_set)
 ```
 
 You can print `validation_summary` to see the available metrics
 
-```{r}
+```{r modeling-super-logistic-summary}
 validation_summary
 ```
-
 ```
 BinaryLogisticRegressionSummaryImpl 
  Access the following via `$` or `ml_summary()`. 
@@ -717,16 +704,16 @@ BinaryLogisticRegressionSummaryImpl
 
 We can plot the ROC curve by collecting the output of `validation_summary$roc()` and using ggplot2:
 
-```{r echo = FALSE}
+```{r modeling-super-roc, echo=FALSE}
 roc <- validation_summary$roc() %>%
   collect()
 saveRDS(roc, "data/modeling-okc-roc-1.rds")
 ```
-```{r}
+```{r modeling-super-roc-plot}
 ggplot(roc, aes(x = FPR, y = TPR)) +
   geom_line() + geom_abline(lty = "dashed")
 ```
-```{r, echo = FALSE}
+```{r modeling-super-roc-plot, echo=FALSE}
 roc <- readRDS("data/modeling-okc-roc-1.rds")
 ggplot(roc, aes(x = FPR, y = TPR)) +
   geom_line() +
@@ -735,17 +722,16 @@ ggplot(roc, aes(x = FPR, y = TPR)) +
   labs(title = "ROC Curve", subtitle = "Receiver operating characteristic curve for the logistic regression model") +
   ggsave("images/modeling-okc-roc1.png", device = "png", width = 10, height = 5)
 ```
-```{r roc1, echo = FALSE, eval = TRUE, fig.cap='ROC curve for the logistic regression model', fig.align = 'center'}
+```{r modeling-super-roc1, echo = FALSE, eval = TRUE, fig.cap='ROC curve for the logistic regression model', fig.align = 'center'}
 render_image("images/modeling-okc-roc1.png")
 ```
 
 The ROC curve plots the true positive rate (sensitivity) against the false positive rate (1 - specificity) for varying values of the classification threshold. In practice, the business problem helps to determine where on the curve one sets the threshold for classification. The AUC is a summary measure for determining the quality of a model, and we can compute it by calling the `area_under_roc()` function.
 
-```{r}
+```{r modeling-super-area-roc}
 validation_summary$area_under_roc()
 ```
-
-```r
+```
 [1] 0.7872754
 ```
 
@@ -753,7 +739,7 @@ validation_summary$area_under_roc()
 
 Now, we can easily repeat the logic we have above and apply it to each analysis/assessment split:
 
-```{r}
+```{r modeling-super-map-roc}
 cv_results <- purrr::map_df(1:10, function(v) {
   analysis_set <- do.call(rbind, vfolds[setdiff(1:10, v)]) %>% compute()
   assessment_set <- vfolds[[v]]
@@ -780,17 +766,17 @@ cv_results <- purrr::map_df(1:10, function(v) {
 
 This gives us 10 ROC curves:
 
-```{r}
+```{r modeling-super-unnest-roc}
 unnest(cv_results, roc_df) %>%
   ggplot(aes(x = FPR, y = TPR, color = Resample)) +
   geom_line() + geom_abline(lty = "dashed")
 ```
-```{r echo = FALSE}
+```{r modeling-super-unnest-roc-save, echo=FALSE}
 cv_roc <- cv_results %>% 
   unnest(roc_df)
 saveRDS(cv_roc, "data/modeling-okc-cv-roc.rds")
 ```
-```{r echo = FALSE}
+```{r modeling-super-unnest-roc-render, echo=FALSE}
 cv_roc <- readRDS("data/modeling-okc-cv-roc.rds")
 cv_roc %>%
   ggplot(aes(x = FPR, y = TPR, color = Resample)) +
@@ -802,17 +788,16 @@ cv_roc %>%
   ggsave("images/modeling-okc-roc2.png", device = "png", width = 10, height = 5)
 ```
 
-```{r roc2, echo = FALSE, eval = TRUE, fig.cap='Cross-validated ROC curves for the logistic regression model', fig.align = 'center'}
+```{r modeling-super-roc2, echo = FALSE, eval = TRUE, fig.cap='Cross-validated ROC curves for the logistic regression model', fig.align = 'center'}
 render_image("images/modeling-okc-roc2.png")
 ```
 
 and we can obtain the average AUC metric:
 
-```{r}
+```{r modeling-super-auc-meean}
 mean(cv_results$auc)
 ```
-
-```r
+```
 [1] 0.7715102
 ```
 
@@ -820,7 +805,7 @@ mean(cv_results$auc)
 
 If you are interested in generalized linear model (GLM) diagnostics,you can also fit a logistic regression via the generalized linear regression interface by specifying `family = "binomial"`. Because the result is a regression model, the `ml_predict()` method does not give class probabilities. However, it includes confidence intervals for coefficient estimates.
 
-```{r, echo = FALSE}
+```{r modeling-super-glr-save, echo = FALSE}
 glr <- ml_generalized_linear_regression(
   analysis_set, 
   not_working ~ scaled_age + sex + drinks + drugs + essay_length, 
@@ -829,7 +814,7 @@ glr <- ml_generalized_linear_regression(
 tidy_glr <- tidy(glr)
 saveRDS(tidy_glr, "data/modeling-okc-tidy-glr.rds")
 ```
-```{r}
+```{r modeling-super-glr-code}
 glr <- ml_generalized_linear_regression(
   analysis_set, 
   not_working ~ scaled_age + sex + drinks + drugs, 
@@ -838,13 +823,13 @@ glr <- ml_generalized_linear_regression(
 
 tidy_glr <- tidy(glr)
 ```
-```{r, echo = FALSE}
+```{r modeling-super-glr-load, echo=FALSE}
 tidy_glr <- readRDS("data/modeling-okc-tidy-glr.rds")
 ```
 
-We can extract the coefficient estimates into a tidy data frame, which we can then process further, for example, to create a coefficient plot, as shown in Figure \@ref(fig:glr-coefs).
+We can extract the coefficient estimates into a tidy data frame, which we can then process further, for example, to create a coefficient plot, as shown in Figure \@ref(fig:modeling-super-glr-coefs).
 
-```r
+```{r modeling-super-glr-plot-code}
 tidy_glr %>%
   ggplot(aes(x = term, y = estimate)) +
   geom_point() +
@@ -855,8 +840,7 @@ tidy_glr %>%
   coord_flip() +
   geom_hline(yintercept = 0, linetype = "dashed")
 ```
-
-```{r echo = FALSE}
+```{r modeling-super-glr-plot-render, echo=FALSE}
 tidy_glr %>%
   ggplot(aes(x = term, y = estimate)) +
   geom_point() +
@@ -866,8 +850,7 @@ tidy_glr %>%
   labs(title = "Confidence Intervals", subtitle = "Coefficient estimates with 95% confidence intervals") +
   ggsave("images/modeling-okc-glr-coefs.png", width = 10, height = 5)
 ```
-
-```{r glr-coefs, eval=TRUE, echo=FALSE, fig.cap='Coefficient estimates with 95% confidence intervals', fig.align = 'center'}
+```{r modeling-super-glr-coefs, eval=TRUE, echo=FALSE, fig.cap='Coefficient estimates with 95% confidence intervals', fig.align = 'center'}
 render_image("images/modeling-okc-glr-coefs.png")
 ```
 
@@ -877,7 +860,7 @@ render_image("images/modeling-okc-glr-coefs.png")
 
 Spark supports many of the standard modeling algorithms and it's easy to apply these models and hyperparameters (values that control the model fitting process) for your particular problem. You can find a list of supported ML related functions in the Appendix. The interfaces to access these functionalities are largely identical, so it is easy to experiment with them. For example, to fit a neural network model we can run:
 
-```{r}
+```{r modeling-super-other}
 nn <- ml_multilayer_perceptron_classifier(
   analysis_set,
   not_working ~ scaled_age + sex + drinks + drugs + essay_length, 
@@ -887,17 +870,16 @@ nn <- ml_multilayer_perceptron_classifier(
 
 This gives us a feedforward neural network model with two hidden layers of 64 nodes each. Note that you have to specify the correct values for the input and output layers in the `layers` argument. We can obtain predictions on a validation set using `ml_predict()`
 
-```{r}
+```{r modeling-super-other-predict}
 predictions <- ml_predict(nn, assessment_set)
 ```
 
 then compute the AUC via `ml_binary_classification_evaluator()`
 
-```{r}
+```{r modeling-super-other-eval}
 ml_binary_classification_evaluator(predictions)
 ```
-
-```r
+```
 [1] 0.7812709
 ```
 
