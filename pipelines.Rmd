@@ -13,7 +13,7 @@ source("r/render.R")
 
 In the Modeling chapter, we learned how to build predictive models using the high-level functions Spark provides and well-known R packages that work well together with Spark. You learned about supervised methods first and finished the chapter with an unsupervised method over raw text.
 
-In this chapter, we dive into Spark Pipelines, which is the engine that powers the features we demonstrated in the Modeling chapter. So for instance, when you invoke an MLlib function via the formula interface in R, for example `ml_logistic_regression(cars, am ~ .)`, `sparklyr` actually constructs a *pipeline* for you under the hood. Therefore, Pipelines also allow you to make use of advanced data processing and modeling workflows. In addition, pipeline also facilitates collaboration across data science and engineering teams by allowing you to *deploy* pipelines into production systems, web applications, mobile applications and so on.
+In this chapter, we dive into Spark Pipelines, which is the engine that powers the features we demonstrated in the Modeling chapter. So for instance, when you invoke an MLlib function via the formula interface in R; for example `ml_logistic_regression(cars, am ~ .)`, a *pipeline* gets constructed for you under the hood. Therefore, Pipelines also allow you to make use of advanced data processing and modeling workflows. In addition, a pipeline also facilitates collaboration across data science and engineering teams by allowing you to *deploy* pipelines into production systems, web applications, mobile applications and so on.
 
 This chapter also happens to be the last chapter that encourages using your local computer as a Spark cluster, you are just one chapter away from getting properly introduced to cluster computing, and be able to perform data science or machine learning that can scale to the most demanding computation problems.
 
@@ -38,7 +38,7 @@ scaler <- ft_standard_scaler(
 scaler
 ```
 
-```r
+```
 StandardScaler (Estimator)
 <standard_scaler_7f6d46f452a1> 
  (Parameters -- Column Names)
@@ -59,7 +59,7 @@ scaler_model <- ml_fit(scaler, df)
 scaler_model
 ```
 
-```r
+```
 StandardScalerModel (Transformer)
 <standard_scaler_7f6d46f452a1> 
  (Parameters -- Column Names)
@@ -80,7 +80,7 @@ scaler_model %>%
   glimpse()
 ```
 
-```r
+```
 Observations: ??
 Variables: 3
 Database: spark_connection
@@ -107,7 +107,7 @@ ml_pipeline(sc) %>%
     with_mean = TRUE)
 ```
 
-```r
+```
 Pipeline (Estimator) with 1 stage
 <pipeline_7f6d6a6a38ee> 
   Stages 
@@ -134,7 +134,7 @@ pipeline_model <- ml_fit(pipeline, df)
 pipeline_model
 ```
 
-```r
+```
 PipelineModel (Transformer) with 1 stage
 <pipeline_7f6d64df6e45> 
   Stages 
@@ -197,7 +197,7 @@ okc_train %>%
   select(sex_indexed)
 ```
 
-```r
+```
 # Source: spark<?> [?? x 1]
    sex_indexed
          <dbl>
@@ -248,7 +248,7 @@ We expect this to give rise to $2 \times 2 \times 2 = 8$ hyperparameter combinat
 cv
 ```
 
-```r
+```
 CrossValidator (Estimator)
 <cross_validator_d5676ac6f5> 
  (Parameters -- Tuning)
@@ -274,7 +274,7 @@ ml_validation_metrics(cv_model) %>%
   arrange(-areaUnderROC)
 ```
 
-```r
+```
   areaUnderROC elastic_net_param_1 reg_param_1 with_mean_2
 1    0.7722700                0.75       0.001        TRUE
 2    0.7718431                0.75       0.010       FALSE
@@ -321,7 +321,7 @@ model_dir <- file.path("spark_model")
 ml_save(cv_model$best_model, model_dir, overwrite = TRUE)
 ```
 
-```r
+```
 Model successfully saved.
 ```
 
@@ -331,7 +331,7 @@ Let us take a look at the directory we just wrote to.
 list.dirs(model_dir,full.names = FALSE) %>%
   head(10)
 ```
-```r
+```
  [1] ""                                             
  [2] "metadata"                                     
  [3] "stages"                                       
@@ -354,7 +354,7 @@ spark_read_json(sc, file.path(
 )) %>% 
   glimpse()
 ```
-```r
+```
 Observations: ??
 Variables: 5
 Database: spark_connection
@@ -372,7 +372,7 @@ spark_read_parquet(sc, file.path(
                 full.names = TRUE), "data")
 ))
 ```
-```r
+```
 # Source: spark<data> [?? x 5]
   numClasses numFeatures interceptVector coefficientMatr… isMultinomial
        <int>       <int> <list>          <list>           <lgl>        
@@ -382,15 +382,15 @@ spark_read_parquet(sc, file.path(
 We see that quite a bit of information has been exported, from the SQL statement in the dplyr transformer to the fitted coefficient estimates of the logistic regression. We can then (in a new Spark session) reconstruct the model by using `ml_load()`:
 
 ```{r}
-model_2 <- ml_load(sc, model_dir)
+model_reload <- ml_load(sc, model_dir)
 ```
 
 Let us see if we can retrieve the logistic regression stage from this pipeline model:
 
 ```{r}
-ml_stage(model_2, "logistic_regression")
+ml_stage(model_reload, "logistic_regression")
 ```
-```r
+```
 LogisticRegressionModel (Transformer)
 <logistic_regression_5b423b539d0f> 
  (Parameters -- Column Names)
@@ -469,7 +469,7 @@ p$run(port = 8000)
 
 This should start the web service locally and emit a message similar to
 
-```r
+```
 Starting server to listen on port 8000
 Running the swagger UI at http://127.0.0.1:8000/__swagger__/
 ```
@@ -484,12 +484,16 @@ httr::content(httr::POST(
 ))
 ```
 
-```r
+```
 [[1]]
 [1] 0
 ```
 
 If we were to time this operation (e.g. with `system.time()`), we see that the latency is on the order of hundreds of milliseconds, which may be appropriate for batch applications but insufficient for real-time. The main bottleneck is the serialization of the R data frame to a Spark data frame and back. Also, it also requires an active Spark session which is a heavy runtime requirement. To ameliorate these issues, we discuss next a deployment method more suitable for real time deployment.
+
+```{r echo=FALSE}
+spark_disconnect(sc)
+```
 
 ### Real-Time Scoring
 
@@ -500,7 +504,7 @@ For real-time production, we want to keep dependencies as light as possible so w
 
 Since `mleap` is a sparklyr extension and an R package, first we need to install it from CRAN:
 
-```{r}
+```{r eval=FALSE}
 install.packages("mleap")
 ```
 
@@ -572,7 +576,7 @@ p$run(port = 8000)
 
 Again, in a separate session, we can run the exact same code we did previously to test this new service:
 
-```{r}
+```{r eval=FALSE}
 httr::POST(
   "http://127.0.0.1:8000/predict",
   body = '{"age": [42], "sex": "m", "drinks": "not at all", 
@@ -580,13 +584,16 @@ httr::POST(
 ) %>%
   httr::content()
 ```
-
-```r
+```
 [[1]]
 [1] 0
 ```
 
 If we were to time this operation, we will see that the service now returns predictions in tens of milliseconds!
+
+```{r echo=FALSE}
+spark_disconnect(sc)
+```
 
 ## Recap
 
