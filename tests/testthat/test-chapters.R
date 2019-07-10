@@ -11,7 +11,7 @@ test_that("can knit starting", {
 })
 
 test_that("can knit analysis", {
-  callr::r(rmarkdown::render("sources/analysis.Rmd", output_dir = "output"))
+  rmarkdown::render("sources/analysis.Rmd", output_dir = "output")
   expect_true(file.exists("output/analysis.html"))
 })
 
