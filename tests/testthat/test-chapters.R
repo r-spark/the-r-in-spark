@@ -15,6 +15,12 @@ test_that("can knit analysis", {
   expect_true(file.exists("output/analysis.html"))
 })
 
+test_that("can knit modeling", {
+  rmarkdown::render("sources/modeling.Rmd", output_dir = "output")
+  expect_true(file.exists("output/modeling.html"))
+})
+
+
 test_that("can knit extensions", {
   skip("TODO")
 
