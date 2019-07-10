@@ -6,7 +6,6 @@ test_that("can knit intro", {
 })
 
 test_that("can knit starting", {
-  skip("disable while testing")
   rmarkdown::render("sources/starting.Rmd", output_dir = "output")
   expect_true(file.exists("output/starting.html"))
 })
