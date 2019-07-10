@@ -453,11 +453,11 @@ Histograms provide a great way to analyze a single variable. To analyze two vari
 
 Scatter plots are used to compare the relationship between two continuous variables. For example, a scatter plot will display the relationship between the weight of a car and its gas consumption.  The plot will show that the higher the weight, the higher the gas consumption because the dots clump together into almost a line that goes from the top left towards the bottom right. See Figure \@ref(fig:analysis-point) for an example of the plot. 
 
-```{r, eval = FALSE}
+```{r analysis-scatter-code, eval = FALSE}
 ggplot(aes(mpg, wt), data = mtcars) + 
   geom_point()
 ```
-```{r, eval = FALSE, echo = FALSE}
+```{r analysis-scatter-rendeer, eval = FALSE, echo = FALSE}
 ggplot(aes(mpg, wt), data = mtcars) + 
   geom_point() +
   labs(title = "Weigth over MPG", subtitle = "A scatter plot visualizing car weigth over miles per gallon") +
@@ -475,10 +475,10 @@ The best alternative is to find a plot type that represents the x/y relationship
 
 You can use `dbplot_raster()` to create a scatter-like plot in Spark, while only retrieving a small subset of the remote dataset:
 
-```{r, eval = FALSE}
+```{r analysis-raster-codee, eval = FALSE}
 dbplot_raster(cars, mpg, wt, resolution = 16)
 ```
-```{r, eval = FALSE, echo = FALSE}
+```{r  analysis-rasteer-render, eval = FALSE, echo = FALSE}
 db_compute_raster2(cars, mpg, wt, resolution = 16) %>%
   ggplot() +
   scale_fill_gradientn(colours = grey.colors(10, start = 0.6, end = 0.2)) +
@@ -508,7 +508,7 @@ Therefore, the ideal data analysis language enables you to quickly adjust over e
 
 To illustrate how easy it is to iterate over wrangling and modeling in Spark, consider the following example. We will start by performing a linear regression against all features and predict MPG:
 
-```{r, eval = FALSE}
+```{r analysis-model-linear, eval = FALSE}
 cars %>% 
   ml_linear_regression(mpg ~ .) %>%
   summary()
@@ -530,7 +530,7 @@ Root Mean Squared Error: 2.147
 
 At this point it is very easy to experiment with different features, we can simply change the R formula from `mpg ~ .` to say `mpg ~ hp + cyl` to only use HP and cylinders as features:
 
-```{r, eval = FALSE}
+```{r analysis-model-summary, eval = FALSE}
 cars %>% 
   ml_linear_regression(mpg ~ hp + cyl) %>%
   summary()
@@ -550,7 +550,7 @@ Root Mean Squared Error: 3.021
 
 Additionally, it is also very easy to iterate with other kinds of models. The following one replaces the linear model with a generalized linear model:
 
-```{r, eval = FALSE}
+```{r analysis-model-glm, eval = FALSE}
 cars %>% 
   ml_generalized_linear_regression(mpg ~ hp + cyl) %>%
   summary()
@@ -579,13 +579,13 @@ The examples in this chapter are built using a very small data set. In real-life
 
 The `compute()` command can take the end of a `dplyr` piped command set and save the results to Spark memory.
 
-```{r, eval = FALSE}
+```{r analysis-caching-compute, eval = FALSE}
 cached_cars <- cars %>% 
   mutate(cyl = paste0("cyl_", cyl)) %>%
   compute("cached_cars")
 ```
 
-```{r, eval = FALSE}
+```{r analysis-caching-linear, eval = FALSE}
 cached_cars %>%
   ml_linear_regression(mpg ~ .) %>%
   summary()
@@ -623,7 +623,7 @@ Creating a new R Markdown report which uses Spark as a computer engine is easy! 
 
 Since an R Markdown document is self-contained and meant to be reproducible, before rendering documents we should first disconnect from Spark to free resources:
 
-```{r}
+```{r analysis-disconnect}
 spark_disconnect(sc)
 ```
 
@@ -670,7 +670,7 @@ spark_disconnect(sc)
 
 To knit this report, save the contents into a `report.Rmd` file and run `render()` from R. The output should look like the one in Figure \@(fig:visualize-analysis-communicate).
 
-```{r}
+```{r analysis-communicate-rmd}
 rmarkdown::render("report.Rmd")
 ```
 ```{r visualize-analysis-communicate, eval = TRUE, fig.width=10, fig.height=5, fig.cap='R Markdown HTML output', fig.align = 'center', echo = FALSE}
