@@ -761,23 +761,22 @@ library(dplyr)
 polygons_wkt <- mutate(polygons_wkt, y = st_geomfromwkt(geom))
 points_wkt <- mutate(points_wkt, x = st_geomfromwkt(geom))
 
-sc_res <- inner_join(polygons_wkt,
-                     points_wkt,
-                     join = sql("st_contains(y,x)")) %>% 
+inner_join(polygons_wkt,
+           points_wkt,
+           sql_on = sql("st_contains(y,x)")) %>% 
   group_by(area, state) %>%
-  summarise(cnt = n()) %>%
-  head()
+  summarise(cnt = n()) 
 ```
 ```
-    # Source: spark<?> [?? x 3]
-    # Groups: area
-      area            state   cnt
-      <chr>           <chr> <dbl>
-    1 texas area      TX       10
-    2 dakota area     SD        1
-    3 dakota area     ND       10
-    4 california area CA       10
-    5 new york area   NY        9
+# Source: spark<?> [?? x 3]
+# Groups: area
+  area            state   cnt
+  <chr>           <chr> <dbl>
+1 california area CA       10
+2 new york area   NY        9
+3 dakota area     ND       10
+4 texas area      TX       10
+5 dakota area     SD        1
 ```
 
 You can also plot these datasets by collecting a subset of the entire dataset or aggregating the geometries in spark before collecting them, one package you should look into is the `sf` package. We will now start closing this chapter by presenting a couple troubleshooting techniques applicable to all extensions.
