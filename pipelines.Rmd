@@ -519,14 +519,14 @@ install.packages("mleap")
 
 It then must be loaded when `spark_connect()` is called; so let's restart your R session, establish a new Spark connection[^4], and load the pipeline model that we previously saved.
 
-```{r echo=FALSE}
-# manually registered since rmakrdown won't restart the session
-sparklyr::register_extension("mleap")
-sparklyr::registered_extensions()
+```{r pipelines-realtime-workaround}
+# workaround for loading mleaep in travis
+options(sparklyr.log.console = TRUE)
+on.exit(options(sparklyr.log.console = NULL))
 ```
 ```{r pipelines-realtime-load}
-library(mleap)
 library(sparklyr)
+library(mleap)
 sc <- spark_connect(master = "local", version = "2.3")
 
 spark_model <- ml_load(sc, "spark_model")
