@@ -285,23 +285,23 @@ Previous chapters used `copy_to()` as a handy helper to copy data into Spark; ho
 For instance, suppose that we have a 3GB dataset generated as follows,
 
 ```{r data-copy-create}
-dir.create("large-file.txt")
-write.table(matrix(rnorm(10 * 10^6), ncol = 10), "large-file.txt/1",
+dir.create("largefile.txt")
+write.table(matrix(rnorm(10 * 10^6), ncol = 10), "largefile.txt/1",
             append = T, col.names = F, row.names = F)
 for (i in 2:30) 
-  file.copy("large-file.txt/1", paste("large-file.txt/", i))
+  file.copy("largefile.txt/1", paste("largefile.txt/", i))
 ```
 
 If we only had 2GB of memory in the driver node, we would not be able to load this 3GB file into memory using `copy_to()`. Instead, when using the Hadoop file system as storage in your cluster, you can use the `hadoop` command line tool to copy files from disk into Spark from the terminal as follows. Please notice that the following code will only work in clusters using HDFS, not in local environments.
 
 ```{bash eval=FALSE}
-hadoop fs -copyFromLocal large-file.txt large-file.txt
+hadoop fs -copyFromLocal largefile.txt largefile.txt
 ```
 
 You can then read the uploaded file as described in the [file formats](#data-file-formats) section; for text files, you would run:
 
 ```{r data-copy-read}
-spark_read_text(sc, "large-file.txt", memory = FALSE)
+spark_read_text(sc, "largefile.txt", memory = FALSE)
 ```
 ```
 # Source: spark<largefile> [?? x 1]
@@ -323,7 +323,7 @@ spark_read_text(sc, "large-file.txt", memory = FALSE)
 `collect()` has a similar limitation, it can only collect datasets that fit your driver memory; however, if you had to extract a large dataset from Spark through the driver node, you could use specialized tools provided by the distributed storage, for HDFS you would run,
 
 ```{bash eval=FALSE}
-hadoop fs -copyToLocal large-file.txt large-file.txt
+hadoop fs -copyToLocal largefile.txt largefile.txt
 ```
 
 Alternatively, you can also collect datasets that don't fit in-memory by providing a callback to `collect()`. A callback is just an R function that will be called over each Spark partition, you can then write this dataset to disk or push to other clusters over the network.
@@ -332,7 +332,7 @@ The following code could be use to collect 3GB even if the driver node collectin
 
 ```{r data-copy-collect}
 dir.create("large")
-spark_read_text(sc, "large-file.txt", memory = FALSE) %>%
+spark_read_text(sc, "largefile.txt", memory = FALSE) %>%
   dplyr::head(10^6) %>%
   collect(callback = function(df, idx) {
     writeLines(df$line, paste0("large/large-", idx, ".txt"))
@@ -342,7 +342,7 @@ spark_read_text(sc, "large-file.txt", memory = FALSE) %>%
 Make sure you clean up these large files and empty your recycle bin as well,
 
 ```{r data-copy-unlink}
-unlink("large-file.txt", recursive = TRUE)
+unlink("largefile.txt", recursive = TRUE)
 unlink("large", recursive = TRUE)
 ```
 
