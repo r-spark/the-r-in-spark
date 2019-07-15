@@ -559,9 +559,8 @@ FIGURE 10.3: Seven Bridges of Königsberg from the Euler Archive
 <p>Today, a graph is defined as an ordered pair <span class="math inline">\(G=(V,E)\)</span>, with <span class="math inline">\(V\)</span> a set of vertices (nodes or points) and <span class="math inline">\(E \subseteq \{\{x, y\} | (x, y) ∈ \mathrm{V}^2 \land x \ne y\}\)</span> a set of edges (links or lines) which are either an unordered pair for <em>undirected graphs</em> or an ordered pair for <em>directed graphs</em>. The former describing links where the direction does not matter and the latter linked where it does.</p>
 <p>As a simple example, we can use the <code>highschool</code> dataset from the <code>ggraph</code> package which tracks friendship among high school boys. In this dataset, the vertices are the students and the edges describe pairs of students who happen to be friends in a particular year.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;ggraph&quot;</span>)
-<span class="kw">install.packages</span>(<span class="st">&quot;igraph&quot;</span>)
-
-<span class="kw">library</span>(ggraph)
+<span class="kw">install.packages</span>(<span class="st">&quot;igraph&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggraph)
 <span class="kw">library</span>(igraph)
 
 highschool</code></pre>
@@ -763,9 +762,8 @@ FIGURE 10.6: Layered perceptrons as illustrated in the perceptrons book
 </p>
 </div>
 <p>Using Spark we can create a multi-layer perceptron classifier with <code>ml_multilayer_perceptron_classifier()</code> and gradient descent to classify and predict over large datasets. Gradient descent was introduced to layered perceptrons by Geoff Hinton <span class="citation">(Ackley, Hinton, and Sejnowski <a href="#ref-extensions-hinton-layered">1985</a>)</span> and like XGBoost, it also makes use of gradient descent. Let’s try it out, why we are on it, let’s also install <code>sparktf</code> which we are also about to introduce.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;sparktf&quot;</span>)
-
-<span class="kw">library</span>(sparktf)
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;sparktf&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparktf)
 <span class="kw">library</span>(sparklyr)
 
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)
@@ -904,21 +902,20 @@ FIGURE 10.10: Spatial operations available in geospark.
 polygons_wkt &lt;-<span class="st"> </span><span class="kw">mutate</span>(polygons_wkt, <span class="dt">y =</span> <span class="kw">st_geomfromwkt</span>(geom))
 points_wkt &lt;-<span class="st"> </span><span class="kw">mutate</span>(points_wkt, <span class="dt">x =</span> <span class="kw">st_geomfromwkt</span>(geom))
 
-sc_res &lt;-<span class="st"> </span><span class="kw">inner_join</span>(polygons_wkt,
-                     points_wkt,
-                     <span class="dt">join =</span> <span class="kw">sql</span>(<span class="st">&quot;st_contains(y,x)&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="kw">inner_join</span>(polygons_wkt,
+           points_wkt,
+           <span class="dt">sql_on =</span> <span class="kw">sql</span>(<span class="st">&quot;st_contains(y,x)&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">group_by</span>(area, state) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">summarise</span>(<span class="dt">cnt =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">head</span>()</code></pre>
-<pre><code>    # Source: spark&lt;?&gt; [?? x 3]
-    # Groups: area
-      area            state   cnt
-      &lt;chr&gt;           &lt;chr&gt; &lt;dbl&gt;
-    1 texas area      TX       10
-    2 dakota area     SD        1
-    3 dakota area     ND       10
-    4 california area CA       10
-    5 new york area   NY        9</code></pre>
+<span class="st">  </span><span class="kw">summarise</span>(<span class="dt">cnt =</span> <span class="kw">n</span>()) </code></pre>
+<pre><code># Source: spark&lt;?&gt; [?? x 3]
+# Groups: area
+  area            state   cnt
+  &lt;chr&gt;           &lt;chr&gt; &lt;dbl&gt;
+1 california area CA       10
+2 new york area   NY        9
+3 dakota area     ND       10
+4 texas area      TX       10
+5 dakota area     SD        1</code></pre>
 <p>You can also plot these datasets by collecting a subset of the entire dataset or aggregating the geometries in spark before collecting them, one package you should look into is the <code>sf</code> package. We will now start closing this chapter by presenting a couple troubleshooting techniques applicable to all extensions.</p>
 </div>
 <div id="troubleshooting" class="section level2">

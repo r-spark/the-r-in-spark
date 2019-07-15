@@ -414,7 +414,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>— Three-Eyed Raven</p>
 </blockquote>
 <p>In the Modeling chapter, we learned how to build predictive models using the high-level functions Spark provides and well-known R packages that work well together with Spark. You learned about supervised methods first and finished the chapter with an unsupervised method over raw text.</p>
-<p>In this chapter, we dive into Spark Pipelines, which is the engine that powers the features we demonstrated in the Modeling chapter. So for instance, when you invoke an MLlib function via the formula interface in R, for example <code>ml_logistic_regression(cars, am ~ .)</code>, <code>sparklyr</code> actually constructs a <em>pipeline</em> for you under the hood. Therefore, Pipelines also allow you to make use of advanced data processing and modeling workflows. In addition, pipeline also facilitates collaboration across data science and engineering teams by allowing you to <em>deploy</em> pipelines into production systems, web applications, mobile applications and so on.</p>
+<p>In this chapter, we dive into Spark Pipelines, which is the engine that powers the features we demonstrated in the Modeling chapter. So for instance, when you invoke an MLlib function via the formula interface in R; for example <code>ml_logistic_regression(cars, am ~ .)</code>, a <em>pipeline</em> gets constructed for you under the hood. Therefore, Pipelines also allow you to make use of advanced data processing and modeling workflows. In addition, a pipeline also facilitates collaboration across data science and engineering teams by allowing you to <em>deploy</em> pipelines into production systems, web applications, mobile applications and so on.</p>
 <p>This chapter also happens to be the last chapter that encourages using your local computer as a Spark cluster, you are just one chapter away from getting properly introduced to cluster computing, and be able to perform data science or machine learning that can scale to the most demanding computation problems.</p>
 <div id="overview-2" class="section level2">
 <h2><span class="header-section-number">5.1</span> Overview</h2>
@@ -432,39 +432,39 @@ scaler &lt;-<span class="st"> </span><span class="kw">ft_standard_scaler</span>(
   <span class="dt">with_mean =</span> <span class="ot">TRUE</span>)
 
 scaler</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">StandardScaler</span> (Estimator)
-<span class="op">&lt;</span>standard_scaler_7f6d46f452a1<span class="op">&gt;</span><span class="st"> </span>
-<span class="st"> </span>(Parameters <span class="op">--</span><span class="st"> </span>Column Names)
-  input_col<span class="op">:</span><span class="st"> </span>features
-  output_col<span class="op">:</span><span class="st"> </span>features_scaled
+<pre><code>StandardScaler (Estimator)
+&lt;standard_scaler_7f6d46f452a1&gt; 
+ (Parameters -- Column Names)
+  input_col: features
+  output_col: features_scaled
  (Parameters)
-  with_mean<span class="op">:</span><span class="st"> </span><span class="ot">TRUE</span>
-  with_std<span class="op">:</span><span class="st"> </span><span class="ot">TRUE</span></code></pre>
+  with_mean: TRUE
+  with_std: TRUE</code></pre>
 <p>We can now create some data (for which we know the mean and standard deviation) then fit our scaling model to it using the <code>ml_fit()</code> function.</p>
 <pre class="sourceCode r"><code class="sourceCode r">df &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">value =</span> <span class="kw">rnorm</span>(<span class="dv">100000</span>))) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">ft_vector_assembler</span>(<span class="dt">input_cols =</span> <span class="st">&quot;value&quot;</span>, <span class="dt">output_col =</span> <span class="st">&quot;features&quot;</span>)
 
 scaler_model &lt;-<span class="st"> </span><span class="kw">ml_fit</span>(scaler, df)
 scaler_model</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">StandardScalerModel</span> (Transformer)
-<span class="op">&lt;</span>standard_scaler_7f6d46f452a1<span class="op">&gt;</span><span class="st"> </span>
-<span class="st"> </span>(Parameters <span class="op">--</span><span class="st"> </span>Column Names)
-  input_col<span class="op">:</span><span class="st"> </span>features
-  output_col<span class="op">:</span><span class="st"> </span>features_scaled
+<pre><code>StandardScalerModel (Transformer)
+&lt;standard_scaler_7f6d46f452a1&gt; 
+ (Parameters -- Column Names)
+  input_col: features
+  output_col: features_scaled
  (Transformer Info)
-  mean<span class="op">:</span><span class="st">  </span>num <span class="fl">0.00421</span> 
-  std<span class="op">:</span><span class="st">  </span>num <span class="fl">0.999</span> </code></pre>
+  mean:  num 0.00421 
+  std:  num 0.999 </code></pre>
 <p><strong>Note:</strong> In Spark ML, many algorithms and feature transformers require that the input be a vector column. The function <code>ft_vector_assembler()</code> performs this task. The function can also be used to initialize a transformer to be used in a pipeline.</p>
 <p>We see that the mean and standard deviation are very close to 0 and 1, respectively, which is what we expect. We can then use the transformer to <em>transform</em> a data frame, using the <code>ml_transform()</code> function:</p>
 <pre class="sourceCode r"><code class="sourceCode r">scaler_model <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">ml_transform</span>(df) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">glimpse</span>()</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">Observations<span class="op">:</span><span class="st"> </span>??
-Variables<span class="op">:</span><span class="st"> </span><span class="dv">3</span>
-Database<span class="op">:</span><span class="st"> </span>spark_connection
-<span class="op">$</span><span class="st"> </span>value           <span class="op">&lt;</span>dbl<span class="op">&gt;</span><span class="st"> </span><span class="fl">0.75373300</span>, <span class="fl">-0.84207731</span>, <span class="fl">0.59365113</span>, <span class="op">-</span>…
-<span class="op">$</span><span class="st"> </span>features        <span class="op">&lt;</span>list<span class="op">&gt;</span><span class="st"> </span>[<span class="fl">0.753733</span>, <span class="fl">-0.8420773</span>, <span class="fl">0.5936511</span>, <span class="fl">-0.</span>…
-<span class="op">$</span><span class="st"> </span>features_scaled <span class="op">&lt;</span>list<span class="op">&gt;</span><span class="st"> </span>[<span class="fl">0.7502211</span>, <span class="fl">-0.8470762</span>, <span class="fl">0.58999</span>, <span class="fl">-0.4</span>…</code></pre>
+<pre><code>Observations: ??
+Variables: 3
+Database: spark_connection
+$ value           &lt;dbl&gt; 0.75373300, -0.84207731, 0.59365113, -…
+$ features        &lt;list&gt; [0.753733, -0.8420773, 0.5936511, -0.…
+$ features_scaled &lt;list&gt; [0.7502211, -0.8470762, 0.58999, -0.4…</code></pre>
 <p>Now that we’ve seen basic examples of estimators and transformers, we can move on to pipelines.</p>
 </div>
 <div id="creation" class="section level2">
@@ -477,33 +477,33 @@ Database<span class="op">:</span><span class="st"> </span>spark_connection
     <span class="dt">input_col =</span> <span class="st">&quot;features&quot;</span>,
     <span class="dt">output_col =</span> <span class="st">&quot;features_scaled&quot;</span>, 
     <span class="dt">with_mean =</span> <span class="ot">TRUE</span>)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">Pipeline</span> (Estimator) with <span class="dv">1</span> stage
-<span class="op">&lt;</span>pipeline_7f6d6a6a38ee<span class="op">&gt;</span><span class="st"> </span>
-<span class="st">  </span>Stages 
-  <span class="op">|--</span><span class="dv">1</span> <span class="kw">StandardScaler</span> (Estimator)
-  <span class="op">|</span><span class="st">    </span><span class="er">&lt;</span>standard_scaler_7f6d63bfc7d6<span class="op">&gt;</span><span class="st"> </span>
-<span class="st">  </span><span class="er">|</span><span class="st">     </span>(Parameters <span class="op">--</span><span class="st"> </span>Column Names)
-  <span class="op">|</span><span class="st">      </span>input_col<span class="op">:</span><span class="st"> </span>features
-  <span class="op">|</span><span class="st">      </span>output_col<span class="op">:</span><span class="st"> </span>features_scaled
-  <span class="op">|</span><span class="st">     </span>(Parameters)
-  <span class="op">|</span><span class="st">      </span>with_mean<span class="op">:</span><span class="st"> </span><span class="ot">TRUE</span>
-  <span class="op">|</span><span class="st">      </span>with_std<span class="op">:</span><span class="st"> </span><span class="ot">TRUE</span></code></pre>
+<pre><code>Pipeline (Estimator) with 1 stage
+&lt;pipeline_7f6d6a6a38ee&gt; 
+  Stages 
+  |--1 StandardScaler (Estimator)
+  |    &lt;standard_scaler_7f6d63bfc7d6&gt; 
+  |     (Parameters -- Column Names)
+  |      input_col: features
+  |      output_col: features_scaled
+  |     (Parameters)
+  |      with_mean: TRUE
+  |      with_std: TRUE</code></pre>
 <p>Alternatively, we can pass stages directly to <code>ml_pipeline()</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r">pipeline &lt;-<span class="st"> </span><span class="kw">ml_pipeline</span>(scaler)</code></pre>
 <p>We fit a pipeline as we would fit an estimator:</p>
 <pre class="sourceCode r"><code class="sourceCode r">pipeline_model &lt;-<span class="st"> </span><span class="kw">ml_fit</span>(pipeline, df)
 pipeline_model</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">PipelineModel</span> (Transformer) with <span class="dv">1</span> stage
-<span class="op">&lt;</span>pipeline_7f6d64df6e45<span class="op">&gt;</span><span class="st"> </span>
-<span class="st">  </span>Stages 
-  <span class="op">|--</span><span class="dv">1</span> <span class="kw">StandardScalerModel</span> (Transformer)
-  <span class="op">|</span><span class="st">    </span><span class="er">&lt;</span>standard_scaler_7f6d46f452a1<span class="op">&gt;</span><span class="st"> </span>
-<span class="st">  </span><span class="er">|</span><span class="st">     </span>(Parameters <span class="op">--</span><span class="st"> </span>Column Names)
-  <span class="op">|</span><span class="st">      </span>input_col<span class="op">:</span><span class="st"> </span>features
-  <span class="op">|</span><span class="st">      </span>output_col<span class="op">:</span><span class="st"> </span>features_scaled
-  <span class="op">|</span><span class="st">     </span>(Transformer Info)
-  <span class="op">|</span><span class="st">      </span>mean<span class="op">:</span><span class="st">  </span>num <span class="fl">0.00421</span> 
-  <span class="op">|</span><span class="st">      </span>std<span class="op">:</span><span class="st">  </span>num <span class="fl">0.999</span> </code></pre>
+<pre><code>PipelineModel (Transformer) with 1 stage
+&lt;pipeline_7f6d64df6e45&gt; 
+  Stages 
+  |--1 StandardScalerModel (Transformer)
+  |    &lt;standard_scaler_7f6d46f452a1&gt; 
+  |     (Parameters -- Column Names)
+  |      input_col: features
+  |      output_col: features_scaled
+  |     (Transformer Info)
+  |      mean:  num 0.00421 
+  |      std:  num 0.999 </code></pre>
 <pre><code>pipeline </code></pre>
 <p><strong>Note:</strong> As a result of the design of Spark ML, pipelines are always estimator objects, even if they comprise only of transformers. This means that if you have a pipeline with only transformers, you still need to call <code>ml_fit()</code> on it to obtain a transformer. The “fitting” procedure in this case wouldn’t actually modify any of the transformers.</p>
 </div>
@@ -537,20 +537,20 @@ okc_train &lt;-<span class="st"> </span>okc_train <span class="op">%&gt;%</span>
 <pre class="sourceCode r"><code class="sourceCode r">okc_train <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ft_string_indexer</span>(<span class="st">&quot;sex&quot;</span>, <span class="st">&quot;sex_indexed&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">select</span>(sex_indexed)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Source: spark&lt;?&gt; [?? x 1]</span>
+<pre><code># Source: spark&lt;?&gt; [?? x 1]
    sex_indexed
-         <span class="op">&lt;</span>dbl<span class="op">&gt;</span>
-<span class="st"> </span><span class="dv">1</span>           <span class="dv">0</span>
- <span class="dv">2</span>           <span class="dv">0</span>
- <span class="dv">3</span>           <span class="dv">1</span>
- <span class="dv">4</span>           <span class="dv">0</span>
- <span class="dv">5</span>           <span class="dv">1</span>
- <span class="dv">6</span>           <span class="dv">0</span>
- <span class="dv">7</span>           <span class="dv">0</span>
- <span class="dv">8</span>           <span class="dv">1</span>
- <span class="dv">9</span>           <span class="dv">1</span>
-<span class="dv">10</span>           <span class="dv">0</span>
-<span class="co"># … with more rows</span></code></pre>
+         &lt;dbl&gt;
+ 1           0
+ 2           0
+ 3           1
+ 4           0
+ 5           1
+ 6           0
+ 7           0
+ 8           1
+ 9           1
+10           0
+# … with more rows</code></pre>
 <p>Once you have found the right transformations for your dataset, you can then replace the data frame input with <code>ml_pipeline(sc)</code>, and the result will be a pipeline that you can apply to any data frame with the appropriate schema. In the next section, we’ll see how pipelines can make it easier for us to test different model specifications.</p>
 <div id="hyperparameter-tuning" class="section level3">
 <h3><span class="header-section-number">5.3.1</span> Hyperparameter Tuning</h3>
@@ -578,30 +578,30 @@ okc_train &lt;-<span class="st"> </span>okc_train <span class="op">%&gt;%</span>
 </dl>
 <p>We expect this to give rise to <span class="math inline">\(2 \times 2 \times 2 = 8\)</span> hyperparameter combinations, which we can confirm by printing the <code>cv</code> object:</p>
 <pre class="sourceCode r"><code class="sourceCode r">cv</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">CrossValidator</span> (Estimator)
-<span class="op">&lt;</span>cross_validator_d5676ac6f5<span class="op">&gt;</span><span class="st"> </span>
-<span class="st"> </span>(Parameters <span class="op">--</span><span class="st"> </span>Tuning)
-  estimator<span class="op">:</span><span class="st"> </span>Pipeline
-             <span class="op">&lt;</span>pipeline_d563b0cba31<span class="op">&gt;</span><span class="st"> </span>
-<span class="st">  </span>evaluator<span class="op">:</span><span class="st"> </span>BinaryClassificationEvaluator
-             <span class="op">&lt;</span>binary_classification_evaluator_d561d90b53d<span class="op">&gt;</span><span class="st"> </span>
-<span class="st">    </span>with metric areaUnderROC 
-  num_folds<span class="op">:</span><span class="st"> </span><span class="dv">10</span> 
-  [Tuned over <span class="dv">8</span> hyperparameter sets]</code></pre>
+<pre><code>CrossValidator (Estimator)
+&lt;cross_validator_d5676ac6f5&gt; 
+ (Parameters -- Tuning)
+  estimator: Pipeline
+             &lt;pipeline_d563b0cba31&gt; 
+  evaluator: BinaryClassificationEvaluator
+             &lt;binary_classification_evaluator_d561d90b53d&gt; 
+    with metric areaUnderROC 
+  num_folds: 10 
+  [Tuned over 8 hyperparameter sets]</code></pre>
 <p>As with any other estimator, we can fit the cross validator using <code>ml_fit()</code></p>
 <pre class="sourceCode r"><code class="sourceCode r">cv_model &lt;-<span class="st"> </span><span class="kw">ml_fit</span>(cv, okc_train)</code></pre>
 <p>and inspect the results:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ml_validation_metrics</span>(cv_model) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">arrange</span>(<span class="op">-</span>areaUnderROC)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">  areaUnderROC elastic_net_param_<span class="dv">1</span> reg_param_<span class="dv">1</span> with_mean_<span class="dv">2</span>
-<span class="dv">1</span>    <span class="fl">0.7722700</span>                <span class="fl">0.75</span>       <span class="fl">0.001</span>        <span class="ot">TRUE</span>
-<span class="dv">2</span>    <span class="fl">0.7718431</span>                <span class="fl">0.75</span>       <span class="fl">0.010</span>       <span class="ot">FALSE</span>
-<span class="dv">3</span>    <span class="fl">0.7718350</span>                <span class="fl">0.75</span>       <span class="fl">0.010</span>        <span class="ot">TRUE</span>
-<span class="dv">4</span>    <span class="fl">0.7717677</span>                <span class="fl">0.25</span>       <span class="fl">0.001</span>        <span class="ot">TRUE</span>
-<span class="dv">5</span>    <span class="fl">0.7716070</span>                <span class="fl">0.25</span>       <span class="fl">0.010</span>        <span class="ot">TRUE</span>
-<span class="dv">6</span>    <span class="fl">0.7715972</span>                <span class="fl">0.25</span>       <span class="fl">0.010</span>       <span class="ot">FALSE</span>
-<span class="dv">7</span>    <span class="fl">0.7713816</span>                <span class="fl">0.75</span>       <span class="fl">0.001</span>       <span class="ot">FALSE</span>
-<span class="dv">8</span>    <span class="fl">0.7703913</span>                <span class="fl">0.25</span>       <span class="fl">0.001</span>       <span class="ot">FALSE</span></code></pre>
+<pre><code>  areaUnderROC elastic_net_param_1 reg_param_1 with_mean_2
+1    0.7722700                0.75       0.001        TRUE
+2    0.7718431                0.75       0.010       FALSE
+3    0.7718350                0.75       0.010        TRUE
+4    0.7717677                0.25       0.001        TRUE
+5    0.7716070                0.25       0.010        TRUE
+6    0.7715972                0.25       0.010       FALSE
+7    0.7713816                0.75       0.001       FALSE
+8    0.7703913                0.25       0.001       FALSE</code></pre>
 <p>Now that we have seen the pipelines API in action, let’s talk more formally about how they behave in various contexts.</p>
 </div>
 </div>
@@ -659,20 +659,20 @@ okc_train &lt;-<span class="st"> </span>okc_train <span class="op">%&gt;%</span>
 <p>One of the most powerful aspects of pipelines is that they can be serialized to disk and are fully interoperable with the other Spark APIs, such as Python and Scala. This means they can be easily shared among users of Spark working in different languages, which may include other data scientists, data engineers, and deployment engineers. To save a pipeline model, call <code>ml_save()</code> and provide a path.</p>
 <pre class="sourceCode r"><code class="sourceCode r">model_dir &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="st">&quot;spark_model&quot;</span>)
 <span class="kw">ml_save</span>(cv_model<span class="op">$</span>best_model, model_dir, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">Model successfully saved.</code></pre>
+<pre><code>Model successfully saved.</code></pre>
 <p>Let us take a look at the directory we just wrote to.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">list.dirs</span>(model_dir,<span class="dt">full.names =</span> <span class="ot">FALSE</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">head</span>(<span class="dv">10</span>)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"> [<span class="dv">1</span>] <span class="st">&quot;&quot;</span>                                             
- [<span class="dv">2</span>] <span class="st">&quot;metadata&quot;</span>                                     
- [<span class="dv">3</span>] <span class="st">&quot;stages&quot;</span>                                       
- [<span class="dv">4</span>] <span class="st">&quot;stages/0_string_indexer_5b42c72817b&quot;</span>          
- [<span class="dv">5</span>] <span class="st">&quot;stages/0_string_indexer_5b42c72817b/data&quot;</span>     
- [<span class="dv">6</span>] <span class="st">&quot;stages/0_string_indexer_5b42c72817b/metadata&quot;</span> 
- [<span class="dv">7</span>] <span class="st">&quot;stages/1_string_indexer_5b423192b89f&quot;</span>         
- [<span class="dv">8</span>] <span class="st">&quot;stages/1_string_indexer_5b423192b89f/data&quot;</span>    
- [<span class="dv">9</span>] <span class="st">&quot;stages/1_string_indexer_5b423192b89f/metadata&quot;</span>
-[<span class="dv">10</span>] <span class="st">&quot;stages/2_string_indexer_5b421796e826&quot;</span>    </code></pre>
+<pre><code> [1] &quot;&quot;                                             
+ [2] &quot;metadata&quot;                                     
+ [3] &quot;stages&quot;                                       
+ [4] &quot;stages/0_string_indexer_5b42c72817b&quot;          
+ [5] &quot;stages/0_string_indexer_5b42c72817b/data&quot;     
+ [6] &quot;stages/0_string_indexer_5b42c72817b/metadata&quot; 
+ [7] &quot;stages/1_string_indexer_5b423192b89f&quot;         
+ [8] &quot;stages/1_string_indexer_5b423192b89f/data&quot;    
+ [9] &quot;stages/1_string_indexer_5b423192b89f/metadata&quot;
+[10] &quot;stages/2_string_indexer_5b421796e826&quot;    </code></pre>
 <p>We can dive into a couple of the files to see what type of data was saved.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_json</span>(sc, <span class="kw">file.path</span>(
   <span class="kw">file.path</span>(<span class="kw">dir</span>(<span class="kw">file.path</span>(model_dir, <span class="st">&quot;stages&quot;</span>),
@@ -680,44 +680,44 @@ okc_train &lt;-<span class="st"> </span>okc_train <span class="op">%&gt;%</span>
                 <span class="dt">full.names =</span> <span class="ot">TRUE</span>), <span class="st">&quot;metadata&quot;</span>)
 )) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">glimpse</span>()</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">Observations<span class="op">:</span><span class="st"> </span>??
-Variables<span class="op">:</span><span class="st"> </span><span class="dv">5</span>
-Database<span class="op">:</span><span class="st"> </span>spark_connection
-<span class="op">$</span><span class="st"> </span>class        <span class="op">&lt;</span>chr<span class="op">&gt;</span><span class="st"> &quot;org.apache.spark.ml.feature.StringIndexerModel&quot;</span>
-<span class="op">$</span><span class="st"> </span>paramMap     <span class="op">&lt;</span>list<span class="op">&gt;</span><span class="st"> </span>[[<span class="st">&quot;error&quot;</span>, <span class="st">&quot;drinks&quot;</span>, <span class="st">&quot;drinks_indexed&quot;</span>, <span class="st">&quot;frequencyDesc&quot;</span>]]
-<span class="op">$</span><span class="st"> </span>sparkVersion <span class="op">&lt;</span>chr<span class="op">&gt;</span><span class="st"> &quot;2.3.2&quot;</span>
-<span class="op">$</span><span class="st"> </span>timestamp    <span class="op">&lt;</span>dbl<span class="op">&gt;</span><span class="st"> </span><span class="fl">1.561763e+12</span>
-<span class="op">$</span><span class="st"> </span>uid          <span class="op">&lt;</span>chr<span class="op">&gt;</span><span class="st"> &quot;string_indexer_ce05afa9899&quot;</span></code></pre>
+<pre><code>Observations: ??
+Variables: 5
+Database: spark_connection
+$ class        &lt;chr&gt; &quot;org.apache.spark.ml.feature.StringIndexerModel&quot;
+$ paramMap     &lt;list&gt; [[&quot;error&quot;, &quot;drinks&quot;, &quot;drinks_indexed&quot;, &quot;frequencyDesc&quot;]]
+$ sparkVersion &lt;chr&gt; &quot;2.3.2&quot;
+$ timestamp    &lt;dbl&gt; 1.561763e+12
+$ uid          &lt;chr&gt; &quot;string_indexer_ce05afa9899&quot;</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_parquet</span>(sc, <span class="kw">file.path</span>(
   <span class="kw">file.path</span>(<span class="kw">dir</span>(<span class="kw">file.path</span>(model_dir, <span class="st">&quot;stages&quot;</span>),
                 <span class="dt">pattern =</span> <span class="st">&quot;6_logistic_regression.*&quot;</span>,
                 <span class="dt">full.names =</span> <span class="ot">TRUE</span>), <span class="st">&quot;data&quot;</span>)
 ))</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Source: spark&lt;data&gt; [?? x 5]</span>
+<pre><code># Source: spark&lt;data&gt; [?? x 5]
   numClasses numFeatures interceptVector coefficientMatr… isMultinomial
-       <span class="op">&lt;</span>int<span class="op">&gt;</span><span class="st">       </span><span class="er">&lt;</span>int<span class="op">&gt;</span><span class="st"> </span><span class="er">&lt;</span>list<span class="op">&gt;</span><span class="st">          </span><span class="er">&lt;</span>list<span class="op">&gt;</span><span class="st">           </span><span class="er">&lt;</span>lgl<span class="op">&gt;</span><span class="st">        </span>
-<span class="dv">1</span>          <span class="dv">2</span>          <span class="dv">12</span> <span class="op">&lt;</span>dbl [<span class="dv">1</span>]<span class="op">&gt;</span><span class="st">       </span><span class="er">&lt;</span><span class="op">-</span><span class="fl">1.27950828662</span>… <span class="ot">FALSE</span>        </code></pre>
+       &lt;int&gt;       &lt;int&gt; &lt;list&gt;          &lt;list&gt;           &lt;lgl&gt;        
+1          2          12 &lt;dbl [1]&gt;       &lt;-1.27950828662… FALSE        </code></pre>
 <p>We see that quite a bit of information has been exported, from the SQL statement in the dplyr transformer to the fitted coefficient estimates of the logistic regression. We can then (in a new Spark session) reconstruct the model by using <code>ml_load()</code>:</p>
-<pre class="sourceCode r"><code class="sourceCode r">model_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="kw">ml_load</span>(sc, model_dir)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">model_reload &lt;-<span class="st"> </span><span class="kw">ml_load</span>(sc, model_dir)</code></pre>
 <p>Let us see if we can retrieve the logistic regression stage from this pipeline model:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ml_stage</span>(model_<span class="dv">2</span>, <span class="st">&quot;logistic_regression&quot;</span>)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">LogisticRegressionModel</span> (Transformer)
-<span class="op">&lt;</span>logistic_regression_5b423b539d0f<span class="op">&gt;</span><span class="st"> </span>
-<span class="st"> </span>(Parameters <span class="op">--</span><span class="st"> </span>Column Names)
-  features_col<span class="op">:</span><span class="st"> </span>features_scaled
-  label_col<span class="op">:</span><span class="st"> </span>not_working
-  prediction_col<span class="op">:</span><span class="st"> </span>prediction
-  probability_col<span class="op">:</span><span class="st"> </span>probability
-  raw_prediction_col<span class="op">:</span><span class="st"> </span>rawPrediction
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ml_stage</span>(model_reload, <span class="st">&quot;logistic_regression&quot;</span>)</code></pre>
+<pre><code>LogisticRegressionModel (Transformer)
+&lt;logistic_regression_5b423b539d0f&gt; 
+ (Parameters -- Column Names)
+  features_col: features_scaled
+  label_col: not_working
+  prediction_col: prediction
+  probability_col: probability
+  raw_prediction_col: rawPrediction
  (Transformer Info)
-  coefficient_matrix<span class="op">:</span><span class="st">  </span>num [<span class="dv">1</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">12</span>] <span class="fl">-1.2795</span> <span class="fl">-0.0915</span> <span class="dv">0</span> <span class="fl">0.126</span> <span class="fl">-0.0324</span> ... 
-  coefficients<span class="op">:</span><span class="st">  </span>num [<span class="dv">1</span><span class="op">:</span><span class="dv">12</span>] <span class="fl">-1.2795</span> <span class="fl">-0.0915</span> <span class="dv">0</span> <span class="fl">0.126</span> <span class="fl">-0.0324</span> ... 
-  intercept<span class="op">:</span><span class="st">  </span>num <span class="fl">-2.79</span> 
-  intercept_vector<span class="op">:</span><span class="st">  </span>num <span class="fl">-2.79</span> 
-  num_classes<span class="op">:</span><span class="st">  </span>int <span class="dv">2</span> 
-  num_features<span class="op">:</span><span class="st">  </span>int <span class="dv">12</span> 
-  threshold<span class="op">:</span><span class="st">  </span>num <span class="fl">0.5</span> 
-  thresholds<span class="op">:</span><span class="st">  </span>num [<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>] <span class="fl">0.5</span> <span class="fl">0.5</span> </code></pre>
+  coefficient_matrix:  num [1, 1:12] -1.2795 -0.0915 0 0.126 -0.0324 ... 
+  coefficients:  num [1:12] -1.2795 -0.0915 0 0.126 -0.0324 ... 
+  intercept:  num -2.79 
+  intercept_vector:  num -2.79 
+  num_classes:  int 2 
+  num_features:  int 12 
+  threshold:  num 0.5 
+  thresholds:  num [1:2] 0.5 0.5 </code></pre>
 <p>Note that the exported JSON and parquet files are agnostic of the API that exported them. This means that in a multilingual machine learning engineering team, you can pick up a data preprocessing pipeline from a data engineer working in Python, build a prediction model on top of it, then hand off the final pipeline off to a deployment engineering working in Scala. In the next section, we discuss deployment of models in more detail.</p>
 <p><strong>Note:</strong> When <code>ml_save()</code> is called for sparklyr ML models (created using the formula interface), the associated pipeline model is saved, but any sparklyr specific metadata, such as index labels, are not. In other words, saving a sparklyr <code>ml_model</code> object then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. What we gain from this tradeoff of loss information is interoperability with other languages.</p>
 <p>Before we move on to discuss how to run pipelines in production, make sure you disconnect from Spark,</p>
@@ -731,10 +731,14 @@ Database<span class="op">:</span><span class="st"> </span>spark_connection
 <p>The nightly portfolio risk and credit application scoring examples we mention above represent two modes of ML deployment known as <em>batch</em> and <em>real-time</em>. Loosely, batch processing implies processing many records at the same time and that execution time is not important as long it is reasonable (often on the scale of minutes to hours.) On the other hand, real-time processing implies scoring one or a few records at a time but the latency is crucial (on the scale of &lt;1 second.) We will now see how we can take our OKCupid pipeline model to “production.”</p>
 <div id="batch-scoring" class="section level3">
 <h3><span class="header-section-number">5.6.1</span> Batch Scoring</h3>
-<p>For both scoring methods, batch and real-time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The plumber<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> R package enables us to do this very easily by annotating our prediction function.</p>
+<p>For both scoring methods, batch and real-time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The <code>plumber</code><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> R package enables us to do this very easily by annotating our prediction function.</p>
+<p>You will need make sure that <code>plumber</code>, <code>callr</code> and the <code>httr</code> package are installed by running:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="kw">c</span>(<span class="st">&quot;plumber&quot;</span>, <span class="st">&quot;callr&quot;</span>, <span class="st">&quot;httr&quot;</span>))</code></pre>
+<p>The <code>callr</code> package provides support to run R code in separate R sessions, it is not strictly required but we will use it to start a web service in the background. The <code>httr</code> package allows us to use web APIs from R.</p>
 <p>In the batch scoring use case, we simply initiate a Spark connection and load the saved model. Save the following script as <code>plumber/spark-plumber.R</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)
+
 spark_model &lt;-<span class="st"> </span><span class="kw">ml_load</span>(sc, <span class="st">&quot;spark_model&quot;</span>)
 
 <span class="co">#* @post /predict</span>
@@ -753,19 +757,20 @@ score_spark &lt;-<span class="st"> </span><span class="cf">function</span>(age, 
 <span class="st">    </span>dplyr<span class="op">::</span><span class="kw">pull</span>(prediction)
 }</code></pre>
 <p>We can then initialize the service by executing the following:</p>
-<pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span>plumber<span class="op">::</span><span class="kw">plumb</span>(<span class="st">&quot;plumber/spark-plumber.R&quot;</span>)
-p<span class="op">$</span><span class="kw">run</span>(<span class="dt">port =</span> <span class="dv">8000</span>)</code></pre>
-<p>This should start the web service locally and emit a message similar to</p>
-<pre class="sourceCode r"><code class="sourceCode r">Starting server to listen on port <span class="dv">8000</span>
-Running the swagger UI at http<span class="op">:</span><span class="er">//</span><span class="dv">127</span>.<span class="dv">0</span>.<span class="fl">0.1</span><span class="op">:</span><span class="dv">8000</span><span class="op">/</span>__swagger__<span class="op">/</span></code></pre>
-<p>In a separate R session, we can try to query the service with new data to be scored:</p>
+<pre class="sourceCode r"><code class="sourceCode r">service &lt;-<span class="st"> </span>callr<span class="op">::</span><span class="kw">r_bg</span>(<span class="cf">function</span>() {
+  p &lt;-<span class="st"> </span>plumber<span class="op">::</span><span class="kw">plumb</span>(<span class="st">&quot;plumber/spark-plumber.R&quot;</span>)
+  p<span class="op">$</span><span class="kw">run</span>(<span class="dt">port =</span> <span class="dv">8000</span>)
+})</code></pre>
+<p>This will start the web service locally that we can then query the service with new data to be scored; however, you might need to wait a few seconds for the Spark service to initialize.</p>
 <pre class="sourceCode r"><code class="sourceCode r">httr<span class="op">::</span><span class="kw">content</span>(httr<span class="op">::</span><span class="kw">POST</span>(
   <span class="st">&quot;http://127.0.0.1:8000/predict&quot;</span>,
-  <span class="dt">body =</span> <span class="st">&#39;{&quot;age&quot;: [42], &quot;sex&quot;: &quot;m&quot;, &quot;drinks&quot;: &quot;not at all&quot;, </span>
-<span class="st">           &quot;drugs&quot;: &quot;never&quot;, &quot;essay_length&quot;: [99]}&#39;</span>
+  <span class="dt">body =</span> <span class="st">&#39;{&quot;age&quot;: 42, &quot;sex&quot;: &quot;m&quot;, &quot;drinks&quot;: &quot;not at all&quot;, </span>
+<span class="st">           &quot;drugs&quot;: &quot;never&quot;, &quot;essay_length&quot;: 99}&#39;</span>
 ))</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">[[<span class="dv">1</span>]]
-[<span class="dv">1</span>] <span class="dv">0</span></code></pre>
+<pre><code>[[1]]
+[1] 0</code></pre>
+<p>This reply tell us that this particular profile is likely to not be unemployed, that is, employed. We can now terminate the <code>plumber</code> service by stopping the <code>callr</code> service:</p>
+<pre class="sourceCode r"><code class="sourceCode r">service<span class="op">$</span><span class="kw">interrupt</span>()</code></pre>
 <p>If we were to time this operation (e.g. with <code>system.time()</code>), we see that the latency is on the order of hundreds of milliseconds, which may be appropriate for batch applications but insufficient for real-time. The main bottleneck is the serialization of the R data frame to a Spark data frame and back. Also, it also requires an active Spark session which is a heavy runtime requirement. To ameliorate these issues, we discuss next a deployment method more suitable for real time deployment.</p>
 </div>
 <div id="real-time-scoring" class="section level3">
@@ -791,10 +796,13 @@ spark_model &lt;-<span class="st"> </span><span class="kw">ml_load</span>(sc, <s
 
 sample_input_tbl &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, sample_input)
 
-<span class="kw">ml_write_bundle</span>(
-  spark_model,
-  <span class="dt">sample_input =</span> sample_input_tbl, <span class="dt">path =</span> <span class="st">&quot;mleap_model.zip&quot;</span>)</code></pre>
-<p>The artifact we just created, <code>mleap_model.zip</code>, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! To test this model, we can create a new plumber API to expose it. The script <code>plumber/mleap-plumber.R</code> is very similar to the previous example:</p>
+<span class="kw">ml_write_bundle</span>(spark_model, sample_input_tbl, <span class="st">&quot;mleap_model.zip&quot;</span>)</code></pre>
+<p>The artifact we just created, <code>mleap_model.zip</code>, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! In fact, we can go ahead and disconnect from Spark already:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)</code></pre>
+<p>Before we use this MLeap model, make sure the runtime dependencies are installed:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install_maven</span>()
+<span class="kw">install_mleap</span>()</code></pre>
+<p>To test this model, we can create a new plumber API to expose it. The script <code>plumber/mleap-plumber.R</code> is very similar to the previous example:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mleap)
 
 mleap_model &lt;-<span class="st"> </span><span class="kw">mleap_load_bundle</span>(<span class="st">&quot;mleap_model.zip&quot;</span>)
@@ -811,22 +819,23 @@ score_spark &lt;-<span class="st"> </span><span class="cf">function</span>(age, 
   )
   <span class="kw">mleap_transform</span>(mleap_model, new_data)<span class="op">$</span>prediction
 }</code></pre>
-<p>However, before we launch this web API, make sure the runtime dependencies are installed:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install_maven</span>()
-<span class="kw">install_mleap</span>()</code></pre>
 <p>And the way we launch the service is exactly the same:</p>
-<pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span>plumber<span class="op">::</span><span class="kw">plumb</span>(<span class="st">&quot;plumber/mleap-plumber.R&quot;</span>)
-p<span class="op">$</span><span class="kw">run</span>(<span class="dt">port =</span> <span class="dv">8000</span>)</code></pre>
-<p>Again, in a separate session, we can run the exact same code we did previously to test this new service:</p>
+<pre class="sourceCode r"><code class="sourceCode r">service &lt;-<span class="st"> </span>callr<span class="op">::</span><span class="kw">r_bg</span>(<span class="cf">function</span>() {
+  p &lt;-<span class="st"> </span>plumber<span class="op">::</span><span class="kw">plumb</span>(<span class="st">&quot;plumber/mleap-plumber.R&quot;</span>)
+  p<span class="op">$</span><span class="kw">run</span>(<span class="dt">port =</span> <span class="dv">8000</span>)
+})</code></pre>
+<p>We can run the exact same code we did previously to test unemployment predictions in this new service:</p>
 <pre class="sourceCode r"><code class="sourceCode r">httr<span class="op">::</span><span class="kw">POST</span>(
   <span class="st">&quot;http://127.0.0.1:8000/predict&quot;</span>,
-  <span class="dt">body =</span> <span class="st">&#39;{&quot;age&quot;: [42], &quot;sex&quot;: &quot;m&quot;, &quot;drinks&quot;: &quot;not at all&quot;, </span>
-<span class="st">           &quot;drugs&quot;: &quot;never&quot;, &quot;essay_length&quot;: [99]}&#39;</span>
+  <span class="dt">body =</span> <span class="st">&#39;{&quot;age&quot;: 42, &quot;sex&quot;: &quot;m&quot;, &quot;drinks&quot;: &quot;not at all&quot;, </span>
+<span class="st">           &quot;drugs&quot;: &quot;never&quot;, &quot;essay_length&quot;: 99}&#39;</span>
 ) <span class="op">%&gt;%</span>
 <span class="st">  </span>httr<span class="op">::</span><span class="kw">content</span>()</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">[[<span class="dv">1</span>]]
-[<span class="dv">1</span>] <span class="dv">0</span></code></pre>
+<pre><code>[[1]]
+[1] 0</code></pre>
 <p>If we were to time this operation, we will see that the service now returns predictions in tens of milliseconds!</p>
+<p>Let’s stop this service and then wrap up this chapter.</p>
+<pre class="sourceCode r"><code class="sourceCode r">service<span class="op">$</span><span class="kw">interrupt</span>()</code></pre>
 </div>
 </div>
 <div id="recap-2" class="section level2">
@@ -844,7 +853,7 @@ p<span class="op">$</span><span class="kw">run</span>(<span class="dt">port =</s
 <li id="fn4"><p><a href="https://www.rplumber.io/" class="uri">https://www.rplumber.io/</a><a href="pipelines.html#fnref4" class="footnote-back">↩</a></p></li>
 <li id="fn5"><p><a href="https://github.com/rstudio/mleap">https://github.com/rstudio/mleap</a><a href="pipelines.html#fnref5" class="footnote-back">↩</a></p></li>
 <li id="fn6"><p><a href="https://github.com/combust/mleap">https://github.com/combust/mleap</a><a href="pipelines.html#fnref6" class="footnote-back">↩</a></p></li>
-<li id="fn7"><p>Note that, as of the writing of this book, MLeap does not yet support Spark 2.4, so we use Spark 2.3 instead.<a href="pipelines.html#fnref7" class="footnote-back">↩</a></p></li>
+<li id="fn7"><p>Note that, as of the writing of this book, MLeap does not yet support Spark 2.4.<a href="pipelines.html#fnref7" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
             </section>
