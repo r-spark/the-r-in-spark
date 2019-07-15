@@ -519,18 +519,18 @@ install.packages("mleap")
 
 It then must be loaded when `spark_connect()` is called; so let's restart your R session, establish a new Spark connection[^4], and load the pipeline model that we previously saved.
 
-```{r pipelines-realtime-workaround}
-yaml::write_yaml(list(default = list("sparklyr.log.console" = TRUE)), "config.yml")
-```
-```{r pipelines-realtime-load}
+```{r pipelines-realtime-load-libs}
 library(sparklyr)
 library(mleap)
-sc <- spark_connect(master = "local", version = "2.3")
-
-spark_model <- ml_load(sc, "spark_model")
 ```
-```{r pipelines-realtime-workaround-remove}
-unlink("config.yml")
+```{r pipelines-realtime-workaround, echo=FALSE}
+sc <- spark_connect(master = "local", version = "2.3", config = list(sparklyr.log.console = TRUE))
+```
+```{r eval=FALSE}
+sc <- spark_connect(master = "local", version = "2.3")
+```
+```{r pipelines-realtime-load}
+spark_model <- ml_load(sc, "spark_model")
 ```
 
 [^4]: Note that, as of the writing of this book, MLeap does not yet support Spark 2.4.
