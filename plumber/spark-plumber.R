@@ -1,5 +1,6 @@
 library(sparklyr)
 sc <- spark_connect(master = "local", version = "2.3")
+
 spark_model <- ml_load(sc, "spark_model")
 
 #* @post /predict

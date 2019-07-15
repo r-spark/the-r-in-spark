@@ -99,7 +99,7 @@ There are a couple ways to construct a pipeline in sparklyr, both of which uses 
 
 We can initialize an empty pipeline with `ml_pipeline(sc)` and append stages to it:
 
-```{r}
+```{r pipelines-create}
 ml_pipeline(sc) %>% 
   ft_standard_scaler(
     input_col = "features",
@@ -123,13 +123,13 @@ Pipeline (Estimator) with 1 stage
 
 Alternatively, we can pass stages directly to `ml_pipeline()`:
 
-```{r}
+```{r pipelines-create-stages}
 pipeline <- ml_pipeline(scaler)
 ```
 
 We fit a pipeline as we would fit an estimator:
 
-```{r}
+```{r pipelines-create-fit}
 pipeline_model <- ml_fit(pipeline, df)
 pipeline_model
 ```
@@ -158,7 +158,7 @@ pipeline
 
 Now that we have an understanding of the rudimentary concepts for ML Pipelines, let us apply them to the predictive modeling problem from the previous chapter, where we are trying to predict whether people are currently employed by looking at their profiles. Our starting point is the `okc_train` data frame with the relevant columns.
 
-```{r}
+```{r pipelines-use-load}
 okc_train <- spark_read_parquet(sc, "data/okc-train.parquet")
 
 okc_train <- okc_train %>% 
@@ -167,7 +167,7 @@ okc_train <- okc_train %>%
 
 We first exhibit the pipeline, which includes feature engineering and modeling steps, then walk through it.
 
-```{r}
+```{r pipelines-use-stages}
 pipeline <- ml_pipeline(sc) %>%
   ft_string_indexer(input_col = "sex", output_col = "sex_indexed") %>%
   ft_string_indexer(input_col = "drinks", output_col = "drinks_indexed") %>%
@@ -191,7 +191,7 @@ The first three stages index the `sex`, `drinks`, and `drugs` columns, which are
 
 During prototyping, you may want to execute these transformations *eagerly* on a small subset of the data, by passing the data frame to the `ft_` and `ml_` functions, and inspecting the transformed data frame. The immediate feedback allows for rapid iteration of ideas; once you have arrived at the desired processing steps, you can roll them up into a pipeline. For example, you can do the following:
 
-```{r}
+```{r pipelines-use-train}
 okc_train %>%
   ft_string_indexer("sex", "sex_indexed") %>% 
   select(sex_indexed)
@@ -219,7 +219,7 @@ Once you have found the right transformations for your dataset, you can then rep
 
 Going back to the pipeline we have created above, we can use `ml_cross_validator()` to perform the cross validation workflow we demonstrated in the previous chapter and easily test different hyperparameter combinations. In this example, we test whether centering the variables improve predictions together with various regularization values for the logistic regression. We define the cross validator as follows:
 
-```{r}
+```{r pipelines-hyper-validator}
 cv <- ml_cross_validator(
   sc,
   estimator = pipeline,
@@ -244,7 +244,7 @@ Logistic regression
 
 We expect this to give rise to $2 \times 2 \times 2 = 8$ hyperparameter combinations, which we can confirm by printing the `cv` object:
 
-```{r}
+```{r pipelines-hyper-validator-print}
 cv
 ```
 
@@ -263,13 +263,13 @@ CrossValidator (Estimator)
 
 As with any other estimator, we can fit the cross validator using `ml_fit()`
 
-```{r}
+```{r pipelines-hyper-fit}
 cv_model <- ml_fit(cv, okc_train)
 ```
 
 and inspect the results:
 
-```{r}
+```{r pipelines-hyper-roc}
 ml_validation_metrics(cv_model) %>%
   arrange(-areaUnderROC)
 ```
@@ -316,7 +316,7 @@ With the basics of pipelines down, we are now ready to discuss the collaboration
 
 One of the most powerful aspects of pipelines is that they can be serialized to disk and are fully interoperable with the other Spark APIs, such as Python and Scala. This means they can be easily shared among users of Spark working in different languages, which may include other data scientists, data engineers, and deployment engineers. To save a pipeline model, call `ml_save()` and provide a path.
 
-```{r}
+```{r pipelines-interop-save}
 model_dir <- file.path("spark_model")
 ml_save(cv_model$best_model, model_dir, overwrite = TRUE)
 ```
@@ -327,7 +327,7 @@ Model successfully saved.
 
 Let us take a look at the directory we just wrote to.
 
-```{r}
+```{r pipelines-interop-list}
 list.dirs(model_dir,full.names = FALSE) %>%
   head(10)
 ```
@@ -346,7 +346,7 @@ list.dirs(model_dir,full.names = FALSE) %>%
 
 We can dive into a couple of the files to see what type of data was saved.
 
-```{r}
+```{r pipelines-interop-json}
 spark_read_json(sc, file.path(
   file.path(dir(file.path(model_dir, "stages"),
                 pattern = "1_string_indexer.*",
@@ -365,7 +365,7 @@ $ timestamp    <dbl> 1.561763e+12
 $ uid          <chr> "string_indexer_ce05afa9899"
 ```
 
-```{r}
+```{r pipelines-interop-parquet}
 spark_read_parquet(sc, file.path(
   file.path(dir(file.path(model_dir, "stages"),
                 pattern = "6_logistic_regression.*",
@@ -381,13 +381,13 @@ spark_read_parquet(sc, file.path(
 
 We see that quite a bit of information has been exported, from the SQL statement in the dplyr transformer to the fitted coefficient estimates of the logistic regression. We can then (in a new Spark session) reconstruct the model by using `ml_load()`:
 
-```{r}
+```{r pipelines-interop-load}
 model_reload <- ml_load(sc, model_dir)
 ```
 
 Let us see if we can retrieve the logistic regression stage from this pipeline model:
 
-```{r}
+```{r pipelines-interop-stages}
 ml_stage(model_reload, "logistic_regression")
 ```
 ```
@@ -416,7 +416,7 @@ Note that the exported JSON and parquet files are agnostic of the API that expor
 
 Before we move on to discuss how to run pipelines in production, make sure you disconnect from Spark,
 
-```{r}
+```{r pipelines-interop-disconnecet}
 spark_disconnect(sc)
 ```
 
@@ -432,15 +432,24 @@ The nightly portfolio risk and credit application scoring examples we mention ab
 
 ### Batch Scoring
 
-For both scoring methods, batch and real-time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The plumber[^1] R package enables us to do this very easily by annotating our prediction function.
+For both scoring methods, batch and real-time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The `plumber`[^1] R package enables us to do this very easily by annotating our prediction function.
+
+You will need make sure that `plumber`, `callr` and the `httr` package are installed by running:
+
+```{r eval=FALSE}
+install.packages(c("plumber", "callr", "httr"))
+```
+
+The `callr` package provides support to run R code in separate R sessions, it is not strictly required but we will use it to start a web service in the background. The `httr` package allows us to use web APIs from R.
 
 [^1]: https://www.rplumber.io/
 
 In the batch scoring use case, we simply initiate a Spark connection and load the saved model. Save the following script as `plumber/spark-plumber.R`:
 
-```{r}
+```{r pipelines-batch-score}
 library(sparklyr)
 sc <- spark_connect(master = "local", version = "2.3")
+
 spark_model <- ml_load(sc, "spark_model")
 
 #* @post /predict
@@ -462,38 +471,34 @@ score_spark <- function(age, sex, drinks, drugs, essay_length) {
 
 We can then initialize the service by executing the following:
 
-```{r}
-p <- plumber::plumb("plumber/spark-plumber.R")
-p$run(port = 8000)
+```{r pipelines-batch-plumber}
+service <- callr::r_bg(function() {
+  p <- plumber::plumb("plumber/spark-plumber.R")
+  p$run(port = 8000)
+})
 ```
 
-This should start the web service locally and emit a message similar to
+This will start the web service locally that we can then query the service with new data to be scored; however, you might need to wait a few seconds for the Spark service to initialize.
 
-```
-Starting server to listen on port 8000
-Running the swagger UI at http://127.0.0.1:8000/__swagger__/
-```
-
-In a separate R session, we can try to query the service with new data to be scored:
-
-```{r}
+```{r pipelines-batch-post}
 httr::content(httr::POST(
   "http://127.0.0.1:8000/predict",
-  body = '{"age": [42], "sex": "m", "drinks": "not at all", 
-           "drugs": "never", "essay_length": [99]}'
+  body = '{"age": 42, "sex": "m", "drinks": "not at all", 
+           "drugs": "never", "essay_length": 99}'
 ))
 ```
-
 ```
 [[1]]
 [1] 0
 ```
 
-If we were to time this operation (e.g. with `system.time()`), we see that the latency is on the order of hundreds of milliseconds, which may be appropriate for batch applications but insufficient for real-time. The main bottleneck is the serialization of the R data frame to a Spark data frame and back. Also, it also requires an active Spark session which is a heavy runtime requirement. To ameliorate these issues, we discuss next a deployment method more suitable for real time deployment.
+This reply tell us that this particular profile is likely to not be unemployed, that is, employed. We can now terminate the `plumber` service by stopping the `callr` service:
 
-```{r echo=FALSE}
-spark_disconnect(sc)
+```{r pipelines-batch-interrrupt}
+service$interrupt()
 ```
+
+If we were to time this operation (e.g. with `system.time()`), we see that the latency is on the order of hundreds of milliseconds, which may be appropriate for batch applications but insufficient for real-time. The main bottleneck is the serialization of the R data frame to a Spark data frame and back. Also, it also requires an active Spark session which is a heavy runtime requirement. To ameliorate these issues, we discuss next a deployment method more suitable for real time deployment.
 
 ### Real-Time Scoring
 
@@ -510,7 +515,7 @@ install.packages("mleap")
 
 It then must be loaded when `spark_connect()` is called; so let's restart your R session, establish a new Spark connection[^4], and load the pipeline model that we previously saved.
 
-```{r}
+```{r pipelines-realtime-load}
 library(sparklyr)
 library(mleap)
 sc <- spark_connect(master = "local", version = "2.3")
@@ -518,11 +523,11 @@ sc <- spark_connect(master = "local", version = "2.3")
 spark_model <- ml_load(sc, "spark_model")
 ```
 
-[^4]: Note that, as of the writing of this book, MLeap does not yet support Spark 2.4, so we use Spark 2.3 instead.
+[^4]: Note that, as of the writing of this book, MLeap does not yet support Spark 2.4.
 
 The way we save a model to MLeap bundle format is very similar to saving a model using the Spark ML Pipelines API; the only additional argument is `sample_input`, which is a Spark data frame with schema that we expect new data to be scored to have.
 
-```{r}
+```{r pipelines-realtime-write}
 sample_input <- data.frame(
   sex = "m",
   drinks = "not at all",
@@ -534,14 +539,25 @@ sample_input <- data.frame(
 
 sample_input_tbl <- copy_to(sc, sample_input)
 
-ml_write_bundle(
-  spark_model,
-  sample_input = sample_input_tbl, path = "mleap_model.zip")
+ml_write_bundle(spark_model, sample_input_tbl, "mleap_model.zip")
 ```
 
-The artifact we just created, `mleap_model.zip`, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! To test this model, we can create a new plumber API to expose it. The script `plumber/mleap-plumber.R` is very similar to the previous example:
+The artifact we just created, `mleap_model.zip`, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! In fact, we can go ahead and disconnect from Spark already:
 
-```{r}
+```{r pipelines-realtime-disconnect}
+spark_disconnect(sc)
+```
+
+Before we use this MLeap model, make sure the runtime dependencies are installed:
+
+```{r pipelines-realtime-install}
+install_maven()
+install_mleap()
+```
+
+To test this model, we can create a new plumber API to expose it. The script `plumber/mleap-plumber.R` is very similar to the previous example:
+
+```{r pipelines-realtime-mleap-load}
 library(mleap)
 
 mleap_model <- mleap_load_bundle("mleap_model.zip")
@@ -560,27 +576,22 @@ score_spark <- function(age, sex, drinks, drugs, essay_length) {
 }
 ```
 
-However, before we launch this web API, make sure the runtime dependencies are installed:
-
-```{r}
-install_maven()
-install_mleap()
-```
-
 And the way we launch the service is exactly the same:
 
-```{r}
-p <- plumber::plumb("plumber/mleap-plumber.R")
-p$run(port = 8000)
+```{r pipelines-realtime-plumber}
+service <- callr::r_bg(function() {
+  p <- plumber::plumb("plumber/mleap-plumber.R")
+  p$run(port = 8000)
+})
 ```
 
-Again, in a separate session, we can run the exact same code we did previously to test this new service:
+We can run the exact same code we did previously to test unemployment predictions in this new service:
 
-```{r eval=FALSE}
+```{r pipelines-realtime-plmber-score}
 httr::POST(
   "http://127.0.0.1:8000/predict",
-  body = '{"age": [42], "sex": "m", "drinks": "not at all", 
-           "drugs": "never", "essay_length": [99]}'
+  body = '{"age": 42, "sex": "m", "drinks": "not at all", 
+           "drugs": "never", "essay_length": 99}'
 ) %>%
   httr::content()
 ```
@@ -591,8 +602,10 @@ httr::POST(
 
 If we were to time this operation, we will see that the service now returns predictions in tens of milliseconds!
 
-```{r echo=FALSE}
-spark_disconnect(sc)
+Let's stop this service and then wrap up this chapter.
+
+```{r pipelines-realtime-interrrupt}
+service$interrupt()
 ```
 
 ## Recap
