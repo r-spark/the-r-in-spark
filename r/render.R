@@ -69,5 +69,13 @@ render_clear_resized <- function() {
   unlink(dir("images/", "resized.png", full.names = T))
 }
 
+render_wait_for_url <- function(url, time) {
+  wait <- 0
+  while (identical(tryCatch(httr::HEAD(url), error = function(e) NULL), NULL) && wait < time) {
+    Sys.sleep(1)
+    wait <- wait + 1
+  }
+}
+
 source("r/plots.R")
 ggplot2::theme_set(plot_style())

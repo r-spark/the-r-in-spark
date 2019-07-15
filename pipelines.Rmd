@@ -481,8 +481,8 @@ service <- callr::r_bg(function() {
 This will start the web service locally that we can then query the service with new data to be scored; however, you might need to wait a few seconds for the Spark service to initialize.
 
 ```{r pipelines-batch-wait, echo=FALSE}
-Sys.sleep(10)
-message(service$get_result())
+render_wait_for_url("http://127.0.0.1:8000/predict", 40)
+if (!service$is_alive()) message(service$get_result())
 ```
 ```{r pipelines-batch-post}
 httr::content(httr::POST(
@@ -592,8 +592,8 @@ service <- callr::r_bg(function() {
 We can run the exact same code we did previously to test unemployment predictions in this new service:
 
 ```{r pipelines-realtime-wait, echo=FALSE}
-Sys.sleep(10)
-message(service$get_result())
+render_wait_for_url("http://127.0.0.1:8000/predict", 40)
+if (!service$is_alive()) message(service$get_result())
 ```
 ```{r pipelines-realtime-plmber-score}
 httr::POST(
