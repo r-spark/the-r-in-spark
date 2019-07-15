@@ -21,6 +21,10 @@ test_that("can knit modeling", {
 })
 
 test_that("can knit pipelines", {
+  # workaround for loading mleaep in travis
+  options(sparklyr.log.console = TRUE)
+  on.exit(options(sparklyr.log.console = NULL))
+
   rmarkdown::render("sources/pipelines.Rmd", output_dir = "output")
   expect_true(file.exists("output/pipelines.html"))
 })
