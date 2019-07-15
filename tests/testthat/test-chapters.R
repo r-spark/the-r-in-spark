@@ -25,6 +25,11 @@ test_that("can knit pipelines", {
   expect_true(file.exists("output/pipelines.html"))
 })
 
+test_that("can knit data", {
+  rmarkdown::render("sources/data.Rmd", output_dir = "output")
+  expect_true(file.exists("output/data.html"))
+})
+
 test_that("can knit extensions", {
   skip("TODO")
 

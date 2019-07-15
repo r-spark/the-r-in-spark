@@ -281,27 +281,26 @@ It is best to recognize that Spark, R, and any other technology are tools. No to
 
 Previous chapters used `copy_to()` as a handy helper to copy data into Spark; however, `copy_to()` can only be used to transfer in-memory datasets that are already loaded in memory; this dataset tend to be much smaller than the kind of datasets you would want to copy into Spark.
 
-For instance, suppose that we have a 10GB generated as follows, please consider skipping this exercise if you don't have 10GB free to spare.
+For instance, suppose that we have a 3GB dataset generated as follows,
 
 ```{r}
-for (i in 1:10^2) {
-  write.table(
-    matrix(rnorm(6 * 10^6), ncol = 6) ,
-    "largefile.txt", append = T,
-    col.names = F, row.names = F)
-}
+dir.create("large-file.txt")
+write.table(matrix(rnorm(10 * 10^6), ncol = 10), "large-file.txt/1",
+            append = T, col.names = F, row.names = F)
+for (i in 2:30) 
+  file.copy("large-file.txt/1", paste("large-file.txt/", i))
 ```
 
-If we only had 2GB of memory in the driver node, we would not be able to load this 10GB file into memory using `copy_to()`. Instead, when using the Hadoop file system as storage in your cluster, you can use the `hadoop` command line tool to copy files from disk into Spark from the terminal as follows. Please notice that the following code will only work in clusters using HDFS, not in local environments.
+If we only had 2GB of memory in the driver node, we would not be able to load this 3GB file into memory using `copy_to()`. Instead, when using the Hadoop file system as storage in your cluster, you can use the `hadoop` command line tool to copy files from disk into Spark from the terminal as follows. Please notice that the following code will only work in clusters using HDFS, not in local environments.
 
-```{bash}
+```{bash eval=FALSE}
 hadoop fs -copyFromLocal large-file.txt large-file.txt
 ```
 
 You can then read the uploaded file as described in the [file formats](#data-file-formats) section; for text files, you would run:
 
 ```{r}
-spark_read_text(sc, "largefile.txt", memory = FALSE)
+spark_read_text(sc, "large-file.txt", memory = FALSE)
 ```
 ```
 # Source: spark<largefile> [?? x 1]
@@ -322,23 +321,31 @@ spark_read_text(sc, "largefile.txt", memory = FALSE)
 
 `collect()` has a similar limitation, it can only collect datasets that fit your driver memory; however, if you had to extract a large dataset from Spark through the driver node, you could use specialized tools provided by the distributed storage, for HDFS you would run,
 
-```{bash}
+```{bash eval=FALSE}
 hadoop fs -copyToLocal large-file.txt large-file.txt
 ```
 
 Alternatively, you can also collect datasets that don't fit in-memory by providing a callback to `collect()`. A callback is just an R function that will be called over each Spark partition, you can then write this dataset to disk or push to other clusters over the network.
 
-The following code will crete 10K files adding up to 10GB even if the driver node collecting this dataset had less than 10GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this usually creates a significant performance bottleneck.
+The following code could be use to collect 3GB even if the driver node collecting this dataset had less than 3GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this creates a significant performance bottleneck. For conciseness, we will collect only the first million rows; feel free to remove `head()` if you havee a few minutes to spare.
 
 ```{r}
 dir.create("large")
-spark_read_text(sc, "largefile.txt", memory = FALSE) %>%
+spark_read_text(sc, "large-file.txt", memory = FALSE) %>%
+  head(10^6) %>%
   collect(callback = function(df, idx) {
     writeLines(df$line, paste0("large/large-", idx, ".txt"))
   })
 ```
 
-Since in most cases data will already be stored in the cluster, you should not have to worry about copying large-datasets; instead, you can usually focus on reading and writing different file formats, which we will describe next.
+Make sure you clean up these large files and empty your recycle bin as well,
+
+```{r}
+unlink("large-file.txt", recursive = TRUE)
+unlink("large", recursive = TRUE)
+```
+
+In most cases, data will already be stored in the cluster, so you should not have to worry about copying large-datasets; instead, you can usually focus on reading and writing different file formats, which we will describe next.
 
 ## File Formats {#data-file-formats}
 
@@ -488,7 +495,13 @@ bench::mark(
 render_image("images/data-file-format-benchmark.png")
 ```
 
-This concludes the introduction to some of the out-of-the-box supported file formats, we will present next how to deal with formats that require external packages and customization.
+From now on, please disconnect from Spark whenever we present a new `spark_connect()` command.
+
+```{r}
+spark_disconnect(sc)
+```
+
+This concludes the introduction to some of the out-of-the-box supported file formats, we will present next how to deal with formats that require external packages and customization. 
 
 ### Others
 
@@ -525,6 +538,10 @@ tbl(sc, "simple_xml") %>%
 
 In addition, there are a few extensions developed by the R community to load additional file formats, to mention a few: `sparklyr.nested` to assist with nested data, `spark.sas7bdat` to read data from SAS, `sparkavro` to read data in AVRO format and `sparkwarc` to read WARC files which use extensibility mechanisms introduced in the Extensions chapter. The Distributed R chapter will present techniques to use R packages to load additional file formats and the Contributing chapter presents techniques to use Java libraries to complement this further. But first, let's explore how to retrieve and store files from several different file systems.
 
+```{r echo=FALSE}
+spark_disconnect(sc)
+```
+
 ## File Systems {#data-file-systems}
 
 Spark will default to the file system that it is currently running on.  In a YARN managed cluster, the default file system will be HDFS. An example path of "/home/user/file.csv" will be read from cluster's HDFS folders, and not the Linux folders.  The Operating System's file system will be accessed for other deployments, such as Stand Alone, and `sparklyr`'s local. 
@@ -535,7 +552,7 @@ There are many other file system protocols like: `dbfs://` for Databricks' file 
 
 Spark does not provide support for all them directly; instead, they are configured as needed. For instance, accessing the "s3a" protocol requires adding a package to the `sparklyr.connect.packages` configuration setting while connecting and appropriate credentials might need to be specified using the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
 
-```{r}
+```{r eval=FALSE}
 Sys.setenv(AWS_ACCESS_KEY_ID = my_key_id)
 Sys.setenv(AWS_SECRET_ACCESS_KEY = my_secret_key)
 
@@ -562,6 +579,9 @@ In YARN managed clusters, Spark provides a deeper integration with Apache Hive. 
 Accessing a Hive table's data can be done using `DBI`, by referencing a table in a SQL statement.
 
 ```{r}
+sc <- spark_connect(master = "local", version = "2.3")
+spark_read_csv(sc, "test", "data-csv/", memory = FALSE)
+
 DBI::dbGetQuery(sc, "SELECT * FROM test limit 10")
 ```
 
@@ -611,7 +631,7 @@ Apache *Cassandra* is a free and open-source, distributed, wide column store, No
 
 The following example code shows how to use the `datastax:spark-cassandra-connector` package to read from Cassandra. The key is to use the  `org.apache.spark.sql.cassandra` library as the `source` argument.  It provides the mapping Spark can use to make sense of the data source. Unless you have a Cassandra database, skip executing the following statement.
 
-```{r}
+```{r eval=FALSE}
 sc <- spark_connect(master = "local", version = "2.3", config = list(
   sparklyr.connect.packages = "datastax:spark-cassandra-connector:2.3.1-s_2.11"))
 
@@ -635,7 +655,7 @@ It is quite easy to connect to a remote database with `spark_read_jdbc()` and `s
 
 First, you would need to download the appropriate JDBC driver from the MySQL's developer portal and specify this additional driver as a `sparklyr.shell.driver-class-path` connection option. Since JDBC drivers are Java-based, the code is contained inside a *JAR* (Java ARchive) file. Once connected to Spark with the appropriate driver, you can use the `jdbc://` protocol to access particular drivers and databases. Unless you are willing to download and configure MySQL on your own, skip executing the following statement.
 
-```{r}
+```{r eval=FALSE}
 sc <- spark_connect(master = "local", version = "2.3", config = list(
   "sparklyr.shell.driver-class-path" =
     "~/Downloads/mysql-connector-java-5.1.41/mysql-connector-java-5.1.41-bin.jar"
