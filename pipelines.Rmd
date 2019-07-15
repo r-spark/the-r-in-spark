@@ -416,7 +416,7 @@ Note that the exported JSON and parquet files are agnostic of the API that expor
 
 Before we move on to discuss how to run pipelines in production, make sure you disconnect from Spark,
 
-```{r pipelines-interop-disconnecet}
+```{r pipelines-interop-disconnect}
 spark_disconnect(sc)
 ```
 
@@ -519,6 +519,10 @@ install.packages("mleap")
 
 It then must be loaded when `spark_connect()` is called; so let's restart your R session, establish a new Spark connection[^4], and load the pipeline model that we previously saved.
 
+```{r echo=FALSE}
+# manually registered since rmakrdown won't restart the session
+sparklyr::register_extension("mleap")
+```
 ```{r pipelines-realtime-load}
 library(mleap)
 library(sparklyr)
