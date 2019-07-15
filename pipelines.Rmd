@@ -522,11 +522,12 @@ It then must be loaded when `spark_connect()` is called; so let's restart your R
 ```{r echo=FALSE}
 # manually registered since rmakrdown won't restart the session
 sparklyr::register_extension("mleap")
+sparklyr::registered_extensions()
 ```
 ```{r pipelines-realtime-load}
 library(mleap)
 library(sparklyr)
-sc <- spark_connect(master = "local", version = "2.3")
+sc <- spark_connect(master = "local", version = "2.3", config = list(sparklyr.log.console = TRUE))
 
 spark_model <- ml_load(sc, "spark_model")
 ```
@@ -547,7 +548,7 @@ sample_input <- data.frame(
 
 sample_input_tbl <- copy_to(sc, sample_input)
 
-ml_write_bundle(spark_model, sample_input_tbl, "mleap_model.zip")
+ml_write_bundle(spark_model, sample_input_tbl, "mleap_model.zip", overwrite = TRUE)
 ```
 
 The artifact we just created, `mleap_model.zip`, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! In fact, we can go ahead and disconnect from Spark already:
