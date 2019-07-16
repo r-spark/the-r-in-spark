@@ -89,26 +89,11 @@ install.packages("rsparkling", type = "source",
                  repos = "http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/31/R")
 ```
 
-It is then important to notice that you need to use compatible versions of Spark, Sparkling Water and H2O. So let's start by checking the version of H2O by running,
+It is important to notice that you need to use compatible versions of Spark, Sparkling Water and H2O as specified in their docs; we present instructions for Spark 2.3, but using different Spark versions will require you to install different versions. So let's start by checking the version of H2O by running,
 
 ```{r extensions-h2o-version, eval=TRUE}
 packageVersion("h2o")
-```
-
-Then we can explore the Spark and Sparkling Water versions that are compatible with `h2o_release_table()`.
-
-```{r extensions-h2o-versions}
-rsparkling::h2o_release_table() %>%
-  dplyr::filter(H2O_Version == !!as.character(packageVersion("h2o")))
-```
-```
-# A tibble: 4 x 5
-  Spark_Version Sparkling_Water… H2O_Version H2O_Release_Name H2O_Release_Patch…
-          <dbl> <fct>            <fct>       <fct>                         <int>
-1           2.4 2.4.5            3.22.1.3    rel-xu                            3
-2           2.3 2.3.23           3.22.1.3    rel-xu                            3
-3           2.2 2.2.34           3.22.1.3    rel-xu                            3
-4           2.1 2.1.48           3.22.1.3    rel-xu                            3
+packageVersion("rsparkling")
 ```
 
 We can then connect with the supported Spark versions as follows, you will have to adjust the `master` parameter for your particular cluster.
