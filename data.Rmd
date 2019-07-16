@@ -90,7 +90,7 @@ In Spark, there is the notion of a folder as a dataset. Instead of enumerating e
 library(sparklyr)
 sc <- spark_connect(master = "local", version = "2.3")
 
-spark_read_csv(sc, "data-csv")
+spark_read_csv(sc, "data-csv/")
 ```
 ```
 # Source: spark<datacsv> [?? x 2]
@@ -143,7 +143,7 @@ The accepted variable types are: `integer`, `character`, `logical`, `double`, `n
 Then, when reading using `spark_read_csv()`, you can pass `col_spec_1` to the `columns` argument to match the names and types of the original file. This helps improve performance since Spark will not have to figure out the column types.
 
 ```{r data-schema-read-csv}
-spark_read_csv(sc, "data-csv", columns = spec_with_r)
+spark_read_csv(sc, "data-csv/", columns = spec_with_r)
 ```
 ```
 # Source: spark<datacsv> [?? x 2]
@@ -162,7 +162,7 @@ The following example shows how to set the field type to something different. Ho
 ```{r data-schema-compatible}
 spec_compatible <- c(my_letter = "character", my_number = "character")
 
-spark_read_csv(sc, "data-csv", columns = spec_compatible)
+spark_read_csv(sc, "data-csv/", columns = spec_compatible)
 ```
 ```
 # Source: spark<datacsv> [?? x 2]
@@ -624,7 +624,7 @@ The following examples require additional Spark packages and database which migh
 spark_disconnect(sc)
 ```
 
-Nest we will explore a less structured storage system, often referred to as NoSQL database.
+Next we will explore a less structured storage system, often referred to as NoSQL databases.
 
 ### Cassandra
 

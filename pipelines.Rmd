@@ -525,6 +525,7 @@ library(mleap)
 ```
 ```{r pipelines-realtime-workaround, echo=FALSE}
 sc <- spark_connect(master = "local", version = "2.3", config = list(sparklyr.log.console = TRUE))
+spark_session(sc) %>% invoke("sparkContext") %>% invoke("setLogLevel", "WARN")
 ```
 ```{r eval=FALSE}
 sc <- spark_connect(master = "local", version = "2.3")
