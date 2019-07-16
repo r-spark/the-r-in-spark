@@ -9,6 +9,7 @@ file.copy("../../plumber/", "sources/", recursive = TRUE)
 file.copy("../../r/", "sources/", recursive = TRUE)
 file.copy("../../data/", "sources/", recursive = TRUE)
 file.copy("../../images/", "sources/", recursive = TRUE)
+file.copy("../../shiny/", "shiny/", recursive = TRUE)
 
 for (rmd in dir("sources", pattern = "*.Rmd", full.names = TRUE)) {
   lines <- readLines(rmd)

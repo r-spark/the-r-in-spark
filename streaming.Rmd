@@ -15,7 +15,7 @@ We can look back at the previous eleven chapters and think, what else are we mis
 
 We were not explicit about this, but we've always assumed your data is static, we assumed it doesn't change over time. But suppose for a moment your job is to analyze traffic patterns to give recommendations to the department of transportation. A very reasonable approach would be to analyze historical data and then design predictive models that compute forecasts overnight. Overnight? That's very useful but traffic patterns change to the hour and even by the minute. You could try to preprocess and predict faster and faster, but eventually this model breaks -- you can't load large-scale datasets, transform them, score them, unload them and repeat this process by the second.
 
-Instead, we need to introduce a different kind of dataset, one that is not static but rather dynamic; one that is like a table but is growing constantly, we will refer to such datasets as stream.
+Instead, we need to introduce a different kind of dataset, one that is not static but rather dynamic; one that is like a table but is growing constantly, we will refer to such datasets as streams.
 
 ## Overview
 
@@ -86,7 +86,7 @@ dir.create("source")
 
 We are now ready to define our first stream!
 
-```{r}
+```{r streaming-overview-copy}
 stream <- stream_read_text(sc, "source/") %>%
   stream_write_text("destination/")
 ```
@@ -95,8 +95,10 @@ The streams starts running with `stream_write_*()`; once executed, the stream wi
 
 We can use `stream_generate_test()` to produce a file every second containing lines of text that follow a given distribution, you can read more about this in the Appendix. In practice, you would connect to existing sources without having to generate data artificially. We can then use `view_stream()` to track the **rows per second (rps)** being processed in the source, destination and their latest values over time. The result is shown in Figure .
 
-```{r streaming-overview-test, eval=FALSE}
+```{r streaming-overview-test}
 future::future(stream_generate_test(interval = 0.5))
+```
+```{r streaming-overview-view, eval=FALSE}
 stream_view(stream)
 ```
 
@@ -128,7 +130,7 @@ Each sub-section will cover an option provided by `sparklyr` to perform transfor
 
 You can analyze streams with `dplyr` verbs and SQL using `DBI`, as a quick example, we will filter rows and add columns over a stream. We won't explicitly call `stream_generate_test()`, but you can call it on your own through the `later` package if you feel the urge to verify that data is being processed continuously.
 
-```{r}
+```{r streaming-analysis}
 library(dplyr)
 
 stream_read_csv(sc, "source") %>%
@@ -154,7 +156,7 @@ stream_read_csv(sc, "source") %>%
 
 It is also possible to perform aggregations over the entire history of the stream.  The history could be filtered or not.
 
-```{r}
+```{r streaming-analysis-aggregations}
 stream_read_csv(sc, "source") %>%
   filter(x > 700) %>%
   mutate(y = round(x / 100)) %>%
@@ -172,7 +174,7 @@ stream_read_csv(sc, "source") %>%
 
 Grouped aggregations of the latest data in the stream require a timestamp.  The timestamp will be of when reading function, in this case `stream_read_csv()` , first "saw" that specific record. In Spark stream terms, that timestamp is called a "watermark".  The `spark_watermark()` function is used to add the timestamp.  For this exercise, the watermark will be the same for all records, since the five files were read by the stream after they were created.  Please note that only Kafka and memory *outputs* support watermarks.  
 
-```{r}
+```{r streaming-analysis-watermark}
 stream_read_csv(sc, "source") %>%
   stream_watermark()
 ```
@@ -195,7 +197,7 @@ stream_read_csv(sc, "source") %>%
 
 After the watermark is created, it can be used in the `group_by()` verb.  It can then be piped into a `summarise()` function to get some stats of the stream.
 
-```{r}
+```{r streaming-analysis-watermark-agg}
 stream_read_csv(sc, "source") %>%
   stream_watermark() %>%
   group_by(timestamp) %>%
@@ -220,7 +222,7 @@ That said, there are other modeling concepts we can use with streams, like featu
 
 The next example makes use of the `ft_bucketizer()` feature transformer to modify the stream followed by regular `dplyr` functions which you can use just as you would with static datasets.
 
-```{r}
+```{r streaming-modeling-featureese}
 stream_read_csv(sc, "source") %>%
   mutate(x = as.numeric(x)) %>%
   ft_bucketizer("x", "buckets", splits = 0:10 * 100) %>%
@@ -250,7 +252,7 @@ Spark pipelines can be used for scoring streams, but not to train over streaming
 
 In order to score a stream, it is necessary to first create a our model. So lets build, fit and save a simple pipeline.
 
-```{r}
+```{r streaming-pipelines}
 cars <- copy_to(sc, mtcars)
 
 model <- ml_pipeline(sc) %>%
@@ -264,7 +266,7 @@ model <- ml_pipeline(sc) %>%
 
 We can then generate a stream based on `mtcars` using `stream_generate_test()` and score the model using `ml_transform()`:
 
-```{r}
+```{r streaming-pipelines-transform}
 future::future(stream_generate_test(mtcars, "cars-stream", iterations = 5))
 
 ml_transform(model, stream_read_csv(sc, "cars-stream"))
@@ -293,7 +295,7 @@ Even though the example this example was put together with a few lines of code, 
 
 Arbitrary R code can also be used to transform a stream with the use of `spark_apply()`. This approach follows the same principles discussed in the Distributed R chapter, as in, `spark_apply()` runs R code over each executor in the cluster where data is available, this enables processing high-throughput streams and fulfill low-latency requirements.
 
-```{r}
+```{r streaming-distributed}
 stream_read_csv(sc, "cars-stream") %>%
   select(mpg) %>%
   spark_apply(~ round(.x), mpg = "integer") %>%
@@ -302,7 +304,7 @@ stream_read_csv(sc, "cars-stream") %>%
 
 Which as you would expect, processes data from `cars-stream` into `cars-round` by running the custom `round()` R function, let's pick into the output sink:
 
-```{r}
+```{r streaming-distributed-read}
 spark_read_csv(sc, "cars-round")
 ```
 ```
@@ -326,6 +328,10 @@ Again, make sure you apply the concepts you already know about `spark_apply()` w
 
 This was our last transformation for streams, you will now learn how to use Spark streams with Shiny, a package that makes it easy to build interactive web applications from R. 
 
+```{r streaming-distributed-disconnect}
+spark_disconnect(sc)
+```
+
 ## Kafka
 
 Apache Kafka is an open-source stream-processing software platform developed by LinkedIn and donated to the Apache Software Foundation, written in Scala and Java. As an analogy. Kafka is to real-time storage as what Hadoop is to static storage.
@@ -348,11 +354,10 @@ If you are new to Kafka, we don't recommend you try to run the code from this se
 
 Using Kafka also requires the Kafka package when connecting to Spark, make sure is specified in your connection `config`:
 
-```{r}
+```{r streaming-kafka-connect}
 library(sparklyr)
 library(dplyr)
 
-config$
 sc <- spark_connect(master = "local", config = list(
   sparklyr.shell.packages = "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
 ))
@@ -360,7 +365,7 @@ sc <- spark_connect(master = "local", config = list(
 
 Once connected, it's straightforward to read data from a stream:
     
-```{r}
+```{r streaming-kafka-read, eval=FALSE}
 stream_read_kafka(
   sc, 
   options = list(
@@ -390,7 +395,7 @@ There are three modes available when processing Kafka streams in Spark: *complet
 
 In our next example, the *producer* will stream random letters into Kafka under a `letters` topic. Then Spark will act as the *stream processor* reading the `letters` topic and computing unique letter which are then written back to Kafka under the `totals` topic. We will use the `update` mode when writing back into Kafka, only the totals that changed will be sent to Kafka. This change is determined after each batch from the `letters` topic.
 
-```{r}
+```{r streaming-kafka-read-write, eval=FALSE}
 hosts  <- "localhost:9092"
 
 read_options <- list(kafka.bootstrap.servers = hosts, subscribe = "letters")
@@ -406,7 +411,7 @@ stream_read_kafka(sc, options = read_options) %>%
 
 You can take a quick look at totals by reading from Kafka,
 
-```{r}
+```{r streaming-kafka-preview, eval=FALSE}
 stream_read_kafka(sc, options = totals_options)
 ```
 
@@ -427,15 +432,21 @@ Next, we will use the Shiny framework to visualize streams, in real-time!
 
 Shiny's reactive framework is well suited to support streaming information which you can use to display real-time data from Spark using the `reactiveSpark()`, reactive. There is much to learn about Shiny which we can possibly present; however, if you are already familiar with Shiny, this example should be quite easy to understand.
 
-We have a modified version of the k-means Shiny example which, instead of getting the data from the static `iris` dataset, gets generated with `stream_generate_test()`, consumed by Spark and retrieved to Shiny through `reactiveSpark()` and displayed as captured in Figure \@ref(fig:streaming-shiny-app), enjoy!
+We have a modified version of the k-means Shiny example which, instead of getting the data from the static `iris` dataset, gets generated with `stream_generate_test()`, consumed by Spark, retrieved to Shiny through `reactiveSpark()` and displayed as captured in Figure \@ref(fig:streaming-shiny-app).
 
-```{r}
-options(sparklyr.sanitize.column.names = FALSE)
+To run this example, store the following Shiny app under `shiny/shiny-stream.R`.
+
+```{r streaming-shiny, eval=FALSE}
 library(sparklyr)
 library(shiny)
 
-sc <- spark_connect(master = "local", version = "2.3")
+unlink("shiny-stream", recursive = TRUE)
+dir.create("shiny-stream", showWarnings = FALSE)
 
+sc <- spark_connect(
+  master = "local", version = "2.3",
+  config = list(sparklyr.sanitize.column.names = FALSE))
+  
 ui <- pageWithSidebar(
   headerPanel('Iris k-means clustering from Spark stream'),
   sidebarPanel(
@@ -449,7 +460,9 @@ ui <- pageWithSidebar(
 )
 
 server <- function(input, output, session) {
-  iris <- reactiveSpark(stream_read_csv(sc, "shiny-stream"))
+  iris <- stream_read_csv(sc, "shiny-stream",
+                          columns = sapply(datasets::iris, class)) %>%
+    reactiveSpark()
   
   selectedData <- reactive(iris()[, c(input$xcol, input$ycol)])
   clusters <- reactive(kmeans(selectedData(), input$clusters))
@@ -461,16 +474,19 @@ server <- function(input, output, session) {
   })
 }
 
-app <- shinyApp(ui, server)
+shinyApp(ui, server)
 ```
 
-The Shiny app can be activated with `runApp()` and the test stream with `stream_generate_test()` using a constant distribution this time.
+This Shiny application can then be launched with `runApp()`,
 
-```{r}
-unlink("shiny-stream", recursive = TRUE)
-future::future(stream_generate_test(iris, "shiny-stream", rep(5, 10^3)))
+```{r eval=FALSE}
+shiny::runApp("shiny/shiny-stream.R")
+```
 
-runApp(app)
+While the shiny app runs, launch a new R session from the same directory and create a test stream with `stream_generate_test()`; this will generate a stream of continuous data that Spark can process and Shiny visualize.
+
+```{r eval=FALSE}
+sparklyr::stream_generate_test(datasets::iris, "shiny/shiny-stream", rep(5, 10^3))
 ```
 
 ```{r streaming-shiny-app, eval = TRUE,  fig.align = 'center', fig.cap = 'Progression of Spark reactive loading data into Shiny app', echo = FALSE}
@@ -487,7 +503,7 @@ Before we transition, disconnect from Spark and clear the folders that we used:
 spark_disconnect(sc)
 
 unlink(c("source", "destination", "cars-stream",
-         "car-round", "shiny-stream"), recursive = TRUE)
+         "car-round", "shiny/shiny-stream"), recursive = TRUE)
 ```
 
 ## Recap
