@@ -1002,14 +1002,15 @@ If a particular partition fails, you can detect the broken partition by computin
 sdf_len(sc, 3) %>% spark_apply(function(x) {
     worker_log("processing ", digest::digest(x), " partition")
     # your code
+    x
 })
 ```
 
 This will add an entry similar to:
 
 ```
-18/11/03 14:48:32 INFO sparklyr: RScript (2566) processing f35b1c321df0162e3f
-                                                partition 
+18/11/03 14:48:32 INFO sparklyr: RScript (2566)
+  processing f35b1c321df0162e3f914adfb70b5416 partition 
 ```
 
 When executing this in your cluster, you will have to look in the logs for the task that is not finishing, once you have that digest, you can cancel the job.
@@ -1017,9 +1018,16 @@ When executing this in your cluster, you will have to look in the logs for the t
 Then you can use that digest to retrieve that specific data frame to R with something like:
 
 ```{r distributed-worker-partitions-collect}
-broken_partition <- sdf_len(sc, 3) %>% spark_apply(function(x) {
-    if (identical(digest::digest(x), "f35b1c321df0162e3f")) x else x[0,]
+sdf_len(sc, 3) %>% spark_apply(function(x) {
+    if (identical(digest::digest(x),
+                  "f35b1c321df0162e3f914adfb70b5416")) x else x[0,]
 }) %>% collect()
+```
+```
+# A tibble: 1 x 1
+  result
+   <int>
+1      1
 ```
 
 Which you can then run in R to troubleshoot further.
