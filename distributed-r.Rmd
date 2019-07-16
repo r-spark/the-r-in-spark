@@ -51,6 +51,10 @@ render_nomnoml("
 
 This chapter presents how to define a custom `f(x)` mapping operation using `spark_apply()`; for the previous example, `spark_apply()` provides support to define `10 * x` as follows:
 
+```{r distributed-overview-connect, echo=FALSE}
+library(sparklyr)
+sc <- spark_connect(master = "local", version = "2.3")
+```
 ```{r distributed-increment-one-code}
 sdf_len(sc, 3) %>% spark_apply(~ 10 * .x)
 ```
@@ -76,7 +80,7 @@ render_nomnoml("
 
 We can refer back to the original MapReduce example from the Introduction chapter, where the map operation was defined to split sentences into words and then, the total unique words were counted as the reduce operation. In R, we could make use of the `unnest_tokens()` function in the `tidytext` R package, combining the functionality of `tidytext` with `spark_apply()` would allow us to tokenize those sentences into a table of words as follows:
 
-```{r}
+```{r distributed-overview-sentences}
 sentences <- copy_to(sc, data_frame(text = c("I like apples", "I like bananas")))
 
 sentences %>%
@@ -96,7 +100,7 @@ sentences %>%
 
 Finally, we can reduce this dataset using `dplyr` to compute this original MapReduce word-count example using `dplyr` as follows:
 
-```{r}
+```{r distributed-overview-summarize}
 sentences %>%
   spark_apply(~tidytext::unnest_tokens(., word, text)) %>%
   group_by(word) %>%
@@ -140,7 +144,7 @@ While Spark and its various extensions provide support for many file formats (CS
 
 It is common to use Spark to analyze log files; for instance, logs that track download data from Amazon S3. To parse logs, the `webreadr` package can simplify this process by providing support to load logs stored as: Amazon S3, Squid and the Common log format. An Amazon S3 log looks as follows:
 
-```{r echo=FALSE}
+```{r distributed-parser-write, echo=FALSE}
 cat(paste(readLines(system.file("extdata/log.aws", package = "webreadr")), collapse = "\n"))
 ```
 ```
@@ -158,7 +162,7 @@ cat(paste(readLines(system.file("extdata/log.aws", package = "webreadr")), colla
 
 Which can be parsed easily with `read_aws()` as follows:
 
-```{r}
+```{r distributed-parser-read}
 aws_log <- system.file("extdata/log.aws", package = "webreadr")
 webreadr::read_aws(aws_log)
 ```
@@ -175,7 +179,7 @@ webreadr::read_aws(aws_log)
 
 To scale this operation, we can make use of `read_aws()` using `spark_apply()`:
 
-```{r}
+```{r distributed-parser-read-spark}
 spark_read_text(sc, "logs", aws_log, overwrite = TRUE, whole = TRUE) %>%
   spark_apply(~webreadr::read_aws(.x$contents))
 ```
@@ -202,7 +206,7 @@ For instance, suppose that you have a 1TB dataset for sales data across multiple
 
 As a simple example of partitioned modeling, we can run a linear regression using the `iris` dataset partitioned by Species:
 
-```{r}
+```{r distributed-partitioned-copy}
 iris <- copy_to(sc, datasets::iris)
 
 iris %>%
@@ -219,7 +223,7 @@ iris %>%
 
 Then you can run a linear regression over each species using `spark_apply()`:
 
-```{r}
+```{r distributed-partitioned-lm}
 iris %>%
   spark_apply(
     function(e) summary(lm(Petal_Length ~ Petal_Width, e))$r.squared,
@@ -237,9 +241,15 @@ iris %>%
 
 As you can see from the `r.squared` results and intuitively in Figure \@ref(fig:distributed-r-modeling-species), the linear model for versicolor better fits to the regression line.
 
-```{r echo=FALSE}
+```{r distributed-partitioned-plot}
+purrr::map(c("versicolor", "virginica", "setosa"),
+  ~dplyr::filter(datasets::iris, Species == !!.x) %>%
+    ggplot2::ggplot(ggplot2::aes(x = Petal.Length, y = Petal.Width)) +
+    ggplot2::geom_point())
+```
+```{r distributed-partitioned-plot-styled, echo=FALSE}
 build_plot <- function(filter, h_line, theme_extra) {
-  filter(iris, Species == !!filter) %>%
+  filter(datasets::iris, Species == !!filter) %>%
     transmute(Petal_Width = Petal.Width, Petal_Length = Petal.Length) %>%
     ggplot(aes(x = Petal_Length, y = Petal_Width)) +
       labs(title = filter) +
@@ -275,7 +285,7 @@ Many R packages provide models that require defining multiple parameters to conf
 
 For example, we can define a grid of parameters to optimize decision tree models as follows:
 
-```{r}
+```{r distributed-grid-build}
 grid <- list(minsplit = c(2, 5, 10), maxdepth = c(1, 3, 8)) %>%
   purrr:::cross_df() %>%
   copy_to(sc, ., repartition = 9)
@@ -298,7 +308,7 @@ grid
 
 The grid dataset was copied with `repartition = 9` to ensure that each partition is contained in one machine since the grid has also nine rows. Now, assuming that the original dataset fits in every machine, we can distribute this dataset to many machines and perform parameter search to find the model that best fits this data.
 
-```{r}
+```{r distributed-grid-apply}
 spark_apply(
   grid,
   function(grid, cars) {
@@ -340,7 +350,7 @@ For example, Google provides a Web API to label images using deep learning techn
 
 The following example makes use of the `googleAuthR` package to authenticate to Google Cloud, the `RoogleVision` package to perform labeling over the Google Vision API, and `spark_apply()` to interoperate between Spark and Google's deep learning service. If you want to run the following example you will need to disconnect first from Spark and download your `cloudml.json` from the Google developer portal.
 
-```{r eval=FALSE}
+```{r distributed-api, eval=FALSE}
 sc <- spark_connect(
   master = "local",
   config = list(sparklyr.shell.files = "cloudml.json"))
@@ -380,7 +390,7 @@ R can be used in combination with Spark to perform large-scale computing. The us
 
 Let's use this package to render a simple scene that includes a few spheres with using a lambertian material, a diffusely reflecting material or "matte"; but first, install using `remotes::install_github("tylermorganwall/rayrender")`, make sure to also disconnect and reconnect from Spark.
 
-```{r echo=FALSE, eval=FALSE}
+```{r distributed-sim-render, eval=FALSE, echo=FALSE}
 library(rayrender)
 
 scene <- generate_ground(material = lambertian()) %>%
@@ -390,7 +400,7 @@ scene <- generate_ground(material = lambertian()) %>%
 
 render_scene(scene, width = 1920, height = 1080, lookfrom = c(10, 5, 0), parallel = TRUE, filename = "images/distributed-r-rayrender.png")
 ```
-```{r}
+```{r distributed-sim-rayrender}
 library(rayrender)
 
 scene <- generate_ground(material = lambertian()) %>%
@@ -406,7 +416,7 @@ render_image("images/distributed-r-rayrender.png")
 
 In higher definitions, say 1920x1080, the previous example takes several minutes to render the single frame from Figure \@ref(fig:distributed-r-ray-tracing), rendering a few seconds at 30 frames-per-second would take several hours in a single machine. However, we can reduce this time using multiple machines by parallelizing computation across them. For instance, using ten machines with the same amount of CPUs would cut rendering time ten fold:
 
-```{r eval=FALSE}
+```{r distributed-sim-apply, eval=FALSE}
 system2("hadoop", args = c("fs", "-mkdir", "/rendering"))
 
 sdf_len(sc, 628, repartition = 628) %>%
@@ -437,7 +447,7 @@ Most Spark operations, say to analyze data with `dplyr` or model with MLlib, do 
 
 To help us understand how partitions are represented in `spark_apply()`, consider the following code. Should we expect the output to be the total number of rows?
 
-```{r}
+```{r distributed-partitions}
 sdf_len(sc, 10) %>%
   spark_apply(~nrow(.x))
 ```
@@ -451,7 +461,7 @@ sdf_len(sc, 10) %>%
 
 As you can see from the results, the general the answer is no; Spark assumes data will be distributed across multiple machines so you will often find it already partitioned, even for small datasets. So we should not expect `spark_apply()` to operate over a single partition, let's find out how many partitions `sdf_len(sc, 10)` contains:
 
-```{r}
+```{r distributed-partitions-num}
 sdf_len(sc, 10) %>% sdf_num_partitions()
 ```
 ```
@@ -462,7 +472,7 @@ This explains why counting rows through `nrow()` under `spark_apply()` retrieves
 
 For this particular example, we could further aggregate these partitions by repartitioning and then adding up -- this would resemble a simple MapReduce operation using `spark_apply()`:
 
-```{r}
+```{r distributed-partitions-apply}
 sdf_len(sc, 10) %>%
   spark_apply(~nrow(.x)) %>%
   sdf_repartition(1) %>%
@@ -481,7 +491,7 @@ It was the intent of this section is to make you aware of partitions while using
 
 When using `spark_apply()`, we can request explicit partitions from Spark. For instance, if we had to process numbers less than four in one partition and the remaining ones in a second partition, we could create these groups explicitly and then request `spark_apply()` to use them:
 
-```{r distributed-parallel-grouping}
+```{r distributed-grouping-parallel}
 sdf_len(sc, 10) %>%
   transmute(groups = id < 4) %>%
   spark_apply(~nrow(.x), group_by = "groups")
@@ -504,7 +514,7 @@ The takeaway from this section is to always consider partitions when dealing wit
 
 By default, `spark_apply()`, will inspect the data frame being produced to find out column names and types automatically, for example:
 
-```{r}
+```{r distributed-columns}
 sdf_len(sc, 1) %>%
   spark_apply(~ data.frame(numbers = 1, names = "abc"))
 ```
@@ -627,14 +637,14 @@ Functions enable complex and multi-line transformations, they are defined as `fu
 
 The function passed to `spark_apply()` is serialized using `serialize()`, which is described as “a simple low-level interface for serializing to connections.”. One of the current limitations of `serialize()` is that it won't serialize objects being referenced outside of its environment. For instance, the following function will error out since the closures references `external_value`:
 
-```{r}
+```{r distributed-functions}
 external_value <- 1
 spark_apply(iris, function(e) e + external_value)
 ```
 
 As workarounds to this limitation, you can add the functions your closure needs into the `context` followed by assigning the functions into the global environment:
 
-```{r}
+```{r distributed-functions-workaround}
 func_a <- function() 40
 func_b <- function() func_a() + 1
 func_c <- function() func_b() + 1
@@ -663,7 +673,7 @@ Up to this point, you've learned all the functionality available in `spark_apply
 
 With `spark_apply()` you can use any R package inside Spark. For instance, you can use the broom package to create a tidy data frame from linear regression output.
 
-```{r}
+```{r distributed-packages}
 spark_apply(
   iris,
   function(e) broom::tidy(lm(Petal_Length ~ Petal_Width, e)),
