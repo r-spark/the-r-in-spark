@@ -80,16 +80,18 @@ render_nomnoml("
 ", "images/extensions-h2o-diagram.png")
 ```
 
-First, install `rsparkling` and `h2o`:
+First, install `rsparkling` and `h2o` as specified in the `rsparkling` documentation site. [@extensions-h2o-rsparkling-docs]
 
-```{r eval=FALSE}
-install.packages("rsparkling")
-install.packages("h2o")
+```{r extensions-h2o-install}
+install.packages("h2o", type = "source",
+                 repos = "http://h2o-release.s3.amazonaws.com/h2o/rel-yates/5/R")
+install.packages("rsparkling", type = "source",
+                 repos = "http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/31/R")
 ```
 
 It is then important to notice that you need to use compatible versions of Spark, Sparkling Water and H2O. So let's start by checking the version of H2O by running,
 
-```{r eval=TRUE}
+```{r extensions-h2o-version, eval=TRUE}
 packageVersion("h2o")
 ```
 
@@ -111,7 +113,7 @@ rsparkling::h2o_release_table() %>%
 
 We can then connect with the supported Spark versions as follows, you will have to adjust the `master` parameter for your particular cluster.
 
-```{r}
+```{r extensions-h2o-connect}
 library(rsparkling)
 library(sparklyr)
 library(h2o)
@@ -130,7 +132,7 @@ render_image("images/extensions-h2o-flow.png")
 
 When using H2O, you will have to convert your Spark DataFrame into and H2O DataFrame through `as_h2o_frame`:
 
-```{r}
+```{r extensions-h2o-copy}
 cars_h2o <- as_h2o_frame(sc, cars)
 cars_h2o
 ```
@@ -148,7 +150,7 @@ cars_h2o
 
 Then you can use many of the modeling functions available in the `h2o` package with ease. For instance, we can fit a generalized linear model with ease:
 
-```{r eval=FALSE}
+```{r extensions-h2o-glm}
 model <- h2o.glm(x = c("wt", "cyl"),
                  y = "mpg",
                  training_frame = cars_h2o,
@@ -157,7 +159,7 @@ model <- h2o.glm(x = c("wt", "cyl"),
 
 H2O provides additional metrics not necessarily available in Spark's modeling algorithms, the model that we just fit  `Residual Deviance` is provided in the model while this would not be a standard metric when using Spark MLlib.
 
-```{r}
+```{r extensions-h2o-model}
 model
 ```
 ```
@@ -177,7 +179,7 @@ AIC :156.2425
 
 Then you can run prediction over the generalized linear model model, a similar approach would work for many other models available in H2O:
 
-```{r}
+```{r extensions-h2o-predict}
 predictions <- as_h2o_frame(sc, copy_to(sc, data.frame(wt = 2, cyl = 6)))
 h2o.predict(model, predictions)
 ```
@@ -190,7 +192,7 @@ h2o.predict(model, predictions)
 
 H2O can also be used to perform automatic training and tuning of many models; meaning that, H2O can choose which model to use for you using AutoML. [@extensions-h2o-automl]
 
-```{r}
+```{r extensions-h2o-automl}
 automl <- h2o.automl(x = c("wt", "cyl"), y = "mpg",
                      training_frame = cars_h2o,
                      max_models = 20,
@@ -199,7 +201,7 @@ automl <- h2o.automl(x = c("wt", "cyl"), y = "mpg",
 
 For this particular dataset, H2O finds out that XGBoost is a better fit than GLM. Specifically, the H2O explored using XGBoost, Deep Learning, GLM and a Stacked Ensemble.
 
-```{r}
+```{r extensions-h2o-automl-print}
 automl
 ```
 ```
@@ -216,7 +218,7 @@ Many additional examples are available under [spark.rstudio.com/guides/h2o](http
 
 The next extension, `graphframes`, will allow you to process large-scale relational datasets; however, before you start using it, make sure to disconnect with `spark_disconnect(sc)` and restart your R session since using a different extensions requires you to reconnect to Spark and reload `sparklyr`.
 
-```{r echo=FALSE}
+```{r extensions-h2o-disconnect, echo=FALSE}
 spark_disconnect(sc)
 ```
 
