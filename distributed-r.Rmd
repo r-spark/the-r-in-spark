@@ -340,7 +340,7 @@ For example, Google provides a Web API to label images using deep learning techn
 
 The following example makes use of the `googleAuthR` package to authenticate to Google Cloud, the `RoogleVision` package to perform labeling over the Google Vision API, and `spark_apply()` to interoperate between Spark and Google's deep learning service. If you want to run the following example you will need to disconnect first from Spark and download your `cloudml.json` from the Google developer portal.
 
-```{r}
+```{r eval=FALSE}
 sc <- spark_connect(
   master = "local",
   config = list(sparklyr.shell.files = "cloudml.json"))
@@ -376,9 +376,11 @@ Next you will learn a use case for large-compute where R is used to perform dist
 
 ### Simulations
 
-R can be used in combination with Spark to perform large-scale computing. The use case we will explore in this section is rendering computationally-expensive images using the `rayrender` package, which uses ray tracing -- a photorealistic technique commonly used in movie production. Let's use this package to render a simple scene that includes a few spheres.
+R can be used in combination with Spark to perform large-scale computing. The use case we will explore in this section is rendering computationally-expensive images using the `rayrender` package, which uses ray tracing -- a photorealistic technique commonly used in movie production.
 
-```{r echo=FALSE}
+Let's use this package to render a simple scene that includes a few spheres with using a lambertian material, a diffusely reflecting material or "matte"; but first, install using `remotes::install_github("tylermorganwall/rayrender")`, make sure to also disconnect and reconnect from Spark.
+
+```{r echo=FALSE, eval=FALSE}
 library(rayrender)
 
 scene <- generate_ground(material = lambertian()) %>%
@@ -396,15 +398,15 @@ scene <- generate_ground(material = lambertian()) %>%
   add_object(sphere(material = metal(color="orange"), z = +2)) %>%
   add_object(sphere(material = metal(color="orange"), x = -2))
 
-render_scene(scene, width = 1920, height = 1080, lookfrom = c(10, 5, 0), parallel = TRUE)
+render_scene(scene, lookfrom = c(10, 5, 0), parallel = TRUE)
 ```
 ```{r distributed-r-ray-tracing, eval=TRUE, echo=FALSE, fig.cap='Ray tracing in Spark using R and rayrender', fig.align = 'center'}
 render_image("images/distributed-r-rayrender.png")
 ```
 
-The previous example takes several minutes to render the single frame from Figure \@ref(fig:distributed-r-ray-tracing), rendering a few seconds at 30 frames-per-second would take several hours in a single machine. However, we can reduce this time using multiple machines by parallelizing computation across them. For instance, using ten machines with the same amount of CPUs would cut rendering time ten fold:
+In higher definitions, say 1920x1080, the previous example takes several minutes to render the single frame from Figure \@ref(fig:distributed-r-ray-tracing), rendering a few seconds at 30 frames-per-second would take several hours in a single machine. However, we can reduce this time using multiple machines by parallelizing computation across them. For instance, using ten machines with the same amount of CPUs would cut rendering time ten fold:
 
-```{r}
+```{r eval=FALSE}
 system2("hadoop", args = c("fs", "-mkdir", "/rendering"))
 
 sdf_len(sc, 628, repartition = 628) %>%
@@ -420,7 +422,7 @@ sdf_len(sc, 628, repartition = 628) %>%
 
 After all the images are rendered, the last step is to collect them from HDFS and use tools like `ffmpeg` to convert individual images into an animation:
 
-```{bash}
+```{bash eval=FALSE}
 hadoop fs -get rendering/
 ffmpeg -s 1920x1080 -i rendering/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p rendering.mp4
 ```
@@ -705,7 +707,7 @@ Failure to install R in every node will trigger a `Cannot run program, no such f
 
 Contact your cluster administrator to consider making the R runtime available throughout the entire cluster. If R is already installed, you can specify the installation path to use using the `spark.r.command` configuration setting, as in:
 
-```{r}
+```{r eval=FALSE}
 config <- spark_config()
 config["spark.r.command"] <- "<path-to-r-version>"
 
@@ -772,13 +774,13 @@ Arrow is not required but it is strongly advised while working `spark_apply()`. 
 
 In addition, to use Apache Arrow with `sparklyr` you also need to install the `arrow` package:
 
-```{r}
+```{r eval=FALSE}
 devtools::install_github("apache/arrow", subdir = "r", ref = "apache-arrow-0.12.0")
 ```
 
 Before we use `arrow`, we will take a measurement to validate 
 
-```{r}
+```{r eval=FALSE}
 system.time(
   sdf_len(sc, 10^4) %>% spark_apply(nrow) %>% collect()
 )
@@ -790,7 +792,7 @@ system.time(
 
 In our particular system, processing 10K rows takes about 8 seconds. To enable Arrow, simply include the library and use `spark_apply()` as usual. Lets measure how long it takes `spark_apply()` to process 1M rows:
 
-```{r}
+```{r eval=FALSE}
 library(arrow)
 system.time(
   sdf_len(sc, 10^6) %>% spark_apply(nrow) %>% collect()
@@ -805,7 +807,7 @@ In our system, Arrow can process 100X more data in half the time, just 4 seconds
 
 Most functionality in `arrow` simply works on the background improving performance and data serialization; however, there is one setting you should be aware of. The `spark.sql.execution.arrow.maxRecordsPerBatch` configuration settings specifies the default size of each arrow data transfer. It's shared with other Spark components and defaults to 10,000 rows. 
 
-```{r}
+```{r eval=FALSE}
 library(arrow)
 sdf_len(sc, 2 * 10^4) %>% spark_apply(nrow)
 ```
@@ -819,9 +821,7 @@ sdf_len(sc, 2 * 10^4) %>% spark_apply(nrow)
 
 You might need to adjust this number based on how much data your system can handle, making it smaller for large dataset or bigger for operations that require records to be processed together. We can change this setting to 5K rows and verify the partitions change appropriately:
 
-```{r}
-spark_disconnect(sc)
-
+```{r eval=FALSE}
 config <- spark_config()
 config$spark.sql.execution.arrow.maxRecordsPerBatch <- 5 * 10^3
 
@@ -844,7 +844,7 @@ So far we've presented use cases, main operations and cluster requirements. The 
 
 A custom transformation can fail for many reasons, to learn how to troubleshoot errors, lets simulate a problem by triggering an errors ourselves:
 
-```{r}
+```{r eval=FALSE}
 sdf_len(sc, 1) %>% spark_apply(~stop("force an error"))
 ```
 ```
@@ -922,7 +922,7 @@ Notice that the logs print our custom log entry showing that `id` is the name of
 
 This functionality is useful when troubleshooting errors; for instance, if we force an error using the `stop()` function:
 
-```{r distributed-force-error}
+```{r distributed-force-error, eval=FALSE}
 sdf_len(sc, 1) %>% spark_apply(function(df) {
   stop("force an error")
 })
@@ -1014,7 +1014,7 @@ Which you can then run in R to troubleshoot further.
 
 You can use a debugger, which is a tool to let you execute your code line-by-line, to troubleshoot `spark_apply()` for local connections. You can start `spark_apply()` in debug mode using the `debug` parameter and then following the instructions.
 
-```{r distributed-debugger}
+```{r distributed-debugger, eval=FALSE}
 sdf_len(sc, 1) %>% spark_apply(function() {
   stop("Error!")
 }, debug = TRUE)
