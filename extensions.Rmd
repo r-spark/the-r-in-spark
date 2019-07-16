@@ -414,6 +414,10 @@ render_image("images/extensions-graph-pagerank.png")
 
 There are many more graph algorithms provided in `graphframes`, to mention some: bread depth search, connected components, label propagation for detecting communities, strongly connected components and triangle count. For questions on this extension refer to the official GitHub repo, [github.com/rstudio/graphframes](https://github.com/rstudio/graphframes). We will now present a popular gradient boosting framework, make sure to disconnect, restart before trying the next extension.
 
+```{r echo=FALSE}
+spark_disconnect(sc)
+```
+
 ## XGBoost
 
 A decision tree is a flowchart-like structure in which each internal node represents a test on an attribute, each branch represents the outcome of the test, and each leaf node represents a class label. For example, the diagram in Figure \@ref(fig:extensions-decision-diagram) shows an a decision tree that could help classify if an employee is likely to leave given a set of factors, like job satisfaction and overtime. When a decision tree is used to predict continuous variables instead of discrete outcomes, say, how likely someone is to leave a company,  decision trees are referred to as regression trees.
@@ -438,13 +442,13 @@ XGBoost is an open-source software library which provides a gradient boosting fr
 
 `sparkxgb` is an extension that you can use to train XGBoost models in Spark; however, please beware that currently Windows is unsupported. To use this extension, first install it from CRAN:
 
-```{r eval=FALSE}
+```{r extensions-xgb-install, eval=FALSE}
 install.packages("sparkxgb")
 ```
 
 Then you would need to import the `sparkxgb` extension followed by your usual Spark connection code, adjusting `master` as needed:
 
-```{r}
+```{r extensions-xgb-connect}
 library(sparkxgb)
 library(sparklyr)
 library(dplyr)
@@ -454,7 +458,7 @@ sc <- spark_connect(master = "local", version = "2.3")
 
 For this example, we will use the `attrition` dataset from the `rsample` package which you would need to install with `install.packages("rsample")`. This dataset is a fictional dataset created by IBM data scientists to uncover the factors that lead to employee attrition.
 
-```{r}
+```{r extensions-xgb-copy}
 attrition <- copy_to(sc, rsample::attrition)
 attrition
 ```
@@ -486,7 +490,7 @@ attrition
 
 To build an XGBoost model in Spark use `xgboost_classifier()`, we will compute attrition against all other features by using the `Attrition ~ .` formula and specify two for the number of classes since the attrition attribute tracks only whether an employee leaves or not. Then you can use `ml_predict()` to predict over large-scale datasets:
 
-```{r}
+```{r extensions-xgb-model}
 xgb_model <- xgboost_classifier(attrition,
                                 Attrition ~ .,
                                 num_class = 2,
@@ -509,6 +513,10 @@ $ probability_Yes <dbl> 0.24606191, 0.97521925, 0.08485363, 0.85643125, 0.927375
 ```
 
 XGBoost became well known in the competition circles after its use in the winning solution of the Higgs Machine Learning Challenge which uses the ATLAS experiment to identify the Higgs boson. Since then, it has become a popular model and used for a large number of Kaggle competitions. However, decision trees could prove limiting especially in datasets with non tabular data like images, audio and text which you can tackle with deep learning models, should we remind you to disconnect and restart?
+
+```{r echo=FALSE}
+spark_disconnect(sc)
+```
 
 ## Deep Learning
 
