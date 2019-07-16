@@ -266,6 +266,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="8.2.1" data-path="data.html"><a href="data.html#paths"><i class="fa fa-check"></i><b>8.2.1</b> Paths</a></li>
 <li class="chapter" data-level="8.2.2" data-path="data.html"><a href="data.html#schema"><i class="fa fa-check"></i><b>8.2.2</b> Schema</a></li>
 <li class="chapter" data-level="8.2.3" data-path="data.html"><a href="data.html#memory"><i class="fa fa-check"></i><b>8.2.3</b> Memory</a></li>
+<li class="chapter" data-level="8.2.4" data-path="data.html"><a href="data.html#columns"><i class="fa fa-check"></i><b>8.2.4</b> Columns</a></li>
 </ul></li>
 <li class="chapter" data-level="8.3" data-path="data.html"><a href="data.html#write"><i class="fa fa-check"></i><b>8.3</b> Write</a></li>
 <li class="chapter" data-level="8.4" data-path="data.html"><a href="data.html#copy"><i class="fa fa-check"></i><b>8.4</b> Copy</a></li>
@@ -329,7 +330,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="11.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>11.3</b> Partitions</a></li>
 <li class="chapter" data-level="11.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>11.4</b> Grouping</a></li>
-<li class="chapter" data-level="11.5" data-path="distributed.html"><a href="distributed.html#columns"><i class="fa fa-check"></i><b>11.5</b> Columns</a></li>
+<li class="chapter" data-level="11.5" data-path="distributed.html"><a href="distributed.html#columns-1"><i class="fa fa-check"></i><b>11.5</b> Columns</a></li>
 <li class="chapter" data-level="11.6" data-path="distributed.html"><a href="distributed.html#context"><i class="fa fa-check"></i><b>11.6</b> Context</a></li>
 <li class="chapter" data-level="11.7" data-path="distributed.html"><a href="distributed.html#functions"><i class="fa fa-check"></i><b>11.7</b> Functions</a></li>
 <li class="chapter" data-level="11.8" data-path="distributed.html"><a href="distributed.html#packages"><i class="fa fa-check"></i><b>11.8</b> Packages</a></li>
@@ -454,7 +455,7 @@ FIGURE 8.1: Spark processing raw data from a data lakes, databases and data ware
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)
 
-<span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv&quot;</span>)</code></pre>
+<span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>)</code></pre>
 <pre><code># Source: spark&lt;datacsv&gt; [?? x 2]
    x         y
    &lt;chr&gt; &lt;int&gt;
@@ -475,6 +476,8 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <h3><span class="header-section-number">8.2.2</span> Schema</h3>
 <p>When reading data, Spark is able to determine the data source’s column names and column types, also known as the <em>schema</em>. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess what it is. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size datasets. For files that are read over and over again, the additional read time accumulates over time.</p>
 <p>To avoid this, Spark allows you to provide a column definition py providing a <code>columns</code> argument to describe your dataset. This argument is the switch that indicates if the <code>column</code> argument should be used.</p>
+<pre class="sourceCode r"><code class="sourceCode r">spec_with_r &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">read.csv</span>(<span class="st">&quot;data-csv/letters1.csv&quot;</span>, <span class="dt">nrows =</span> <span class="dv">10</span>), class)
+spec_with_r</code></pre>
 <pre><code>        x         y 
  &quot;factor&quot; &quot;integer&quot; </code></pre>
 <p>You can set the column specification to a vector containing the column types. The vector’s values are named to match the field names.</p>
@@ -484,7 +487,7 @@ spec_explicit</code></pre>
 &quot;character&quot;   &quot;numeric&quot; </code></pre>
 <p>The accepted variable types are: <code>integer</code>, <code>character</code>, <code>logical</code>, <code>double</code>, <code>numeric</code>, <code>factor</code>, <code>Date</code> and <code>POSIXct</code>.</p>
 <p>Then, when reading using <code>spark_read_csv()</code>, you can pass <code>col_spec_1</code> to the <code>columns</code> argument to match the names and types of the original file. This helps improve performance since Spark will not have to figure out the column types.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv&quot;</span>, <span class="dt">columns =</span> spec_with_r)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">columns =</span> spec_with_r)</code></pre>
 <pre><code># Source: spark&lt;datacsv&gt; [?? x 2]
   x         y
   &lt;chr&gt; &lt;int&gt;
@@ -497,7 +500,7 @@ spec_explicit</code></pre>
 <p>The following example shows how to set the field type to something different. However, the new field type needs to be a compatible type in the original dataset. For example, a <code>character</code> field can not be set to <code>numeric</code>. If an incompatible type is used, the file read will fail with an error. Additionally, the following example also changes the names of the original fields.</p>
 <pre class="sourceCode r"><code class="sourceCode r">spec_compatible &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">my_letter =</span> <span class="st">&quot;character&quot;</span>, <span class="dt">my_number =</span> <span class="st">&quot;character&quot;</span>)
 
-<span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv&quot;</span>, <span class="dt">columns =</span> spec_compatible)</code></pre>
+<span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">columns =</span> spec_compatible)</code></pre>
 <pre><code># Source: spark&lt;datacsv&gt; [?? x 2]
   my_letter my_number
   &lt;chr&gt;     &lt;chr&gt;    
@@ -520,8 +523,10 @@ spec_explicit</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">mapped_csv <span class="op">%&gt;%</span>
 <span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(y) <span class="op">%&gt;%</span>
 <span class="st">  </span>dplyr<span class="op">::</span><span class="kw">compute</span>(<span class="st">&quot;test&quot;</span>)</code></pre>
-<p>The next subsection covers a short technique to make it easier to carry the original field names of imported data.
-### Columns</p>
+<p>The next subsection covers a short technique to make it easier to carry the original field names of imported data.</p>
+</div>
+<div id="columns" class="section level3">
+<h3><span class="header-section-number">8.2.4</span> Columns</h3>
 <p>Spark 1.6 required that column names be sanitized, so R does that by default. There may be cases when you would like to keep the original names intact, and are also working with Spark version 2.0 or above. To do that set the <code>sparklyr.sanitize.column.names</code> option to <code>FALSE</code>.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">options</span>(<span class="dt">sparklyr.sanitize.column.names =</span> <span class="ot">FALSE</span>)
 <span class="kw">copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</code></pre>
@@ -577,15 +582,14 @@ External Transfer
 <div id="copy" class="section level2">
 <h2><span class="header-section-number">8.4</span> Copy</h2>
 <p>Previous chapters used <code>copy_to()</code> as a handy helper to copy data into Spark; however, <code>copy_to()</code> can only be used to transfer in-memory datasets that are already loaded in memory; this dataset tend to be much smaller than the kind of datasets you would want to copy into Spark.</p>
-<p>For instance, suppose that we have a 10GB generated as follows, please consider skipping this exercise if you don’t have 10GB free to spare.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span><span class="op">^</span><span class="dv">2</span>) {
-  <span class="kw">write.table</span>(
-    <span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">6</span> <span class="op">*</span><span class="st"> </span><span class="dv">10</span><span class="op">^</span><span class="dv">6</span>), <span class="dt">ncol =</span> <span class="dv">6</span>) ,
-    <span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">append =</span> T,
-    <span class="dt">col.names =</span> F, <span class="dt">row.names =</span> F)
-}</code></pre>
-<p>If we only had 2GB of memory in the driver node, we would not be able to load this 10GB file into memory using <code>copy_to()</code>. Instead, when using the Hadoop file system as storage in your cluster, you can use the <code>hadoop</code> command line tool to copy files from disk into Spark from the terminal as follows. Please notice that the following code will only work in clusters using HDFS, not in local environments.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">hadoop</span> fs -copyFromLocal large-file.txt large-file.txt</code></pre>
+<p>For instance, suppose that we have a 3GB dataset generated as follows,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dir.create</span>(<span class="st">&quot;largefile.txt&quot;</span>)
+<span class="kw">write.table</span>(<span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="dv">10</span><span class="op">^</span><span class="dv">6</span>), <span class="dt">ncol =</span> <span class="dv">10</span>), <span class="st">&quot;largefile.txt/1&quot;</span>,
+            <span class="dt">append =</span> T, <span class="dt">col.names =</span> F, <span class="dt">row.names =</span> F)
+<span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span><span class="dv">30</span>) 
+  <span class="kw">file.copy</span>(<span class="st">&quot;largefile.txt/1&quot;</span>, <span class="kw">paste</span>(<span class="st">&quot;largefile.txt/&quot;</span>, i))</code></pre>
+<p>If we only had 2GB of memory in the driver node, we would not be able to load this 3GB file into memory using <code>copy_to()</code>. Instead, when using the Hadoop file system as storage in your cluster, you can use the <code>hadoop</code> command line tool to copy files from disk into Spark from the terminal as follows. Please notice that the following code will only work in clusters using HDFS, not in local environments.</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">hadoop</span> fs -copyFromLocal largefile.txt largefile.txt</code></pre>
 <p>You can then read the uploaded file as described in the <a href="data.html#data-file-formats">file formats</a> section; for text files, you would run:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>)</code></pre>
 <pre><code># Source: spark&lt;largefile&gt; [?? x 1]
@@ -603,15 +607,19 @@ External Transfer
 10 0.6318328148434 -1.08741784644221 -0.550575696474202 0.971967251067794…
 # … with more rows</code></pre>
 <p><code>collect()</code> has a similar limitation, it can only collect datasets that fit your driver memory; however, if you had to extract a large dataset from Spark through the driver node, you could use specialized tools provided by the distributed storage, for HDFS you would run,</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">hadoop</span> fs -copyToLocal large-file.txt large-file.txt</code></pre>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">hadoop</span> fs -copyToLocal largefile.txt largefile.txt</code></pre>
 <p>Alternatively, you can also collect datasets that don’t fit in-memory by providing a callback to <code>collect()</code>. A callback is just an R function that will be called over each Spark partition, you can then write this dataset to disk or push to other clusters over the network.</p>
-<p>The following code will crete 10K files adding up to 10GB even if the driver node collecting this dataset had less than 10GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this usually creates a significant performance bottleneck.</p>
+<p>The following code could be use to collect 3GB even if the driver node collecting this dataset had less than 3GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this creates a significant performance bottleneck. For conciseness, we will collect only the first million rows; feel free to remove <code>head()</code> if you havee a few minutes to spare.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dir.create</span>(<span class="st">&quot;large&quot;</span>)
 <span class="kw">spark_read_text</span>(sc, <span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">head</span>(<span class="dv">10</span><span class="op">^</span><span class="dv">6</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">collect</span>(<span class="dt">callback =</span> <span class="cf">function</span>(df, idx) {
     <span class="kw">writeLines</span>(df<span class="op">$</span>line, <span class="kw">paste0</span>(<span class="st">&quot;large/large-&quot;</span>, idx, <span class="st">&quot;.txt&quot;</span>))
   })</code></pre>
-<p>Since in most cases data will already be stored in the cluster, you should not have to worry about copying large-datasets; instead, you can usually focus on reading and writing different file formats, which we will describe next.</p>
+<p>Make sure you clean up these large files and empty your recycle bin as well,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">unlink</span>(<span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)
+<span class="kw">unlink</span>(<span class="st">&quot;large&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</code></pre>
+<p>In most cases, data will already be stored in the cluster, so you should not have to worry about copying large-datasets; instead, you can usually focus on reading and writing different file formats, which we will describe next.</p>
 </div>
 <div id="data-file-formats" class="section level2">
 <h2><span class="header-section-number">8.5</span> File Formats</h2>
@@ -739,13 +747,15 @@ bench<span class="op">::</span><span class="kw">mark</span>(
   <span class="dt">Parquet =</span> <span class="kw">spark_write_parquet</span>(numeric, <span class="st">&quot;data.parquet&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),
   <span class="dt">ORC =</span> <span class="kw">spark_write_parquet</span>(numeric, <span class="st">&quot;data.orc&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),
   <span class="dt">iterations =</span> <span class="dv">20</span>
-) <span class="op">+</span><span class="st"> </span><span class="kw">autoplot</span>(benchmark)</code></pre>
+) <span class="op">%&gt;%</span><span class="st"> </span>ggplot2<span class="op">::</span><span class="kw">autoplot</span>()</code></pre>
 <div class="figure" style="text-align: center"><span id="fig:data-file-format-benchmark"></span>
 <img src="images/data-file-format-benchmark-resized.png" alt="One million rows write benchmark between CSV, JSON, Parquet and ORC" width="1500" />
 <p class="caption">
 FIGURE 8.4: One million rows write benchmark between CSV, JSON, Parquet and ORC
 </p>
 </div>
+<p>From now on, please disconnect from Spark whenever we present a new <code>spark_connect()</code> command.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)</code></pre>
 <p>This concludes the introduction to some of the out-of-the-box supported file formats, we will present next how to deal with formats that require external packages and customization.</p>
 </div>
 <div id="others" class="section level3">
@@ -758,8 +768,8 @@ FIGURE 8.4: One million rows write benchmark between CSV, JSON, Parquet and ORC
 <pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(
   <span class="dt">sparklyr.connect.packages =</span> <span class="st">&quot;com.databricks:spark-xml_2.11:0.5.0&quot;</span>))
 
-<span class="kw">writeLines</span>(<span class="st">&quot;&lt;ROWS&gt;&lt;ROW&gt;&lt;text&gt;Hello World&lt;/text&gt;&lt;/ROW&gt;&quot;</span>, <span class="st">&quot;data.xml&quot;</span>)
-<span class="kw">spark_read_source</span>(sc, <span class="st">&quot;simple_xml&quot;</span>, <span class="st">&quot;data.xml&quot;</span>, <span class="st">&quot;xml&quot;</span>)</code></pre>
+<span class="kw">writeLines</span>(<span class="st">&quot;&lt;ROWS&gt;&lt;ROW&gt;&lt;text&gt;Hello World&lt;/text&gt;&lt;/ROW&gt;&quot;</span>, <span class="st">&quot;simple.xml&quot;</span>)
+<span class="kw">spark_read_source</span>(sc, <span class="st">&quot;simple_xml&quot;</span>, <span class="st">&quot;simple.xml&quot;</span>, <span class="st">&quot;xml&quot;</span>)</code></pre>
 <pre><code># Source: spark&lt;data&gt; [?? x 1]
   text       
   &lt;chr&gt;      
@@ -794,7 +804,10 @@ my_file &lt;-<span class="st"> </span><span class="kw">spark_read_csv</span>(sc,
 <h3><span class="header-section-number">8.7.1</span> Hive</h3>
 <p>In YARN managed clusters, Spark provides a deeper integration with Apache Hive. Hive tables are easily accessible after opening a Spark connection.</p>
 <p>Accessing a Hive table’s data can be done using <code>DBI</code>, by referencing a table in a SQL statement.</p>
-<pre class="sourceCode r"><code class="sourceCode r">DBI<span class="op">::</span><span class="kw">dbGetQuery</span>(sc, <span class="st">&quot;SELECT * FROM test limit 10&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)
+<span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;test&quot;</span>, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>)
+
+DBI<span class="op">::</span><span class="kw">dbGetQuery</span>(sc, <span class="st">&quot;SELECT * FROM test limit 10&quot;</span>)</code></pre>
 <p>Another way to reference a table is with <code>dplyr</code> using the <code>tbl()</code> function, which retrieves a reference to the table.</p>
 <pre class="sourceCode r"><code class="sourceCode r">dplyr<span class="op">::</span><span class="kw">tbl</span>(sc, <span class="st">&quot;test&quot;</span>)</code></pre>
 <p>It is important to reiterate that no data is imported into R, the <code>tbl()</code> function only creates a reference. You can then pipe more <code>dplyr</code> verbs following the <code>tbl()</code> command.</p>
@@ -804,12 +817,12 @@ my_file &lt;-<span class="st"> </span><span class="kw">spark_read_csv</span>(sc,
 <p>Hive table references assume a default database source. Often, the table needed table is in a different database within the Metastore. To access it using SQL, prefix the database name to the table. Separate them using a period.</p>
 <pre class="sourceCode r"><code class="sourceCode r">DBI<span class="op">::</span><span class="kw">dbSendQuery</span>(sc, <span class="st">&quot;SELECT * FROM databasename.table&quot;</span>)</code></pre>
 <p>In <code>dplyr</code>, the <code>in_schema()</code> function can be used. The function is used inside the <code>tbl()</code> call.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tbl</span>(sc, <span class="kw">in_schema</span>(<span class="st">&quot;databasename&quot;</span>, <span class="st">&quot;table&quot;</span>))</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tbl</span>(sc, dbplyr<span class="op">::</span><span class="kw">in_schema</span>(<span class="st">&quot;databasename&quot;</span>, <span class="st">&quot;table&quot;</span>))</code></pre>
 <p>You can also use the <code>tbl_change_db()</code> function to set the current session’s default database. Any subsequent call via <code>DBI</code> or <code>dplyr</code> will use the selected name as the default database.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tbl_change_db</span>(sc, <span class="st">&quot;databasename&quot;</span>)</code></pre>
 <p>The following examples require additional Spark packages and database which might be hard to follow unless you happen to have a JDBC driver or Cassandra database accessible to you; therefore, lets disconnect from Spark:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)</code></pre>
-<p>Nest we will explore a less structured storage system, often referred to as NoSQL database.</p>
+<p>Next we will explore a less structured storage system, often referred to as NoSQL databases.</p>
 </div>
 <div id="cassandra" class="section level3">
 <h3><span class="header-section-number">8.7.2</span> Cassandra</h3>

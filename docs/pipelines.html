@@ -266,6 +266,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="8.2.1" data-path="data.html"><a href="data.html#paths"><i class="fa fa-check"></i><b>8.2.1</b> Paths</a></li>
 <li class="chapter" data-level="8.2.2" data-path="data.html"><a href="data.html#schema"><i class="fa fa-check"></i><b>8.2.2</b> Schema</a></li>
 <li class="chapter" data-level="8.2.3" data-path="data.html"><a href="data.html#memory"><i class="fa fa-check"></i><b>8.2.3</b> Memory</a></li>
+<li class="chapter" data-level="8.2.4" data-path="data.html"><a href="data.html#columns"><i class="fa fa-check"></i><b>8.2.4</b> Columns</a></li>
 </ul></li>
 <li class="chapter" data-level="8.3" data-path="data.html"><a href="data.html#write"><i class="fa fa-check"></i><b>8.3</b> Write</a></li>
 <li class="chapter" data-level="8.4" data-path="data.html"><a href="data.html#copy"><i class="fa fa-check"></i><b>8.4</b> Copy</a></li>
@@ -329,7 +330,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="11.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>11.3</b> Partitions</a></li>
 <li class="chapter" data-level="11.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>11.4</b> Grouping</a></li>
-<li class="chapter" data-level="11.5" data-path="distributed.html"><a href="distributed.html#columns"><i class="fa fa-check"></i><b>11.5</b> Columns</a></li>
+<li class="chapter" data-level="11.5" data-path="distributed.html"><a href="distributed.html#columns-1"><i class="fa fa-check"></i><b>11.5</b> Columns</a></li>
 <li class="chapter" data-level="11.6" data-path="distributed.html"><a href="distributed.html#context"><i class="fa fa-check"></i><b>11.6</b> Context</a></li>
 <li class="chapter" data-level="11.7" data-path="distributed.html"><a href="distributed.html#functions"><i class="fa fa-check"></i><b>11.7</b> Functions</a></li>
 <li class="chapter" data-level="11.8" data-path="distributed.html"><a href="distributed.html#packages"><i class="fa fa-check"></i><b>11.8</b> Packages</a></li>
@@ -780,10 +781,9 @@ score_spark &lt;-<span class="st"> </span><span class="cf">function</span>(age, 
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;mleap&quot;</span>)</code></pre>
 <p>It then must be loaded when <code>spark_connect()</code> is called; so let’s restart your R session, establish a new Spark connection<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>, and load the pipeline model that we previously saved.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
-<span class="kw">library</span>(mleap)
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)
-
-spark_model &lt;-<span class="st"> </span><span class="kw">ml_load</span>(sc, <span class="st">&quot;spark_model&quot;</span>)</code></pre>
+<span class="kw">library</span>(mleap)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">spark_model &lt;-<span class="st"> </span><span class="kw">ml_load</span>(sc, <span class="st">&quot;spark_model&quot;</span>)</code></pre>
 <p>The way we save a model to MLeap bundle format is very similar to saving a model using the Spark ML Pipelines API; the only additional argument is <code>sample_input</code>, which is a Spark data frame with schema that we expect new data to be scored to have.</p>
 <pre class="sourceCode r"><code class="sourceCode r">sample_input &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
   <span class="dt">sex =</span> <span class="st">&quot;m&quot;</span>,
@@ -796,12 +796,12 @@ spark_model &lt;-<span class="st"> </span><span class="kw">ml_load</span>(sc, <s
 
 sample_input_tbl &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, sample_input)
 
-<span class="kw">ml_write_bundle</span>(spark_model, sample_input_tbl, <span class="st">&quot;mleap_model.zip&quot;</span>)</code></pre>
+<span class="kw">ml_write_bundle</span>(spark_model, sample_input_tbl, <span class="st">&quot;mleap_model.zip&quot;</span>, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</code></pre>
 <p>The artifact we just created, <code>mleap_model.zip</code>, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! In fact, we can go ahead and disconnect from Spark already:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)</code></pre>
 <p>Before we use this MLeap model, make sure the runtime dependencies are installed:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install_maven</span>()
-<span class="kw">install_mleap</span>()</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">mleap<span class="op">::</span><span class="kw">install_maven</span>()
+mleap<span class="op">::</span><span class="kw">install_mleap</span>()</code></pre>
 <p>To test this model, we can create a new plumber API to expose it. The script <code>plumber/mleap-plumber.R</code> is very similar to the previous example:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mleap)
 

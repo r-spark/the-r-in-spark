@@ -266,6 +266,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="8.2.1" data-path="data.html"><a href="data.html#paths"><i class="fa fa-check"></i><b>8.2.1</b> Paths</a></li>
 <li class="chapter" data-level="8.2.2" data-path="data.html"><a href="data.html#schema"><i class="fa fa-check"></i><b>8.2.2</b> Schema</a></li>
 <li class="chapter" data-level="8.2.3" data-path="data.html"><a href="data.html#memory"><i class="fa fa-check"></i><b>8.2.3</b> Memory</a></li>
+<li class="chapter" data-level="8.2.4" data-path="data.html"><a href="data.html#columns"><i class="fa fa-check"></i><b>8.2.4</b> Columns</a></li>
 </ul></li>
 <li class="chapter" data-level="8.3" data-path="data.html"><a href="data.html#write"><i class="fa fa-check"></i><b>8.3</b> Write</a></li>
 <li class="chapter" data-level="8.4" data-path="data.html"><a href="data.html#copy"><i class="fa fa-check"></i><b>8.4</b> Copy</a></li>
@@ -329,7 +330,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="11.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>11.3</b> Partitions</a></li>
 <li class="chapter" data-level="11.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>11.4</b> Grouping</a></li>
-<li class="chapter" data-level="11.5" data-path="distributed.html"><a href="distributed.html#columns"><i class="fa fa-check"></i><b>11.5</b> Columns</a></li>
+<li class="chapter" data-level="11.5" data-path="distributed.html"><a href="distributed.html#columns-1"><i class="fa fa-check"></i><b>11.5</b> Columns</a></li>
 <li class="chapter" data-level="11.6" data-path="distributed.html"><a href="distributed.html#context"><i class="fa fa-check"></i><b>11.6</b> Context</a></li>
 <li class="chapter" data-level="11.7" data-path="distributed.html"><a href="distributed.html#functions"><i class="fa fa-check"></i><b>11.7</b> Functions</a></li>
 <li class="chapter" data-level="11.8" data-path="distributed.html"><a href="distributed.html#packages"><i class="fa fa-check"></i><b>11.8</b> Packages</a></li>
@@ -429,7 +430,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <span class="st">&quot;https://github.com/rudeboybert/JSE_OkCupid/raw/master/profiles.csv.zip&quot;</span>,
   <span class="st">&quot;okcupid.zip&quot;</span>)
 
-<span class="kw">unzip</span>(<span class="st">&quot;okcupid.zip&quot;</span>, <span class="dt">exdir =</span> <span class="st">&quot;data&quot;</span>)</code></pre>
+<span class="kw">unzip</span>(<span class="st">&quot;okcupid.zip&quot;</span>, <span class="dt">exdir =</span> <span class="st">&quot;data&quot;</span>)
+<span class="kw">unlink</span>(<span class="st">&quot;okcupid.zip&quot;</span>)</code></pre>
+<p>We don’t recommend sampling this dataset since the model won’t be nearly as rich; however, if you have limited hardware resources, you are welcome to sample this dataset as follows:</p>
+<pre class="sourceCode r"><code class="sourceCode r">profiles &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/profiles.csv&quot;</span>)
+<span class="kw">write.csv</span>(profiles[<span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(profiles), <span class="dv">10</span><span class="op">^</span><span class="dv">3</span>),],
+          <span class="st">&quot;data/profiles.csv&quot;</span>, <span class="dt">row.names =</span> <span class="ot">FALSE</span>)</code></pre>
 <p><strong>Note:</strong> The examples in this chapter utilize small datasets so readers can easily follow along in local mode. In practice, if your dataset fits comfortably in memory on your local machine, you may be better off using an efficient non-distributed implementation of the modeling algorithm. For example, you may want to use the ranger package instead of <code>ml_random_forest_classifier()</code>.</p>
 <p>In addition, to follow along, you will need to install a few additional packages:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;ggmosaic&quot;</span>)

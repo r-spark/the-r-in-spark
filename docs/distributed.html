@@ -266,6 +266,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="8.2.1" data-path="data.html"><a href="data.html#paths"><i class="fa fa-check"></i><b>8.2.1</b> Paths</a></li>
 <li class="chapter" data-level="8.2.2" data-path="data.html"><a href="data.html#schema"><i class="fa fa-check"></i><b>8.2.2</b> Schema</a></li>
 <li class="chapter" data-level="8.2.3" data-path="data.html"><a href="data.html#memory"><i class="fa fa-check"></i><b>8.2.3</b> Memory</a></li>
+<li class="chapter" data-level="8.2.4" data-path="data.html"><a href="data.html#columns"><i class="fa fa-check"></i><b>8.2.4</b> Columns</a></li>
 </ul></li>
 <li class="chapter" data-level="8.3" data-path="data.html"><a href="data.html#write"><i class="fa fa-check"></i><b>8.3</b> Write</a></li>
 <li class="chapter" data-level="8.4" data-path="data.html"><a href="data.html#copy"><i class="fa fa-check"></i><b>8.4</b> Copy</a></li>
@@ -329,7 +330,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="11.3" data-path="distributed.html"><a href="distributed.html#partitions"><i class="fa fa-check"></i><b>11.3</b> Partitions</a></li>
 <li class="chapter" data-level="11.4" data-path="distributed.html"><a href="distributed.html#grouping"><i class="fa fa-check"></i><b>11.4</b> Grouping</a></li>
-<li class="chapter" data-level="11.5" data-path="distributed.html"><a href="distributed.html#columns"><i class="fa fa-check"></i><b>11.5</b> Columns</a></li>
+<li class="chapter" data-level="11.5" data-path="distributed.html"><a href="distributed.html#columns-1"><i class="fa fa-check"></i><b>11.5</b> Columns</a></li>
 <li class="chapter" data-level="11.6" data-path="distributed.html"><a href="distributed.html#context"><i class="fa fa-check"></i><b>11.6</b> Context</a></li>
 <li class="chapter" data-level="11.7" data-path="distributed.html"><a href="distributed.html#functions"><i class="fa fa-check"></i><b>11.7</b> Functions</a></li>
 <li class="chapter" data-level="11.8" data-path="distributed.html"><a href="distributed.html#packages"><i class="fa fa-check"></i><b>11.8</b> Packages</a></li>
@@ -415,7 +416,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </blockquote>
 <p>In previous chapters you learned how to perform data analysis and modeling in local Spark instances and proper Spark clusters and the previous Extensions chapter described how to make use of additional functionality provided by the Spark and R communities at large. In most cases, the combination of Spark functionality and extensions is more than enough to perform almost any computation. However, for those cases where functionality is lacking in Spark and their extensions, you can consider distributing R computations to worker nodes yourself.</p>
 <p>You can run arbitrary R code in each worker node to run any computation – you can run simulations, crawl content from the web, transform data and so on. In addition, you can also make use of any package available in CRAN and private packages available in your organization, this reduces the amount of code you need to write to help you keep productive.</p>
-<p>If you are already familiar with R, you might be tempted to use this approach for all Spark operations; however, this is not the recommended use of <code>spark_apply()</code>. Previous chapters provided more efficient techniques and tools to solve well known problems – in contrast, <code>spark_apply()</code> introduces additional cognitive overhead, additional troubleshooting steps, performance trade-offs and, in general, additional complexity that should be avoided. Not to say that <code>spark_apply()</code> should never used; but instead, <code>spark_apply()</code> is reserved to support use cases where previous tools and techniques fall short.</p>
+<p>If you are already familiar with R, you might be tempted to use this approach for all Spark operations; however, this is not the recommended use of <code>spark_apply()</code>. Previous chapters provided more efficient techniques and tools to solve well known problems – in contrast, <code>spark_apply()</code> introduces additional cognitive overhead, additional troubleshooting steps, performance trade-offs and, in general, additional complexity that should be avoided. Not to say that <code>spark_apply()</code> should never be used; but instead, <code>spark_apply()</code> is reserved to support use cases where previous tools and techniques fell short.</p>
 <div id="overview-6" class="section level2">
 <h2><span class="header-section-number">11.1</span> Overview</h2>
 <p>The Introduction chapter introduced MapReduce as a technique capable of processing large-scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The Tuning chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually, this is illustrated in Figure <a href="distributed.html#fig:distributed-times-ten">11.1</a>.</p>
@@ -723,7 +724,7 @@ FIGURE 11.4: Ray tracing in Spark using R and rayrender
 <p><em>Note</em>: You can only group data by partitions that fit in a single machine, if one of the groups is too large, an exception will be thrown. To perform operations over groups that exceed the resources of a single node, you can consider partitioning to smaller units or use <code>dplyr::do</code> which is currently optimized for large partitions.</p>
 <p>The takeaway from this section is to always consider partitions when dealing with <code>spark_apply()</code>. Next, we will zoom inside <code>spark_apply()</code> to understand how columns are interpreted.</p>
 </div>
-<div id="columns" class="section level2">
+<div id="columns-1" class="section level2">
 <h2><span class="header-section-number">11.5</span> Columns</h2>
 <p>By default, <code>spark_apply()</code>, will inspect the data frame being produced to find out column names and types automatically, for example:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sdf_len</span>(sc, <span class="dv">1</span>) <span class="op">%&gt;%</span>
