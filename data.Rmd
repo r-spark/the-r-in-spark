@@ -116,7 +116,7 @@ Next we will present a technique that allows Spark to read file faster, as well 
 
 When reading data, Spark is able to determine the data source's column names and column types, also known as the *schema*. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess what it is. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size datasets. For files that are read over and over again, the additional read time accumulates over time.
 
-To avoid this, Spark allows you to provide a column definition py providing a `columns` argument to describe your dataset. This argument is the switch that indicates if the `column` argument should be used.
+To avoid this, Spark allows you to provide a column definition py providing a `columns` argument to describe your dataset. You can create this schema by sampling a small portion of the original file yourself,
 
 ```{r data-schema}
 spec_with_r <- sapply(read.csv("data-csv/letters1.csv", nrows = 10), class)
@@ -127,7 +127,7 @@ spec_with_r
  "factor" "integer" 
 ```
 
-You can set the column specification to a vector containing the column types. The vector's values are named to match the field names. 
+Or you can set the column specification to a vector containing the column types explicitly. The vector's values are named to match the field names. 
 
 ```{r data-schema-explicit}
 spec_explicit <- c(x = "character", y = "numeric")
