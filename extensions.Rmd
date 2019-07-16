@@ -588,9 +588,10 @@ copy_to(sc, iris) %>%
   spark_write_tfrecord(path = "tfrecord")
 ```
 
-Once trained, you can use the `tfdatasets` package to load the dataset followed by training with `keras` or `tensorflow`. To learn more about training deep learning models with Keras we recommend reading "Deep Learning with R". [@extensions-chollet-jj]
+Once trained, you can use the `tfdatasets` package to load the dataset followed by training with `keras` or `tensorflow`. You will also need to install the TensorFlow runtime with `install_tensorflow()` and install Python on your own. To learn more about training deep learning models with Keras we recommend reading "Deep Learning with R". [@extensions-chollet-jj]
 
 ```{r}
+tensorflow::install_tensorflow()
 tfdatasets::tfrecord_dataset("tfrecord/part-r-00000")
 ```
 ```
@@ -645,7 +646,9 @@ The human genome consists of two copies of about three billion base pairs of DNA
 render_image("images/extensions-genomics-diagram.png")
 ```
 
-VariantSpark is a framework based on scala and spark to analyze genome datasets. It is being developed by CSIRO Bioinformatics team in Australia. VariantSpark was tested on datasets with 3000 samples each one containing 80 million features in either unsupervised clustering approaches and supervised applications, like classification and regression. VariantSpark can read VCF files and run analyses while using familiar Spark DataFrames. To get started, install `variantspark` from CRAN and connect to Spark:
+VariantSpark is a framework based on scala and spark to analyze genome datasets. It is being developed by CSIRO Bioinformatics team in Australia. VariantSpark was tested on datasets with 3000 samples each one containing 80 million features in either unsupervised clustering approaches and supervised applications, like classification and regression. VariantSpark can read VCF files and run analyses while using familiar Spark DataFrames.
+
+To get started, install `variantspark` from CRAN, connect to Spark and retrieve a `vsc` connection to VariantSpark:
 
 ```{r}
 library(variantspark)
