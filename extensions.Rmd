@@ -650,17 +650,19 @@ VariantSpark is a framework based on scala and spark to analyze genome datasets.
 
 To get started, install `variantspark` from CRAN, connect to Spark and retrieve a `vsc` connection to VariantSpark:
 
-```{r}
+```{r extensions-genomics-connect}
 library(variantspark)
 library(sparklyr)
 
-sc <- spark_connect(master = "local", version = "2.3")
+sc <- spark_connect(master = "local", version = "2.3",
+                    config = list(sparklyr.connect.timeout = 3 * 60))
+
 vsc <- vs_connect(sc)
 ```
 
 We can start by loading a VCF file,
 
-```{r}
+```{r extensions-genomics-read-vcf}
 vsc_data <- system.file("extdata/", package = "variantspark")
 
 hipster_vcf <- vs_read_vcf(vsc, file.path(vsc_data, "hipster.vcf.bz2"))
@@ -670,7 +672,7 @@ labels <- vs_read_labels(vsc, file.path(vsc_data, "hipster_labels.txt"))
 
 VariantSpark uses Random Forest to assign an Importance score to each tested variant reflecting its association to the interest phenotype. A variant with higher Importance score implies it is more strongly associated with the phenotype of interest. You can compute the Importance and transform it into a Spark table as follows,
 
-```{r}
+```{r extensions-genomics-importance-code}
 importance_tbl <- vs_importance_analysis(vsc, hipster_vcf, 
                                          labels, n_trees = 100) %>%
   importance_tbl()
@@ -696,7 +698,7 @@ importance_tbl
 
 You can then use `dplyr` and `ggplot2` to transform the output and visualize it,
 
-```{r}
+```{r extensions-genomics-plot-code}
 importance_df <- importance_tbl %>% 
   arrange(-importance) %>% 
   head(20) %>% 
@@ -708,7 +710,7 @@ ggplot(importance_df) +
   scale_x_discrete(limits = importance_df[order(importance_df$importance), 1]$variable) + 
   coord_flip()
 ```
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 ggplot(importance_df) +
   aes(x = variable, y = importance) + 
   labs(title = "Importance Analysis",
@@ -728,7 +730,7 @@ render_image("images/extensions-genomics-importance.png")
 
 This concludes a brief introduction to genomic analysis in Spark using the variantspark extensions. Next, we will move away from microscopic genes, to macroscopic datasets that contain geographic locations across the world.
 
-```{r echo=FALSE}
+```{r extensions-genomics-disconnect, echo=FALSE}
 spark_disconnect(sc)
 ```
 
@@ -749,7 +751,7 @@ Then we will initialize the geospark extension and connect to Spark:
 library(geospark)
 library(sparklyr)
 
-sc <- spark_connect(master = "local")
+sc <- spark_connect(master = "local", version = "2.3")
 register_gis(sc)
 ```
 
