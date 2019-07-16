@@ -11,28 +11,30 @@ test_that("can knit starting", {
 })
 
 test_that("can knit analysis", {
+  skip("troubleshoot extensions")
   rmarkdown::render("sources/analysis.Rmd", output_dir = "output")
   expect_true(file.exists("output/analysis.html"))
 })
 
 test_that("can knit modeling", {
+  skip("troubleshoot extensions")
   rmarkdown::render("sources/modeling.Rmd", output_dir = "output")
   expect_true(file.exists("output/modeling.html"))
 })
 
 test_that("can knit pipelines", {
+  skip("troubleshoot extensions")
   rmarkdown::render("sources/pipelines.Rmd", output_dir = "output")
   expect_true(file.exists("output/pipelines.html"))
 })
 
 test_that("can knit data", {
+  skip("troubleshoot extensions")
   rmarkdown::render("sources/data.Rmd", output_dir = "output")
   expect_true(file.exists("output/data.html"))
 })
 
 test_that("can knit extensions", {
-  skip("TODO")
-
   rmarkdown::render("sources/extensions.Rmd", output_dir = "output")
   expect_true(file.exists("output/extensions.html"))
 })

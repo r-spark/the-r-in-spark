@@ -47,7 +47,7 @@ Before you learn how and when to use each extension, we should first briefly exp
 
 First, a Spark extension is just and R package that happens to be aware of Spark. As any other R package, you will first have to install the R package. Once installed, it is important to know that you will need to reconnect to Spark before the extension can be used. So, in general, the pattern you should follow goes as follows:
 
-```{r}
+```{r eval=FALSE}
 library(sparkextension)
 library(sparklyr)
 
@@ -116,7 +116,8 @@ library(rsparkling)
 library(sparklyr)
 library(h2o)
 
-sc <- spark_connect(master = "local", version = "2.3")
+sc <- spark_connect(master = "local", version = "2.3",
+                    config = list(sparklyr.connect.timeout = 3 * 60))
 
 cars <- copy_to(sc, mtcars)
 ```
@@ -214,6 +215,10 @@ model_id              mean_residual_dev…     rmse      mse      mae     rmsle
 Many additional examples are available under [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/), you can also request help from [github.com/h2oai/sparkling-water/tree/master/r](https://github.com/h2oai/sparkling-water/tree/master/r), the official GitHub repository for the `rsparkling` package.
 
 The next extension, `graphframes`, will allow you to process large-scale relational datasets; however, before you start using it, make sure to disconnect with `spark_disconnect(sc)` and restart your R session since using a different extensions requires you to reconnect to Spark and reload `sparklyr`.
+
+```{r echo=FALSE}
+spark_disconnect(sc)
+```
 
 ## Graphs
 
@@ -626,6 +631,10 @@ render_image("images/extensions-distributed-training.png")
 
 Training large-scale deep learning models is possible in Spark and TensorFlow through frameworks like Horovod. Today, it's possible to use Horovod with Spark from R using the `reticulate` package since Horovod requires Python and Open MPI which goes beyond the scope of this book. Instead, we will introduce a different Spark extension in the domain of genomics.
 
+```{r echo=FALSE}
+spark_disconnect(sc)
+```
+
 ## Genomics
 
 The human genome consists of two copies of about three billion base pairs of DNA within the 23 chromosome pairs, Figure \@ref(fig:extensions-genomics-diagram) shows the organization of the genome into chromosomes. DNA strands are composed of nucleotides, each composed of one of four nitrogen-containing nucleobases: cytosine (C), guanine (G), adenine (A) or thymine (T). [@extensions-genomics-wikipedia] Since the DNA of all humans is nearly identical, we only need to store the differences from the reference genome in the form of a Variant Call Format (VCF) file.
@@ -714,6 +723,10 @@ render_image("images/extensions-genomics-importance.png")
 
 This concludes a brief introduction to genomic analysis in Spark using the variantspark extensions. Next, we will move away from microscopic genes, to macroscopic datasets that contain geographic locations across the world.
 
+```{r echo=FALSE}
+spark_disconnect(sc)
+```
+
 ## Spatial 
 
 [geospark](https://github.com/harryprince/geospark) enables distributed geospatial computing using a grammar compatible with [`dplyr`](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) and [`sf`](https://github.com/rstudio/cheatsheets/raw/master/sf.pdf) package which provides a set of tools for working with geospatial vectors.
@@ -781,11 +794,15 @@ inner_join(polygons_wkt,
 
 You can also plot these datasets by collecting a subset of the entire dataset or aggregating the geometries in spark before collecting them, one package you should look into is the `sf` package. We will now start closing this chapter by presenting a couple troubleshooting techniques applicable to all extensions.
 
+```{r echo=FALSE}
+spark_disconnect(sc)
+```
+
 ## Troubleshooting
 
 When using a new extension for the first time, we recommend increasing the connection timeout since Spark will usually have to download extension dependencies and changing logging to verbose to help troubleshoot when the download process does not complete:
 
-```{r}
+```{r eval=FALSE}
 config <- spark_config()
 config$sparklyr.connect.timeout <- 3 * 60
 config$sparklyr.log.console = TRUE
@@ -795,7 +812,7 @@ sc <- spark_connect(master = "local", config = config)
 
 In addition, you should know that [Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility, simplicity, and is used by Apache Spark while installing extensions. When the connection fails while using an extension, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
 
-```{r extensions-rsparkling-cache}
+```{r extensions-rsparkling-cache, eval=FALSE}
 unlink("~/.ivy2", recursive = TRUE)
 ```
 
