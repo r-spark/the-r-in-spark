@@ -78,7 +78,9 @@ render_nomnoml("
 ", "images/distributed-r-spark-apply-input-output.png", "Expected Function Signature in spark_apply() Mappings", styles)
 ```
 
-We can refer back to the original MapReduce example from the Introduction chapter, where the map operation was defined to split sentences into words and then, the total unique words were counted as the reduce operation. In R, we could make use of the `unnest_tokens()` function in the `tidytext` R package, combining the functionality of `tidytext` with `spark_apply()` would allow us to tokenize those sentences into a table of words as follows:
+We can refer back to the original MapReduce example from the Introduction chapter, where the map operation was defined to split sentences into words and then, the total unique words were counted as the reduce operation.
+
+In R, we could make use of the `unnest_tokens()` function from the `tidytext` R package, which you would need to install from CRAN before conneceting to Spark. You can then use `tidytext` with `spark_apply()` to tokenize those sentences into a table of words:
 
 ```{r distributed-overview-sentences}
 sentences <- copy_to(sc, data_frame(text = c("I like apples", "I like bananas")))
