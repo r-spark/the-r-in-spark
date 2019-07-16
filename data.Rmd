@@ -284,7 +284,14 @@ Previous chapters used `copy_to()` as a handy helper to copy data into Spark; ho
 
 For instance, suppose that we have a 3GB dataset generated as follows,
 
-```{r data-copy-create}
+```{r data-copy-create-travis, echo=FALSE}
+dir.create("largefile.txt")
+write.table(matrix(rnorm(10^5), ncol = 10), "largefile.txt/1",
+            append = T, col.names = F, row.names = F)
+for (i in 2:30) 
+  file.copy("largefile.txt/1", paste("largefile.txt/", i))
+```
+```{r data-copy-create, eval=FALSE}
 dir.create("largefile.txt")
 write.table(matrix(rnorm(10 * 10^6), ncol = 10), "largefile.txt/1",
             append = T, col.names = F, row.names = F)
@@ -330,7 +337,15 @@ Alternatively, you can also collect datasets that don't fit in-memory by providi
 
 The following code could be use to collect 3GB even if the driver node collecting this dataset had less than 3GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this creates a significant performance bottleneck. For conciseness, we will collect only the first million rows; feel free to remove `head()` if you havee a few minutes to spare.
 
-```{r data-copy-collect}
+```{r data-copy-collect-travis, echo=FALSE}
+dir.create("large")
+spark_read_text(sc, "largefile.txt", memory = FALSE) %>%
+  head(10^3) %>%
+  collect(callback = function(df, idx) {
+    writeLines(df$line, paste0("large/large-", idx, ".txt"))
+  })
+```
+```{r data-copy-collect, eval=FALSE}
 dir.create("large")
 spark_read_text(sc, "largefile.txt", memory = FALSE) %>%
   head(10^6) %>%
