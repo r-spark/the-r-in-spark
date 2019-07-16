@@ -333,7 +333,7 @@ The following code could be use to collect 3GB even if the driver node collectin
 ```{r data-copy-collect}
 dir.create("large")
 spark_read_text(sc, "largefile.txt", memory = FALSE) %>%
-  dplyr::head(10^6) %>%
+  head(10^6) %>%
   collect(callback = function(df, idx) {
     writeLines(df$line, paste0("large/large-", idx, ".txt"))
   })
