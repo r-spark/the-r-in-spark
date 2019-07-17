@@ -699,14 +699,15 @@ BinaryLogisticRegressionSummaryImpl
 
 We can plot the ROC curve by collecting the output of `validation_summary$roc()` and using ggplot2:
 
-```{r modeling-super-roc-save, echo=FALSE, eval=FALSE}
+```{r modeling-super-roc-code}
 roc <- validation_summary$roc() %>%
   collect()
-saveRDS(roc, "data/modeling-okc-roc-1.rds")
-```
-```{r modeling-super-roc-code}
+
 ggplot(roc, aes(x = FPR, y = TPR)) +
   geom_line() + geom_abline(lty = "dashed")
+```
+```{r modeling-super-roc-save, echo=FALSE}
+saveRDS(roc, "data/modeling-okc-roc-1.rds")
 ```
 ```{r modeling-super-roc-plot, echo=FALSE, eval=FALSE}
 roc <- readRDS("data/modeling-okc-roc-1.rds")
