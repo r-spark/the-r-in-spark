@@ -67,10 +67,11 @@ ggplot2::theme_set(plot_style())
 The following script was used to generate the worlds store capacity diagram:
 
 ```{r eval=FALSE}
-library(tidyverse)
-read_csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
+library(ggplot2)
+library(tidyr)
+read.csv("data/01-worlds-capacity-to-store-information.csv", skip = 8) %>%
   gather(key = storage, value = capacity, analog, digital) %>%
-  mutate(year = X1, terabytes = capacity / 1e+12) %>%
+  mutate(year = X, terabytes = capacity / 1e+12) %>%
   ggplot(aes(x = year, y = terabytes, group = storage)) +
     geom_line(aes(linetype = storage)) +
     geom_point(aes(shape = storage)) +

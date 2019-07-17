@@ -224,10 +224,7 @@ install.packages("ggraph")
 install.packages("igraph")
 ```
 ```{r}
-library(ggraph)
-library(igraph)
-
-highschool
+ggraph::highschool
 ```
 ```
 # A tibble: 506 x 3
@@ -262,7 +259,7 @@ library(sparklyr)
 library(dplyr)
 
 sc <- spark_connect(master = "local", version = "2.3")
-highschool_tbl <- copy_to(sc, highschool, "highschool") %>%
+highschool_tbl <- copy_to(sc, ggraph::highschool, "highschool") %>%
   filter(year == 1957) %>%
   transmute(from = as.character(as.integer(from)),
             to = as.character(as.integer(to)))
@@ -276,6 +273,9 @@ edges_tbl <- highschool_tbl %>% transmute(src = from, dst = to)
 
 The `vertices_tbl` table is expected to have a single `id` column:
 
+```{r extensions-graphframes-vertices}
+vertices_tbl
+```
 ```
 # Source: spark<?> [?? x 1]
    id   
@@ -295,6 +295,8 @@ The `vertices_tbl` table is expected to have a single `id` column:
 
 While the `edges_tbl` is expected to have a `src` and `dst` columns:
 
+```{r extensions-graphframes-eedges}
+edges_tbl
 ```
 # Source: spark<?> [?? x 2]
    src   dst  
@@ -357,7 +359,7 @@ gf_shortest_paths(graph, 33) %>%
 
 Finally, we can compute PageRank over this graph, which is named after Google's foudner Larry Page: 
 
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 model <- gf_graphframe(vertices_tbl, edges_tbl) %>%
   gf_pagerank(reset_prob = 0.15, max_iter = 10L)
 
@@ -383,9 +385,9 @@ Edges:
 
 To give you some insights into this dataset, Figure \@ref(fig:extensions-graph-pagerank) plots this chart using the `ggraph` and highlights the highest PageRank scores for this dataset, 
 
-```{r}
+```{r extensions-graph-pagerank-plot, eval=FALSE}
 highschool_tbl %>%
-  graph_from_data_frame(directed = FALSE) %>%
+  igraph::graph_from_data_frame(directed = FALSE) %>%
   ggraph(layout = 'kk') + 
     geom_edge_link(alpha = 0.2,
                    arrow = arrow(length = unit(2, 'mm')),
@@ -397,7 +399,7 @@ highschool_tbl %>%
 library(ggraph)
 library(igraph)
 highschool_rdf <- readRDS("data/09-extensions-graphframes-highschool.rds")
-highschool_rdf %>% graph_from_data_frame(directed = FALSE) %>%
+highschool_rdf %>% igraph::graph_from_data_frame(directed = FALSE) %>%
   ggraph(layout = 'kk') + 
     geom_edge_link(alpha = 0.2,
                    arrow = arrow(length = unit(2, 'mm')),
