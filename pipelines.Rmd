@@ -432,7 +432,7 @@ The nightly portfolio risk and credit application scoring examples we mention ab
 
 ### Batch Scoring
 
-For both scoring methods, batch and real-time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The `plumber`[^1] R package enables us to do this very easily by annotating our prediction function.
+For both scoring methods, batch and real-time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The `plumber`[^2] R package enables us to do this very easily by annotating our prediction function.
 
 You will need make sure that `plumber`, `callr` and the `httr` package are installed by running:
 
@@ -442,7 +442,7 @@ install.packages(c("plumber", "callr", "httr"))
 
 The `callr` package provides support to run R code in separate R sessions, it is not strictly required but we will use it to start a web service in the background. The `httr` package allows us to use web APIs from R.
 
-[^1]: https://www.rplumber.io/
+[^2]: https://www.rplumber.io/
 
 In the batch scoring use case, we simply initiate a Spark connection and load the saved model. Save the following script as `plumber/spark-plumber.R`:
 
@@ -506,10 +506,10 @@ If we were to time this operation (e.g. with `system.time()`), we see that the l
 
 ### Real-Time Scoring
 
-For real-time production, we want to keep dependencies as light as possible so we can target more platforms for deployment. We now show how we can use the mleap[^2] package, which provides an interface to the MLeap[^3] library, to serialize and serve Spark ML models. MLeap is open source (Apache License 2.0) and supports a wide range, though not all, of Spark ML transformers. At run time, the only prerequisites for the environment are the Java Virtual Machine (JVM) and the MLeap runtime library. This avoids both the Spark binaries and expensive overhead in converting data to and from Spark data frames.
+For real-time production, we want to keep dependencies as light as possible so we can target more platforms for deployment. We now show how we can use the mleap[^3] package, which provides an interface to the MLeap[^4] library, to serialize and serve Spark ML models. MLeap is open source (Apache License 2.0) and supports a wide range, though not all, of Spark ML transformers. At run time, the only prerequisites for the environment are the Java Virtual Machine (JVM) and the MLeap runtime library. This avoids both the Spark binaries and expensive overhead in converting data to and from Spark data frames.
 
-[^2]: [https://github.com/rstudio/mleap](https://github.com/rstudio/mleap)
-[^3]: [https://github.com/combust/mleap](https://github.com/combust/mleap)
+[^3]: [https://github.com/rstudio/mleap](https://github.com/rstudio/mleap)
+[^4]: [https://github.com/combust/mleap](https://github.com/combust/mleap)
 
 Since `mleap` is a sparklyr extension and an R package, first we need to install it from CRAN:
 
@@ -517,7 +517,7 @@ Since `mleap` is a sparklyr extension and an R package, first we need to install
 install.packages("mleap")
 ```
 
-It then must be loaded when `spark_connect()` is called; so let's restart your R session, establish a new Spark connection[^4], and load the pipeline model that we previously saved.
+It then must be loaded when `spark_connect()` is called; so let's restart your R session, establish a new Spark connection[^5], and load the pipeline model that we previously saved.
 
 ```{r pipelines-realtime-load-libs}
 library(sparklyr)
@@ -534,7 +534,7 @@ sc <- spark_connect(master = "local", version = "2.3")
 spark_model <- ml_load(sc, "spark_model")
 ```
 
-[^4]: Note that, as of the writing of this book, MLeap does not yet support Spark 2.4.
+[^5]: Note that, as of the writing of this book, MLeap does not yet support Spark 2.4.
 
 The way we save a model to MLeap bundle format is very similar to saving a model using the Spark ML Pipelines API; the only additional argument is `sample_input`, which is a Spark data frame with schema that we expect new data to be scored to have.
 
