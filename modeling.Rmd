@@ -15,13 +15,13 @@ In the previous chapter, Analysis, you learn how to scale up data analysis to la
 
 We will start this chapter by introducing modeling in the context of Spark and the dataset you will use throughout the chapter. We will then demonstrate a supervised learning workflow that includes exploratory data analysis, feature engineering, and model building. We will then move on to an unsupervised topic modeling example using unstructured text data. Keep in mind that our goal will be to show various techniques of executing data science tasks on large data, rather than conducting a rigorous and coherent analysis. There are also many other models available in Spark that won't be covered in this chapter, but by the end of the chapter, you will have the right tools to experiment with additional ones on your own.
 
-While predicting datasets manually is often a reasonable approach, by manually we mean, importing a dataset into Spark and using the fitted model to enrich or predict values; it does bring up the question -- could we automate this process into systems that just work? Like the original example about automatically classifying email as spam, without having to manually analyze and model specific datasets, the next chapter, Pipelines; presents the tools to automate data analysis and modeling with pipelines. To get there, we need to first understand how to train models, “by-hand”.
+While predicting datasets manually is often a reasonable approach, by manually we mean, someone imports a dataset into Spark and uses the fitted model to enrich or predict values; it does bring up the question -- could we automate this process into systems that anyone can use? For instance, how can we build a system that automatically identifies an email as spam without having to manually analyze each email account? The next chapter presents the tools to automate data analysis and modeling with pipelines; but to get there, we need to first understand how to train models, “by-hand”.
 
 ## Overview
 
 The R interface to Spark provides modeling algorithms that should be familiar to R users, and we'll go into detail in the chapter. For instance, we've already used `ml_linear_regression(cars, mpg ~ .)`, but we could run `ml_logistic_regression(cars, am ~ .)` just as easily.
 
-Take a moment to glance at the long list of MLlib Functions included in the Appendix of this book; otherwise, let us at least give you a quick glance of some of the models Spark supports: Decision Trees, Gradient-Boosted Trees, Accelerated Failure Time Survival Regression, Isotonic Regression, K-Means Clustering, Gaussian Mixture Clustering and so on!
+Take a moment to glance at the long list of MLlib Functions included in the Appendix of this book; a quick glance to this list shows that Spark supports: Decision Trees, Gradient-Boosted Trees, Accelerated Failure Time Survival Regression, Isotonic Regression, K-Means Clustering, Gaussian Mixture Clustering and so on!
 
 As you can see, Spark provides a wide range of algorithms and feature transformers, and we will touch on a representative portion of the functionality. A complete treatment of predictive modeling concepts is outside the scope of this book, so we recommend complementing with "R for Data Science" [@intro-r-for-data-science] and "Feature Engineering and Selection: A Practical Approach for Predictive Models" [@kuhn-fes], from which we adopted (sometimes verbatim) for examples and visualizations in this chapter.
 
@@ -31,9 +31,7 @@ The ML interface in sparklyr has been designed to minimize the cognitive effort 
 
 [^2]: We acknowledge that the terms here may mean different things to different people, and that there is a continuum between the two approaches, however they are defined.
 
-The examples in this chapter will utilize the OkCupid dataset [@kim2015okcupid], available at [^1]. The dataset consists of user profile data from an online dating site, and contains a diverse set of features, including biographical characteristics such as gender and profession, and free text fields related to personal interests. There are about 60,000 profiles in the dataset, which fits comfortably into memory on a modern laptop and wouldn't be considered "big data", so you can easily follow along running Spark local mode.
-
-[^1]: [https://github.com/rudeboybert/JSE_OkCupid](https://github.com/rudeboybert/JSE_OkCupid)
+The examples in this chapter will utilize the OkCupid dataset [@kim2015okcupid], available at [github.com/r-spark/okcupid](https://github.com/r-spark/okcupid). The dataset consists of user profile data from an online dating site, and contains a diverse set of features, including biographical characteristics such as gender and profession, and free text fields related to personal interests. There are about 60,000 profiles in the dataset, which fits comfortably into memory on a modern laptop and wouldn't be considered "big data", so you can easily follow along running Spark local mode.
 
 You can download this dataset as follows:
 
@@ -68,7 +66,7 @@ To motivate the examples, we will consider the following problem:
 
 > Predict whether someone is actively working, i.e. not retired, a student, or unemployed.
 
-Next up, we will look at the data.
+Next up, we will explore this dataset.
 
 ## Exploratory Data Analysis
 
@@ -365,7 +363,7 @@ contingency_tbl %>%
 render_image("images/modeling-okc-mosaic.png", "Mosaic plot of drug and alcohol use")
 ```
 
-To further explore the relationship between these two variables, we can perform correspondence analysis ([@greenacre2017correspondence]) using the FactoMineR package. This technique enables us to summarize the relationship between the high dimensional factor levels by mapping each level to a point on the plane. We first obtain the mapping using `FactoMineR::CA()` as follows:
+To further explore the relationship between these two variables, we can perform correspondence analysis [@greenacre2017correspondence] using the FactoMineR package. This technique enables us to summarize the relationship between the high dimensional factor levels by mapping each level to a point on the plane. We first obtain the mapping using `FactoMineR::CA()` as follows:
 
 ```{r modeling-eda-factominer-map}
 dd_obj <- contingency_tbl %>% 
@@ -461,7 +459,7 @@ This concludes our discussion on EDA, and we will now proceed to feature enginee
 
 The feature engineering exercise comprises transforming the data to increase the performance of the model. This can include things like centering and scaling numerical values and performing string manipulation to extract meaningful variables. It also often includes variable selection --- the process of selecting which predictors are used in the model.
 
-In Figure \@ref(fig:scaled-age-distribution) we see that the `age` variable has a range from 18 to over 60. Some algorithms, especially neural networks, train faster if we normalize our inputs so that they are of the same magnitude. Let's now normalize the `age` variable by removing the mean and scaling to unit variance, beginning by calculating its mean and standard deviation:
+In Figure \@ref(fig:modeling-eda-bins) we see that the `age` variable has a range from 18 to over 60. Some algorithms, especially neural networks, train faster if we normalize our inputs so that they are of the same magnitude. Let's now normalize the `age` variable by removing the mean and scaling to unit variance, beginning by calculating its mean and standard deviation:
 
 ```{r modeling-eda-scale}
 scale_values <- okc_train %>%
