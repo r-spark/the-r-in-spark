@@ -1,7 +1,6 @@
 context("chapters")
 
 chapters <- Sys.getenv("BOOK_CHAPTERS", "intro,starting,analysis,modeling,pipelines,data,extensions,distributed-r,streaming")
-chapters <- "intro"
 
 for (chapter in strsplit(chapters, ",")[[1]]) {
   test_that(paste("can knit", chapter), {
