@@ -427,7 +427,8 @@ sdf_len(sc, 628, repartition = 628) %>%
   spark_apply(function(idx, scene) {
     render <- sprintf("%04d.png", idx$id)
     rayrender::render_scene(scene, width = 1920, height = 1080,
-                            lookfrom = c(12 * sin(idx$id/100), 5, 12 * cos(idx$id/100)),
+                            lookfrom = c(12 * sin(idx$id/100), 
+                                         5, 12 * cos(idx$id/100)),
                             filename = render)
       
     system2("hadoop", args = c("fs", "-put", render, "/user/hadoop/rendering/"))
@@ -438,7 +439,8 @@ After all the images are rendered, the last step is to collect them from HDFS an
 
 ```{bash eval=FALSE}
 hadoop fs -get rendering/
-ffmpeg -s 1920x1080 -i rendering/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p rendering.mp4
+ffmpeg -s 1920x1080 -i rendering/%d.png -vcodec libx264 -crf 25
+       -pix_fmt yuv420p rendering.mp4
 ```
 
 **Note:** This example assumes HDFS is used as the storage technology for Spark and being run under a `hadoop` user, you will need to adjust this for your particular storage or user.

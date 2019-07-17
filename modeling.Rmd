@@ -278,8 +278,10 @@ prop_data %>%
 ```{r modeling-eda-prop-code}
 prop_data %>%
   ggplot(aes(x = religion, y = prop)) + geom_point(size = 2) +
-  geom_errorbar(aes(ymin = prop - 1.96 * se, ymax = prop + 1.96 * se), width = .1) +
-  geom_hline(yintercept = sum(prop_data$prop * prop_data$count) / sum(prop_data$count))
+  geom_errorbar(aes(ymin = prop - 1.96 * se, ymax = prop + 1.96 * se),
+                width = .1) +
+  geom_hline(yintercept = sum(prop_data$prop * prop_data$count) /
+                              sum(prop_data$count))
 ```
 ```{r modeling-eda-prop-render, echo = FALSE, eval = TRUE, fig.cap='Proportion of individuals not currently employed, by religion', fig.align = 'center'}
 render_image("images/modeling-okc-prop.png", "Proportion of individuals not currently employed, by religion")
