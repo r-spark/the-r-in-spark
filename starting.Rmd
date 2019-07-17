@@ -3,8 +3,6 @@
 ```{r include=FALSE, eval=TRUE}
 knitr::opts_chunk$set(eval = FALSE)
 source("r/render.R")
-library(sparklyr)
-library(ggplot2)
 ```
 
 # Getting Started {#starting}
@@ -271,7 +269,8 @@ select(cars, hp, mpg) %>%
   collect() %>%
   plot()
 ```
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
+library(ggplot2)
 select(cars, hp, mpg) %>%
   sample_n(100) %>%
   collect() %>%
@@ -320,7 +319,7 @@ model %>%
   collect() %>%
   plot()
 ```
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 model %>%
   ml_predict(copy_to(sc, data.frame(hp = 250 + 10 * 1:10))) %>%
   transmute(hp = hp, mpg = prediction, label = "Predicted") %>%

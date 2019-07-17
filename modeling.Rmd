@@ -4,11 +4,6 @@ knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 source("r/render.R")
 ```
-```{r echo=FALSE}
-library(tidyverse)
-library(sparklyr)
-library(dbplot)
-```
 
 # Modeling {#modeling}
 
@@ -216,7 +211,7 @@ sdf_describe(okc_train, cols = c("age", "income"))
 
 Like we saw in the Analysis chapter, we can also utilize the dbplot package to plot distributions of these variables. In Figure \@ref(fig:age-histogram) we show a histogram of the distribution of the `age` variable.
 
-```{r modeling-eda-bins, echo=FALSE}
+```{r modeling-eda-bins, echo=FALSE, eval=FALSE}
 db_compute_bins(okc_train, age) %>%
   ggplot() +
   geom_col(aes(age, count), fill = "#878787") +
@@ -269,7 +264,7 @@ saveRDS(prop_data, "data/modeling-okc-prop-data.rds")
 
 Note that `prop_data` is a small data frame that has been collected into memory in our R session, we can take advantage of ggplot2 to create an informative visualization in Figure \@ref(fig:modeling-eda-prop-render).
 
-```{r modeling-eda-prop-plot, echo=FALSE}
+```{r modeling-eda-prop-plot, echo=FALSE, eval=FALSE}
 prop_data <- readRDS("data/modeling-okc-prop-data.rds")
 prop_data %>%
   ggplot(aes(x = religion, y = prop)) + 
@@ -338,7 +333,7 @@ contingency_tbl %>%
                   weight = count))
 ```
 
-```{r modeling-eda-contingency-plot, echo=FALSE}
+```{r modeling-eda-contingency-plot, echo=FALSE, eval=FALSE}
 library(ggmosaic)
 library(forcats)
 library(tidyr)
@@ -495,7 +490,7 @@ okc_train <- okc_train %>%
 ```{r modeling-eda-scale-code}
 dbplot_histogram(okc_train, scaled_age)
 ```
-```{r modeling-eda-scale-plot, echo=FALSE}
+```{r modeling-eda-scale-plot, echo=FALSE, eval=FALSE}
 db_compute_bins(okc_train, scaled_age) %>%
   ggplot() +
   geom_col(aes(scaled_age, count), fill = "#878787") +
@@ -570,7 +565,7 @@ okc_train <- okc_train %>%
     essay_length = char_length(paste(!!!syms(paste0("essay", 0:9))))
   ) %>% compute()
 ```
-```{r modeling-eda-essay-plot, echo=FALSE}
+```{r modeling-eda-essay-plot, echo=FALSE, eval=FALSE}
 db_compute_bins(okc_train, essay_length, bins = 100) %>%
   ggplot() +
   geom_col(aes(essay_length, count), fill = "#878787") +
@@ -715,7 +710,7 @@ saveRDS(roc, "data/modeling-okc-roc-1.rds")
 ggplot(roc, aes(x = FPR, y = TPR)) +
   geom_line() + geom_abline(lty = "dashed")
 ```
-```{r modeling-super-roc-plot, echo=FALSE}
+```{r modeling-super-roc-plot, echo=FALSE, eval=FALSE}
 roc <- readRDS("data/modeling-okc-roc-1.rds")
 ggplot(roc, aes(x = FPR, y = TPR)) +
   geom_line() +
@@ -778,7 +773,7 @@ cv_roc <- cv_results %>%
   unnest(roc_df)
 saveRDS(cv_roc, "data/modeling-okc-cv-roc.rds")
 ```
-```{r modeling-super-unnest-roc-render, echo=FALSE}
+```{r modeling-super-unnest-roc-render, echo=FALSE, eval=FALSE}
 cv_roc <- readRDS("data/modeling-okc-cv-roc.rds")
 cv_roc %>%
   ggplot(aes(x = FPR, y = TPR, color = Resample)) +
@@ -842,7 +837,7 @@ tidy_glr %>%
   coord_flip() +
   geom_hline(yintercept = 0, linetype = "dashed")
 ```
-```{r modeling-super-glr-plot-render, echo=FALSE}
+```{r modeling-super-glr-plot-render, echo=FALSE, eval=FALSE}
 tidy_glr %>%
   ggplot(aes(x = term, y = estimate)) +
   geom_point() +
@@ -1007,7 +1002,7 @@ lda_model <-  ml_lda(
 betas <- tidy(lda_model)
 saveRDS(betas, "data/modeling-okc-betas-100.rds")
 ```
-```{r modeling-unsuper-lda-betas-plot, echo=FALSE}
+```{r modeling-unsuper-lda-betas-plot, echo=FALSE, eval=FALSE}
 plot_betas <- function(betas) {
   betas %>%
     group_by(topic) %>%
