@@ -1,46 +1,10 @@
 context("chapters")
 
-test_that("can knit intro", {
-  rmarkdown::render("sources/intro.Rmd", output_dir = "output")
-  expect_true(file.exists("output/intro.html"))
-})
+chapters <- Sys.getenv("BOOK_CHAPTERS", "intro,starting,analysis,modeling,pipelines,data,extensions,distributed-r,streaming")
 
-test_that("can knit starting", {
-  rmarkdown::render("sources/starting.Rmd", output_dir = "output")
-  expect_true(file.exists("output/starting.html"))
-})
-
-test_that("can knit analysis", {
-  rmarkdown::render("sources/analysis.Rmd", output_dir = "output")
-  expect_true(file.exists("output/analysis.html"))
-})
-
-test_that("can knit modeling", {
-  rmarkdown::render("sources/modeling.Rmd", output_dir = "output")
-  expect_true(file.exists("output/modeling.html"))
-})
-
-test_that("can knit pipelines", {
-  rmarkdown::render("sources/pipelines.Rmd", output_dir = "output")
-  expect_true(file.exists("output/pipelines.html"))
-})
-
-test_that("can knit data", {
-  rmarkdown::render("sources/data.Rmd", output_dir = "output")
-  expect_true(file.exists("output/data.html"))
-})
-
-test_that("can knit extensions", {
-  rmarkdown::render("sources/extensions.Rmd", output_dir = "output")
-  expect_true(file.exists("output/extensions.html"))
-})
-
-test_that("can knit distributed", {
-  rmarkdown::render("sources/distributed-r.Rmd", output_dir = "output")
-  expect_true(file.exists("output/distributed-r.html"))
-})
-
-test_that("can knit streaming", {
-  rmarkdown::render("sources/streaming.Rmd", output_dir = "output")
-  expect_true(file.exists("output/streaming.html"))
-})
+for (chapter in strsplit(chapters, ",")[[1]]) {
+  test_that(paste("can knit", chapter), {
+    rmarkdown::render(paste0("sources/", chapter, ".Rmd"), output_dir = "output")
+    expect_true(file.exists(paste0("output/", chapter, ".html")))
+  })
+}
