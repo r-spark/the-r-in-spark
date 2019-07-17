@@ -12,7 +12,7 @@ render_nomnoml <- function(code, png, caption = NULL, styles = "") {
 
     knitr::asis_output(paste0("![", caption, "||", knitr::opts_current$get()$label, "](", png_resized, ")"))
   } else {
-    nomnoml::nomnoml(paste0(styles, "\n", code), png = png)
+    nomnoml::nomnoml(paste0(defaults, "\n", styles, "\n", code), png = png)
   }
 }
 
