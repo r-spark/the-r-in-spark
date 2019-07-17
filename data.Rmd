@@ -13,9 +13,9 @@ library(ggplot2)
 
 The previous chapter, Connections, presented how to connect to Spark clusters, either on-premise or in the cloud; with previous knowledge acquired in previous chapters, you are now equipped to start doing analysis and modeling at scale! However, so far we haven't really explained much about how to read data into Spark, we've used `copy_to()` to upload small datasets or functions like `spark_read_csv()` or `spark_write_csv()` without explaining in detail how and why.
 
-So, we are about to learn how to read and write data using Spark; while this is important on it's own, this chapter will also introduce you to data lakes -- a repository of data stored in its natural or raw format which provides various benefits over existing storage architectures.
+So, we are about to learn how to read and write data using Spark; while this is important on it's own, this chapter will also introduce you to data lakes -- a repository of data stored in its natural or raw format which provides various benefits over existing storage architectures. For instance, you can easily integrate data from external systems without transforming into a common format and without assuming they are as reliable as your internal data sources.
 
-In addition, we will also present how to extend Spark's capabilities to work with data not accessible out-of-the-box and several recommendations focused on improving performance for reading and writing data.
+In addition, we will also present how to extend Spark's capabilities to work with data not accessible out-of-the-box and several recommendations focused on improving performance for reading and writing data. Reading large datasets often requires you to fine-tune your Spark cluster configuration, but this will be the topic of the next chapter, Tuning.
 
 ## Overview
 
@@ -23,7 +23,9 @@ In the Introduction chapter, you learned that beyond big data and big compute, y
 
 For several years, it's been a common practice to store large datasets in a relational *database*, a system first proposed in 1970 by Edgar F. Codd. [@data-codd-relational] You can think of a database as a collection of tables that are related to one another where each table is carefully designed to hold specific data types and relationships to other tables. Most relational database systems use *SQL* (Structured Query Language) for querying and maintaining the database. Databases are still widely used today, with good reason -- Databases store data reliably and consistently, your bank probably stores account balances in a database and that's a good practice!
 
-However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as *ETL* (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became popular in the 1970s. Aside from databases, data is often also loaded into a *data warehouse*, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. The challenge is that, changing databases and data warehouses is usually a long and delicate process since data needs to be re-indexed and the data from multiple data sources needs to be carefully transformed into single tables that can share across data sources.
+However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as *ETL* (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became popular in the 1970s.
+
+Aside from databases, data is often also loaded into a *data warehouse*, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. The challenge is that, changing databases and data warehouses is usually a long and delicate process since data needs to be re-indexed and the data from multiple data sources needs to be carefully transformed into single tables that can share across data sources.
 
 Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a *data lake* -- a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since data lakes make data available in its original format, there is no need to carefully transform it in advance, anyone can use it for analysis which adds significant flexibility over ETL. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure \@ref(fig:data-data-lake).
 
@@ -59,7 +61,7 @@ In order to support a broad variety of data source, Spark needs to be able to re
 
 ## Read
 
-If you are new to Spark, it is highly recommended to review this section before you start working with large datasets. We will introduce several techniques that improve the speed and efficiency of reading data. Each subsection will present specific ways to take advantage of how Spark reads files, such as the ability to treat entire folders as datasets, as well as being able to describe them to accelerate this operation. 
+If you are new to Spark, it is highly recommended to review this section before you start working with large datasets. We will introduce several techniques that improve the speed and efficiency of reading data. Each subsection will present specific ways to take advantage of how Spark reads files, such as the ability to treat entire folders as datasets, as well as being able to describe them to read datasets faster in Spark.
 
 ### Paths
 
@@ -243,9 +245,9 @@ render_nomnoml("
 #lineWidth: 1
 #spacing:90
 [Avoid writing data from R!| 
-[Source] -> [Spark | Process] 
+[Source] -> [Spark | Read -  Process] 
 [Spark]collect() -> [R]
-[R] -> [Target]
+[R | Write] -> [Target]
 ]
 ", "images/data-r-pass-through.png")
 ```
@@ -260,7 +262,7 @@ render_nomnoml("
 #arrowSize: 0.4
 #lineWidth: 1
 #spacing:90
-[Source] -> [Spark | Reads -  Process - Writes] 
+[Source] -> [Spark | Reads -  Process - Write] 
 [Spark] -> [Target]
 ", "images/data-spark-pass-through.png")
 ```
@@ -335,17 +337,9 @@ hadoop fs -copyToLocal largefile.txt largefile.txt
 
 Alternatively, you can also collect datasets that don't fit in-memory by providing a callback to `collect()`. A callback is just an R function that will be called over each Spark partition, you can then write this dataset to disk or push to other clusters over the network.
 
-The following code could be use to collect 3GB even if the driver node collecting this dataset had less than 3GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this creates a significant performance bottleneck. For conciseness, we will collect only the first million rows; feel free to remove `head()` if you havee a few minutes to spare.
+The following code could be use to collect 3GB even if the driver node collecting this dataset had less than 3GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this creates a significant performance bottleneck. For conciseness, we will collect only the first million rows; feel free to remove `head(10^6)` if you havee a few minutes to spare.
 
-```{r data-copy-collect-travis, echo=FALSE}
-dir.create("large")
-spark_read_text(sc, "largefile.txt", memory = FALSE) %>%
-  head(10^3) %>%
-  collect(callback = function(df, idx) {
-    writeLines(df$line, paste0("large/large-", idx, ".txt"))
-  })
-```
-```{r data-copy-collect, eval=FALSE}
+```{r data-copy-collect}
 dir.create("large")
 spark_read_text(sc, "largefile.txt", memory = FALSE) %>%
   head(10^6) %>%
@@ -382,7 +376,7 @@ The following sections will describe special considerations particular to each f
 
 The CSV format may be the most common file type in use today, which is defined by a text file separated by a given character, usually a comma. It should be pretty straightforward to read CSV files; however, it's worth mentioning a couple techniques that can help you process CSVs that are not fully compliant with a well-formed CSV file. Spark offers the following modes for addressing parsing issues:
 
-- *Permissive*: `NULL`s are inserted for missing tokens.
+- *Permissive*: NULL values are inserted for missing tokens.
 
 - *Drop Malformed*: Drops lines which are malformed.
 
