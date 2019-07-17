@@ -10,9 +10,9 @@ knitr::opts_chunk$set(eval = FALSE)
 >
 > --- Jon Snow
 
-Previous chapters focused on introducing Spark with R, they got you up to speed and encouraged you to try basic data analysis workflows. However, they have not properly introduced what such data analysis means, especially while running in Spark. They presented the tools you need throughout this book, to help you spend more time learning and hopefully, less time troubleshooting.
+Previous chapters focused on introducing Spark with R, they got you up to speed and encouraged you to try basic data analysis workflows. However, they have not properly introduced what such data analysis means, especially while running in Spark. They presented the tools you need throughout this book, to help you spend more time learning and less time troubleshooting.
 
-This chapter, Analysis, will introduce tools to perform data analysis in R; which, spoiler alert, are the same tools you will use when using Spark with R! This is not accidental coincidence, but rather, we want data scientist to live in a world where technology is hidden from them, where you can use the R packages you know and love, and where they simply happen to just work across! Now, we are not quite there yet, but we are also not that far. This chapter will present widely used R packages and practices to do data analysis in R, which also happen to Spark work in Spark, like: `dplyr`, `ggplot2`, formulas, `rmarkdown` and so on.
+This chapter will introduce tools and concepts to perform data analysis in Spark from R; which, spoiler alert, these are the same tools you use when using plain R! This is not accidental coincidence; but rather, we want data scientist to live in a world where technology is hidden from them, where you can use the R packages you know and love, and where they simply happen to just work in Spark! Now, we are not quite there yet, but we are also not that far. Therefore, in this chapter you will learn widely used R packages and practices to pereform data analysis like: `dplyr`, `ggplot2`, formulas, `rmarkdown` and so on -- which also happen to work in Spark!
 
 The next chapter, Modeling, will focus on creating statistical models to predict, estimate and describe datasets; but first, let's get started with analysis!
 
@@ -159,7 +159,7 @@ After the data is cleaned, you still need to understand the basics about its con
 
 The main goal is to write the data transformations using R syntax as much as possible. This saves us from the cognitive cost of having to switch between multiple computer technologies to accomplish a single task. In this case, it is better to take advantage of `dplyr`, instead of writing Spark SQL statements for data exploration.  
 
-In the R environment, *cars* can be treated as if it is a local data frame, so `dplyr` verbs can be used, and in a piped fashion using `%>%`. For instance, we can find out the mean of all columns as with `summarise_all()`:
+In the R environment, *cars* can be treated as if it is a local data frame, so `dplyr` verbs can be used. For instance, we can find out the mean of all columns as with `summarise_all()`:
 
 ```{r analysis-summarize-all, eval = FALSE}
 summarize_all(cars, mean)
@@ -181,8 +181,8 @@ summarize_all(cars, mean) %>%
 <SQL>
 SELECT AVG(`mpg`) AS `mpg`, AVG(`cyl`) AS `cyl`, AVG(`disp`) AS `disp`,
        AVG(`hp`) AS `hp`, AVG(`drat`) AS `drat`, AVG(`wt`) AS `wt`,
-      AVG(`qsec`) AS `qsec`, AVG(`vs`) AS `vs`, AVG(`am`) AS `am`,
-      AVG(`gear`) AS `gear`, AVG(`carb`) AS `carb`
+       AVG(`qsec`) AS `qsec`, AVG(`vs`) AS `vs`, AVG(`am`) AS `am`,
+       AVG(`gear`) AS `gear`, AVG(`carb`) AS `carb`
 FROM `mtcars`
 ```
 As it is evident, `dplyr` is much more concise than SQL; but rest assured, you will not have to see nor understand SQL when using `dplyr`. Your focus can remain on obtaining insights from the data, as opposed to figuring out how to express a given set of transformation in SQL. Here is another example that groups the cars dataset by "transmission" type.
@@ -290,7 +290,7 @@ ml_corr(cars)
 #   gear <dbl>, carb <dbl>
 ```
 
-The `corrr` R package specializes in correlations.  It contains friendly functions to prepare and visualize the results.  Included inside the package is a back-end for `sparklyr` table objects, so it will not return an error if a non local table is passed to it.  In the background, the `correlate()` function runs `ml_corr()`, so there is no need to collect any data into R prior running the command.
+The `corrr` R package specializes in correlations.  It contains friendly functions to prepare and visualize the results.  Included inside the package is a back-end for Spark, so when a Spark object is used in `corrr` the actual computation also happens in Spark. In the background, the `correlate()` function runs `sparklyr::ml_corr()`, so there is no need to collect any data into R prior running the command.
 
 ```{r analysis-corrr-pairwise}
 library(corrr)
@@ -497,7 +497,7 @@ render_image("images/analysis-visualizations-raster.png")
 
 As shown in Figure \@ref(fig:analysis-visualizations-raster), the plot returns a grid no bigger than 5x5.  This limits the number of records that need to be collected into R to 25.
 
-**Tip:** YOu can also use `dbplot` to retrieve the raw data and visualize by other means; to retrieve the aggregates but not the plots use: `db_compute_bins()`, `db_compute_count()`, `db_compute_raster()` and `db_compute_boxplot()`.
+**Tip:** You can also use `dbplot` to retrieve the raw data and visualize by other means; to retrieve the aggregates but not the plots use: `db_compute_bins()`, `db_compute_count()`, `db_compute_raster()` and `db_compute_boxplot()`.
 
 While visualizations are indispensable, you can complement data analysis using statistical models to gain even deeper insights into our data. The next section will present how we can prepare data for modeling with Spark.  
 
@@ -671,7 +671,7 @@ spark_disconnect(sc)
 ```
 ````
 
-To knit this report, save the contents into a `report.Rmd` file and run `render()` from R. The output should look like the one in Figure \@(fig:visualize-analysis-communicate).
+To knit this report, save the contents into a `report.Rmd` file and run `render()` from R. The output should look like the one in Figure \@ref(fig:visualize-analysis-communicate).
 
 ```{r analysis-communicate-rmd, eval=FALSE}
 rmarkdown::render("report.Rmd")
