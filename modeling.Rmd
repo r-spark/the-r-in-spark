@@ -39,7 +39,7 @@ You can download this dataset as follows:
 
 ```{r modeling-download-data}
 download.file(
-  "https://github.com/rudeboybert/JSE_OkCupid/raw/master/profiles.csv.zip",
+  "https://github.com/r-spark/okcupid/raw/master/profiles.csv.zip",
   "okcupid.zip")
 
 unzip("okcupid.zip", exdir = "data")
@@ -365,17 +365,15 @@ render_image("images/modeling-okc-mosaic.png", "Mosaic plot of drug and alcohol 
 
 To further explore the relationship between these two variables, we can perform correspondence analysis ([@greenacre2017correspondence]) using the FactoMineR package. This technique enables us to summarize the relationship between the high dimensional factor levels by mapping each level to a point on the plane. We first obtain the mapping using `FactoMineR::CA()` as follows:
 
-```{r modeling-eda-factominer-map, eval=FALSE}
+```{r modeling-eda-factominer-map}
 dd_obj <- contingency_tbl %>% 
   tibble::column_to_rownames(var = "drinks_drugs") %>%
-  as.matrix() %>%
-  as.table() %>%
   FactoMineR::CA(graph = FALSE)
 ```
 
 We can then plot the results using ggplot:
 
-```{r modeling-eda-factominer-code, eval=FALSE}
+```{r modeling-eda-factominer-code}
 dd_drugs <-
   dd_obj$row$coord %>%
   as.data.frame() %>%
@@ -701,7 +699,7 @@ BinaryLogisticRegressionSummaryImpl
 
 We can plot the ROC curve by collecting the output of `validation_summary$roc()` and using ggplot2:
 
-```{r modeling-super-roc-save, echo=FALSE}
+```{r modeling-super-roc-save, echo=FALSE, eval=FALSE}
 roc <- validation_summary$roc() %>%
   collect()
 saveRDS(roc, "data/modeling-okc-roc-1.rds")
@@ -768,7 +766,7 @@ unnest(cv_results, roc_df) %>%
   ggplot(aes(x = FPR, y = TPR, color = Resample)) +
   geom_line() + geom_abline(lty = "dashed")
 ```
-```{r modeling-super-unnest-roc-save, echo=FALSE}
+```{r modeling-super-unnest-roc-save, echo=FALSE, eval=FALSE}
 cv_roc <- cv_results %>% 
   unnest(roc_df)
 saveRDS(cv_roc, "data/modeling-okc-cv-roc.rds")
@@ -791,7 +789,7 @@ render_image("images/modeling-okc-roc2.png")
 
 and we can obtain the average AUC metric:
 
-```{r modeling-super-auc-meean}
+```{r modeling-super-auc-mean}
 mean(cv_results$auc)
 ```
 ```
@@ -802,7 +800,7 @@ mean(cv_results$auc)
 
 If you are interested in generalized linear model (GLM) diagnostics,you can also fit a logistic regression via the generalized linear regression interface by specifying `family = "binomial"`. Because the result is a regression model, the `ml_predict()` method does not give class probabilities. However, it includes confidence intervals for coefficient estimates.
 
-```{r modeling-super-glr-save, echo = FALSE}
+```{r modeling-super-glr-save, echo=FALSE, eval=FALSE}
 glr <- ml_generalized_linear_regression(
   analysis_set, 
   not_working ~ scaled_age + sex + drinks + drugs + essay_length, 
@@ -994,7 +992,7 @@ betas %>%
     facet_wrap(~ topic, scales = "free") +
     coord_flip()
 ```
-```{r modeling-unsuper-lda-betas-save, echo=FALSE}
+```{r modeling-unsuper-lda-betas-save, echo=FALSE, eval=FALSE}
 lda_model <-  ml_lda(
   essays, ~ words, 
   k = 6, max_iter = 100, min_token_length = 4, stop_words = stop_words, min_df = 5
