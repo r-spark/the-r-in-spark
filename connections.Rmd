@@ -516,17 +516,17 @@ system2(
   c(
     "--master", "local",
     "--class", "org.apache.spark.examples.SparkPi",
-    file.path(spark_home, "examples", "jars", "spark-examples_2.11-2.4.0.jar"),
-    100)
+    dir(file.path(spark_home, "examples", "jars"), 
+        pattern = "spark-examples", full.names = TRUE),
+    100),
+  stderr = FALSE
 )
 ```
 ```
-...
 Pi is roughly 3.1415503141550314
-...
 ```
 
-If the above message is not displayed, you will have to investigate why your Spark cluster is not properly configured, which is beyond the scope of this book. When using a cloud provider or a Spark distribution, you can contact their support team to help you troubleshoot this further; otherwise, StackOverflow is a good place to start.
+If the above message is not displayed, you will have to investigate why your Spark cluster is not properly configured, which is beyond the scope of this book. As a start, rerun the Pi example but remove `stderr = FALSE`, this will print errors to the console which you can then use to investigate what the problem might be. When using a cloud provider or a Spark distribution, you can contact their support team to help you troubleshoot this further; otherwise, StackOverflow is a good place to start.
 
 If you do see the message above, this means your Spark cluster is properly configured but somehow, R is not being able to use Spark, so you will have to troubleshoot in-detail as we will explain next.
 
