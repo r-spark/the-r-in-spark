@@ -434,12 +434,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Once a package is created, there are many ways to share this with colleagues or the world. For instance, for packages meant to be private, you can consider using <a href="https://cran.r-project.org/web/packages/drat/vignettes/WhyDrat.html">Drat</a> or products like <a href="https://www.rstudio.com/products/package-manager/">RStudio Package Manager</a>. R packages meant for public consumption are made available to the R community in <a href="https://cran.r-project.org/"><em>CRAN</em></a>, which stands for the Comprehensive R Archive Network.</p>
 <p>These repositories of R packages make packages allow users to install packages through <code>install.packages("teamdata")</code> without having to worry where to download the package from and allows other packages to reuse your package as well.</p>
 <p>In addition to using R packages like <code>sparklyr</code>, <code>dplyr</code>, <code>broom</code>, etc. to create new R packages that extend Spark; you can also make use of all the functionality available in the Spark API, Spark Extensions or write custom Scala code.</p>
-<p>For instance, suppose that there is a new file format similar to a CSV but not quite the same, we might want to write a function named <code>spark_read_file()</code> that would take a path to this new file type and read it in Spark. One approach would be to use <code>dplyr</code> to process each line of text or any other R library using <code>spark_apply()</code>. Another approach would be to use the <em>Spark API</em> to access methods provided by Spark. A third approach would be to find if someone in the Spark community has already provided an <em>Spark Extension</em> that supports this new file format. Last but not least, you can write our own custom <em>Scala Code</em> that makes use any Java library, including Spark and its extensions. This is illustrated in Figure <a href="contributing.html#fig:contributing-types-of-extensions">13.1</a>.</p>
-<div class="figure"><span id="fig:contributing-types-of-extensions"></span>
-<img src="the-r-in-spark_files/figure-html/contributing-types-of-extensions-1.png" alt="Extending Spark using the Spark API, Spark extensions or Scala code" width="672" />
-<p class="caption">
-FIGURE 13.1: Extending Spark using the Spark API, Spark extensions or Scala code
-</p>
+<p>For instance, suppose that there is a new file format similar to a CSV but not quite the same, we might want to write a function named <code>spark_read_file()</code> that would take a path to this new file type and read it in Spark. One approach would be to use <code>dplyr</code> to process each line of text or any other R library using <code>spark_apply()</code>. Another approach would be to use the <em>Spark API</em> to access methods provided by Spark. A third approach would be to find if someone in the Spark community has already provided an <em>Spark Extension</em> that supports this new file format. Last but not least, you can write our own custom <em>Scala Code</em> that makes use any Java library, including Spark and its extensions. This is illustrated in Figure <a href="#fig:contributing-types-of-extensions"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/contributing-types-of-extensions-resized.png" alt="Extending Spark using the Spark API, Spark extensions or Scala code||contributing-types-of-extensions" />
+<p class="caption">Extending Spark using the Spark API, Spark extensions or Scala code||contributing-types-of-extensions</p>
 </div>
 <p>We will focus first on extending Spark using the Spark API since the techniques required to call the Spark API are also applicable while calling Spark extensions or custom Scala code.</p>
 </div>
@@ -521,12 +519,10 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 </div>
 <div id="scala-code" class="section level2">
 <h2><span class="header-section-number">13.4</span> Scala Code</h2>
-<p>Scala code enables you to use any method in the Spark API, Spark extensions or Java library; in addition, writing Scala code when running in Spark can provide performance improvements over R code using <code>spark_apply()</code>. In general, the structure of your R package will contains R code and Scala code; however, the Scala code will need to be compiled as JARs (Java ARchive files) and included in your package. Conceptually, your R package will look as shown in Figure <a href="contributing.html#fig:contributing-scala-code">13.2</a>.</p>
-<div class="figure"><span id="fig:contributing-scala-code"></span>
-<img src="the-r-in-spark_files/figure-html/contributing-scala-code-1.png" alt="R package structure when using Scala code" width="672" />
-<p class="caption">
-FIGURE 13.2: R package structure when using Scala code
-</p>
+<p>Scala code enables you to use any method in the Spark API, Spark extensions or Java library; in addition, writing Scala code when running in Spark can provide performance improvements over R code using <code>spark_apply()</code>. In general, the structure of your R package will contains R code and Scala code; however, the Scala code will need to be compiled as JARs (Java ARchive files) and included in your package. Conceptually, your R package will look as shown in Figure <a href="#fig:contributing-scala-code"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/contributing-scala-code.png" alt="R package structure when using Scala code||contributing-scala-code" />
+<p class="caption">R package structure when using Scala code||contributing-scala-code</p>
 </div>
 <p>As usual, the R code should be placed under a top-level <code>R</code> folder, Scala code under a <code>java</code> folder while the compiled JARs are distributed under an <code>inst/java</code> folder. While you are certainly welcomed to manually compiled the Scala code, you can use helper functions to download the required compiler and compile Scala code.</p>
 <p>In order to compile Scala code, you will need the Java Development Kit 8 installed (JDK8 for short); the JDK can be downloaded from <a href="https://www.oracle.com/technetwork/java/javase/downloads/">oracle.com/technetwork/java/javase/downloads/</a> and will require you to restart your R session.</p>
@@ -536,12 +532,10 @@ FIGURE 13.2: R package structure when using Scala code
 <pre><code>## [1] &quot;1.5.2&quot; &quot;1.6.0&quot; &quot;2.0.0&quot; &quot;2.3.0&quot; &quot;2.4.0&quot;</code></pre>
 <p>You can also customize this specification by creating custom entries with <code>spark_compilation_spec()</code>.</p>
 <p>While you can create the project structure for Scala code by hand, you can also simply call <code>spark_extension(path)</code> to create an extension in the given path; this extension will be mostly empty but will contain the appropriate project structure to call Scala code.</p>
-<p>Since <code>spark_extension()</code> is registered as a custom project extension in RStudio; you can also create an R package that extends Spark using Scala code from the <code>File</code> menu, <code>New Project...</code> and selecting <code>R Package using sparklyr</code> as shown in Figure <a href="contributing.html#fig:contributing-r-rstudio-project">13.3</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:contributing-r-rstudio-project"></span>
-<img src="images/contributing-r-rstudio-project-resized.png" alt="Creating a Scala extension package from RStudio" width="1500" />
-<p class="caption">
-FIGURE 13.3: Creating a Scala extension package from RStudio
-</p>
+<p>Since <code>spark_extension()</code> is registered as a custom project extension in RStudio; you can also create an R package that extends Spark using Scala code from the <code>File</code> menu, <code>New Project...</code> and selecting <code>R Package using sparklyr</code> as shown in Figure <a href="#fig:contributing-r-rstudio-project"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/contributing-r-rstudio-project-resized.png" alt="Creating a Scala extension package from RStudio||contributing-r-rstudio-project" />
+<p class="caption">Creating a Scala extension package from RStudio||contributing-r-rstudio-project</p>
 </div>
 <p>Once you are ready to compile your package JARs, you can simply run:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">compile_package_jars</span>()</code></pre>

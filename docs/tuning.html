@@ -434,61 +434,51 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <span class="dt">repartition =</span> <span class="dv">3</span>)
 
 data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(id) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>()</code></pre>
-<p>The diagram in Figure <a href="tuning.html#fig:tuning-overview">9.1</a> shows how this sorting <em>job</em> would conceptually work across a cluster of machines. First, Spark would <em>configure</em> the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the <em>data</em> is already partitioned, each worker node loads this implicit <em>partition</em>; for instance, <code>4,9,1</code> is loaded in the first worker node. Afterwards, a <em>task</em> is distributed to each worker to apply a transformation to each data partition in each worker node, this task is denoted by <code>f(x)</code>. In this example, <code>f(x)</code> <em>executes</em> a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed.</p>
+<p>The diagram in Figure <a href="#fig:tuning-overview"><strong>??</strong></a> shows how this sorting <em>job</em> would conceptually work across a cluster of machines. First, Spark would <em>configure</em> the cluster to use three worker machines. In this example, the numbers 1-9 are partitioned across three storage instances. Since the <em>data</em> is already partitioned, each worker node loads this implicit <em>partition</em>; for instance, <code>4,9,1</code> is loaded in the first worker node. Afterwards, a <em>task</em> is distributed to each worker to apply a transformation to each data partition in each worker node, this task is denoted by <code>f(x)</code>. In this example, <code>f(x)</code> <em>executes</em> a sorting operation within a partition. Since Spark is general, execution over a partition can be as simple or complex as needed.</p>
 <p>The result is then <em>shuffled</em> to the correct machine to finish the sorting operation across the entire dataset, this completes a stage. A <em>stage</em> is a set of operations that Spark can execute without shuffling data between machines. Once the data is sorted across the cluster, the sorted results can be optionally <em>cached</em> in memory to avoid rerunning this computation multiple times.</p>
 <p>Finally, a small subset of the results is <em>serialized</em>, through the network connecting the cluster machines, back to the driver node to print a preview of this sorting example.</p>
-<div class="figure" style="text-align: center"><span id="fig:tuning-overview"></span>
-<img src="images/tuning-spark-overview-resized.png" alt="Sorting Distributed Data with Apache Spark" width="1500" />
-<p class="caption">
-FIGURE 9.1: Sorting Distributed Data with Apache Spark
-</p>
+<div class="figure">
+<img src="images/tuning-spark-overview-resized.png" alt="Sorting Distributed Data with Apache Spark||tuning-overview" />
+<p class="caption">Sorting Distributed Data with Apache Spark||tuning-overview</p>
 </div>
-<p>Notice that while Figure <a href="tuning.html#fig:tuning-overview">9.1</a> describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, most of these lower level operations are not exposed in <code>sparklyr</code>; instead, <code>sparklyr</code> makes those operations available through higher level commands provided by data <a href="analysis.html#analysis">analysis</a> tools like <code>dplyr</code> or <code>DBI</code>, <a href="modeling.html#modeling">modeling</a>, and by using many <a href="extensions.html#extensions">extensions</a>. For those few cases where you might need to implement low-level operations, you can always use the Spark’s Scala API through an <code>sparklyr</code> <a href="#extension">extensions</a> or run custom <a href="distributed.html#distributed">distributed R</a> code.</p>
+<p>Notice that while Figure <a href="#fig:tuning-overview"><strong>??</strong></a> describes a sorting operation, a similar approach applies to filtering or joining datasets and analyzing and modeling data at scale. Spark provides support to perform custom partitions, custom shuffling, etc; however, most of these lower level operations are not exposed in <code>sparklyr</code>; instead, <code>sparklyr</code> makes those operations available through higher level commands provided by data <a href="analysis.html#analysis">analysis</a> tools like <code>dplyr</code> or <code>DBI</code>, <a href="modeling.html#modeling">modeling</a>, and by using many <a href="extensions.html#extensions">extensions</a>. For those few cases where you might need to implement low-level operations, you can always use the Spark’s Scala API through an <code>sparklyr</code> <a href="#extension">extensions</a> or run custom <a href="distributed.html#distributed">distributed R</a> code.</p>
 <p>In order to effectively tune Spark, we will start by getting familiar with Spark’s computation <a href="tuning.html#tuning-graph-visualization"><em>graph</em></a> and Spark’s event <a href="tuning.html#tuning-event-timeline"><em>timeline</em></a>. Both are accessible through <a href="starting.html#starting-spark-web-interface">Spark’s web interface</a>.</p>
 <div id="tuning-graph-visualization" class="section level3">
 <h3><span class="header-section-number">9.1.1</span> Graph</h3>
 <p>Spark describes all computation steps using a Directed Acyclic Graph (DAG), which means that all computations in Spark move computation forward without repeating previous steps, this helps Spark optimize computations effectively.</p>
-<p>The best way to understand Spark’s computation graph for a given operation, sorting for our example, is to open the last <em>completed query</em> under the <em>SQL</em> tab in <a href="starting.html#starting-spark-web-interface">Spark’s web interface</a>. Figure <a href="tuning.html#fig:tuning-graph-sql-render">9.2</a> shows the resulting graph for this sorting operation, this graph contains the following operations:</p>
+<p>The best way to understand Spark’s computation graph for a given operation, sorting for our example, is to open the last <em>completed query</em> under the <em>SQL</em> tab in <a href="starting.html#starting-spark-web-interface">Spark’s web interface</a>. Figure <a href="#fig:tuning-graph-sql-render"><strong>??</strong></a> shows the resulting graph for this sorting operation, this graph contains the following operations:</p>
 <ul>
 <li>**WholeStageCodegen:* This block describes that the operations it contains were used to generate computer code that was efficiently translated to *byte code**. There is usually a small cost associated with translating operations into byte code, but this is a small cost to pay since then the operations can be executed much faster from Spark. In general, you can ignore this blog and focus on the blocks that it contains.</li>
 <li><strong>InMemoryTableScan:</strong> This means that the original dataset <code>data</code> was stored in-memory and traversed row-by-row once.</li>
 <li><strong>Exchange:</strong> Partitions were exchanged, read shuffled, across executors in your cluster.</li>
 <li><strong>Sort:</strong> Once the records arrived at the right executor, they were sorted in this final stage.</li>
 </ul>
-<div class="figure" style="text-align: center"><span id="fig:tuning-graph-sql-render"></span>
-<img src="images/tuning-spark-graph-visualization-sql.png" alt="Spark Graph for a Sorting Query" width="1427" />
-<p class="caption">
-FIGURE 9.2: Spark Graph for a Sorting Query
-</p>
+<div class="figure">
+<img src="images/tuning-spark-graph-visualization-sql.png" alt="Spark Graph for a Sorting Query||tuning-graph-sql-render" />
+<p class="caption">Spark Graph for a Sorting Query||tuning-graph-sql-render</p>
 </div>
-<p>From the query details, you can then open the last Spark job to arrive to the job details page, you can then expand “DAG Visualization” to visualize a graph similar to Figure <a href="tuning.html#fig:tuning-graph-render">9.3</a>. This graph shows a few additional details and the stages in this job. Notice that there are no arrows pointing back to previous steps, since Spark makes use of acyclic graphs.</p>
-<div class="figure" style="text-align: center"><span id="fig:tuning-graph-render"></span>
-<img src="images/tuning-spark-graph-visualization-resized.png" alt="Spark Graph for a Sorting Job" width="1500" />
-<p class="caption">
-FIGURE 9.3: Spark Graph for a Sorting Job
-</p>
+<p>From the query details, you can then open the last Spark job to arrive to the job details page, you can then expand “DAG Visualization” to visualize a graph similar to Figure <a href="#fig:tuning-graph-render"><strong>??</strong></a>. This graph shows a few additional details and the stages in this job. Notice that there are no arrows pointing back to previous steps, since Spark makes use of acyclic graphs.</p>
+<div class="figure">
+<img src="images/tuning-spark-graph-visualization-resized.png" alt="Spark Graph for a Sorting Job||tuning-graph-render" />
+<p class="caption">Spark Graph for a Sorting Job||tuning-graph-render</p>
 </div>
 <p>Next, we will dive into a Spark stage and explore its event timeline.</p>
 </div>
 <div id="tuning-event-timeline" class="section level3">
 <h3><span class="header-section-number">9.1.2</span> Timeline</h3>
 <p>The <em>event timeline</em> is a great summary of how Spark is spending computation cycles over each stage. Ideally, you want to see this timeline consisting of mostly CPU usage since other tasks can be considered overhead. You also want to see Spark using all the CPUs across all the cluster nodes available to you.</p>
-<p>Select the first stage in the current job and expand the “Event Timeline”, you should see a timeline similar to Figure <a href="tuning.html#fig:tuning-timeline-simple">9.4</a>. Notice that we explicitly requested three partitions, which is represented by three lanes in this visualization.</p>
-<div class="figure" style="text-align: center"><span id="fig:tuning-timeline-simple"></span>
-<img src="images/tuning-spark-event-timeline.png" alt="Spark Event Timeline" width="1410" />
-<p class="caption">
-FIGURE 9.4: Spark Event Timeline
-</p>
+<p>Select the first stage in the current job and expand the “Event Timeline”, you should see a timeline similar to Figure <a href="#fig:tuning-timeline-simple"><strong>??</strong></a>. Notice that we explicitly requested three partitions, which is represented by three lanes in this visualization.</p>
+<div class="figure">
+<img src="images/tuning-spark-event-timeline.png" alt="Spark event timeline||tuning-timeline-simple" />
+<p class="caption">Spark event timeline||tuning-timeline-simple</p>
 </div>
 <p>Since our machine is equipped with four CPUs, we can parallelize this computation even further by explicitly repartition data using <code>sdf_repartition()</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r">data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sdf_repartition</span>(<span class="dv">4</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(id) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>()</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:tuning-timeline-repartition"></span>
-<img src="images/tuning-spark-event-timeline-repartition.png" alt="Spark Event Timeline with Additional Partitions" width="1413" />
-<p class="caption">
-FIGURE 9.5: Spark Event Timeline with Additional Partitions
-</p>
+<div class="figure">
+<img src="images/tuning-spark-event-timeline-repartition.png" alt="Spark Event Timeline with Additional Partitions||tuning-timeline-repartition" />
+<p class="caption">Spark Event Timeline with Additional Partitions||tuning-timeline-repartition</p>
 </div>
-<p>Figure <a href="tuning.html#fig:tuning-timeline-repartition">9.5</a> now shows four execution lanes with most time spent under “Executor Computing Time”, which shows us that this particular operation is making better use of our compute resources. When working with clusters, requesting more compute nodes from your cluster should shorten computation time. In contrast, for timelines that show significant time spent shuffling, requesting more compute nodes might not shorten time and might actually makes everything slower. There is no concrete set of rules to follow to optimize a stage; however, as you gain experience understanding this timeline over multiple operations – you will develop insights as to how to properly optimize Spark operations.</p>
+<p>Figure <a href="#fig:tuning-timeline-repartition"><strong>??</strong></a> now shows four execution lanes with most time spent under “Executor Computing Time”, which shows us that this particular operation is making better use of our compute resources. When working with clusters, requesting more compute nodes from your cluster should shorten computation time. In contrast, for timelines that show significant time spent shuffling, requesting more compute nodes might not shorten time and might actually makes everything slower. There is no concrete set of rules to follow to optimize a stage; however, as you gain experience understanding this timeline over multiple operations – you will develop insights as to how to properly optimize Spark operations.</p>
 </div>
 </div>
 <div id="tuning-configuring" class="section level2">
@@ -1015,11 +1005,9 @@ config[<span class="st">&quot;sparklyr.shell.num-executors&quot;</span>] &lt;-<s
 <span class="st">      </span><span class="kw">summarise</span>(<span class="kw">mean</span>(id)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>(),
     <span class="dt">times =</span> <span class="dv">10</span>
 ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">autoplot</span>() <span class="op">+</span><span class="st"> </span><span class="kw">theme_light</span>() </code></pre>
-<div class="figure" style="text-align: center"><span id="fig:tuning-partitioning-explicit-results"></span>
-<img src="images/tuning-partition-explicit.png" alt="Computation speed when using explicit Spark partitions" width="1500" />
-<p class="caption">
-FIGURE 9.6: Computation speed when using explicit Spark partitions
-</p>
+<div class="figure">
+<img src="images/tuning-partition-explicit.png" alt="Computation Speed with Additional Explicit Partitions||tuning-partitioning-explicit-results" />
+<p class="caption">Computation Speed with Additional Explicit Partitions||tuning-partitioning-explicit-results</p>
 </div>
 <p>The results show that sorting data with two partitions is almost twice as fast; this is the case since two CPUs can be used to execute this operation. However, it is not necessarily the case that higher-partitions produce faster computation; instead, partitioning data is particular to your computing cluster and the data analysis operations being performed.</p>
 </div>
@@ -1033,11 +1021,9 @@ FIGURE 9.6: Computation speed when using explicit Spark partitions
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">iris_tbl &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</code></pre>
 <p>You can inspect which tables are cached by navigating to the Spark UI using <code>spark_web(sc)</code>, opening the storage tab, and clicking on a given RDD:</p>
-<div class="figure" style="text-align: center"><span id="fig:tuning-caching-rdd-shot"></span>
-<img src="images/tuning-cache-rdd-web-resized.png" alt="Cached RDD in Spark Web Interface" width="1500" />
-<p class="caption">
-FIGURE 9.7: Cached RDD in Spark Web Interface
-</p>
+<div class="figure">
+<img src="images/tuning-cache-rdd-web-resized.png" alt="Cached RDD in Spark Web Interface||tuning-caching-rdd-shot" />
+<p class="caption">Cached RDD in Spark Web Interface||tuning-caching-rdd-shot</p>
 </div>
 <p>Data loaded in memory will be released when the R session terminates either explicitly or implicitly with a restart or disconnection; however, to free up resources, you can use <code>tbl_uncache()</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tbl_uncache</span>(sc, <span class="st">&quot;iris&quot;</span>)</code></pre>

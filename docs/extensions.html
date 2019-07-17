@@ -455,18 +455,16 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <h2><span class="header-section-number">10.2</span> H2O</h2>
 <p><a href="https://www.h2o.ai/">H2O</a> is open-source software for large-scale modeling created by H2O.ai, which allows you to fit thousands of potential models as part of discovering patterns in data. You can consider using H2O to complement or replace Spark’s default modeling algorithms. It is common to Spark’s default modeling algorithms and transition to H2O when Spark’s algorithms fall short or when advanced functionality (like additional modeling metrics or automatic model selection) are desired</p>
 <p>We can’t do justice to H2O’s great modeling capabilities in a single paragraph, explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the “Practical machine learning with H2O” <span class="citation">(Cook <a href="#ref-extensions-practical-h2o">2016</a>)</span> book to explore in-depth H2O’s modeling algorithms and features. In the meantime, you can use this section as a brief guide to get started using H2O in Spark with R.</p>
-<p>In order to use H2O with Spark, it is important to know that there are four components involved: H2O, Sparkling Water, [rsparkling][rsparkling](<a href="https://github.com/h2oai/sparkling-water/tree/master/r" class="uri">https://github.com/h2oai/sparkling-water/tree/master/r</a>) and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and <code>rsparkling</code> as the R front-end for Sparkling Water, this is illustrated in Figure <a href="extensions.html#fig:extensions-h2o-diagram">10.1</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:extensions-h2o-diagram"></span>
-<img src="the-r-in-spark_files/figure-html/extensions-h2o-diagram-1.png" alt="H2O components with Spark and R" width="768" />
-<p class="caption">
-FIGURE 10.1: H2O components with Spark and R
-</p>
+<p>In order to use H2O with Spark, it is important to know that there are four components involved: H2O, Sparkling Water, [rsparkling][rsparkling](<a href="https://github.com/h2oai/sparkling-water/tree/master/r" class="uri">https://github.com/h2oai/sparkling-water/tree/master/r</a>) and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and <code>rsparkling</code> as the R front-end for Sparkling Water, this is illustrated in Figure <a href="#fig:extensions-h2o-diagram"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/extensions-h2o-diagram-resized.png" alt="H2O components with Spark and R||extensions-h2o-diagram" />
+<p class="caption">H2O components with Spark and R||extensions-h2o-diagram</p>
 </div>
 <p>First, install <code>rsparkling</code> and <code>h2o</code> as specified in the <code>rsparkling</code> documentation site. <span class="citation">(“RSparkling — H2o Sparkling Water 2.3.31 Documentation” <a href="#ref-extensions-h2o-rsparkling-docs">2019</a>)</span></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;h2o&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;source&quot;</span>,
-                 <span class="dt">repos =</span> <span class="st">&quot;http://h2o-release.s3.amazonaws.com/h2o/rel-yates/5/R&quot;</span>)
+  <span class="dt">repos =</span> <span class="st">&quot;http://h2o-release.s3.amazonaws.com/h2o/rel-yates/5/R&quot;</span>)
 <span class="kw">install.packages</span>(<span class="st">&quot;rsparkling&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;source&quot;</span>,
-                 <span class="dt">repos =</span> <span class="st">&quot;http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/31/R&quot;</span>)</code></pre>
+  <span class="dt">repos =</span> <span class="st">&quot;http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/31/R&quot;</span>)</code></pre>
 <p>It is important to notice that you need to use compatible versions of Spark, Sparkling Water and H2O as specified in their docs; we present instructions for Spark 2.3, but using different Spark versions will require you to install different versions. So let’s start by checking the version of H2O by running,</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">packageVersion</span>(<span class="st">&quot;h2o&quot;</span>)</code></pre>
 <pre><code>## [1] &#39;3.22.1.3&#39;</code></pre>
@@ -481,12 +479,10 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
                     <span class="dt">config =</span> <span class="kw">list</span>(<span class="dt">sparklyr.connect.timeout =</span> <span class="dv">3</span> <span class="op">*</span><span class="st"> </span><span class="dv">60</span>))
 
 cars &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, mtcars)</code></pre>
-<p>H2O provides a web interface which can help you monitor training and access much of H2O’s functionality. The web interface can be accessed through <code>h2o_flow(sc)</code>, it is referred to as H2O Flow and is shown in Figure <a href="extensions.html#fig:extensions-h2o-flow">10.2</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:extensions-h2o-flow"></span>
-<img src="images/extensions-h2o-flow-resized.png" alt="H2O Flow Interface using Spark with R" width="1500" />
-<p class="caption">
-FIGURE 10.2: H2O Flow Interface using Spark with R
-</p>
+<p>H2O provides a web interface which can help you monitor training and access much of H2O’s functionality. The web interface can be accessed through <code>h2o_flow(sc)</code>, it is referred to as H2O Flow and is shown in Figure <a href="#fig:extensions-h2o-flow"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/extensions-h2o-flow-resized.png" alt="H2O Flow Interface using Spark with R||extensions-h2o-flow" />
+<p class="caption">H2O Flow Interface using Spark with R||extensions-h2o-flow</p>
 </div>
 <p>When using H2O, you will have to convert your Spark DataFrame into and H2O DataFrame through <code>as_h2o_frame</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r">cars_h2o &lt;-<span class="st"> </span><span class="kw">as_h2o_frame</span>(sc, cars)
@@ -545,21 +541,16 @@ AIC :156.2425</code></pre>
 </div>
 <div id="graphs" class="section level2">
 <h2><span class="header-section-number">10.3</span> Graphs</h2>
-<p>The first paper in the history of graph theory was written by Leonhard Euler on the Seven Bridges of Königsberg in 1736. The problem was to devise a walk through the city that would cross each of those bridges once and only, the original diagram is shown in Figure <a href="extensions.html#fig:extensions-eulers-paths">10.3</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:extensions-eulers-paths"></span>
-<img src="images/extensions-eulers-paths-resized.png" alt="Seven Bridges of Königsberg from the Euler Archive" width="1500" />
-<p class="caption">
-FIGURE 10.3: Seven Bridges of Königsberg from the Euler Archive
-</p>
+<p>The first paper in the history of graph theory was written by Leonhard Euler on the Seven Bridges of Königsberg in 1736. The problem was to devise a walk through the city that would cross each of those bridges once and only, the original diagram is shown in Figure <a href="#fig:extensions-eulers-paths"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/extensions-eulers-paths-resized.png" alt="Seven Bridges of Königsberg from the Euler Archive||extensions-eulers-paths" />
+<p class="caption">Seven Bridges of Königsberg from the Euler Archive||extensions-eulers-paths</p>
 </div>
 <p>Today, a graph is defined as an ordered pair <span class="math inline">\(G=(V,E)\)</span>, with <span class="math inline">\(V\)</span> a set of vertices (nodes or points) and <span class="math inline">\(E \subseteq \{\{x, y\} | (x, y) ∈ \mathrm{V}^2 \land x \ne y\}\)</span> a set of edges (links or lines) which are either an unordered pair for <em>undirected graphs</em> or an ordered pair for <em>directed graphs</em>. The former describing links where the direction does not matter and the latter linked where it does.</p>
 <p>As a simple example, we can use the <code>highschool</code> dataset from the <code>ggraph</code> package which tracks friendship among high school boys. In this dataset, the vertices are the students and the edges describe pairs of students who happen to be friends in a particular year.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;ggraph&quot;</span>)
 <span class="kw">install.packages</span>(<span class="st">&quot;igraph&quot;</span>)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggraph)
-<span class="kw">library</span>(igraph)
-
-highschool</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">ggraph<span class="op">::</span>highschool</code></pre>
 <pre><code># A tibble: 506 x 3
     from    to  year
    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
@@ -583,7 +574,7 @@ highschool</code></pre>
 <span class="kw">library</span>(dplyr)
 
 sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)
-highschool_tbl &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, highschool, <span class="st">&quot;highschool&quot;</span>) <span class="op">%&gt;%</span>
+highschool_tbl &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, ggraph<span class="op">::</span>highschool, <span class="st">&quot;highschool&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">filter</span>(year <span class="op">==</span><span class="st"> </span><span class="dv">1957</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">transmute</span>(<span class="dt">from =</span> <span class="kw">as.character</span>(<span class="kw">as.integer</span>(from)),
             <span class="dt">to =</span> <span class="kw">as.character</span>(<span class="kw">as.integer</span>(to)))
@@ -594,6 +585,7 @@ to_tbl &lt;-<span class="st"> </span>highschool_tbl <span class="op">%&gt;%</spa
 vertices_tbl &lt;-<span class="st"> </span><span class="kw">distinct</span>(<span class="kw">sdf_bind_rows</span>(from_tbl, to_tbl))
 edges_tbl &lt;-<span class="st"> </span>highschool_tbl <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">transmute</span>(<span class="dt">src =</span> from, <span class="dt">dst =</span> to)</code></pre>
 <p>The <code>vertices_tbl</code> table is expected to have a single <code>id</code> column:</p>
+<pre class="sourceCode r"><code class="sourceCode r">vertices_tbl</code></pre>
 <pre><code># Source: spark&lt;?&gt; [?? x 1]
    id   
    &lt;chr&gt;
@@ -609,6 +601,7 @@ edges_tbl &lt;-<span class="st"> </span>highschool_tbl <span class="op">%&gt;%</
 10 71   
 # … with more rows</code></pre>
 <p>While the <code>edges_tbl</code> is expected to have a <code>src</code> and <code>dst</code> columns:</p>
+<pre class="sourceCode r"><code class="sourceCode r">edges_tbl</code></pre>
 <pre><code># Source: spark&lt;?&gt; [?? x 2]
    src   dst  
    &lt;chr&gt; &lt;chr&gt;
@@ -663,31 +656,27 @@ Edges:
   $ src    &lt;dbl&gt; 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 12, 12, 12,…
   $ dst    &lt;dbl&gt; 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17,…
   $ weight &lt;dbl&gt; 0.25000000, 0.25000000, 0.25000000, 0.25000000, 0.25000000,…</code></pre>
-<p>To give you some insights into this dataset, Figure <a href="extensions.html#fig:extensions-graph-pagerank">10.4</a> plots this chart using the <code>ggraph</code> and highlights the highest PageRank scores for this dataset,</p>
+<p>To give you some insights into this dataset, Figure <a href="#fig:extensions-graph-pagerank"><strong>??</strong></a> plots this chart using the <code>ggraph</code> and highlights the highest PageRank scores for this dataset,</p>
 <pre class="sourceCode r"><code class="sourceCode r">highschool_tbl <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">graph_from_data_frame</span>(<span class="dt">directed =</span> <span class="ot">FALSE</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span>igraph<span class="op">::</span><span class="kw">graph_from_data_frame</span>(<span class="dt">directed =</span> <span class="ot">FALSE</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ggraph</span>(<span class="dt">layout =</span> <span class="st">&#39;kk&#39;</span>) <span class="op">+</span><span class="st"> </span>
 <span class="st">    </span><span class="kw">geom_edge_link</span>(<span class="dt">alpha =</span> <span class="fl">0.2</span>,
                    <span class="dt">arrow =</span> <span class="kw">arrow</span>(<span class="dt">length =</span> <span class="kw">unit</span>(<span class="dv">2</span>, <span class="st">&#39;mm&#39;</span>)),
                    <span class="dt">end_cap =</span> <span class="kw">circle</span>(<span class="dv">2</span>, <span class="st">&#39;mm&#39;</span>),
                    <span class="dt">start_cap =</span> <span class="kw">circle</span>(<span class="dv">2</span>, <span class="st">&#39;mm&#39;</span>)) <span class="op">+</span><span class="st"> </span>
 <span class="st">    </span><span class="kw">geom_node_point</span>(<span class="dt">size =</span> <span class="dv">2</span>, <span class="dt">alpha =</span> <span class="fl">0.4</span>)</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:extensions-graph-pagerank"></span>
-<img src="images/extensions-graph-pagerank-resized.png" alt="Highschool ggraph dataset with highest pagerank highlighted" width="1500" />
-<p class="caption">
-FIGURE 10.4: Highschool ggraph dataset with highest pagerank highlighted
-</p>
+<div class="figure">
+<img src="images/extensions-graph-pagerank-resized.png" alt="Highschool ggraph dataset with highest pagerank highlighted||extensions-graph-pagerank" />
+<p class="caption">Highschool ggraph dataset with highest pagerank highlighted||extensions-graph-pagerank</p>
 </div>
 <p>There are many more graph algorithms provided in <code>graphframes</code>, to mention some: bread depth search, connected components, label propagation for detecting communities, strongly connected components and triangle count. For questions on this extension refer to the official GitHub repo, <a href="https://github.com/rstudio/graphframes">github.com/rstudio/graphframes</a>. We will now present a popular gradient boosting framework, make sure to disconnect, restart before trying the next extension.</p>
 </div>
 <div id="xgboost" class="section level2">
 <h2><span class="header-section-number">10.4</span> XGBoost</h2>
-<p>A decision tree is a flowchart-like structure in which each internal node represents a test on an attribute, each branch represents the outcome of the test, and each leaf node represents a class label. For example, the diagram in Figure <a href="extensions.html#fig:extensions-decision-diagram">10.5</a> shows an a decision tree that could help classify if an employee is likely to leave given a set of factors, like job satisfaction and overtime. When a decision tree is used to predict continuous variables instead of discrete outcomes, say, how likely someone is to leave a company, decision trees are referred to as regression trees.</p>
-<div class="figure" style="text-align: center"><span id="fig:extensions-decision-diagram"></span>
-<img src="the-r-in-spark_files/figure-html/extensions-decision-diagram-1.png" alt="A Decision tree to predict job attrition based on known factors" width="768" />
-<p class="caption">
-FIGURE 10.5: A Decision tree to predict job attrition based on known factors
-</p>
+<p>A decision tree is a flowchart-like structure in which each internal node represents a test on an attribute, each branch represents the outcome of the test, and each leaf node represents a class label. For example, the diagram in Figure <a href="#fig:extensions-decision-diagram"><strong>??</strong></a> shows an a decision tree that could help classify if an employee is likely to leave given a set of factors, like job satisfaction and overtime. When a decision tree is used to predict continuous variables instead of discrete outcomes, say, how likely someone is to leave a company, decision trees are referred to as regression trees.</p>
+<div class="figure">
+<img src="images/extensions-decision-diagram-resized.png" alt="A Decision tree to predict job attrition based on known factors||extensions-decision-diagram" />
+<p class="caption">A Decision tree to predict job attrition based on known factors||extensions-decision-diagram</p>
 </div>
 <p>While a decision tree representation is quite easy to understand and to interpret, finding out the decisions in the tree requires mathematical techniques like gradient descent to find a local minimum. Gradient descent takes steps proportional to the negative of the gradient of the function at the current point. The gradient is represented by <span class="math inline">\(\nabla\)</span>, the learning rate by <span class="math inline">\(\gamma\)</span> and one simply starts from a given state <span class="math inline">\(a_n\)</span> and compute the next iteration <span class="math inline">\(a_{n+1}\)</span> by simply following the direction of the gradient:</p>
 <p><span class="math inline">\(a_{n+1} = a_n - \gamma \nabla F(a_n)\)</span></p>
@@ -750,15 +739,15 @@ $ probability_Yes &lt;dbl&gt; 0.24606191, 0.97521925, 0.08485363, 0.85643125, 0.
 <h2><span class="header-section-number">10.5</span> Deep Learning</h2>
 <p>A perceptron is a mathematical model introduced by Rosenblatt <span class="citation">(Rosenblatt <a href="#ref-extensions-rosenblatt-perceptron">1958</a>)</span> who developed it as a theory for a hypothetical nervous system. The perceptron maps stimuli to numeric inputs that are weighted into a threshold function that activates only when enough stimuli is present, mathematically:</p>
 <p><span class="math inline">\(f(x) = \begin{cases} 1 &amp; \sum_{i=1}^m w_i x_i + b &gt; 0\\ 0 &amp; \text{otherwise} \end{cases}\)</span></p>
-<p>Minsky found out that a single perceptron can only classify datasets that are linearly separable; however, he also presented in his perceptrons book <span class="citation">(Minsky and Papert <a href="#ref-extensions-minsky-perceptrons">2017</a>)</span> that layering perceptrons would bring additional classification capabilities, the original diagram showcasing a multi-layered perceptron is presented in Figure <a href="extensions.html#fig:extensions-minsky-layered">10.6</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:extensions-minsky-layered"></span>
-<img src="images/extensions-minsky-multi-layers.png" alt="Layered perceptrons as illustrated in the perceptrons book" width="1821" />
-<p class="caption">
-FIGURE 10.6: Layered perceptrons as illustrated in the perceptrons book
-</p>
+<p>Minsky found out that a single perceptron can only classify datasets that are linearly separable; however, he also presented in his perceptrons book <span class="citation">(Minsky and Papert <a href="#ref-extensions-minsky-perceptrons">2017</a>)</span> that layering perceptrons would bring additional classification capabilities, the original diagram showcasing a multi-layered perceptron is presented in Figure <a href="#fig:extensions-minsky-layered"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/extensions-minsky-multi-layers.png" alt="Layered perceptrons as illustrated in the perceptrons book||extensions-minsky-layered" />
+<p class="caption">Layered perceptrons as illustrated in the perceptrons book||extensions-minsky-layered</p>
 </div>
-<p>Using Spark we can create a multi-layer perceptron classifier with <code>ml_multilayer_perceptron_classifier()</code> and gradient descent to classify and predict over large datasets. Gradient descent was introduced to layered perceptrons by Geoff Hinton <span class="citation">(Ackley, Hinton, and Sejnowski <a href="#ref-extensions-hinton-layered">1985</a>)</span> and like XGBoost, it also makes use of gradient descent. Let’s try it out, why we are on it, let’s also install <code>sparktf</code> which we are also about to introduce.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;sparktf&quot;</span>)</code></pre>
+<p>Before we start, let’s first install all the packages we are about to use,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;sparktf&quot;</span>)
+<span class="kw">install.packages</span>(<span class="st">&quot;tfdatasets&quot;</span>)</code></pre>
+<p>Using Spark we can create a multi-layer perceptron classifier with <code>ml_multilayer_perceptron_classifier()</code> and gradient descent to classify and predict over large datasets. Gradient descent was introduced to layered perceptrons by Geoff Hinton <span class="citation">(Ackley, Hinton, and Sejnowski <a href="#ref-extensions-hinton-layered">1985</a>)</span> and like XGBoost, it also makes use of gradient descent.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparktf)
 <span class="kw">library</span>(sparklyr)
 
@@ -793,32 +782,32 @@ $ probability_Yes &lt;dbl&gt; 0.1560725, 0.1560725, 0.1560725, 0.1560725, 0.1560
     <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;setosa&quot;</span>, <span class="st">&quot;versicolor&quot;</span>, <span class="st">&quot;virginica&quot;</span>)
   ) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">spark_write_tfrecord</span>(<span class="dt">path =</span> <span class="st">&quot;tfrecord&quot;</span>)</code></pre>
-<p>Once trained, you can use the <code>tfdatasets</code> package to load the dataset followed by training with <code>keras</code> or <code>tensorflow</code>. To learn more about training deep learning models with Keras we recommend reading “Deep Learning with R”. <span class="citation">(Chollet and Allaire <a href="#ref-extensions-chollet-jj">2018</a>)</span></p>
-<pre class="sourceCode r"><code class="sourceCode r">tfdatasets<span class="op">::</span><span class="kw">tfrecord_dataset</span>(<span class="st">&quot;tfrecord/part-r-00000&quot;</span>)</code></pre>
+<p>Once trained, you can use the <code>tfdatasets</code> package to load the dataset followed by training with <code>keras</code> or <code>tensorflow</code>. You will also need to install the TensorFlow runtime with <code>install_tensorflow()</code> and install Python on your own. To learn more about training deep learning models with Keras we recommend reading “Deep Learning with R”. <span class="citation">(Chollet and Allaire <a href="#ref-extensions-chollet-jj">2018</a>)</span></p>
+<pre class="sourceCode r"><code class="sourceCode r">tensorflow<span class="op">::</span><span class="kw">install_tensorflow</span>()
+tfdatasets<span class="op">::</span><span class="kw">tfrecord_dataset</span>(<span class="st">&quot;tfrecord/part-r-00000&quot;</span>)</code></pre>
 <pre><code>&lt;DatasetV1Adapter shapes: (), types: tf.string&gt;</code></pre>
-<p>Training deep learning models in a single local node with one or more GPUs is often enough for most applications; however, recent state-of-the-art deep learning models train using distributed computing frameworks like Apache Spark. Distributed computing frameworks are used to achieve higher petaflops each day the systems spends training these models. OpenAI analyzed trends in the field of <em>Artificial Intelligence</em> and cluster computing <span class="citation">(“AI and Compute” <a href="#ref-extensions-openai-compute">2019</a>)</span> and illustrated in Figure <a href="extensions.html#fig:extensions-distributed-training">10.7</a>. It should be obvious from the figure that there is a trend in recent years to use distributed computing frameworks.</p>
-<div class="figure" style="text-align: center"><span id="fig:extensions-distributed-training"></span>
-<img src="images/extensions-distributed-training-resized.png" alt="Training using distributed systems based on OpenAI analysis" width="1500" />
-<p class="caption">
-FIGURE 10.7: Training using distributed systems based on OpenAI analysis
-</p>
+<p>Training deep learning models in a single local node with one or more GPUs is often enough for most applications; however, recent state-of-the-art deep learning models train using distributed computing frameworks like Apache Spark. Distributed computing frameworks are used to achieve higher petaflops each day the systems spends training these models. OpenAI analyzed trends in the field of <em>Artificial Intelligence</em> and cluster computing <span class="citation">(“AI and Compute” <a href="#ref-extensions-openai-compute">2019</a>)</span> and illustrated in Figure <a href="#fig:extensions-distributed-training"><strong>??</strong></a>. It should be obvious from the figure that there is a trend in recent years to use distributed computing frameworks.</p>
+<div class="figure">
+<img src="images/extensions-distributed-training-resized.png" alt="Training using distributed systems based on OpenAI analysis||extensions-distributed-training" />
+<p class="caption">Training using distributed systems based on OpenAI analysis||extensions-distributed-training</p>
 </div>
 <p>Training large-scale deep learning models is possible in Spark and TensorFlow through frameworks like Horovod. Today, it’s possible to use Horovod with Spark from R using the <code>reticulate</code> package since Horovod requires Python and Open MPI which goes beyond the scope of this book. Instead, we will introduce a different Spark extension in the domain of genomics.</p>
 </div>
 <div id="genomics" class="section level2">
 <h2><span class="header-section-number">10.6</span> Genomics</h2>
-<p>The human genome consists of two copies of about three billion base pairs of DNA within the 23 chromosome pairs, Figure <a href="extensions.html#fig:extensions-genomics-diagram">10.8</a> shows the organization of the genome into chromosomes. DNA strands are composed of nucleotides, each composed of one of four nitrogen-containing nucleobases: cytosine (C), guanine (G), adenine (A) or thymine (T). <span class="citation">(“HUman Genome” <a href="#ref-extensions-genomics-wikipedia">2019</a>)</span> Since the DNA of all humans is nearly identical, we only need to store the differences from the reference genome in the form of a Variant Call Format (VCF) file.</p>
-<div class="figure" style="text-align: center"><span id="fig:extensions-genomics-diagram"></span>
-<img src="images/extensions-genomics-diagram-resized.png" alt="The idealized human diploid karyotype showing the organization of the genome into chromosomes" width="1500" />
-<p class="caption">
-FIGURE 10.8: The idealized human diploid karyotype showing the organization of the genome into chromosomes
-</p>
+<p>The human genome consists of two copies of about three billion base pairs of DNA within the 23 chromosome pairs, Figure <a href="#fig:extensions-genomics-diagram"><strong>??</strong></a> shows the organization of the genome into chromosomes. DNA strands are composed of nucleotides, each composed of one of four nitrogen-containing nucleobases: cytosine (C), guanine (G), adenine (A) or thymine (T). <span class="citation">(“Human Genome” <a href="#ref-extensions-genomics-wikipedia">2019</a>)</span> Since the DNA of all humans is nearly identical, we only need to store the differences from the reference genome in the form of a Variant Call Format (VCF) file.</p>
+<div class="figure">
+<img src="images/extensions-genomics-diagram-resized.png" alt="The idealized human diploid karyotype showing the organization of the genome into chromosomes||extensions-genomics-diagram" />
+<p class="caption">The idealized human diploid karyotype showing the organization of the genome into chromosomes||extensions-genomics-diagram</p>
 </div>
-<p>VariantSpark is a framework based on scala and spark to analyze genome datasets. It is being developed by CSIRO Bioinformatics team in Australia. VariantSpark was tested on datasets with 3000 samples each one containing 80 million features in either unsupervised clustering approaches and supervised applications, like classification and regression. VariantSpark can read VCF files and run analyses while using familiar Spark DataFrames. To get started, install <code>variantspark</code> from CRAN and connect to Spark:</p>
+<p>VariantSpark is a framework based on scala and spark to analyze genome datasets. It is being developed by CSIRO Bioinformatics team in Australia. VariantSpark was tested on datasets with 3000 samples each one containing 80 million features in either unsupervised clustering approaches and supervised applications, like classification and regression. VariantSpark can read VCF files and run analyses while using familiar Spark DataFrames.</p>
+<p>To get started, install <code>variantspark</code> from CRAN, connect to Spark and retrieve a <code>vsc</code> connection to VariantSpark:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(variantspark)
 <span class="kw">library</span>(sparklyr)
 
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)
+sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>,
+                    <span class="dt">config =</span> <span class="kw">list</span>(<span class="dt">sparklyr.connect.timeout =</span> <span class="dv">3</span> <span class="op">*</span><span class="st"> </span><span class="dv">60</span>))
+
 vsc &lt;-<span class="st"> </span><span class="kw">vs_connect</span>(sc)</code></pre>
 <p>We can start by loading a VCF file,</p>
 <pre class="sourceCode r"><code class="sourceCode r">vsc_data &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata/&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;variantspark&quot;</span>)
@@ -855,13 +844,12 @@ importance_tbl</code></pre>
 <span class="kw">ggplot</span>(importance_df) <span class="op">+</span>
 <span class="st">  </span><span class="kw">aes</span>(<span class="dt">x =</span> variable, <span class="dt">y =</span> importance) <span class="op">+</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&#39;identity&#39;</span>) <span class="op">+</span><span class="st">          </span>
-<span class="st">  </span><span class="kw">scale_x_discrete</span>(<span class="dt">limits =</span> importance_df[<span class="kw">order</span>(importance_df<span class="op">$</span>importance), <span class="dv">1</span>]<span class="op">$</span>variable) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">scale_x_discrete</span>(<span class="dt">limits =</span> 
+    importance_df[<span class="kw">order</span>(importance_df<span class="op">$</span>importance), <span class="dv">1</span>]<span class="op">$</span>variable) <span class="op">+</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">coord_flip</span>()</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:extensions-genomics-importance"></span>
-<img src="images/extensions-genomics-importance-resized.png" alt="Genomic importance analysis using variantspark" width="1500" />
-<p class="caption">
-FIGURE 10.9: Genomic importance analysis using variantspark
-</p>
+<div class="figure">
+<img src="images/extensions-genomics-importance-resized.png" alt="Genomic importance analysis using variantspark||extensions-genomics-importance" />
+<p class="caption">Genomic importance analysis using variantspark||extensions-genomics-importance</p>
 </div>
 <p>This concludes a brief introduction to genomic analysis in Spark using the variantspark extensions. Next, we will move away from microscopic genes, to macroscopic datasets that contain geographic locations across the world.</p>
 </div>
@@ -875,8 +863,7 @@ remotes<span class="op">::</span><span class="kw">install_github</span>(<span cl
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(geospark)
 <span class="kw">library</span>(sparklyr)
 
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)
-<span class="kw">register_gis</span>(sc)</code></pre>
+sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)</code></pre>
 <p>Next we will load a spatial dataset containing polygons and points.</p>
 <pre class="sourceCode r"><code class="sourceCode r">polygons &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;examples/polygons.txt&quot;</span>, <span class="dt">package=</span><span class="st">&quot;geospark&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">read.table</span>(<span class="dt">sep=</span><span class="st">&quot;|&quot;</span>, <span class="dt">col.names =</span> <span class="kw">c</span>(<span class="st">&quot;area&quot;</span>, <span class="st">&quot;geom&quot;</span>))
@@ -886,12 +873,10 @@ points &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span c
 
 polygons_wkt &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, polygons)
 points_wkt &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, points)</code></pre>
-<p>There are various spatial operations defined in <code>geospark</code>, which Figure <a href="extensions.html#fig:extensions-geospark-operations">10.10</a> describes. These operations allow you to control how geospatial data should be queried based on overlap, intersection, disjoint sets, etc.</p>
-<div class="figure" style="text-align: center"><span id="fig:extensions-geospark-operations"></span>
-<img src="images/extensions-geospark-operations.png" alt="Spatial operations available in geospark." width="1234" />
-<p class="caption">
-FIGURE 10.10: Spatial operations available in geospark.
-</p>
+<p>There are various spatial operations defined in <code>geospark</code>, which Figure <a href="#fig:extensions-geospark-operations"><strong>??</strong></a> describes. These operations allow you to control how geospatial data should be queried based on overlap, intersection, disjoint sets, etc.</p>
+<div class="figure">
+<img src="images/extensions-geospark-operations.png" alt="Spatial operations available in geospark.||extensions-geospark-operations" />
+<p class="caption">Spatial operations available in geospark.||extensions-geospark-operations</p>
 </div>
 <p>For instance, we can use these operations to find the polygons that contain a given set of points using <code>st_contains()</code>,</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
@@ -974,7 +959,7 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <p>“AI and Compute.” 2019. <a href="https://openai.com/blog/ai-and-compute">https://openai.com/blog/ai-and-compute</a>.</p>
 </div>
 <div id="ref-extensions-genomics-wikipedia">
-<p>“HUman Genome.” 2019. <a href="https://en.wikipedia.org/wiki/Human_genome">https://en.wikipedia.org/wiki/Human_genome</a>.</p>
+<p>“Human Genome.” 2019. <a href="https://en.wikipedia.org/wiki/Human_genome">https://en.wikipedia.org/wiki/Human_genome</a>.</p>
 </div>
 </div>
             </section>

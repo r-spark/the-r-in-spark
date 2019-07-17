@@ -418,12 +418,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>For those of you who already have a Spark cluster in your organization, you could consider skipping to the next chapter, <a href="connections.html#connections">Connections</a>, which will teach you how to connect to an existing cluster. Otherwise, if you don’t have a cluster or are considering improvements to your existing infrastructure, this chapter will introduce the cluster trends, managers, and providers available today.</p>
 <div id="clusters-overview" class="section level2">
 <h2><span class="header-section-number">6.1</span> Overview</h2>
-<p>There are three major trends in cluster computing worth discussing: <em>On-Premise</em>, <em>Cloud</em> computing, and <em>Kubernetes</em>. Framing these trends over time will help us understand how they came to be, what they are, and what their future might be. To illustrate this, Figure <a href="clusters.html#fig:clusters-trends">6.1</a> plots these trends over time using data from Google trends.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-trends"></span>
-<img src="images/clusters-trends-resized.png" alt="Google trends for on-premise (mainframe), cloud computing and Kubernetes" width="100%" />
-<p class="caption">
-FIGURE 6.1: Google trends for on-premise (mainframe), cloud computing and Kubernetes
-</p>
+<p>There are three major trends in cluster computing worth discussing: <em>On-Premise</em>, <em>Cloud</em> computing, and <em>Kubernetes</em>. Framing these trends over time will help us understand how they came to be, what they are, and what their future might be. To illustrate this, Figure <a href="#fig:clusters-trends"><strong>??</strong></a> plots these trends over time using data from Google trends.</p>
+<div class="figure">
+<img src="images/clusters-trends-resized.png" alt="Google trends for on-premise (mainframe), cloud computing and Kubernetes||clusters-trends" />
+<p class="caption">Google trends for on-premise (mainframe), cloud computing and Kubernetes||clusters-trends</p>
 </div>
 <p>For <em>on-premise</em> clusters, yourself or someone in your organization purchased physical computers that were intended to be used for cluster computing. The computers in this cluster are made of <em>off-the-shelf</em> hardware, meaning that someone placed an order to purchase computers usually found in stores shelves or, <em>high-performance</em> hardware, meaning that a computing vendor provided highly customized computing hardware which also comes optimized for high-performance network connectivity, power consumption, etc. When purchasing hundreds or thousands of computing instances, it doesn’t make sense to keep them in the usual computing case that we are all familiar with, instead, it makes sense to stack them as efficiently as possible on top of each other to minimize the space the use. This group of efficiently stacked computing instances is known as a <a href="https://en.wikipedia.org/wiki/Rack_unit">rack</a>. Once a cluster grows to thousands of computers, you will also need to host hundreds of racks of computing devices, at this scale, you would also need significant physical space to hosts those racks. A building that provides racks of computing instances is usually known as a <em>data center</em>. At the scale of a data center, you would also need to find ways to make the building more efficient, specially the cooling system, power supplies, network connectivity, and so on. Since this is time consuming, a few organizations have come together to open source their infrastructure under the <a href="http://www.opencompute.org/">Open Compute Project</a> initiative, which provides a set of data center blueprints free for anyone to use.</p>
 <p>There is nothing preventing you from building our own data center and in fact, many organizations have followed this path. For instance, Amazon started as an online book store, over the years Amazon grew to sell much more than just books and, with its online store growth, their data centers also grew in size. In 2002, Amazon considered <a href="https://en.wikipedia.org/wiki/Amazon_Web_Services#History">renting servers in their data centers to the public</a>, two year later, Amazon Web Services launched as a way to let anyone rent servers in their data centers on-demand, meaning that, one did not have to purchase, configure, maintain nor teardown it’s own clusters but could rather rent them from Amazon directly.</p>
@@ -445,12 +443,10 @@ FIGURE 6.1: Google trends for on-premise (mainframe), cloud computing and Kubern
 <p><strong>Note:</strong> In distributed systems and clusters literature, we often refer to each physical machine as a compute instance, compute node, instance or node.</p>
 <div id="clusters-standalone" class="section level4">
 <h4><span class="header-section-number">6.2.1.1</span> Standalone</h4>
-<p>In <em>Spark Standalone</em>, Spark uses itself as its own cluster manager, which allows you to use Spark without installing additional software in your cluster. This can be useful if you are planning to use your cluster to only run Spark applications; if this cluster is not dedicated to Spark, a generic cluster manager like YARN, Mesos or Kubernetes would be more suitable. The Spark Standalone documentation is available under <a href="https://spark.apache.org/docs/latest/spark-standalone.html">spark.apache.org</a> <span class="citation">(“Spark Standalone Mode” <a href="#ref-clusters-spark-standalone-mode">2019</a>)</span> and contains detailed information on configuring, launching, monitoring and enabling high-availability, see Figure <a href="clusters.html#fig:clusters-spark-standalone">6.2</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-spark-standalone"></span>
-<img src="images/clusters-spark-standalone-resized.png" alt="Spark Standalone Site" width="1500" />
-<p class="caption">
-FIGURE 6.2: Spark Standalone Site
-</p>
+<p>In <em>Spark Standalone</em>, Spark uses itself as its own cluster manager, which allows you to use Spark without installing additional software in your cluster. This can be useful if you are planning to use your cluster to only run Spark applications; if this cluster is not dedicated to Spark, a generic cluster manager like YARN, Mesos or Kubernetes would be more suitable. The Spark Standalone documentation is available under <a href="https://spark.apache.org/docs/latest/spark-standalone.html">spark.apache.org</a> <span class="citation">(“Spark Standalone Mode” <a href="#ref-clusters-spark-standalone-mode">2019</a>)</span> and contains detailed information on configuring, launching, monitoring and enabling high-availability, see Figure <a href="#fig:clusters-spark-standalone"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/clusters-spark-standalone-resized.png" alt="Spark Standalone Site||clusters-spark-standalone" />
+<p class="caption">Spark Standalone Site||clusters-spark-standalone</p>
 </div>
 <p>However, since Spark Standalone is contained within a Spark installation; then, by completing the Getting Started chapter, you have now a Spark installation available that you can use to initialize a local Spark Standalone cluster in your own machine. In practice, you would want to start the worker nodes in different machines but, for simplicity, we will present the code to start a standalone cluster in a single machine.</p>
 <p>First, retrieve the <code>SPARK_HOME</code> directory by running <code>spark_home_dir()</code> then starting the master node and a worker node as follows:</p>
@@ -462,23 +458,19 @@ spark_path &lt;-<span class="st"> </span><span class="kw">file.path</span>(spark
 
 <span class="co"># Start cluster manager master node</span>
 <span class="kw">system2</span>(spark_path, <span class="st">&quot;org.apache.spark.deploy.master.Master&quot;</span>, <span class="dt">wait =</span> <span class="ot">FALSE</span>)</code></pre>
-<p>The previous command initialized the master node, the master node interface can be accessed under <a href="http://localhost:8080">localhost:8080</a> as captured in Figure <a href="clusters.html#fig:clusters-spark-standalone-web">6.3</a>. Please note the Spark master URL is specified as <code>spark://address:port</code>, you will need this URL to initialize worker nodes.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-spark-standalone-web"></span>
-<img src="images/clusters-spark-standalone-web-ui-resized.png" alt="Spark Standalone Web Interface." width="1500" />
-<p class="caption">
-FIGURE 6.3: Spark Standalone Web Interface.
-</p>
+<p>The previous command initialized the master node, the master node interface can be accessed under <a href="http://localhost:8080">localhost:8080</a> as captured in Figure <a href="#fig:clusters-spark-standalone-web"><strong>??</strong></a>. Please note the Spark master URL is specified as <code>spark://address:port</code>, you will need this URL to initialize worker nodes.</p>
+<div class="figure">
+<img src="images/clusters-spark-standalone-web-ui-resized.png" alt="Spark Standalone Web Interface.||clusters-spark-standalone-web" />
+<p class="caption">Spark Standalone Web Interface.||clusters-spark-standalone-web</p>
 </div>
 <p>We can then initialize a single worker using the master URL; although, a similar approach could be used to initialize multiple workers by running the code multiple times and, potentially, across different machines.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Start worker node, find master URL at http://localhost:8080/</span>
 <span class="kw">system2</span>(spark_path, <span class="kw">c</span>(<span class="st">&quot;org.apache.spark.deploy.worker.Worker&quot;</span>,
                       <span class="st">&quot;spark://192.168.0.10:7077&quot;</span>), <span class="dt">wait =</span> <span class="ot">FALSE</span>)</code></pre>
-<p>Notice that there is one worker register in Spark standalone, you can follow the link to this worker node to see, Figure <a href="clusters.html#fig:clusters-spark-standalone-webui">6.4</a>, details for this particular worker like available memory and cores.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-spark-standalone-webui"></span>
-<img src="images/clusters-spark-standalone-web-ui-worker.png" alt="Spark Standalone Worker Web Interface" width="992" />
-<p class="caption">
-FIGURE 6.4: Spark Standalone Worker Web Interface
-</p>
+<p>Notice that there is one worker register in Spark standalone, you can follow the link to this worker node to see, Figure <a href="#fig:clusters-spark-standalone-webui"><strong>??</strong></a>, details for this particular worker like available memory and cores.</p>
+<div class="figure">
+<img src="images/clusters-spark-standalone-web-ui-worker.png" alt="Spark Standalone Worker Web Interface||clusters-spark-standalone-webui" />
+<p class="caption">Spark Standalone Worker Web Interface||clusters-spark-standalone-webui</p>
 </div>
 <p>Once you are done performing computations in this cluster, you can simply restart your R session which will in-turn, stop all the subprocesses associated to it; including the process for the master and worker nodes.</p>
 <p>A similar approach can be followed to configure a cluster by the initialization code over each machine in the cluster.</p>
@@ -489,12 +481,10 @@ FIGURE 6.4: Spark Standalone Worker Web Interface
 <p>YARN for short, or Hadoop YARN, is the resource manager of the Hadoop project. It was originally developed in the Hadoop project but, refactored into its own project in Hadoop 2. As we mentioned in the Introduction chapter, Spark was built to speed up computation over Hadoop and therefore, it’s very common to find Spark installed on Hadoop clusters.</p>
 <p>One advantage of YARN, is that it is likely to be already installed in many existing clusters that support Hadoop; which means that you can easily use Spark with many existing Hadoop clusters without requesting any major changes to the existing cluster infrastructure. It is also very common to find Spark deployed in YARN clusters since many started out as Hadoop clusters that were eventually upgraded to also support Spark.</p>
 <p>YARN applications can be submitted in two modes: <em>yarn-client</em> and <em>yarn-cluster</em>. In yarn-cluster mode the driver is running remotely (potentially), while in yarn-client mode, the driver is running locally, both modes are supported and are explained further in the Connections chapter.</p>
-<p>YARN provides a resource management user interface useful to access logs, monitor available resources, terminate applications, etc. Once connecting to Spark from R, you will be able to manage the running application in YARN, this is shown in Figure <a href="clusters.html#fig:clusters-hadoop-yarn-site">6.5</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-hadoop-yarn-site"></span>
-<img src="images/clusters-yarn-resource-manager-resized.png" alt="YARN's Resource Manager running sparklyr application" width="1500" />
-<p class="caption">
-FIGURE 6.5: YARN’s Resource Manager running sparklyr application
-</p>
+<p>YARN provides a resource management user interface useful to access logs, monitor available resources, terminate applications, etc. Once connecting to Spark from R, you will be able to manage the running application in YARN, this is shown in Figure <a href="#fig:clusters-hadoop-yarn-site"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/clusters-yarn-resource-manager-resized.png" alt="YARN’s Resource Manager running sparklyr application||clusters-hadoop-yarn-site" />
+<p class="caption">YARN’s Resource Manager running sparklyr application||clusters-hadoop-yarn-site</p>
 </div>
 <p>Since YARN is the cluster manager from the Hadoop project, YARN’s documentation can be found under the <a href="https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html">hadoop.apache.org</a> <span class="citation">(“Apache Hadoop Yarn” <a href="#ref-clusters-hadoop-yarn">2019</a>)</span>, you can also reference the “Running Spark on YARN” guide from <a href="https://spark.apache.org/docs/latest/running-on-yarn.html">spark.apache.org</a>. <span class="citation">(<span class="citeproc-not-found" data-reference-id="clusters-spark-on-yarn"><strong>???</strong></span>)</span></p>
 </div>
@@ -502,12 +492,10 @@ FIGURE 6.5: YARN’s Resource Manager running sparklyr application
 <h4><span class="header-section-number">6.2.1.3</span> Mesos</h4>
 <p>Apache Mesos is an open-source project to manage computer clusters. Mesos began as a research project in the UC Berkeley RAD Lab and makes use of Linux <a href="https://en.wikipedia.org/wiki/Cgroups">Cgroups</a> to provide isolation for CPU, memory, I/O and file system access.</p>
 <p>Mesos, like YARN, supports executing many cluster frameworks, including Spark. However, one advantage particular to Mesos is that, it allows cluster framework like Spark to implement custom task schedulers. A scheduler is the component that coordinates in a cluster which applications get execution time and which resources are assigned to them. Spark uses a coarse-grained scheduler <span class="citation">(“Spark on Mesos” <a href="#ref-clusters-spark-mesos-run-modes">2018</a>)</span> which schedules resources for the duration of the application; however, other frameworks might use Mesos’ fine-grained scheduler, which can increase the overall efficiency in the cluster by scheduling tasks in shorter intervals allowing them to share resources between them.</p>
-<p>Mesos provides a web interface to manage your running applications, resources, and so on. After connecting to Spark from R, your application will be registered like any other application running in Mesos, Figure <a href="clusters.html#fig:clusters-mesos-webui">6.6</a> shows a successful connection to Spark from R.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-mesos-webui"></span>
-<img src="images/clusters-mesos-webui.png" alt="Mesos web interface running Spark from R" width="1437" />
-<p class="caption">
-FIGURE 6.6: Mesos web interface running Spark from R
-</p>
+<p>Mesos provides a web interface to manage your running applications, resources, and so on. After connecting to Spark from R, your application will be registered like any other application running in Mesos, Figure <a href="#fig:clusters-mesos-webui"><strong>??</strong></a> shows a successful connection to Spark from R.</p>
+<div class="figure">
+<img src="images/clusters-mesos-webui.png" alt="Mesos web interface running Spark from R||clusters-mesos-webui" />
+<p class="caption">Mesos web interface running Spark from R||clusters-mesos-webui</p>
 </div>
 <p>Mesos is an Apache project with its documentation available under <a href="https://mesos.apache.org/">mesos.apache.org</a>. The “Running Spark on Mesos” guide from <a href="https://spark.apache.org/docs/latest/running-on-mesos.html">spark.apache.org</a> is also a great resource if you choose to use Mesos as your cluster manager.</p>
 </div>
@@ -517,12 +505,10 @@ FIGURE 6.6: Mesos web interface running Spark from R
 <p>One can use a cluster manager in on-premise clusters as described in the previous section; however, many organizations choose to partner with companies providing additional management software, services and resources to help manage applications in their cluster; including, but not limited to, Apache Spark. Some of the on-premise cluster providers include: <em>Cloudera</em>, <em>Hortonworks</em> and <em>MapR</em> to mention a few which we will be briefly introduce next.</p>
 <p><em>Cloudera</em>, Inc. is a United States-based software company that provides Apache Hadoop and Apache Spark-based software, support and services, and training to business customers. Cloudera’s hybrid open-source Apache Hadoop distribution, CDH (Cloudera Distribution Including Apache Hadoop), targets enterprise-class deployments of that technology. Cloudera donates more than 50% of its engineering output to the various Apache-licensed open source projects (Apache Hive, Apache Avro, Apache HBase, and so on) that combine to form the Apache Hadoop platform. Cloudera is also a sponsor of the Apache Software Foundation. <span class="citation">(“Cloudera Wikipedia” <a href="#ref-clusters-cloudera-wikipedia">2018</a>)</span></p>
 <p>Cloudera clusters make use of <em>parcels</em>, which are binary distributions containing program files and metadata <span class="citation">(“Cloudera Documentation” <a href="#ref-clusters-cloudera-parcel">2018</a>)</span>, Spark happens to be installed as a parcel in Cloudera. It’s beyond the scope of this book to present how to configure Cloudera clusters, resources and documentation can be found under <a href="https://www.cloudera.com/products/open-source/apache-hadoop/apache-spark.html">cloudera.com</a>, and <a href="https://blog.cloudera.com/blog/2016/09/introducing-sparklyr-an-r-interface-for-apache-spark/">“Introducing sparklyr, an R Interface for Apache Spark”</a> <span class="citation">(“Cloudera Engineering” <a href="#ref-clusters-cloudera-engineering-blog">2016</a>)</span> under Cloudera’s Engineering Blog.</p>
-<p>Cloudera provides the Cloudera Manager web interface to manage resources, services, parcels, diagnostics, etc. Figure <a href="clusters.html#fig:clusters-cloudera-manager-spark">6.7</a> shows a Spark parcel running in Cloduera Manager which you can later use to connect from R.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-cloudera-manager-spark"></span>
-<img src="images/clusters-cloudera-manager-resized.png" alt="Cloudera Manager running Spark parcel" width="1500" />
-<p class="caption">
-FIGURE 6.7: Cloudera Manager running Spark parcel
-</p>
+<p>Cloudera provides the Cloudera Manager web interface to manage resources, services, parcels, diagnostics, etc. Figure <a href="#fig:clusters-cloudera-manager-spark"><strong>??</strong></a> shows a Spark parcel running in Cloduera Manager which you can later use to connect from R.</p>
+<div class="figure">
+<img src="images/clusters-cloudera-manager-resized.png" alt="Cloudera Manager running Spark parcel||clusters-cloudera-manager-spark" />
+<p class="caption">Cloudera Manager running Spark parcel||clusters-cloudera-manager-spark</p>
 </div>
 <p><code>sparklyr</code> is certified with Cloudera; <span class="citation">(“Cloudera Partners” <a href="#ref-clusters-cloudera-sparklyr-certification">2017</a>)</span> meaning that, Cloudera’s support is aware of <code>sparklyr</code> and can be effective helping organizations that are using Spark and R, the following table summarizes the versions currently certified.</p>
 <table>
@@ -584,12 +570,10 @@ FIGURE 6.7: Cloudera Manager running Spark parcel
   <span class="ex">--bootstrap-action</span> Path=s3://aws-bigdata-blog/artifacts/aws-blog-emr-\
 rstudio-sparklyr/rstudio_sparklyr_emr5.sh,Args=[<span class="st">&quot;--user-pw&quot;</span>, <span class="st">&quot;&lt;password&gt;&quot;</span>, \
   <span class="st">&quot;--rstudio&quot;</span>, <span class="st">&quot;--arrow&quot;</span>] --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole</code></pre>
-<p>You can then see the cluster launching, and eventually running under the AWS portal, see Figure <a href="clusters.html#fig:clusters-amazon-emr-launching">6.8</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-amazon-emr-launching"></span>
-<img src="images/clusters-amazon-emr-launching-resized.png" alt="Launching an Amazon EMR Cluster" width="1500" />
-<p class="caption">
-FIGURE 6.8: Launching an Amazon EMR Cluster
-</p>
+<p>You can then see the cluster launching, and eventually running under the AWS portal, see Figure <a href="#fig:clusters-amazon-emr-launching"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/clusters-amazon-emr-launching-resized.png" alt="Launching an Amazon EMR Cluster||clusters-amazon-emr-launching" />
+<p class="caption">Launching an Amazon EMR Cluster||clusters-amazon-emr-launching</p>
 </div>
 <p>You can then navigate to the Master Public DNS and find RStudio under port 8787, for instance: <code>ec2-12-34-567-890.us-west-1.compute.amazonaws.com:8787</code>, and then login with user <code>hadoop</code> and password <code>&lt;password&gt;</code>.</p>
 <p>It is also possible to launch the EMR cluster using the web interface, the same introductory post contains additional details and walkthroughs specifically designed for EMR.</p>
@@ -639,12 +623,10 @@ FIGURE 6.8: Launching an Amazon EMR Cluster
 <h3><span class="header-section-number">6.3.2</span> Databricks</h3>
 <p><a href="http://databricks.com">Databricks</a> is a company founded by the creators of Apache Spark, that aims to help clients with cloud-based big data processing using Spark. Databricks grew out of the <a href="https://amplab.cs.berkeley.edu/">AMPLab</a> project at the University of California, Berkeley. <span class="citation">(“Databricks Wikipedia” <a href="#ref-clusters-databricks-wikipedia">2018</a>)</span></p>
 <p>Databricks provides enterprise-level cluster computing plans, while also providing a free/community tear to explore functionality and get familiar with their environment.</p>
-<p>Once a cluster is launched, R and <code>sparklyr</code> can be used from Databricks notebooks following the steps from the Getting Started chapter or, by installing <a href="https://docs.databricks.com/spark/latest/sparkr/rstudio.html">RStudio on Databricks</a>. <span class="citation">(“Databricks Rstudio” <a href="#ref-clusters-databricks-rstudio">2018</a>)</span> Figure <a href="clusters.html#fig:clusters-databricks-notebook">6.9</a> shows a Databricks notebook using Spark through <code>sparkylr</code>.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-databricks-notebook"></span>
-<img src="images/clusters-databricks-sparklyr.png" alt="Databricks community notebook running sparklyr" width="1432" />
-<p class="caption">
-FIGURE 6.9: Databricks community notebook running sparklyr
-</p>
+<p>Once a cluster is launched, R and <code>sparklyr</code> can be used from Databricks notebooks following the steps from the Getting Started chapter or, by installing <a href="https://docs.databricks.com/spark/latest/sparkr/rstudio.html">RStudio on Databricks</a>. <span class="citation">(“Databricks Rstudio” <a href="#ref-clusters-databricks-rstudio">2018</a>)</span> Figure <a href="#fig:clusters-databricks-notebook"><strong>??</strong></a> shows a Databricks notebook using Spark through <code>sparkylr</code>.</p>
+<div class="figure">
+<img src="images/clusters-databricks-sparklyr.png" alt="Databricks community notebook running sparklyr||clusters-databricks-notebook" />
+<p class="caption">Databricks community notebook running sparklyr||clusters-databricks-notebook</p>
 </div>
 <p>Additional resources are available under the Databricks Engineering Blog post: <a href="https://databricks.com/blog/2017/05/25/using-sparklyr-databricks.html">“Using sparklyr in Databricks”</a> <span class="citation">(“Databricks Blog” <a href="#ref-clusters-databricks-blog-sparklyr">2017</a>)</span> and the <a href="https://docs.databricks.com/spark/latest/sparkr/sparklyr.html">“Databricks Documentation for sparklyr”</a>. <span class="citation">(“Databricks Documentation” <a href="#ref-clusters-databricks-documentation-sparklyr">2018</a>)</span></p>
 <p>The latest pricing information can be found under <a href="https://databricks.com/product/pricing">databricks.com/product/pricing</a>, as of this writing, available plans</p>
@@ -683,12 +665,10 @@ FIGURE 6.9: Databricks community notebook running sparklyr
 <div id="google" class="section level3">
 <h3><span class="header-section-number">6.3.3</span> Google</h3>
 <p>Google provides Gooble Cloud Dataproc as a cloud-based managed Spark and Hadoop service offered on Google Cloud Platform. Dataproc utilizes many Google Cloud Platform technologies such as Google Compute Engine and Google Cloud Storage to offer fully managed clusters running popular data processing frameworks such as Apache Hadoop and Apache Spark. <span class="citation">(“Dataproc Wikipedia” <a href="#ref-clusters-dataproc-wikipedia">2018</a>)</span></p>
-<p>A cluster can be easily created from the Google Cloud console or the Google Cloud command line interface as illustrated in Figure <a href="clusters.html#fig:clusters-google-dataproc-launch">6.10</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-google-dataproc-launch"></span>
-<img src="images/clusters-dataproc-launching-resized.png" alt="Launching a Dataproc cluster" width="1500" />
-<p class="caption">
-FIGURE 6.10: Launching a Dataproc cluster
-</p>
+<p>A cluster can be easily created from the Google Cloud console or the Google Cloud command line interface as illustrated in Figure <a href="#fig:clusters-google-dataproc-launch"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/clusters-dataproc-launching-resized.png" alt="Launching a Dataproc cluster||clusters-google-dataproc-launch" />
+<p class="caption">Launching a Dataproc cluster||clusters-google-dataproc-launch</p>
 </div>
 <p>Once created, ports can be forwarded to allow you to access this cluster from your machine; for instance, by launching Chrome to make use of this proxy and securely connect to the Dataproc cluster. Configuring this connection looks as follows:</p>
 <pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">gcloud</span> compute ssh sparklyr-m --project=<span class="op">&lt;</span>project<span class="op">&gt;</span> --zone=<span class="op">&lt;</span>region<span class="op">&gt;</span> -- -D 1080 \
@@ -734,12 +714,10 @@ FIGURE 6.10: Launching a Dataproc cluster
 <div id="ibm" class="section level3">
 <h3><span class="header-section-number">6.3.4</span> IBM</h3>
 <p>IBM cloud computing is a set of cloud computing services for business offered by the information technology company IBM. IBM cloud includes infrastructure as a service (IaaS), software as a service (SaaS) and platform as a service (PaaS) offered through public, private and hybrid cloud delivery models, in addition to the components that make up those clouds. <span class="citation">(“IBM Cloud Wikipedia” <a href="#ref-clusters-ibm-wikipedia">2018</a>)</span></p>
-<p>From within IBM Cloud, open Watson Studio and create a Data Science project, add a Spark cluster under the project settings and launch RStudio from the Launch IDE menu. Please note that, as of this writing, the provided version of <code>sparklyr</code> was not the latest version available in CRAN, since <code>sparklyr</code> was modified to run under the IBM Cloud. In any case, please follow IBMs documentation as an authoritative reference to run R and Spark on the IBM Cloud and particularly, on how to upgrade <code>sparklyr</code> appropriately. Figure <a href="clusters.html#fig:clusters-ibm-portal">6.11</a> captures IBM’s Cloud portal launching a Spark cluster.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-ibm-portal"></span>
-<img src="images/clusters-ibm-sparklyr-resized.png" alt="IBM Watson Studio launching Spark with R support" width="1500" />
-<p class="caption">
-FIGURE 6.11: IBM Watson Studio launching Spark with R support
-</p>
+<p>From within IBM Cloud, open Watson Studio and create a Data Science project, add a Spark cluster under the project settings and launch RStudio from the Launch IDE menu. Please note that, as of this writing, the provided version of <code>sparklyr</code> was not the latest version available in CRAN, since <code>sparklyr</code> was modified to run under the IBM Cloud. In any case, please follow IBMs documentation as an authoritative reference to run R and Spark on the IBM Cloud and particularly, on how to upgrade <code>sparklyr</code> appropriately. Figure <a href="#fig:clusters-ibm-portal"><strong>??</strong></a> captures IBM’s Cloud portal launching a Spark cluster.</p>
+<div class="figure">
+<img src="images/clusters-ibm-sparklyr-resized.png" alt="IBM Watson Studio launching Spark with R support||clusters-ibm-portal" />
+<p class="caption">IBM Watson Studio launching Spark with R support||clusters-ibm-portal</p>
 </div>
 <p>The most up to date pricing information is available under <a href="https://www.ibm.com/cloud/pricing">ibm.com/cloud/pricing</a>. In the following table, compute cost was normalized using 31 days from the per-month costs.</p>
 <table>
@@ -780,12 +758,10 @@ FIGURE 6.11: IBM Watson Studio launching Spark with R support
 <div id="microsoft" class="section level3">
 <h3><span class="header-section-number">6.3.5</span> Microsoft</h3>
 <p>Microsoft Azure is a cloud computing service created by Microsoft for building, testing, deploying, and managing applications and services through a global network of Microsoft-managed data centers. It provides software as a service (SaaS), platform as a service (PaaS) and infrastructure as a service (IaaS) and supports many different programming languages, tools and frameworks, including both Microsoft-specific and third-party software and systems. <span class="citation">(“Azure Wikipedia” <a href="#ref-clusters-azure-wikipedia">2018</a>)</span></p>
-<p>From the Azure portal, the Azure HDInsight service provides support for on-demand Spark clusters. An HDInsight cluster with support for Spark and RStudio can be easily created by selecting the ML Services cluster type. Please note that the provided version of <code>sparklyr</code> might not be the latest version available in CRAN since the default package repo seems to be initialized using an MRAN (Microsoft R Application Network) snapshot, not directly from CRAN. Figure <a href="clusters.html#fig:clusters-azure-hdinsight-mlservices">6.12</a> shows the Azure portal launching a Spark cluster with support for R.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-azure-hdinsight-mlservices"></span>
-<img src="images/clusters-azure-mlservices-resized.png" alt="Creating an Azure HDInsight Spark Cluster" width="1500" />
-<p class="caption">
-FIGURE 6.12: Creating an Azure HDInsight Spark Cluster
-</p>
+<p>From the Azure portal, the Azure HDInsight service provides support for on-demand Spark clusters. An HDInsight cluster with support for Spark and RStudio can be easily created by selecting the ML Services cluster type. Please note that the provided version of <code>sparklyr</code> might not be the latest version available in CRAN since the default package repo seems to be initialized using an MRAN (Microsoft R Application Network) snapshot, not directly from CRAN. Figure <a href="#fig:clusters-azure-hdinsight-mlservices"><strong>??</strong></a> shows the Azure portal launching a Spark cluster with support for R.</p>
+<div class="figure">
+<img src="images/clusters-azure-mlservices-resized.png" alt="Creating an Azure HDInsight Spark Cluster||clusters-azure-hdinsight-mlservices" />
+<p class="caption">Creating an Azure HDInsight Spark Cluster||clusters-azure-hdinsight-mlservices</p>
 </div>
 <p>Up to date pricing for HDInsight is available under <a href="https://azure.microsoft.com/en-us/pricing/details/hdinsight/">azure.microsoft.com/en-us/pricing/details/hdinsight</a>.</p>
 <table>
@@ -821,12 +797,10 @@ FIGURE 6.12: Creating an Azure HDInsight Spark Cluster
 </div>
 <div id="qubole" class="section level3">
 <h3><span class="header-section-number">6.3.6</span> Qubole</h3>
-<p><a href="https://www.qubole.com">Qubole</a> is a company founded in 2013 with a mission to close the data accessibility gap. Qubole delivers a Self-Service Platform for Big Data Analytics built on Amazon, Microsoft, Google and Oracle Clouds. You can use R with Spark clusters though <a href="https://docs.qubole.com/en/latest/user-guide/notebooks-and-dashboards/notebooks/notebook.html">Qubole notebooks</a> or following Qubole’s documentation to use RStudio with Qubole clusters. Figure <a href="clusters.html#fig:clusters-qubole-notebook">6.13</a> shows a Qubole notebook using Spark through <code>sparkylr</code>.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-qubole-notebook"></span>
-<img src="images/clusters-qubole-sparklyr-resized.png" alt="Qubole notebook running sparklyr" width="1500" />
-<p class="caption">
-FIGURE 6.13: Qubole notebook running sparklyr
-</p>
+<p><a href="https://www.qubole.com">Qubole</a> is a company founded in 2013 with a mission to close the data accessibility gap. Qubole delivers a Self-Service Platform for Big Data Analytics built on Amazon, Microsoft, Google and Oracle Clouds. You can use R with Spark clusters though <a href="https://docs.qubole.com/en/latest/user-guide/notebooks-and-dashboards/notebooks/notebook.html">Qubole notebooks</a> or following Qubole’s documentation to use RStudio with Qubole clusters. Figure <a href="#fig:clusters-qubole-notebook"><strong>??</strong></a> shows a Qubole notebook using Spark through <code>sparkylr</code>.</p>
+<div class="figure">
+<img src="images/clusters-qubole-sparklyr-resized.png" alt="Qubole notebook running sparklyr||clusters-qubole-notebook" />
+<p class="caption">Qubole notebook running sparklyr||clusters-qubole-notebook</p>
 </div>
 <p>The latest pricing information can be found under <a href="https://www.qubole.com/qubole-pricing/">qubole.com/qubole-pricing/</a>, as of this writing the following plans are described in their pricing page:</p>
 <table>
@@ -852,12 +826,10 @@ FIGURE 6.13: Qubole notebook running sparklyr
 <h2><span class="header-section-number">6.4</span> Kubernetes</h2>
 <p>Kubernetes is an open-source container-orchestration system for automating deployment, scaling and management of containerized applications that was originally designed by Google and now maintained by the <a href="https://www.cncf.io/">Cloud Native Computing Foundation</a>. Kubernetes was originally based on <a href="https://www.docker.com/">Docker</a> while, like Mesos, it’s also based on Linux Cgroups.</p>
 <p>Kubernetes can execute many cluster applications and frameworks that can be highly customized by using container images with specific resources and libraries. This allows a single Kubernetes cluster to be used for many different purposes beyond data analysis, which in turn helps organizations manage their compute resources with ease. One trade off from using custom images is that they add additional configuration overhead but make kubernetes clusters extremely flexible. Nevertheless, this flexibility has proven to be instrumental to administrate with ease cluster resources in many organizations and, as shown in the <a href="clusters.html#clusters-overview">overview</a> section, it’s becoming a very popular cluster framework.</p>
-<p>Kubernetes is supported across all major cloud providers. They all provide extensive documentation as to how to launch, manage and tear down Kubernetes clusters; Figure <a href="clusters.html#fig:clusters-kubernetes-google-console">6.14</a> shows Google Gloud’s console while creating a Kubernetes cluster. Spark can be deployed over any Kubernetes cluster and R used to connect, analyze, model and so on.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-kubernetes-google-console"></span>
-<img src="images/clusters-kubernetes-google-console-resized.png" alt="Creating a Kubernetes cluster for Spark and R using Google Cloud" width="1500" />
-<p class="caption">
-FIGURE 6.14: Creating a Kubernetes cluster for Spark and R using Google Cloud
-</p>
+<p>Kubernetes is supported across all major cloud providers. They all provide extensive documentation as to how to launch, manage and tear down Kubernetes clusters; Figure <a href="#fig:clusters-kubernetes-google-console"><strong>??</strong></a> shows Google Gloud’s console while creating a Kubernetes cluster. Spark can be deployed over any Kubernetes cluster and R used to connect, analyze, model and so on.</p>
+<div class="figure">
+<img src="images/clusters-kubernetes-google-console-resized.png" alt="Creating a Kubernetes cluster for Spark and R using Google Cloud||clusters-kubernetes-google-console" />
+<p class="caption">Creating a Kubernetes cluster for Spark and R using Google Cloud||clusters-kubernetes-google-console</p>
 </div>
 <p>You can learn more about <a href="https://kubernetes.io/">kubernetes.io</a>, and the “Running Spark on Kubernetes” guide from <a href="https://spark.apache.org/docs/latest/running-on-kubernetes.html">spark.apache.org</a>.</p>
 <p>Strictly speaking, Kubernetes is a cluster technology not a specific cluster architecture. However, Kubernetes represents a larger trend often referred to as a hybrid cloud. A hybrid cloud is a computing environment that makes use of on-premises and public cloud services with orchestration between the various platforms. It’s still too early to precisely categorize the leading technologies that will form a hybrid approach to cluster computing; while Kubernetes is the leading one, many more are likely to form to complement or even replace existing technologies.</p>
@@ -867,24 +839,20 @@ FIGURE 6.14: Creating a Kubernetes cluster for Spark and R using Google Cloud
 <p>While using only R and Spark can be sufficient for some clusters, it is common to install complementary tools in your cluster to improve: monitoring, sql analysis, workflow coordination, etc. with applications like <a href="http://ganglia.info/">Ganglia</a>, <a href="http://gethue.com/">Hue</a> and <a href="https://oozie.apache.org">Oozie</a> respectively. This section is not meant to cover all, but rather mention the ones that are commonly used.</p>
 <div id="rstudio" class="section level3">
 <h3><span class="header-section-number">6.5.1</span> RStudio</h3>
-<p>From reading the Introduction chapter, you are aware that RStudio is a well known, free, desktop development environment for R; therefore, it is likely that you are following the examples in this book using RStudio Desktop; however, you might not be aware that RStudio can also be run as a web service inside a Spark cluster, this version of RStudio is known as RStudio Server. You can see RStudio Server running in Figure <a href="clusters.html#fig:clusters-rstudio-server">6.15</a>. In the same way that the Spark UI runs in the cluster, RStudio Server can be installed inside the cluster, then you can connect to RStudio Server and use RStudio in exactly the same way you use RStudio Desktop but with the ability to run code against the Spark cluster. As you can see on the following image, RStudio Server is running on a web browser inside a Spark cluster; it looks and feels just like RStudio Desktop, but adds support to run commands efficiently by being located within the cluster.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-rstudio-server"></span>
-<img src="images/clusters-rstudio-server-resized.png" alt="RStudio Server Pro running inside Apache Spark" width="1500" />
-<p class="caption">
-FIGURE 6.15: RStudio Server Pro running inside Apache Spark
-</p>
+<p>From reading the Introduction chapter, you are aware that RStudio is a well known, free, desktop development environment for R; therefore, it is likely that you are following the examples in this book using RStudio Desktop; however, you might not be aware that RStudio can also be run as a web service inside a Spark cluster, this version of RStudio is known as RStudio Server. You can see RStudio Server running in Figure <a href="#fig:clusters-rstudio-server"><strong>??</strong></a>. In the same way that the Spark UI runs in the cluster, RStudio Server can be installed inside the cluster, then you can connect to RStudio Server and use RStudio in exactly the same way you use RStudio Desktop but with the ability to run code against the Spark cluster. As you can see on the following image, RStudio Server is running on a web browser inside a Spark cluster; it looks and feels just like RStudio Desktop, but adds support to run commands efficiently by being located within the cluster.</p>
+<div class="figure">
+<img src="images/clusters-rstudio-server-resized.png" alt="RStudio Server||clusters-rstudio-server" />
+<p class="caption">RStudio Server||clusters-rstudio-server</p>
 </div>
 <p>For those familiar with R, Shiny is a very popular tool for building interactive web applications from R; which it is also recommended you install directly in your Spark cluster.</p>
 <p>RStudio Server and Shiny Server are a free and open source; however, RStudio also provides professional products, like: RStudio Server, <a href="https://www.rstudio.com/products/rstudio-server-pro/">RStudio Server Pro</a> <span class="citation">(“RStudio Server Pro” <a href="#ref-clusters-rstudio-server-pro">2019</a>)</span>, <a href="https://www.rstudio.com/products/shiny-server-pro/">Shiny Server Pro</a> <span class="citation">(“Shiny Server Pro” <a href="#ref-clusters-shiny-server-pro">2019</a>)</span> and <a href="https://www.rstudio.com/products/connect/">RStudio Connect</a> <span class="citation">(“RStudio Connect” <a href="#ref-clusters-rstudio-connect">2019</a>)</span> which can be installed within the cluster to support additional R workflows, while <code>sparklyr</code> does not require any additional tools, they provide significant productivity gains worth considering. You can learn more about them at <a href="https://www.rstudio.com/products/">rstudio.com/products/</a>.</p>
 </div>
 <div id="jupyter" class="section level3">
 <h3><span class="header-section-number">6.5.2</span> Jupyter</h3>
-<p>Project <a href="http://jupyter.org/">Jupyter</a> exists to develop open-source software, open-standards, and services for interactive computing across dozens of programming languages. A Jupyter notebook, provide support for various programming languages, including R. <code>sparklyr</code> can be used with Jupyter notebooks using the R Kernel. Figure <a href="clusters.html#fig:clusters-jupyter-sparklyr">6.16</a> shows <code>sparklyr</code> running inside a local Jupyter notebook.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-jupyter-sparklyr"></span>
-<img src="images/clusters-jupyter-resized.png" alt="Jupyter notebook running sparklyr" width="1500" />
-<p class="caption">
-FIGURE 6.16: Jupyter notebook running sparklyr
-</p>
+<p>Project <a href="http://jupyter.org/">Jupyter</a> exists to develop open-source software, open-standards, and services for interactive computing across dozens of programming languages. A Jupyter notebook, provide support for various programming languages, including R. <code>sparklyr</code> can be used with Jupyter notebooks using the R Kernel. Figure <a href="#fig:clusters-jupyter-sparklyr"><strong>??</strong></a> shows <code>sparklyr</code> running inside a local Jupyter notebook.</p>
+<div class="figure">
+<img src="images/clusters-jupyter-resized.png" alt="Jupyter notebook running sparklyr||clusters-jupyter-sparklyr" />
+<p class="caption">Jupyter notebook running sparklyr||clusters-jupyter-sparklyr</p>
 </div>
 </div>
 <div id="clusters-livy" class="section level3">
@@ -905,12 +873,10 @@ FIGURE 6.16: Jupyter notebook running sparklyr
 
 <span class="co"># Start the Livy service</span>
 <span class="kw">livy_service_start</span>()</code></pre>
-<p>You can then navigate to this local Livy session under <a href="http://localhost:8998" class="uri">http://localhost:8998</a>, the Connections chapter will detail how to connect through Livy; once connected, you can navigate to the Livy web application as captured by Figure <a href="clusters.html#fig:clusters-livy-local">6.17</a>.</p>
-<div class="figure" style="text-align: center"><span id="fig:clusters-livy-local"></span>
-<img src="images/clusters-livy-local.png" alt="Apache Livy running as a local service" width="1440" />
-<p class="caption">
-FIGURE 6.17: Apache Livy running as a local service
-</p>
+<p>You can then navigate to this local Livy session under <a href="http://localhost:8998" class="uri">http://localhost:8998</a>, the Connections chapter will detail how to connect through Livy; once connected, you can navigate to the Livy web application as captured by Figure <a href="#fig:clusters-livy-local"><strong>??</strong></a>.</p>
+<div class="figure">
+<img src="images/clusters-livy-local.png" alt="Apache Livy running as a local service||clusters-livy-local" />
+<p class="caption">Apache Livy running as a local service||clusters-livy-local</p>
 </div>
 <p>Make sure you also stop the Livy service when working with local Livy instances, for proper Livy services running in a cluster, you won’t have to.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Stops the Livy service</span>
