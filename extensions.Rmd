@@ -64,13 +64,14 @@ It's not hard to install and use Spark extensions from R; however, each extensio
 
 We can't do justice to H2O's great modeling capabilities in a single paragraph, explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the "Practical machine learning with H2O" [@extensions-practical-h2o] book to explore in-depth H2O's modeling algorithms and features. In the meantime, you can use this section as a brief guide to get started using H2O in Spark with R.
 
-In order to use H2O with Spark, it is important to know that there are four components involved: H2O, Sparkling Water, [rsparkling][rsparkling](https://github.com/h2oai/sparkling-water/tree/master/r) and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and `rsparkling` as the R front-end for Sparkling Water, this is illustrated in Figure \@ref(fig:extensions-h2o-diagram).
+In order to use H2O with Spark, it is important to know that there are four components involved: H2O, Sparkling Water, [rsparkling](https://github.com/h2oai/sparkling-water/tree/master/r) and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and `rsparkling` as the R front-end for Sparkling Water, this is illustrated in Figure \@ref(fig:extensions-h2o-diagram).
 
 ```{r extensions-h2o-diagram, eval=TRUE, echo=FALSE, fig.height=3, fig.width=8, fig.align='center', fig.cap='H2O components with Spark and R'}
 render_nomnoml("
 #spacing: 20
 #padding: 16
 [R | 
+  [h2o]
   [rsparkling]
   [sparklyr]
 ]->[Spark |
@@ -162,7 +163,7 @@ Residual D.o.F. :29
 AIC :156.2425
 ```
 
-Then you can run prediction over the generalized linear model model, a similar approach would work for many other models available in H2O:
+Then you can run prediction over the generalized linear model, a similar approach would work for many other models available in H2O:
 
 ```{r extensions-h2o-predict}
 predictions <- as_h2o_frame(sc, copy_to(sc, data.frame(wt = 2, cyl = 6)))
@@ -184,19 +185,65 @@ automl <- h2o.automl(x = c("wt", "cyl"), y = "mpg",
                      seed = 1)
 ```
 
-For this particular dataset, H2O finds out that XGBoost is a better fit than GLM. Specifically, the H2O explored using XGBoost, Deep Learning, GLM and a Stacked Ensemble.
+For this particular dataset, H2O finds out that a Deep Learning model is a better fit than GLM[^1]. Specifically, H2O's AutoML explored using XGBoost, Deep Learning, GLM and a Stacked Ensemble models.
+
+[^1]: Notice that AutoML uses cross-validation which we did not use in GLM.
 
 ```{r extensions-h2o-automl-print}
-automl
+automl@leaderboard
 ```
 ```
 model_id              mean_residual_dev…     rmse      mse      mae     rmsle
-1 XGBoost_1_...       6.627278           2.574350 6.627278 2.066412 0.1329469
-2 DeepLearning_...    6.945850           2.635498 6.945850 2.209201 0.1258008
-3 XGBoost_grid_1_...  7.025614           2.650587 7.025614 2.192791 0.1339280
-4 XGBoost_grid_1_...  7.266691           2.695680 7.266691 2.167930 0.1331849
-5 GLM_grid_...        7.416367           2.723301 7.416367 2.184664 0.1269808
-6 StackedEnsemble...  7.596133           2.756108 7.596133 2.029900 0.1340302
+1 DeepLearning_…                6.541322 2.557601 6.541322 2.192295 0.1242028
+2 XGBoost_grid_1…               6.958945 2.637981 6.958945 2.129421 0.1347795
+3 XGBoost_grid_1_…              6.969577 2.639996 6.969577 2.178845 0.1336290
+4 XGBoost_grid_1_…              7.266691 2.695680 7.266691 2.167930 0.1331849
+5 StackedEnsemble…              7.304556 2.702694 7.304556 1.938982 0.1304792
+6 XGBoost_3_…                   7.313948 2.704431 7.313948 2.088791 0.1348819
+```
+
+Rather than using the leaderboard, you can focus on the best model through `automl@leader`; for example, you can glance at the particular parameters from this Deep Learning model as follows:
+
+```{r}
+tibble::tibble(parameter = names(automl@leader@parameters),
+               value = as.character(automl@leader@parameters))
+```
+```
+# A tibble: 20 x 2
+   parameter                         values                                                       
+   <chr>                             <chr>                                                        
+ 1 model_id                          DeepLearning_grid_1_AutoML…         
+ 2 training_frame                    automl_training_frame_rdd…
+ 3 nfolds                            5                                                            
+ 4 keep_cross_validation_models      FALSE                                                        
+ 5 keep_cross_validation_predictions TRUE                                                         
+ 6 fold_assignment                   Modulo                                                       
+ 7 overwrite_with_best_model         FALSE                                                        
+ 8 activation                        RectifierWithDropout                                         
+ 9 hidden                            200                                                          
+10 epochs                            10003.6618461538                                             
+11 seed                              1                                                            
+12 rho                               0.95                                                         
+13 epsilon                           1e-06                                                        
+14 input_dropout_ratio               0.2                                                          
+15 hidden_dropout_ratios             0.4                                                          
+16 stopping_rounds                   0                                                            
+17 stopping_metric                   deviance                                                     
+18 stopping_tolerance                0.05                                                         
+19 x                                 c("cyl", "wt")                                         
+20 y                                 mpg 
+```
+
+You can then predict using the leader as follows,
+
+```{r}
+h2o.predict(automl@leader, predictions)
+```
+```
+   predict
+1 30.74639
+
+[1 row x 1 column] 
 ```
 
 Many additional examples are available under [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/), you can also request help from [github.com/h2oai/sparkling-water/tree/master/r](https://github.com/h2oai/sparkling-water/tree/master/r), the official GitHub repository for the `rsparkling` package.
@@ -333,7 +380,7 @@ gf_degrees(graph) %>% summarise(friends = mean(degree))
 1    6.94
 ```
 
-We can then find what the shortest path to some specific vertex (person for this dataset). Since the data is anonymized, we can just pick the person identified as $33$ and find how many degrees of separation exist between them:
+We can then find what the shortest path to some specific vertex (person for this dataset). Since the data is anonymized, we can just pick the person identified as `33` and find how many degrees of separation exist between them:
 
 ```{r}
 gf_shortest_paths(graph, 33) %>%
@@ -358,7 +405,7 @@ gf_shortest_paths(graph, 33) %>%
 # … with more rows
 ```
 
-Finally, we can compute PageRank over this graph, which is named after Google's foudner Larry Page: 
+Finally, we can also compute PageRank over this graph, which was presented in the Introduction chapter as Google's web page ranking algorithm:
 
 ```{r echo=FALSE, eval=FALSE}
 model <- gf_graphframe(vertices_tbl, edges_tbl) %>%
