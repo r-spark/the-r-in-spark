@@ -667,13 +667,13 @@ spark_home &lt;-<span class="st"> </span>sparklyr<span class="op">::</span><span
   <span class="kw">c</span>(
     <span class="st">&quot;--master&quot;</span>, <span class="st">&quot;local&quot;</span>,
     <span class="st">&quot;--class&quot;</span>, <span class="st">&quot;org.apache.spark.examples.SparkPi&quot;</span>,
-    <span class="kw">file.path</span>(spark_home, <span class="st">&quot;examples&quot;</span>, <span class="st">&quot;jars&quot;</span>, <span class="st">&quot;spark-examples_2.11-2.4.0.jar&quot;</span>),
-    <span class="dv">100</span>)
+    <span class="kw">dir</span>(<span class="kw">file.path</span>(spark_home, <span class="st">&quot;examples&quot;</span>, <span class="st">&quot;jars&quot;</span>), 
+        <span class="dt">pattern =</span> <span class="st">&quot;spark-examples&quot;</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>),
+    <span class="dv">100</span>),
+  <span class="dt">stderr =</span> <span class="ot">FALSE</span>
 )</code></pre>
-<pre><code>...
-Pi is roughly 3.1415503141550314
-...</code></pre>
-<p>If the above message is not displayed, you will have to investigate why your Spark cluster is not properly configured, which is beyond the scope of this book. When using a cloud provider or a Spark distribution, you can contact their support team to help you troubleshoot this further; otherwise, StackOverflow is a good place to start.</p>
+<pre><code>Pi is roughly 3.1415503141550314</code></pre>
+<p>If the above message is not displayed, you will have to investigate why your Spark cluster is not properly configured, which is beyond the scope of this book. As a start, rerun the Pi example but remove <code>stderr = FALSE</code>, this will print errors to the console which you can then use to investigate what the problem might be. When using a cloud provider or a Spark distribution, you can contact their support team to help you troubleshoot this further; otherwise, StackOverflow is a good place to start.</p>
 <p>If you do see the message above, this means your Spark cluster is properly configured but somehow, R is not being able to use Spark, so you will have to troubleshoot in-detail as we will explain next.</p>
 <div id="detailed" class="section level4">
 <h4><span class="header-section-number">7.12.2.1</span> Detailed</h4>

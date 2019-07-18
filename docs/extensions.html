@@ -455,7 +455,7 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <h2><span class="header-section-number">10.2</span> H2O</h2>
 <p><a href="https://www.h2o.ai/">H2O</a> is open-source software for large-scale modeling created by H2O.ai, which allows you to fit thousands of potential models as part of discovering patterns in data. You can consider using H2O to complement or replace Spark’s default modeling algorithms. It is common to Spark’s default modeling algorithms and transition to H2O when Spark’s algorithms fall short or when advanced functionality (like additional modeling metrics or automatic model selection) are desired</p>
 <p>We can’t do justice to H2O’s great modeling capabilities in a single paragraph, explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the “Practical machine learning with H2O” <span class="citation">(Cook <a href="#ref-extensions-practical-h2o">2016</a>)</span> book to explore in-depth H2O’s modeling algorithms and features. In the meantime, you can use this section as a brief guide to get started using H2O in Spark with R.</p>
-<p>In order to use H2O with Spark, it is important to know that there are four components involved: H2O, Sparkling Water, [rsparkling][rsparkling](<a href="https://github.com/h2oai/sparkling-water/tree/master/r" class="uri">https://github.com/h2oai/sparkling-water/tree/master/r</a>) and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and <code>rsparkling</code> as the R front-end for Sparkling Water, this is illustrated in Figure <a href="#fig:extensions-h2o-diagram"><strong>??</strong></a>.</p>
+<p>In order to use H2O with Spark, it is important to know that there are four components involved: H2O, Sparkling Water, <a href="https://github.com/h2oai/sparkling-water/tree/master/r">rsparkling</a> and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and <code>rsparkling</code> as the R front-end for Sparkling Water, this is illustrated in Figure <a href="#fig:extensions-h2o-diagram"><strong>??</strong></a>.</p>
 <div class="figure">
 <img src="images/extensions-h2o-diagram-resized.png" alt="H2O components with Spark and R||extensions-h2o-diagram" />
 <p class="caption">H2O components with Spark and R||extensions-h2o-diagram</p>
@@ -467,9 +467,9 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
   <span class="dt">repos =</span> <span class="st">&quot;http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/31/R&quot;</span>)</code></pre>
 <p>It is important to notice that you need to use compatible versions of Spark, Sparkling Water and H2O as specified in their docs; we present instructions for Spark 2.3, but using different Spark versions will require you to install different versions. So let’s start by checking the version of H2O by running,</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">packageVersion</span>(<span class="st">&quot;h2o&quot;</span>)</code></pre>
-<pre><code>## [1] &#39;3.22.1.3&#39;</code></pre>
+<pre><code>## [1] &#39;3.24.0.5&#39;</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">packageVersion</span>(<span class="st">&quot;rsparkling&quot;</span>)</code></pre>
-<pre><code>## [1] &#39;0.2.18&#39;</code></pre>
+<pre><code>## [1] &#39;2.3.31&#39;</code></pre>
 <p>We can then connect with the supported Spark versions as follows, you will have to adjust the <code>master</code> parameter for your particular cluster.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rsparkling)
 <span class="kw">library</span>(sparklyr)
@@ -515,7 +515,7 @@ Null D.o.F. :31
 Residual Deviance :192.5659
 Residual D.o.F. :29
 AIC :156.2425</code></pre>
-<p>Then you can run prediction over the generalized linear model model, a similar approach would work for many other models available in H2O:</p>
+<p>Then you can run prediction over the generalized linear model, a similar approach would work for many other models available in H2O:</p>
 <pre class="sourceCode r"><code class="sourceCode r">predictions &lt;-<span class="st"> </span><span class="kw">as_h2o_frame</span>(sc, <span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">wt =</span> <span class="dv">2</span>, <span class="dt">cyl =</span> <span class="dv">6</span>)))
 <span class="kw">h2o.predict</span>(model, predictions)</code></pre>
 <pre><code>   predict
@@ -527,15 +527,47 @@ AIC :156.2425</code></pre>
                      <span class="dt">training_frame =</span> cars_h2o,
                      <span class="dt">max_models =</span> <span class="dv">20</span>,
                      <span class="dt">seed =</span> <span class="dv">1</span>)</code></pre>
-<p>For this particular dataset, H2O finds out that XGBoost is a better fit than GLM. Specifically, the H2O explored using XGBoost, Deep Learning, GLM and a Stacked Ensemble.</p>
-<pre class="sourceCode r"><code class="sourceCode r">automl</code></pre>
+<p>For this particular dataset, H2O finds out that a Deep Learning model is a better fit than GLM<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>. Specifically, H2O’s AutoML explored using XGBoost, Deep Learning, GLM and a Stacked Ensemble models.</p>
+<pre class="sourceCode r"><code class="sourceCode r">automl<span class="op">@</span>leaderboard</code></pre>
 <pre><code>model_id              mean_residual_dev…     rmse      mse      mae     rmsle
-1 XGBoost_1_...       6.627278           2.574350 6.627278 2.066412 0.1329469
-2 DeepLearning_...    6.945850           2.635498 6.945850 2.209201 0.1258008
-3 XGBoost_grid_1_...  7.025614           2.650587 7.025614 2.192791 0.1339280
-4 XGBoost_grid_1_...  7.266691           2.695680 7.266691 2.167930 0.1331849
-5 GLM_grid_...        7.416367           2.723301 7.416367 2.184664 0.1269808
-6 StackedEnsemble...  7.596133           2.756108 7.596133 2.029900 0.1340302</code></pre>
+1 DeepLearning_…                6.541322 2.557601 6.541322 2.192295 0.1242028
+2 XGBoost_grid_1…               6.958945 2.637981 6.958945 2.129421 0.1347795
+3 XGBoost_grid_1_…              6.969577 2.639996 6.969577 2.178845 0.1336290
+4 XGBoost_grid_1_…              7.266691 2.695680 7.266691 2.167930 0.1331849
+5 StackedEnsemble…              7.304556 2.702694 7.304556 1.938982 0.1304792
+6 XGBoost_3_…                   7.313948 2.704431 7.313948 2.088791 0.1348819</code></pre>
+<p>Rather than using the leaderboard, you can focus on the best model through <code>automl@leader</code>; for example, you can glance at the particular parameters from this Deep Learning model as follows:</p>
+<pre class="sourceCode r"><code class="sourceCode r">tibble<span class="op">::</span><span class="kw">tibble</span>(<span class="dt">parameter =</span> <span class="kw">names</span>(automl<span class="op">@</span>leader<span class="op">@</span>parameters),
+               <span class="dt">value =</span> <span class="kw">as.character</span>(automl<span class="op">@</span>leader<span class="op">@</span>parameters))</code></pre>
+<pre><code># A tibble: 20 x 2
+   parameter                         values                                                       
+   &lt;chr&gt;                             &lt;chr&gt;                                                        
+ 1 model_id                          DeepLearning_grid_1_AutoML…         
+ 2 training_frame                    automl_training_frame_rdd…
+ 3 nfolds                            5                                                            
+ 4 keep_cross_validation_models      FALSE                                                        
+ 5 keep_cross_validation_predictions TRUE                                                         
+ 6 fold_assignment                   Modulo                                                       
+ 7 overwrite_with_best_model         FALSE                                                        
+ 8 activation                        RectifierWithDropout                                         
+ 9 hidden                            200                                                          
+10 epochs                            10003.6618461538                                             
+11 seed                              1                                                            
+12 rho                               0.95                                                         
+13 epsilon                           1e-06                                                        
+14 input_dropout_ratio               0.2                                                          
+15 hidden_dropout_ratios             0.4                                                          
+16 stopping_rounds                   0                                                            
+17 stopping_metric                   deviance                                                     
+18 stopping_tolerance                0.05                                                         
+19 x                                 c(&quot;cyl&quot;, &quot;wt&quot;)                                         
+20 y                                 mpg </code></pre>
+<p>You can then predict using the leader as follows,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">h2o.predict</span>(automl<span class="op">@</span>leader, predictions)</code></pre>
+<pre><code>   predict
+1 30.74639
+
+[1 row x 1 column] </code></pre>
 <p>Many additional examples are available under <a href="http://spark.rstudio.com/guides/h2o/">spark.rstudio.com/guides/h2o</a>, you can also request help from <a href="https://github.com/h2oai/sparkling-water/tree/master/r">github.com/h2oai/sparkling-water/tree/master/r</a>, the official GitHub repository for the <code>rsparkling</code> package.</p>
 <p>The next extension, <code>graphframes</code>, will allow you to process large-scale relational datasets; however, before you start using it, make sure to disconnect with <code>spark_disconnect(sc)</code> and restart your R session since using a different extensions requires you to reconnect to Spark and reload <code>sparklyr</code>.</p>
 </div>
@@ -624,7 +656,7 @@ edges_tbl &lt;-<span class="st"> </span>highschool_tbl <span class="op">%&gt;%</
   friends
     &lt;dbl&gt;
 1    6.94</code></pre>
-<p>We can then find what the shortest path to some specific vertex (person for this dataset). Since the data is anonymized, we can just pick the person identified as <span class="math inline">\(33\)</span> and find how many degrees of separation exist between them:</p>
+<p>We can then find what the shortest path to some specific vertex (person for this dataset). Since the data is anonymized, we can just pick the person identified as <code>33</code> and find how many degrees of separation exist between them:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">gf_shortest_paths</span>(graph, <span class="dv">33</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">filter</span>(<span class="kw">size</span>(distances) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">distance =</span> <span class="kw">explode</span>(<span class="kw">map_values</span>(distances))) <span class="op">%&gt;%</span>
@@ -643,7 +675,7 @@ edges_tbl &lt;-<span class="st"> </span>highschool_tbl <span class="op">%&gt;%</
  9 33           0
 10 18           5
 # … with more rows</code></pre>
-<p>Finally, we can compute PageRank over this graph, which is named after Google’s foudner Larry Page:</p>
+<p>Finally, we can also compute PageRank over this graph, which was presented in the Introduction chapter as Google’s web page ranking algorithm:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">gf_graphframe</span>(vertices_tbl, edges_tbl) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">gf_pagerank</span>(<span class="dt">reset_prob =</span> <span class="fl">0.15</span>, <span class="dt">max_iter =</span> 10L)</code></pre>
 <pre><code>GraphFrame
@@ -836,7 +868,10 @@ importance_tbl</code></pre>
 10 2_109511579 0         
 # … with more rows</code></pre>
 <p>You can then use <code>dplyr</code> and <code>ggplot2</code> to transform the output and visualize it,</p>
-<pre class="sourceCode r"><code class="sourceCode r">importance_df &lt;-<span class="st"> </span>importance_tbl <span class="op">%&gt;%</span><span class="st"> </span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
+<span class="kw">library</span>(ggplot2)
+
+importance_df &lt;-<span class="st"> </span>importance_tbl <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">arrange</span>(<span class="op">-</span>importance) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">head</span>(<span class="dv">20</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">collect</span>()
@@ -961,6 +996,12 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <div id="ref-extensions-genomics-wikipedia">
 <p>“Human Genome.” 2019. <a href="https://en.wikipedia.org/wiki/Human_genome">https://en.wikipedia.org/wiki/Human_genome</a>.</p>
 </div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="7">
+<li id="fn7"><p>Notice that AutoML uses cross-validation which we did not use in GLM.<a href="extensions.html#fnref7" class="footnote-back">↩</a></p></li>
+</ol>
 </div>
             </section>
 

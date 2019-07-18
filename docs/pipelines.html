@@ -645,7 +645,7 @@ okc_train &lt;-<span class="st"> </span>okc_train <span class="op">%&gt;%</span>
 </tr>
 </tbody>
 </table>
-<p>These functions are implemented using S3<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>, which is the most popular object oriented programming paradigm provided by R. For our purposes, it suffices to know that the behavior of an <code>ml_</code> or <code>ft_</code> function is dictated by the class of the first argument provided. This allows us to provide a wide range of features without introducing additional function names. We can now summarize the behavior of these functions:</p>
+<p>These functions are implemented using S3<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>, which is the most popular object oriented programming paradigm provided by R. For our purposes, it suffices to know that the behavior of an <code>ml_</code> or <code>ft_</code> function is dictated by the class of the first argument provided. This allows us to provide a wide range of features without introducing additional function names. We can now summarize the behavior of these functions:</p>
 <ul>
 <li>If a Spark connection is provided, the function returns a transformer or estimator object, which can be utilized directly using <code>ml_fit()</code> or <code>ml_transform()</code> or be included in a pipeline.</li>
 <li>If a pipeline is provided, the function returns a pipeline object with the stage appended to it.</li>
@@ -732,7 +732,7 @@ $ uid          &lt;chr&gt; &quot;string_indexer_ce05afa9899&quot;</code></pre>
 <p>The nightly portfolio risk and credit application scoring examples we mention above represent two modes of ML deployment known as <em>batch</em> and <em>real-time</em>. Loosely, batch processing implies processing many records at the same time and that execution time is not important as long it is reasonable (often on the scale of minutes to hours.) On the other hand, real-time processing implies scoring one or a few records at a time but the latency is crucial (on the scale of &lt;1 second.) We will now see how we can take our OKCupid pipeline model to “production.”</p>
 <div id="batch-scoring" class="section level3">
 <h3><span class="header-section-number">5.6.1</span> Batch Scoring</h3>
-<p>For both scoring methods, batch and real-time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The <code>plumber</code><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> R package enables us to do this very easily by annotating our prediction function.</p>
+<p>For both scoring methods, batch and real-time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The <code>plumber</code><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> R package enables us to do this very easily by annotating our prediction function.</p>
 <p>You will need make sure that <code>plumber</code>, <code>callr</code> and the <code>httr</code> package are installed by running:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="kw">c</span>(<span class="st">&quot;plumber&quot;</span>, <span class="st">&quot;callr&quot;</span>, <span class="st">&quot;httr&quot;</span>))</code></pre>
 <p>The <code>callr</code> package provides support to run R code in separate R sessions, it is not strictly required but we will use it to start a web service in the background. The <code>httr</code> package allows us to use web APIs from R.</p>
@@ -776,10 +776,10 @@ score_spark &lt;-<span class="st"> </span><span class="cf">function</span>(age, 
 </div>
 <div id="real-time-scoring" class="section level3">
 <h3><span class="header-section-number">5.6.2</span> Real-Time Scoring</h3>
-<p>For real-time production, we want to keep dependencies as light as possible so we can target more platforms for deployment. We now show how we can use the mleap<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> package, which provides an interface to the MLeap<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a> library, to serialize and serve Spark ML models. MLeap is open source (Apache License 2.0) and supports a wide range, though not all, of Spark ML transformers. At run time, the only prerequisites for the environment are the Java Virtual Machine (JVM) and the MLeap runtime library. This avoids both the Spark binaries and expensive overhead in converting data to and from Spark data frames.</p>
+<p>For real-time production, we want to keep dependencies as light as possible so we can target more platforms for deployment. We now show how we can use the mleap<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> package, which provides an interface to the MLeap<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> library, to serialize and serve Spark ML models. MLeap is open source (Apache License 2.0) and supports a wide range, though not all, of Spark ML transformers. At run time, the only prerequisites for the environment are the Java Virtual Machine (JVM) and the MLeap runtime library. This avoids both the Spark binaries and expensive overhead in converting data to and from Spark data frames.</p>
 <p>Since <code>mleap</code> is a sparklyr extension and an R package, first we need to install it from CRAN:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;mleap&quot;</span>)</code></pre>
-<p>It then must be loaded when <code>spark_connect()</code> is called; so let’s restart your R session, establish a new Spark connection<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>, and load the pipeline model that we previously saved.</p>
+<p>It then must be loaded when <code>spark_connect()</code> is called; so let’s restart your R session, establish a new Spark connection<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>, and load the pipeline model that we previously saved.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
 <span class="kw">library</span>(mleap)</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)</code></pre>
@@ -848,12 +848,12 @@ score_spark &lt;-<span class="st"> </span><span class="cf">function</span>(age, 
 </div>
 <div class="footnotes">
 <hr />
-<ol start="3">
+<ol start="2">
+<li id="fn2"><p>Notice that AutoML uses cross-validation which we did not use in GLM.<a href="pipelines.html#fnref2" class="footnote-back">↩</a></p></li>
 <li id="fn3"><p><a href="https://www.rplumber.io/" class="uri">https://www.rplumber.io/</a><a href="pipelines.html#fnref3" class="footnote-back">↩</a></p></li>
-<li id="fn4"><p><a href="https://www.rplumber.io/" class="uri">https://www.rplumber.io/</a><a href="pipelines.html#fnref4" class="footnote-back">↩</a></p></li>
-<li id="fn5"><p><a href="https://github.com/rstudio/mleap">https://github.com/rstudio/mleap</a><a href="pipelines.html#fnref5" class="footnote-back">↩</a></p></li>
-<li id="fn6"><p><a href="https://github.com/combust/mleap">https://github.com/combust/mleap</a><a href="pipelines.html#fnref6" class="footnote-back">↩</a></p></li>
-<li id="fn7"><p>Note that, as of the writing of this book, MLeap does not yet support Spark 2.4.<a href="pipelines.html#fnref7" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p><a href="https://github.com/rstudio/mleap">https://github.com/rstudio/mleap</a><a href="pipelines.html#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn5"><p><a href="https://github.com/combust/mleap">https://github.com/combust/mleap</a><a href="pipelines.html#fnref5" class="footnote-back">↩</a></p></li>
+<li id="fn6"><p>Note that, as of the writing of this book, MLeap does not yet support Spark 2.4.<a href="pipelines.html#fnref6" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
             </section>
