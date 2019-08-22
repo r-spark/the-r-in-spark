@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 13 Contributing | Mastering Apache Spark with R</title>
-  <meta name="description" content="The complete guide to large-scale analysis and modeling.">
-  <meta name="generator" content="bookdown  and GitBook 2.6.7">
+  <meta name="description" content="The complete guide to large-scale analysis and modeling." />
+  <meta name="generator" content="bookdown 0.13 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 13 Contributing | Mastering Apache Spark with R" />
   <meta property="og:type" content="book" />
@@ -22,17 +21,17 @@
   <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
   
 
-<meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
+<meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz" />
 
 
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="streaming.html">
-<link rel="next" href="appendix.html">
+<link rel="prev" href="streaming.html"/>
+<link rel="next" href="appendix.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -64,7 +63,6 @@ a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
 a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
@@ -421,52 +419,54 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">13.1</span> Overview</h2>
 <p>When thinking of contributing back, the most important question you can ask about the code above – but really, about any piece of code you write is: Would this code be useful to someone else?</p>
 <p>We can start by considering one of the first and simplest lines of code presented in this book, this code was used to load a simple CSV file:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;cars.csv&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb494"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb494-1" title="1"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;cars.csv&quot;</span>)</a></code></pre></div>
 <p>For the code above, the answer is probably no, the code is not useful to someone else; however, a more useful example would be to tailor that same example to something someone will actually care about, perhaps:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;/path/that/is/hard/to/remember/data.csv&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb495"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb495-1" title="1"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;/path/that/is/hard/to/remember/data.csv&quot;</span>)</a></code></pre></div>
 <p>The code above is quite similar to the original one; however, assuming that you work with others that care about this dataset, the answer to: Would this code be useful to someone else? Is now completely different: Yes, most likely! This is surprising since this means that not all useful code needs to be advanced nor complicated; however, for it to be useful to others, it does need to be packaged, presented and shared in a format that is easy to consume.</p>
 <p>One first attempt would be to save this into a <code>teamdata.R</code> file and write a function wrapping it:</p>
-<pre class="sourceCode r"><code class="sourceCode r">load_team_data &lt;-<span class="st"> </span><span class="cf">function</span>() {
-  <span class="kw">spark_read_text</span>(sc, <span class="st">&quot;/path/that/is/hard/to/remember/data.csv&quot;</span>)
-}</code></pre>
+<div class="sourceCode" id="cb496"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb496-1" title="1">load_team_data &lt;-<span class="st"> </span><span class="cf">function</span>() {</a>
+<a class="sourceLine" id="cb496-2" title="2">  <span class="kw">spark_read_text</span>(sc, <span class="st">&quot;/path/that/is/hard/to/remember/data.csv&quot;</span>)</a>
+<a class="sourceLine" id="cb496-3" title="3">}</a></code></pre></div>
 <p>This is an improvement; however, it would require users to manually share this file over and over. Fortunately, this is a problem well solved in R through <em>R Packages</em>.</p>
 <p>An <em>R package</em> contains R code packaged in a format installable using the <code>install.packages()</code> function. <code>sparklyr</code> is an R package, but there are many other packages available in R and you can also create your own packages. For those of you new to creating R packages, we would encourage reading Hadley Wickam’s book on packages: <a href="@wickham2015r">R Packages: Organize, Test, Document, and Share Your Code</a>. Creating an R package allows you to easily share your functions with others by sharing the package file in your organization.</p>
 <p>Once a package is created, there are many ways to share this with colleagues or the world. For instance, for packages meant to be private, you can consider using <a href="https://cran.r-project.org/web/packages/drat/vignettes/WhyDrat.html">Drat</a> or products like <a href="https://www.rstudio.com/products/package-manager/">RStudio Package Manager</a>. R packages meant for public consumption are made available to the R community in <a href="https://cran.r-project.org/"><em>CRAN</em></a>, which stands for the Comprehensive R Archive Network.</p>
 <p>These repositories of R packages make packages allow users to install packages through <code>install.packages("teamdata")</code> without having to worry where to download the package from and allows other packages to reuse your package as well.</p>
 <p>In addition to using R packages like <code>sparklyr</code>, <code>dplyr</code>, <code>broom</code>, etc. to create new R packages that extend Spark; you can also make use of all the functionality available in the Spark API, Spark Extensions or write custom Scala code.</p>
-<p>For instance, suppose that there is a new file format similar to a CSV but not quite the same, we might want to write a function named <code>spark_read_file()</code> that would take a path to this new file type and read it in Spark. One approach would be to use <code>dplyr</code> to process each line of text or any other R library using <code>spark_apply()</code>. Another approach would be to use the <em>Spark API</em> to access methods provided by Spark. A third approach would be to find if someone in the Spark community has already provided an <em>Spark Extension</em> that supports this new file format. Last but not least, you can write our own custom <em>Scala Code</em> that makes use any Java library, including Spark and its extensions. This is illustrated in Figure <a href="#fig:contributing-types-of-extensions"><strong>??</strong></a>.</p>
-<div class="figure">
-<img src="images/contributing-types-of-extensions-resized.png" alt="Extending Spark using the Spark API, Spark extensions or Scala code||contributing-types-of-extensions" />
-<p class="caption">Extending Spark using the Spark API, Spark extensions or Scala code||contributing-types-of-extensions</p>
+<p>For instance, suppose that there is a new file format similar to a CSV but not quite the same, we might want to write a function named <code>spark_read_file()</code> that would take a path to this new file type and read it in Spark. One approach would be to use <code>dplyr</code> to process each line of text or any other R library using <code>spark_apply()</code>. Another approach would be to use the <em>Spark API</em> to access methods provided by Spark. A third approach would be to find if someone in the Spark community has already provided an <em>Spark Extension</em> that supports this new file format. Last but not least, you can write our own custom <em>Scala Code</em> that makes use any Java library, including Spark and its extensions. This is illustrated in Figure <a href="contributing.html#fig:contributing-types-of-extensions">13.1</a>.</p>
+<div class="figure"><span id="fig:contributing-types-of-extensions"></span>
+<img src="the-r-in-spark_files/figure-html/contributing-types-of-extensions-1.png" alt="Extending Spark using the Spark API, Spark extensions or Scala code" width="672" />
+<p class="caption">
+FIGURE 13.1: Extending Spark using the Spark API, Spark extensions or Scala code
+</p>
 </div>
 <p>We will focus first on extending Spark using the Spark API since the techniques required to call the Spark API are also applicable while calling Spark extensions or custom Scala code.</p>
 </div>
 <div id="contributing-spark-api" class="section level2">
 <h2><span class="header-section-number">13.2</span> Spark API</h2>
 <p>Before we introduce the Spark API, let’s consider a simple and well known problem. Suppose we want to count the number of lines in a distributed and potentially large text file, say, <code>cars.csv</code> that we initialize as follows:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
-<span class="kw">library</span>(dplyr)
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)
-
-cars &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, mtcars)
-<span class="kw">spark_write_csv</span>(cars, <span class="st">&quot;cars.csv&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb497"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb497-1" title="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb497-2" title="2"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb497-3" title="3">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>)</a>
+<a class="sourceLine" id="cb497-4" title="4"></a>
+<a class="sourceLine" id="cb497-5" title="5">cars &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, mtcars)</a>
+<a class="sourceLine" id="cb497-6" title="6"><span class="kw">spark_write_csv</span>(cars, <span class="st">&quot;cars.csv&quot;</span>)</a></code></pre></div>
 <p>Now, in order to count how many lines are available in this file we can run:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;cars.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>()</code></pre>
+<div class="sourceCode" id="cb498"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb498-1" title="1"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;cars.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>()</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [?? x 1]
       n
   &lt;dbl&gt;
 1    33</code></pre>
 <p>Easy enough, we used <code>spark_read_text()</code> to read the entire text file, followed by counting lines using dplyr’s <code>count()</code>. Now, suppose that <code>spark_read_text()</code>, <code>dplyr</code> nor any other Spark functionality is available to you; how would you ask Spark to count the number of rows in <code>cars.csv</code>?</p>
 <p>If you were to do this in Scala, you will be able to find in the Spark documentation that using the Spark API you can count lines in a file as follows:</p>
-<pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> textFile = spark.<span class="fu">read</span>.<span class="fu">textFile</span>(<span class="st">&quot;cars.csv&quot;</span>)
-textFile.<span class="fu">count</span>()</code></pre>
+<div class="sourceCode" id="cb500"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb500-1" title="1"><span class="kw">val</span> textFile = spark.<span class="fu">read</span>.<span class="fu">textFile</span>(<span class="st">&quot;cars.csv&quot;</span>)</a>
+<a class="sourceLine" id="cb500-2" title="2">textFile.<span class="fu">count</span>()</a></code></pre></div>
 <p>So, in order to use functionality available in the Spark API from R, like <code>spark.read.textFile</code>; you can use <code>invoke()</code>, <code>invoke_static()</code> or <code>invoke_new()</code>. As their names suggest, one invokes a method from an object, the second one invokes a method from a static object and the third creates a new object. We can then use these functions to call Spark’s API and execute similar code as the one provided in Scala:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_context</span>(sc) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;textFile&quot;</span>, file, 1L) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;count&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb501"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb501-1" title="1"><span class="kw">spark_context</span>(sc) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb501-2" title="2"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;textFile&quot;</span>, file, 1L) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb501-3" title="3"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;count&quot;</span>)</a></code></pre></div>
 <pre><code>[1] 33</code></pre>
 <p>While the <code>invoke()</code> function was originally designed to call Spark code, it can call any code available in Java. For instance, we can create a Java <code>BigInteger</code> with the following code:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">invoke_new</span>(sc, <span class="st">&quot;java.math.BigInteger&quot;</span>, <span class="st">&quot;1000000000&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb503"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb503-1" title="1"><span class="kw">invoke_new</span>(sc, <span class="st">&quot;java.math.BigInteger&quot;</span>, <span class="st">&quot;1000000000&quot;</span>)</a></code></pre></div>
 <p>As you can see, the object that gets created is not an R object but rather – a proper Java object. In R, this Java object is represented by the <code>spark_jobj</code>. These objects are only meant to be used with the <code>invoke()</code> functions or <code>spark_dataframe()</code> and <code>spark_connection()</code>. <code>spark_dataframe()</code> transforms a <code>spark_jobj</code> into a Spark DataFrame, when possible; while <code>spark_connect()</code> retrieves the original Spark connection object, which can be useful to avoid passing the <code>sc</code> object across functions.</p>
 <p>While calling the Spark API can be useful in some cases, most of the functionality available in Spark is already supported in <code>sparklyr</code>; therefore, a more interesting way to extend Spark is by using one of its many existing extensions.</p>
 </div>
@@ -475,70 +475,74 @@ textFile.<span class="fu">count</span>()</code></pre>
 <p>Before we get started with this section, consider navigating to <a href="https://spark-packages.org/">spark-packages.org</a> – a site that tracks Spark extensions provided by the Spark community. Using the same techniques presented in the previous section, you can make use of these extensions from R.</p>
 <p>For instance, Apache Solr is a “blazing-fast, open source enterprise search platform built on Apache Lucene”. <span class="citation">(“Apache Solr” <a href="#ref-contributing-solr">2019</a>)</span> Solr is a system designed to perform full text search over large datasets which Apache Spark currently does not support natevely. Also, as of this writing, there is no extension for R to support Solr. So let’s try to solve this using a Spark extension.</p>
 <p>First, you would want to search “spark-packages.org” to find out that there is a Solr extension, you should be able to find <code>spark-solr</code>. <span class="citation">(“Spark-Solr Spark Package” <a href="#ref-contributing-spark-solr">2019</a>)</span> The extension “How to” mentioned that the <code>com.lucidworks.spark:spark-solr:2.0.1</code> should be loaded. We can accomplish this in R using the <code>sparklyr.shell.packages</code> configuration option:</p>
-<pre class="sourceCode r"><code class="sourceCode r">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()
-config[<span class="st">&quot;sparklyr.shell.packages&quot;</span>] &lt;-<span class="st"> &quot;com.lucidworks.spark:spark-solr:3.6.3&quot;</span>
-config[<span class="st">&quot;sparklyr.shell.repositories&quot;</span>] &lt;-<span class="st"> </span>
-<span class="st">  &quot;http://repo.spring.io/plugins-release/,http://central.maven.org/maven2/&quot;</span>
-  
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> config)</code></pre>
+<div class="sourceCode" id="cb504"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb504-1" title="1">config &lt;-<span class="st"> </span><span class="kw">spark_config</span>()</a>
+<a class="sourceLine" id="cb504-2" title="2">config[<span class="st">&quot;sparklyr.shell.packages&quot;</span>] &lt;-<span class="st"> &quot;com.lucidworks.spark:spark-solr:3.6.3&quot;</span></a>
+<a class="sourceLine" id="cb504-3" title="3">config[<span class="st">&quot;sparklyr.shell.repositories&quot;</span>] &lt;-<span class="st"> </span></a>
+<a class="sourceLine" id="cb504-4" title="4"><span class="st">  &quot;http://repo.spring.io/plugins-release/,http://central.maven.org/maven2/&quot;</span></a>
+<a class="sourceLine" id="cb504-5" title="5">  </a>
+<a class="sourceLine" id="cb504-6" title="6">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> config)</a></code></pre></div>
 <p>While specifying the <code>sparklyr.shell.packages</code> parameter is usually enough, for this particular extension, dependencies failed to download from the Spark Packages repository. For the failed dependencies, you would have to manually find them in the Maven repo (<a href="https://mvnrepository.com">mvnrepository.com</a>) and add additional repositories under the <code>sparklyr.shell.repositories</code> parameter.</p>
-<p><strong>Note:</strong> When using an extension, Spark connects to the Maven package repository to retrieve the extension, this can take significant time depending on the extension and your download speed. Therefore, you should consider using the <code>sparklyr.connect.timeout</code> configuration parameter which defines the total seconds to wait before set to several minutes if you experience a connection error.</p>
+<p><strong>Note:</strong> When using an extension, Spark connects to the Maven package repository to retrieve the extension, this can take significant time depending on the extension and your download speed. Therefore, you should consider increasing the <code>sparklyr.connect.timeout</code> configuration parameter to allow Spark to download the required files.</p>
 <p>From the <code>spark-solr</code> documentation, you would find that this extension can be used with the following Scala code:</p>
-<pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> options = Map(
-  <span class="st">&quot;collection&quot;</span> -&gt; <span class="st">&quot;{solr_collection_name}&quot;</span>,
-  <span class="st">&quot;zkhost&quot;</span> -&gt; <span class="st">&quot;{zk_connect_string}&quot;</span>
-)
-
-<span class="kw">val</span> df = spark.<span class="fu">read.format</span>(<span class="st">&quot;solr&quot;</span>)
-  .<span class="fu">options</span>(options)
-  .<span class="fu">load</span>()</code></pre>
+<div class="sourceCode" id="cb505"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb505-1" title="1"><span class="kw">val</span> options = Map(</a>
+<a class="sourceLine" id="cb505-2" title="2">  <span class="st">&quot;collection&quot;</span> -&gt; <span class="st">&quot;{solr_collection_name}&quot;</span>,</a>
+<a class="sourceLine" id="cb505-3" title="3">  <span class="st">&quot;zkhost&quot;</span> -&gt; <span class="st">&quot;{zk_connect_string}&quot;</span></a>
+<a class="sourceLine" id="cb505-4" title="4">)</a>
+<a class="sourceLine" id="cb505-5" title="5"></a>
+<a class="sourceLine" id="cb505-6" title="6"><span class="kw">val</span> df = spark.<span class="fu">read.format</span>(<span class="st">&quot;solr&quot;</span>)</a>
+<a class="sourceLine" id="cb505-7" title="7">  .<span class="fu">options</span>(options)</a>
+<a class="sourceLine" id="cb505-8" title="8">  .<span class="fu">load</span>()</a></code></pre></div>
 <p>Which we can translate to R code:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_session</span>(sc) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;read&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;format&quot;</span>, <span class="st">&quot;solr&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;option&quot;</span>, <span class="st">&quot;collection&quot;</span>, <span class="st">&quot;&lt;collection&gt;&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;option&quot;</span>, <span class="st">&quot;zkhost&quot;</span>, <span class="st">&quot;&lt;host&gt;&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;load&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb506"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb506-1" title="1"><span class="kw">spark_session</span>(sc) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb506-2" title="2"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;read&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb506-3" title="3"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;format&quot;</span>, <span class="st">&quot;solr&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb506-4" title="4"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;option&quot;</span>, <span class="st">&quot;collection&quot;</span>, <span class="st">&quot;&lt;collection&gt;&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb506-5" title="5"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;option&quot;</span>, <span class="st">&quot;zkhost&quot;</span>, <span class="st">&quot;&lt;host&gt;&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb506-6" title="6"><span class="st">  </span><span class="kw">invoke</span>(<span class="st">&quot;load&quot;</span>)</a></code></pre></div>
 <p>The code above will fail since it would require a valid Solr instance and configuring Solr goes beyond the scope of this book; however, this example provides insights as to how you can create Spark extensions. It’s also worth mentioning that <code>spark_read_source()</code> can be used to read from generic sources to avoid writing custom <code>invoke()</code> code.</p>
 <p>As pointed out in the <a href="contributing.html#contributing-overview">Overview</a> section, you should consider sharing code with others using R package. While you could require users of your package to specify <code>sparklyr.shell.packages</code>, you can avoid this by registering dependencies in your package. Dependencies are declared under a <code>spark_dependencies()</code> function, for the example in this section:</p>
-<pre class="sourceCode r"><code class="sourceCode r">spark_dependencies &lt;-<span class="st"> </span><span class="cf">function</span>(spark_version, scala_version, ...) {
-  <span class="kw">spark_dependency</span>(
-    <span class="dt">packages =</span> <span class="st">&quot;com.lucidworks.spark:spark-solr:3.6.3&quot;</span>,
-    <span class="dt">repositories =</span> <span class="kw">c</span>(
-      <span class="st">&quot;http://repo.spring.io/plugins-release/&quot;</span>,
-      <span class="st">&quot;http://central.maven.org/maven2/&quot;</span>)
-  )
-}
-
-.onLoad &lt;-<span class="st"> </span><span class="cf">function</span>(libname, pkgname) {
-  sparklyr<span class="op">::</span><span class="kw">register_extension</span>(pkgname)
-}</code></pre>
+<div class="sourceCode" id="cb507"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb507-1" title="1">spark_dependencies &lt;-<span class="st"> </span><span class="cf">function</span>(spark_version, scala_version, ...) {</a>
+<a class="sourceLine" id="cb507-2" title="2">  <span class="kw">spark_dependency</span>(</a>
+<a class="sourceLine" id="cb507-3" title="3">    <span class="dt">packages =</span> <span class="st">&quot;com.lucidworks.spark:spark-solr:3.6.3&quot;</span>,</a>
+<a class="sourceLine" id="cb507-4" title="4">    <span class="dt">repositories =</span> <span class="kw">c</span>(</a>
+<a class="sourceLine" id="cb507-5" title="5">      <span class="st">&quot;http://repo.spring.io/plugins-release/&quot;</span>,</a>
+<a class="sourceLine" id="cb507-6" title="6">      <span class="st">&quot;http://central.maven.org/maven2/&quot;</span>)</a>
+<a class="sourceLine" id="cb507-7" title="7">  )</a>
+<a class="sourceLine" id="cb507-8" title="8">}</a>
+<a class="sourceLine" id="cb507-9" title="9"></a>
+<a class="sourceLine" id="cb507-10" title="10">.onLoad &lt;-<span class="st"> </span><span class="cf">function</span>(libname, pkgname) {</a>
+<a class="sourceLine" id="cb507-11" title="11">  sparklyr<span class="op">::</span><span class="kw">register_extension</span>(pkgname)</a>
+<a class="sourceLine" id="cb507-12" title="12">}</a></code></pre></div>
 <p>The <code>onLoad</code> function will be automatically called by R when you library loads, it should call <code>register_extension()</code> which will then call back <code>spark_dependencies()</code> to allow your extension to provide additional dependencies. The example above supports Spark 2.4 but you should also support a map of Spark and Scala versions to the correct Spark extension version.</p>
 <p>There are about 450 Spark extensions you can use; in addition, you can also use any Java library from a Maven repository where Maven Central has over 3M artifacts. <span class="citation">(“Maven Repository: Repositories” <a href="#ref-contributing-maven-libraries">2019</a>)</span> While not all the Maven Central libraries might be relevant to Spark, the combination of Spark extensions and Maven repositories certainly opens many interesting possibilities for you to consider!</p>
 <p>However, for those cases where no Spark extension is available, the next section will teach you how to use custom Scala code from your own R package.</p>
 </div>
 <div id="scala-code" class="section level2">
 <h2><span class="header-section-number">13.4</span> Scala Code</h2>
-<p>Scala code enables you to use any method in the Spark API, Spark extensions or Java library; in addition, writing Scala code when running in Spark can provide performance improvements over R code using <code>spark_apply()</code>. In general, the structure of your R package will contains R code and Scala code; however, the Scala code will need to be compiled as JARs (Java ARchive files) and included in your package. Conceptually, your R package will look as shown in Figure <a href="#fig:contributing-scala-code"><strong>??</strong></a>.</p>
-<div class="figure">
-<img src="images/contributing-scala-code.png" alt="R package structure when using Scala code||contributing-scala-code" />
-<p class="caption">R package structure when using Scala code||contributing-scala-code</p>
+<p>Scala code enables you to use any method in the Spark API, Spark extensions or Java library; in addition, writing Scala code when running in Spark can provide performance improvements over R code using <code>spark_apply()</code>. In general, the structure of your R package will contains R code and Scala code; however, the Scala code will need to be compiled as JARs (Java ARchive files) and included in your package. Conceptually, your R package will look as shown in Figure <a href="contributing.html#fig:contributing-scala-code">13.2</a>.</p>
+<div class="figure"><span id="fig:contributing-scala-code"></span>
+<img src="the-r-in-spark_files/figure-html/contributing-scala-code-1.png" alt="R package structure when using Scala code" width="672" />
+<p class="caption">
+FIGURE 13.2: R package structure when using Scala code
+</p>
 </div>
 <p>As usual, the R code should be placed under a top-level <code>R</code> folder, Scala code under a <code>java</code> folder while the compiled JARs are distributed under an <code>inst/java</code> folder. While you are certainly welcomed to manually compiled the Scala code, you can use helper functions to download the required compiler and compile Scala code.</p>
 <p>In order to compile Scala code, you will need the Java Development Kit 8 installed (JDK8 for short); the JDK can be downloaded from <a href="https://www.oracle.com/technetwork/java/javase/downloads/">oracle.com/technetwork/java/javase/downloads/</a> and will require you to restart your R session.</p>
 <p>You also need a Scala compiler for Scala 2.11 and 2.12 from <a href="https://www.scala-lang.org">https://www.scala-lang.org/</a>; the Scala compilers can be automatically downloaded and installed using <code>download_scalac</code>:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">download_scalac</span>()</code></pre>
+<div class="sourceCode" id="cb508"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb508-1" title="1"><span class="kw">download_scalac</span>()</a></code></pre></div>
 <p>Next you will need to compile your Scala sources using <code>compile_package_jars()</code>. By default, it uses <code>spark_compilation_spec()</code> which compiles your sources for the following Spark versions:</p>
 <pre><code>## [1] &quot;1.5.2&quot; &quot;1.6.0&quot; &quot;2.0.0&quot; &quot;2.3.0&quot; &quot;2.4.0&quot;</code></pre>
 <p>You can also customize this specification by creating custom entries with <code>spark_compilation_spec()</code>.</p>
 <p>While you can create the project structure for Scala code by hand, you can also simply call <code>spark_extension(path)</code> to create an extension in the given path; this extension will be mostly empty but will contain the appropriate project structure to call Scala code.</p>
-<p>Since <code>spark_extension()</code> is registered as a custom project extension in RStudio; you can also create an R package that extends Spark using Scala code from the <code>File</code> menu, <code>New Project...</code> and selecting <code>R Package using sparklyr</code> as shown in Figure <a href="#fig:contributing-r-rstudio-project"><strong>??</strong></a>.</p>
-<div class="figure">
-<img src="images/contributing-r-rstudio-project-resized.png" alt="Creating a Scala extension package from RStudio||contributing-r-rstudio-project" />
-<p class="caption">Creating a Scala extension package from RStudio||contributing-r-rstudio-project</p>
+<p>Since <code>spark_extension()</code> is registered as a custom project extension in RStudio; you can also create an R package that extends Spark using Scala code from the <code>File</code> menu, <code>New Project...</code> and selecting <code>R Package using sparklyr</code> as shown in Figure <a href="contributing.html#fig:contributing-r-rstudio-project">13.3</a>.</p>
+<div class="figure" style="text-align: center"><span id="fig:contributing-r-rstudio-project"></span>
+<img src="images/contributing-r-rstudio-project-resized.png" alt="Creating a Scala extension package from RStudio" width="1500" />
+<p class="caption">
+FIGURE 13.3: Creating a Scala extension package from RStudio
+</p>
 </div>
 <p>Once you are ready to compile your package JARs, you can simply run:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">compile_package_jars</span>()</code></pre>
+<div class="sourceCode" id="cb510"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb510-1" title="1"><span class="kw">compile_package_jars</span>()</a></code></pre></div>
 <p>Since the JARs are compiled by default into the <code>inst/</code> package path, when building the R package all the JARs will also get included within the package, this means that you can share or publish your R package and it will be fully functional by R users. For advanced Spark users with most of their expertise in Scala, it should be quite compelling to consider writing libraries for R users and the R community in Scala and then easily packaging into R packages that are easy to consume, use and share among them.</p>
 <p>If you are interested in developing a Spark extension with R and you happen to get stuck along the way, consider joining the <code>sparklyr</code> Gitter <span class="citation">(“Spark with R in Gitter” <a href="#ref-contributing-gitter">2019</a>)</span> channel, where many of us hang out to help wonderful community to grow – we hope to hear from you soon!</p>
 </div>
@@ -556,11 +560,11 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <div id="ref-contributing-solr">
 <p>“Apache Solr.” 2019. <a href="http://lucene.apache.org/solr/">http://lucene.apache.org/solr/</a>.</p>
 </div>
-<div id="ref-contributing-spark-solr">
-<p>“Spark-Solr Spark Package.” 2019. <a href="https://spark-packages.org/package/LucidWorks/spark-solr">https://spark-packages.org/package/LucidWorks/spark-solr</a>.</p>
-</div>
 <div id="ref-contributing-maven-libraries">
 <p>“Maven Repository: Repositories.” 2019. <a href="https://mvnrepository.com/repos">https://mvnrepository.com/repos</a>.</p>
+</div>
+<div id="ref-contributing-spark-solr">
+<p>“Spark-Solr Spark Package.” 2019. <a href="https://spark-packages.org/package/LucidWorks/spark-solr">https://spark-packages.org/package/LucidWorks/spark-solr</a>.</p>
 </div>
 <div id="ref-contributing-gitter">
 <p>“Spark with R in Gitter.” 2019. <a href="https://gitter.im/rstudio/sparklyr">https://gitter.im/rstudio/sparklyr</a>.</p>
@@ -624,8 +628,9 @@ gitbook.start({
     script.type = "text/javascript";
     var src = "true";
     if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(src))
-      src = src.replace(/^https?:/, '');
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
     script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();

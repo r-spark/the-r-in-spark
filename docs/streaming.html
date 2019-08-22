@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 12 Streaming | Mastering Apache Spark with R</title>
-  <meta name="description" content="The complete guide to large-scale analysis and modeling.">
-  <meta name="generator" content="bookdown  and GitBook 2.6.7">
+  <meta name="description" content="The complete guide to large-scale analysis and modeling." />
+  <meta name="generator" content="bookdown 0.13 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 12 Streaming | Mastering Apache Spark with R" />
   <meta property="og:type" content="book" />
@@ -22,17 +21,17 @@
   <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
   
 
-<meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
+<meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz" />
 
 
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="distributed.html">
-<link rel="next" href="contributing.html">
+<link rel="prev" href="distributed.html"/>
+<link rel="next" href="contributing.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -64,7 +63,6 @@ a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
 a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
@@ -423,7 +421,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>For instance, if we wanted to do real-time scoring using a pre-trained topic model, the entries would be lines of text for static datasets; for real-time datasets, we would perform the same scoring over an infinite amount of lines of text. Now, in practice, you will never process an infinite amount of records, you will eventually stop the stream – or this universe might end, whatever comes first – regardless, thinking of them as infinite datasets makes it so much easier to reason about them.</p>
 <p>Streams are most relevant when processing real time data; for example, when analyzing a Twitter feed or stock prices. Both examples have well defined columns, like ‘tweet’ or ‘price’, but there are always new rows of data to be analyzed.</p>
 <p>Spark <em>Structured Streams</em> provide scalable and fault-tolerant data processing over streams of data. That means, one can use many machines to process multiple streaming sources, perform joins with other streams or static sources, and recover from failures with at-least-once guarantees (each message is certain to be delivered, but may do so multiple times).</p>
-<p>In Spark, you create streams by defining a <em>source</em>, a <em>transformation</em> and a <em>sink</em>; you can think of these steps as reading, transforming and writing a stream, which Figure <a href="#fig:streaming-working"><strong>??</strong></a> describes.</p>
+<p>In Spark, you create streams by defining a <em>source</em>, a <em>transformation</em> and a <em>sink</em>; you can think of these steps as reading, transforming and writing a stream, which Figure <a href="streaming.html#fig:streaming-working">12.1</a> describes.</p>
 <dl>
 <dt>Reading</dt>
 <dd>Streams read data using any of the <code>stream_read_*()</code> functions, the read operation defines the <em>source</em> of the stream; you can define one or multiple sources from which to read from.
@@ -435,9 +433,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <dd>The write operations are performed with the family of <code>stream_write_*()</code> functions, the read operation defined the <em>sink</em> of the stream. You can specify a single sink to write data to or multiple ones.
 </dd>
 </dl>
-<div class="figure">
-<img src="images/streaming-working.png" alt="Working with Spark Streams||streaming-working" />
-<p class="caption">Working with Spark Streams||streaming-working</p>
+<div class="figure" style="text-align: center"><span id="fig:streaming-working"></span>
+<img src="the-r-in-spark_files/figure-html/streaming-working-1.png" alt="Working with Spark Streams" width="672" />
+<p class="caption">
+FIGURE 12.1: Working with Spark Streams
+</p>
 </div>
 <p>You can read and write to streams in several different file formats: CSV, JSON, Parquet, ORC and text; and form Kafka which we will introduce later on.</p>
 <table>
@@ -489,21 +489,23 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Since the transformation step is optional, the simplest stream we can define is one that continuously copies text files between source and destination.</p>
 <p>First, install the <code>future</code> package with <code>install.packages("future")</code> and connect to Spark:</p>
 <p>Since a stream requires the source to exist, create a <code>source</code> folder:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dir.create</span>(<span class="st">&quot;source&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb463"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb463-1" title="1"><span class="kw">dir.create</span>(<span class="st">&quot;source&quot;</span>)</a></code></pre></div>
 <p>We are now ready to define our first stream!</p>
-<pre class="sourceCode r"><code class="sourceCode r">stream &lt;-<span class="st"> </span><span class="kw">stream_read_text</span>(sc, <span class="st">&quot;source/&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">stream_write_text</span>(<span class="st">&quot;destination/&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb464"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb464-1" title="1">stream &lt;-<span class="st"> </span><span class="kw">stream_read_text</span>(sc, <span class="st">&quot;source/&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb464-2" title="2"><span class="st">  </span><span class="kw">stream_write_text</span>(<span class="st">&quot;destination/&quot;</span>)</a></code></pre></div>
 <p>The streams starts running with <code>stream_write_*()</code>; once executed, the stream will monitor the <code>source</code> path and process data into the <code>destination/</code> path as it arrives.</p>
 <p>We can use <code>stream_generate_test()</code> to produce a file every second containing lines of text that follow a given distribution, you can read more about this in the Appendix. In practice, you would connect to existing sources without having to generate data artificially. We can then use <code>view_stream()</code> to track the <strong>rows per second (rps)</strong> being processed in the source, destination and their latest values over time. The result is shown in Figure .</p>
-<pre class="sourceCode r"><code class="sourceCode r">future<span class="op">::</span><span class="kw">future</span>(<span class="kw">stream_generate_test</span>(<span class="dt">interval =</span> <span class="fl">0.5</span>))</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stream_view</span>(stream)</code></pre>
-<div class="figure">
-<img src="images/streaming-stream-view-resized.png" alt="Monitoring a stream generating rows following a binomial distribution||streaming-view-stream" />
-<p class="caption">Monitoring a stream generating rows following a binomial distribution||streaming-view-stream</p>
+<div class="sourceCode" id="cb465"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb465-1" title="1">future<span class="op">::</span><span class="kw">future</span>(<span class="kw">stream_generate_test</span>(<span class="dt">interval =</span> <span class="fl">0.5</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb466"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb466-1" title="1"><span class="kw">stream_view</span>(stream)</a></code></pre></div>
+<div class="figure" style="text-align: center"><span id="fig:streaming-view-stream"></span>
+<img src="images/streaming-stream-view-resized.png" alt="Monitoring a stream generating rows following a binomial distribution" width="1500" />
+<p class="caption">
+FIGURE 12.2: Monitoring a stream generating rows following a binomial distribution
+</p>
 </div>
 <p>Notice that the rows-per-second in the destination stream are higher than the rows-per-second in the source stream; this is expected and desirable since Spark measures incoming rates from the source, but actual row processing times in the destination stream. For example, if 10 rows-per-second are written to the <code>source/</code> path, the incoming rate is 10 RPS. However, if it takes Spark only 0.01 seconds to write all those 10 rows, the output rate is 100 RPS.</p>
 <p>Use <code>stream_stop()</code> to properly stop processing data from this stream.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stream_stop</span>(stream)</code></pre>
+<div class="sourceCode" id="cb467"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb467-1" title="1"><span class="kw">stream_stop</span>(stream)</a></code></pre></div>
 <p>This exercise introduced how we can easily start a Spark stream that reads and writes data based on a simulated stream, let’s do something more interesting than just copying data with proper transformations.</p>
 </div>
 <div id="transformations" class="section level2">
@@ -515,11 +517,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="analysis-1" class="section level3">
 <h3><span class="header-section-number">12.2.1</span> Analysis</h3>
 <p>You can analyze streams with <code>dplyr</code> verbs and SQL using <code>DBI</code>, as a quick example, we will filter rows and add columns over a stream. We won’t explicitly call <code>stream_generate_test()</code>, but you can call it on your own through the <code>later</code> package if you feel the urge to verify that data is being processed continuously.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
-
-<span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;source&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">filter</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">700</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">y =</span> <span class="kw">round</span>(x <span class="op">/</span><span class="st"> </span><span class="dv">100</span>))</code></pre>
+<div class="sourceCode" id="cb468"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb468-1" title="1"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb468-2" title="2"></a>
+<a class="sourceLine" id="cb468-3" title="3"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;source&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb468-4" title="4"><span class="st">  </span><span class="kw">filter</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">700</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb468-5" title="5"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">y =</span> <span class="kw">round</span>(x <span class="op">/</span><span class="st"> </span><span class="dv">100</span>))</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [inf x 2]
        x     y
    &lt;int&gt; &lt;dbl&gt;
@@ -535,10 +537,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 10   710     7
 # … with more rows</code></pre>
 <p>It is also possible to perform aggregations over the entire history of the stream. The history could be filtered or not.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;source&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">filter</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">700</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">y =</span> <span class="kw">round</span>(x <span class="op">/</span><span class="st"> </span><span class="dv">100</span>)) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">count</span>(y) </code></pre>
+<div class="sourceCode" id="cb470"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb470-1" title="1"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;source&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb470-2" title="2"><span class="st">  </span><span class="kw">filter</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">700</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb470-3" title="3"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">y =</span> <span class="kw">round</span>(x <span class="op">/</span><span class="st"> </span><span class="dv">100</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb470-4" title="4"><span class="st">  </span><span class="kw">count</span>(y) </a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [inf x 2]
       y     n
   &lt;dbl&gt; &lt;dbl&gt;
@@ -547,8 +549,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 3    10 13210
 4     7 12692</code></pre>
 <p>Grouped aggregations of the latest data in the stream require a timestamp. The timestamp will be of when reading function, in this case <code>stream_read_csv()</code> , first “saw” that specific record. In Spark stream terms, that timestamp is called a “watermark”. The <code>spark_watermark()</code> function is used to add the timestamp. For this exercise, the watermark will be the same for all records, since the five files were read by the stream after they were created. Please note that only Kafka and memory <em>outputs</em> support watermarks.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;source&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">stream_watermark</span>()</code></pre>
+<div class="sourceCode" id="cb472"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb472-1" title="1"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;source&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb472-2" title="2"><span class="st">  </span><span class="kw">stream_watermark</span>()</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [inf x 2]
        x timestamp          
    &lt;int&gt; &lt;dttm&gt;             
@@ -564,14 +566,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 10   285 2019-06-30 07:14:21
 # … with more rows</code></pre>
 <p>After the watermark is created, it can be used in the <code>group_by()</code> verb. It can then be piped into a <code>summarise()</code> function to get some stats of the stream.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;source&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">stream_watermark</span>() <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">group_by</span>(timestamp) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">summarise</span>(
-    <span class="dt">max_x =</span> <span class="kw">max</span>(x, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),
-    <span class="dt">min_x =</span> <span class="kw">min</span>(x, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),
-    <span class="dt">count =</span> <span class="kw">n</span>()
-  ) </code></pre>
+<div class="sourceCode" id="cb474"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb474-1" title="1"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;source&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb474-2" title="2"><span class="st">  </span><span class="kw">stream_watermark</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb474-3" title="3"><span class="st">  </span><span class="kw">group_by</span>(timestamp) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb474-4" title="4"><span class="st">  </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb474-5" title="5">    <span class="dt">max_x =</span> <span class="kw">max</span>(x, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb474-6" title="6">    <span class="dt">min_x =</span> <span class="kw">min</span>(x, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb474-7" title="7">    <span class="dt">count =</span> <span class="kw">n</span>()</a>
+<a class="sourceLine" id="cb474-8" title="8">  ) </a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [inf x 4]
   timestamp           max_x min_x  count
   &lt;dttm&gt;              &lt;int&gt; &lt;int&gt;  &lt;dbl&gt;
@@ -582,11 +584,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Spark streams currently do not support training on reael-time datasets, aside from the technical challenges; even if it were possible, it would be quite challenging to train models since the model itself would have to adapt over time, this is known as <em>online learning</em> and perhaps something that Spark will support in the future.</p>
 <p>That said, there are other modeling concepts we can use with streams, like feature transformers and scoring, lets try out a feature transformer with streams and leave scoring for the next section since we will need to train a model.</p>
 <p>The next example makes use of the <code>ft_bucketizer()</code> feature transformer to modify the stream followed by regular <code>dplyr</code> functions which you can use just as you would with static datasets.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;source&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">x =</span> <span class="kw">as.numeric</span>(x)) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">ft_bucketizer</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;buckets&quot;</span>, <span class="dt">splits =</span> <span class="dv">0</span><span class="op">:</span><span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="dv">100</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">count</span>(buckets)  <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">arrange</span>(buckets)</code></pre>
+<div class="sourceCode" id="cb476"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb476-1" title="1"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;source&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb476-2" title="2"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">x =</span> <span class="kw">as.numeric</span>(x)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb476-3" title="3"><span class="st">  </span><span class="kw">ft_bucketizer</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;buckets&quot;</span>, <span class="dt">splits =</span> <span class="dv">0</span><span class="op">:</span><span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="dv">100</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb476-4" title="4"><span class="st">  </span><span class="kw">count</span>(buckets)  <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb476-5" title="5"><span class="st">  </span><span class="kw">arrange</span>(buckets)</a></code></pre></div>
 <pre><code># Source:     spark&lt;?&gt; [inf x 2]
 # Ordered by: buckets
    buckets     n
@@ -606,18 +608,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h3><span class="header-section-number">12.2.3</span> Pipelines</h3>
 <p>Spark pipelines can be used for scoring streams, but not to train over streaming data. The former is fully supported while the latter is a feature under active development by the Spark community.</p>
 <p>In order to score a stream, it is necessary to first create a our model. So lets build, fit and save a simple pipeline.</p>
-<pre class="sourceCode r"><code class="sourceCode r">cars &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, mtcars)
-
-model &lt;-<span class="st"> </span><span class="kw">ml_pipeline</span>(sc) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">ft_binarizer</span>(<span class="st">&quot;mpg&quot;</span>, <span class="st">&quot;over_30&quot;</span>, <span class="dv">30</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">ft_r_formula</span>(over_<span class="dv">30</span> <span class="op">~</span><span class="st"> </span>wt) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">ml_logistic_regression</span>() <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">ml_fit</span>(cars)</code></pre>
+<div class="sourceCode" id="cb478"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb478-1" title="1">cars &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, mtcars)</a>
+<a class="sourceLine" id="cb478-2" title="2"></a>
+<a class="sourceLine" id="cb478-3" title="3">model &lt;-<span class="st"> </span><span class="kw">ml_pipeline</span>(sc) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb478-4" title="4"><span class="st">  </span><span class="kw">ft_binarizer</span>(<span class="st">&quot;mpg&quot;</span>, <span class="st">&quot;over_30&quot;</span>, <span class="dv">30</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb478-5" title="5"><span class="st">  </span><span class="kw">ft_r_formula</span>(over_<span class="dv">30</span> <span class="op">~</span><span class="st"> </span>wt) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb478-6" title="6"><span class="st">  </span><span class="kw">ml_logistic_regression</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb478-7" title="7"><span class="st">  </span><span class="kw">ml_fit</span>(cars)</a></code></pre></div>
 <p><strong>Tip:</strong> If you choose to, you can make use of other concepts presented in the Pipelines chapter, like saving and reloading pipelines through <code>ml_save()</code> and <code>ml_load()</code> before scoring streams.</p>
 <p>We can then generate a stream based on <code>mtcars</code> using <code>stream_generate_test()</code> and score the model using <code>ml_transform()</code>:</p>
-<pre class="sourceCode r"><code class="sourceCode r">future<span class="op">::</span><span class="kw">future</span>(<span class="kw">stream_generate_test</span>(mtcars, <span class="st">&quot;cars-stream&quot;</span>, <span class="dt">iterations =</span> <span class="dv">5</span>))
-
-<span class="kw">ml_transform</span>(model, <span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;cars-stream&quot;</span>))</code></pre>
+<div class="sourceCode" id="cb479"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb479-1" title="1">future<span class="op">::</span><span class="kw">future</span>(<span class="kw">stream_generate_test</span>(mtcars, <span class="st">&quot;cars-stream&quot;</span>, <span class="dt">iterations =</span> <span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb479-2" title="2"></a>
+<a class="sourceLine" id="cb479-3" title="3"><span class="kw">ml_transform</span>(model, <span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;cars-stream&quot;</span>))</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [inf x 17]
      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb over_30
    &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;
@@ -638,12 +640,12 @@ model &lt;-<span class="st"> </span><span class="kw">ml_pipeline</span>(sc) <spa
 <div id="distributed-r-streaming-r-code" class="section level3">
 <h3><span class="header-section-number">12.2.4</span> Distributed R {streaming-r-code}</h3>
 <p>Arbitrary R code can also be used to transform a stream with the use of <code>spark_apply()</code>. This approach follows the same principles discussed in the Distributed R chapter, as in, <code>spark_apply()</code> runs R code over each executor in the cluster where data is available, this enables processing high-throughput streams and fulfill low-latency requirements.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;cars-stream&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">select</span>(mpg) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="st"> </span><span class="kw">round</span>(.x), <span class="dt">mpg =</span> <span class="st">&quot;integer&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">stream_write_csv</span>(<span class="st">&quot;cars-round&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb481"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb481-1" title="1"><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;cars-stream&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb481-2" title="2"><span class="st">  </span><span class="kw">select</span>(mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb481-3" title="3"><span class="st">  </span><span class="kw">spark_apply</span>(<span class="op">~</span><span class="st"> </span><span class="kw">round</span>(.x), <span class="dt">mpg =</span> <span class="st">&quot;integer&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb481-4" title="4"><span class="st">  </span><span class="kw">stream_write_csv</span>(<span class="st">&quot;cars-round&quot;</span>)</a></code></pre></div>
 <p>Which as you would expect, processes data from <code>cars-stream</code> into <code>cars-round</code> by running the custom <code>round()</code> R function, let’s pick into the output sink:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;cars-round&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb482"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb482-1" title="1"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;cars-round&quot;</span>)</a></code></pre></div>
 <pre><code># Source: spark&lt;carsround&gt; [?? x 1]
      mpg
    &lt;dbl&gt;
@@ -660,54 +662,58 @@ model &lt;-<span class="st"> </span><span class="kw">ml_pipeline</span>(sc) <spa
 # … with more rows</code></pre>
 <p>Again, make sure you apply the concepts you already know about <code>spark_apply()</code> when using streams; for instance, you should consider using <code>arrow</code> to significantly improve performance.</p>
 <p>This was our last transformation for streams, you will now learn how to use Spark streams with Shiny, a package that makes it easy to build interactive web applications from R.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)</code></pre>
+<div class="sourceCode" id="cb484"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb484-1" title="1"><span class="kw">spark_disconnect</span>(sc)</a></code></pre></div>
 </div>
 </div>
 <div id="kafka" class="section level2">
 <h2><span class="header-section-number">12.3</span> Kafka</h2>
 <p>Apache Kafka is an open-source stream-processing software platform developed by LinkedIn and donated to the Apache Software Foundation, written in Scala and Java. As an analogy. Kafka is to real-time storage as what Hadoop is to static storage.</p>
-<p>Kafka stores the stream as records which consist of a key, a value and a timestamp. Kafka can handle multiple streams that contain different information by categorizing them into topic. Kafka is commonly used to connect multiple real-time applications, a <em>producer</em> is an application that streams data into Kafka, while a <em>consumer</em> is the one that reads from Kafka; in Kafka terminology, a consumer application subscribes to topics. Therefore, the most basic workflow we can accomplish with Kafka is one with a single producer and a single consumer, illustrated in Figure <a href="#fig:streaming-kafka-apis"><strong>??</strong></a>.</p>
-<div class="figure">
-<img src="images/streaming-kafka-apis.png" alt="Basic workflow||streaming-kafka-apis" />
-<p class="caption">Basic workflow||streaming-kafka-apis</p>
+<p>Kafka stores the stream as records which consist of a key, a value and a timestamp. Kafka can handle multiple streams that contain different information by categorizing them into topic. Kafka is commonly used to connect multiple real-time applications, a <em>producer</em> is an application that streams data into Kafka, while a <em>consumer</em> is the one that reads from Kafka; in Kafka terminology, a consumer application subscribes to topics. Therefore, the most basic workflow we can accomplish with Kafka is one with a single producer and a single consumer, illustrated in Figure <a href="streaming.html#fig:streaming-kafka-apis">12.3</a>.</p>
+<div class="figure" style="text-align: center"><span id="fig:streaming-kafka-apis"></span>
+<img src="the-r-in-spark_files/figure-html/streaming-kafka-apis-1.png" alt="Basic workflow" width="672" />
+<p class="caption">
+FIGURE 12.3: Basic workflow
+</p>
 </div>
 <p>If you are new to Kafka, we don’t recommend you try to run the code from this section; but if you are really motivated to follow along , first you will need to install Kafka as explained in the Appendix or deploy Kafka in your cluster.</p>
 <p>Using Kafka also requires the Kafka package when connecting to Spark, make sure is specified in your connection <code>config</code>:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
-<span class="kw">library</span>(dplyr)
-
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(
-  <span class="dt">sparklyr.shell.packages =</span> <span class="st">&quot;org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0&quot;</span>
-))</code></pre>
+<div class="sourceCode" id="cb485"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb485-1" title="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb485-2" title="2"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb485-3" title="3"></a>
+<a class="sourceLine" id="cb485-4" title="4">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb485-5" title="5">  <span class="dt">sparklyr.shell.packages =</span> <span class="st">&quot;org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0&quot;</span></a>
+<a class="sourceLine" id="cb485-6" title="6">))</a></code></pre></div>
 <p>Once connected, it’s straightforward to read data from a stream:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stream_read_kafka</span>(
-  sc, 
-  <span class="dt">options =</span> <span class="kw">list</span>(
-    <span class="dt">kafka.bootstrap.server =</span> <span class="st">&quot;host1:9092, host2:9092&quot;</span>, 
-    <span class="dt">subscribe =</span> <span class="st">&quot;&lt;topic-name&gt;&quot;</span>
-    )
-  ) </code></pre>
+<div class="sourceCode" id="cb486"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb486-1" title="1"><span class="kw">stream_read_kafka</span>(</a>
+<a class="sourceLine" id="cb486-2" title="2">  sc, </a>
+<a class="sourceLine" id="cb486-3" title="3">  <span class="dt">options =</span> <span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb486-4" title="4">    <span class="dt">kafka.bootstrap.server =</span> <span class="st">&quot;host1:9092, host2:9092&quot;</span>, </a>
+<a class="sourceLine" id="cb486-5" title="5">    <span class="dt">subscribe =</span> <span class="st">&quot;&lt;topic-name&gt;&quot;</span></a>
+<a class="sourceLine" id="cb486-6" title="6">    )</a>
+<a class="sourceLine" id="cb486-7" title="7">  ) </a></code></pre></div>
 <p>However, notice that you need to properly configure the <code>options</code> list; <code>kafka.bootstrap.server</code> expects a list of Kafka hosts, <code>topic</code> and <code>subscribe</code> define which topic should be used when writing or reading from Kafka respectively.</p>
-<p>While we started by presenting first a simple single-producer and single-consumer use case; Kafka also allows much more complex interactions. Next we will read from one topic, process its data and then write the results to a different topic – systems that are producers and consumers from the same topic are referred as, <em>stream processors</em>. In Figure <a href="#fig:streaming-kafka-two-outputs"><strong>??</strong></a>, the stream processor reads topic A, and then writes results to topic B. This allows for a given <em>consumer</em> application to read results instead of “raw” feed data.</p>
-<div class="figure">
-<img src="images/streaming-kafka-two-outputs-resized.png" alt="Kafka workflow||streaming-kafka-two-outputs" />
-<p class="caption">Kafka workflow||streaming-kafka-two-outputs</p>
+<p>While we started by presenting first a simple single-producer and single-consumer use case; Kafka also allows much more complex interactions. Next we will read from one topic, process its data and then write the results to a different topic – systems that are producers and consumers from the same topic are referred as, <em>stream processors</em>. In Figure <a href="streaming.html#fig:streaming-kafka-two-outputs">12.4</a>, the stream processor reads topic A, and then writes results to topic B. This allows for a given <em>consumer</em> application to read results instead of “raw” feed data.</p>
+<div class="figure" style="text-align: center"><span id="fig:streaming-kafka-two-outputs"></span>
+<img src="the-r-in-spark_files/figure-html/streaming-kafka-two-outputs-1.png" alt="Kafka workflow" width="672" />
+<p class="caption">
+FIGURE 12.4: Kafka workflow
+</p>
 </div>
 <p>There are three modes available when processing Kafka streams in Spark: <em>complete</em>, <em>update</em> and <em>append</em>. The <em>complete</em> mode will provide the totals for every group every time there is a new batch, <em>update</em> provides totals for only the groups that have updates in the latest batch, <em>append</em> adds raw records to the target topic. This <em>append</em> mode is not meant for aggregates, but works well for passing a filtered subset to the target topic.</p>
 <p>In our next example, the <em>producer</em> will stream random letters into Kafka under a <code>letters</code> topic. Then Spark will act as the <em>stream processor</em> reading the <code>letters</code> topic and computing unique letter which are then written back to Kafka under the <code>totals</code> topic. We will use the <code>update</code> mode when writing back into Kafka, only the totals that changed will be sent to Kafka. This change is determined after each batch from the <code>letters</code> topic.</p>
-<pre class="sourceCode r"><code class="sourceCode r">hosts  &lt;-<span class="st"> &quot;localhost:9092&quot;</span>
-
-read_options &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">kafka.bootstrap.servers =</span> hosts, <span class="dt">subscribe =</span> <span class="st">&quot;letters&quot;</span>)
-write_options &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">kafka.bootstrap.servers =</span> hosts, <span class="dt">topic =</span> <span class="st">&quot;totals&quot;</span>)
-
-<span class="kw">stream_read_kafka</span>(sc, <span class="dt">options =</span> read_options) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">value =</span> <span class="kw">as.character</span>(value)) <span class="op">%&gt;%</span><span class="st">         </span><span class="co"># coerce into a character</span>
-<span class="st">  </span><span class="kw">count</span>(value) <span class="op">%&gt;%</span><span class="st">                                </span><span class="co"># group and count letters</span>
-<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">value =</span> <span class="kw">paste0</span>(value, <span class="st">&quot;=&quot;</span>, n)) <span class="op">%&gt;%</span><span class="st">       </span><span class="co"># kafka expects a value field</span>
-<span class="st">  </span><span class="kw">stream_write_kafka</span>(<span class="dt">mode =</span> <span class="st">&quot;update&quot;</span>,
-                     <span class="dt">options =</span> write_options)</code></pre>
+<div class="sourceCode" id="cb487"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb487-1" title="1">hosts  &lt;-<span class="st"> &quot;localhost:9092&quot;</span></a>
+<a class="sourceLine" id="cb487-2" title="2"></a>
+<a class="sourceLine" id="cb487-3" title="3">read_options &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">kafka.bootstrap.servers =</span> hosts, <span class="dt">subscribe =</span> <span class="st">&quot;letters&quot;</span>)</a>
+<a class="sourceLine" id="cb487-4" title="4">write_options &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">kafka.bootstrap.servers =</span> hosts, <span class="dt">topic =</span> <span class="st">&quot;totals&quot;</span>)</a>
+<a class="sourceLine" id="cb487-5" title="5"></a>
+<a class="sourceLine" id="cb487-6" title="6"><span class="kw">stream_read_kafka</span>(sc, <span class="dt">options =</span> read_options) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb487-7" title="7"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">value =</span> <span class="kw">as.character</span>(value)) <span class="op">%&gt;%</span><span class="st">         </span><span class="co"># coerce into a character</span></a>
+<a class="sourceLine" id="cb487-8" title="8"><span class="st">  </span><span class="kw">count</span>(value) <span class="op">%&gt;%</span><span class="st">                                </span><span class="co"># group and count letters</span></a>
+<a class="sourceLine" id="cb487-9" title="9"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">value =</span> <span class="kw">paste0</span>(value, <span class="st">&quot;=&quot;</span>, n)) <span class="op">%&gt;%</span><span class="st">       </span><span class="co"># kafka expects a value field</span></a>
+<a class="sourceLine" id="cb487-10" title="10"><span class="st">  </span><span class="kw">stream_write_kafka</span>(<span class="dt">mode =</span> <span class="st">&quot;update&quot;</span>,</a>
+<a class="sourceLine" id="cb487-11" title="11">                     <span class="dt">options =</span> write_options)</a></code></pre></div>
 <p>You can take a quick look at totals by reading from Kafka,</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stream_read_kafka</span>(sc, <span class="dt">options =</span> totals_options)</code></pre>
+<div class="sourceCode" id="cb488"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb488-1" title="1"><span class="kw">stream_read_kafka</span>(sc, <span class="dt">options =</span> totals_options)</a></code></pre></div>
 <p>Using a new terminal session, use Kafka’s command line tool to manually write single letter into the <code>letters</code> topic.</p>
 <pre><code>kafka-console-producer.sh --broker-list localhost:9092 --topic letters
 &gt;A
@@ -719,62 +725,64 @@ write_options &lt;-<span class="st"> </span><span class="kw">list</span>(<span c
 <div id="shiny" class="section level2">
 <h2><span class="header-section-number">12.4</span> Shiny</h2>
 <p>Shiny’s reactive framework is well suited to support streaming information which you can use to display real-time data from Spark using the <code>reactiveSpark()</code>, reactive. There is much to learn about Shiny which we can possibly present; however, if you are already familiar with Shiny, this example should be quite easy to understand.</p>
-<p>We have a modified version of the k-means Shiny example which, instead of getting the data from the static <code>iris</code> dataset, gets generated with <code>stream_generate_test()</code>, consumed by Spark, retrieved to Shiny through <code>reactiveSpark()</code> and displayed as captured in Figure <a href="#fig:streaming-shiny-app"><strong>??</strong></a>.</p>
+<p>We have a modified version of the k-means Shiny example which, instead of getting the data from the static <code>iris</code> dataset, gets generated with <code>stream_generate_test()</code>, consumed by Spark, retrieved to Shiny through <code>reactiveSpark()</code> and displayed as captured in Figure <a href="streaming.html#fig:streaming-shiny-app">12.5</a>.</p>
 <p>To run this example, store the following Shiny app under <code>shiny/shiny-stream.R</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
-<span class="kw">library</span>(shiny)
-
-<span class="kw">unlink</span>(<span class="st">&quot;shiny-stream&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)
-<span class="kw">dir.create</span>(<span class="st">&quot;shiny-stream&quot;</span>, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>)
-
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(
-  <span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>,
-  <span class="dt">config =</span> <span class="kw">list</span>(<span class="dt">sparklyr.sanitize.column.names =</span> <span class="ot">FALSE</span>))
-  
-ui &lt;-<span class="st"> </span><span class="kw">pageWithSidebar</span>(
-  <span class="kw">headerPanel</span>(<span class="st">&#39;Iris k-means clustering from Spark stream&#39;</span>),
-  <span class="kw">sidebarPanel</span>(
-    <span class="kw">selectInput</span>(<span class="st">&#39;xcol&#39;</span>, <span class="st">&#39;X Variable&#39;</span>, <span class="kw">names</span>(iris)),
-    <span class="kw">selectInput</span>(<span class="st">&#39;ycol&#39;</span>, <span class="st">&#39;Y Variable&#39;</span>, <span class="kw">names</span>(iris),
-                <span class="dt">selected=</span><span class="kw">names</span>(iris)[[<span class="dv">2</span>]]),
-    <span class="kw">numericInput</span>(<span class="st">&#39;clusters&#39;</span>, <span class="st">&#39;Cluster count&#39;</span>, <span class="dv">3</span>,
-                 <span class="dt">min =</span> <span class="dv">1</span>, <span class="dt">max =</span> <span class="dv">9</span>)
-  ),
-  <span class="kw">mainPanel</span>(<span class="kw">plotOutput</span>(<span class="st">&#39;plot1&#39;</span>))
-)
-
-server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output, session) {
-  iris &lt;-<span class="st"> </span><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;shiny-stream&quot;</span>,
-                          <span class="dt">columns =</span> <span class="kw">sapply</span>(datasets<span class="op">::</span>iris, class)) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">reactiveSpark</span>()
-  
-  selectedData &lt;-<span class="st"> </span><span class="kw">reactive</span>(<span class="kw">iris</span>()[, <span class="kw">c</span>(input<span class="op">$</span>xcol, input<span class="op">$</span>ycol)])
-  clusters &lt;-<span class="st"> </span><span class="kw">reactive</span>(<span class="kw">kmeans</span>(<span class="kw">selectedData</span>(), input<span class="op">$</span>clusters))
-  
-  output<span class="op">$</span>plot1 &lt;-<span class="st"> </span><span class="kw">renderPlot</span>({
-    <span class="kw">par</span>(<span class="dt">mar =</span> <span class="kw">c</span>(<span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="dv">0</span>, <span class="dv">1</span>))
-    <span class="kw">plot</span>(<span class="kw">selectedData</span>(), <span class="dt">col =</span> <span class="kw">clusters</span>()<span class="op">$</span>cluster, <span class="dt">pch =</span> <span class="dv">20</span>, <span class="dt">cex =</span> <span class="dv">3</span>)
-    <span class="kw">points</span>(<span class="kw">clusters</span>()<span class="op">$</span>centers, <span class="dt">pch =</span> <span class="dv">4</span>, <span class="dt">cex =</span> <span class="dv">4</span>, <span class="dt">lwd =</span> <span class="dv">4</span>)
-  })
-}
-
-<span class="kw">shinyApp</span>(ui, server)</code></pre>
+<div class="sourceCode" id="cb490"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb490-1" title="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb490-2" title="2"><span class="kw">library</span>(shiny)</a>
+<a class="sourceLine" id="cb490-3" title="3"></a>
+<a class="sourceLine" id="cb490-4" title="4"><span class="kw">unlink</span>(<span class="st">&quot;shiny-stream&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb490-5" title="5"><span class="kw">dir.create</span>(<span class="st">&quot;shiny-stream&quot;</span>, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb490-6" title="6"></a>
+<a class="sourceLine" id="cb490-7" title="7">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(</a>
+<a class="sourceLine" id="cb490-8" title="8">  <span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>,</a>
+<a class="sourceLine" id="cb490-9" title="9">  <span class="dt">config =</span> <span class="kw">list</span>(<span class="dt">sparklyr.sanitize.column.names =</span> <span class="ot">FALSE</span>))</a>
+<a class="sourceLine" id="cb490-10" title="10">  </a>
+<a class="sourceLine" id="cb490-11" title="11">ui &lt;-<span class="st"> </span><span class="kw">pageWithSidebar</span>(</a>
+<a class="sourceLine" id="cb490-12" title="12">  <span class="kw">headerPanel</span>(<span class="st">&#39;Iris k-means clustering from Spark stream&#39;</span>),</a>
+<a class="sourceLine" id="cb490-13" title="13">  <span class="kw">sidebarPanel</span>(</a>
+<a class="sourceLine" id="cb490-14" title="14">    <span class="kw">selectInput</span>(<span class="st">&#39;xcol&#39;</span>, <span class="st">&#39;X Variable&#39;</span>, <span class="kw">names</span>(iris)),</a>
+<a class="sourceLine" id="cb490-15" title="15">    <span class="kw">selectInput</span>(<span class="st">&#39;ycol&#39;</span>, <span class="st">&#39;Y Variable&#39;</span>, <span class="kw">names</span>(iris),</a>
+<a class="sourceLine" id="cb490-16" title="16">                <span class="dt">selected=</span><span class="kw">names</span>(iris)[[<span class="dv">2</span>]]),</a>
+<a class="sourceLine" id="cb490-17" title="17">    <span class="kw">numericInput</span>(<span class="st">&#39;clusters&#39;</span>, <span class="st">&#39;Cluster count&#39;</span>, <span class="dv">3</span>,</a>
+<a class="sourceLine" id="cb490-18" title="18">                 <span class="dt">min =</span> <span class="dv">1</span>, <span class="dt">max =</span> <span class="dv">9</span>)</a>
+<a class="sourceLine" id="cb490-19" title="19">  ),</a>
+<a class="sourceLine" id="cb490-20" title="20">  <span class="kw">mainPanel</span>(<span class="kw">plotOutput</span>(<span class="st">&#39;plot1&#39;</span>))</a>
+<a class="sourceLine" id="cb490-21" title="21">)</a>
+<a class="sourceLine" id="cb490-22" title="22"></a>
+<a class="sourceLine" id="cb490-23" title="23">server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output, session) {</a>
+<a class="sourceLine" id="cb490-24" title="24">  iris &lt;-<span class="st"> </span><span class="kw">stream_read_csv</span>(sc, <span class="st">&quot;shiny-stream&quot;</span>,</a>
+<a class="sourceLine" id="cb490-25" title="25">                          <span class="dt">columns =</span> <span class="kw">sapply</span>(datasets<span class="op">::</span>iris, class)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb490-26" title="26"><span class="st">    </span><span class="kw">reactiveSpark</span>()</a>
+<a class="sourceLine" id="cb490-27" title="27">  </a>
+<a class="sourceLine" id="cb490-28" title="28">  selectedData &lt;-<span class="st"> </span><span class="kw">reactive</span>(<span class="kw">iris</span>()[, <span class="kw">c</span>(input<span class="op">$</span>xcol, input<span class="op">$</span>ycol)])</a>
+<a class="sourceLine" id="cb490-29" title="29">  clusters &lt;-<span class="st"> </span><span class="kw">reactive</span>(<span class="kw">kmeans</span>(<span class="kw">selectedData</span>(), input<span class="op">$</span>clusters))</a>
+<a class="sourceLine" id="cb490-30" title="30">  </a>
+<a class="sourceLine" id="cb490-31" title="31">  output<span class="op">$</span>plot1 &lt;-<span class="st"> </span><span class="kw">renderPlot</span>({</a>
+<a class="sourceLine" id="cb490-32" title="32">    <span class="kw">par</span>(<span class="dt">mar =</span> <span class="kw">c</span>(<span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="dv">0</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb490-33" title="33">    <span class="kw">plot</span>(<span class="kw">selectedData</span>(), <span class="dt">col =</span> <span class="kw">clusters</span>()<span class="op">$</span>cluster, <span class="dt">pch =</span> <span class="dv">20</span>, <span class="dt">cex =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb490-34" title="34">    <span class="kw">points</span>(<span class="kw">clusters</span>()<span class="op">$</span>centers, <span class="dt">pch =</span> <span class="dv">4</span>, <span class="dt">cex =</span> <span class="dv">4</span>, <span class="dt">lwd =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb490-35" title="35">  })</a>
+<a class="sourceLine" id="cb490-36" title="36">}</a>
+<a class="sourceLine" id="cb490-37" title="37"></a>
+<a class="sourceLine" id="cb490-38" title="38"><span class="kw">shinyApp</span>(ui, server)</a></code></pre></div>
 <p>This Shiny application can then be launched with <code>runApp()</code>,</p>
-<pre class="sourceCode r"><code class="sourceCode r">shiny<span class="op">::</span><span class="kw">runApp</span>(<span class="st">&quot;shiny/shiny-stream.R&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb491"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb491-1" title="1">shiny<span class="op">::</span><span class="kw">runApp</span>(<span class="st">&quot;shiny/shiny-stream.R&quot;</span>)</a></code></pre></div>
 <p>While the shiny app runs, launch a new R session from the same directory and create a test stream with <code>stream_generate_test()</code>; this will generate a stream of continuous data that Spark can process and Shiny visualize.</p>
-<pre class="sourceCode r"><code class="sourceCode r">sparklyr<span class="op">::</span><span class="kw">stream_generate_test</span>(datasets<span class="op">::</span>iris, <span class="st">&quot;shiny/shiny-stream&quot;</span>,
-                               <span class="kw">rep</span>(<span class="dv">5</span>, <span class="dv">10</span><span class="op">^</span><span class="dv">3</span>))</code></pre>
-<div class="figure">
-<img src="images/streaming-shiny-app-resized.png" alt="Progression of Spark reactive loading data into Shiny app||streaming-shiny-app" />
-<p class="caption">Progression of Spark reactive loading data into Shiny app||streaming-shiny-app</p>
+<div class="sourceCode" id="cb492"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb492-1" title="1">sparklyr<span class="op">::</span><span class="kw">stream_generate_test</span>(datasets<span class="op">::</span>iris, <span class="st">&quot;shiny/shiny-stream&quot;</span>,</a>
+<a class="sourceLine" id="cb492-2" title="2">                               <span class="kw">rep</span>(<span class="dv">5</span>, <span class="dv">10</span><span class="op">^</span><span class="dv">3</span>))</a></code></pre></div>
+<div class="figure" style="text-align: center"><span id="fig:streaming-shiny-app"></span>
+<img src="images/streaming-shiny-app-resized.png" alt="Progression of Spark reactive loading data into Shiny app" width="1500" />
+<p class="caption">
+FIGURE 12.5: Progression of Spark reactive loading data into Shiny app
+</p>
 </div>
 <p>This section showed how easy it is to create a Shiny app that can be used for several purposes, such as monitoring, and dashboarding.</p>
 <p>In a more complex implementation, the source would more likely be a Kafka stream. The next section will cover how to integrate Kafka, Spark Stream and <code>sparklyr</code>.</p>
 <p>Before we transition, disconnect from Spark and clear the folders that we used:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)
-
-<span class="kw">unlink</span>(<span class="kw">c</span>(<span class="st">&quot;source&quot;</span>, <span class="st">&quot;destination&quot;</span>, <span class="st">&quot;cars-stream&quot;</span>,
-         <span class="st">&quot;car-round&quot;</span>, <span class="st">&quot;shiny/shiny-stream&quot;</span>), <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</code></pre>
+<div class="sourceCode" id="cb493"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb493-1" title="1"><span class="kw">spark_disconnect</span>(sc)</a>
+<a class="sourceLine" id="cb493-2" title="2"></a>
+<a class="sourceLine" id="cb493-3" title="3"><span class="kw">unlink</span>(<span class="kw">c</span>(<span class="st">&quot;source&quot;</span>, <span class="st">&quot;destination&quot;</span>, <span class="st">&quot;cars-stream&quot;</span>,</a>
+<a class="sourceLine" id="cb493-4" title="4">         <span class="st">&quot;car-round&quot;</span>, <span class="st">&quot;shiny/shiny-stream&quot;</span>), <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 </div>
 <div id="recap-9" class="section level2">
 <h2><span class="header-section-number">12.5</span> Recap</h2>
@@ -844,8 +852,9 @@ gitbook.start({
     script.type = "text/javascript";
     var src = "true";
     if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(src))
-      src = src.replace(/^https?:/, '');
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
     script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();

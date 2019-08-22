@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Mastering Apache Spark with R</title>
-  <meta name="description" content="The complete guide to large-scale analysis and modeling.">
-  <meta name="generator" content="bookdown  and GitBook 2.6.7">
+  <meta name="description" content="The complete guide to large-scale analysis and modeling." />
+  <meta name="generator" content="bookdown 0.13 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Mastering Apache Spark with R" />
   <meta property="og:type" content="book" />
@@ -22,17 +21,17 @@
   <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
   
 
-<meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
+<meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz" />
 
 
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
 
-<link rel="next" href="starting.html">
+<link rel="next" href="starting.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -64,7 +63,6 @@ a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
 a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
@@ -426,20 +424,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">1.1</span> Overview</h2>
 <p>As humans, we have been storing, retrieving, manipulating, and communicating information since the Sumerians in Mesopotamia developed writing in about 3000 BC. Based on the storage and processing technologies employed, it is possible to distinguish four distinct phases of development: pre-mechanical (3000 BC – 1450 AD), mechanical (1450–1840), electromechanical (1840–1940), and electronic (1940–present). <span class="citation">(Laudon, Traver, and Laudon <a href="#ref-intro-information-technology">1996</a>)</span></p>
 <p>Mathematician George Stibitz used the word <em>digital</em> to describe fast electric pulses back in 1942 <span class="citation">(Ceruzzi <a href="#ref-intro-computing-concise-history">2012</a>)</span> and, to this day, we describe information stored electronically as digital information. In contrast, <em>analog</em> information represents everything we have stored by any non-electronic means such as hand written notes, books, newspapers, and so on. <span class="citation">(Webster <a href="#ref-intro-webster2006merriam">2006</a>)</span></p>
-<p>The world bank report on digital development provides an estimate of digital and analog information stored over the last decades. <span class="citation">(Group <a href="#ref-intro-data-revolution">2016</a>)</span> This report noted that digital information surpassed analog information around 2003. At that time, there were about 10 million terabytes of digital information, which is roughly about 10 million storage drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at exponential rates. Figure <a href="#fig:intro-store-capacity"><strong>??</strong></a> shows the findings of this report, notice that every other year, the world’s information has grown tenfold.</p>
-<div class="figure">
-<img src="images/intro-world-store-capacity-resized.png" alt="World’s capacity to store information||intro-store-capacity" />
-<p class="caption">World’s capacity to store information||intro-store-capacity</p>
+<p>The world bank report on digital development provides an estimate of digital and analog information stored over the last decades. <span class="citation">(Group <a href="#ref-intro-data-revolution">2016</a>)</span> This report noted that digital information surpassed analog information around 2003. At that time, there were about 10 million terabytes of digital information, which is roughly about 10 million storage drives today. However, a more relevant finding from this report was that our footprint of digital information is growing at exponential rates. Figure <a href="intro.html#fig:intro-store-capacity">1.1</a> shows the findings of this report, notice that every other year, the world’s information has grown tenfold.</p>
+<div class="figure" style="text-align: center"><span id="fig:intro-store-capacity"></span>
+<img src="images/intro-world-store-capacity-resized.png" alt="World’s capacity to store information" width="1500" />
+<p class="caption">
+FIGURE 1.1: World’s capacity to store information
+</p>
 </div>
 <p>With the ambition to provide tools capable of searching all this new digital information, many companies attempted to provide such functionality with what we know today as search engines, used when searching the web. Given the vast amount of digital information, managing information at this scale was a challenging problem. Search engines were unable to store all the web page information required to support web searches in a single computer. This meant that they had to split information into several files and store them across many machines. This approach became known as the Google File System, a research paper published in 2003 by Google. <span class="citation">(Ghemawat, Gobioff, and Leung <a href="#ref-intro-google-file-system">2003</a>)</span></p>
 </div>
 <div id="intro-hadoop" class="section level2">
 <h2><span class="header-section-number">1.2</span> Hadoop</h2>
 <p>One year later, Google published a new paper describing how to perform operations across the Google File System, this approach came to be known as <em>MapReduce</em>. <span class="citation">(Dean and Ghemawat <a href="#ref-intro-google-map-reduce">2004</a>)</span> As you would expect, there are two operations in MapReduce: Map and Reduce. The <em>map operation</em> provides an arbitrary way to transform each file into a new file, while the <em>reduce operation</em> combines two files. Both operations require custom computer code, but the MapReduce framework takes care of automatically executing them across many computers at once. These two operations are sufficient to process all the data available in the web, while also providing enough flexibility to extract meaningful information from it.</p>
-<p>For example, as illustrated in Figure <a href="#fig:intro-mapreduce-example"><strong>??</strong></a>, we can use MapReduce to count words in two different text files stored in different machines. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files.</p>
-<div class="figure">
-<img src="images/intro-simple-map-reduce-example-resized.png" alt="MapReduce example counting words across files||intro-mapreduce-example" />
-<p class="caption">MapReduce example counting words across files||intro-mapreduce-example</p>
+<p>For example, as illustrated in Figure <a href="intro.html#fig:intro-mapreduce-example">1.2</a>, we can use MapReduce to count words in two different text files stored in different machines. The mapping operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word, this last file will contain a list of word counts across all the original files.</p>
+<div class="figure"><span id="fig:intro-mapreduce-example"></span>
+<img src="the-r-in-spark_files/figure-html/intro-mapreduce-example-1.png" alt="MapReduce example counting words across files" width="672" />
+<p class="caption">
+FIGURE 1.2: MapReduce example counting words across files
+</p>
 </div>
 <p>Counting words is often the most basic MapReduce example, but it can be also used for much more sophisticated and interesting applications. For instance, MapReduce can be used to rank web pages in Google’s <em>PageRank</em> algorithm, which assigns ranks to web pages based on the count of hyperlinks linking to a web page and the rank of the page linking to it.</p>
 <p>After these papers were released by Google, a team in Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as <em>Hadoop</em> with the Google File System implemented as the Hadoop File System, or <em>HDFS</em> for short. The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations, making MapReduce useful beyond web data processing.</p>
@@ -447,10 +449,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="intro-spark" class="section level2">
 <h2><span class="header-section-number">1.3</span> Spark</h2>
-<p>In 2009, <em>Apache Spark</em> began as a research project at the UC Berkeley’s AMPLab to improve on MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines, and by loading data in-memory making operations much faster than Hadoop’s on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the Modeling chapter, allowed Spark to run 10 times faster than Hadoop by making use of in-memory datasets <span class="citation">(Zaharia et al. <a href="#ref-intro-zaharia2010spark">2010</a>)</span>, a chart similar to Figure <a href="#fig:intro-spark-logistic-regression"><strong>??</strong></a> was presented in the original research publication.</p>
-<div class="figure">
-<img src="images/intro-hadoop-spark-logistic-regression-resized.png" alt="Logistic regression performance in Hadoop and Spark||intro-spark-logistic-regression" />
-<p class="caption">Logistic regression performance in Hadoop and Spark||intro-spark-logistic-regression</p>
+<p>In 2009, <em>Apache Spark</em> began as a research project at the UC Berkeley’s AMPLab to improve on MapReduce. Specifically, by providing a richer set of verbs beyond MapReduce that facilitate optimizing code running in multiple machines, and by loading data in-memory making operations much faster than Hadoop’s on-disk storage. One of the earliest results showed that running logistic regression, a data modeling technique that will be introduced under the Modeling chapter, allowed Spark to run 10 times faster than Hadoop by making use of in-memory datasets <span class="citation">(Zaharia et al. <a href="#ref-intro-zaharia2010spark">2010</a>)</span>, a chart similar to Figure <a href="intro.html#fig:intro-spark-logistic-regression">1.3</a> was presented in the original research publication.</p>
+<div class="figure"><span id="fig:intro-spark-logistic-regression"></span>
+<img src="images/intro-hadoop-spark-logistic-regression-resized.png" alt="Logistic regression performance in Hadoop and Spark" width="1500" />
+<p class="caption">
+FIGURE 1.3: Logistic regression performance in Hadoop and Spark
+</p>
 </div>
 <p>While Spark is well known for its in-memory performance, Spark was designed to be a general execution engine that works both in-memory and on-disk. For instance, Spark has set new records in large-scale sorting <span class="citation">(“Sort Benchmark” <a href="#ref-intro-sort-benchmark">2014</a>)</span>, where data was not loaded in-memory; but rather, Spark made use of improvements in network serialization, network shuffling and efficient use of the CPU’s cache to dramatically improve performance. If you needed to sort large amounts of data, there was no other system in the world faster than Spark.</p>
 <p>To give you a sense of how much faster and efficient Spark is, you can sort 100 terabytes of data in 72min and 2100 computers using Hadoop, but only 206 computers in 23 minutes using Spark <span class="citation">(“Apache Spark Officially Sets a New Record in Large-Scale Sorting” <a href="#ref-intro-spark-record-sorting">2014</a>)</span>. In addition, Spark holds the cloud sorting benchmark <span class="citation">(“Spark Wins Cloudsort Benchmark as the Most Efficient Engine” <a href="#ref-intro-spark-record-cloudsort">2016</a>)</span>, which made Spark the most cost effective solution for sort large-datasets in the cloud.</p>
@@ -529,10 +533,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </dl>
 <p>Spark is described as an <em>engine</em> since it’s generic and efficient, it optimizes and executes generic code; there are no restrictions as to what type of code one can write in Spark. It is also quite efficient, as we mentioned, Spark is much faster than other technologies by making efficient use of memory, network and CPUs to speed data processing algorithms in computing clusters.</p>
 <p>This makes Spark ideal in many <em>analytics</em> projects like ranking movies at Netflix <span class="citation">(“Netflix at Spark” <a href="#ref-intro-spark-relevance">2018</a>)</span>, aligning protein sequences <span class="citation">(“Bioinformatics Applications on Apache Spark” <a href="#ref-intro-spark-bioinformatics">2018</a>)</span> or analyzing high energy physics at CERN. <span class="citation">(“Apache Spark and Cern Open Data Analysis, an Example” <a href="#ref-intro-spark-cern">2017</a>)</span></p>
-<p>As a <em>unified</em> platform, Spark is expected to support many cluster technologies and multiple data sources, which you will learn about in the Clusters and Data chapters. It is also expected to support many different libraries like Spark SQL, MLlib, GraphX and Spark Streaming; libraries which you can use for analysis, modeling, graph processing and real-time data processing respectively. You can think of Spark as a platform providing access to clusters, data sources and libraries for large-scale computing as illustrated in Figure <a href="#fig:intro-spark-unified"><strong>??</strong></a>.</p>
-<div class="figure">
-<img src="images/intro-spark-capabilities-resized.png" alt="Spark as a unified analytics engine for large-scale data processing||intro-spark-unified" />
-<p class="caption">Spark as a unified analytics engine for large-scale data processing||intro-spark-unified</p>
+<p>As a <em>unified</em> platform, Spark is expected to support many cluster technologies and multiple data sources, which you will learn about in the Clusters and Data chapters. It is also expected to support many different libraries like Spark SQL, MLlib, GraphX and Spark Streaming; libraries which you can use for analysis, modeling, graph processing and real-time data processing respectively. You can think of Spark as a platform providing access to clusters, data sources and libraries for large-scale computing as illustrated in Figure <a href="intro.html#fig:intro-spark-unified">1.4</a>.</p>
+<div class="figure" style="text-align: center"><span id="fig:intro-spark-unified"></span>
+<img src="the-r-in-spark_files/figure-html/intro-spark-unified-1.png" alt="Spark as a unified analytics engine for large-scale data processing" width="100%" height="220pt" />
+<p class="caption">
+FIGURE 1.4: Spark as a unified analytics engine for large-scale data processing
+</p>
 </div>
 <p>Describing Spark as <em>large scale</em> implies that a good use case for Spark is tackling problems that can be solved with multiple machines. For instance, when data does not fit in a single disk driver or does not fit into memory, Spark is a good candidate to consider. However, it can also be considered for problems that may not be large-scale, but where using multiple computers could speed up computation. For instance, CPU intensive models or scientific simulations also benefit from running in Spark.</p>
 <p>Therefore, Spark is good at tackling large-scale data processing problems, this usually known as <em>big data</em> (datasets that are more voluminous and complex that traditional ones <span class="citation">(“Big Data Wikipedia” <a href="#ref-intro-spark-big-data">2019</a>)</span>) but also is good at tackling large-scale computation problems, known as <em>big compute</em> (tools and approaches using a large amount of CPU and memory resources in a coordinated way <span class="citation">(“Big Compute Nimbix” <a href="#ref-intro-spark-big-compute">2019</a>)</span>). Big data often requires big compute but big compute does not necessarily requires big data. <span class="citation">(“Big Compute Vs Big Data” <a href="#ref-intro-spark-big-compute-big-data">2013</a>)</span></p>
@@ -554,10 +560,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="intro-r" class="section level2">
 <h2><span class="header-section-number">1.4</span> R</h2>
-<p>The R computing language has its origins in the S language, created at Bell Laboratories. R was not created at Bell Labs, but its predecessor, the S computing language was. <a href="https://bit.ly/2MSTm0j">Rick Becker explained in useR 2016</a> <span class="citation">(“The History of R’s Predecessor, S, from Co-Creator Rick Becker” <a href="#ref-intro-r-rick-becker-user">2016</a>)</span> that at that time in Bell Labs, computing was done by calling subroutines written in the Fortran language which, apparently, were not pleasant to deal with. The S computing language was designed as an interface language to solve particular problems without having to worry about other languages, such as Fortran. The creator of S, <a href="https://en.wikipedia.org/wiki/John_Chambers_(statistician)">John Chambers</a>, describes in Figure <a href="#fig:intro-r-diagram"><strong>??</strong></a> how S was designed to provide an interface that simplifies data processing, this was presented during <em>useR! 2016</em> as the original diagram that inspired the creation of S.</p>
-<div class="figure">
-<img src="images/intro-s-algorithm-interface-resized.png" alt="Interface language diagram by John Chambers - Rick Becker useR 2016||intro-r-diagram" />
-<p class="caption">Interface language diagram by John Chambers - Rick Becker useR 2016||intro-r-diagram</p>
+<p>The R computing language has its origins in the S language, created at Bell Laboratories. R was not created at Bell Labs, but its predecessor, the S computing language was. <a href="https://bit.ly/2MSTm0j">Rick Becker explained in useR 2016</a> <span class="citation">(“The History of R’s Predecessor, S, from Co-Creator Rick Becker” <a href="#ref-intro-r-rick-becker-user">2016</a>)</span> that at that time in Bell Labs, computing was done by calling subroutines written in the Fortran language which, apparently, were not pleasant to deal with. The S computing language was designed as an interface language to solve particular problems without having to worry about other languages, such as Fortran. The creator of S, <a href="https://en.wikipedia.org/wiki/John_Chambers_(statistician)">John Chambers</a>, describes in Figure <a href="intro.html#fig:intro-r-diagram">1.5</a> how S was designed to provide an interface that simplifies data processing, this was presented during <em>useR! 2016</em> as the original diagram that inspired the creation of S.</p>
+<div class="figure" style="text-align: center"><span id="fig:intro-r-diagram"></span>
+<img src="images/intro-s-algorithm-interface-resized.png" alt="Interface language diagram by John Chambers - Rick Becker useR 2016" width="1500" />
+<p class="caption">
+FIGURE 1.5: Interface language diagram by John Chambers - Rick Becker useR 2016
+</p>
 </div>
 <p>R is a modern and free implementation of S, specifically:</p>
 <blockquote>
@@ -570,12 +578,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <dd>R was designed by statisticians for statisticians, meaning, this is one of the few successful languages designed for non-programmers; so learning R will probably feel more natural. Additionally, since the R language was designed to be an interface to other tools and languages, R allows you to focus more on understanding data and less on peculiarities of computer science and engineering.
 </dd>
 <dt>R Community</dt>
-<dd>The R community provides a rich package archive provided by CRAN (<a href="https://cran.r-project.org/">The Comprehensive R Archive Network</a>) which allows you to install ready-to-use packages to perform many tasks; most notably, high-quality data manipulation, visualization and statistical models, many of which are only available in R. In addition, the R community is a welcoming and active group of talented individuals motivated to help you succeed. Many packages provided by the R community make R, by far, the best option for statistical computing. Some of the most downloaded R packages include: <a href="https://CRAN.R-project.org/package=dplyr">dplyr</a> to manipulate data, <a href="https://CRAN.R-project.org/package=cluster">cluster</a> to analyze clusters and <a href="https://CRAN.R-project.org/package=ggplot2">ggplot2</a> to visualize data. Figure <a href="#fig:intro-cran-downloads"><strong>??</strong></a> quantifies the growth of the R community by plotting daily downloads of R packages in CRAN.
+<dd>The R community provides a rich package archive provided by CRAN (<a href="https://cran.r-project.org/">The Comprehensive R Archive Network</a>) which allows you to install ready-to-use packages to perform many tasks; most notably, high-quality data manipulation, visualization and statistical models, many of which are only available in R. In addition, the R community is a welcoming and active group of talented individuals motivated to help you succeed. Many packages provided by the R community make R, by far, the best option for statistical computing. Some of the most downloaded R packages include: <a href="https://CRAN.R-project.org/package=dplyr">dplyr</a> to manipulate data, <a href="https://CRAN.R-project.org/package=cluster">cluster</a> to analyze clusters and <a href="https://CRAN.R-project.org/package=ggplot2">ggplot2</a> to visualize data. Figure <a href="intro.html#fig:intro-cran-downloads">1.6</a> quantifies the growth of the R community by plotting daily downloads of R packages in CRAN.
 </dd>
 </dl>
-<div class="figure">
-<img src="images/intro-daily-cran-downloads-resized.png" alt="Daily downloads of CRAN packages||intro-cran-downloads" />
-<p class="caption">Daily downloads of CRAN packages||intro-cran-downloads</p>
+<div class="figure" style="text-align: center"><span id="fig:intro-cran-downloads"></span>
+<img src="images/intro-daily-cran-downloads-resized.png" alt="Daily downloads of CRAN packages" width="1500" />
+<p class="caption">
+FIGURE 1.6: Daily downloads of CRAN packages
+</p>
 </div>
 <p>Aside from statistics, R is also used in many other fields. The following ones are particularly relevant to this book:</p>
 <dl>
@@ -627,47 +637,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <h3> References</h3>
 <div id="refs" class="references">
-<div id="ref-intro-information-technology">
-<p>Laudon, Kenneth C, Carol Guercio Traver, and Jane P Laudon. 1996. “Information Technology and Systems.” <em>Cambridge, MA: Course Technology</em>.</p>
-</div>
-<div id="ref-intro-computing-concise-history">
-<p>Ceruzzi, Paul E. 2012. <em>Computing: A Concise History</em>. MIT Press.</p>
-</div>
-<div id="ref-intro-webster2006merriam">
-<p>Webster, Merriam. 2006. “Merriam-Webster Online Dictionary.” <em>Webster, Merriam</em>.</p>
-</div>
-<div id="ref-intro-data-revolution">
-<p>Group, World Bank. 2016. <em>The Data Revolution</em>. World Bank Publications.</p>
-</div>
-<div id="ref-intro-google-file-system">
-<p>Ghemawat, Sanjay, Howard Gobioff, and Shun-Tak Leung. 2003. “The Google File System.” In <em>Proceedings of the Nineteenth Acm Symposium on Operating Systems Principles</em>. New York, NY, USA: ACM.</p>
-</div>
-<div id="ref-intro-google-map-reduce">
-<p>Dean, Jeffrey, and Sanjay Ghemawat. 2004. “MapReduce: Simplified Data Processing on Large Clusters.” In <em>USENIX Symposium on Operating System Design and Implementation (Osdi)</em>.</p>
-</div>
-<div id="ref-intro-zaharia2010spark">
-<p>Zaharia, Matei, Mosharaf Chowdhury, Michael J Franklin, Scott Shenker, and Ion Stoica. 2010. “Spark: Cluster Computing with Working Sets.” <em>HotCloud</em> 10 (10-10): 95.</p>
-</div>
-<div id="ref-intro-sort-benchmark">
-<p>“Sort Benchmark.” 2014. <a href="http://sortbenchmark.org/">http://sortbenchmark.org/</a>.</p>
-</div>
-<div id="ref-intro-spark-record-sorting">
-<p>“Apache Spark Officially Sets a New Record in Large-Scale Sorting.” 2014. <a href="https://bit.ly/2r95oHX">https://bit.ly/2r95oHX</a>.</p>
-</div>
-<div id="ref-intro-spark-record-cloudsort">
-<p>“Spark Wins Cloudsort Benchmark as the Most Efficient Engine.” 2016. <a href="https://bit.ly/2DexBmm">https://bit.ly/2DexBmm</a>.</p>
-</div>
-<div id="ref-intro-spark-relevance">
-<p>“Netflix at Spark.” 2018. <a href="https://bit.ly/2MUlqwf">https://bit.ly/2MUlqwf</a>.</p>
-</div>
-<div id="ref-intro-spark-bioinformatics">
-<p>“Bioinformatics Applications on Apache Spark.” 2018. <a href="https://bit.ly/2KUZEdb">https://bit.ly/2KUZEdb</a>.</p>
-</div>
 <div id="ref-intro-spark-cern">
 <p>“Apache Spark and Cern Open Data Analysis, an Example.” 2017. <a href="https://bit.ly/2KoTGlc">https://bit.ly/2KoTGlc</a>.</p>
 </div>
-<div id="ref-intro-spark-big-data">
-<p>“Big Data Wikipedia.” 2019. <a href="https://bit.ly/2XnLHec">https://bit.ly/2XnLHec</a>.</p>
+<div id="ref-intro-spark-record-sorting">
+<p>“Apache Spark Officially Sets a New Record in Large-Scale Sorting.” 2014. <a href="https://bit.ly/2r95oHX">https://bit.ly/2r95oHX</a>.</p>
 </div>
 <div id="ref-intro-spark-big-compute">
 <p>“Big Compute Nimbix.” 2019. <a href="https://www.nimbix.net/glossary/big-compute/">https://www.nimbix.net/glossary/big-compute/</a>.</p>
@@ -675,20 +649,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="ref-intro-spark-big-compute-big-data">
 <p>“Big Compute Vs Big Data.” 2013. <a href="https://bit.ly/2FhjStV">https://bit.ly/2FhjStV</a>.</p>
 </div>
-<div id="ref-intro-r-rick-becker-user">
-<p>“The History of R’s Predecessor, S, from Co-Creator Rick Becker.” 2016. <a href="https://bit.ly/2MSTm0j">https://bit.ly/2MSTm0j</a>.</p>
+<div id="ref-intro-spark-big-data">
+<p>“Big Data Wikipedia.” 2019. <a href="https://bit.ly/2XnLHec">https://bit.ly/2XnLHec</a>.</p>
 </div>
-<div id="ref-intro-r-for-data-science">
-<p>Wickham, Hadley, and Garrett Grolemund. 2016. <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. O’Reilly Media, Inc.</p>
+<div id="ref-intro-spark-bioinformatics">
+<p>“Bioinformatics Applications on Apache Spark.” 2018. <a href="https://bit.ly/2KUZEdb">https://bit.ly/2KUZEdb</a>.</p>
 </div>
-<div id="ref-intro-statisticsisdatascience">
-<p>Wu, C.F. Jeff. 1997. “Statistics = Data Science?”</p>
+<div id="ref-intro-computing-concise-history">
+<p>Ceruzzi, Paul E. 2012. <em>Computing: A Concise History</em>. MIT Press.</p>
 </div>
 <div id="ref-intro-datascienceindependent">
 <p>Cleveland, William S. 2001. “Data Science: An Action Plan for Expanding the Technical Areas of the Field of Statistics?”</p>
 </div>
-<div id="ref-intro-samuel1959some">
-<p>Samuel, Arthur L. 1959. “Some Studies in Machine Learning Using the Game of Checkers.” <em>IBM Journal of Research and Development</em> 3 (3): 210–29.</p>
+<div id="ref-intro-google-map-reduce">
+<p>Dean, Jeffrey, and Sanjay Ghemawat. 2004. “MapReduce: Simplified Data Processing on Large Clusters.” In <em>USENIX Symposium on Operating System Design and Implementation (Osdi)</em>.</p>
+</div>
+<div id="ref-intro-google-file-system">
+<p>Ghemawat, Sanjay, Howard Gobioff, and Shun-Tak Leung. 2003. “The Google File System.” In <em>Proceedings of the Nineteenth Acm Symposium on Operating Systems Principles</em>. New York, NY, USA: ACM.</p>
+</div>
+<div id="ref-intro-data-revolution">
+<p>Group, World Bank. 2016. <em>The Data Revolution</em>. World Bank Publications.</p>
 </div>
 <div id="ref-intro-hinton2006fast">
 <p>Hinton, Geoffrey E, Simon Osindero, and Yee-Whye Teh. 2006. “A Fast Learning Algorithm for Deep Belief Nets.” <em>Neural Computation</em> 18 (7): 1527–54.</p>
@@ -696,11 +676,41 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="ref-intro-krizhevsky2012imagenet">
 <p>Krizhevsky, Alex, Ilya Sutskever, and Geoffrey E Hinton. 2012. “Imagenet Classification with Deep Convolutional Neural Networks.” In <em>Advances in Neural Information Processing Systems</em>, 1097–1105.</p>
 </div>
+<div id="ref-intro-information-technology">
+<p>Laudon, Kenneth C, Carol Guercio Traver, and Jane P Laudon. 1996. “Information Technology and Systems.” <em>Cambridge, MA: Course Technology</em>.</p>
+</div>
+<div id="ref-intro-spark-relevance">
+<p>“Netflix at Spark.” 2018. <a href="https://bit.ly/2MUlqwf">https://bit.ly/2MUlqwf</a>.</p>
+</div>
 <div id="ref-intro-profvis">
 <p>“Profvis.” 2018. <a href="https://rstudio.github.io/profvis/">https://rstudio.github.io/profvis/</a>.</p>
 </div>
 <div id="ref-intro-rstudio-profiler">
 <p>“RStudio Profiler.” 2018. <a href="https://bit.ly/2RqJPw8">https://bit.ly/2RqJPw8</a>.</p>
+</div>
+<div id="ref-intro-samuel1959some">
+<p>Samuel, Arthur L. 1959. “Some Studies in Machine Learning Using the Game of Checkers.” <em>IBM Journal of Research and Development</em> 3 (3): 210–29.</p>
+</div>
+<div id="ref-intro-sort-benchmark">
+<p>“Sort Benchmark.” 2014. <a href="http://sortbenchmark.org/">http://sortbenchmark.org/</a>.</p>
+</div>
+<div id="ref-intro-spark-record-cloudsort">
+<p>“Spark Wins Cloudsort Benchmark as the Most Efficient Engine.” 2016. <a href="https://bit.ly/2DexBmm">https://bit.ly/2DexBmm</a>.</p>
+</div>
+<div id="ref-intro-r-rick-becker-user">
+<p>“The History of R’s Predecessor, S, from Co-Creator Rick Becker.” 2016. <a href="https://bit.ly/2MSTm0j">https://bit.ly/2MSTm0j</a>.</p>
+</div>
+<div id="ref-intro-webster2006merriam">
+<p>Webster, Merriam. 2006. “Merriam-Webster Online Dictionary.” <em>Webster, Merriam</em>.</p>
+</div>
+<div id="ref-intro-r-for-data-science">
+<p>Wickham, Hadley, and Garrett Grolemund. 2016. <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. O’Reilly Media, Inc.</p>
+</div>
+<div id="ref-intro-statisticsisdatascience">
+<p>Wu, C.F. Jeff. 1997. “Statistics = Data Science?”</p>
+</div>
+<div id="ref-intro-zaharia2010spark">
+<p>Zaharia, Matei, Mosharaf Chowdhury, Michael J Franklin, Scott Shenker, and Ion Stoica. 2010. “Spark: Cluster Computing with Working Sets.” <em>HotCloud</em> 10 (10-10): 95.</p>
 </div>
 </div>
             </section>
@@ -761,8 +771,9 @@ gitbook.start({
     script.type = "text/javascript";
     var src = "true";
     if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(src))
-      src = src.replace(/^https?:/, '');
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
     script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();

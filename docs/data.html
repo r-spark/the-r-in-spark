@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 8 Data | Mastering Apache Spark with R</title>
-  <meta name="description" content="The complete guide to large-scale analysis and modeling.">
-  <meta name="generator" content="bookdown  and GitBook 2.6.7">
+  <meta name="description" content="The complete guide to large-scale analysis and modeling." />
+  <meta name="generator" content="bookdown 0.13 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 8 Data | Mastering Apache Spark with R" />
   <meta property="og:type" content="book" />
@@ -22,17 +21,17 @@
   <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
   
 
-<meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz">
+<meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz" />
 
 
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="connections.html">
-<link rel="next" href="tuning.html">
+<link rel="prev" href="connections.html"/>
+<link rel="next" href="tuning.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -64,7 +63,6 @@ a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
 a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
@@ -423,10 +421,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>For several years, it’s been a common practice to store large datasets in a relational <em>database</em>, a system first proposed in 1970 by Edgar F. Codd. <span class="citation">(Codd <a href="#ref-data-codd-relational">1970</a>)</span> You can think of a database as a collection of tables that are related to one another where each table is carefully designed to hold specific data types and relationships to other tables. Most relational database systems use <em>SQL</em> (Structured Query Language) for querying and maintaining the database. Databases are still widely used today, with good reason – Databases store data reliably and consistently, your bank probably stores account balances in a database and that’s a good practice!</p>
 <p>However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as <em>ETL</em> (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became popular in the 1970s.</p>
 <p>Aside from databases, data is often also loaded into a <em>data warehouse</em>, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. The challenge is that, changing databases and data warehouses is usually a long and delicate process since data needs to be re-indexed and the data from multiple data sources needs to be carefully transformed into single tables that can share across data sources.</p>
-<p>Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a <em>data lake</em> – a system or repository of data stored in its natural format, see Figure <a href="#fig:data-data-lake"><strong>??</strong></a>. Since data lakes make data available in its original format, there is no need to carefully transform it in advance, anyone can use it for analysis which adds significant flexibility over ETL. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure <a href="#fig:data-data-lake"><strong>??</strong></a>.</p>
-<div class="figure">
-<img src="images/data-data-lake.png" alt="Spark processing raw data from a data lakes, databases and data warehouses||data-data-lake" />
-<p class="caption">Spark processing raw data from a data lakes, databases and data warehouses||data-data-lake</p>
+<p>Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a <em>data lake</em> – a system or repository of data stored in its natural format, see Figure <a href="data.html#fig:data-data-lake">8.1</a>. Since data lakes make data available in its original format, there is no need to carefully transform it in advance, anyone can use it for analysis which adds significant flexibility over ETL. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure <a href="data.html#fig:data-data-lake">8.1</a>.</p>
+<div class="figure"><span id="fig:data-data-lake"></span>
+<img src="the-r-in-spark_files/figure-html/data-data-lake-1.png" alt="Spark processing raw data from a data lakes, databases and data warehouses" width="672" />
+<p class="caption">
+FIGURE 8.1: Spark processing raw data from a data lakes, databases and data warehouses
+</p>
 </div>
 <p>In order to support a broad variety of data source, Spark needs to be able to read and write data in several different <em>file formats</em> (CSV, JSON, Parquet, etc), access them while stored in several <em>file systems</em> (HDFS, S3, DBFS, etc) and, potentially, interoperate with other <em>storage systems</em> (databases, data warehouses, etc). We will get to all of that; but first, we will start by presenting how to read, write and copy data using Spark.</p>
 </div>
@@ -436,13 +436,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="paths" class="section level3">
 <h3><span class="header-section-number">8.2.1</span> Paths</h3>
 <p>When analyzing data, loading multiple files into a single data object is a common scenario. In R, we typically use a loop or a functional programming directive to accomplish this. That is because R has to load each file individually into your R session. Let’s create a few CSV files inside a folder and read them with R first,</p>
-<pre class="sourceCode r"><code class="sourceCode r">letters &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x =</span> letters, <span class="dt">y =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(letters))
-
-<span class="kw">dir.create</span>(<span class="st">&quot;data-csv&quot;</span>)
-<span class="kw">write.csv</span>(letters[<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, ], <span class="st">&quot;data-csv/letters1.csv&quot;</span>, <span class="dt">row.names =</span> <span class="ot">FALSE</span>)
-<span class="kw">write.csv</span>(letters[<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, ], <span class="st">&quot;data-csv/letters2.csv&quot;</span>, <span class="dt">row.names =</span> <span class="ot">FALSE</span>)
-
-<span class="kw">do.call</span>(<span class="st">&quot;rbind&quot;</span>, <span class="kw">lapply</span>(<span class="kw">dir</span>(<span class="st">&quot;data-csv&quot;</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>), read.csv))</code></pre>
+<div class="sourceCode" id="cb250"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb250-1" title="1">letters &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x =</span> letters, <span class="dt">y =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(letters))</a>
+<a class="sourceLine" id="cb250-2" title="2"></a>
+<a class="sourceLine" id="cb250-3" title="3"><span class="kw">dir.create</span>(<span class="st">&quot;data-csv&quot;</span>)</a>
+<a class="sourceLine" id="cb250-4" title="4"><span class="kw">write.csv</span>(letters[<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, ], <span class="st">&quot;data-csv/letters1.csv&quot;</span>, <span class="dt">row.names =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb250-5" title="5"><span class="kw">write.csv</span>(letters[<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, ], <span class="st">&quot;data-csv/letters2.csv&quot;</span>, <span class="dt">row.names =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb250-6" title="6"></a>
+<a class="sourceLine" id="cb250-7" title="7"><span class="kw">do.call</span>(<span class="st">&quot;rbind&quot;</span>, <span class="kw">lapply</span>(<span class="kw">dir</span>(<span class="st">&quot;data-csv&quot;</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>), read.csv))</a></code></pre></div>
 <pre><code>  x y
 1 a 1
 2 b 2
@@ -451,10 +451,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 5 b 2
 6 c 3</code></pre>
 <p>In Spark, there is the notion of a folder as a dataset. Instead of enumerating each file, simply pass the path containing all the files. Spark assumes that every file in that folder is part of the same dataset. This implies that the target folder should only be used for data purposes. This is specially important since storage systems like HDFS, store files across multiple machines but conceptually, they are stored in the same folder; when Spark reads the files from this folder, is actually executing distributed code to read each file inside each machine – no data is transferred between machines when distributed files are read!</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)
-
-<span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb252"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb252-1" title="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb252-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)</a>
+<a class="sourceLine" id="cb252-3" title="3"></a>
+<a class="sourceLine" id="cb252-4" title="4"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>)</a></code></pre></div>
 <pre><code># Source: spark&lt;datacsv&gt; [?? x 2]
    x         y
    &lt;chr&gt; &lt;int&gt;
@@ -474,19 +474,19 @@ sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span cla
 <div id="schema" class="section level3">
 <h3><span class="header-section-number">8.2.2</span> Schema</h3>
 <p>When reading data, Spark is able to determine the data source’s column names and column types, also known as the <em>schema</em>. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess what it is. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size datasets. For files that are read over and over again, the additional read time accumulates over time.</p>
-<p>To avoid this, Spark allows you to provide a column definition py providing a <code>columns</code> argument to describe your dataset. You can create this schema by sampling a small portion of the original file yourself,</p>
-<pre class="sourceCode r"><code class="sourceCode r">spec_with_r &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">read.csv</span>(<span class="st">&quot;data-csv/letters1.csv&quot;</span>, <span class="dt">nrows =</span> <span class="dv">10</span>), class)
-spec_with_r</code></pre>
+<p>To avoid this, Spark allows you to provide a column definition by providing a <code>columns</code> argument to describe your dataset. You can create this schema by sampling a small portion of the original file yourself,</p>
+<div class="sourceCode" id="cb254"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb254-1" title="1">spec_with_r &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">read.csv</span>(<span class="st">&quot;data-csv/letters1.csv&quot;</span>, <span class="dt">nrows =</span> <span class="dv">10</span>), class)</a>
+<a class="sourceLine" id="cb254-2" title="2">spec_with_r</a></code></pre></div>
 <pre><code>        x         y 
  &quot;factor&quot; &quot;integer&quot; </code></pre>
 <p>Or you can set the column specification to a vector containing the column types explicitly. The vector’s values are named to match the field names.</p>
-<pre class="sourceCode r"><code class="sourceCode r">spec_explicit &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">x =</span> <span class="st">&quot;character&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;numeric&quot;</span>)
-spec_explicit</code></pre>
+<div class="sourceCode" id="cb256"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb256-1" title="1">spec_explicit &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">x =</span> <span class="st">&quot;character&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;numeric&quot;</span>)</a>
+<a class="sourceLine" id="cb256-2" title="2">spec_explicit</a></code></pre></div>
 <pre><code>          x           y 
 &quot;character&quot;   &quot;numeric&quot; </code></pre>
 <p>The accepted variable types are: <code>integer</code>, <code>character</code>, <code>logical</code>, <code>double</code>, <code>numeric</code>, <code>factor</code>, <code>Date</code> and <code>POSIXct</code>.</p>
 <p>Then, when reading using <code>spark_read_csv()</code>, you can pass <code>col_spec_1</code> to the <code>columns</code> argument to match the names and types of the original file. This helps improve performance since Spark will not have to figure out the column types.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">columns =</span> spec_with_r)</code></pre>
+<div class="sourceCode" id="cb258"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb258-1" title="1"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">columns =</span> spec_with_r)</a></code></pre></div>
 <pre><code># Source: spark&lt;datacsv&gt; [?? x 2]
   x         y
   &lt;chr&gt; &lt;int&gt;
@@ -497,9 +497,9 @@ spec_explicit</code></pre>
 5 b         2
 6 c         3</code></pre>
 <p>The following example shows how to set the field type to something different. However, the new field type needs to be a compatible type in the original dataset. For example, a <code>character</code> field can not be set to <code>numeric</code>. If an incompatible type is used, the file read will fail with an error. Additionally, the following example also changes the names of the original fields.</p>
-<pre class="sourceCode r"><code class="sourceCode r">spec_compatible &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">my_letter =</span> <span class="st">&quot;character&quot;</span>, <span class="dt">my_number =</span> <span class="st">&quot;character&quot;</span>)
-
-<span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">columns =</span> spec_compatible)</code></pre>
+<div class="sourceCode" id="cb260"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb260-1" title="1">spec_compatible &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">my_letter =</span> <span class="st">&quot;character&quot;</span>, <span class="dt">my_number =</span> <span class="st">&quot;character&quot;</span>)</a>
+<a class="sourceLine" id="cb260-2" title="2"></a>
+<a class="sourceLine" id="cb260-3" title="3"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">columns =</span> spec_compatible)</a></code></pre></div>
 <pre><code># Source: spark&lt;datacsv&gt; [?? x 2]
   my_letter my_number
   &lt;chr&gt;     &lt;chr&gt;    
@@ -517,18 +517,18 @@ spec_explicit</code></pre>
 <p>By default, when using Spark with R, when you read data is copied into Sparks distributed memory – making data analysis and other operations very fast. There are cases, such as when the data is too big, where loading all the data may not be practical, or even necessary. For those cases, Spark can then just “map” the files without copying data into memory.</p>
 <p>The mapping creates a sort of “virtual” table in Spark. The implication is that when a query runs against that table, Spark has to read the data from the files at that time. Any consecutive reads after that will do the same. In effect, Spark becomes a pass-through for the data. The advantage of this method is that there is almost no up-front time cost to “reading” the file, the mapping is very fast. The downside is that running queries that actually extract data will take longer.</p>
 <p>This is controlled by the <code>memory</code> argument of the read functions. Setting it to <code>FALSE</code> prevents the data copy. It defaults to <code>TRUE</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r">mapped_csv &lt;-<span class="st"> </span><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>)</code></pre>
+<div class="sourceCode" id="cb262"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb262-1" title="1">mapped_csv &lt;-<span class="st"> </span><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 <p>There are good use cases for this method, one of them is when not all columns of a table are needed. For example, take a very large file that contains many columns, assuming this is not the first time you interact with this data, you would know what columns are needed for the analysis. When know which columns you need, the files can be read using <code>memory = FALSE</code>, and then select the needed columns with <code>dplyr</code>. The resulting <code>dplyr</code> variable can then be cached into memory, using the <code>compute()</code> function. This will make Spark query the file(s), pull the selected fields, and copy only that data into memory. The result is a in-memory table that took comparatively less time to ingest.</p>
-<pre class="sourceCode r"><code class="sourceCode r">mapped_csv <span class="op">%&gt;%</span>
-<span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(y) <span class="op">%&gt;%</span>
-<span class="st">  </span>dplyr<span class="op">::</span><span class="kw">compute</span>(<span class="st">&quot;test&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb263"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb263-1" title="1">mapped_csv <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb263-2" title="2"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(y) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb263-3" title="3"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">compute</span>(<span class="st">&quot;test&quot;</span>)</a></code></pre></div>
 <p>The next subsection covers a short technique to make it easier to carry the original field names of imported data.</p>
 </div>
 <div id="columns" class="section level3">
 <h3><span class="header-section-number">8.2.4</span> Columns</h3>
 <p>Spark 1.6 required that column names be sanitized, so R does that by default. There may be cases when you would like to keep the original names intact, and are also working with Spark version 2.0 or above. To do that set the <code>sparklyr.sanitize.column.names</code> option to <code>FALSE</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">options</span>(<span class="dt">sparklyr.sanitize.column.names =</span> <span class="ot">FALSE</span>)
-<span class="kw">copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</code></pre>
+<div class="sourceCode" id="cb264"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb264-1" title="1"><span class="kw">options</span>(<span class="dt">sparklyr.sanitize.column.names =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb264-2" title="2"><span class="kw">copy_to</span>(sc, iris, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <pre><code># Source:   table&lt;iris&gt; [?? x 5]
 # Database: spark_connection
    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
@@ -550,16 +550,20 @@ spec_explicit</code></pre>
 <div id="write" class="section level2">
 <h2><span class="header-section-number">8.3</span> Write</h2>
 <p>Some projects require that new data generated in Spark to be written back to a remote source. For example, the data could be new predicted values returned by a Spark model. The job processes the mass generation of predictions, but then the predictions need to be stored. This section will focus on how we should use Spark for moving the data from Spark into an external destination.</p>
-<p>Many new users start by downloading Spark data into R, to then upload it to a target. Figure <a href="#fig:data-avoid-approach"><strong>??</strong></a> illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones. The data typically grows in size to the point that it is no longer feasible for R to be the middle point.</p>
-<div class="figure">
-<img src="images/data-r-pass-through.png" alt="Incorrect use of Spark when writing large datasets||data-avoid-approach" />
-<p class="caption">Incorrect use of Spark when writing large datasets||data-avoid-approach</p>
+<p>Many new users start by downloading Spark data into R, to then upload it to a target. Figure <a href="data.html#fig:data-avoid-approach">8.2</a> illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones. The data typically grows in size to the point that it is no longer feasible for R to be the middle point.</p>
+<div class="figure" style="text-align: center"><span id="fig:data-avoid-approach"></span>
+<img src="the-r-in-spark_files/figure-html/data-avoid-approach-1.png" alt="Incorrect use of Spark when writing large datasets" width="672" />
+<p class="caption">
+FIGURE 8.2: Incorrect use of Spark when writing large datasets
+</p>
 </div>
 <p>All efforts should be made to have Spark connect to the target location. This way, reading, processing and writing happens within the same Spark session.</p>
-<p>As Figure <a href="#fig:data-recommended-approach"><strong>??</strong></a> shows, a better approach is to use Spark to read, process, and write to the target. This approach is able to scale as big as the Spark cluster allows, and prevents using R as a choke point.</p>
-<div class="figure">
-<img src="images/data-spark-pass-through.png" alt="Correct use of Spark when writing large datasets||data-recommended-approach" />
-<p class="caption">Correct use of Spark when writing large datasets||data-recommended-approach</p>
+<p>As Figure <a href="data.html#fig:data-recommended-approach">8.3</a> shows, a better approach is to use Spark to read, process, and write to the target. This approach is able to scale as big as the Spark cluster allows, and prevents using R as a choke point.</p>
+<div class="figure" style="text-align: center"><span id="fig:data-recommended-approach"></span>
+<img src="the-r-in-spark_files/figure-html/data-recommended-approach-1.png" alt="Correct use of Spark when writing large datasets" width="672" />
+<p class="caption">
+FIGURE 8.3: Correct use of Spark when writing large datasets
+</p>
 </div>
 <p>Consider the following scenario: A Spark job just processed predictions for a large data set, resulting in a considerably amount of predictions. Choosing a method to write results will depend on the technology infrastructure you are working on. More specifically, it will depend on Spark and the target running, or not, in the same cluster.</p>
 <p>Back to our scenario, we have a large dataset in Spark that needs to be saved. When Spark and the target are in the same cluster, copying the results is not a problem, the data transfer is between RAM and disk of the same cluster or efficiently shuffled through a high-bandwidth connection.</p>
@@ -578,15 +582,15 @@ External Transfer
 <h2><span class="header-section-number">8.4</span> Copy</h2>
 <p>Previous chapters used <code>copy_to()</code> as a handy helper to copy data into Spark; however, <code>copy_to()</code> can only be used to transfer in-memory datasets that are already loaded in memory; this dataset tend to be much smaller than the kind of datasets you would want to copy into Spark.</p>
 <p>For instance, suppose that we have a 3GB dataset generated as follows,</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dir.create</span>(<span class="st">&quot;largefile.txt&quot;</span>)
-<span class="kw">write.table</span>(<span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="dv">10</span><span class="op">^</span><span class="dv">6</span>), <span class="dt">ncol =</span> <span class="dv">10</span>), <span class="st">&quot;largefile.txt/1&quot;</span>,
-            <span class="dt">append =</span> T, <span class="dt">col.names =</span> F, <span class="dt">row.names =</span> F)
-<span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span><span class="dv">30</span>) 
-  <span class="kw">file.copy</span>(<span class="st">&quot;largefile.txt/1&quot;</span>, <span class="kw">paste</span>(<span class="st">&quot;largefile.txt/&quot;</span>, i))</code></pre>
+<div class="sourceCode" id="cb266"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb266-1" title="1"><span class="kw">dir.create</span>(<span class="st">&quot;largefile.txt&quot;</span>)</a>
+<a class="sourceLine" id="cb266-2" title="2"><span class="kw">write.table</span>(<span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="dv">10</span><span class="op">^</span><span class="dv">6</span>), <span class="dt">ncol =</span> <span class="dv">10</span>), <span class="st">&quot;largefile.txt/1&quot;</span>,</a>
+<a class="sourceLine" id="cb266-3" title="3">            <span class="dt">append =</span> T, <span class="dt">col.names =</span> F, <span class="dt">row.names =</span> F)</a>
+<a class="sourceLine" id="cb266-4" title="4"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span><span class="dv">30</span>) </a>
+<a class="sourceLine" id="cb266-5" title="5">  <span class="kw">file.copy</span>(<span class="st">&quot;largefile.txt/1&quot;</span>, <span class="kw">paste</span>(<span class="st">&quot;largefile.txt/&quot;</span>, i))</a></code></pre></div>
 <p>If we only had 2GB of memory in the driver node, we would not be able to load this 3GB file into memory using <code>copy_to()</code>. Instead, when using the Hadoop file system as storage in your cluster, you can use the <code>hadoop</code> command line tool to copy files from disk into Spark from the terminal as follows. Please notice that the following code will only work in clusters using HDFS, not in local environments.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">hadoop</span> fs -copyFromLocal largefile.txt largefile.txt</code></pre>
+<div class="sourceCode" id="cb267"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb267-1" title="1"><span class="ex">hadoop</span> fs -copyFromLocal largefile.txt largefile.txt</a></code></pre></div>
 <p>You can then read the uploaded file as described in the <a href="data.html#data-file-formats">file formats</a> section; for text files, you would run:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>)</code></pre>
+<div class="sourceCode" id="cb268"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb268-1" title="1"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 <pre><code># Source: spark&lt;largefile&gt; [?? x 1]
    line                                                                   
    &lt;chr&gt;                                                                  
@@ -602,18 +606,18 @@ External Transfer
 10 0.6318328148434 -1.08741784644221 -0.550575696474202 0.971967251067794…
 # … with more rows</code></pre>
 <p><code>collect()</code> has a similar limitation, it can only collect datasets that fit your driver memory; however, if you had to extract a large dataset from Spark through the driver node, you could use specialized tools provided by the distributed storage, for HDFS you would run,</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">hadoop</span> fs -copyToLocal largefile.txt largefile.txt</code></pre>
+<div class="sourceCode" id="cb270"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb270-1" title="1"><span class="ex">hadoop</span> fs -copyToLocal largefile.txt largefile.txt</a></code></pre></div>
 <p>Alternatively, you can also collect datasets that don’t fit in-memory by providing a callback to <code>collect()</code>. A callback is just an R function that will be called over each Spark partition, you can then write this dataset to disk or push to other clusters over the network.</p>
 <p>The following code could be use to collect 3GB even if the driver node collecting this dataset had less than 3GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this creates a significant performance bottleneck. For conciseness, we will collect only the first million rows; feel free to remove <code>head(10^6)</code> if you havee a few minutes to spare.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dir.create</span>(<span class="st">&quot;large&quot;</span>)
-<span class="kw">spark_read_text</span>(sc, <span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">head</span>(<span class="dv">10</span><span class="op">^</span><span class="dv">6</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">collect</span>(<span class="dt">callback =</span> <span class="cf">function</span>(df, idx) {
-    <span class="kw">writeLines</span>(df<span class="op">$</span>line, <span class="kw">paste0</span>(<span class="st">&quot;large/large-&quot;</span>, idx, <span class="st">&quot;.txt&quot;</span>))
-  })</code></pre>
+<div class="sourceCode" id="cb271"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb271-1" title="1"><span class="kw">dir.create</span>(<span class="st">&quot;large&quot;</span>)</a>
+<a class="sourceLine" id="cb271-2" title="2"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb271-3" title="3"><span class="st">  </span><span class="kw">head</span>(<span class="dv">10</span><span class="op">^</span><span class="dv">6</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb271-4" title="4"><span class="st">  </span><span class="kw">collect</span>(<span class="dt">callback =</span> <span class="cf">function</span>(df, idx) {</a>
+<a class="sourceLine" id="cb271-5" title="5">    <span class="kw">writeLines</span>(df<span class="op">$</span>line, <span class="kw">paste0</span>(<span class="st">&quot;large/large-&quot;</span>, idx, <span class="st">&quot;.txt&quot;</span>))</a>
+<a class="sourceLine" id="cb271-6" title="6">  })</a></code></pre></div>
 <p>Make sure you clean up these large files and empty your recycle bin as well,</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">unlink</span>(<span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)
-<span class="kw">unlink</span>(<span class="st">&quot;large&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</code></pre>
+<div class="sourceCode" id="cb272"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb272-1" title="1"><span class="kw">unlink</span>(<span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb272-2" title="2"><span class="kw">unlink</span>(<span class="st">&quot;large&quot;</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <p>In most cases, data will already be stored in the cluster, so you should not have to worry about copying large-datasets; instead, you can usually focus on reading and writing different file formats, which we will describe next.</p>
 </div>
 <div id="data-file-formats" class="section level2">
@@ -675,15 +679,15 @@ External Transfer
 <li><p><em>Fail Fast</em>: Aborts if encounters any malformed line.</p></li>
 </ul>
 <p>These can be used in <code>sparklyr</code> by passing them inside the <code>options</code> argument. The following example creates a file with a broken entry. It then shows how it can be read into Spark.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## Creates bad test file</span>
-<span class="kw">writeLines</span>(<span class="kw">c</span>(<span class="st">&quot;bad&quot;</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="st">&quot;broken&quot;</span>), <span class="st">&quot;bad.csv&quot;</span>)
-
-<span class="kw">spark_read_csv</span>(
-  sc,
-  <span class="st">&quot;bad3&quot;</span>,
-  <span class="st">&quot;bad.csv&quot;</span>,
-  <span class="dt">columns =</span> <span class="kw">list</span>(<span class="dt">foo =</span> <span class="st">&quot;integer&quot;</span>),
-  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">mode =</span> <span class="st">&quot;DROPMALFORMED&quot;</span>))</code></pre>
+<div class="sourceCode" id="cb273"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb273-1" title="1"><span class="co">## Creates bad test file</span></a>
+<a class="sourceLine" id="cb273-2" title="2"><span class="kw">writeLines</span>(<span class="kw">c</span>(<span class="st">&quot;bad&quot;</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="st">&quot;broken&quot;</span>), <span class="st">&quot;bad.csv&quot;</span>)</a>
+<a class="sourceLine" id="cb273-3" title="3"></a>
+<a class="sourceLine" id="cb273-4" title="4"><span class="kw">spark_read_csv</span>(</a>
+<a class="sourceLine" id="cb273-5" title="5">  sc,</a>
+<a class="sourceLine" id="cb273-6" title="6">  <span class="st">&quot;bad3&quot;</span>,</a>
+<a class="sourceLine" id="cb273-7" title="7">  <span class="st">&quot;bad.csv&quot;</span>,</a>
+<a class="sourceLine" id="cb273-8" title="8">  <span class="dt">columns =</span> <span class="kw">list</span>(<span class="dt">foo =</span> <span class="st">&quot;integer&quot;</span>),</a>
+<a class="sourceLine" id="cb273-9" title="9">  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">mode =</span> <span class="st">&quot;DROPMALFORMED&quot;</span>))</a></code></pre></div>
 <pre><code># Source: spark&lt;bad3&gt; [?? x 1]
     foo
   &lt;int&gt;
@@ -691,13 +695,13 @@ External Transfer
 2     2
 3     3</code></pre>
 <p>Spark provides an issue tracking column which was hidden by default. To enable it, add <code>_corrupt_record</code> to the <code>columns</code> list. This can be combined with the use of the <em>PERMISSIVE</em> mode. All rows will be imported, invalid entries will receive an <code>NA</code>, and the issue tracked in the <code>_corrupt_record</code> column.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_read_csv</span>(
-  sc,
-  <span class="st">&quot;bad2&quot;</span>,
-  <span class="st">&quot;bad.csv&quot;</span>,
-  <span class="dt">columns =</span> <span class="kw">list</span>(<span class="dt">foo =</span> <span class="st">&quot;integer&quot;</span>, <span class="st">&quot;_corrupt_record&quot;</span> =<span class="st"> &quot;character&quot;</span>),
-  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">mode =</span> <span class="st">&quot;PERMISSIVE&quot;</span>)
-)</code></pre>
+<div class="sourceCode" id="cb275"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb275-1" title="1"><span class="kw">spark_read_csv</span>(</a>
+<a class="sourceLine" id="cb275-2" title="2">  sc,</a>
+<a class="sourceLine" id="cb275-3" title="3">  <span class="st">&quot;bad2&quot;</span>,</a>
+<a class="sourceLine" id="cb275-4" title="4">  <span class="st">&quot;bad.csv&quot;</span>,</a>
+<a class="sourceLine" id="cb275-5" title="5">  <span class="dt">columns =</span> <span class="kw">list</span>(<span class="dt">foo =</span> <span class="st">&quot;integer&quot;</span>, <span class="st">&quot;_corrupt_record&quot;</span> =<span class="st"> &quot;character&quot;</span>),</a>
+<a class="sourceLine" id="cb275-6" title="6">  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">mode =</span> <span class="st">&quot;PERMISSIVE&quot;</span>)</a>
+<a class="sourceLine" id="cb275-7" title="7">)</a></code></pre></div>
 <pre><code># Source: spark&lt;bad2&gt; [?? x 2]
     foo `_corrupt_record`
   &lt;int&gt; &lt;chr&gt;            
@@ -710,21 +714,21 @@ External Transfer
 <div id="json" class="section level3">
 <h3><span class="header-section-number">8.5.2</span> JSON</h3>
 <p>JSON is a file format originally derived from JavaScript which has grown to be language-independent and very popular due to its flexibility and ubiquitous support. Reading and writing JSON files is quite straightforward,</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">writeLines</span>(<span class="st">&quot;{&#39;a&#39;:1, &#39;b&#39;: {&#39;f1&#39;: 2, &#39;f3&#39;: 3}}&quot;</span>, <span class="st">&quot;data.json&quot;</span>)
-simple_json &lt;-<span class="st"> </span><span class="kw">spark_read_json</span>(sc, <span class="st">&quot;data.json&quot;</span>)
-simple_json</code></pre>
+<div class="sourceCode" id="cb277"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb277-1" title="1"><span class="kw">writeLines</span>(<span class="st">&quot;{&#39;a&#39;:1, &#39;b&#39;: {&#39;f1&#39;: 2, &#39;f3&#39;: 3}}&quot;</span>, <span class="st">&quot;data.json&quot;</span>)</a>
+<a class="sourceLine" id="cb277-2" title="2">simple_json &lt;-<span class="st"> </span><span class="kw">spark_read_json</span>(sc, <span class="st">&quot;data.json&quot;</span>)</a>
+<a class="sourceLine" id="cb277-3" title="3">simple_json</a></code></pre></div>
 <pre><code># Source: spark&lt;data&gt; [?? x 2]
       a b         
   &lt;dbl&gt; &lt;list&gt;    
 1     1 &lt;list [2]&gt;</code></pre>
 <p>However, when you deal with dataset containing nested fields like the one from this example; it is worth pointing out how to extract nested fields. One approach is to use a JSON Path, which is a domain specific syntax commonly used to extract and query JSON files, you can use a combination of <code>get_json_object()</code> and <code>to_json()</code> to specify the JSON path you are interested in, to extract <code>f1</code> you would run the following transformation:</p>
-<pre class="sourceCode r"><code class="sourceCode r">simple_json <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw">transmute</span>(<span class="dt">z =</span> <span class="kw">get_json_object</span>(<span class="kw">to_json</span>(b), <span class="st">&#39;$.f1&#39;</span>))</code></pre>
+<div class="sourceCode" id="cb279"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb279-1" title="1">simple_json <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw">transmute</span>(<span class="dt">z =</span> <span class="kw">get_json_object</span>(<span class="kw">to_json</span>(b), <span class="st">&#39;$.f1&#39;</span>))</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [?? x 3]
       a b          z    
   &lt;dbl&gt; &lt;list&gt;     &lt;chr&gt;
 1     1 &lt;list [2]&gt; 2 </code></pre>
 <p>Another approach is to install <code>sparkly.nested</code> from CRAN with <code>install.packages("sparklyr.nested")</code> and then unnest nested data with <code>sdf_unnest()</code>:</p>
-<pre class="sourceCode r"><code class="sourceCode r">sparklyr.nested<span class="op">::</span><span class="kw">sdf_unnest</span>(simple_json, <span class="st">&quot;b&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb281"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb281-1" title="1">sparklyr.nested<span class="op">::</span><span class="kw">sdf_unnest</span>(simple_json, <span class="st">&quot;b&quot;</span>)</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [?? x 3]
       a    f1    f3
   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
@@ -734,21 +738,23 @@ simple_json</code></pre>
 <div id="parquet" class="section level3">
 <h3><span class="header-section-number">8.5.3</span> Parquet</h3>
 <p>Apache Parquet, Apache ORC and Apache AVRO are all file formats designed with performance in mind. Parquet and ORC happen to store data in columnar format while AVRO is row-based, all of them are binary file formats which reduces storage space and improve performance. This at the cost of making them a bit harder to read by external systems and libraries; however, this is usually not an issue when used as intermediate data storage within Spark.</p>
-<p>To illustrate this, Figure <a href="#fig:data-file-format-benchmark"><strong>??</strong></a> plots the result of running a one-million-rows write-speed benchmark using the <code>bench</code> package, please use your own benchmarks over meaningful datasets when deciding which formats fits best your needs.</p>
-<pre class="sourceCode r"><code class="sourceCode r">numeric &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">nums =</span> <span class="kw">runif</span>(<span class="dv">10</span><span class="op">^</span><span class="dv">6</span>)))
-bench<span class="op">::</span><span class="kw">mark</span>(
-  <span class="dt">CSV =</span> <span class="kw">spark_write_csv</span>(numeric, <span class="st">&quot;data.csv&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),
-  <span class="dt">JSON =</span> <span class="kw">spark_write_json</span>(numeric, <span class="st">&quot;data.json&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),
-  <span class="dt">Parquet =</span> <span class="kw">spark_write_parquet</span>(numeric, <span class="st">&quot;data.parquet&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),
-  <span class="dt">ORC =</span> <span class="kw">spark_write_parquet</span>(numeric, <span class="st">&quot;data.orc&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),
-  <span class="dt">iterations =</span> <span class="dv">20</span>
-) <span class="op">%&gt;%</span><span class="st"> </span>ggplot2<span class="op">::</span><span class="kw">autoplot</span>()</code></pre>
-<div class="figure">
-<img src="images/data-file-format-benchmark-resized.png" alt="One million rows write benchmark between CSV, JSON, Parquet and ORC||data-file-format-benchmark" />
-<p class="caption">One million rows write benchmark between CSV, JSON, Parquet and ORC||data-file-format-benchmark</p>
+<p>To illustrate this, Figure <a href="data.html#fig:data-file-format-benchmark">8.4</a> plots the result of running a one-million-rows write-speed benchmark using the <code>bench</code> package, please use your own benchmarks over meaningful datasets when deciding which formats fits best your needs.</p>
+<div class="sourceCode" id="cb283"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb283-1" title="1">numeric &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">nums =</span> <span class="kw">runif</span>(<span class="dv">10</span><span class="op">^</span><span class="dv">6</span>)))</a>
+<a class="sourceLine" id="cb283-2" title="2">bench<span class="op">::</span><span class="kw">mark</span>(</a>
+<a class="sourceLine" id="cb283-3" title="3">  <span class="dt">CSV =</span> <span class="kw">spark_write_csv</span>(numeric, <span class="st">&quot;data.csv&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),</a>
+<a class="sourceLine" id="cb283-4" title="4">  <span class="dt">JSON =</span> <span class="kw">spark_write_json</span>(numeric, <span class="st">&quot;data.json&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),</a>
+<a class="sourceLine" id="cb283-5" title="5">  <span class="dt">Parquet =</span> <span class="kw">spark_write_parquet</span>(numeric, <span class="st">&quot;data.parquet&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),</a>
+<a class="sourceLine" id="cb283-6" title="6">  <span class="dt">ORC =</span> <span class="kw">spark_write_parquet</span>(numeric, <span class="st">&quot;data.orc&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),</a>
+<a class="sourceLine" id="cb283-7" title="7">  <span class="dt">iterations =</span> <span class="dv">20</span></a>
+<a class="sourceLine" id="cb283-8" title="8">) <span class="op">%&gt;%</span><span class="st"> </span>ggplot2<span class="op">::</span><span class="kw">autoplot</span>()</a></code></pre></div>
+<div class="figure" style="text-align: center"><span id="fig:data-file-format-benchmark"></span>
+<img src="images/data-file-format-benchmark-resized.png" alt="One million rows write benchmark between CSV, JSON, Parquet and ORC" width="1500" />
+<p class="caption">
+FIGURE 8.4: One million rows write benchmark between CSV, JSON, Parquet and ORC
+</p>
 </div>
 <p>From now on, please disconnect from Spark whenever we present a new <code>spark_connect()</code> command.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)</code></pre>
+<div class="sourceCode" id="cb284"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb284-1" title="1"><span class="kw">spark_disconnect</span>(sc)</a></code></pre></div>
 <p>This concludes the introduction to some of the out-of-the-box supported file formats, we will present next how to deal with formats that require external packages and customization.</p>
 </div>
 <div id="others" class="section level3">
@@ -758,18 +764,18 @@ bench<span class="op">::</span><span class="kw">mark</span>(
 <p>In <code>sparklyr</code>, the package location is passed to <code>spark_connect()</code>. All packages should be listed in the <code>sparklyr.connect.packages</code> entry of the connection configuration.</p>
 <p>It is possible to access data source types not listed above. Loading the appropriate default package for Spark is the first of two steps The second step is to actually read or write the data. The <code>spark_read_source()</code> and <code>spark_write_source()</code> functions do that. They are generic functions that can use the libraries imported by a default package.</p>
 <p>For instance, we can read XML files as follows:</p>
-<pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(
-  <span class="dt">sparklyr.connect.packages =</span> <span class="st">&quot;com.databricks:spark-xml_2.11:0.5.0&quot;</span>))
-
-<span class="kw">writeLines</span>(<span class="st">&quot;&lt;ROWS&gt;&lt;ROW&gt;&lt;text&gt;Hello World&lt;/text&gt;&lt;/ROW&gt;&quot;</span>, <span class="st">&quot;simple.xml&quot;</span>)
-<span class="kw">spark_read_source</span>(sc, <span class="st">&quot;simple_xml&quot;</span>, <span class="st">&quot;simple.xml&quot;</span>, <span class="st">&quot;xml&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb285"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb285-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb285-2" title="2">  <span class="dt">sparklyr.connect.packages =</span> <span class="st">&quot;com.databricks:spark-xml_2.11:0.5.0&quot;</span>))</a>
+<a class="sourceLine" id="cb285-3" title="3"></a>
+<a class="sourceLine" id="cb285-4" title="4"><span class="kw">writeLines</span>(<span class="st">&quot;&lt;ROWS&gt;&lt;ROW&gt;&lt;text&gt;Hello World&lt;/text&gt;&lt;/ROW&gt;&quot;</span>, <span class="st">&quot;simple.xml&quot;</span>)</a>
+<a class="sourceLine" id="cb285-5" title="5"><span class="kw">spark_read_source</span>(sc, <span class="st">&quot;simple_xml&quot;</span>, <span class="st">&quot;simple.xml&quot;</span>, <span class="st">&quot;xml&quot;</span>)</a></code></pre></div>
 <pre><code># Source: spark&lt;data&gt; [?? x 1]
   text       
   &lt;chr&gt;      
 1 Hello World</code></pre>
 <p>Which you can also write back to XML with ease as follows,</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tbl</span>(sc, <span class="st">&quot;simple_xml&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">spark_write_source</span>(<span class="st">&quot;xml&quot;</span>, <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">path =</span> <span class="st">&quot;data.xml&quot;</span>))</code></pre>
+<div class="sourceCode" id="cb287"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb287-1" title="1"><span class="kw">tbl</span>(sc, <span class="st">&quot;simple_xml&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb287-2" title="2"><span class="st">  </span><span class="kw">spark_write_source</span>(<span class="st">&quot;xml&quot;</span>, <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">path =</span> <span class="st">&quot;data.xml&quot;</span>))</a></code></pre></div>
 <p>In addition, there are a few extensions developed by the R community to load additional file formats, to mention a few: <code>sparklyr.nested</code> to assist with nested data, <code>spark.sas7bdat</code> to read data from SAS, <code>sparkavro</code> to read data in AVRO format and <code>sparkwarc</code> to read WARC files which use extensibility mechanisms introduced in the Extensions chapter. The Distributed R chapter will present techniques to use R packages to load additional file formats and the Contributing chapter presents techniques to use Java libraries to complement this further. But first, let’s explore how to retrieve and store files from several different file systems.</p>
 </div>
 </div>
@@ -779,13 +785,13 @@ bench<span class="op">::</span><span class="kw">mark</span>(
 <p>The file system protocol can be changed when reading or writing. It is done via the <code>path</code> argument of the <code>sparklyr</code> function. For example, a full path of “<a href="file://home/user/file.csv" class="uri">file://home/user/file.csv</a>” will force the use of the local Operating System’s file system.</p>
 <p>There are many other file system protocols like: <code>dbfs://</code> for Databricks’ file system, <code>s3a://</code> for Amazon’s S3 service, <code>wasb://</code> for Microsoft Azure storage, <code>gs://</code> for Google storage, etc.</p>
 <p>Spark does not provide support for all them directly; instead, they are configured as needed. For instance, accessing the “s3a” protocol requires adding a package to the <code>sparklyr.connect.packages</code> configuration setting while connecting and appropriate credentials might need to be specified using the <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> environment variables.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">Sys.setenv</span>(<span class="dt">AWS_ACCESS_KEY_ID =</span> my_key_id)
-<span class="kw">Sys.setenv</span>(<span class="dt">AWS_SECRET_ACCESS_KEY =</span> my_secret_key)
-
-sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(
-  <span class="dt">sparklyr.connect.packages =</span> <span class="st">&quot;org.apache.hadoop:hadoop-aws:2.7.7&quot;</span>))
-
-my_file &lt;-<span class="st"> </span><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;my-file&quot;</span>, <span class="dt">path =</span>  <span class="st">&quot;s3a://my-bucket/my-file.csv&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb288"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb288-1" title="1"><span class="kw">Sys.setenv</span>(<span class="dt">AWS_ACCESS_KEY_ID =</span> my_key_id)</a>
+<a class="sourceLine" id="cb288-2" title="2"><span class="kw">Sys.setenv</span>(<span class="dt">AWS_SECRET_ACCESS_KEY =</span> my_secret_key)</a>
+<a class="sourceLine" id="cb288-3" title="3"></a>
+<a class="sourceLine" id="cb288-4" title="4">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb288-5" title="5">  <span class="dt">sparklyr.connect.packages =</span> <span class="st">&quot;org.apache.hadoop:hadoop-aws:2.7.7&quot;</span>))</a>
+<a class="sourceLine" id="cb288-6" title="6"></a>
+<a class="sourceLine" id="cb288-7" title="7">my_file &lt;-<span class="st"> </span><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;my-file&quot;</span>, <span class="dt">path =</span> <span class="st">&quot;s3a://my-bucket/my-file.csv&quot;</span>)</a></code></pre></div>
 <p>Accessing other file protocol requires loading different packages; although, in some cases, the vendor providing the Spark environment might loading the package for you. Please refer to your vendor’s documentation to find out if that is the case.</p>
 <p>The section file systems in the Appendix contains tips on how to read and write data from specific file systems.</p>
 </div>
@@ -797,39 +803,39 @@ my_file &lt;-<span class="st"> </span><span class="kw">spark_read_csv</span>(sc,
 <h3><span class="header-section-number">8.7.1</span> Hive</h3>
 <p>In YARN managed clusters, Spark provides a deeper integration with Apache Hive. Hive tables are easily accessible after opening a Spark connection.</p>
 <p>Accessing a Hive table’s data can be done using <code>DBI</code>, by referencing a table in a SQL statement.</p>
-<pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)
-<span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;test&quot;</span>, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>)
-
-DBI<span class="op">::</span><span class="kw">dbGetQuery</span>(sc, <span class="st">&quot;SELECT * FROM test limit 10&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb289"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb289-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>)</a>
+<a class="sourceLine" id="cb289-2" title="2"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;test&quot;</span>, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb289-3" title="3"></a>
+<a class="sourceLine" id="cb289-4" title="4">DBI<span class="op">::</span><span class="kw">dbGetQuery</span>(sc, <span class="st">&quot;SELECT * FROM test limit 10&quot;</span>)</a></code></pre></div>
 <p>Another way to reference a table is with <code>dplyr</code> using the <code>tbl()</code> function, which retrieves a reference to the table.</p>
-<pre class="sourceCode r"><code class="sourceCode r">dplyr<span class="op">::</span><span class="kw">tbl</span>(sc, <span class="st">&quot;test&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb290"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb290-1" title="1">dplyr<span class="op">::</span><span class="kw">tbl</span>(sc, <span class="st">&quot;test&quot;</span>)</a></code></pre></div>
 <p>It is important to reiterate that no data is imported into R, the <code>tbl()</code> function only creates a reference. You can then pipe more <code>dplyr</code> verbs following the <code>tbl()</code> command.</p>
-<pre class="sourceCode r"><code class="sourceCode r">dplyr<span class="op">::</span><span class="kw">tbl</span>(sc, <span class="st">&quot;test&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span>dplyr<span class="op">::</span><span class="kw">group_by</span>(y) <span class="op">%&gt;%</span>
-<span class="st">  </span>dplyr<span class="op">::</span><span class="kw">summarise</span>(<span class="dt">totals =</span> <span class="kw">sum</span>(y))</code></pre>
+<div class="sourceCode" id="cb291"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb291-1" title="1">dplyr<span class="op">::</span><span class="kw">tbl</span>(sc, <span class="st">&quot;test&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb291-2" title="2"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">group_by</span>(y) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb291-3" title="3"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">summarise</span>(<span class="dt">totals =</span> <span class="kw">sum</span>(y))</a></code></pre></div>
 <p>Hive table references assume a default database source. Often, the table needed table is in a different database within the Metastore. To access it using SQL, prefix the database name to the table. Separate them using a period.</p>
-<pre class="sourceCode r"><code class="sourceCode r">DBI<span class="op">::</span><span class="kw">dbSendQuery</span>(sc, <span class="st">&quot;SELECT * FROM databasename.table&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb292"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb292-1" title="1">DBI<span class="op">::</span><span class="kw">dbSendQuery</span>(sc, <span class="st">&quot;SELECT * FROM databasename.table&quot;</span>)</a></code></pre></div>
 <p>In <code>dplyr</code>, the <code>in_schema()</code> function can be used. The function is used inside the <code>tbl()</code> call.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tbl</span>(sc, dbplyr<span class="op">::</span><span class="kw">in_schema</span>(<span class="st">&quot;databasename&quot;</span>, <span class="st">&quot;table&quot;</span>))</code></pre>
+<div class="sourceCode" id="cb293"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb293-1" title="1"><span class="kw">tbl</span>(sc, dbplyr<span class="op">::</span><span class="kw">in_schema</span>(<span class="st">&quot;databasename&quot;</span>, <span class="st">&quot;table&quot;</span>))</a></code></pre></div>
 <p>You can also use the <code>tbl_change_db()</code> function to set the current session’s default database. Any subsequent call via <code>DBI</code> or <code>dplyr</code> will use the selected name as the default database.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tbl_change_db</span>(sc, <span class="st">&quot;databasename&quot;</span>)</code></pre>
+<div class="sourceCode" id="cb294"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb294-1" title="1"><span class="kw">tbl_change_db</span>(sc, <span class="st">&quot;databasename&quot;</span>)</a></code></pre></div>
 <p>The following examples require additional Spark packages and database which might be hard to follow unless you happen to have a JDBC driver or Cassandra database accessible to you; therefore, lets disconnect from Spark:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">spark_disconnect</span>(sc)</code></pre>
+<div class="sourceCode" id="cb295"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb295-1" title="1"><span class="kw">spark_disconnect</span>(sc)</a></code></pre></div>
 <p>Next we will explore a less structured storage system, often referred to as NoSQL databases.</p>
 </div>
 <div id="cassandra" class="section level3">
 <h3><span class="header-section-number">8.7.2</span> Cassandra</h3>
 <p>Apache <em>Cassandra</em> is a free and open-source, distributed, wide column store, NoSQL database management system designed to handle large amounts of data across many commodity servers. While there are many other database systems beyond Cassandra, taking a quick look at how Cassandra can be used form Spark will also inform how to make use of other Database and storage systems like Solr, Redshift, Delta Lake, etc.</p>
 <p>The following example code shows how to use the <code>datastax:spark-cassandra-connector</code> package to read from Cassandra. The key is to use the <code>org.apache.spark.sql.cassandra</code> library as the <code>source</code> argument. It provides the mapping Spark can use to make sense of the data source. Unless you have a Cassandra database, skip executing the following statement.</p>
-<pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(
-  <span class="dt">sparklyr.connect.packages =</span> <span class="st">&quot;datastax:spark-cassandra-connector:2.3.1-s_2.11&quot;</span>))
-
-<span class="kw">spark_read_source</span>(
-  sc, 
-  <span class="dt">name =</span> <span class="st">&quot;emp&quot;</span>,
-  <span class="dt">source =</span> <span class="st">&quot;org.apache.spark.sql.cassandra&quot;</span>,
-  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">keyspace =</span> <span class="st">&quot;dev&quot;</span>, <span class="dt">table =</span> <span class="st">&quot;emp&quot;</span>),
-  <span class="dt">memory =</span> <span class="ot">FALSE</span>)</code></pre>
+<div class="sourceCode" id="cb296"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb296-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb296-2" title="2">  <span class="dt">sparklyr.connect.packages =</span> <span class="st">&quot;datastax:spark-cassandra-connector:2.3.1-s_2.11&quot;</span>))</a>
+<a class="sourceLine" id="cb296-3" title="3"></a>
+<a class="sourceLine" id="cb296-4" title="4"><span class="kw">spark_read_source</span>(</a>
+<a class="sourceLine" id="cb296-5" title="5">  sc, </a>
+<a class="sourceLine" id="cb296-6" title="6">  <span class="dt">name =</span> <span class="st">&quot;emp&quot;</span>,</a>
+<a class="sourceLine" id="cb296-7" title="7">  <span class="dt">source =</span> <span class="st">&quot;org.apache.spark.sql.cassandra&quot;</span>,</a>
+<a class="sourceLine" id="cb296-8" title="8">  <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">keyspace =</span> <span class="st">&quot;dev&quot;</span>, <span class="dt">table =</span> <span class="st">&quot;emp&quot;</span>),</a>
+<a class="sourceLine" id="cb296-9" title="9">  <span class="dt">memory =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 <p>One of the most useful features of Spark when dealing with external databases and data warehouses is that, Spark can push down computation to the Database, this is known as <em>pushdown predicates</em>; in a nutshell, it improves performance by asking remote databases smart questions. When you execute a query that contains the <code>filter(age &gt; 20)</code> expression against a remote table referenced through <code>spark_read_source()</code> and not loaded in-memory, rather than bringing the entire table into Spark, it will get passed to the remote database and only a subset of the remote table is retrieved.</p>
 <p>While is ideal to find Spark packages that support the remote storage system, there will be times when a package is not available and vendor JDBC drivers need to be considered.</p>
 </div>
@@ -838,15 +844,15 @@ DBI<span class="op">::</span><span class="kw">dbGetQuery</span>(sc, <span class=
 <p>When a Spark package is not available to provide connectivity, a JDBC connection can be considered. <em>JDBC</em> stands for Java Database Connectivity, t’s an interface for the programming language Java, which defines how a client may access a database.</p>
 <p>It is quite easy to connect to a remote database with <code>spark_read_jdbc()</code> and <code>spark_write_jdbc()</code>; as long as you have access to the appropriate JDBC driver, which at times is trivial and other times quite an adventure. To keep this simple, we can briefly consider how a connection to a remote MySQL database could be accomplished.</p>
 <p>First, you would need to download the appropriate JDBC driver from the MySQL’s developer portal and specify this additional driver as a <code>sparklyr.shell.driver-class-path</code> connection option. Since JDBC drivers are Java-based, the code is contained inside a <em>JAR</em> (Java ARchive) file. Once connected to Spark with the appropriate driver, you can use the <code>jdbc://</code> protocol to access particular drivers and databases. Unless you are willing to download and configure MySQL on your own, skip executing the following statement.</p>
-<pre class="sourceCode r"><code class="sourceCode r">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(
-  <span class="st">&quot;sparklyr.shell.driver-class-path&quot;</span> =
-<span class="st">    &quot;~/Downloads/mysql-connector-java-5.1.41/mysql-connector-java-5.1.41-bin.jar&quot;</span>
-))
-
-<span class="kw">spark_read_jdbc</span>(sc, <span class="st">&quot;person_jdbc&quot;</span>,  <span class="dt">options =</span> <span class="kw">list</span>(
-  <span class="dt">url =</span> <span class="st">&quot;jdbc:mysql://localhost:3306/sparklyr&quot;</span>,
-  <span class="dt">user =</span> <span class="st">&quot;root&quot;</span>, <span class="dt">password =</span> <span class="st">&quot;&lt;password&gt;&quot;</span>,
-  <span class="dt">dbtable =</span> <span class="st">&quot;person&quot;</span>))</code></pre>
+<div class="sourceCode" id="cb297"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb297-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">master =</span> <span class="st">&quot;local&quot;</span>, <span class="dt">version =</span> <span class="st">&quot;2.3&quot;</span>, <span class="dt">config =</span> <span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb297-2" title="2">  <span class="st">&quot;sparklyr.shell.driver-class-path&quot;</span> =</a>
+<a class="sourceLine" id="cb297-3" title="3"><span class="st">    &quot;~/Downloads/mysql-connector-java-5.1.41/mysql-connector-java-5.1.41-bin.jar&quot;</span></a>
+<a class="sourceLine" id="cb297-4" title="4">))</a>
+<a class="sourceLine" id="cb297-5" title="5"></a>
+<a class="sourceLine" id="cb297-6" title="6"><span class="kw">spark_read_jdbc</span>(sc, <span class="st">&quot;person_jdbc&quot;</span>,  <span class="dt">options =</span> <span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb297-7" title="7">  <span class="dt">url =</span> <span class="st">&quot;jdbc:mysql://localhost:3306/sparklyr&quot;</span>,</a>
+<a class="sourceLine" id="cb297-8" title="8">  <span class="dt">user =</span> <span class="st">&quot;root&quot;</span>, <span class="dt">password =</span> <span class="st">&quot;&lt;password&gt;&quot;</span>,</a>
+<a class="sourceLine" id="cb297-9" title="9">  <span class="dt">dbtable =</span> <span class="st">&quot;person&quot;</span>))</a></code></pre></div>
 <p>If you are a customer of particular database vendors, making use of the vendor-provided resources is usually the best place to start looking for appropriate drivers.</p>
 </div>
 </div>
@@ -922,8 +928,9 @@ gitbook.start({
     script.type = "text/javascript";
     var src = "true";
     if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(src))
-      src = src.replace(/^https?:/, '');
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
     script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
