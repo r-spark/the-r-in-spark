@@ -512,7 +512,7 @@ sdf_len(sc, 10) %>%
 
 Notice that `spark_apply()` is still processing two partitions, but in this case, we expect these partitions since we explicitly requested them in `spark_apply()`; therefore, you can safely interpret the results as "there are three integers less than four".
 
-*Note*: You can only group data by partitions that fit in a single machine, if one of the groups is too large, an exception will be thrown. To perform operations over groups that exceed the resources of a single node, you can consider partitioning to smaller units or use `dplyr::do` which is currently optimized for large partitions.
+**Note**: You can only group data by partitions that fit in a single machine, if one of the groups is too large, an exception will be thrown. To perform operations over groups that exceed the resources of a single node, you can consider partitioning to smaller units or use `dplyr::do` which is currently optimized for large partitions.
 
 The takeaway from this section is to always consider partitions when dealing with `spark_apply()`. Next, we will zoom inside `spark_apply()` to understand how columns are interpreted.
 
@@ -702,7 +702,7 @@ The first time you call `spark_apply()` all of the contents in your local `.libP
 
 **Note:** Since packages are copied only once for the duration of the `spark_connect()` connection, installing additional packages is not supported while the connection is active. Therefore, if a new package needs to be installed, spark_disconnect() the connection, modify packages and reconnect. In addition, R packages are not copied in local mode because the packages already exist on the local system.
 
-While this was a short section, using packages with distributed R code opens up and entire new universe of interesting use cases. Somewhere covered in the use cases section, but you can think of many more by looking at the rich ecosystem of R packages available today.
+While this was a short section, using packages with distributed R code opens up an entire new universe of interesting use cases. Somewhere covered in the use cases section, but you can think of many more by looking at the rich ecosystem of R packages available today.
 
 This section completes all the functionality you need to distribute R code with R packages, next we will cover some of the requirements your cluster needs to make use of `spark_apply()`.
 
@@ -791,7 +791,7 @@ Arrow is not required but it is strongly advised while working `spark_apply()`. 
 In addition, to use Apache Arrow with `sparklyr` you also need to install the `arrow` package:
 
 ```{r eval=FALSE}
-devtools::install_github("apache/arrow", subdir = "r", ref = "apache-arrow-0.12.0")
+install.packages("arrow")
 ```
 
 Before we use `arrow`, we will take a measurement to validate 

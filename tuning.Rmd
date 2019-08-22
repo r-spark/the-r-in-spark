@@ -72,7 +72,7 @@ Spark describes all computation steps using a Directed Acyclic Graph (DAG), whic
 
 The best way to understand Spark's computation graph for a given operation, sorting for our example, is to open the last *completed query* under the *SQL* tab in [Spark's web interface](#starting-spark-web-interface). Figure \@ref(fig:tuning-graph-sql-render) shows the resulting graph for this sorting operation, this graph contains the following operations:
 
-- **WholeStageCodegen:* This block describes that the operations it contains were used to generate computer code that was efficiently translated to *byte code**. There is usually a small cost associated with translating operations into byte code, but this is a small cost to pay since then the operations can be executed much faster from Spark. In general, you can ignore this blog and focus on the blocks that it contains.
+- **WholeStageCodegen:** This block describes that the operations it contains were used to generate computer code that was efficiently translated to *byte code*. There is usually a small cost associated with translating operations into byte code, but this is a small cost to pay since then the operations can be executed much faster from Spark. In general, you can ignore this blog and focus on the blocks that it contains.
 - **InMemoryTableScan:** This means that the original dataset `data` was stored in-memory and traversed row-by-row once.
 - **Exchange:** Partitions were exchanged, read shuffled, across executors in your cluster.
 - **Sort:** Once the records arrived at the right executor, they were sorted in this final stage.
@@ -415,10 +415,6 @@ Data loaded in memory will be released when the R session terminates either expl
 tbl_uncache(sc, "iris")
 ```
 
-```{r tuning-caching-disconnect, echo=FALSE}
-spark_disconnect(sc)
-```
-
 ### Checkpointing
 
 Checkpointing is a slightly different type of caching; while it also persists data it will, additionally, break the graph computation lineage. For example, if a cached partition is lost, it can be computed from the computation graph which is not possible while checkpointing since the source of computation is lost.
@@ -427,7 +423,19 @@ When performing expensive computation graphs, it can make sense to checkpoint to
 
 You can checkpoint explicitly by saving to CSV, Parquet, etc. files. Or let Spark checkpoint this for you using `sdf_checkpoint()` in `sparklyr` as follows.
 
+```{r tuning-checkpointing}
+# set checkpoint path
+spark_set_checkpoint_dir(sc, getwd())
+
+# checkpoint the iris dataset
+iris_tbl %>% sdf_checkpoint()
+```
+
 Notice that checkpointing truncates the computation lineage graph, which can speed up performance if the same intermediate result is used multiple times.
+
+```{r tuning-caching-disconnect, echo=FALSE}
+spark_disconnect(sc)
+```
 
 ### Memory {#tuning-memory}
 
@@ -516,7 +524,7 @@ Then, connecting with the same configuration settings becomes much cleaner by us
 sc <- spark_connect(master = "local")
 ```
 
-You can also specify an alternate config file name or location by setting the `file` parameter in `spark_config()`. One additional benefit from using configuration files, is that a system administrator can change the default configuration file without modifying the original one and additional functionality provided by the `config` package, see [github.com/rstudio/config](https://github.com/rstudio/config).
+You can also specify an alternate config file name or location by setting the `file` parameter in `spark_config()`. One additional benefit from using configuration files, is that a system administrator can change the default configuration by changing the value of the `R_CONFIG_ACTIVE` environment variable, see [github.com/rstudio/config](https://github.com/rstudio/config) for additional information.
 
 ## Recap
 

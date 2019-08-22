@@ -33,13 +33,13 @@ Instead of trying to transform all data sources into a common format, you can em
 render_nomnoml("
 #spacing: 20
 #padding: 10
-[Data Lakes|
+[Data Lake|
   [hdfs://data.csv]
   [s3a://data.json]
   [dbfs://data.parquet]
   [wasbs://data.xml]
 ]
-[Data Lakes]->[Spark|
+[Data Lake]->[Spark|
   [<note>spark_read_csv()
   spark_read_json()
   spark_read_parquet()
@@ -118,7 +118,7 @@ Next we will present a technique that allows Spark to read file faster, as well 
 
 When reading data, Spark is able to determine the data source's column names and column types, also known as the *schema*. However, guessing the schema comes at a cost; Spark has to do an initial pass on the data to guess what it is. For large dataset, this may add a significant amount of time to the data ingestion process, which can become costly even for medium size datasets. For files that are read over and over again, the additional read time accumulates over time.
 
-To avoid this, Spark allows you to provide a column definition py providing a `columns` argument to describe your dataset. You can create this schema by sampling a small portion of the original file yourself,
+To avoid this, Spark allows you to provide a column definition by providing a `columns` argument to describe your dataset. You can create this schema by sampling a small portion of the original file yourself,
 
 ```{r data-schema}
 spec_with_r <- sapply(read.csv("data-csv/letters1.csv", nrows = 10), class)
