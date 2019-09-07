@@ -21,13 +21,13 @@ When thinking of contributing back, the most important question you can ask abou
 
 We can start by considering one of the first and simplest lines of code presented in this book, this code was used to load a simple CSV file:
 
-```{r contributing-read}
+```{r contributing-read, eval=FALSE}
 spark_read_csv(sc, "cars.csv")
 ```
 
 For the code above, the answer is probably no, the code is not useful to someone else; however, a more useful example would be to tailor that same example to something someone will actually care about, perhaps:
 
-```{r contributing-read-useful}
+```{r contributing-read-useful, eval=FALSE}
 spark_read_csv(sc, "/path/that/is/hard/to/remember/data.csv")
 ```
 
@@ -35,7 +35,7 @@ The code above is quite similar to the original one; however, assuming that you 
 
 One first attempt would be to save this into a `teamdata.R` file and  write a function wrapping it:
 
-```{r contributing-useful-function}
+```{r contributing-useful-function, eval=FALSE}
 load_team_data <- function() {
   spark_read_text(sc, "/path/that/is/hard/to/remember/data.csv")
 }
@@ -84,10 +84,10 @@ Before we introduce the Spark API, let's consider a simple and well known proble
 ```{r contributing-prepare-count-lines}
 library(sparklyr)
 library(dplyr)
-sc <- spark_connect(master = "local")
+sc <- spark_connect(master = "local", version = "2.3")
 
 cars <- copy_to(sc, mtcars)
-spark_write_csv(cars, "cars.csv")
+spark_write_csv(cars, "cars.csv", mode = "overwrite")
 ```
 
 Now, in order to count how many lines are available in this file we can run:
@@ -106,7 +106,7 @@ Easy enough, we used `spark_read_text()` to read the entire text file, followed 
 
 If you were to do this in Scala, you will be able to find in the Spark documentation that using the Spark API you can count lines in a file as follows:
 
-```{scala contributing-scala-count-lines}
+```{scala contributing-scala-count-lines, eval=FALSE}
 val textFile = spark.read.textFile("cars.csv")
 textFile.count()
 ```
@@ -115,7 +115,7 @@ So, in order to use functionality available in the Spark API from R, like `spark
 
 ```{r contributing-func-count-lines}
 spark_context(sc) %>% 
-  invoke("textFile", file, 1L) %>% 
+  invoke("textFile", "cars.csv", 1L) %>% 
   invoke("count")
 ```
 ```
@@ -127,10 +127,19 @@ While the `invoke()` function was originally designed to call Spark code, it can
 ```{r}
 invoke_new(sc, "java.math.BigInteger", "1000000000")
 ```
+```
+<jobj[225]>
+  java.math.BigInteger
+  1000000000
+```
 
 As you can see, the object that gets created is not an R object but rather -- a proper Java object. In R, this Java object is represented by the `spark_jobj`. These objects are only meant to be used with the `invoke()` functions or `spark_dataframe()` and `spark_connection()`. `spark_dataframe()` transforms a `spark_jobj` into a Spark DataFrame, when possible; while `spark_connect()` retrieves the original Spark connection object, which can be useful to avoid passing the `sc` object across functions.
 
 While calling the Spark API can be useful in some cases, most of the functionality available in Spark is already supported in `sparklyr`; therefore, a more interesting way to extend Spark is by using one of its many existing extensions.
+
+```{r echo=FALSE}
+spark_disconnect(sc)
+```
 
 ## Spark Extensions
 
@@ -140,13 +149,13 @@ For instance, Apache Solr is a "blazing-fast, open source enterprise search plat
 
 First, you would want to search "spark-packages.org" to find out that there is a Solr extension, you should be able to find `spark-solr`. [@contributing-spark-solr] The extension "How to" mentioned that the `com.lucidworks.spark:spark-solr:2.0.1` should be loaded. We can accomplish this in R using the `sparklyr.shell.packages` configuration option:
 
-```{r}
+```{r eval=FALSE}
 config <- spark_config()
 config["sparklyr.shell.packages"] <- "com.lucidworks.spark:spark-solr:3.6.3"
 config["sparklyr.shell.repositories"] <- 
   "http://repo.spring.io/plugins-release/,http://central.maven.org/maven2/"
   
-sc <- spark_connect(master = "local", config = config)
+sc <- spark_connect(master = "local", config = config, version = "2.3")
 ```
 
 While specifying the `sparklyr.shell.packages` parameter is usually enough, for this particular extension, dependencies failed to download from the Spark Packages repository. For the failed dependencies, you would have to manually find them in the Maven repo ([mvnrepository.com](https://mvnrepository.com)) and add additional repositories under the `sparklyr.shell.repositories` parameter.
@@ -155,7 +164,7 @@ While specifying the `sparklyr.shell.packages` parameter is usually enough, for 
 
 From the `spark-solr` documentation, you would find that this extension can be used with the following Scala code:
 
-```{scala}
+```{scala eval=FALSE}
 val options = Map(
   "collection" -> "{solr_collection_name}",
   "zkhost" -> "{zk_connect_string}"
@@ -168,7 +177,7 @@ val df = spark.read.format("solr")
 
 Which we can translate to R code:
 
-```{r}
+```{r eval=FALSE}
 spark_session(sc) %>%
   invoke("read") %>%
   invoke("format", "solr") %>%
@@ -181,7 +190,7 @@ The code above will fail since it would require a valid Solr instance and config
 
 As pointed out in the [Overview](#contributing-overview) section, you should consider sharing code with others using R package. While you could require users of your package to specify `sparklyr.shell.packages`, you can avoid this by registering dependencies in your package. Dependencies are declared under a `spark_dependencies()` function, for the example in this section:
 
-```{r}
+```{r eval=FALSE}
 spark_dependencies <- function(spark_version, scala_version, ...) {
   spark_dependency(
     packages = "com.lucidworks.spark:spark-solr:3.6.3",
@@ -231,21 +240,24 @@ In order to compile Scala code, you will need the Java Development Kit 8 install
 
 You also need a Scala compiler for Scala 2.11 and 2.12 from [https://www.scala-lang.org/](https://www.scala-lang.org); the Scala compilers can be automatically downloaded and installed using `download_scalac`:
 
-```{r contributing-download-scalac}
+```{r contributing-download-scalac, eval = FALSE}
 download_scalac()
 ```
 
 Next you will need to compile your Scala sources using `compile_package_jars()`. By default, it uses `spark_compilation_spec()` which compiles your sources for the following Spark versions:
 
-```{r contributing-scala-code-spec, eval = TRUE, echo = FALSE}
+```{r contributing-scala-code-spec, eval = FALSE, echo = FALSE}
 sapply(sparklyr::spark_default_compilation_spec(), function(e) e$spark_version)
+```
+```
+[1] "1.5.2" "1.6.0" "2.0.0" "2.3.0" "2.4.0"
 ```
 
 You can also customize this specification by creating custom entries with `spark_compilation_spec()`.
 
 While you can create the project structure for Scala code by hand, you can also simply call `spark_extension(path)` to create an extension in the given path; this extension will be mostly empty but will contain the appropriate project structure to call Scala code.
 
-Since `spark_extension()` is registered as a custom project extension in RStudio; you can also create an R package that extends Spark using Scala code from the `File` menu, `New Project...` and selecting `R Package using sparklyr` as shown in Figure \@ref(fig:contributing-r-rstudio-project).
+Since `spark_extension()` is registered as a custom project extension in RStudio; you can also create an R package that extends Spark using Scala code from the `File` menu, `New Project...` and selecting `R Package using Spark` as shown in Figure \@ref(fig:contributing-r-rstudio-project).
 
 ```{r contributing-r-rstudio-project, eval=TRUE, fig.align='center', echo=FALSE, fig.cap='Creating a Scala extension package from RStudio'}
 render_image("images/contributing-r-rstudio-project.png")
@@ -253,7 +265,7 @@ render_image("images/contributing-r-rstudio-project.png")
 
 Once you are ready to compile your package JARs, you can simply run:
 
-```{r}
+```{r eval=FALSE}
 compile_package_jars()
 ```
 
