@@ -240,14 +240,17 @@ In order to compile Scala code, you will need the Java Development Kit 8 install
 
 You also need a Scala compiler for Scala 2.11 and 2.12 from [https://www.scala-lang.org/](https://www.scala-lang.org); the Scala compilers can be automatically downloaded and installed using `download_scalac`:
 
-```{r contributing-download-scalac, eval=FALSE}
+```{r contributing-download-scalac, eval = FALSE}
 download_scalac()
 ```
 
 Next you will need to compile your Scala sources using `compile_package_jars()`. By default, it uses `spark_compilation_spec()` which compiles your sources for the following Spark versions:
 
-```{r contributing-scala-code-spec, eval = TRUE, echo = FALSE}
+```{r contributing-scala-code-spec, eval = FALSE, echo = FALSE}
 sapply(sparklyr::spark_default_compilation_spec(), function(e) e$spark_version)
+```
+```
+[1] "1.5.2" "1.6.0" "2.0.0" "2.3.0" "2.4.0"
 ```
 
 You can also customize this specification by creating custom entries with `spark_compilation_spec()`.
@@ -262,7 +265,7 @@ render_image("images/contributing-r-rstudio-project.png")
 
 Once you are ready to compile your package JARs, you can simply run:
 
-```{r}
+```{r eval=FALSE}
 compile_package_jars()
 ```
 
