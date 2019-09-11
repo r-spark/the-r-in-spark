@@ -1,0 +1,165 @@
+
+# Data {#data}
+
+## Overview
+
+## Read
+
+### Paths
+
+```{r data-paths}
+letters <- data.frame(x = letters, y = 1:length(letters))
+
+dir.create("data-csv")
+write.csv(letters[1:3, ], "data-csv/letters1.csv", row.names = FALSE)
+write.csv(letters[1:3, ], "data-csv/letters2.csv", row.names = FALSE)
+
+do.call("rbind", lapply(dir("data-csv", full.names = TRUE), read.csv))
+```
+
+```{r data-paths-connect}
+library(sparklyr)
+sc <- spark_connect(master = "local", version = "2.3")
+
+spark_read_csv(sc, "data-csv/")
+```
+
+### Schema
+
+```{r data-schema}
+spec_with_r <- sapply(read.csv("data-csv/letters1.csv", nrows = 10), class)
+spec_with_r
+```
+
+```{r data-schema-explicit}
+spec_explicit <- c(x = "character", y = "numeric")
+spec_explicit
+```
+
+```{r data-schema-read-csv}
+spark_read_csv(sc, "data-csv/", columns = spec_with_r)
+```
+
+```{r data-schema-compatible}
+spec_compatible <- c(my_letter = "character", my_number = "character")
+
+spark_read_csv(sc, "data-csv/", columns = spec_compatible)
+```
+
+### Memory
+
+```{r data-memory}
+mapped_csv <- spark_read_csv(sc, "data-csv/", memory = FALSE)
+```
+
+```{r data-memory-compute}
+mapped_csv %>%
+  dplyr::select(y) %>%
+  dplyr::compute("test")
+```
+
+### Columns
+
+```{r data-columns}
+options(sparklyr.sanitize.column.names = FALSE)
+copy_to(sc, iris, overwrite = TRUE)
+```
+
+## Write
+
+## Copy
+
+```{r data-copy-unlink}
+unlink("largefile.txt", recursive = TRUE)
+unlink("large", recursive = TRUE)
+```
+
+## File Formats {#data-file-formats}
+
+```{r data-csv-read-drop}
+## Creates bad test file
+writeLines(c("bad", 1, 2, 3, "broken"), "bad.csv")
+
+spark_read_csv(
+  sc,
+  "bad3",
+  "bad.csv",
+  columns = list(foo = "integer"),
+  options = list(mode = "DROPMALFORMED"))
+```
+
+```{r data-csv-read-bad}
+spark_read_csv(
+  sc,
+  "bad2",
+  "bad.csv",
+  columns = list(foo = "integer", "_corrupt_record" = "character"),
+  options = list(mode = "PERMISSIVE")
+)
+```
+
+```{r data-json-read}
+writeLines("{'a':1, 'b': {'f1': 2, 'f3': 3}}", "data.json")
+simple_json <- spark_read_json(sc, "data.json")
+simple_json
+```
+
+```{r data-json-path}
+simple_json %>% dplyr::transmute(z = get_json_object(to_json(b), '$.f1'))
+```
+
+```{r data-json-unnest}
+sparklyr.nested::sdf_unnest(simple_json, "b")
+```
+
+### Parquet
+
+```{r data-parquet-disconnect}
+spark_disconnect(sc)
+```
+
+### Others
+
+```{r data-other-xml}
+sc <- spark_connect(master = "local", version = "2.3", config = list(
+  sparklyr.connect.packages = "com.databricks:spark-xml_2.11:0.5.0"))
+
+writeLines("<ROWS><ROW><text>Hello World</text></ROW>", "simple.xml")
+spark_read_source(sc, "simple_xml", "simple.xml", "xml")
+```
+
+```{r data-other-xml-write}
+tbl(sc, "simple_xml") %>%
+  spark_write_source("xml", options = list(path = "data.xml"))
+```
+
+## File Systems {#data-file-systems}
+
+## Storage Systems {#data-storage-systems}
+
+### Hive
+
+```{r data-hive-connect}
+sc <- spark_connect(master = "local", version = "2.3")
+spark_read_csv(sc, "test", "data-csv/", memory = FALSE)
+
+DBI::dbGetQuery(sc, "SELECT * FROM test limit 10")
+```
+
+```{r data-hive-tbl}
+dplyr::tbl(sc, "test")
+```
+
+```{r data-hive-group}
+dplyr::tbl(sc, "test") %>%
+  dplyr::group_by(y) %>%
+  dplyr::summarise(totals = sum(y))
+```
+
+```{r data-hive-disconnect}
+spark_disconnect(sc)
+```
+
+### Cassandra
+
+## Recap

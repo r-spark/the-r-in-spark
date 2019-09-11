@@ -1,0 +1,255 @@
+
+# Distributed R {#distributed}
+
+## Overview
+
+```{r distributed-increment-one-code}
+sdf_len(sc, 3) %>% spark_apply(~ 10 * .x)
+```
+
+```{r distributed-overview-sentences}
+sentences <- copy_to(sc, data_frame(text = c("I like apples", "I like bananas")))
+
+sentences %>%
+  spark_apply(~tidytext::unnest_tokens(.x, word, text))
+```
+
+```{r distributed-overview-summarize}
+sentences %>%
+  spark_apply(~tidytext::unnest_tokens(., word, text)) %>%
+  group_by(word) %>%
+  summarise(count = count())
+```
+
+## Use Cases
+
+### Custom Parsers
+
+```{r distributed-parser-read}
+aws_log <- system.file("extdata/log.aws", package = "webreadr")
+webreadr::read_aws(aws_log)
+```
+
+```{r distributed-parser-read-spark}
+spark_read_text(sc, "logs", aws_log, overwrite = TRUE, whole = TRUE) %>%
+  spark_apply(~webreadr::read_aws(.x$contents))
+```
+
+### Partitioned Modeling
+
+```{r distributed-partitioned-copy}
+iris <- copy_to(sc, datasets::iris)
+
+iris %>%
+  spark_apply(nrow, group_by = "Species")
+```
+
+```{r distributed-partitioned-lm}
+iris %>%
+  spark_apply(
+    function(e) summary(lm(Petal_Length ~ Petal_Width, e))$r.squared,
+    names = "r.squared",
+    group_by = "Species")
+```
+
+```{r distributed-partitioned-plot}
+purrr::map(c("versicolor", "virginica", "setosa"),
+  ~dplyr::filter(datasets::iris, Species == !!.x) %>%
+    ggplot2::ggplot(ggplot2::aes(x = Petal.Length, y = Petal.Width)) +
+    ggplot2::geom_point())
+```
+
+### Grid Search {#distributed-grid-search}
+
+```{r distributed-grid-build}
+grid <- list(minsplit = c(2, 5, 10), maxdepth = c(1, 3, 8)) %>%
+  purrr:::cross_df() %>%
+  copy_to(sc, ., repartition = 9)
+grid
+```
+
+```{r distributed-grid-apply}
+spark_apply(
+  grid,
+  function(grid, cars) {
+    model <- rpart::rpart(
+      am ~ hp + mpg,
+      data = cars,
+      control = rpart::rpart.control(minsplit = grid$minsplit,
+                                     maxdepth = grid$maxdepth)
+    )
+    dplyr::mutate(
+      grid,
+      accuracy = mean(round(predict(model, dplyr::select(cars, -am))) == cars$am)
+    )
+  },
+  context = mtcars)
+```
+
+### Web APIs
+
+### Simulations
+
+```{r distributed-sim-rayrender}
+library(rayrender)
+
+scene <- generate_ground(material = lambertian()) %>%
+  add_object(sphere(material = metal(color="orange"), z = -2)) %>%
+  add_object(sphere(material = metal(color="orange"), z = +2)) %>%
+  add_object(sphere(material = metal(color="orange"), x = -2))
+
+render_scene(scene, lookfrom = c(10, 5, 0), parallel = TRUE)
+```
+
+```{r distributed-partitions-num}
+sdf_len(sc, 10) %>% sdf_num_partitions()
+```
+
+```{r distributed-partitions-apply}
+sdf_len(sc, 10) %>%
+  spark_apply(~nrow(.x)) %>%
+  sdf_repartition(1) %>%
+  spark_apply(~sum(.x))
+```
+
+## Grouping
+
+```{r distributed-grouping-parallel}
+sdf_len(sc, 10) %>%
+  transmute(groups = id < 4) %>%
+  spark_apply(~nrow(.x), group_by = "groups")
+```
+
+## Columns
+
+```{r distributed-columns}
+sdf_len(sc, 1) %>%
+  spark_apply(~ data.frame(numbers = 1, names = "abc"))
+```
+
+```{r distributed-columns-explicit}
+sdf_len(sc, 1) %>%
+  spark_apply(
+    ~ data.frame(numbers = 1, names = "abc"),
+    columns = list(numbers = "double", names = "character"))
+```
+
+## Context
+
+```{r distributed-context}
+sdf_len(sc, 4) %>%
+  spark_apply(
+    function(data, context) context * data,
+    context = 100
+  )
+```
+
+```{r distributed-context-list}
+sdf_len(sc, 4) %>%
+  spark_apply(
+    ~.y$m * .x + .y$b,
+    context = list(b = 2, m = 10)
+  )
+```
+
+## Functions
+
+```{r distributed-functions-workaround}
+func_a <- function() 40
+func_b <- function() func_a() + 1
+func_c <- function() func_b() + 1
+
+sdf_len(sc, 1) %>% spark_apply(function(df, context) {
+  for (name in names(context)) assign(name, context[[name]], envir = .GlobalEnv)
+  func_c()
+}, context = list(
+  func_a = func_a,
+  func_b = func_b,
+  func_c = func_c
+))
+```
+
+## Packages
+
+```{r distributed-packages}
+spark_apply(
+  iris,
+  function(e) broom::tidy(lm(Petal_Length ~ Petal_Width, e)),
+  names = c("term", "estimate", "std.error", "statistic", "p.value"),
+  group_by = "Species")
+```
+
+## Cluster Requirements
+
+### Installing R
+
+### Apache Arrow
+
+```{r eval=FALSE, exercise=TRUE}
+install.packages("arrow")
+```
+
+## Troubleshooting
+
+```{r}
+spark_log(sc, filter = "terminated unexpectedly")
+```
+
+```{r}
+sdf_len(sc, 1) %>% spark_apply(~tryCatch(
+    stop("force an error"),
+    error = function(e) e$message
+))
+```
+
+### Worker Logs
+
+```{r distributed-logs}
+sdf_len(sc, 1) %>% spark_apply(function(df) {
+  worker_log("the first column in the data frame is named ", names(df)[[1]])
+  df
+})
+```
+
+```{r distributed-logs-filter}
+spark_log(sc, filter = "sparklyr: RScript")
+```
+
+```{r distributed-force-error-log}
+spark_log(sc)
+```
+
+### Resolving Timeouts
+
+```{r}
+sdf_len(sc, 3, repartition = 3) %>%
+  spark_apply(~ download.file("https://google.com", "index.html") +
+                file.size("index.html"))
+```
+
+```{r}
+config <- spark_config()
+config["spark.speculation"] <- TRUE
+config["spark.speculation.multiplier"] <- 4
+```
+
+### Inspecting Partition
+
+```{r distributed-worker-partitions}
+sdf_len(sc, 3) %>% spark_apply(function(x) {
+    worker_log("processing ", digest::digest(x), " partition")
+    # your code
+    x
+})
+```
+
+```{r distributed-worker-partitions-collect}
+sdf_len(sc, 3) %>% spark_apply(function(x) {
+    if (identical(digest::digest(x),
+                  "f35b1c321df0162e3f914adfb70b5416")) x else x[0,]
+}) %>% collect()
+```
+
+### Debugging Workers
+
+## Recap

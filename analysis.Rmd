@@ -100,7 +100,7 @@ In order to practice as you learn, the rest of this chapter's code will use a si
 
 This chapter will make use of packages that you might not have installed; so first, make sure the following packages are installed by running:
 
-```{r eval=FALSE}
+```{r eval=FALSE, exercise=TRUE}
 install.packages("ggplot2")
 install.packages("corrr")
 install.packages("dbplot")
@@ -161,7 +161,7 @@ The main goal is to write the data transformations using R syntax as much as pos
 
 In the R environment, *cars* can be treated as if it is a local data frame, so `dplyr` verbs can be used. For instance, we can find out the mean of all columns as with `summarise_all()`:
 
-```{r analysis-summarize-all, eval = FALSE}
+```{r analysis-summarize-all}
 summarize_all(cars, mean)
 ```
 ```
@@ -173,7 +173,7 @@ summarize_all(cars, mean)
 
 While this code is exactly the same as the code you would run when using `dplyr` without Spark, a lot is happening under the hood! The data is NOT being imported into R; instead,`dplyr` converts this task into SQL statements that are then sent to Spark. The `show_query()` command makes it possible to peer into the SQL statement that `sparklyr` and `dplyr` created and sent to Spark. We can also use this time to introduce the pipe (`%>%`) operator, a custom operator from the `magrittr` package that takes pipes a computation into the first argument of the next function, making your data analysis much easier to read.
 
-```{r analysis-summarize-show-query, eval = FALSE}
+```{r analysis-summarize-show-query}
 summarize_all(cars, mean) %>%
   show_query()
 ```

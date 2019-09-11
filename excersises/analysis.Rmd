@@ -1,0 +1,163 @@
+
+# Analysis {#analysis}
+
+## Overview {#analysis-overview}
+
+```{r eval=FALSE, exercise=TRUE}
+install.packages("ggplot2")
+install.packages("corrr")
+install.packages("dbplot")
+install.packages("rmarkdown")
+```
+
+```{r}
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local", version = "2.3")
+```
+
+## Import
+
+```{r analysis-copy-to}
+cars <- copy_to(sc, mtcars)
+```
+
+## Wrangle
+
+```{r analysis-summarize-all}
+summarize_all(cars, mean)
+```
+
+```{r analysis-summarize-show-query}
+summarize_all(cars, mean) %>%
+  show_query()
+```
+
+```{r analysis-group-summarize}
+cars %>%
+  mutate(transmission = ifelse(am == 0, "automatic", "manual")) %>%
+  group_by(transmission) %>%
+  summarise_all(mean)
+```
+
+### Built-in Functions
+
+```{r analysis-percentile}
+summarise(cars, mpg_percentile = percentile(mpg, 0.25))
+```
+
+```{r analysis-percentile-query}
+summarise(cars, mpg_percentile = percentile(mpg, 0.25)) %>%
+  show_query()
+```
+
+```{r analysis-percentile-rename}
+summarise(cars, mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75)))
+```
+
+```{r analysis-percentile-mutate}
+summarise(cars, mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75))) %>%
+  mutate(mpg_percentile = explode(mpg_percentile))
+```
+
+### Correlations
+
+```{r analysis-corrr-cars}
+ml_corr(cars)
+```
+
+```{r analysis-corrr-pairwise}
+library(corrr)
+correlate(cars, use = "pairwise.complete.obs", method = "pearson") 
+```
+
+```{r analysis-corrr-show}
+correlate(cars, use = "pairwise.complete.obs", method = "pearson") %>%
+  shave() %>%
+  rplot()
+```
+
+## Visualize
+
+### Using ggplot2
+
+```{r analysis-ggplot2-simple, eval = TRUE, out.width='500pt', out.height='400pt', fig.cap='Plotting inside R', fig.align = 'center'}
+library(ggplot2)
+ggplot(aes(as.factor(cyl), mpg), data = mtcars) + geom_col()
+```
+
+```{r analysis-ggplot2-simmarise}
+car_group <- cars %>%
+  group_by(cyl) %>%
+  summarise(mpg = sum(mpg, na.rm = TRUE)) %>%
+  collect() %>%
+  print()
+```
+
+```{r analysis-ggplot2-groups}
+ggplot(aes(as.factor(cyl), mpg), data = car_group) + 
+  geom_col(fill = "#999999") + coord_flip()
+```
+
+### Using dbplot
+
+```{r  analysis-dbplot-simple}
+library(dbplot)
+
+cars %>%
+dbplot_histogram(mpg, binwidth = 3) +
+labs(title = "MPG Distribution",
+     subtitle = "Histogram over miles per gallon")
+```
+
+## Model
+
+### Caching
+
+## Communicate
+
+```{r analysis-disconnect}
+spark_disconnect(sc)
+```
+
+````markdown
+---
+title: "mtcars analysis"
+output:
+  html_document: 
+    fig_width: 6 
+    fig_height: 3
+---
+`r ''````{r, setup, include = FALSE}
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local", version = "2.3")
+cars <- copy_to(sc, mtcars)
+```
+
+## Visualize
+Aggregate data in Spark, visualize in R.
+`r ''````{r  fig.align='center', warning=FALSE}
+library(ggplot2)
+cars %>%
+  group_by(cyl) %>% summarise(mpg = mean(mpg)) %>%
+  ggplot(aes(cyl, mpg)) + geom_bar(stat="identity")
+```
+
+## Model
+The selected model was a simple linear regression that 
+uses the weight as the predictor of MPG
+
+`r ''````{r}
+cars %>%
+  ml_linear_regression(wt ~ mpg) %>%
+  summary()
+```
+`r ''````{r, include = FALSE}
+spark_disconnect(sc)
+```
+````
+
+## Recap
