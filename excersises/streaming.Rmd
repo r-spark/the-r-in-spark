@@ -1,0 +1,169 @@
+
+# Streaming {#streaming}
+
+## Overview
+
+```{r}
+dir.create("source")
+```
+
+```{r streaming-overview-copy}
+stream <- stream_read_text(sc, "source/") %>%
+  stream_write_text("destination/")
+```
+
+```{r streaming-overview-test}
+future::future(stream_generate_test(interval = 0.5))
+```
+
+## Transformations 
+
+### Analysis
+
+```{r streaming-analysis}
+library(dplyr)
+
+stream_read_csv(sc, "source") %>%
+  filter(x > 700) %>%
+  mutate(y = round(x / 100))
+```
+
+```{r streaming-analysis-aggregations}
+stream_read_csv(sc, "source") %>%
+  filter(x > 700) %>%
+  mutate(y = round(x / 100)) %>%
+  count(y) 
+```
+
+```{r streaming-analysis-watermark}
+stream_read_csv(sc, "source") %>%
+  stream_watermark()
+```
+
+```{r streaming-analysis-watermark-agg}
+stream_read_csv(sc, "source") %>%
+  stream_watermark() %>%
+  group_by(timestamp) %>%
+  summarise(
+    max_x = max(x, na.rm = TRUE),
+    min_x = min(x, na.rm = TRUE),
+    count = n()
+  ) 
+```
+
+### Modeling
+
+```{r streaming-modeling-featureese}
+stream_read_csv(sc, "source") %>%
+  mutate(x = as.numeric(x)) %>%
+  ft_bucketizer("x", "buckets", splits = 0:10 * 100) %>%
+  count(buckets)  %>%
+  arrange(buckets)
+```
+
+### Pipelines
+
+```{r streaming-pipelines}
+cars <- copy_to(sc, mtcars)
+
+model <- ml_pipeline(sc) %>%
+  ft_binarizer("mpg", "over_30", 30) %>%
+  ft_r_formula(over_30 ~ wt) %>%
+  ml_logistic_regression() %>%
+  ml_fit(cars)
+```
+
+```{r streaming-pipelines-transform}
+future::future(stream_generate_test(mtcars, "cars-stream", iterations = 5))
+
+ml_transform(model, stream_read_csv(sc, "cars-stream"))
+```
+
+### Distributed R {streaming-r-code}
+
+```{r streaming-distributed}
+stream_read_csv(sc, "cars-stream") %>%
+  select(mpg) %>%
+  spark_apply(~ round(.x), mpg = "integer") %>%
+  stream_write_csv("cars-round")
+```
+
+```{r streaming-distributed-read}
+spark_read_csv(sc, "cars-round")
+```
+
+```{r streaming-distributed-disconnect}
+spark_disconnect(sc)
+```
+
+## Kafka
+
+```{r streaming-kafka-connect}
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local", config = list(
+  sparklyr.shell.packages = "org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0"
+))
+```
+
+## Shiny
+
+```{r streaming-shiny, eval=FALSE, exercise=TRUE}
+library(sparklyr)
+library(shiny)
+
+unlink("shiny-stream", recursive = TRUE)
+dir.create("shiny-stream", showWarnings = FALSE)
+
+sc <- spark_connect(
+  master = "local", version = "2.3",
+  config = list(sparklyr.sanitize.column.names = FALSE))
+  
+ui <- pageWithSidebar(
+  headerPanel('Iris k-means clustering from Spark stream'),
+  sidebarPanel(
+    selectInput('xcol', 'X Variable', names(iris)),
+    selectInput('ycol', 'Y Variable', names(iris),
+                selected=names(iris)[[2]]),
+    numericInput('clusters', 'Cluster count', 3,
+                 min = 1, max = 9)
+  ),
+  mainPanel(plotOutput('plot1'))
+)
+
+server <- function(input, output, session) {
+  iris <- stream_read_csv(sc, "shiny-stream",
+                          columns = sapply(datasets::iris, class)) %>%
+    reactiveSpark()
+  
+  selectedData <- reactive(iris()[, c(input$xcol, input$ycol)])
+  clusters <- reactive(kmeans(selectedData(), input$clusters))
+  
+  output$plot1 <- renderPlot({
+    par(mar = c(5.1, 4.1, 0, 1))
+    plot(selectedData(), col = clusters()$cluster, pch = 20, cex = 3)
+    points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+```{r eval=FALSE, exercise=TRUE}
+shiny::runApp("shiny/shiny-stream.R")
+```
+
+```{r eval=FALSE, exercise=TRUE}
+sparklyr::stream_generate_test(datasets::iris, "shiny/shiny-stream",
+                               rep(5, 10^3))
+```
+
+```{r}
+spark_disconnect(sc)
+
+unlink(c("source", "destination", "cars-stream",
+         "car-round", "shiny/shiny-stream"), recursive = TRUE)
+```
+
+## Recap

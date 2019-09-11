@@ -1,0 +1,290 @@
+
+# Pipelines {#pipelines}
+
+## Overview
+
+```{r}
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local", version = "2.3")
+
+scaler <- ft_standard_scaler(
+  sc,
+  input_col = "features",
+  output_col = "features_scaled",
+  with_mean = TRUE)
+
+scaler
+```
+
+```{r}
+df <- copy_to(sc, data.frame(value = rnorm(100000))) %>% 
+  ft_vector_assembler(input_cols = "value", output_col = "features")
+
+scaler_model <- ml_fit(scaler, df)
+scaler_model
+```
+
+```{r}
+scaler_model %>% 
+  ml_transform(df) %>%
+  glimpse()
+```
+
+## Creation
+
+```{r pipelines-create}
+ml_pipeline(sc) %>% 
+  ft_standard_scaler(
+    input_col = "features",
+    output_col = "features_scaled", 
+    with_mean = TRUE)
+```
+
+```{r pipelines-create-stages}
+pipeline <- ml_pipeline(scaler)
+```
+
+```{r pipelines-create-fit}
+pipeline_model <- ml_fit(pipeline, df)
+pipeline_model
+```
+
+## Use Cases
+
+```{r pipelines-use-load}
+okc_train <- spark_read_parquet(sc, "data/okc-train.parquet")
+
+okc_train <- okc_train %>% 
+  select(not_working, age, sex, drinks, drugs, essay1:essay9, essay_length)
+```
+
+```{r pipelines-use-stages}
+pipeline <- ml_pipeline(sc) %>%
+  ft_string_indexer(input_col = "sex", output_col = "sex_indexed") %>%
+  ft_string_indexer(input_col = "drinks", output_col = "drinks_indexed") %>%
+  ft_string_indexer(input_col = "drugs", output_col = "drugs_indexed") %>%
+  ft_one_hot_encoder_estimator(
+    input_cols = c("sex_indexed", "drinks_indexed", "drugs_indexed"),
+    output_cols = c("sex_encoded", "drinks_encoded", "drugs_encoded")
+  ) %>%
+  ft_vector_assembler(
+    input_cols = c("age", "sex_encoded", "drinks_encoded", 
+                   "drugs_encoded", "essay_length"), 
+    output_col = "features"
+  ) %>%
+  ft_standard_scaler(input_col = "features", output_col = "features_scaled", 
+                     with_mean = TRUE) %>%
+  ml_logistic_regression(features_col = "features_scaled", 
+                         label_col = "not_working")
+```
+
+```{r pipelines-use-train}
+okc_train %>%
+  ft_string_indexer("sex", "sex_indexed") %>% 
+  select(sex_indexed)
+```
+
+### Hyperparameter Tuning
+
+```{r pipelines-hyper-validator}
+cv <- ml_cross_validator(
+  sc,
+  estimator = pipeline,
+  estimator_param_maps = list(
+    standard_scaler = list(with_mean = c(TRUE, FALSE)),
+    logistic_regression = list(
+      elastic_net_param = c(0.25, 0.75),
+      reg_param = c(1e-2, 1e-3)
+    )
+  ),
+  evaluator = ml_binary_classification_evaluator(sc, label_col = "not_working"),
+  num_folds = 10)
+```
+
+```{r pipelines-hyper-validator-print}
+cv
+```
+
+```{r pipelines-hyper-fit}
+cv_model <- ml_fit(cv, okc_train)
+```
+
+```{r pipelines-hyper-roc}
+ml_validation_metrics(cv_model) %>%
+  arrange(-areaUnderROC)
+```
+
+## Operating Modes
+
+## Interoperability
+
+```{r pipelines-interop-save}
+model_dir <- file.path("spark_model")
+ml_save(cv_model$best_model, model_dir, overwrite = TRUE)
+```
+
+```{r pipelines-interop-list}
+list.dirs(model_dir,full.names = FALSE) %>%
+  head(10)
+```
+
+```{r pipelines-interop-json}
+spark_read_json(sc, file.path(
+  file.path(dir(file.path(model_dir, "stages"),
+                pattern = "1_string_indexer.*",
+                full.names = TRUE), "metadata")
+)) %>% 
+  glimpse()
+```
+
+```{r pipelines-interop-parquet}
+spark_read_parquet(sc, file.path(
+  file.path(dir(file.path(model_dir, "stages"),
+                pattern = "6_logistic_regression.*",
+                full.names = TRUE), "data")
+))
+```
+
+```{r pipelines-interop-load}
+model_reload <- ml_load(sc, model_dir)
+```
+
+```{r pipelines-interop-stages}
+ml_stage(model_reload, "logistic_regression")
+```
+
+```{r pipelines-interop-disconnect}
+spark_disconnect(sc)
+```
+
+## Deployment
+
+### Batch Scoring
+
+```{r eval=FALSE, exercise=TRUE}
+install.packages(c("plumber", "callr", "httr"))
+```
+
+```{r pipelines-batch-score}
+library(sparklyr)
+sc <- spark_connect(master = "local", version = "2.3")
+
+spark_model <- ml_load(sc, "spark_model")
+
+#* @post /predict
+score_spark <- function(age, sex, drinks, drugs, essay_length) {
+  new_data <- data.frame(
+    age = age,
+    sex = sex,
+    drinks = drinks,
+    drugs = drugs,
+    essay_length = essay_length,
+    stringsAsFactors = FALSE
+  )
+  new_data_tbl <- copy_to(sc, new_data, overwrite = TRUE)
+  
+  ml_transform(spark_model, new_data_tbl) %>%
+    dplyr::pull(prediction)
+}
+```
+
+```{r pipelines-batch-plumber}
+service <- callr::r_bg(function() {
+  p <- plumber::plumb("plumber/spark-plumber.R")
+  p$run(port = 8000)
+})
+```
+
+```{r pipelines-batch-post}
+httr::content(httr::POST(
+  "http://127.0.0.1:8000/predict",
+  body = '{"age": 42, "sex": "m", "drinks": "not at all", 
+           "drugs": "never", "essay_length": 99}'
+))
+```
+
+```{r pipelines-batch-interrrupt}
+service$interrupt()
+```
+
+### Real-Time Scoring
+
+```{r eval=FALSE, exercise=TRUE}
+install.packages("mleap")
+```
+
+```{r pipelines-realtime-load-libs}
+library(sparklyr)
+library(mleap)
+```
+
+```{r pipelines-realtime-load}
+spark_model <- ml_load(sc, "spark_model")
+```
+
+```{r pipelines-realtime-write}
+sample_input <- data.frame(
+  sex = "m",
+  drinks = "not at all",
+  drugs = "never",
+  essay_length = 99,
+  age = 25,
+  stringsAsFactors = FALSE
+)
+
+sample_input_tbl <- copy_to(sc, sample_input)
+
+ml_write_bundle(spark_model, sample_input_tbl, "mleap_model.zip", overwrite = TRUE)
+```
+
+```{r pipelines-realtime-disconnect}
+spark_disconnect(sc)
+```
+
+```{r pipelines-realtime-install}
+mleap::install_maven()
+mleap::install_mleap()
+```
+
+```{r pipelines-realtime-mleap-load}
+library(mleap)
+
+mleap_model <- mleap_load_bundle("mleap_model.zip")
+
+#* @post /predict
+score_spark <- function(age, sex, drinks, drugs, essay_length) {
+  new_data <- data.frame(
+    age = as.double(age),
+    sex = sex,
+    drinks = drinks,
+    drugs = drugs,
+    essay_length = as.double(essay_length),
+    stringsAsFactors = FALSE
+  )
+  mleap_transform(mleap_model, new_data)$prediction
+}
+```
+
+```{r pipelines-realtime-plumber}
+service <- callr::r_bg(function() {
+  p <- plumber::plumb("plumber/mleap-plumber.R")
+  p$run(port = 8000)
+})
+```
+
+```{r pipelines-realtime-plmber-score}
+httr::POST(
+  "http://127.0.0.1:8000/predict",
+  body = '{"age": 42, "sex": "m", "drinks": "not at all", 
+           "drugs": "never", "essay_length": 99}'
+) %>%
+  httr::content()
+```
+
+```{r pipelines-realtime-interrrupt}
+service$interrupt()
+```
+
+## Recap

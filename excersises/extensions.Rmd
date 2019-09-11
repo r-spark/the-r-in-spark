@@ -1,0 +1,277 @@
+
+# Extensions {#extensions}
+
+## Overview
+
+```{r extensions-h2o-install, exercise=TRUE}
+install.packages("h2o", type = "source",
+  repos = "http://h2o-release.s3.amazonaws.com/h2o/rel-yates/5/R")
+install.packages("rsparkling", type = "source",
+  repos = "http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/31/R")
+```
+
+```{r extensions-h2o-version, eval=TRUE}
+packageVersion("h2o")
+packageVersion("rsparkling")
+```
+
+```{r extensions-h2o-connect}
+library(rsparkling)
+library(sparklyr)
+library(h2o)
+
+sc <- spark_connect(master = "local", version = "2.3",
+                    config = list(sparklyr.connect.timeout = 3 * 60))
+
+cars <- copy_to(sc, mtcars)
+```
+
+```{r extensions-h2o-copy}
+cars_h2o <- as_h2o_frame(sc, cars)
+cars_h2o
+```
+
+```{r extensions-h2o-glm}
+model <- h2o.glm(x = c("wt", "cyl"),
+                 y = "mpg",
+                 training_frame = cars_h2o,
+                 lambda_search = TRUE)
+```
+
+```{r extensions-h2o-model}
+model
+```
+
+```{r extensions-h2o-predict}
+predictions <- as_h2o_frame(sc, copy_to(sc, data.frame(wt = 2, cyl = 6)))
+h2o.predict(model, predictions)
+```
+
+```{r extensions-h2o-automl}
+automl <- h2o.automl(x = c("wt", "cyl"), y = "mpg",
+                     training_frame = cars_h2o,
+                     max_models = 20,
+                     seed = 1)
+```
+
+```{r extensions-h2o-automl-print}
+automl@leaderboard
+```
+
+```{r}
+tibble::tibble(parameter = names(automl@leader@parameters),
+               value = as.character(automl@leader@parameters))
+```
+
+```{r}
+h2o.predict(automl@leader, predictions)
+```
+
+## Graphs
+
+```{r eval=FALSE, exercise=TRUE}
+install.packages("ggraph")
+install.packages("igraph")
+```
+
+```{r}
+ggraph::highschool
+```
+
+```{r extensions-graphframes}
+library(graphframes)
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local", version = "2.3")
+highschool_tbl <- copy_to(sc, ggraph::highschool, "highschool") %>%
+  filter(year == 1957) %>%
+  transmute(from = as.character(as.integer(from)),
+            to = as.character(as.integer(to)))
+
+from_tbl <- highschool_tbl %>% distinct(from) %>% transmute(id = from)
+to_tbl <- highschool_tbl %>% distinct(to) %>% transmute(id = to)
+
+vertices_tbl <- distinct(sdf_bind_rows(from_tbl, to_tbl))
+edges_tbl <- highschool_tbl %>% transmute(src = from, dst = to)
+```
+
+```{r extensions-graphframes-vertices}
+vertices_tbl
+```
+
+```{r extensions-graphframes-eedges}
+edges_tbl
+```
+
+```{r}
+graph <- gf_graphframe(vertices_tbl, edges_tbl)
+```
+
+```{r}
+gf_degrees(graph) %>% summarise(friends = mean(degree))
+```
+
+```{r}
+gf_shortest_paths(graph, 33) %>%
+  filter(size(distances) > 0) %>%
+  mutate(distance = explode(map_values(distances))) %>%
+  select(id, distance)
+```
+
+```{r extensions-graphframes-code}
+gf_graphframe(vertices_tbl, edges_tbl) %>%
+  gf_pagerank(reset_prob = 0.15, max_iter = 10L)
+```
+
+```{r extensions-xgb-install, eval=FALSE, exercise=TRUE}
+install.packages("sparkxgb")
+```
+
+```{r extensions-xgb-connect}
+library(sparkxgb)
+library(sparklyr)
+library(dplyr)
+
+sc <- spark_connect(master = "local", version = "2.3")
+```
+
+```{r extensions-xgb-copy}
+attrition <- copy_to(sc, rsample::attrition)
+attrition
+```
+
+```{r extensions-xgb-model}
+xgb_model <- xgboost_classifier(attrition,
+                                Attrition ~ .,
+                                num_class = 2,
+                                num_round = 50,
+                                max_depth = 4)
+
+xgb_model %>%
+  ml_predict(attrition) %>%
+  select(Attrition, predicted_label, starts_with("probability_")) %>%
+  glimpse()
+```
+
+## Deep Learning
+
+```{r eval=FALSE, exercise=TRUE}
+install.packages("sparktf")
+install.packages("tfdatasets")
+```
+
+```{r}
+library(sparktf)
+library(sparklyr)
+
+sc <- spark_connect(master = "local", version = "2.3")
+
+attrition <- copy_to(sc, rsample::attrition)
+
+nn_model <- ml_multilayer_perceptron_classifier(
+  attrition,
+  Attrition ~ Age + DailyRate + DistanceFromHome + MonthlyIncome,
+  layers = c(4, 3, 2),
+  solver = "gd")
+
+nn_model %>%
+  ml_predict(attrition) %>%
+  select(Attrition, predicted_label, starts_with("probability_")) %>%
+  glimpse()
+```
+
+```{r}
+copy_to(sc, iris) %>%
+  ft_string_indexer_model(
+    "Species", "label",
+    labels = c("setosa", "versicolor", "virginica")
+  ) %>%
+  spark_write_tfrecord(path = "tfrecord")
+```
+
+## Genomics
+
+```{r extensions-genomics-connect}
+library(variantspark)
+library(sparklyr)
+
+sc <- spark_connect(master = "local", version = "2.3",
+                    config = list(sparklyr.connect.timeout = 3 * 60))
+
+vsc <- vs_connect(sc)
+```
+
+```{r extensions-genomics-read-vcf}
+vsc_data <- system.file("extdata/", package = "variantspark")
+
+hipster_vcf <- vs_read_vcf(vsc, file.path(vsc_data, "hipster.vcf.bz2"))
+hipster_labels <- vs_read_csv(vsc, file.path(vsc_data, "hipster_labels.txt"))
+labels <- vs_read_labels(vsc, file.path(vsc_data, "hipster_labels.txt"))
+```
+
+```{r extensions-genomics-importance-code}
+importance_tbl <- vs_importance_analysis(vsc, hipster_vcf, 
+                                         labels, n_trees = 100) %>%
+  importance_tbl()
+
+importance_tbl
+```
+
+```{r extensions-genomics-plot-code}
+library(dplyr)
+library(ggplot2)
+
+importance_df <- importance_tbl %>% 
+  arrange(-importance) %>% 
+  head(20) %>% 
+  collect()
+
+ggplot(importance_df) +
+  aes(x = variable, y = importance) + 
+  geom_bar(stat = 'identity') +          
+  scale_x_discrete(limits = 
+    importance_df[order(importance_df$importance), 1]$variable) + 
+  coord_flip()
+```
+
+## Spatial 
+
+```{r eval=FALSE, exercise=TRUE}
+install.packages("remotes")
+remotes::install_github("r-spark/geospark")
+```
+
+```{r }
+library(geospark)
+library(sparklyr)
+
+sc <- spark_connect(master = "local", version = "2.3")
+```
+
+```{r}
+polygons <- system.file("examples/polygons.txt", package="geospark") %>%
+  read.table(sep="|", col.names = c("area", "geom"))
+
+points <- system.file("examples/points.txt", package="geospark") %>%
+  read.table(sep = "|", col.names = c("city", "state", "geom"))
+
+polygons_wkt <- copy_to(sc, polygons)
+points_wkt <- copy_to(sc, points)
+```
+
+```{r}
+library(dplyr)
+polygons_wkt <- mutate(polygons_wkt, y = st_geomfromwkt(geom))
+points_wkt <- mutate(points_wkt, x = st_geomfromwkt(geom))
+
+inner_join(polygons_wkt,
+           points_wkt,
+           sql_on = sql("st_contains(y,x)")) %>% 
+  group_by(area, state) %>%
+  summarise(cnt = n()) 
+```
+
+## Troubleshooting
+
+## Recap

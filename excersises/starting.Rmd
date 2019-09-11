@@ -1,0 +1,181 @@
+
+# Getting Started {#starting}
+
+## Overview
+
+## Prerequisites {#starting-prerequisites}
+
+```{r}
+system("java -version")
+```
+
+### Installing sparklyr {#starting-install-sparklyr}
+
+```{r starting-install-sparklyr, eval=FALSE, exercise=TRUE}
+install.packages("sparklyr")
+```
+
+```{r}
+packageVersion("sparklyr")
+```
+
+### Installing Spark {#starting-installing-spark}
+
+```{r starting-install-spark-header, warning=FALSE, message=FALSE}
+library(sparklyr)
+```
+
+```{r starting-install-spark}
+spark_install("2.3")
+```
+
+```{r starting-install-available, eval=TRUE}
+spark_available_versions()
+```
+
+```{r starting-install-installed}
+spark_installed_versions()
+```
+
+## Connecting {#starting-connect-to-spark}
+
+```{r starting-connect-local}
+library(sparklyr)
+sc <- spark_connect(master = "local", version = "2.3")
+```
+
+## Using Spark {#starting-sparklyr-hello-world}
+
+```{r starting-copy-cars}
+cars <- copy_to(sc, mtcars)
+```
+
+```{r starting-print-cars}
+cars
+```
+
+### Web Interface {#starting-spark-web-interface}
+
+```{r starting-spark-web-code}
+spark_web(sc)
+```
+
+### Analysis {#starting-analysis}
+
+```{r}
+library(DBI)
+dbGetQuery(sc, "SELECT count(*) FROM mtcars")
+```
+
+```{r}
+library(dplyr)
+count(cars)
+```
+
+```{r}
+select(cars, hp, mpg) %>%
+  sample_n(100) %>%
+  collect() %>%
+  plot()
+```
+
+### Modeling {#starting-modeling}
+
+```{r}
+model <- ml_linear_regression(cars, mpg ~ hp)
+model
+```
+
+```{r}
+model %>%
+  ml_predict(copy_to(sc, data.frame(hp = 250 + 10 * 1:10))) %>%
+  transmute(hp = hp, mpg = prediction) %>%
+  full_join(select(cars, hp, mpg)) %>%
+  collect() %>%
+  plot()
+```
+
+### Data {#starting-data}
+
+```{r}
+spark_write_csv(cars, "cars.csv")
+```
+
+```{r}
+cars <- spark_read_csv(sc, "cars.csv")
+```
+
+### Extensions {#starting-extensions}
+
+```{r eval=FALSE, exercise=TRUE}
+install.packages("sparklyr.nested")
+```
+
+```{r}
+sparklyr.nested::sdf_nest(cars, hp) %>%
+  group_by(cyl) %>%
+  summarise(data = collect_list(data))
+```
+
+### Distributed R {#starting-distributed-r}
+
+```{r}
+cars %>% spark_apply(~round(.x))
+```
+
+### Streaming {#starting-streaming}
+
+```{r}
+dir.create("input")
+write.csv(mtcars, "input/cars_1.csv", row.names = F)
+```
+
+```{r}
+stream <- stream_read_csv(sc, "input/") %>%
+    select(mpg, cyl, disp) %>%
+    stream_write_csv("output/")
+```
+
+```{r}
+dir("output", pattern = ".csv")
+```
+
+```{r}
+# Write more data into the stream source
+write.csv(mtcars, "input/cars_2.csv", row.names = F)
+```
+
+```{r}
+# Check the contents of the stream destination
+dir("output", pattern = ".csv")
+```
+
+```{r}
+stream_stop(stream)
+```
+
+### Logs {#starting-logs}
+
+```{r starting-logs}
+spark_log(sc)
+```
+
+```{r starting-logs-filter}
+spark_log(sc, filter = "sparklyr")
+```
+
+## Disconnecting {#starting-disconnecting}
+
+```{r starting-disconnect}
+spark_disconnect(sc)
+```
+
+```{r starting-disconnect-all}
+spark_disconnect_all()
+```
+
+## Using RStudio {#starting-using-spark-from-rstudio}
+
+## Resources {#starting-resources}
+
+## Recap {#starting-recap}
