@@ -20,7 +20,7 @@ build_exercises <- function() {
 
   for (file in dir("excersises", full.names = TRUE)) {
     reg_comment <- "^#+ [A-Z][a-z]+.*$"
-    reg_rcode <- "^```\\{r .*"
+    reg_rcode <- "^```\\{r.*"
     reg_code <- "^```$"
 
     content <- readLines(file)
@@ -45,14 +45,26 @@ build_exercises <- function() {
       }
       else {
         ending_idx <- which(match_endings > match)
-        if (length(ending_idx) == 0) warning("Can't find closing statement in ", file, "#", matches[match_idx], " for: ", content[match])
-
-        if (rcode) {
-          new_content <- c(new_content, "", content[match:match_endings[ending_idx[1]]])
+        if (length(ending_idx) == 0) {
+          warning("Can't find closing statement in ", file, "#", matches[match_idx], " for: ", content[match])
+          match_idx <- length(matches) + 1
         }
+        else {
+          chunk_content <- content[match:match_endings[ending_idx[1]]]
 
-        match_next <- which(matches > match_endings[ending_idx[1]])
-        match_idx <- if (length(match_next) == 0 ) length(matches) + 1 else match_next[1]
+          skip <- grepl("eval ?= ?FALSE|echo ?= ?FALSE", content[match]) && !grepl("exercise=TRUE", content[match])
+          skip <- skip || grepl("include=FALSE", content[match])
+          skip <- skip || any(grepl("render_image\\(|render_nomnoml\\(", chunk_content))
+
+          if (skip) rcode <- FALSE
+
+          if (rcode) {
+            new_content <- c(new_content, "", chunk_content)
+          }
+
+          match_next <- which(matches > match_endings[ending_idx[1]])
+          match_idx <- if (length(match_next) == 0 ) length(matches) + 1 else match_next[1]
+        }
       }
     }
 
