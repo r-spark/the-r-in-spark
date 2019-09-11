@@ -22,10 +22,12 @@ build_exercises <- function() {
     reg_comment <- "^#+ [A-Z][a-z]+.*$"
     reg_rcode <- "^```\\{r.*"
     reg_code <- "^```$"
+    reg_rmarkdown <- "^````markdown"
 
     content <- readLines(file)
-    matches <- which(grepl(paste(reg_comment, reg_rcode, reg_code, sep = "|"), content))
+    matches <- which(grepl(paste(reg_comment, reg_rcode, reg_code, reg_rmarkdown, sep = "|"), content))
     match_endings <- which(grepl("^```$", content))
+    match_endings_rmd <- which(grepl("^````$", content))
 
     new_content <- c()
     match_idx <- 1
@@ -34,14 +36,26 @@ build_exercises <- function() {
 
       comment <- grepl(reg_comment, content[match])
       rcode <- grepl(reg_rcode, content[match])
+      rmarkdown <- grepl(reg_rmarkdown, content[match])
 
       if (comment) {
         new_content <- c(new_content, "", content[match])
 
-        # Skip nested rmarkdown in analysis chapter
-        if (grepl("## Visualize", content[match])) match_idx <- length(matches) + 1
-
         match_idx <- match_idx + 1
+      }
+      else if (rmarkdown) {
+        ending_idx <- which(match_endings_rmd > match)
+        if (length(ending_idx) == 0) {
+          warning("Can't find closing RMD statement in ", file, "#", matches[match_idx], " for: ", content[match])
+          match_idx <- length(matches) + 1
+        }
+        else {
+          chunk_content <- content[match:match_endings_rmd[ending_idx[1]]]
+          new_content <- c(new_content, "", chunk_content)
+
+          match_next <- which(matches > match_endings_rmd[ending_idx[1]])
+          match_idx <- if (length(match_next) == 0 ) length(matches) + 1 else match_next[1]
+        }
       }
       else {
         ending_idx <- which(match_endings > match)
