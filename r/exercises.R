@@ -21,7 +21,7 @@ build_exercises <- function() {
   for (file in dir("excersises", full.names = TRUE)) {
     reg_comment <- "^#+ [A-Z][a-z]+.*$"
     reg_rcode <- "^```\\{r.*"
-    reg_code <- "^```$"
+    reg_code <- "^```.*$"
     reg_rmarkdown <- "^````markdown"
 
     content <- readLines(file)
