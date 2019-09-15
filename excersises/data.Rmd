@@ -69,6 +69,19 @@ copy_to(sc, iris, overwrite = TRUE)
 
 ## Copy
 
+```{r data-copy-read}
+spark_read_text(sc, "largefile.txt", memory = FALSE)
+```
+
+```{r data-copy-collect}
+dir.create("large")
+spark_read_text(sc, "largefile.txt", memory = FALSE) %>%
+  head(10^6) %>%
+  collect(callback = function(df, idx) {
+    writeLines(df$line, paste0("large/large-", idx, ".txt"))
+  })
+```
+
 ```{r data-copy-unlink}
 unlink("largefile.txt", recursive = TRUE)
 unlink("large", recursive = TRUE)
