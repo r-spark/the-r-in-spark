@@ -334,16 +334,15 @@ render_nomnoml("
 ", "images/connections-spark-kubernetes.png", "Kubernetes Connection Diagram", styles)
 ```
 
-Kubernetes support is scheduled to be added to `sparklyr` with [sparklyr/issues/1525](https://github.com/rstudio/sparklyr/issues/1525), please follow progress for this feature directly in github. Once Kubernetes becomes supported in `sparklyr`, connecting to Kubernetes will work as follows:
+To use Kubernetes, you will need to prepare a virtual machine with Spark installed and properly configured; however, it is beyond the scope of this book to present how to create one. Once created, connecting to Kubernetes works as follows:
 
 ```{r connections-kubernetes-connect, eval=FALSE}
-sc <- spark_connect(
-  master = "k8s://https://<apiserver-host>:<apiserver-port>",
-  config = list(
-    spark.executor.instances = 2,
-    spark.kubernetes.container.image = "spark-image"
-  )
-)
+library(sparklyr)
+sc <- spark_connect(config = spark_config_kubernetes(
+  "k8s://https://<apiserver-host>:<apiserver-port>",
+  account = "default",
+  image = "docker.io/owner/repo:version",
+  version = "2.3.1"))
 ```
 
 If your computer is already configured to use a Kubernetes cluster, you can use the following command to find the `apiserver-host` and `apiserver-port`:
