@@ -574,14 +574,13 @@ FIGURE 7.8: Mesos Connection Diagram
 FIGURE 7.9: Kubernetes Connection Diagram
 </p>
 </div>
-<p>Kubernetes support is scheduled to be added to <code>sparklyr</code> with <a href="https://github.com/rstudio/sparklyr/issues/1525">sparklyr/issues/1525</a>, please follow progress for this feature directly in github. Once Kubernetes becomes supported in <code>sparklyr</code>, connecting to Kubernetes will work as follows:</p>
-<div class="sourceCode" id="cb226"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb226-1" title="1">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(</a>
-<a class="sourceLine" id="cb226-2" title="2">  <span class="dt">master =</span> <span class="st">&quot;k8s://https://&lt;apiserver-host&gt;:&lt;apiserver-port&gt;&quot;</span>,</a>
-<a class="sourceLine" id="cb226-3" title="3">  <span class="dt">config =</span> <span class="kw">list</span>(</a>
-<a class="sourceLine" id="cb226-4" title="4">    <span class="dt">spark.executor.instances =</span> <span class="dv">2</span>,</a>
-<a class="sourceLine" id="cb226-5" title="5">    <span class="dt">spark.kubernetes.container.image =</span> <span class="st">&quot;spark-image&quot;</span></a>
-<a class="sourceLine" id="cb226-6" title="6">  )</a>
-<a class="sourceLine" id="cb226-7" title="7">)</a></code></pre></div>
+<p>To use Kubernetes, you will need to prepare a virtual machine with Spark installed and properly configured; however, it is beyond the scope of this book to present how to create one. Once created, connecting to Kubernetes works as follows:</p>
+<div class="sourceCode" id="cb226"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb226-1" title="1"><span class="kw">library</span>(sparklyr)</a>
+<a class="sourceLine" id="cb226-2" title="2">sc &lt;-<span class="st"> </span><span class="kw">spark_connect</span>(<span class="dt">config =</span> <span class="kw">spark_config_kubernetes</span>(</a>
+<a class="sourceLine" id="cb226-3" title="3">  <span class="st">&quot;k8s://https://&lt;apiserver-host&gt;:&lt;apiserver-port&gt;&quot;</span>,</a>
+<a class="sourceLine" id="cb226-4" title="4">  <span class="dt">account =</span> <span class="st">&quot;default&quot;</span>,</a>
+<a class="sourceLine" id="cb226-5" title="5">  <span class="dt">image =</span> <span class="st">&quot;docker.io/owner/repo:version&quot;</span>,</a>
+<a class="sourceLine" id="cb226-6" title="6">  <span class="dt">version =</span> <span class="st">&quot;2.3.1&quot;</span>))</a></code></pre></div>
 <p>If your computer is already configured to use a Kubernetes cluster, you can use the following command to find the <code>apiserver-host</code> and <code>apiserver-port</code>:</p>
 <div class="sourceCode" id="cb227"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb227-1" title="1"><span class="kw">system2</span>(<span class="st">&quot;kubectl&quot;</span>, <span class="st">&quot;cluster-info&quot;</span>)</a></code></pre></div>
 </div>
