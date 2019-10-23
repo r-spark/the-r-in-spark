@@ -677,7 +677,7 @@ Up to this point, you've learned all the functionality available in `spark_apply
 
 ## Packages
 
-With `spark_apply()` you can use any R package inside Spark. For instance, you can use the broom package to create a tidy data frame from linear regression output.
+With `spark_apply()` you can use any R package inside Spark. For instance, you can use the `broom` package to create a tidy data frame from linear regression output.
 
 ```{r distributed-packages}
 spark_apply(
@@ -700,7 +700,7 @@ spark_apply(
 
 The first time you call `spark_apply()` all of the contents in your local `.libPaths()`, which contains all R packages, will be copied into each Spark worker node. Packages will only be copied once and will persist as long as the connection remains open. It’s not uncommon for R libraries to be several gigabytes in size, so be prepared for a one-time tax while the R packages are copied over to your Spark cluster. You can disable package distribution by setting `packages = FALSE`.
 
-**Note:** Since packages are copied only once for the duration of the `spark_connect()` connection, installing additional packages is not supported while the connection is active. Therefore, if a new package needs to be installed, spark_disconnect() the connection, modify packages and reconnect. In addition, R packages are not copied in local mode because the packages already exist on the local system.
+**Note:** Since packages are copied only once for the duration of the `spark_connect()` connection, installing additional packages is not supported while the connection is active. Therefore, if a new package needs to be installed, `spark_disconnect()` the connection, modify packages and reconnect. In addition, R packages are not copied in local mode because the packages already exist on the local system.
 
 While this was a short section, using packages with distributed R code opens up an entire new universe of interesting use cases. Somewhere covered in the use cases section, but you can think of many more by looking at the rich ecosystem of R packages available today.
 
@@ -972,7 +972,7 @@ This will show an entry containing the error and the call stack:
 -1L)))
 ```
 
-Notice that, spark_log(sc) only retrieves the worker logs when using local clusters, when running in proper clusters with multiple machines, you will have to use the tools and user interface provided by the cluster manager to find these log entries.
+Notice that, `spark_log(sc)` only retrieves the worker logs when using local clusters, when running in proper clusters with multiple machines, you will have to use the tools and user interface provided by the cluster manager to find these log entries.
 
 ### Resolving Timeouts
 
