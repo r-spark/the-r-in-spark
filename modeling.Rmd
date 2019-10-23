@@ -27,7 +27,7 @@ As you can see, Spark provides a wide range of algorithms and feature transforme
 
 Instead, this chapter focuses on predictive modeling, since Spark aims to enable machine learning, as opposed to statistical inference. Machine learning is often more concerned about forecasting the future rather than inferring the process by which our data is generated [^2] which is then used to create automated systems. Machine learning can be categorized into supervised learning (predictive modeling) and unsupervised learning. In supervised learning, we try to learn a function that will map from "X" to "Y", from a dataset of "(x, y)" examples. In unsupervised learning, we just have "X" and not the "Y" labels, so instead we try to learn something about the structure of "X". Some practical use cases for supervised learning include forecasting tomorrow's weather, determining whether a credit card transaction is fraudulent, and coming up with a price for your car insurance policy. With unsupervised learning, examples include automated grouping of photos of individuals, segmenting customers based on their purchase history, and clustering of documents.
 
-The ML interface in sparklyr has been designed to minimize the cognitive effort for moving from a local, in-memory, native R workflow to the cluster, and back. While the Spark ecosystem is very rich, there is still a tremendous number of packages from CRAN, with some implementing functionality that you may require for a project. Also, you may want to leverage your skills and experience working in R to maintain productivity. What we learned in the Analysis section also applies here --- it is important to keep track of where you are performing computations, and move between the cluster and your R session as appropriate.
+The ML interface in `sparklyr` has been designed to minimize the cognitive effort for moving from a local, in-memory, native R workflow to the cluster, and back. While the Spark ecosystem is very rich, there is still a tremendous number of packages from CRAN, with some implementing functionality that you may require for a project. Also, you may want to leverage your skills and experience working in R to maintain productivity. What we learned in the Analysis section also applies here --- it is important to keep track of where you are performing computations, and move between the cluster and your R session as appropriate.
 
 [^2]: We acknowledge that the terms here may mean different things to different people, and that there is a continuum between the two approaches, however they are defined.
 
@@ -41,7 +41,7 @@ download.file(
   "okcupid.zip")
 
 unzip("okcupid.zip", exdir = "data")
-unlink("okcupid.zip")
+unlink("okcupid.zip") # delete the zip file
 ```
 
 We don't recommend sampling this dataset since the model won't be nearly as rich; however, if you have limited hardware resources, you are welcome to sample this dataset as follows:
@@ -799,7 +799,7 @@ mean(cv_results$auc)
 
 ### Generalized Linear Regression
 
-If you are interested in generalized linear model (GLM) diagnostics,you can also fit a logistic regression via the generalized linear regression interface by specifying `family = "binomial"`. Because the result is a regression model, the `ml_predict()` method does not give class probabilities. However, it includes confidence intervals for coefficient estimates.
+If you are interested in generalized linear model (GLM) diagnostics, you can also fit a logistic regression via the generalized linear regression interface by specifying `family = "binomial"`. Because the result is a regression model, the `ml_predict()` method does not give class probabilities. However, it includes confidence intervals for coefficient estimates.
 
 ```{r modeling-super-glr-save, echo=FALSE, eval=FALSE}
 glr <- ml_generalized_linear_regression(
