@@ -338,7 +338,7 @@ hadoop fs -copyToLocal largefile.txt largefile.txt
 
 Alternatively, you can also collect datasets that don't fit in-memory by providing a callback to `collect()`. A callback is just an R function that will be called over each Spark partition, you can then write this dataset to disk or push to other clusters over the network.
 
-The following code could be use to collect 3GB even if the driver node collecting this dataset had less than 3GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this creates a significant performance bottleneck. For conciseness, we will collect only the first million rows; feel free to remove `head(10^6)` if you havee a few minutes to spare.
+The following code could be use to collect 3GB even if the driver node collecting this dataset had less than 3GB of memory. That said, as explained in the Analysis chapter, you should avoid collecting large datasets into a single machine since this creates a significant performance bottleneck. For conciseness, we will collect only the first million rows; feel free to remove `head(10^6)` if you have a few minutes to spare.
 
 ```{r data-copy-collect}
 dir.create("large")
@@ -610,7 +610,7 @@ dplyr::tbl(sc, "test") %>%
   dplyr::summarise(totals = sum(y))
 ```
 
-Hive table references assume a default database source. Often, the table needed table is in a different database within the Metastore. To access it using SQL, prefix the database name to the table.  Separate them using a period. 
+Hive table references assume a default database source. Often, the table needed table is in a different database within the Metastore. To access it using SQL, prefix the database name to the table; separate them using a period.
 
 ```{r data-hive-dbi, eval=FALSE}
 DBI::dbSendQuery(sc, "SELECT * FROM databasename.table")
