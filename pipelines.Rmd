@@ -412,7 +412,7 @@ LogisticRegressionModel (Transformer)
 
 Note that the exported JSON and parquet files are agnostic of the API that exported them. This means that in a multilingual machine learning engineering team, you can pick up a data preprocessing pipeline from a data engineer working in Python, build a prediction model on top of it, then hand off the final pipeline off to a deployment engineering working in Scala. In the next section, we discuss deployment of models in more detail.
 
-**Note:** When `ml_save()` is called for sparklyr ML models (created using the formula interface), the associated pipeline model is saved, but any sparklyr specific metadata, such as index labels, are not. In other words, saving a sparklyr `ml_model` object then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. This behavior is required to use pipelines with other programming languages.
+**Note:** When `ml_save()` is called for `sparklyr` ML models (created using the formula interface), the associated pipeline model is saved, but any `sparklyr` specific metadata, such as index labels, are not. In other words, saving a `sparklyr` `ml_model` object then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. This behavior is required to use pipelines with other programming languages.
 
 Before we move on to discuss how to run pipelines in production, make sure you disconnect from Spark,
 
@@ -506,7 +506,7 @@ If we were to time this operation (e.g. with `system.time()`), we see that the l
 
 ### Real-Time Scoring
 
-For real-time production, we want to keep dependencies as light as possible so we can target more platforms for deployment. We now show how we can use the mleap[^3] package, which provides an interface to the MLeap[^4] library, to serialize and serve Spark ML models. MLeap is open source (Apache License 2.0) and supports a wide range, though not all, of Spark ML transformers. At run time, the only prerequisites for the environment are the Java Virtual Machine (JVM) and the MLeap runtime library. This avoids both the Spark binaries and expensive overhead in converting data to and from Spark data frames.
+For real-time production, we want to keep dependencies as light as possible so we can target more platforms for deployment. We now show how we can use the `mleap`[^3] package, which provides an interface to the MLeap[^4] library, to serialize and serve Spark ML models. MLeap is open source (Apache License 2.0) and supports a wide range, though not all, of Spark ML transformers. At run time, the only prerequisites for the environment are the Java Virtual Machine (JVM) and the MLeap runtime library. This avoids both the Spark binaries and expensive overhead in converting data to and from Spark data frames.
 
 [^3]: [https://github.com/rstudio/mleap](https://github.com/rstudio/mleap)
 [^4]: [https://github.com/combust/mleap](https://github.com/combust/mleap)
