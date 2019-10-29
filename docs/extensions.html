@@ -10,16 +10,16 @@
 
   <meta property="og:title" content="Chapter 10 Extensions | Mastering Apache Spark with R" />
   <meta property="og:type" content="book" />
-  
-  
+
+
   <meta property="og:description" content="The complete guide to large-scale analysis and modeling." />
   <meta name="github-repo" content="javierluraschi/the-r-in-spark" />
 
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Chapter 10 Extensions | Mastering Apache Spark with R" />
-  
+
   <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
-  
+
 
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz" />
 
@@ -28,8 +28,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  
-  
+
+
 <link rel="prev" href="tuning.html"/>
 <link rel="next" href="distributed.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
@@ -542,27 +542,27 @@ AIC :156.2425</code></pre>
 <div class="sourceCode" id="cb340"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb340-1" title="1">tibble<span class="op">::</span><span class="kw">tibble</span>(<span class="dt">parameter =</span> <span class="kw">names</span>(automl<span class="op">@</span>leader<span class="op">@</span>parameters),</a>
 <a class="sourceLine" id="cb340-2" title="2">               <span class="dt">value =</span> <span class="kw">as.character</span>(automl<span class="op">@</span>leader<span class="op">@</span>parameters))</a></code></pre></div>
 <pre><code># A tibble: 20 x 2
-   parameter                         values                                                       
-   &lt;chr&gt;                             &lt;chr&gt;                                                        
- 1 model_id                          DeepLearning_grid_1_AutoML…         
+   parameter                         values
+   &lt;chr&gt;                             &lt;chr&gt;
+ 1 model_id                          DeepLearning_grid_1_AutoML…
  2 training_frame                    automl_training_frame_rdd…
- 3 nfolds                            5                                                            
- 4 keep_cross_validation_models      FALSE                                                        
- 5 keep_cross_validation_predictions TRUE                                                         
- 6 fold_assignment                   Modulo                                                       
- 7 overwrite_with_best_model         FALSE                                                        
- 8 activation                        RectifierWithDropout                                         
- 9 hidden                            200                                                          
-10 epochs                            10003.6618461538                                             
-11 seed                              1                                                            
-12 rho                               0.95                                                         
-13 epsilon                           1e-06                                                        
-14 input_dropout_ratio               0.2                                                          
-15 hidden_dropout_ratios             0.4                                                          
-16 stopping_rounds                   0                                                            
-17 stopping_metric                   deviance                                                     
-18 stopping_tolerance                0.05                                                         
-19 x                                 c(&quot;cyl&quot;, &quot;wt&quot;)                                         
+ 3 nfolds                            5
+ 4 keep_cross_validation_models      FALSE
+ 5 keep_cross_validation_predictions TRUE
+ 6 fold_assignment                   Modulo
+ 7 overwrite_with_best_model         FALSE
+ 8 activation                        RectifierWithDropout
+ 9 hidden                            200
+10 epochs                            10003.6618461538
+11 seed                              1
+12 rho                               0.95
+13 epsilon                           1e-06
+14 input_dropout_ratio               0.2
+15 hidden_dropout_ratios             0.4
+16 stopping_rounds                   0
+17 stopping_metric                   deviance
+18 stopping_tolerance                0.05
+19 x                                 c(&quot;cyl&quot;, &quot;wt&quot;)
 20 y                                 mpg </code></pre>
 <p>You can then predict using the leader as follows,</p>
 <div class="sourceCode" id="cb342"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb342-1" title="1"><span class="kw">h2o.predict</span>(automl<span class="op">@</span>leader, predictions)</a></code></pre></div>
@@ -623,34 +623,34 @@ FIGURE 10.3: Seven Bridges of Königsberg from the Euler Archive
 <p>The <code>vertices_tbl</code> table is expected to have a single <code>id</code> column:</p>
 <div class="sourceCode" id="cb349"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb349-1" title="1">vertices_tbl</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [?? x 1]
-   id   
+   id
    &lt;chr&gt;
- 1 1    
- 2 34   
- 3 37   
- 4 43   
- 5 44   
- 6 45   
- 7 56   
- 8 57   
- 9 65   
-10 71   
+ 1 1
+ 2 34
+ 3 37
+ 4 43
+ 5 44
+ 6 45
+ 7 56
+ 8 57
+ 9 65
+10 71
 # … with more rows</code></pre>
 <p>While the <code>edges_tbl</code> is expected to have a <code>src</code> and <code>dst</code> columns:</p>
 <div class="sourceCode" id="cb351"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb351-1" title="1">edges_tbl</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [?? x 2]
-   src   dst  
+   src   dst
    &lt;chr&gt; &lt;chr&gt;
- 1 1     14   
- 2 1     15   
- 3 1     21   
- 4 1     54   
- 5 1     55   
- 6 2     21   
- 7 2     22   
- 8 3     9    
- 9 3     15   
-10 4     5    
+ 1 1     14
+ 2 1     15
+ 3 1     21
+ 4 1     54
+ 5 1     55
+ 6 2     21
+ 7 2     22
+ 8 3     9
+ 9 3     15
+10 4     5
 # … with more rows</code></pre>
 <p>You can now create a GraphFrame,</p>
 <div class="sourceCode" id="cb353"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb353-1" title="1">graph &lt;-<span class="st"> </span><span class="kw">gf_graphframe</span>(vertices_tbl, edges_tbl)</a></code></pre></div>
@@ -870,16 +870,16 @@ FIGURE 10.8: The idealized human diploid karyotype showing the organization of t
 <pre><code># Source: spark&lt;?&gt; [?? x 2]
    variable    importance
    &lt;chr&gt;            &lt;dbl&gt;
- 1 2_109511398 0         
- 2 2_109511454 0         
+ 1 2_109511398 0
+ 2 2_109511454 0
  3 2_109511463 0.00000164
  4 2_109511467 0.00000309
- 5 2_109511478 0         
- 6 2_109511497 0         
- 7 2_109511525 0         
- 8 2_109511527 0         
- 9 2_109511532 0         
-10 2_109511579 0         
+ 5 2_109511478 0
+ 6 2_109511497 0
+ 7 2_109511525 0
+ 8 2_109511527 0
+ 9 2_109511532 0
+10 2_109511579 0
 # … with more rows</code></pre>
 <p>You can then use <code>dplyr</code> and <code>ggplot2</code> to transform the output and visualize it,</p>
 <div class="sourceCode" id="cb377"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb377-1" title="1"><span class="kw">library</span>(dplyr)</a>
@@ -1085,6 +1085,8 @@ gitbook.start({
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
+
+<script src="libs/hide-controls.js"></script>
 </body>
 
 </html>
