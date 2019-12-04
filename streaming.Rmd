@@ -250,7 +250,7 @@ stream_read_csv(sc, "source") %>%
 
 Spark pipelines can be used for scoring streams, but not to train over streaming data. The former is fully supported while the latter is a feature under active development by the Spark community.
 
-In order to score a stream, it is necessary to first create a our model. So lets build, fit and save a simple pipeline.
+In order to score a stream, it is necessary to first create our model. So lets build, fit and save a simple pipeline.
 
 ```{r streaming-pipelines}
 cars <- copy_to(sc, mtcars)
@@ -289,7 +289,7 @@ ml_transform(model, stream_read_csv(sc, "cars-stream"))
 #   rawPrediction <list>, probability <list>, prediction <dbl>
 ```
 
-Even though the example this example was put together with a few lines of code, it is actually quite impressive what we just accomplished: You copied data into Spark, performed feature engineering, traineed a model and scored the model over a real-time dataset, with seven lines of code! -- Let's try now to use custom transformations, in real-time.
+Even though this example was put together with a few lines of code, it is actually quite impressive what we just accomplished: You copied data into Spark, performed feature engineering, traineed a model and scored the model over a real-time dataset, with seven lines of code! -- Let's try now to use custom transformations, in real-time.
 
 ### Distributed R {streaming-r-code}
 
@@ -334,7 +334,7 @@ spark_disconnect(sc)
 
 ## Kafka
 
-Apache Kafka is an open-source stream-processing software platform developed by LinkedIn and donated to the Apache Software Foundation, written in Scala and Java. As an analogy. Kafka is to real-time storage as what Hadoop is to static storage.
+Apache Kafka is an open-source stream-processing software platform developed by LinkedIn and donated to the Apache Software Foundation, written in Scala and Java. As an analogy, Kafka is to real-time storage as what Hadoop is to static storage.
 
 Kafka stores the stream as records which consist of a key, a value and a timestamp. Kafka can handle multiple streams that contain different information by categorizing them into topic. Kafka is commonly used to connect multiple real-time applications, a *producer* is an application that streams data into Kafka, while a *consumer* is the one that reads from Kafka; in Kafka terminology, a consumer application subscribes to topics. Therefore, the most basic workflow we can accomplish with Kafka is one with a single producer and a single consumer, illustrated in Figure \@ref(fig:streaming-kafka-apis).
 
@@ -424,7 +424,7 @@ kafka-console-producer.sh --broker-list localhost:9092 --topic letters
 >C
 ```
 
-The letters that you input are pushed to Kaka, read by Spark, aggregated within Spark and pushed back into Kafka and then, finally, consumed by Spark again to give you a glimpse into `totals` topic. This was quite a setup, but also a realistic configuration which is common to find in real-time processing projects.
+The letters that you input are pushed to Kafka, read by Spark, aggregated within Spark and pushed back into Kafka and then, finally, consumed by Spark again to give you a glimpse into `totals` topic. This was quite a setup, but also a realistic configuration which is common to find in real-time processing projects.
 
 Next, we will use the Shiny framework to visualize streams, in real-time!
 

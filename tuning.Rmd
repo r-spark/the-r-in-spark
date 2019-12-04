@@ -287,7 +287,7 @@ However, there are many more configuration settings available in Spark as descri
 
 ### sparklyr Settings
 
-Apart from Spark settings, there are a few settings particular to sparklyr listed below. You usually don't use these settings while tuning SPark; instead, they are helpful while troubleshooting Spark from R. For instance, you can use `sparklyr.log.console = TRUE` to output the Spark logs into the R console, this is ideal while troubleshooting but too noisy otherwise.
+Apart from Spark settings, there are a few settings particular to `sparklyr` listed below. You usually don't use these settings while tuning Spark; instead, they are helpful while troubleshooting Spark from R. For instance, you can use `sparklyr.log.console = TRUE` to output the Spark logs into the R console, this is ideal while troubleshooting but too noisy otherwise.
 
 ```{r tuning-settings-sparklyr, eval=FALSE}
 spark_config_settings()
@@ -304,7 +304,7 @@ By default, Spark will compute over each existing *implicit* partition since it'
 
 ### Implicit
 
-You learned in the Data chapter that Spark can read data stored in many formats and different storage systems; however, since shuffling data is an expensive operations, Spark executes tasks reusing the partitions in the storage system. Therefore, these partitions are implicit to Spark since they are already well defined and expensive to rearrange.
+You learned in the Data chapter that Spark can read data stored in many formats and different storage systems; however, since shuffling data is an expensive operation, Spark executes tasks reusing the partitions in the storage system. Therefore, these partitions are implicit to Spark since they are already well defined and expensive to rearrange.
 
 There is always an implicit partition for every computation in Spark defined by the distributed storage system, by creating a dataset or by copying datasets into Spark.
 
@@ -317,7 +317,7 @@ sdf_len(sc, 10) %>% sdf_num_partitions()
 [1] 2
 ```
 
-While in most cases the default partitions works just fine, there are cases where we you will need to be explicit on the partitions you choose.
+While in most cases the default partitions works just fine, there are cases where you will need to be explicit on the partitions you choose.
 
 ### Explicit
 
@@ -379,11 +379,11 @@ The results show that sorting data with two partitions is almost twice as fast; 
 
 ## Caching {#tuning-caching}
 
-Recall from the [introduction](Intro) that Spark was designed to be faster than its predecessors by using memory instead of disk to store data. This is formally known as a Spark *RDD* and stands for resilient distributed dataset. An RDD distributes copies of the same data across many machines, such that, if one machine fails other can complete the task -- hence the resilient name. Resiliency is important in distributed systems since, while things will usually work in one machine, when running over thousands of machines the likelihood of something failing is much higher. When a failure happens, it is preferable to be fault tolerant to avoid losing the work of all the other machines. RDDs accomplish this by tracking data lineage information to rebuild lost data automatically on failure.
+Recall from the [introduction](Intro) that Spark was designed to be faster than its predecessors by using memory instead of disk to store data. This is formally known as a Spark *RDD* and stands for Resilient Distributed Dataset. An RDD distributes copies of the same data across many machines, such that, if one machine fails other can complete the task -- hence the resilient name. Resiliency is important in distributed systems since, while things will usually work in one machine, when running over thousands of machines the likelihood of something failing is much higher. When a failure happens, it is preferable to be fault tolerant to avoid losing the work of all the other machines. RDDs accomplish this by tracking data lineage information to rebuild lost data automatically on failure.
 
 In `sparklyr`, you can control when an RDD gets loaded or unloaded from memory using `tbl_cache()` and `tbl_uncache()`.
 
-Most sparklyr operations that retrieve a Spark DataFrame, cache the results in-memory. For instance, running `spark_read_parquet()` or `copy_to()` will provide a Spark DataFrame that is already cached in-memory. As a Spark DataFrame, this object can be used in most `sparklyr` functions, including data analysis with dplyr or machine learning.
+Most `sparklyr` operations that retrieve a Spark DataFrame, cache the results in-memory. For instance, running `spark_read_parquet()` or `copy_to()` will provide a Spark DataFrame that is already cached in-memory. As a Spark DataFrame, this object can be used in most `sparklyr` functions, including data analysis with `dplyr` or machine learning.
 
 ```{r tuning-caching-connect}
 library(sparklyr)

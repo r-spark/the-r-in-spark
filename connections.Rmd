@@ -158,7 +158,7 @@ Hadoop YARN is the cluster manager from the Hadoop project, it's the most common
 
 ### Yarn Client {#connections-yarn-client}
 
-When connecting in YARN Client mode, the driver instance runs R, sparklyr and the Spark Context which requests worker nodes from YARN to run Spark executors as shown in Figure \@ref(fig:connections-yarn-client-diagram).
+When connecting in YARN Client mode, the driver instance runs R, `sparklyr` and the Spark Context which requests worker nodes from YARN to run Spark executors as shown in Figure \@ref(fig:connections-yarn-client-diagram).
 
 ```{r connections-yarn-client-diagram, eval=TRUE, echo=FALSE, message=FALSE, fig.align = 'center', fig.cap='YARN Client Connection Diagram'}
 render_nomnoml("
@@ -186,7 +186,7 @@ Behind the scenes, when running YARN in client mode, the cluster manager will do
 
 ### Yarn Cluster {#connections-yarn-cluster}
 
-The main difference between YARN in cluster mode and running YARN in client mode is that, in cluster mode, the driver node is not required to be the node where R and sparklyr were launched; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using cluster mode when the edge node has too many concurrent users, when is lacking computing resources, or where tools (like RStudio or Jupyter) need to be managed independently of other cluster resources.
+The main difference between YARN in cluster mode and running YARN in client mode is that, in cluster mode, the driver node is not required to be the node where R and `sparklyr` were launched; instead, the driver node remains the designated driver node which is usually a different node than the edge node where R is running. It can be helpful to consider using cluster mode when the edge node has too many concurrent users, when is lacking computing resources, or where tools (like RStudio or Jupyter) need to be managed independently of other cluster resources.
 
 Figure \@ref(fig:connections-yarn-cluster-diagram) shows how the different components become decoupled when running in cluster mode. Notice there is still a line connecting the client with the cluster manager since, first of all, resources still need to be allocated from the cluster manager; however, once allocated, the client communicates directly with the driver node which will then communicate with the worker nodes. From this diagram, you might think that cluster mode looks much more complicated than the client mode diagram -- this would be a correct assessment; therefore, it's best to avoid cluster mode when possible due to additional configuration overhead that is best to avoid, if possible.
 
@@ -390,7 +390,7 @@ Please reference your cloud provider documentation and their support channels if
 
 ## Batches
 
-Most of the time, `sparklyr` used interactively; as in, you explicitly connect with `spark_connect()` and then execute commands to analyze and model large-scale data. However, you can also automate processes by scheduling Spark jobs that use `sparklyr`. Spark does not provide tools to schedule data processing tasks; so instead, you would use other workflow management tools. This can be useful useful to transform data, prepare a model and score data overnight or to make use of Spark by other systems.
+Most of the time, `sparklyr` used interactively; as in, you explicitly connect with `spark_connect()` and then execute commands to analyze and model large-scale data. However, you can also automate processes by scheduling Spark jobs that use `sparklyr`. Spark does not provide tools to schedule data processing tasks; so instead, you would use other workflow management tools. This can be useful to transform data, prepare a model and score data overnight or to make use of Spark by other systems.
 
 As an example, you can create a file named `batch.R` with contents:
 
@@ -428,7 +428,7 @@ spark_home_dir()
 system.file("java", package = "sparklyr")
 ```
 
-You can customize your script by passing additional command line arguments to `spark-submit` and then reading them back in R using `commandArgs()`
+You can customize your script by passing additional command line arguments to `spark-submit` and then reading them back in R using `commandArgs()`.
 
 ## Tools
 
@@ -537,7 +537,7 @@ First, [identify the Spark installation directory](troubleshoot-spark-submit) an
 
 ```{r connections-manual-submit}
 dir(system.file("java", package = "sparklyr"),
-    pattern = "sparklyr", full.names = T)
+    pattern = "sparklyr", full.names = TRUE)
 ```
 
 Make sure you identify the correct version that matches your Spark cluster, for instance `sparklyr-2.1-2.11.jar` for Spark 2.1.
@@ -545,7 +545,7 @@ Make sure you identify the correct version that matches your Spark cluster, for 
 Then, from the terminal, run:
 
 ```{r connections-manual-submit-prep, echo=FALSE}
-recent_jars <- dir(system.file("java", package = "sparklyr"), pattern = gsub("\\.[0-9]", "", paste("sparklyr", sparklyr::spark_default_version()$spark, sep = "-")), full.names = T)
+recent_jars <- dir(system.file("java", package = "sparklyr"), pattern = gsub("\\.[0-9]", "", paste("sparklyr", sparklyr::spark_default_version()$spark, sep = "-")), full.names = TRUE)
 Sys.setenv(PATH_TO_SPARKLYR_JAR = recent_jars[[length(recent_jars)]])
 Sys.setenv(SPARK_HOME = sparklyr::spark_home_dir())
 ```
@@ -559,7 +559,7 @@ $SPARK_HOME/bin/spark-submit --class sparklyr.Shell $PATH_TO_SPARKLYR_JAR 8880 4
                                  to connect to port 8880
 ```
 
-The parameter `8880` represents the default port to use in `sparklyr` while `42 the session number, this is a cryptographically secure number generated by `sparklyr`, but for troubleshooting purposes can be as simple as `42`.
+The parameter `8880` represents the default port to use in `sparklyr` while `42` the session number, this is a cryptographically secure number generated by `sparklyr`, but for troubleshooting purposes can be as simple as `42`.
 
 If this first connection step fails, it means that the cluster can't accept the application. This usually means that there are not enough resources, there are permission restrictions, etc.
 
@@ -588,6 +588,6 @@ Connecting from Windows is, in most cases, as straightforward as connecting from
 
 This chapter presented an overview of Spark's architecture, connection concepts and examples to connect in local mode, standalone, YARN, Mesos, Kubernetes and Livy. It also presented edge nodes and their role while connecting to Spark clusters. This should have provided you with enough information to successfully connect to any Apache Spark cluster.
 
-To troubleshoot connection problems beyond the techniques described in this chapter, it is recommended to search for the connection problem in StackOverflow, the [sparklyr GitHub issues](https://github.com/rstudio/sparklyr/issues) and, if needed, open a [new GitHub issue in sparklyr](https://github.com/rstudio/sparklyr/issues/new) to assist further.
+To troubleshoot connection problems beyond the techniques described in this chapter, it is recommended to search for the connection problem in StackOverflow, the [`sparklyr` GitHub issues](https://github.com/rstudio/sparklyr/issues) and, if needed, open a [new GitHub issue in `sparklyr`](https://github.com/rstudio/sparklyr/issues/new) to assist further.
 
 In the next chapter, [Data](#data), we will cover how to user Spark to read and write from a variety of data sources and formats which allows you to be more agile when adding new data sources for data analysis -- what used to take days, weeks or even months, can now be completed in hours by embracing data lakes.
