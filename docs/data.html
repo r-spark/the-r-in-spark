@@ -4,22 +4,22 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 8 Data | Mastering Apache Spark with R</title>
-  <meta name="description" content="The complete guide to large-scale analysis and modeling." />
+  <title>Chapter 8 Data | Mastering Spark with R</title>
+  <meta name="description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
   <meta name="generator" content="bookdown 0.13 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 8 Data | Mastering Apache Spark with R" />
+  <meta property="og:title" content="Chapter 8 Data | Mastering Spark with R" />
   <meta property="og:type" content="book" />
-
-
-  <meta property="og:description" content="The complete guide to large-scale analysis and modeling." />
-  <meta name="github-repo" content="javierluraschi/the-r-in-spark" />
+  
+  
+  <meta property="og:description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
+  <meta name="github-repo" content="r-spark/the-r-in-spark" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 8 Data | Mastering Apache Spark with R" />
-
-  <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
-
+  <meta name="twitter:title" content="Chapter 8 Data | Mastering Spark with R" />
+  
+  <meta name="twitter:description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
+  
 
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz" />
 
@@ -28,8 +28,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
-
+  
+  
 <link rel="prev" href="connections.html"/>
 <link rel="next" href="tuning.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
@@ -133,7 +133,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><strong><a href="./">Mastering Apache Spark with R</a></strong></li>
+<li><strong><a href="./">Mastering Spark with R</a></strong></li>
 
 <li class="divider"></li>
 <li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
@@ -398,7 +398,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Mastering Apache Spark with R</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Mastering Spark with R</a>
           </h1>
         </div>
 
@@ -472,12 +472,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>To avoid this, Spark allows you to provide a column definition by providing a <code>columns</code> argument to describe your dataset. You can create this schema by sampling a small portion of the original file yourself,</p>
 <div class="sourceCode" id="cb254"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb254-1" title="1">spec_with_r &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">read.csv</span>(<span class="st">&quot;data-csv/letters1.csv&quot;</span>, <span class="dt">nrows =</span> <span class="dv">10</span>), class)</a>
 <a class="sourceLine" id="cb254-2" title="2">spec_with_r</a></code></pre></div>
-<pre><code>        x         y
+<pre><code>        x         y 
  &quot;factor&quot; &quot;integer&quot; </code></pre>
 <p>Or you can set the column specification to a vector containing the column types explicitly. The vector’s values are named to match the field names.</p>
 <div class="sourceCode" id="cb256"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb256-1" title="1">spec_explicit &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">x =</span> <span class="st">&quot;character&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;numeric&quot;</span>)</a>
 <a class="sourceLine" id="cb256-2" title="2">spec_explicit</a></code></pre></div>
-<pre><code>          x           y
+<pre><code>          x           y 
 &quot;character&quot;   &quot;numeric&quot; </code></pre>
 <p>The accepted variable types are: <code>integer</code>, <code>character</code>, <code>logical</code>, <code>double</code>, <code>numeric</code>, <code>factor</code>, <code>Date</code> and <code>POSIXct</code>.</p>
 <p>Then, when reading using <code>spark_read_csv()</code>, you can pass <code>col_spec_1</code> to the <code>columns</code> argument to match the names and types of the original file. This helps improve performance since Spark will not have to figure out the column types.</p>
@@ -497,12 +497,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb260-3" title="3"><span class="kw">spark_read_csv</span>(sc, <span class="st">&quot;data-csv/&quot;</span>, <span class="dt">columns =</span> spec_compatible)</a></code></pre></div>
 <pre><code># Source: spark&lt;datacsv&gt; [?? x 2]
   my_letter my_number
-  &lt;chr&gt;     &lt;chr&gt;
-1 a         1
-2 b         2
-3 c         3
-4 a         1
-5 b         2
+  &lt;chr&gt;     &lt;chr&gt;    
+1 a         1        
+2 b         2        
+3 c         3        
+4 a         1        
+5 b         2        
 6 c         3    </code></pre>
 <p>In Spark, malformed entries can cause errors during reading, specially for non-character fields. To prevent such errors, we can use a file spec that imports them as character, and then use <code>dplyr</code> to coerce the field into the desired type.</p>
 <p>This subsection reviewed how we can read files faster and with less failures, which lets us start our analysis quicker. Another way to accelerate our analysis, is by loading less data into Spark memory, the next subsection will cover how to do this.</p>
@@ -527,17 +527,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <pre><code># Source:   table&lt;iris&gt; [?? x 5]
 # Database: spark_connection
    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
-          &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;
- 1          5.1         3.5          1.4         0.2 setosa
- 2          4.9         3            1.4         0.2 setosa
- 3          4.7         3.2          1.3         0.2 setosa
- 4          4.6         3.1          1.5         0.2 setosa
- 5          5           3.6          1.4         0.2 setosa
- 6          5.4         3.9          1.7         0.4 setosa
- 7          4.6         3.4          1.4         0.3 setosa
- 8          5           3.4          1.5         0.2 setosa
- 9          4.4         2.9          1.4         0.2 setosa
-10          4.9         3.1          1.5         0.1 setosa
+          &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;  
+ 1          5.1         3.5          1.4         0.2 setosa 
+ 2          4.9         3            1.4         0.2 setosa 
+ 3          4.7         3.2          1.3         0.2 setosa 
+ 4          4.6         3.1          1.5         0.2 setosa 
+ 5          5           3.6          1.4         0.2 setosa 
+ 6          5.4         3.9          1.7         0.4 setosa 
+ 7          4.6         3.4          1.4         0.3 setosa 
+ 8          5           3.4          1.5         0.2 setosa 
+ 9          4.4         2.9          1.4         0.2 setosa 
+10          4.9         3.1          1.5         0.1 setosa 
 # ... with more rows</code></pre>
 <p>After reviewing how to read data into Spark in this section, the next section will cover how we can write data from our Spark session.</p>
 </div>
@@ -588,8 +588,8 @@ External Transfer
 <p>You can then read the uploaded file as described in the <a href="data.html#data-file-formats">file formats</a> section; for text files, you would run:</p>
 <div class="sourceCode" id="cb268"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb268-1" title="1"><span class="kw">spark_read_text</span>(sc, <span class="st">&quot;largefile.txt&quot;</span>, <span class="dt">memory =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 <pre><code># Source: spark&lt;largefile&gt; [?? x 1]
-   line
-   &lt;chr&gt;
+   line                                                                   
+   &lt;chr&gt;                                                                  
  1 0.0982531064914565 -0.577567317599452 -1.66433938237253 -0.20095089489…
  2 -1.08322304504007 1.05962389624635 1.1852771207729 -0.230934710049462 …
  3 -0.398079835552421 0.293643382374479 0.727994248743204 -1.571547990532…
@@ -700,10 +700,10 @@ External Transfer
 <a class="sourceLine" id="cb275-7" title="7">)</a></code></pre></div>
 <pre><code># Source: spark&lt;bad2&gt; [?? x 2]
     foo `_corrupt_record`
-  &lt;int&gt; &lt;chr&gt;
-1     1 NA
-2     2 NA
-3     3 NA
+  &lt;int&gt; &lt;chr&gt;            
+1     1 NA               
+2     2 NA               
+3     3 NA               
 4    NA broken  </code></pre>
 <p>Reading and storing data as CSVs is quite common and supported across most systems; so for tabular datasets, is still a popular option; for datasets containing nested structures and non-tabular data, JSON is usually preferred</p>
 </div>
@@ -714,13 +714,13 @@ External Transfer
 <a class="sourceLine" id="cb277-2" title="2">simple_json &lt;-<span class="st"> </span><span class="kw">spark_read_json</span>(sc, <span class="st">&quot;data.json&quot;</span>)</a>
 <a class="sourceLine" id="cb277-3" title="3">simple_json</a></code></pre></div>
 <pre><code># Source: spark&lt;data&gt; [?? x 2]
-      a b
-  &lt;dbl&gt; &lt;list&gt;
+      a b         
+  &lt;dbl&gt; &lt;list&gt;    
 1     1 &lt;list [2]&gt;</code></pre>
 <p>However, when you deal with dataset containing nested fields like the one from this example; it is worth pointing out how to extract nested fields. One approach is to use a JSON Path, which is a domain specific syntax commonly used to extract and query JSON files, you can use a combination of <code>get_json_object()</code> and <code>to_json()</code> to specify the JSON path you are interested in, to extract <code>f1</code> you would run the following transformation:</p>
 <div class="sourceCode" id="cb279"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb279-1" title="1">simple_json <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw">transmute</span>(<span class="dt">z =</span> <span class="kw">get_json_object</span>(<span class="kw">to_json</span>(b), <span class="st">&#39;$.f1&#39;</span>))</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [?? x 3]
-      a b          z
+      a b          z    
   &lt;dbl&gt; &lt;list&gt;     &lt;chr&gt;
 1     1 &lt;list [2]&gt; 2 </code></pre>
 <p>Another approach is to install <code>sparkly.nested</code> from CRAN with <code>install.packages("sparklyr.nested")</code> and then unnest nested data with <code>sdf_unnest()</code>:</p>
@@ -766,8 +766,8 @@ FIGURE 8.3: One million rows write benchmark between CSV, JSON, Parquet and ORC
 <a class="sourceLine" id="cb285-4" title="4"><span class="kw">writeLines</span>(<span class="st">&quot;&lt;ROWS&gt;&lt;ROW&gt;&lt;text&gt;Hello World&lt;/text&gt;&lt;/ROW&gt;&quot;</span>, <span class="st">&quot;simple.xml&quot;</span>)</a>
 <a class="sourceLine" id="cb285-5" title="5"><span class="kw">spark_read_source</span>(sc, <span class="st">&quot;simple_xml&quot;</span>, <span class="st">&quot;simple.xml&quot;</span>, <span class="st">&quot;xml&quot;</span>)</a></code></pre></div>
 <pre><code># Source: spark&lt;data&gt; [?? x 1]
-  text
-  &lt;chr&gt;
+  text       
+  &lt;chr&gt;      
 1 Hello World</code></pre>
 <p>Which you can also write back to XML with ease as follows,</p>
 <div class="sourceCode" id="cb287"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb287-1" title="1"><span class="kw">tbl</span>(sc, <span class="st">&quot;simple_xml&quot;</span>) <span class="op">%&gt;%</span></a>
@@ -931,8 +931,6 @@ gitbook.start({
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
-
-<script src="hide-controls.js"></script>
 </body>
 
 </html>

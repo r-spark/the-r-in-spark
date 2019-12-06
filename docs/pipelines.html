@@ -4,22 +4,22 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 5 Pipelines | Mastering Apache Spark with R</title>
-  <meta name="description" content="The complete guide to large-scale analysis and modeling." />
+  <title>Chapter 5 Pipelines | Mastering Spark with R</title>
+  <meta name="description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
   <meta name="generator" content="bookdown 0.13 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 5 Pipelines | Mastering Apache Spark with R" />
+  <meta property="og:title" content="Chapter 5 Pipelines | Mastering Spark with R" />
   <meta property="og:type" content="book" />
-
-
-  <meta property="og:description" content="The complete guide to large-scale analysis and modeling." />
-  <meta name="github-repo" content="javierluraschi/the-r-in-spark" />
+  
+  
+  <meta property="og:description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
+  <meta name="github-repo" content="r-spark/the-r-in-spark" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 5 Pipelines | Mastering Apache Spark with R" />
-
-  <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
-
+  <meta name="twitter:title" content="Chapter 5 Pipelines | Mastering Spark with R" />
+  
+  <meta name="twitter:description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
+  
 
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz" />
 
@@ -28,8 +28,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
-
+  
+  
 <link rel="prev" href="modeling.html"/>
 <link rel="next" href="clusters.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
@@ -133,7 +133,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><strong><a href="./">Mastering Apache Spark with R</a></strong></li>
+<li><strong><a href="./">Mastering Spark with R</a></strong></li>
 
 <li class="divider"></li>
 <li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
@@ -398,7 +398,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Mastering Apache Spark with R</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Mastering Spark with R</a>
           </h1>
         </div>
 
@@ -432,7 +432,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb154-11" title="11"></a>
 <a class="sourceLine" id="cb154-12" title="12">scaler</a></code></pre></div>
 <pre><code>StandardScaler (Estimator)
-&lt;standard_scaler_7f6d46f452a1&gt;
+&lt;standard_scaler_7f6d46f452a1&gt; 
  (Parameters -- Column Names)
   input_col: features
   output_col: features_scaled
@@ -446,12 +446,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb156-4" title="4">scaler_model &lt;-<span class="st"> </span><span class="kw">ml_fit</span>(scaler, df)</a>
 <a class="sourceLine" id="cb156-5" title="5">scaler_model</a></code></pre></div>
 <pre><code>StandardScalerModel (Transformer)
-&lt;standard_scaler_7f6d46f452a1&gt;
+&lt;standard_scaler_7f6d46f452a1&gt; 
  (Parameters -- Column Names)
   input_col: features
   output_col: features_scaled
  (Transformer Info)
-  mean:  num 0.00421
+  mean:  num 0.00421 
   std:  num 0.999 </code></pre>
 <p><strong>Note:</strong> In Spark ML, many algorithms and feature transformers require that the input be a vector column. The function <code>ft_vector_assembler()</code> performs this task. The function can also be used to initialize a transformer to be used in a pipeline.</p>
 <p>We see that the mean and standard deviation are very close to 0 and 1, respectively, which is what we expect. We can then use the transformer to <em>transform</em> a data frame, using the <code>ml_transform()</code> function:</p>
@@ -477,10 +477,10 @@ $ features_scaled &lt;list&gt; [0.7502211, -0.8470762, 0.58999, -0.4…</code></
 <a class="sourceLine" id="cb160-4" title="4">    <span class="dt">output_col =</span> <span class="st">&quot;features_scaled&quot;</span>, </a>
 <a class="sourceLine" id="cb160-5" title="5">    <span class="dt">with_mean =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <pre><code>Pipeline (Estimator) with 1 stage
-&lt;pipeline_7f6d6a6a38ee&gt;
-  Stages
+&lt;pipeline_7f6d6a6a38ee&gt; 
+  Stages 
   |--1 StandardScaler (Estimator)
-  |    &lt;standard_scaler_7f6d63bfc7d6&gt;
+  |    &lt;standard_scaler_7f6d63bfc7d6&gt; 
   |     (Parameters -- Column Names)
   |      input_col: features
   |      output_col: features_scaled
@@ -493,15 +493,15 @@ $ features_scaled &lt;list&gt; [0.7502211, -0.8470762, 0.58999, -0.4…</code></
 <div class="sourceCode" id="cb163"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb163-1" title="1">pipeline_model &lt;-<span class="st"> </span><span class="kw">ml_fit</span>(pipeline, df)</a>
 <a class="sourceLine" id="cb163-2" title="2">pipeline_model</a></code></pre></div>
 <pre><code>PipelineModel (Transformer) with 1 stage
-&lt;pipeline_7f6d64df6e45&gt;
-  Stages
+&lt;pipeline_7f6d64df6e45&gt; 
+  Stages 
   |--1 StandardScalerModel (Transformer)
-  |    &lt;standard_scaler_7f6d46f452a1&gt;
+  |    &lt;standard_scaler_7f6d46f452a1&gt; 
   |     (Parameters -- Column Names)
   |      input_col: features
   |      output_col: features_scaled
   |     (Transformer Info)
-  |      mean:  num 0.00421
+  |      mean:  num 0.00421 
   |      std:  num 0.999 </code></pre>
 <pre><code>pipeline </code></pre>
 <p><strong>Note:</strong> As a result of the design of Spark ML, pipelines are always estimator objects, even if they comprise only of transformers. This means that if you have a pipeline with only transformers, you still need to call <code>ml_fit()</code> on it to obtain a transformer. The “fitting” procedure in this case wouldn’t actually modify any of the transformers.</p>
@@ -578,14 +578,14 @@ $ features_scaled &lt;list&gt; [0.7502211, -0.8470762, 0.58999, -0.4…</code></
 <p>We expect this to give rise to <span class="math inline">\(2 \times 2 \times 2 = 8\)</span> hyperparameter combinations, which we can confirm by printing the <code>cv</code> object:</p>
 <div class="sourceCode" id="cb171"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb171-1" title="1">cv</a></code></pre></div>
 <pre><code>CrossValidator (Estimator)
-&lt;cross_validator_d5676ac6f5&gt;
+&lt;cross_validator_d5676ac6f5&gt; 
  (Parameters -- Tuning)
   estimator: Pipeline
-             &lt;pipeline_d563b0cba31&gt;
+             &lt;pipeline_d563b0cba31&gt; 
   evaluator: BinaryClassificationEvaluator
-             &lt;binary_classification_evaluator_d561d90b53d&gt;
-    with metric areaUnderROC
-  num_folds: 10
+             &lt;binary_classification_evaluator_d561d90b53d&gt; 
+    with metric areaUnderROC 
+  num_folds: 10 
   [Tuned over 8 hyperparameter sets]</code></pre>
 <p>As with any other estimator, we can fit the cross validator using <code>ml_fit()</code></p>
 <div class="sourceCode" id="cb173"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb173-1" title="1">cv_model &lt;-<span class="st"> </span><span class="kw">ml_fit</span>(cv, okc_train)</a></code></pre></div>
@@ -662,14 +662,14 @@ $ features_scaled &lt;list&gt; [0.7502211, -0.8470762, 0.58999, -0.4…</code></
 <p>Let us take a look at the directory we just wrote to.</p>
 <div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb178-1" title="1"><span class="kw">list.dirs</span>(model_dir,<span class="dt">full.names =</span> <span class="ot">FALSE</span>) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb178-2" title="2"><span class="st">  </span><span class="kw">head</span>(<span class="dv">10</span>)</a></code></pre></div>
-<pre><code> [1] &quot;&quot;
- [2] &quot;metadata&quot;
- [3] &quot;stages&quot;
- [4] &quot;stages/0_string_indexer_5b42c72817b&quot;
- [5] &quot;stages/0_string_indexer_5b42c72817b/data&quot;
- [6] &quot;stages/0_string_indexer_5b42c72817b/metadata&quot;
- [7] &quot;stages/1_string_indexer_5b423192b89f&quot;
- [8] &quot;stages/1_string_indexer_5b423192b89f/data&quot;
+<pre><code> [1] &quot;&quot;                                             
+ [2] &quot;metadata&quot;                                     
+ [3] &quot;stages&quot;                                       
+ [4] &quot;stages/0_string_indexer_5b42c72817b&quot;          
+ [5] &quot;stages/0_string_indexer_5b42c72817b/data&quot;     
+ [6] &quot;stages/0_string_indexer_5b42c72817b/metadata&quot; 
+ [7] &quot;stages/1_string_indexer_5b423192b89f&quot;         
+ [8] &quot;stages/1_string_indexer_5b423192b89f/data&quot;    
  [9] &quot;stages/1_string_indexer_5b423192b89f/metadata&quot;
 [10] &quot;stages/2_string_indexer_5b421796e826&quot;    </code></pre>
 <p>We can dive into a couple of the files to see what type of data was saved.</p>
@@ -694,14 +694,14 @@ $ uid          &lt;chr&gt; &quot;string_indexer_ce05afa9899&quot;</code></pre>
 <a class="sourceLine" id="cb182-5" title="5">))</a></code></pre></div>
 <pre><code># Source: spark&lt;data&gt; [?? x 5]
   numClasses numFeatures interceptVector coefficientMatr… isMultinomial
-       &lt;int&gt;       &lt;int&gt; &lt;list&gt;          &lt;list&gt;           &lt;lgl&gt;
+       &lt;int&gt;       &lt;int&gt; &lt;list&gt;          &lt;list&gt;           &lt;lgl&gt;        
 1          2          12 &lt;dbl [1]&gt;       &lt;-1.27950828662… FALSE        </code></pre>
 <p>We see that quite a bit of information has been exported, from the SQL statement in the dplyr transformer to the fitted coefficient estimates of the logistic regression. We can then (in a new Spark session) reconstruct the model by using <code>ml_load()</code>:</p>
 <div class="sourceCode" id="cb184"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb184-1" title="1">model_reload &lt;-<span class="st"> </span><span class="kw">ml_load</span>(sc, model_dir)</a></code></pre></div>
 <p>Let us see if we can retrieve the logistic regression stage from this pipeline model:</p>
 <div class="sourceCode" id="cb185"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb185-1" title="1"><span class="kw">ml_stage</span>(model_reload, <span class="st">&quot;logistic_regression&quot;</span>)</a></code></pre></div>
 <pre><code>LogisticRegressionModel (Transformer)
-&lt;logistic_regression_5b423b539d0f&gt;
+&lt;logistic_regression_5b423b539d0f&gt; 
  (Parameters -- Column Names)
   features_col: features_scaled
   label_col: not_working
@@ -709,13 +709,13 @@ $ uid          &lt;chr&gt; &quot;string_indexer_ce05afa9899&quot;</code></pre>
   probability_col: probability
   raw_prediction_col: rawPrediction
  (Transformer Info)
-  coefficient_matrix:  num [1, 1:12] -1.2795 -0.0915 0 0.126 -0.0324 ...
-  coefficients:  num [1:12] -1.2795 -0.0915 0 0.126 -0.0324 ...
-  intercept:  num -2.79
-  intercept_vector:  num -2.79
-  num_classes:  int 2
-  num_features:  int 12
-  threshold:  num 0.5
+  coefficient_matrix:  num [1, 1:12] -1.2795 -0.0915 0 0.126 -0.0324 ... 
+  coefficients:  num [1:12] -1.2795 -0.0915 0 0.126 -0.0324 ... 
+  intercept:  num -2.79 
+  intercept_vector:  num -2.79 
+  num_classes:  int 2 
+  num_features:  int 12 
+  threshold:  num 0.5 
   thresholds:  num [1:2] 0.5 0.5 </code></pre>
 <p>Note that the exported JSON and parquet files are agnostic of the API that exported them. This means that in a multilingual machine learning engineering team, you can pick up a data preprocessing pipeline from a data engineer working in Python, build a prediction model on top of it, then hand off the final pipeline off to a deployment engineering working in Scala. In the next section, we discuss deployment of models in more detail.</p>
 <p><strong>Note:</strong> When <code>ml_save()</code> is called for sparklyr ML models (created using the formula interface), the associated pipeline model is saved, but any sparklyr specific metadata, such as index labels, are not. In other words, saving a sparklyr <code>ml_model</code> object then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. This behavior is required to use pipelines with other programming languages.</p>
@@ -919,8 +919,6 @@ gitbook.start({
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
-
-<script src="hide-controls.js"></script>
 </body>
 
 </html>

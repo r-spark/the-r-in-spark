@@ -4,22 +4,22 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 Modeling | Mastering Apache Spark with R</title>
-  <meta name="description" content="The complete guide to large-scale analysis and modeling." />
+  <title>Chapter 4 Modeling | Mastering Spark with R</title>
+  <meta name="description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
   <meta name="generator" content="bookdown 0.13 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 Modeling | Mastering Apache Spark with R" />
+  <meta property="og:title" content="Chapter 4 Modeling | Mastering Spark with R" />
   <meta property="og:type" content="book" />
-
-
-  <meta property="og:description" content="The complete guide to large-scale analysis and modeling." />
-  <meta name="github-repo" content="javierluraschi/the-r-in-spark" />
+  
+  
+  <meta property="og:description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
+  <meta name="github-repo" content="r-spark/the-r-in-spark" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 Modeling | Mastering Apache Spark with R" />
-
-  <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
-
+  <meta name="twitter:title" content="Chapter 4 Modeling | Mastering Spark with R" />
+  
+  <meta name="twitter:description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
+  
 
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz" />
 
@@ -28,8 +28,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
-
+  
+  
 <link rel="prev" href="analysis.html"/>
 <link rel="next" href="pipelines.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
@@ -133,7 +133,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><strong><a href="./">Mastering Apache Spark with R</a></strong></li>
+<li><strong><a href="./">Mastering Spark with R</a></strong></li>
 
 <li class="divider"></li>
 <li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
@@ -398,7 +398,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Mastering Apache Spark with R</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Mastering Spark with R</a>
           </h1>
         </div>
 
@@ -539,17 +539,17 @@ $ status      &lt;chr&gt; &quot;single&quot;, &quot;single&quot;, &quot;availabl
 <pre><code># Source: spark&lt;?&gt; [?? x 3]
   not_working     n   frac
         &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
-1           0 43785 0.910
+1           0 43785 0.910 
 2           1  4317 0.0897</code></pre>
 <p>Using the <code>sdf_describe()</code> function, we can obtain numerical summaries of specific columns:</p>
 <div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb103-1" title="1"><span class="kw">sdf_describe</span>(okc_train, <span class="dt">cols =</span> <span class="kw">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;income&quot;</span>))</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [?? x 3]
-  summary age                income
-  &lt;chr&gt;   &lt;chr&gt;              &lt;chr&gt;
-1 count   48102              9193
+  summary age                income            
+  &lt;chr&gt;   &lt;chr&gt;              &lt;chr&gt;             
+1 count   48102              9193              
 2 mean    32.336534863415245 104968.99815076689
-3 stddev  9.43908920033797   202235.2291773537
-4 min     18                 20000.0
+3 stddev  9.43908920033797   202235.2291773537 
+4 min     18                 20000.0           
 5 max     110                1000000.0   </code></pre>
 <p>Like we saw in the Analysis chapter, we can also utilize the dbplot package to plot distributions of these variables. In Figure <a href="modeling.html#fig:age-histogram">4.1</a> we show a histogram of the distribution of the <code>age</code> variable.</p>
 <div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb105-1" title="1"><span class="kw">dbplot_histogram</span>(okc_train, age)</a></code></pre></div>
@@ -579,12 +579,12 @@ FIGURE 4.1: Distribution of age
  1 judaism       2520 0.0794 0.00539
  2 atheism       5624 0.118  0.00436
  3 christianity  4671 0.120  0.00480
- 4 hinduism       358 0.101  0.0159
- 5 islam          115 0.191  0.0367
+ 4 hinduism       358 0.101  0.0159 
+ 5 islam          115 0.191  0.0367 
  6 agnosticism   7078 0.0958 0.00346
  7 other         6240 0.0841 0.00346
- 8 missing      16152 0.0719 0.002
- 9 buddhism      1575 0.0851 0.007
+ 8 missing      16152 0.0719 0.002  
+ 9 buddhism      1575 0.0851 0.007  
 10 catholicism   3769 0.0886 0.00458</code></pre>
 <p>Note that <code>prop_data</code> is a small data frame that has been collected into memory in our R session, we can take advantage of ggplot2 to create an informative visualization in Figure <a href="modeling.html#fig:modeling-eda-prop-render">4.2</a>.</p>
 <div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb108-1" title="1">prop_data <span class="op">%&gt;%</span></a>
@@ -802,42 +802,42 @@ FIGURE 4.6: Distribution of essay length
 <pre><code>Formula: not_working ~ scaled_age + sex + drinks + drugs + essay_length
 
 Coefficients:
-      (Intercept)        scaled_age             sex_m   drinks_socially
-    -2.823517e+00     -1.309498e+00     -1.918137e-01      2.235833e-01
-    drinks_rarely      drinks_often drinks_not at all    drinks_missing
-     6.732361e-01      7.572970e-02      8.214072e-01     -4.456326e-01
-drinks_very often       drugs_never     drugs_missing   drugs_sometimes
-     8.032052e-02     -1.712702e-01     -3.995422e-01     -7.483491e-02
-     essay_length
+      (Intercept)        scaled_age             sex_m   drinks_socially 
+    -2.823517e+00     -1.309498e+00     -1.918137e-01      2.235833e-01 
+    drinks_rarely      drinks_often drinks_not at all    drinks_missing 
+     6.732361e-01      7.572970e-02      8.214072e-01     -4.456326e-01 
+drinks_very often       drugs_never     drugs_missing   drugs_sometimes 
+     8.032052e-02     -1.712702e-01     -3.995422e-01     -7.483491e-02 
+     essay_length 
      3.664964e-05 </code></pre>
 <p>To obtain a summary of performance metrics on the assessment set, we can use the <code>ml_evaluate()</code> function.</p>
 <div class="sourceCode" id="cb130"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb130-1" title="1">validation_summary &lt;-<span class="st"> </span><span class="kw">ml_evaluate</span>(lr, assessment_set)</a></code></pre></div>
 <p>You can print <code>validation_summary</code> to see the available metrics</p>
 <div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb131-1" title="1">validation_summary</a></code></pre></div>
-<pre><code>BinaryLogisticRegressionSummaryImpl
- Access the following via `$` or `ml_summary()`.
- - features_col()
- - label_col()
- - predictions()
- - probability_col()
- - area_under_roc()
- - f_measure_by_threshold()
- - pr()
- - precision_by_threshold()
- - recall_by_threshold()
- - roc()
- - prediction_col()
- - accuracy()
- - f_measure_by_label()
- - false_positive_rate_by_label()
- - labels()
- - precision_by_label()
- - recall_by_label()
- - true_positive_rate_by_label()
- - weighted_f_measure()
- - weighted_false_positive_rate()
- - weighted_precision()
- - weighted_recall()
+<pre><code>BinaryLogisticRegressionSummaryImpl 
+ Access the following via `$` or `ml_summary()`. 
+ - features_col() 
+ - label_col() 
+ - predictions() 
+ - probability_col() 
+ - area_under_roc() 
+ - f_measure_by_threshold() 
+ - pr() 
+ - precision_by_threshold() 
+ - recall_by_threshold() 
+ - roc() 
+ - prediction_col() 
+ - accuracy() 
+ - f_measure_by_label() 
+ - false_positive_rate_by_label() 
+ - labels() 
+ - precision_by_label() 
+ - recall_by_label() 
+ - true_positive_rate_by_label() 
+ - weighted_f_measure() 
+ - weighted_false_positive_rate() 
+ - weighted_precision() 
+ - weighted_recall() 
  - weighted_true_positive_rate() </code></pre>
 <p>We can plot the ROC curve by collecting the output of <code>validation_summary$roc()</code> and using ggplot2:</p>
 <div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb133-1" title="1">roc &lt;-<span class="st"> </span>validation_summary<span class="op">$</span><span class="kw">roc</span>() <span class="op">%&gt;%</span></a>
@@ -1134,8 +1134,6 @@ gitbook.start({
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
-
-<script src="hide-controls.js"></script>
 </body>
 
 </html>

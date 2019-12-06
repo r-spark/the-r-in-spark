@@ -4,22 +4,22 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 3 Analysis | Mastering Apache Spark with R</title>
-  <meta name="description" content="The complete guide to large-scale analysis and modeling." />
+  <title>Chapter 3 Analysis | Mastering Spark with R</title>
+  <meta name="description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
   <meta name="generator" content="bookdown 0.13 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 3 Analysis | Mastering Apache Spark with R" />
+  <meta property="og:title" content="Chapter 3 Analysis | Mastering Spark with R" />
   <meta property="og:type" content="book" />
-
-
-  <meta property="og:description" content="The complete guide to large-scale analysis and modeling." />
-  <meta name="github-repo" content="javierluraschi/the-r-in-spark" />
+  
+  
+  <meta property="og:description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
+  <meta name="github-repo" content="r-spark/the-r-in-spark" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 3 Analysis | Mastering Apache Spark with R" />
-
-  <meta name="twitter:description" content="The complete guide to large-scale analysis and modeling." />
-
+  <meta name="twitter:title" content="Chapter 3 Analysis | Mastering Spark with R" />
+  
+  <meta name="twitter:description" content="The Complete Guide to Large-Scale Analysis and Modeling." />
+  
 
 <meta name="author" content="Javier Luraschi, Kevin Kuo, Edgar Ruiz" />
 
@@ -28,8 +28,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
-
+  
+  
 <link rel="prev" href="starting.html"/>
 <link rel="next" href="modeling.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
@@ -133,7 +133,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><strong><a href="./">Mastering Apache Spark with R</a></strong></li>
+<li><strong><a href="./">Mastering Spark with R</a></strong></li>
 
 <li class="divider"></li>
 <li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
@@ -398,7 +398,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Mastering Apache Spark with R</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Mastering Spark with R</a>
           </h1>
         </div>
 
@@ -529,7 +529,7 @@ FROM `mtcars_remote`</code></pre>
 <div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" title="1"><span class="kw">summarise</span>(cars, <span class="dt">mpg_percentile =</span> <span class="kw">percentile</span>(mpg, <span class="kw">array</span>(<span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>)))</a></code></pre></div>
 <pre><code># Source: spark&lt;?&gt; [?? x 1]
   mpg_percentile
-  &lt;list&gt;
+  &lt;list&gt;        
 1 &lt;list [3]&gt;   </code></pre>
 <p>The <em>explode</em> function can be used to separate the Spark’s array value results into their own record. To do this, use <em>explode</em> within a <code>mutate()</code> command, and pass the variable containing the results of the percentile operation.</p>
 <div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" title="1"><span class="kw">summarise</span>(cars, <span class="dt">mpg_percentile =</span> <span class="kw">percentile</span>(mpg, <span class="kw">array</span>(<span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>))) <span class="op">%&gt;%</span></a>
@@ -549,17 +549,17 @@ FROM `mtcars_remote`</code></pre>
 <pre><code># A tibble: 11 x 11
       mpg    cyl   disp     hp    drat     wt    qsec
     &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
- 1  1     -0.852 -0.848 -0.776  0.681  -0.868  0.419
- 2 -0.852  1      0.902  0.832 -0.700   0.782 -0.591
- 3 -0.848  0.902  1      0.791 -0.710   0.888 -0.434
- 4 -0.776  0.832  0.791  1     -0.449   0.659 -0.708
+ 1  1     -0.852 -0.848 -0.776  0.681  -0.868  0.419 
+ 2 -0.852  1      0.902  0.832 -0.700   0.782 -0.591 
+ 3 -0.848  0.902  1      0.791 -0.710   0.888 -0.434 
+ 4 -0.776  0.832  0.791  1     -0.449   0.659 -0.708 
  5  0.681 -0.700 -0.710 -0.449  1      -0.712  0.0912
- 6 -0.868  0.782  0.888  0.659 -0.712   1     -0.175
- 7  0.419 -0.591 -0.434 -0.708  0.0912 -0.175  1
- 8  0.664 -0.811 -0.710 -0.723  0.440  -0.555  0.745
- 9  0.600 -0.523 -0.591 -0.243  0.713  -0.692 -0.230
-10  0.480 -0.493 -0.556 -0.126  0.700  -0.583 -0.213
-11 -0.551  0.527  0.395  0.750 -0.0908  0.428 -0.656
+ 6 -0.868  0.782  0.888  0.659 -0.712   1     -0.175 
+ 7  0.419 -0.591 -0.434 -0.708  0.0912 -0.175  1     
+ 8  0.664 -0.811 -0.710 -0.723  0.440  -0.555  0.745 
+ 9  0.600 -0.523 -0.591 -0.243  0.713  -0.692 -0.230 
+10  0.480 -0.493 -0.556 -0.126  0.700  -0.583 -0.213 
+11 -0.551  0.527  0.395  0.750 -0.0908  0.428 -0.656 
 # ... with 4 more variables: vs &lt;dbl&gt;, am &lt;dbl&gt;,
 #   gear &lt;dbl&gt;, carb &lt;dbl&gt;</code></pre>
 <p>The <code>corrr</code> R package specializes in correlations. It contains friendly functions to prepare and visualize the results. Included inside the package is a back-end for Spark, so when a Spark object is used in <code>corrr</code> the actual computation also happens in Spark. In the background, the <code>correlate()</code> function runs <code>sparklyr::ml_corr()</code>, so there is no need to collect any data into R prior running the command.</p>
@@ -573,7 +573,7 @@ FROM `mtcars_remote`</code></pre>
  3 disp     -0.848   0.902  NA       0.791  -0.710    0.888
  4 hp       -0.776   0.832   0.791  NA      -0.449    0.659
  5 drat      0.681  -0.700  -0.710  -0.449  NA       -0.712
- 6 wt       -0.868   0.782   0.888   0.659  -0.712   NA
+ 6 wt       -0.868   0.782   0.888   0.659  -0.712   NA    
  7 qsec      0.419  -0.591  -0.434  -0.708   0.0912  -0.175
  8 vs        0.664  -0.811  -0.710  -0.723   0.440   -0.555
  9 am        0.600  -0.523  -0.591  -0.243   0.713   -0.692
@@ -701,14 +701,14 @@ FIGURE 3.13: A raster plot using Spark
 <a class="sourceLine" id="cb79-2" title="2"><span class="st">  </span><span class="kw">ml_linear_regression</span>(mpg <span class="op">~</span><span class="st"> </span>.) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb79-3" title="3"><span class="st">  </span><span class="kw">summary</span>()</a></code></pre></div>
 <pre><code>Deviance Residuals:
-    Min      1Q  Median      3Q     Max
--3.4506 -1.6044 -0.1196  1.2193  4.6271
+    Min      1Q  Median      3Q     Max 
+-3.4506 -1.6044 -0.1196  1.2193  4.6271 
 
 Coefficients:
-(Intercept)         cyl        disp          hp        drat          wt
+(Intercept)         cyl        disp          hp        drat          wt  
 12.30337416 -0.11144048  0.01333524 -0.02148212  0.78711097 -3.71530393
-      qsec          vs          am        gear        carb
-0.82104075  0.31776281  2.52022689  0.65541302 -0.19941925
+      qsec          vs          am        gear        carb 
+0.82104075  0.31776281  2.52022689  0.65541302 -0.19941925 
 
 R-Squared: 0.869
 Root Mean Squared Error: 2.147</code></pre>
@@ -717,12 +717,12 @@ Root Mean Squared Error: 2.147</code></pre>
 <a class="sourceLine" id="cb81-2" title="2"><span class="st">  </span><span class="kw">ml_linear_regression</span>(mpg <span class="op">~</span><span class="st"> </span>hp <span class="op">+</span><span class="st"> </span>cyl) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb81-3" title="3"><span class="st">  </span><span class="kw">summary</span>()</a></code></pre></div>
 <pre><code>Deviance Residuals:
-    Min      1Q  Median      3Q     Max
--4.4948 -2.4901 -0.1828  1.9777  7.2934
+    Min      1Q  Median      3Q     Max 
+-4.4948 -2.4901 -0.1828  1.9777  7.2934 
 
 Coefficients:
-(Intercept)          hp         cyl
- 36.9083305  -0.0191217  -2.2646936
+(Intercept)          hp         cyl 
+ 36.9083305  -0.0191217  -2.2646936 
 
 R-Squared: 0.7407
 Root Mean Squared Error: 3.021</code></pre>
@@ -731,12 +731,12 @@ Root Mean Squared Error: 3.021</code></pre>
 <a class="sourceLine" id="cb83-2" title="2"><span class="st">  </span><span class="kw">ml_generalized_linear_regression</span>(mpg <span class="op">~</span><span class="st"> </span>hp <span class="op">+</span><span class="st"> </span>cyl) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb83-3" title="3"><span class="st">  </span><span class="kw">summary</span>()</a></code></pre></div>
 <pre><code>Deviance Residuals:
-    Min      1Q  Median      3Q     Max
--4.4948 -2.4901 -0.1828  1.9777  7.2934
+    Min      1Q  Median      3Q     Max 
+-4.4948 -2.4901 -0.1828  1.9777  7.2934 
 
 Coefficients:
-(Intercept)          hp         cyl
- 36.9083305  -0.0191217  -2.2646936
+(Intercept)          hp         cyl 
+ 36.9083305  -0.0191217  -2.2646936 
 
 (Dispersion parameter for gaussian family taken to be 10.06809)
 
@@ -755,14 +755,14 @@ AIC: 169.56</code></pre>
 <a class="sourceLine" id="cb86-2" title="2"><span class="st">  </span><span class="kw">ml_linear_regression</span>(mpg <span class="op">~</span><span class="st"> </span>.) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb86-3" title="3"><span class="st">  </span><span class="kw">summary</span>()</a></code></pre></div>
 <pre><code>Deviance Residuals:
-     Min       1Q   Median       3Q      Max
--3.47339 -1.37936 -0.06554  1.05105  4.39057
+     Min       1Q   Median       3Q      Max 
+-3.47339 -1.37936 -0.06554  1.05105  4.39057 
 
 Coefficients:
 (Intercept) cyl_cyl_8.0 cyl_cyl_4.0        disp          hp        drat
 16.15953652  3.29774653  1.66030673  0.01391241 -0.04612835  0.02635025
-          wt        qsec          vs          am       gear        carb
- -3.80624757  0.64695710  1.74738689  2.61726546 0.76402917  0.50935118
+          wt        qsec          vs          am       gear        carb 
+ -3.80624757  0.64695710  1.74738689  2.61726546 0.76402917  0.50935118  
 
 R-Squared: 0.8816
 Root Mean Squared Error: 2.041</code></pre>
@@ -922,8 +922,6 @@ gitbook.start({
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
-
-<script src="hide-controls.js"></script>
 </body>
 
 </html>
