@@ -1,4 +1,5 @@
 
+/*
 function hide() {
   document.getElementsByClassName("book-summary")[0].style.left = "-300px";
   document.getElementsByClassName("book-body")[0].style.left = "0";
@@ -8,3 +9,4 @@ function hide() {
 }
 
 window.setInterval(hide, 200);
+*/
