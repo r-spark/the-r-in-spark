@@ -419,7 +419,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">11.1</span> Overview</h2>
 <p>The Introduction chapter introduced MapReduce as a technique capable of processing large-scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The Tuning chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually, this is illustrated in Figure <a href="distributed.html#fig:distributed-times-ten">11.1</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:distributed-times-ten"></span>
-<img src="the-r-in-spark_files/figure-html/distributed-times-ten-1.png" alt="Map Operation when Multiplying by Ten" width="672" />
+<img src="the-r-in-spark_files/figure-html/distributed-times-ten-1.png" alt="Map Operation when Multiplying by Ten" width="auto" height="280pt" />
 <p class="caption">
 FIGURE 11.1: Map Operation when Multiplying by Ten
 </p>
@@ -435,7 +435,7 @@ FIGURE 11.1: Map Operation when Multiplying by Ten
 <p>Notice that <code>~ 10 * .x</code> is plain R code executed across all worker nodes; the <code>~</code> operator is defined in the <code>rlang</code> package and provides a compact definition of a function equivalent to <code>function(.x) 10 * .x</code> – this compact form is also known as an anonymous function or lambda expression.</p>
 <p>The <code>f(x)</code> function must take an R data frame as input and must also produce an R data frame as output, conceptually illustrated in Figure <a href="distributed.html#fig:distributed-spark-apply-input-output">11.2</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:distributed-spark-apply-input-output"></span>
-<img src="the-r-in-spark_files/figure-html/distributed-spark-apply-input-output-1.png" alt="Expected Function Signature in spark_apply() Mappings" width="672" />
+<img src="the-r-in-spark_files/figure-html/distributed-spark-apply-input-output-1.png" alt="Expected Function Signature in spark_apply() Mappings" width="auto" height="100pt" />
 <p class="caption">
 FIGURE 11.2: Expected Function Signature in spark_apply() Mappings
 </p>
@@ -771,7 +771,7 @@ FIGURE 11.4: Ray tracing in Spark using R and rayrender
 4   400</code></pre>
 <p>Figure <a href="distributed.html#fig:distributed-times-context">11.5</a> illustrates this example conceptually. Notice that the data partitions are still variable; however, the contextual parameter is distributed to all the nodes.</p>
 <div class="figure" style="text-align: center"><span id="fig:distributed-times-context"></span>
-<img src="the-r-in-spark_files/figure-html/distributed-times-context-1.png" alt="Map Operation when Multiplying with Context" width="672" />
+<img src="the-r-in-spark_files/figure-html/distributed-times-context-1.png" alt="Map Operation when Multiplying with Context" width="auto" height="280pt" />
 <p class="caption">
 FIGURE 11.5: Map Operation when Multiplying with Context
 </p>
@@ -886,16 +886,16 @@ FIGURE 11.5: Map Operation when Multiplying with Context
 <h3><span class="header-section-number">11.9.2</span> Apache Arrow</h3>
 <p>Before we introduce Apache Arrow, we need to present how data is stored and transferred between Spark and R. R was designed from its inception to perform fast numeric computations, to accomplish this, figuring out the best way to store data is very important.</p>
 <p>Some computing systems store data internally by row; however, most interesting numerical operations usually require processing data by column. For example, calculating the mean of a column requires processing each column on its own, not the entire row. Spark stores data by default by row, since it’s easier to partition; in contrast, R stores data by column. Therefore, something needs to transform both representations when data is transferred between Spark and R, see Figure <a href="distributed.html#fig:distributed-r-transformation">11.6</a>.</p>
-<div class="figure"><span id="fig:distributed-r-transformation"></span>
-<img src="the-r-in-spark_files/figure-html/distributed-r-transformation-1.png" alt="Data Transformation between Spark and R" width="672" />
+<div class="figure" style="text-align: center"><span id="fig:distributed-r-transformation"></span>
+<img src="the-r-in-spark_files/figure-html/distributed-r-transformation-1.png" alt="Data Transformation between Spark and R" width="auto" height="200pt" />
 <p class="caption">
 FIGURE 11.6: Data Transformation between Spark and R
 </p>
 </div>
 <p>This transformation from rows to columns needs to happen for each partition. In addition, data also needs to be transformed from Scala’s internal representation to R’s internal representation. These transformations wastes a lot of CPU cycles, Apache Arrow reduces these transformations.</p>
 <p>Apache Arrow is a cross-language development platform for in-memory data. In Spark, it speeds up transferring data between Scala and R by defining a common data format compatible with many programming languages – instead of having to transform between Scala’s internal representation and R’s, the same structure can be used for both languages. In addition, transforming data from row based storage to columnar storage, is performed in parallel in Spark, which can be further optimized by using the columnar storage formats presented in the Data chapter. The improved transformation are available in Figure <a href="distributed.html#fig:distributed-r-transformation">11.6</a>.</p>
-<div class="figure"><span id="fig:distributed-r-using-arrow"></span>
-<img src="the-r-in-spark_files/figure-html/distributed-r-using-arrow-1.png" alt="Data Transformation between Spark and R using Arrow" width="672" />
+<div class="figure" style="text-align: center"><span id="fig:distributed-r-using-arrow"></span>
+<img src="the-r-in-spark_files/figure-html/distributed-r-using-arrow-1.png" alt="Data Transformation between Spark and R using Arrow" width="auto" height="260pt" />
 <p class="caption">
 FIGURE 11.7: Data Transformation between Spark and R using Arrow
 </p>

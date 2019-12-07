@@ -421,8 +421,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>For several years, it’s been a common practice to store large datasets in a relational <em>database</em>, a system first proposed in 1970 by Edgar F. Codd. <span class="citation">(Codd <a href="#ref-data-codd-relational">1970</a>)</span> You can think of a database as a collection of tables that are related to one another where each table is carefully designed to hold specific data types and relationships to other tables. Most relational database systems use <em>SQL</em> (Structured Query Language) for querying and maintaining the database. Databases are still widely used today, with good reason – Databases store data reliably and consistently, your bank probably stores account balances in a database and that’s a good practice!</p>
 <p>However, databases have also been used to store information from other applications and systems. For instance, your bank may also store data produced by other banks, say incoming checks. In order to accomplish this, the external data needs to be extracted from the external system, transformed into something that fits the current database and finally load it. This is known as <em>ETL</em> (extract-transform-load), a general procedure of copying data from one or more sources into a destination system which represents the data differently from the source, this process became popular in the 1970s.</p>
 <p>Aside from databases, data is often also loaded into a <em>data warehouse</em>, a system used for reporting and data analysis; usually stored and indexed in a format that increases data analysis speed, but which is often not suitable for modeling or running custom distributed code. The challenge is that, changing databases and data warehouses is usually a long and delicate process since data needs to be re-indexed and the data from multiple data sources needs to be carefully transformed into single tables that can share across data sources.</p>
-<p>Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a <em>data lake</em> – a system or repository of data stored in its natural format, see Figure <a href="#fig:data-data-lake"><strong>??</strong></a>. Since data lakes make data available in its original format, there is no need to carefully transform it in advance, anyone can use it for analysis which adds significant flexibility over ETL. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure <a href="#fig:data-data-lake"><strong>??</strong></a>.</p>
-<p><img src="images/data-data-lake.png" /></p>
+<p>Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a <em>data lake</em> – a system or repository of data stored in its natural format, see Figure <a href="data.html#fig:data-data-lake">8.1</a>. Since data lakes make data available in its original format, there is no need to carefully transform it in advance, anyone can use it for analysis which adds significant flexibility over ETL. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure <a href="data.html#fig:data-data-lake">8.1</a>.</p>
+<div class="figure" style="text-align: center"><span id="fig:data-data-lake"></span>
+<img src="the-r-in-spark_files/figure-html/data-data-lake-1.png" alt="Spark processing raw data from a data lakes, databases and data warehouses" width="auto" height="280pt" />
+<p class="caption">
+FIGURE 8.1: Spark processing raw data from a data lakes, databases and data warehouses
+</p>
+</div>
 <p>In order to support a broad variety of data source, Spark needs to be able to read and write data in several different <em>file formats</em> (CSV, JSON, Parquet, etc), access them while stored in several <em>file systems</em> (HDFS, S3, DBFS, etc) and, potentially, interoperate with other <em>storage systems</em> (databases, data warehouses, etc). We will get to all of that; but first, we will start by presenting how to read, write and copy data using Spark.</p>
 </div>
 <div id="read" class="section level2">
@@ -545,20 +550,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="write" class="section level2">
 <h2><span class="header-section-number">8.3</span> Write</h2>
 <p>Some projects require that new data generated in Spark to be written back to a remote source. For example, the data could be new predicted values returned by a Spark model. The job processes the mass generation of predictions, but then the predictions need to be stored. This section will focus on how we should use Spark for moving the data from Spark into an external destination.</p>
-<p>Many new users start by downloading Spark data into R, to then upload it to a target. Figure <a href="data.html#fig:data-avoid-approach">8.1</a> illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones. The data typically grows in size to the point that it is no longer feasible for R to be the middle point.</p>
+<p>Many new users start by downloading Spark data into R, to then upload it to a target. Figure <a href="data.html#fig:data-avoid-approach">8.2</a> illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones. The data typically grows in size to the point that it is no longer feasible for R to be the middle point.</p>
 <div class="figure" style="text-align: center"><span id="fig:data-avoid-approach"></span>
-<img src="the-r-in-spark_files/figure-html/data-avoid-approach-1.png" alt="Incorrect use of Spark when writing large datasets" width="672" />
+<img src="the-r-in-spark_files/figure-html/data-avoid-approach-1.png" alt="Incorrect use of Spark when writing large datasets" width="auto" height="100pt" />
 <p class="caption">
-FIGURE 8.1: Incorrect use of Spark when writing large datasets
+FIGURE 8.2: Incorrect use of Spark when writing large datasets
 </p>
 </div>
-<p><img src="images/data-r-pass-through.png" /></p>
 <p>All efforts should be made to have Spark connect to the target location. This way, reading, processing and writing happens within the same Spark session.</p>
-<p>As Figure <a href="data.html#fig:data-recommended-approach">8.2</a> shows, a better approach is to use Spark to read, process, and write to the target. This approach is able to scale as big as the Spark cluster allows, and prevents using R as a choke point.</p>
+<p>As Figure <a href="data.html#fig:data-recommended-approach">8.3</a> shows, a better approach is to use Spark to read, process, and write to the target. This approach is able to scale as big as the Spark cluster allows, and prevents using R as a choke point.</p>
 <div class="figure" style="text-align: center"><span id="fig:data-recommended-approach"></span>
-<img src="the-r-in-spark_files/figure-html/data-recommended-approach-1.png" alt="Correct use of Spark when writing large datasets" width="672" />
+<img src="the-r-in-spark_files/figure-html/data-recommended-approach-1.png" alt="Correct use of Spark when writing large datasets" width="auto" height="100pt" />
 <p class="caption">
-FIGURE 8.2: Correct use of Spark when writing large datasets
+FIGURE 8.3: Correct use of Spark when writing large datasets
 </p>
 </div>
 <p>Consider the following scenario: A Spark job just processed predictions for a large data set, resulting in a considerably amount of predictions. Choosing a method to write results will depend on the technology infrastructure you are working on. More specifically, it will depend on Spark and the target running, or not, in the same cluster.</p>
@@ -734,7 +738,7 @@ External Transfer
 <div id="parquet" class="section level3">
 <h3><span class="header-section-number">8.5.3</span> Parquet</h3>
 <p>Apache Parquet, Apache ORC and Apache AVRO are all file formats designed with performance in mind. Parquet and ORC happen to store data in columnar format while AVRO is row-based, all of them are binary file formats which reduces storage space and improve performance. This at the cost of making them a bit harder to read by external systems and libraries; however, this is usually not an issue when used as intermediate data storage within Spark.</p>
-<p>To illustrate this, Figure <a href="data.html#fig:data-file-format-benchmark">8.3</a> plots the result of running a one-million-rows write-speed benchmark using the <code>bench</code> package, please use your own benchmarks over meaningful datasets when deciding which formats fits best your needs.</p>
+<p>To illustrate this, Figure <a href="data.html#fig:data-file-format-benchmark">8.4</a> plots the result of running a one-million-rows write-speed benchmark using the <code>bench</code> package, please use your own benchmarks over meaningful datasets when deciding which formats fits best your needs.</p>
 <div class="sourceCode" id="cb283"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb283-1" title="1">numeric &lt;-<span class="st"> </span><span class="kw">copy_to</span>(sc, <span class="kw">data.frame</span>(<span class="dt">nums =</span> <span class="kw">runif</span>(<span class="dv">10</span><span class="op">^</span><span class="dv">6</span>)))</a>
 <a class="sourceLine" id="cb283-2" title="2">bench<span class="op">::</span><span class="kw">mark</span>(</a>
 <a class="sourceLine" id="cb283-3" title="3">  <span class="dt">CSV =</span> <span class="kw">spark_write_csv</span>(numeric, <span class="st">&quot;data.csv&quot;</span>, <span class="dt">mode =</span> <span class="st">&quot;overwrite&quot;</span>),</a>
@@ -746,7 +750,7 @@ External Transfer
 <div class="figure" style="text-align: center"><span id="fig:data-file-format-benchmark"></span>
 <img src="images/data-file-format-benchmark-resized.png" alt="One million rows write benchmark between CSV, JSON, Parquet and ORC" width="1500" />
 <p class="caption">
-FIGURE 8.3: One million rows write benchmark between CSV, JSON, Parquet and ORC
+FIGURE 8.4: One million rows write benchmark between CSV, JSON, Parquet and ORC
 </p>
 </div>
 <p>From now on, please disconnect from Spark whenever we present a new <code>spark_connect()</code> command.</p>

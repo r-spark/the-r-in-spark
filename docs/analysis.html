@@ -419,7 +419,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">3.1</span> Overview</h2>
 <p>In a data analysis project, the main goal is to understand what the data is trying to “tell us”, hoping that it provides an answer to a specific question. Most data analysis projects follow a set of steps outlined in Figure <a href="analysis.html#fig:analysis-steps">3.1</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-steps"></span>
-<img src="the-r-in-spark_files/figure-html/analysis-steps-1.png" alt="General steps of a data analysis" width="100%" height="220pt" />
+<img src="the-r-in-spark_files/figure-html/analysis-steps-1.png" alt="General steps of a data analysis" width="auto" height="220pt" />
 <p class="caption">
 FIGURE 3.1: General steps of a data analysis
 </p>
@@ -429,21 +429,21 @@ FIGURE 3.1: General steps of a data analysis
 <p>For data analysis, the ideal approach is to let Spark do what its good at. Spark is a parallel computation engine that works at a large-scale and provides a SQL engine and modeling libraries. These can be used to perform most of the same operations R performs. Such operations include data selection, transformation, and modeling. Additionally, Spark includes tools for performing specialized computational work like graph analysis, stream processing, and many others. For now, we will skip those non-rectangular datasets and present them in later chapters.</p>
 <p>Data <em>import</em>, <em>wrangling</em>, and <em>modeling</em> can be performed inside Spark. <em>Visualization</em> can also partly be done by Spark, and we will cover that later in this chapter. The relationship between Spark, R, and your data is an important concept to grasp. The goal is to use R to tell Spark what data operations to run. The only data that should come through R directly are the final results of those Spark operations. As illustrated in Figure <a href="analysis.html#fig:analysis-approach">3.2</a>, the ideal method is to <em>push compute</em> to the Spark cluster, and then <em>collect results</em> into R.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-approach"></span>
-<img src="the-r-in-spark_files/figure-html/analysis-approach-1.png" alt="Spark computes while R collects results" width="100%" height="220pt" />
+<img src="the-r-in-spark_files/figure-html/analysis-approach-1.png" alt="Spark computes while R collects results" width="auto" height="220pt" />
 <p class="caption">
 FIGURE 3.2: Spark computes while R collects results
 </p>
 </div>
 <p>The <code>sparklyr</code> package aids in using the “push compute, collect results” principle. Most of its functions are wrappers on top of Spark API calls. This allows us to take advantage of Spark’s analysis components, instead of R’s. For example, when you need to fit a linear regression model; instead of using R’s familiar <code>lm()</code> function, you would use Spark’s <code>ml_linear_regression()</code>. This R function then calls Spark to create this model, this specific example is illustrated in Figure <a href="analysis.html#fig:analysis-scala">3.3</a>.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-scala"></span>
-<img src="the-r-in-spark_files/figure-html/analysis-scala-1.png" alt="R functions call Spark functionality" width="100%" height="220pt" />
+<img src="the-r-in-spark_files/figure-html/analysis-scala-1.png" alt="R functions call Spark functionality" width="auto" height="140pt" />
 <p class="caption">
 FIGURE 3.3: R functions call Spark functionality
 </p>
 </div>
 <p>For more common data manipulation tasks, <code>sparklyr</code> provides a back-end for <code>dplyr</code>. This means that already familiar <code>dplyr</code> verbs can be used in R, and then <code>sparklyr</code> and <code>dplyr</code> will translate those actions into Spark SQL statements, which are generally more compact and easier to read than SQL statements. So, if you are already familiar with R and <code>dplyr</code>, there is nothing new to learn! This might feel a bit anticlimactic, it is indeed, but it’s also great since you can focus that energy on learning other skills required to do large-scale computing.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-23"></span>
-<img src="the-r-in-spark_files/figure-html/unnamed-chunk-23-1.png" alt="dplyr writes SQL" width="100%" height="220pt" />
+<img src="the-r-in-spark_files/figure-html/unnamed-chunk-23-1.png" alt="dplyr writes SQL" width="auto" height="140pt" />
 <p class="caption">
 FIGURE 3.4: dplyr writes SQL
 </p>
@@ -465,7 +465,7 @@ FIGURE 3.4: dplyr writes SQL
 <h2><span class="header-section-number">3.2</span> Import</h2>
 <p>Importing data is to be approached differently when using Spark with R. Usually, importing means that R will read files and load them into memory; when using Spark, the data is imported into Spark, not R. Notice how in Figure <a href="analysis.html#fig:analysis-access">3.5</a> the data source is connected to Spark instead of being connected to R.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-access"></span>
-<img src="the-r-in-spark_files/figure-html/analysis-access-1.png" alt="Import Data to Spark not R" width="100%" height="220pt" />
+<img src="the-r-in-spark_files/figure-html/analysis-access-1.png" alt="Import Data to Spark not R" width="auto" height="160pt" />
 <p class="caption">
 FIGURE 3.5: Import Data to Spark not R
 </p>
@@ -601,14 +601,14 @@ FIGURE 3.6: Using rplot() to visualize correlations
 <p>R is great at data visualizations. Its capabilities for creating plots are extended by the many R packages that focus on this analysis step. Unfortunately, the vast majority of R functions that create plots depend on the data already being in local memory within R, so they fail when using a remote table inside Spark.</p>
 <p>It is possible to create visualizations in R from data sources that exist in Spark. To understand how to do this, let’s first break down how computer programs build plots: It takes the raw data and performs some sort of transformation. The transformed data is then mapped to a set of coordinates. Finally, the mapped values are drawn in a plot. Figure <a href="analysis.html#fig:analysis-plot">3.7</a> summarizes each of the steps.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-plot"></span>
-<img src="the-r-in-spark_files/figure-html/analysis-plot-1.png" alt="Stages of an R plot" width="100%" height="100pt" />
+<img src="the-r-in-spark_files/figure-html/analysis-plot-1.png" alt="Stages of an R plot" width="auto" height="80pt" />
 <p class="caption">
 FIGURE 3.7: Stages of an R plot
 </p>
 </div>
 <p>In essence, the approach for visualizing is the same as in wrangling, push the computation to Spark, then collect the results in R for plotting. As illustrated in Figure <a href="analysis.html#fig:analysis-spark-plot">3.8</a>, the heavy lifting of preparing the data, such as aggregating the data by groups or bins, can be done inside Spark, then collected as a much smaller data set into R. Inside R, the plot becomes a more basic operation. For example, to plot a histogram, bins are first calculated in Spark. Once the result is collected to R, we can use a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins.</p>
 <div class="figure" style="text-align: center"><span id="fig:analysis-spark-plot"></span>
-<img src="the-r-in-spark_files/figure-html/analysis-spark-plot-1.png" alt="Plotting with Spark and R" width="100%" height="200pt" />
+<img src="the-r-in-spark_files/figure-html/analysis-spark-plot-1.png" alt="Plotting with Spark and R" width="auto" height="150pt" />
 <p class="caption">
 FIGURE 3.8: Plotting with Spark and R
 </p>
