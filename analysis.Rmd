@@ -20,7 +20,7 @@ The next chapter, Modeling, will focus on creating statistical models to predict
 
 In a data analysis project, the main goal is to understand what the data is trying to “tell us”, hoping that it provides an answer to a specific question. Most data analysis projects follow a set of steps outlined in Figure \@ref(fig:analysis-steps). 
 
-```{r analysis-steps, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='General steps of a data analysis', fig.align = 'center', eval = TRUE}
+```{r analysis-steps, echo=FALSE, out.width='auto', out.height='220pt', fig.cap='General steps of a data analysis', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
@@ -45,7 +45,7 @@ For data analysis, the ideal approach is to let Spark do what its good at. Spark
 
 Data *import*, *wrangling*, and *modeling* can be performed inside Spark. *Visualization* can also partly be done by Spark, and we will cover that later in this chapter. The relationship between Spark, R, and your data is an important concept to grasp. The goal is to use R to tell Spark what data operations to run. The only data that should come through R directly are the final results of those Spark operations. As illustrated in Figure \@ref(fig:analysis-approach), the ideal method is to *push compute* to the Spark cluster, and then *collect results* into R.
 
-```{r analysis-approach, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Spark computes while R collects results', fig.align = 'center', eval = TRUE}
+```{r analysis-approach, echo=FALSE, out.width='auto', out.height='220pt', fig.cap='Spark computes while R collects results', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #arrowSize: 0.4
@@ -71,7 +71,7 @@ rmarkdown]]->[<label> Push Compute]
 
 The `sparklyr` package aids in using the "push compute, collect results" principle. Most of its functions are wrappers on top of Spark API calls. This allows us to take advantage of Spark's analysis components, instead of R's. For example, when you need to fit a linear regression model; instead of using R's familiar `lm()` function, you would use Spark's `ml_linear_regression()`. This R function then calls Spark to create this model, this specific example is illustrated in Figure \@ref(fig:analysis-scala).
 
-```{r analysis-scala, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='R functions call Spark functionality', fig.align = 'center', eval = TRUE}
+```{r analysis-scala, echo=FALSE, out.width='auto', out.height='140pt', fig.cap='R functions call Spark functionality', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 12
@@ -85,7 +85,7 @@ render_nomnoml("
 
 For more common data manipulation tasks, `sparklyr` provides a back-end for `dplyr`. This means that already familiar `dplyr` verbs can be used in R, and then `sparklyr` and `dplyr` will translate those actions into Spark SQL statements, which are generally more compact and easier to read than SQL statements. So, if you are already familiar with R and `dplyr`, there is nothing new to learn! This might feel a bit anticlimactic, it is indeed, but it's also great since you can focus that energy on learning other skills required to do large-scale computing.
 
-```{r echo=FALSE, out.width='100%', out.height='220pt', fig.cap='dplyr writes SQL', fig.align = 'center', eval = TRUE}
+```{r echo=FALSE, out.width='auto', out.height='140pt', fig.cap='dplyr writes SQL', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 12
@@ -121,10 +121,11 @@ The environment is ready to be used, so our next task is to import data that we 
 
 Importing data is to be approached differently when using Spark with R. Usually, importing means that R will read files and load them into memory; when using Spark, the data is imported into Spark, not R. Notice how in Figure \@ref(fig:analysis-access) the data source is connected to Spark instead of being connected to R. 
 
-```{r analysis-access, echo=FALSE, out.width='100%', out.height='220pt', fig.cap='Import Data to Spark not R', fig.align = 'center', eval = TRUE}
+```{r analysis-access, echo=FALSE, out.width='auto', out.height='160pt', fig.cap='Import Data to Spark not R', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #padding: 14
+#lineWidth: 1
 #arrowSize: 0.4
 [R]->[<label>Push Compute]
 [Push Compute]->[Spark]
@@ -345,13 +346,13 @@ R is great at data visualizations. Its capabilities for creating plots are exten
 
 It is possible to create visualizations in R from data sources that exist in Spark. To understand how to do this, let's first break down how computer programs build plots: It takes the raw data and performs some sort of transformation. The transformed data is then mapped to a set of coordinates. Finally, the mapped values are drawn in a plot. Figure \@ref(fig:analysis-plot) summarizes each of the steps.
 
-```{r analysis-plot, echo=FALSE, out.width='100%', out.height='100pt', fig.cap='Stages of an R plot', fig.align = 'center', eval = TRUE}
+```{r analysis-plot, echo=FALSE, out.width='auto', out.height='80pt', fig.cap='Stages of an R plot', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4
 #padding: 25
 #fontSize: 18
-
+#lineWidth: 1
 [Raw data] -> [Transformed Data]
 [Transformed Data] -> [Map data to coordinates]
 [Map data to coordinates] -> [Draw plot]
@@ -360,7 +361,7 @@ render_nomnoml("
 
 In essence, the approach for visualizing is the same as in wrangling, push the computation to Spark, then collect the results in R for plotting.  As illustrated in Figure \@ref(fig:analysis-spark-plot), the heavy lifting of preparing the data, such as aggregating the data by groups or bins, can be done inside Spark, then collected as a much smaller data set into R.  Inside R, the plot becomes a more basic operation.  For example, to plot a histogram, bins are first calculated in Spark. Once the result is collected to R, we can use a simple column plot, as opposed to a histogram plot, because there is no need for R to re-calculate the bins. 
 
-```{r analysis-spark-plot, echo=FALSE, out.width='100%', out.height='200pt', fig.cap='Plotting with Spark and R', fig.align = 'center', eval = TRUE}
+```{r analysis-spark-plot, echo=FALSE, out.width='auto', out.height='150pt', fig.cap='Plotting with Spark and R', fig.align = 'center', eval = TRUE}
 render_nomnoml("
 #direction: right
 #edgeMargin: 4

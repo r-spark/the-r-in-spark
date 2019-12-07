@@ -29,7 +29,7 @@ Aside from databases, data is often also loaded into a *data warehouse*, a syste
 
 Instead of trying to transform all data sources into a common format, you can embrace this variety of data sources in a *data lake* -- a system or repository of data stored in its natural format, see Figure \@ref(fig:data-data-lake). Since data lakes make data available in its original format, there is no need to carefully transform it in advance, anyone can use it for analysis which adds significant flexibility over ETL. Spark can then be used to unify data processing from data lakes, databases and data warehouses through a single interface that is scalable across all of them. Some organizations also use Spark to replace their existing ETL process; however, this falls in the realm of data engineering which is well beyond the scope of this book, we illustrate this with dotted lines in Figure \@ref(fig:data-data-lake).
 
-```{r data-data-lake, eval=FALSE, echo=FALSE, fig.cap='Spark processing raw data from a data lakes, databases and data warehouses'}
+```{r data-data-lake, echo=FALSE, eval=TRUE, fig.cap='Spark processing raw data from a data lakes, databases and data warehouses', out.height = '280pt', out.width = 'auto', fig.align = 'center'}
 render_nomnoml("
 #spacing: 20
 #padding: 10
@@ -57,7 +57,6 @@ render_nomnoml("
 [Spark]--->[Storage Systems]
 ", "images/data-data-lake.png")
 ```
-![](images/data-data-lake.png)
 
 In order to support a broad variety of data source, Spark needs to be able to read and write data in several different *file formats* (CSV, JSON, Parquet, etc), access them while stored in several *file systems* (HDFS, S3, DBFS, etc) and, potentially, interoperate with other *storage systems* (databases, data warehouses, etc). We will get to all of that; but first, we will start by presenting how to read, write and copy data using Spark.
 
@@ -240,7 +239,7 @@ Some projects require that new data generated in Spark to be written back to a r
 
 Many new users start by downloading Spark data into R, to then upload it to a target. Figure \@ref(fig:data-avoid-approach) illustrates this approach. It works for smaller data sets, but it becomes inefficient for larger ones. The data typically grows in size to the point that it is no longer feasible for R to be the middle point. 
 
-```{r data-avoid-approach, echo=FALSE,  fig.cap='Incorrect use of Spark when writing large datasets', fig.align = 'center', eval = TRUE}
+```{r data-avoid-approach, echo=FALSE, fig.cap='Incorrect use of Spark when writing large datasets', fig.align = 'center', eval = TRUE, out.height = '100pt', out.width = 'auto', fig.align = 'center'}
 render_nomnoml("
 #direction: right
 #arrowSize: 0.4
@@ -251,13 +250,12 @@ render_nomnoml("
 [R | Write] -> [Target]
 ", "images/data-r-pass-through.png")
 ```
-![](images/data-r-pass-through.png)
 
 All efforts should be made to have Spark connect to the target location. This way, reading, processing and writing happens within the same Spark session.  
 
 As Figure \@ref(fig:data-recommended-approach) shows, a better approach is to use Spark to read, process, and write to the target. This approach is able to scale as big as the Spark cluster allows, and prevents using R as a choke point.
 
-```{r data-recommended-approach, echo=FALSE,  fig.cap='Correct use of Spark when writing large datasets', fig.align = 'center', eval = TRUE}
+```{r data-recommended-approach, echo=FALSE, eval=TRUE, fig.cap='Correct use of Spark when writing large datasets', fig.align = 'center', out.height = '100pt', out.width = 'auto', fig.align = 'center'}
 render_nomnoml("
 #direction: right
 #arrowSize: 0.4

@@ -23,17 +23,17 @@ If you are already familiar with R, you might be tempted to use this approach fo
 
 The Introduction chapter introduced MapReduce as a technique capable of processing large-scale datasets; it also described how Apache Spark provided a superset of operations to perform MapReduce computations with ease and more efficiently. The Tuning chapter presented insights into how Spark works by applying custom transformation over each partition of the distributed datasets. For instance, if we were to multiply by ten each element of a distributed numeric dataset, Spark would apply a mapping operation over each partition through multiple workers, conceptually, this is illustrated in Figure \@ref(fig:distributed-times-ten).
 
-```{r echo=FALSE}
+```{r echo=FALSE, eval=TRUE}
 styles <- "
 #padding: 16
 #fontSize: 18
 #direction: right
-#lineWidth:2
+#lineWidth:1
 #leading:1
 #spacing: 20
 "
 ```
-```{r distributed-times-ten, echo=FALSE, eval=TRUE, fig.cap='Map Operation when Multiplying by Ten', fig.align='center'}
+```{r distributed-times-ten, echo=FALSE, eval=TRUE, fig.cap='Map Operation when Multiplying by Ten', fig.align='center', out.height = '280pt', out.width = 'auto'}
 render_nomnoml("
 [Data |
   [1]
@@ -71,7 +71,7 @@ Notice that `~ 10 * .x` is plain R code executed across all worker nodes; the `~
 
 The `f(x)` function must take an R data frame as input and must also produce an R data frame as output, conceptually illustrated in Figure \@ref(fig:distributed-spark-apply-input-output).
 
-```{r distributed-spark-apply-input-output, echo=FALSE, eval=TRUE, fig.cap='Expected Function Signature in spark_apply() Mappings', fig.align='center'}
+```{r distributed-spark-apply-input-output, echo=FALSE, eval=TRUE, fig.cap='Expected Function Signature in spark_apply() Mappings', out.height = '100pt', out.width = 'auto', fig.align = 'center'}
 render_nomnoml("
 [DataFrame]->[f(x)]
 [f(x)]->[DataFrame']
@@ -577,7 +577,7 @@ sdf_len(sc, 4) %>%
 
 Figure \@ref(fig:distributed-times-context) illustrates this example conceptually. Notice that the data partitions are still variable; however, the contextual parameter is distributed to all the nodes.
 
-```{r distributed-times-context, echo=FALSE, eval=TRUE, fig.cap='Map Operation when Multiplying with Context', fig.align='center'}
+```{r distributed-times-context, echo=FALSE, eval=TRUE, fig.cap='Map Operation when Multiplying with Context', out.height = '280pt', out.width = 'auto', fig.align = 'center'}
 render_nomnoml("
 #.none: visual=none direction=right empty
 [<none> x1|
@@ -758,7 +758,7 @@ Before we introduce Apache Arrow, we need to present how data is stored and tran
 
 Some computing systems store data internally by row; however, most interesting numerical operations usually require processing data by column. For example, calculating the mean of a column requires processing each column on its own, not the entire row. Spark stores data by default by row, since it's easier to partition; in contrast, R stores data by column. Therefore, something needs to transform both representations when data is transferred between Spark and R, see Figure \@ref(fig:distributed-r-transformation).
 
-```{r distributed-r-transformation, eval=TRUE, echo=FALSE, fig.cap='Data Transformation between Spark and R'}
+```{r distributed-r-transformation, eval=TRUE, echo=FALSE, fig.cap='Data Transformation between Spark and R', out.height = '200pt', out.width = 'auto', fig.align = 'center'}
 render_nomnoml("
 #direction: right
 #.left: align=left
@@ -776,7 +776,7 @@ This transformation from rows to columns needs to happen for each partition. In 
 
 Apache Arrow is a cross-language development platform for in-memory data. In Spark, it speeds up transferring data between Scala and R by defining a common data format compatible with many programming languages -- instead of having to transform between Scala's internal representation and R's, the same structure can be used for both languages. In addition, transforming data from row based storage to columnar storage, is performed in parallel in Spark, which can be further optimized by using the columnar storage formats presented in the Data chapter. The improved transformation are available in Figure \@ref(fig:distributed-r-transformation).
 
-```{r distributed-r-using-arrow, eval=TRUE, echo=FALSE, fig.cap='Data Transformation between Spark and R using Arrow'}
+```{r distributed-r-using-arrow, eval=TRUE, echo=FALSE, fig.cap='Data Transformation between Spark and R using Arrow', out.height = '260pt', out.width = 'auto', fig.align = 'center'}
 render_nomnoml("
 #direction: right
 #.left: align=left
