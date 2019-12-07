@@ -1,0 +1,264 @@
+== Contributing
+
+_________________________________
+``Hold the door, hold the door.''
+
+— Hodor
+_________________________________
+
+The previous chapter, Streaming, equipped you with tools to tackle large-scale and real-time data processing in Spark using R. In a way, the previous chapter was the last learning chapter, while this last chapter is less focused on learning and more on giving back to the Spark and R communities or colleagues in your professional career – It really takes an entire community to keep this going, so we are counting on you!
+
+There are many ways to contribute, from helping community members, opening GitHub issues, to providing new functionality for yourself, colleagues or the R and Spark community; however, this chapter will focus on writing and sharing code that extends Spark to help others use new functionality that you can provide as an author of Spark extensions using R. Specifically, in this chapter you will learn what an extension is, when to build one, what tools are available, the different types of extensions you can consider building and how to build one from scratch.
+
+You will also learn how to make use of hundreds of extensions available in Spark and millions of components available in Java that you can use in R with ease. You will also learn how to create code natevely in Scala that makes use of Spark; as you might know, R is a great language to interface with other languages, like C++, SQL, Python and many other languages. It then to no surprise that working with Scala from R will follow similar practices that make R ideal to provide easy-to-use interfaces that make data-processing productive and that are loved by many of us.
+
+[[contributing-overview]]
+=== Overview
+
+When thinking of contributing back, the most important question you can ask about the code above – but really, about any piece of code you write is: Would this code be useful to someone else?
+
+We can start by considering one of the first and simplest lines of code presented in this book, this code was used to load a simple CSV file:
+
+[source,r]
+----
+spark_read_csv(sc, "cars.csv")
+----
+
+For the code above, the answer is probably no, the code is not useful to someone else; however, a more useful example would be to tailor that same example to something someone will actually care about, perhaps:
+
+[source,r]
+----
+spark_read_csv(sc, "/path/that/is/hard/to/remember/data.csv")
+----
+
+The code above is quite similar to the original one; however, assuming that you work with others that care about this dataset, the answer to: Would this code be useful to someone else? Is now completely different: Yes, most likely! This is surprising since this means that not all useful code needs to be advanced nor complicated; however, for it to be useful to others, it does need to be packaged, presented and shared in a format that is easy to consume.
+
+One first attempt would be to save this into a `teamdata.R` file and write a function wrapping it:
+
+[source,r]
+----
+load_team_data <- function() {
+  spark_read_text(sc, "/path/that/is/hard/to/remember/data.csv")
+}
+----
+
+This is an improvement; however, it would require users to manually share this file over and over. Fortunately, this is a problem well solved in R through _R Packages_.
+
+An _R package_ contains R code packaged in a format installable using the `install.packages()` function. `sparklyr` is an R package, but there are many other packages available in R and you can also create your own packages. For those of you new to creating R packages, we would encourage reading Hadley Wickam’s book on packages: link:@wickham2015r[R Packages: Organize, Test, Document, and Share Your Code]. Creating an R package allows you to easily share your functions with others by sharing the package file in your organization.
+
+Once a package is created, there are many ways to share this with colleagues or the world. For instance, for packages meant to be private, you can consider using https://cran.r-project.org/web/packages/drat/vignettes/WhyDrat.html[Drat] or products like https://www.rstudio.com/products/package-manager/[RStudio Package Manager]. R packages meant for public consumption are made available to the R community in https://cran.r-project.org/[_CRAN_], which stands for the Comprehensive R Archive Network.
+
+These repositories of R packages make packages allow users to install packages through `install.packages("teamdata")` without having to worry where to download the package from and allows other packages to reuse your package as well.
+
+In addition to using R packages like `sparklyr`, `dplyr`, `broom`, etc. to create new R packages that extend Spark; you can also make use of all the functionality available in the Spark API, Spark Extensions or write custom Scala code.
+
+For instance, suppose that there is a new file format similar to a CSV but not quite the same, we might want to write a function named `spark_read_file()` that would take a path to this new file type and read it in Spark. One approach would be to use `dplyr` to process each line of text or any other R library using `spark_apply()`. Another approach would be to use the _Spark API_ to access methods provided by Spark. A third approach would be to find if someone in the Spark community has already provided an _Spark Extension_ that supports this new file format. Last but not least, you can write our own custom _Scala Code_ that makes use any Java library, including Spark and its extensions. This is illustrated in <<contributing-types-of-extensions>>.
+
+....
+## Error in png::readPNG(image): libpng error: Read Error
+....
+
+We will focus first on extending Spark using the Spark API since the techniques required to call the Spark API are also applicable while calling Spark extensions or custom Scala code.
+
+[[contributing-spark-api]]
+=== Spark API
+
+Before we introduce the Spark API, let’s consider a simple and well known problem. Suppose we want to count the number of lines in a distributed and potentially large text file, say, `cars.csv` that we initialize as follows:
+
+[source,r]
+----
+library(sparklyr)
+library(dplyr)
+sc <- spark_connect(master = "local", version = "2.3")
+
+cars <- copy_to(sc, mtcars)
+spark_write_csv(cars, "cars.csv", mode = "overwrite")
+----
+
+Now, in order to count how many lines are available in this file we can run:
+
+[source,r]
+----
+spark_read_text(sc, "cars.csv") %>% count()
+----
+
+....
+# Source: spark<?> [?? x 1]
+      n
+  <dbl>
+1    33
+....
+
+Easy enough, we used `spark_read_text()` to read the entire text file, followed by counting lines using dplyr’s `count()`. Now, suppose that `spark_read_text()`, `dplyr` nor any other Spark functionality is available to you; how would you ask Spark to count the number of rows in `cars.csv`?
+
+If you were to do this in Scala, you will be able to find in the Spark documentation that using the Spark API you can count lines in a file as follows:
+
+[source,scala]
+----
+val textFile = spark.read.textFile("cars.csv")
+textFile.count()
+----
+
+So, in order to use functionality available in the Spark API from R, like `spark.read.textFile`; you can use `invoke()`, `invoke_static()` or `invoke_new()`. As their names suggest, one invokes a method from an object, the second one invokes a method from a static object and the third creates a new object. We can then use these functions to call Spark’s API and execute similar code as the one provided in Scala:
+
+[source,r]
+----
+spark_context(sc) %>% 
+  invoke("textFile", "cars.csv", 1L) %>% 
+  invoke("count")
+----
+
+....
+[1] 33
+....
+
+While the `invoke()` function was originally designed to call Spark code, it can call any code available in Java. For instance, we can create a Java `BigInteger` with the following code:
+
+[source,r]
+----
+invoke_new(sc, "java.math.BigInteger", "1000000000")
+----
+
+....
+<jobj[225]>
+  java.math.BigInteger
+  1000000000
+....
+
+As you can see, the object that gets created is not an R object but rather – a proper Java object. In R, this Java object is represented by the `spark_jobj`. These objects are only meant to be used with the `invoke()` functions or `spark_dataframe()` and `spark_connection()`. `spark_dataframe()` transforms a `spark_jobj` into a Spark DataFrame, when possible; while `spark_connect()` retrieves the original Spark connection object, which can be useful to avoid passing the `sc` object across functions.
+
+While calling the Spark API can be useful in some cases, most of the functionality available in Spark is already supported in `sparklyr`; therefore, a more interesting way to extend Spark is by using one of its many existing extensions.
+
+=== Spark Extensions
+
+Before we get started with this section, consider navigating to https://spark-packages.org/[spark-packages.org] – a site that tracks Spark extensions provided by the Spark community. Using the same techniques presented in the previous section, you can make use of these extensions from R.
+
+For instance, Apache Solr is a ``blazing-fast, open source enterprise search platform built on Apache Lucene''.footnote:[] Solr is a system designed to perform full text search over large datasets which Apache Spark currently does not support natevely. Also, as of this writing, there is no extension for R to support Solr. So let’s try to solve this using a Spark extension.
+
+First, you would want to search ``spark-packages.org'' to find out that there is a Solr extension, you should be able to find `spark-solr`.footnote:[] The extension ``How to'' mentioned that the `com.lucidworks.spark:spark-solr:2.0.1` should be loaded. We can accomplish this in R using the `sparklyr.shell.packages` configuration option:
+
+[source,r]
+----
+config <- spark_config()
+config["sparklyr.shell.packages"] <- "com.lucidworks.spark:spark-solr:3.6.3"
+config["sparklyr.shell.repositories"] <- 
+  "http://repo.spring.io/plugins-release/,http://central.maven.org/maven2/"
+  
+sc <- spark_connect(master = "local", config = config, version = "2.3")
+----
+
+While specifying the `sparklyr.shell.packages` parameter is usually enough, for this particular extension, dependencies failed to download from the Spark Packages repository. For the failed dependencies, you would have to manually find them in the Maven repo (https://mvnrepository.com[mvnrepository.com]) and add additional repositories under the `sparklyr.shell.repositories` parameter.
+
+[NOTE]
+====
+When using an extension, Spark connects to the Maven package repository to retrieve the extension, this can take significant time depending on the extension and your download speed. Therefore, you should consider increasing the `sparklyr.connect.timeout` configuration parameter to allow Spark to download the required files.
+====
+
+
+From the `spark-solr` documentation, you would find that this extension can be used with the following Scala code:
+
+[source,scala]
+----
+val options = Map(
+  "collection" -> "{solr_collection_name}",
+  "zkhost" -> "{zk_connect_string}"
+)
+
+val df = spark.read.format("solr")
+  .options(options)
+  .load()
+----
+
+Which we can translate to R code:
+
+[source,r]
+----
+spark_session(sc) %>%
+  invoke("read") %>%
+  invoke("format", "solr") %>%
+  invoke("option", "collection", "<collection>") %>%
+  invoke("option", "zkhost", "<host>") %>%
+  invoke("load")
+----
+
+The code above will fail since it would require a valid Solr instance and configuring Solr goes beyond the scope of this book; however, this example provides insights as to how you can create Spark extensions. It’s also worth mentioning that `spark_read_source()` can be used to read from generic sources to avoid writing custom `invoke()` code.
+
+As pointed out in the link:#contributing-overview[Overview] section, you should consider sharing code with others using R package. While you could require users of your package to specify `sparklyr.shell.packages`, you can avoid this by registering dependencies in your package. Dependencies are declared under a `spark_dependencies()` function, for the example in this section:
+
+[source,r]
+----
+spark_dependencies <- function(spark_version, scala_version, ...) {
+  spark_dependency(
+    packages = "com.lucidworks.spark:spark-solr:3.6.3",
+    repositories = c(
+      "http://repo.spring.io/plugins-release/",
+      "http://central.maven.org/maven2/")
+  )
+}
+
+.onLoad <- function(libname, pkgname) {
+  sparklyr::register_extension(pkgname)
+}
+----
+
+The `onLoad` function will be automatically called by R when you library loads, it should call `register_extension()` which will then call back `spark_dependencies()` to allow your extension to provide additional dependencies. The example above supports Spark 2.4 but you should also support a map of Spark and Scala versions to the correct Spark extension version.
+
+There are about 450 Spark extensions you can use; in addition, you can also use any Java library from a Maven repository where Maven Central has over 3M artifacts.footnote:[] While not all the Maven Central libraries might be relevant to Spark, the combination of Spark extensions and Maven repositories certainly opens many interesting possibilities for you to consider!
+
+However, for those cases where no Spark extension is available, the next section will teach you how to use custom Scala code from your own R package.
+
+=== Scala Code
+
+Scala code enables you to use any method in the Spark API, Spark extensions or Java library; in addition, writing Scala code when running in Spark can provide performance improvements over R code using `spark_apply()`. In general, the structure of your R package will contains R code and Scala code; however, the Scala code will need to be compiled as JARs (Java ARchive files) and included in your package. Conceptually, your R package will look as shown in <<contributing-scala-code>>.
+
+....
+## Error in png::readPNG(image): file is not in PNG format
+....
+
+As usual, the R code should be placed under a top-level `R` folder, Scala code under a `java` folder while the compiled JARs are distributed under an `inst/java` folder. While you are certainly welcomed to manually compiled the Scala code, you can use helper functions to download the required compiler and compile Scala code.
+
+In order to compile Scala code, you will need the Java Development Kit 8 installed (JDK8 for short); the JDK can be downloaded from https://www.oracle.com/technetwork/java/javase/downloads/[oracle.com/technetwork/java/javase/downloads/] and will require you to restart your R session.
+
+You also need a Scala compiler for Scala 2.11 and 2.12 from https://www.scala-lang.org[https://www.scala-lang.org/]; the Scala compilers can be automatically downloaded and installed using `download_scalac`:
+
+[source,r]
+----
+download_scalac()
+----
+
+Next you will need to compile your Scala sources using `compile_package_jars()`. By default, it uses `spark_compilation_spec()` which compiles your sources for the following Spark versions:
+
+....
+[1] "1.5.2" "1.6.0" "2.0.0" "2.3.0" "2.4.0"
+....
+
+You can also customize this specification by creating custom entries with `spark_compilation_spec()`.
+
+While you can create the project structure for Scala code by hand, you can also simply call `spark_extension(path)` to create an extension in the given path; this extension will be mostly empty but will contain the appropriate project structure to call Scala code.
+
+Since `spark_extension()` is registered as a custom project extension in RStudio; you can also create an R package that extends Spark using Scala code from the `File` menu, `New Project...` and selecting `R Package using Spark` as shown in <<contributing-r-rstudio-project>>.
+
+[[contributing-r-rstudio-project]]
+.Creating a Scala extension package from RStudio
+image::images/contributing-r-rstudio-project-resized.png[Creating a Scala extension package from RStudio]
+
+Once you are ready to compile your package JARs, you can simply run:
+
+[source,r]
+----
+compile_package_jars()
+----
+
+Since the JARs are compiled by default into the `inst/` package path, when building the R package all the JARs will also get included within the package, this means that you can share or publish your R package and it will be fully functional by R users. For advanced Spark users with most of their expertise in Scala, it should be quite compelling to consider writing libraries for R users and the R community in Scala and then easily packaging into R packages that are easy to consume, use and share among them.
+
+If you are interested in developing a Spark extension with R and you happen to get stuck along the way, consider joining the `sparklyr` Gitterfootnote:[] channel, where many of us hang out to help wonderful community to grow – we hope to hear from you soon!
+
+=== Recap
+
+This last chapter introduced you to an entire new set of tools you can use to expand Spark functionality beyond what R and R packages currently support, this vast new space of libraries includes over 450 spark extensions and millions of Java artifacts you can use in Spark from R. Beyond these resources, you also learned how to build your own Java artifacts using Scala code that can be easily embedded and compiled from R.
+
+This brings us back to the purpose of this book presented early on, while we know that in this chapter and previous ones you’ve learned how to perform large-scale computing using Spark in R; we are also confident that you have acquired the knowledge required to help other community members through Spark extensions – we can’t wait to see your new creations, which will surely help grow the Spark and R communities at large.
+
+To close and recap on the entire book, we hope the first chapters gave you an easy intro to Spark and R, followed by presenting analysis and modeling as foundations for using Spark with the familiarity of R package you already know and love. You moved then to learning how to perform large-scale computing in proper Spark clusters. The last third of this book focused on advanced through extensions, distributing R code, processing real-time data and finally, contributing back Spark extensions using R and Scala code.
+
+We tried presenting the best possible content; however, if there is room to improve this book please open a GitHub issue under https://github.com/r-spark/the-r-in-spark[github.com/r-spark/the-r-in-spark] which we can address in upcoming revisions. We hope you enjoyed reading this book, that you’ve learned as much as we’ve learned while writing it, and we hope it was worthy of your time – it has been an honor having you as our reader.
