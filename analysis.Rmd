@@ -14,7 +14,7 @@ Previous chapters focused on introducing Spark with R, getting you up to speed a
 
 This<!--((("Spark using R", "data analysis", id="SURdataanal03")))--> chapter introduces tools and concepts to perform data analysis in Spark from R. Spoiler alert: these are the same tools you use with plain R! This is not a mere coincidence; rather, we want data scientists to live in a world where technology is hidden from them, where you can use the R packages you know and love, and they "just work" in Spark! Now, we are not quite there yet, but we are also not that far. Therefore, in this chapter you learn widely used R packages and practices to perform data analysis—`dplyr`, `ggplot2`, formulas, `rmarkdown`, and so on—which also happen to work in Spark.
 
-<!--link-->[Chapter 4](#modeling) will focus on creating statistical models to predict, estimate, and describe datasets, but first, let’s get started with analysis!
+[Chapter 4](#modeling) will focus on creating statistical models to predict, estimate, and describe datasets, but first, let’s get started with analysis!
 
 ## Overview {#analysis-overview}
 
@@ -96,7 +96,7 @@ render_nomnoml("
 ", "images/analysis-dplyr-sql-translation.png")
 ```
 
-To practice as you learn, the rest of this chapter’s code uses a single exercise that runs in the _local_ Spark master. This way, you can replicate the code on your personal computer. Make sure `sparklyr` is already working, which should be the case if you completed <!--link-->[Chapter 2](#starting).
+To practice as you learn, the rest of this chapter’s code uses a single exercise that runs in the _local_ Spark master. This way, you can replicate the code on your personal computer. Make sure `sparklyr` is already working, which should be the case if you completed [Chapter 2](#starting).
 
 This chapter will make use of packages that you might not have installed. So, first, make sure the following packages<!--((("ggplot2 package", "installing")))((("corr package", "installing")))((("dbplot package", "installing")))((("R Markdown")))--> are installed by running these commands:
 
@@ -137,11 +137,11 @@ render_nomnoml("
 ", "images/analysis-import-data-to-spark.png")
 ```
 
-**Note:** When you're performing analysis over large-scale datasets, the vast majority of the necessary data will already be available in your Spark cluster (which is usually made available to users via Hive tables or by accessing the file system directly). <!--link-->[Chapter 8](#data) will cover this extensively.
+**Note:** When you're performing analysis over large-scale datasets, the vast majority of the necessary data will already be available in your Spark cluster (which is usually made available to users via Hive tables or by accessing the file system directly). [Chapter 8](#data) will cover this extensively.
 
-Rather than importing all data into Spark, you can request Spark to access the data source without importing it—this is a decision you should make based on speed and performance. Importing all of the data into the Spark session incurs a one-time up-front cost, since Spark needs to wait for the data to be loaded before analyzing it. If the data is not imported, you usually incur a cost with every Spark operation since Spark needs to retrieve a subset from the cluster’s storage, which is usually disk drives that happen to be much slower than reading from Spark’s memory. More on this topic will be covered in <!--link-->[Chapter 9](#tuning).
+Rather than importing all data into Spark, you can request Spark to access the data source without importing it—this is a decision you should make based on speed and performance. Importing all of the data into the Spark session incurs a one-time up-front cost, since Spark needs to wait for the data to be loaded before analyzing it. If the data is not imported, you usually incur a cost with every Spark operation since Spark needs to retrieve a subset from the cluster’s storage, which is usually disk drives that happen to be much slower than reading from Spark’s memory. More on this topic will be covered in [Chapter 9](#tuning).
 
-Let’s prime<!--((("commands", "copy_to()")))--> the session with some data by importing `mtcars` into Spark using `copy_to()`; you can also import data from distributed files in many different file formats, which we look at in <!--link-->[Chapter 8](#data).
+Let’s prime<!--((("commands", "copy_to()")))--> the session with some data by importing `mtcars` into Spark using `copy_to()`; you can also import data from distributed files in many different file formats, which we look at in [Chapter 8](#data).
 
 ```{r analysis-copy-to}
 cars <- copy_to(sc, mtcars)
@@ -263,7 +263,7 @@ summarise(cars, mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75))) %>%
 3           22.8
 ```
 
-We have included a comprehensive list of all the Hive functions in the section <!--link-->[Hive Functions](#hive-functions). Glance over them to get a sense of the wide range of operations that you can accomplish with them.<!--((("", startref="dwrang03")))-->
+We have included a comprehensive list of all the Hive functions in the section [Hive Functions](#hive-functions). Glance over them to get a sense of the wide range of operations that you can accomplish with them.<!--((("", startref="dwrang03")))-->
 
 ### Correlations
 
@@ -714,4 +714,4 @@ It should now be quite obvious that, together, R and Spark are a powerful combin
 
 While doing analysis in Spark with R, remember to push computation to Spark and focus on collecting results in R. This paradigm should set up a successful approach to data manipulation, visualization and communication through sharing your results in a variety of outputs.
 
-<!--link-->[Chapter 4](#modeling) will dive deeper into how to build statistical models in Spark using a much more interesting dataset (what’s more interesting than dating datasets?). You will also learn many more techniques that we did not even mention in the brief modeling section from this chapter.
+[Chapter 4](#modeling) will dive deeper into how to build statistical models in Spark using a much more interesting dataset (what’s more interesting than dating datasets?). You will also learn many more techniques that we did not even mention in the brief modeling section from this chapter.
