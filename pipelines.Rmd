@@ -7,19 +7,19 @@ source("r/render.R")
 
 # Pipelines {#pipelines}
 
-> "You will never walk again, but you will fly!"
+> You will never walk again, but you will fly!
 >
 > --- Three-Eyed Raven
 
-In the Modeling chapter, we learned how to build predictive models using the high-level functions Spark provides and well-known R packages that work well together with Spark. You learned about supervised methods first and finished the chapter with an unsupervised method over raw text.
+In [Chapter 4](#modeling), you learned how to build predictive models using the high-level functions Spark provides and well-known R packages that work well together with Spark. You learned about supervised methods first and finished the chapter with an unsupervised method over raw text.
 
-In this chapter, we dive into Spark Pipelines, which is the engine that powers the features we demonstrated in the Modeling chapter. So for instance, when you invoke an MLlib function via the formula interface in R; for example `ml_logistic_regression(cars, am ~ .)`, a *pipeline* gets constructed for you under the hood. Therefore, Pipelines also allow you to make use of advanced data processing and modeling workflows. In addition, a pipeline also facilitates collaboration across data science and engineering teams by allowing you to *deploy* pipelines into production systems, web applications, mobile applications and so on.
+In this chapter, we dive into Spark Pipelines, which is the engine that powers the features we demonstrated in [Chapter 5](#modeling). So, for instance, when you invoke an `MLlib` function via the formula interface in R—for example, `ml_logistic_regression(cars, am ~ .)`—a _pipeline_ is constructed for you under the hood. Therefore, Pipelines((("pipelines", "purpose of"))) also allow you to make use of advanced data processing and modeling workflows. In addition, a pipeline also facilitates collaboration across data science and engineering teams by allowing you to _deploy_ pipelines into production systems, web applications, mobile applications, and so on.
 
-This chapter also happens to be the last chapter that encourages using your local computer as a Spark cluster, you are just one chapter away from getting properly introduced to cluster computing, and be able to perform data science or machine learning that can scale to the most demanding computation problems.
+This chapter also happens to be the last chapter that encourages using your local computer as a Spark cluster. You are just one chapter away from getting properly introduced to cluster computing and beginning to perform data science or machine learning that can scale to the most demanding computation problems.
 
 ## Overview
 
-The building blocks of pipelines are objects called transformers and estimators, which are collectively referred to as *pipeline stages*. A *transformer* can be used to apply transformations to a data frame and return another data frame; the resulting data frame often comprises the original data frame with new columns appended to it. An *estimator*, on the other hand, can be used to create a transformer giving some training data. Consider the following example to illustrate this relationship: a "center and scale" estimator can learn the mean and standard deviation of some data and store the statistics in a resulting transformer object; this transformer can then be used to normalize the data it was trained on and also any new, yet unseen, data.
+The<!--((("pipelines", "overview of", id="Pover05")))((("transformations", "transformers and estimators")))((("estimators")))((("pipeline stages")))--> building blocks of pipelines are objects called _transformers_ and _estimators_, which are collectively referred to as _pipeline stages_. A _transformer_ can be used to apply transformations to a<!--((("DataFrames", "transforming")))--> DataFrame and return another DataFrame; the resulting DataFrame often comprises the original DataFrame with new columns appended to it. An _estimator_, on the other hand, can be used to create a transformer giving some training data. Consider the following example to illustrate this relationship: a "center and scale" estimator can learn the mean and standard deviation of some data and store the statistics in a resulting transformer object; this transformer can then be used to normalize the data that it was trained on and also any new, yet unseen, data.
 
 Here is an example of how to define an estimator:
 
@@ -49,7 +49,7 @@ StandardScaler (Estimator)
   with_std: TRUE
 ```
 
-We can now create some data (for which we know the mean and standard deviation) then fit our scaling model to it using the `ml_fit()` function.
+We can now create some data (for which we know the mean and standard deviation) and then fit our scaling model to it using<!--((("commands", "ml_fit()")))--> the `ml_fit()` function:
 
 ```{r}
 df <- copy_to(sc, data.frame(value = rnorm(100000))) %>% 
@@ -70,9 +70,9 @@ StandardScalerModel (Transformer)
   std:  num 0.999 
 ```
 
-**Note:** In Spark ML, many algorithms and feature transformers require that the input be a vector column. The function `ft_vector_assembler()` performs this task. The function can also be used to initialize a transformer to be used in a pipeline.
+**Note:** In<!--((("commands", "ft_vector-assembler()")))--> Spark ML, many algorithms and feature transformers require that the input be a vector column. The function `ft_vector_assembler()` performs this task. You can also use the function to initialize a transformer to be used in a pipeline.
 
-We see that the mean and standard deviation are very close to 0 and 1, respectively, which is what we expect. We can then use the transformer to *transform* a data frame, using the `ml_transform()` function:
+We see that the mean and standard deviation are very close to 0 and 1, respectively, which is what we expect. We then can use<!--((("DataFrames", "transforming")))--> the transformer to _transform_ a DataFrame, using<!--((("commands", "ml_transform()")))--> the `ml_transform()` function:
 
 ```{r}
 scaler_model %>% 
@@ -89,15 +89,15 @@ $ features        <list> [0.753733, -0.8420773, 0.5936511, -0.…
 $ features_scaled <list> [0.7502211, -0.8470762, 0.58999, -0.4…
 ```
 
-Now that we've seen basic examples of estimators and transformers, we can move on to pipelines.
+Now that you’ve seen basic examples of estimators and transformers, we can move on to pipelines.<!--((("", startref="Pover05")))-->
 
 ## Creation
 
-A *pipeline* is simply a sequence of transformers and estimators, and a *pipeline model* is a pipeline that has been trained on data so all of its components have been converted to transformers. 
+A _pipeline_ is<!--((("pipelines", "creating")))((("pipeline models")))((("modeling", "pipeline models")))--> simply a sequence of transformers and estimators, and a _pipeline model_ is a pipeline that has been trained on data so all of its components have been converted to transformers.
 
-There are a couple ways to construct a pipeline in sparklyr, both of which uses the `ml_pipeline()` function.
+There<!--((("sparklyr package", "pipeline construction")))--> are a couple of ways to construct a pipeline in `sparklyr`, both of which use the `ml_pipeline()` function.
 
-We can initialize an empty pipeline with `ml_pipeline(sc)` and append stages to it:
+We can initialize an empty pipeline<!--((("commands", "ml_pipeline(sc)")))--> with `ml_pipeline(sc)` and append stages to it:
 
 ```{r pipelines-create}
 ml_pipeline(sc) %>% 
@@ -121,7 +121,7 @@ Pipeline (Estimator) with 1 stage
   |      with_std: TRUE
 ```
 
-Alternatively, we can pass stages directly to `ml_pipeline()`:
+Alternatively, we can pass stages directly<!--((("commands", "ml_pipeline()")))--> to `ml_pipeline()`:
 
 ```{r pipelines-create-stages}
 pipeline <- ml_pipeline(scaler)
@@ -152,11 +152,11 @@ PipelineModel (Transformer) with 1 stage
 pipeline 
 ```
 
-**Note:** As a result of the design of Spark ML, pipelines are always estimator objects, even if they comprise only of transformers. This means that if you have a pipeline with only transformers, you still need to call `ml_fit()` on it to obtain a transformer. The "fitting" procedure in this case wouldn't actually modify any of the transformers.
+**Note:** As a result of the design of Spark ML, pipelines are always estimator objects, even if they comprise only transformers. This means that if you have a pipeline with only transformers, you still need<!--((("commands", "ml_fit()")))--> to call `ml_fit()` on it to obtain a transformer. The "fitting" procedure in this case wouldn’t actually modify any of the transformers.
 
 ## Use Cases
 
-Now that we have an understanding of the rudimentary concepts for ML Pipelines, let us apply them to the predictive modeling problem from the previous chapter, where we are trying to predict whether people are currently employed by looking at their profiles. Our starting point is the `okc_train` data frame with the relevant columns.
+Now<!--((("pipelines", "use cases", id="Puse05")))--> that you have an understanding of the rudimentary concepts for ML Pipelines, let's apply them to the<!--((("prediction models")))--> predictive modeling problem from the previous chapter in which we are trying to predict whether people are currently employed by looking at their profiles. Our starting point is the `okc_train` DataFrame with the relevant columns.
 
 ```{r pipelines-use-load}
 okc_train <- spark_read_parquet(sc, "data/okc-train.parquet")
@@ -165,7 +165,7 @@ okc_train <- okc_train %>%
   select(not_working, age, sex, drinks, drugs, essay1:essay9, essay_length)
 ```
 
-We first exhibit the pipeline, which includes feature engineering and modeling steps, then walk through it.
+We first exhibit the pipeline, which includes feature engineering and modeling steps, and then walk through it:
 
 ```{r pipelines-use-stages}
 pipeline <- ml_pipeline(sc) %>%
@@ -187,9 +187,9 @@ pipeline <- ml_pipeline(sc) %>%
                          label_col = "not_working")
 ```
 
-The first three stages index the `sex`, `drinks`, and `drugs` columns, which are character, into numeric indicies via `ft_string_indexer()`. This is necessary for the `ft_one_hot_encoder_estimator()` that comes next which requires numeric column inputs. Once all of our predictor variables are of numeric type (recall that `age` is numeric already), we can create our features vector using `ft_vector_assembler()` which concatenates all of its inputs together into one column of vectors. We can then use `ft_standard_scaler()` to normalize all elements of the features column (including the one-hot encoded 0/1 values of the categorical variables), and finally apply a logistic regression via `ml_logistic_regression()`.
+The first three stages index the `sex`, `drinks`, and `drugs` columns, which are characters, into numeric indices<!--((("commands", "ft_string_indexer()")))((("commands", "ft_one_hot_encoder_estimator()")))((("commands", "ft_vector_assembler()")))((("commands", "ft_standard_scaler()")))((("commands", "ml_logistic_regression()")))--> via `ft_string_indexer()`. This is necessary for the `ft_one_hot_encoder_estimator()` that comes next, which requires numeric column inputs. When all of our predictor variables are of numeric type (recall that `age` is numeric already), we can create our features vector using `ft_vector_assembler()`, which concatenates all of its inputs together into one column of vectors. We can then use `ft_standard_scaler()` to normalize all elements of the features column (including the one-hot-encoded 0/1 values of the categorical variables), and finally apply a logistic regression via `ml_logistic_regression()`.
 
-During prototyping, you may want to execute these transformations *eagerly* on a small subset of the data, by passing the data frame to the `ft_` and `ml_` functions, and inspecting the transformed data frame. The immediate feedback allows for rapid iteration of ideas; once you have arrived at the desired processing steps, you can roll them up into a pipeline. For example, you can do the following:
+During prototyping, you might want to execute these transformations _eagerly_ on a small subset of the data, by passing<!--((("DataFrames", "transforming")))--> the DataFrame to the `ft_` and `ml_` functions, and inspecting the transformed DataFrame. The immediate feedback allows for rapid iteration of ideas; when you have arrived at the desired processing steps, you can roll them up into a pipeline. For example, you can do the following:
 
 ```{r pipelines-use-train}
 okc_train %>%
@@ -213,11 +213,11 @@ okc_train %>%
 10           0
 # … with more rows
 ```
-Once you have found the right transformations for your dataset, you can then replace the data frame input with `ml_pipeline(sc)`, and the result will be a pipeline that you can apply to any data frame with the appropriate schema. In the next section, we'll see how pipelines can make it easier for us to test different model specifications.
+After you have found the appropriate transformations for your dataset, you can replace the<!--((("DataFrames", "pipelines and")))--> DataFrame input with `ml_pipeline(sc)`, and the result will be a pipeline that you can apply to any DataFrame with the appropriate schema. In the next section, we’ll see how pipelines can make it easier for us to test different model specifications.
 
 ### Hyperparameter Tuning
 
-Going back to the pipeline we have created above, we can use `ml_cross_validator()` to perform the cross validation workflow we demonstrated in the previous chapter and easily test different hyperparameter combinations. In this example, we test whether centering the variables improve predictions together with various regularization values for the logistic regression. We define the cross validator as follows:
+Going<!--((("hyperparameter tuning")))((("commands", "ml_cross_validator()")))--> back to the pipeline we have created earlier, we can use `ml_cross_validator()` to perform the cross-validation workflow we demonstrated in the previous chapter and easily test different hyperparameter combinations. In this example, we test whether centering the variables improves predictions together with various regularization values for the logistic regression. We define the cross-validator as follows:
 
 ```{r pipelines-hyper-validator}
 cv <- ml_cross_validator(
@@ -234,13 +234,13 @@ cv <- ml_cross_validator(
   num_folds = 10)
 ```
 
-The `estimator` argument is simply the estimator we want to tune, and in this case it is the `pipeline` that we defined. We provide the hyperparameter values we are interested in via the `estimator_param_maps` parameter, which takes a nested named list. The names at the first level correspond to UIDs, which are unique identifiers associated with each pipeline stage object, of the stages we want to tune (if a partial UID is provided sparklyr will attempt to match it to a pipeline stage) and the names at the second level correspond to parameters of each stage. In the snippet above, we are specifying that we want to test
+The `estimator` argument is simply the estimator that we want to tune, and in this case it is the `pipeline` that we defined. We provide the hyperparameter values we are interested in via the `estimator_param_maps` parameter, which takes a nested named list. The names at the first level correspond to UIDs, which are unique identifiers associated with each pipeline stage object, of the stages we want to tune (if a partial UID is provided, `sparklyr` will attempt to match it to a pipeline stage), and the names at the second level correspond to parameters of each stage. In the preceding snippet, we are specifying that we want to test the following:
 
 Standard scaler
-: The values `TRUE` and `FALSE` for `with_mean`, which denotes whether predictor values are centered.
+: The<!--((("standard scaler")))--> values `TRUE` and `FALSE` for `with_mean`, which denotes whether predictor values are centered.
 
 Logistic regression
-: The values `0.25` and `0.75` for $\alpha$, and the values `1e-2` and `1e-3` for $\lambda$.
+: The<!--((("logistic regression")))--> values `0.25` and `0.75` for $\alpha$, and the values `1e-2` and `1e-3` for $\lambda$.
 
 We expect this to give rise to $2 \times 2 \times 2 = 8$ hyperparameter combinations, which we can confirm by printing the `cv` object:
 
@@ -261,13 +261,13 @@ CrossValidator (Estimator)
   [Tuned over 8 hyperparameter sets]
 ```
 
-As with any other estimator, we can fit the cross validator using `ml_fit()`
+As<!--((("commands", "ml_fit()")))--> with any other estimator, we can fit the cross-validator by using `ml_fit()`
 
 ```{r pipelines-hyper-fit}
 cv_model <- ml_fit(cv, okc_train)
 ```
 
-and inspect the results:
+and then inspect the results:
 
 ```{r pipelines-hyper-roc}
 ml_validation_metrics(cv_model) %>%
@@ -286,12 +286,15 @@ ml_validation_metrics(cv_model) %>%
 8    0.7703913                0.25       0.001       FALSE
 ```
 
-Now that we have seen the pipelines API in action, let's talk more formally about how they behave in various contexts.
+Now that we have seen the pipelines API in action, let’s talk more formally about how they behave in various contexts.<!--((("", startref="Puse05")))-->
 
 ## Operating Modes
 
-By now, you have likely noticed that the pipeline stage functions, such as `ft_string_indexer()` and `ml_logistic_regression()`, return different types of objects depending on the first argument passed to them. The full pattern is:
+By<!--((("pipelines", "operating modes")))((("commands", "ft_string_indexer()")))((("commands", "ml_logistic_regression()")))--> now, you have likely noticed that the pipeline stage functions, such as `ft_string_indexer()` and `ml_logistic_regression()`, return different types of objects depending on the first argument passed to them. <!--<<table0501>>--> presents the full pattern.<!--((("DataFrames", "operating modes in ML functions")))-->
 
+<!--[[table0501]]
+.Operating modes in machine learning functions
+[cols=",,",options="header",]-->
 | First argument                | Returns                         | Example                                          |
 |-------------------------------|---------------------------------|--------------------------------------------------|
 | Spark connection              | Estimator or transformer object | `ft_string_indexer(sc)`                          |
@@ -299,22 +302,20 @@ By now, you have likely noticed that the pipeline stage functions, such as `ft_s
 | Data frame, without formula   | Data frame                      | `ft_string_indexer(iris, "Species", "indexed")`  |
 | Data frame, with formula      | sparklyr ML model object        | `ml_logistic_regression(iris, Species ~ .)`      |
 
-These functions are implemented using S3[^1], which is the most popular object oriented programming paradigm provided by R. For our purposes, it suffices to know that the behavior of an `ml_` or `ft_` function is dictated by the class of the first argument provided. This allows us to provide a wide range of features without introducing additional function names. We can now summarize the behavior of these functions:
+These<!--((("S3")))--> functions are implemented using [S3](https://adv-r.hadley.nz/s3.html), which is the most popular object-oriented programming paradigm provided by R. For our purposes, it suffices to know that the behavior of an `ml_` or `ft_` function is dictated by the class of the first argument provided. This allows us to provide a wide range of features without introducing additional function names. We now can summarize the behavior of these functions:
 
-- If a Spark connection is provided, the function returns a transformer or estimator object, which can be utilized directly using `ml_fit()` or `ml_transform()` or be included in a pipeline.
+- If<!--((("commands", "ml_transform()")))--> a Spark connection is provided, the function returns a transformer or estimator object, which can be utilized directly<!--((("commands", "ml_fit()")))--> using `ml_fit()` or `ml_transform()` or be included in a pipeline.
 - If a pipeline is provided, the function returns a pipeline object with the stage appended to it.
-- If a data frame is provided to a feature transformer function (those with prefix `ft_`), or an ML algorithm without also providing a formula, the function instantiates the pipeline stage object, fit it to the data if necessary (if the stage is an estimator), then transforms the data frame returning a data frame.
-- If a data frame and a formula are provided to an ML algorithm that supports the formula interface, sparklyr builds a pipeline model under the hood and returns an ML model object which contains additional metadata information.
+- If a<!--((("DataFrames", "transforming")))--> DataFrame is provided to a feature transformer function (those with prefix `ft_`), or an ML algorithm without also providing a formula, the function instantiates the pipeline stage object, fits it to the data if necessary (if the stage is an estimator), and then transforms the DataFrame returning a DataFrame.
+- If a DataFrame and a formula are provided to an ML algorithm that supports the formula interface, `sparklyr` builds a pipeline model under the hood and returns an ML model object that contains additional metadata information.
 
-The formula interface approach is what we studied in the [Modeling](#modeling) section, and is what we recommend new users to Spark start with, since its syntax is similar to existing R modeling packages and abstracts away some Spark ML peculiarities. However, to take advantage of the full power of Spark ML and leverage pipelines for workflow organization and interoperability, it is worthwhile to learn the ML Pipelines API.
+The formula interface approach is what we studied in [Chapter 5](#modeling), and this is what we recommend users new to Spark start with, since its syntax is similar to existing R modeling packages and abstracts away some Spark ML peculiarities. However, to take advantage of the full power of Spark ML and leverage pipelines for workflow organization and interoperability, it is worthwhile to learn the ML Pipelines API.
 
-[^1]: See [https://adv-r.hadley.nz/s3.html](https://adv-r.hadley.nz/s3.html) for a discussion.
-
-With the basics of pipelines down, we are now ready to discuss the collaboration and model deployment aspects hinted at in the introduction of this chapter. 
+With the basics of pipelines down, we are now ready to discuss the collaboration and model deployment aspects hinted at in the introduction of this chapter.
 
 ## Interoperability
 
-One of the most powerful aspects of pipelines is that they can be serialized to disk and are fully interoperable with the other Spark APIs, such as Python and Scala. This means they can be easily shared among users of Spark working in different languages, which may include other data scientists, data engineers, and deployment engineers. To save a pipeline model, call `ml_save()` and provide a path.
+One<!--((("pipelines", "interoperability", id="Pinter05")))--> of the most powerful aspects of pipelines is that they can be serialized to disk and are fully interoperable with the other Spark APIs such as Python and Scala. This means that you can easily share them among users of Spark working in different languages, which might include other data scientists, data engineers, and deployment engineers. To save a pipeline model, call<!--((("commands", "ml_save()")))--> `ml_save()` and provide a path:
 
 ```{r pipelines-interop-save}
 model_dir <- file.path("spark_model")
@@ -325,7 +326,7 @@ ml_save(cv_model$best_model, model_dir, overwrite = TRUE)
 Model successfully saved.
 ```
 
-Let us take a look at the directory we just wrote to.
+Let's take a look at the directory to which we just wrote:
 
 ```{r pipelines-interop-list}
 list.dirs(model_dir,full.names = FALSE) %>%
@@ -344,7 +345,7 @@ list.dirs(model_dir,full.names = FALSE) %>%
 [10] "stages/2_string_indexer_5b421796e826"    
 ```
 
-We can dive into a couple of the files to see what type of data was saved.
+We can dive into a couple of the files to see what type of data was saved:
 
 ```{r pipelines-interop-json}
 spark_read_json(sc, file.path(
@@ -379,13 +380,13 @@ spark_read_parquet(sc, file.path(
 1          2          12 <dbl [1]>       <-1.27950828662… FALSE        
 ```
 
-We see that quite a bit of information has been exported, from the SQL statement in the dplyr transformer to the fitted coefficient estimates of the logistic regression. We can then (in a new Spark session) reconstruct the model by using `ml_load()`:
+We see that quite a bit of information has been exported, from the SQL statement in the `dplyr` transformer to the fitted coefficient estimates of the logistic regression. We can then (in a new Spark session) reconstruct<!--((("commands", "ml_load()")))--> the model by using `ml_load()`:
 
 ```{r pipelines-interop-load}
 model_reload <- ml_load(sc, model_dir)
 ```
 
-Let us see if we can retrieve the logistic regression stage from this pipeline model:
+Let's see if we can retrieve the logistic regression stage from this pipeline model:
 
 ```{r pipelines-interop-stages}
 ml_stage(model_reload, "logistic_regression")
@@ -410,41 +411,39 @@ LogisticRegressionModel (Transformer)
   thresholds:  num [1:2] 0.5 0.5 
 ```
 
-Note that the exported JSON and parquet files are agnostic of the API that exported them. This means that in a multilingual machine learning engineering team, you can pick up a data preprocessing pipeline from a data engineer working in Python, build a prediction model on top of it, then hand off the final pipeline off to a deployment engineering working in Scala. In the next section, we discuss deployment of models in more detail.
+Note that the exported JSON and parquet files are agnostic of the API that exported them. This means that in a multilingual machine learning engineering team, you can pick up a data preprocessing pipeline from a data engineer working in Python, build a prediction model on top of it, and then hand off the final pipeline to a deployment engineering working in Scala. In the next section, we discuss deployment of models in more detail.
 
-**Note:** When `ml_save()` is called for sparklyr ML models (created using the formula interface), the associated pipeline model is saved, but any sparklyr specific metadata, such as index labels, are not. In other words, saving a sparklyr `ml_model` object then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. This behavior is required to use pipelines with other programming languages.
+**Note:** When<!--((("commands", "ml_save()")))((("sparklyr package", "pipeline model objects")))--> `ml_save()` is called for `sparklyr` ML models (created using the formula interface), the associated pipeline model is saved, but any `sparklyr`-specific metadata, such as index labels, is not. In other words, saving a `sparklyr` `ml_model` object and then loading it will yield a pipeline model object, as if you created it via the ML Pipelines API. This behavior is required to use pipelines with other programming languages.
 
-Before we move on to discuss how to run pipelines in production, make sure you disconnect from Spark,
+Before<!--((("commands", "spark_disconnect(sc)")))--> we move on to discuss how to run pipelines in production, make sure you disconnect from Spark:
 
 ```{r pipelines-interop-disconnect}
 spark_disconnect(sc)
 ```
 
-That way, we will start from a brand new new environment; which is also expected when deploying pipelines to production.
+That way, we can start from a brand new environment, which is also expected when you are deploying pipelines to production.<!--((("", startref="Pinter05")))-->
 
 ## Deployment
 
-What we have just demonstrated bears emphasizing: by collaborating within the framework of ML pipelines, we reduce friction among different personas in a data science team. In particular, we can cut down on the time from modeling to deployment.
+What<!--((("pipelines", "deployment", id="Pdeploy05")))((("deployment", "benefits of collaboration through pipelines")))((("collaboration")))--> we have just demonstrated bears emphasizing: by collaborating within the framework of ML Pipelines, we reduce friction among different personas in a data science team. In particular, we cut down on the time from modeling to deployment.
 
-In many cases, a data science project does not end with just a slide deck with insights and recommendations. Instead, the business problem at hand may require scoring new data points on a schedule or on-demand in real time. For example, a bank might want to evaluate its mortgage portfolio risk nightly, or to provide instant decisions on credit card applications. This process of taking a model and turning it into a service that others can consume is usually referred to as *deployment* or *productionisation*. Historically, there was a large gap between the analyst who built the model and the engineer who deployed it: the former might work in R and develop extensive documentation on the scoring mechanism, so the latter can re-implement the model in C++ or Java. This practice, which may easily take months in some organizations, is less prevalent today, but is almost always unnecessary in Spark ML workflows.
+In many cases, a data science project does not end with just a slide deck with insights and recommendations. Instead, the business problem at hand might require scoring new data points on a schedule or on-demand in real time. For example, a bank might want to evaluate its mortgage portfolio risk nightly or provide instant decisions on credit card applications. This<!--((("deployment", "defined")))((("productionization")))--> process of taking a model and turning it into a service that others can consume is usually referred to as _deployment_ or _productionization_. Historically, there was a large gap between the analyst who built the model and the engineer who deployed it: the former might work in R and develop extensive documentation on the scoring mechanism, so that the latter can reimplement the model in C++ or Java. This practice, which might easily take months in some organizations, is less prevalent today, but is almost always unnecessary in Spark ML workflows.
 
-The nightly portfolio risk and credit application scoring examples we mention above represent two modes of ML deployment known as *batch* and *real-time*. Loosely, batch processing implies processing many records at the same time and that execution time is not important as long it is reasonable (often on the scale of minutes to hours.) On the other hand, real-time processing implies scoring one or a few records at a time but the latency is crucial (on the scale of <1 second.) We will now see how we can take our OKCupid pipeline model to "production."
+The<!--((("deployment", "modes of")))--> aforementioned nightly portfolio risk and credit application scoring examples represent two modes of ML deployment known as _batch_ and _real time_. Loosely, batch processing implies processing many records at the same time, and that execution time is not important as long it is reasonable (often on the scale of minutes to hours). On the other hand, real-time processing implies scoring one or a few records at a time, but the latency is crucial (on the scale of <1 second). Let's turn now to see how we can take our `OKCupid` pipeline model to "production".
 
 ### Batch Scoring
 
-For both scoring methods, batch and real-time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The `plumber`[^2] R package enables us to do this very easily by annotating our prediction function.
+For<!--((("batch scoring")))((("deployment", "batch scoring")))--> both scoring methods, batch and real time, we will expose our model as web services, in the form of an API over the Hypertext Transfer Protocol (HTTP). This is the primary medium over which software communicates. By providing an API, other services or end users can utilize our model without any knowledge of R or Spark. The<!--((("plumber package")))--> [`plumber`](https://www.rplumber.io/) R package enables us to do this very easily by annotating our prediction function.
 
-You will need make sure that `plumber`, `callr` and the `httr` package are installed by running:
+You<!--((("callr package")))((("httr package")))--> will need make sure that `plumber`, `callr`, and the `httr` package are installed by running the following:
 
 ```{r eval=FALSE, exercise=TRUE}
 install.packages(c("plumber", "callr", "httr"))
 ```
 
-The `callr` package provides support to run R code in separate R sessions, it is not strictly required but we will use it to start a web service in the background. The `httr` package allows us to use web APIs from R.
+The `callr` package provides support to run R code in separate R sessions; it is not strictly required, but we will use it to start a web service in the background. The `httr` package allows us to use web APIs from R.
 
-[^2]: https://www.rplumber.io/
-
-In the batch scoring use case, we simply initiate a Spark connection and load the saved model. Save the following script as `plumber/spark-plumber.R`:
+In the batch scoring use case, we simply initiate a Spark connection and load the saved model. Save the following script as _plumber/spark-plumber.R_:
 
 ```{r pipelines-batch-score}
 library(sparklyr)
@@ -478,7 +477,7 @@ service <- callr::r_bg(function() {
 })
 ```
 
-This will start the web service locally that we can then query the service with new data to be scored; however, you might need to wait a few seconds for the Spark service to initialize.
+This starts the web service locally, and then we can query the service with new data to be scored; however, you might need to wait a few seconds for the Spark service to initialize:
 
 ```{r pipelines-batch-wait, echo=FALSE}
 render_wait_for_url("http://127.0.0.1:8000/predict", 40)
@@ -502,22 +501,19 @@ This reply tell us that this particular profile is likely to not be unemployed, 
 service$interrupt()
 ```
 
-If we were to time this operation (e.g. with `system.time()`), we see that the latency is on the order of hundreds of milliseconds, which may be appropriate for batch applications but insufficient for real-time. The main bottleneck is the serialization of the R data frame to a Spark data frame and back. Also, it also requires an active Spark session which is a heavy runtime requirement. To ameliorate these issues, we discuss next a deployment method more suitable for real time deployment.
+If we were to time this operation (e.g., with `system.time()`), we see that the latency is on the order of hundreds of milliseconds, which might be appropriate for batch applications but is insufficient for real time. The main bottleneck is the serialization of the R DataFrame to a Spark DataFrame and back. Also, it requires an active Spark session, which is a heavy runtime requirement. To ameliorate these issues, we discuss next a deployment method more suitable for real-time deployment.
 
 ### Real-Time Scoring
 
-For real-time production, we want to keep dependencies as light as possible so we can target more platforms for deployment. We now show how we can use the mleap[^3] package, which provides an interface to the MLeap[^4] library, to serialize and serve Spark ML models. MLeap is open source (Apache License 2.0) and supports a wide range, though not all, of Spark ML transformers. At run time, the only prerequisites for the environment are the Java Virtual Machine (JVM) and the MLeap runtime library. This avoids both the Spark binaries and expensive overhead in converting data to and from Spark data frames.
+For<!--((("deployment", "real-time scoring")))((("real-time scoring")))--> real-time production, we want to keep dependencies as light as possible so we can target more platforms for deployment. We<!--((("mleap package")))--> now show how we can use the [`mleap`](http://bit.ly/2Z7jgSV) package, which provides an interface to the [MLeap](http://bit.ly/33G271R) library, to serialize and serve Spark ML models. MLeap is open source (Apache License 2.0) and supports a wide range of, though not all, Spark ML transformers. At runtime, the only prerequisites for the environment are the Java Virtual Machine (JVM) and the MLeap runtime library. This<!--((("DataFrames", "converting data to and from")))--> avoids both the Spark binaries and expensive overhead in converting data to and from Spark DataFrames.
 
-[^3]: [https://github.com/rstudio/mleap](https://github.com/rstudio/mleap)
-[^4]: [https://github.com/combust/mleap](https://github.com/combust/mleap)
-
-Since `mleap` is a sparklyr extension and an R package, first we need to install it from CRAN:
+Since `mleap` is a `sparklyr` extension and an R package, first we need to install it from CRAN:
 
 ```{r eval=FALSE, exercise=TRUE}
 install.packages("mleap")
 ```
 
-It then must be loaded when `spark_connect()` is called; so let's restart your R session, establish a new Spark connection[^5], and load the pipeline model that we previously saved.
+It then must be loaded when `spark_connect()` is called; so let’s restart your R session, establish a new Spark connection,^[As of the writing of this book, MLeap does not support Spark 2.4.] and load the pipeline model that we previously saved:
 
 ```{r pipelines-realtime-load-libs}
 library(sparklyr)
@@ -534,9 +530,7 @@ sc <- spark_connect(master = "local", version = "2.3")
 spark_model <- ml_load(sc, "spark_model")
 ```
 
-[^5]: Note that, as of the writing of this book, MLeap does not yet support Spark 2.4.
-
-The way we save a model to MLeap bundle format is very similar to saving a model using the Spark ML Pipelines API; the only additional argument is `sample_input`, which is a Spark data frame with schema that we expect new data to be scored to have.
+The way we save a model to MLeap bundle format is very similar to saving a model using the Spark ML Pipelines API; the only additional argument is `sample_input`, which is a Spark DataFrame with schema that we expect new data to be scored to have:
 
 ```{r pipelines-realtime-write}
 sample_input <- data.frame(
@@ -553,7 +547,7 @@ sample_input_tbl <- copy_to(sc, sample_input)
 ml_write_bundle(spark_model, sample_input_tbl, "mleap_model.zip", overwrite = TRUE)
 ```
 
-The artifact we just created, `mleap_model.zip`, can now be deployed in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! In fact, we can go ahead and disconnect from Spark already:
+We can now deploy the artifact we just created, _mleap_model.zip_, in any device that runs Java and has the open source MLeap runtime dependencies, without needing Spark or R! In fact, we can go ahead and disconnect from Spark already:
 
 ```{r pipelines-realtime-disconnect}
 spark_disconnect(sc)
@@ -566,7 +560,7 @@ mleap::install_maven()
 mleap::install_mleap()
 ```
 
-To test this model, we can create a new plumber API to expose it. The script `plumber/mleap-plumber.R` is very similar to the previous example:
+To test this model, we can create a new plumber API to expose it. The script _plumber/mleap-plumber.R_ is very similar to the previous example:
 
 ```{r pipelines-realtime-mleap-load}
 library(mleap)
@@ -615,9 +609,9 @@ httr::POST(
 [1] 0
 ```
 
-If we were to time this operation, we will see that the service now returns predictions in tens of milliseconds!
+If we were to time this operation, we would see that the service now returns predictions in tens of milliseconds.<!--((("", startref="Pdeploy05")))-->
 
-Let's stop this service and then wrap up this chapter.
+Let’s stop this service and then wrap up this chapter:
 
 ```{r pipelines-realtime-interrrupt}
 service$interrupt()
@@ -625,8 +619,8 @@ service$interrupt()
 
 ## Recap
 
-In this chapter, we discussed Spark Pipelines, which is the engine behind the modeling functions introduced in the previous chapter. We learned how to tidy up our predictive modeling workflows by organizing data processing and modeling algorithms into pipelines. You learned that pipelines also facilitate collaboration among members of a multilingual data science and engineering team by sharing a language agnostic serialization format -- you can export a Spark pipeline from R and let others reload your pipeline into Spark using Python or Scala, which allows them to collaborate without changing their language of choice.
+In this chapter, we discussed Spark Pipelines, which is the engine behind the modeling functions introduced in [Chapter 4](#modeling). You learned how to tidy up your predictive modeling workflows by organizing data processing and modeling algorithms into pipelines. You<!--((("deployment", "benefits of collaboration through pipelines")))((("collaboration")))--> learned that pipelines also facilitate collaboration among members of a multilingual data science and engineering team by sharing a language-agnostic serialization format—you can export a Spark pipeline from R and let others reload your pipeline into Spark using Python or Scala, which allows them to collaborate without changing their language of choice.
 
-You also learned how to deploy pipelines using `mleap`, a Java runtime which provides another path to productionize Spark models -- you can export a pipeline and integrate it to Java-enabled environments without requiring the target environment to support Spark nor R.
+You also learned how to deploy pipelines using `mleap`, a Java runtime that provides another path to productionize Spark models—you can export a pipeline and integrate it to Java-enabled environments without requiring the target environment to support Spark or R.
 
-You probably noticed that some algorithms, especially the unsupervised learning kind, where slow even for the OKCupid dataset which can be loaded into memory. If we had access to a proper Spark cluster, we could spend more time modeling and less time waiting! Not only that, but we could use cluster resources to run broader hyperparameter-tuning jobs and process large-datasets. To get there, the next chapter will present what exactly a computing cluster is and explain you various options you can consider; like building your own, or using cloud clusters on-demand.
+You probably noticed that some algorithms, especially the unsupervised learning kind, were slow, even for the `OKCupid` dataset, which can be loaded into memory. If we had access to a proper Spark cluster, we could spend more time modeling and less time waiting! Not only that, but we could use cluster resources to run broader hyperparameter-tuning jobs and process large datasets. To get there, [Chapter 6](#clusters) presents what exactly a computing cluster is and explains the various options you can consider, like building your own or using cloud clusters on demand.
