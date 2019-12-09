@@ -29,7 +29,7 @@ _Spark Streaming_ provides<!--((("Spark Streaming")))--> scalable and fault-tole
 
 In Spark, you<!--((("source")))((("sink")))--> create streams by defining a _source_, a _transformation_, and a _sink_; you can think of these steps as reading, transforming, and writing a stream, as shown in Figure \@ref(fig:streaming-working) describes.
 
-```{r streaming-working, echo=FALSE, fig.cap='Working with Spark Streams', fig.align = 'center', eval = TRUE, fig.align='center', out.height = '280pt', out.width = 'auto'}
+```{r streaming-working, echo=FALSE, fig.cap='Working with Spark Streaming', fig.align = 'center', eval = TRUE, fig.align='center', out.height = '280pt', out.width = 'auto'}
 render_nomnoml("
 #direction: right
 [Real-Time|[<note>File Source
@@ -348,7 +348,7 @@ Apache Kafka<!--((("Kafka", "streaming")))((("Apache Kafka", "streaming")))((("s
 
 Kafka stores the stream as records, which consist of a key, a value, and a timestamp. It can handle multiple streams that contain different information, by categorizing them by topic. Kafka is commonly used to connect multiple real-time applications. A _producer_ is<!--((("producers")))((("consumers")))((("subscribers")))--> an application that streams data into Kafka, while a _consumer_ is the one that reads from Kafka; in Kafka terminology, a consumer application _subscribes_ to topics. Therefore, the most basic workflow we can accomplish with Kafka is one with a single producer and a single consumer; this is illustrated in Figure \@ref(fig:streaming-kafka-apis).
 
-```{r streaming-kafka-apis, echo=FALSE, fig.cap='Basic workflow', fig.align = 'center', eval = TRUE, fig.align='center', out.height = '100pt', out.width = 'auto'}
+```{r streaming-kafka-apis, echo=FALSE, fig.cap='A basic Kafka workflow', fig.align = 'center', eval = TRUE, fig.align='center', out.height = '100pt', out.width = 'auto'}
 render_nomnoml("
 #leading: 4
 #padding: 10
@@ -389,7 +389,7 @@ However, notice that you need to properly configure the `options` list; `kafka.b
 
 Though we've started by presenting a simple single-producer and single-consumer use case, Kafka also allows much more complex interactions. We will next read from one topic, process its data, and then write the results to a different topic. Systems that are producers and consumers from the same topic are referred to as _stream processors_. In Figure \@ref(fig:streaming-kafka-two-outputs), the stream processor reads topic A and then writes results to topic B. This allows for a given consumer application to read results instead of "raw" feed data.
 
-```{r streaming-kafka-two-outputs, echo=FALSE, fig.cap='Kafka workflow', fig.align = 'center', eval = TRUE, fig.align='center', out.height = '260pt', out.width = 'auto'}
+```{r streaming-kafka-two-outputs, echo=FALSE, fig.cap='A Kafka workflow using stream processors', fig.align = 'center', eval = TRUE, fig.align='center', out.height = '260pt', out.width = 'auto'}
 render_nomnoml("
 #padding: 20
 #spacing: 80
@@ -401,7 +401,7 @@ render_nomnoml("
 ", "images/streaming-kafka-two-outputs.png")
 ```
 
-Three modes are available when processing Kafka streams in Spark: _++complete++_, _++update++_, and _++append++_. The `complete` mode provides the totals for every group every time there is a new batch; `update` provides totals for only the groups that have updates in the latest batch; and `append` adds raw records to the target topic. The `append` mode is not meant for aggregates, but works well for passing a filtered subset to the target topic.
+Three modes are available when processing Kafka streams in Spark: _complete_, _update_, and _append_. The `complete` mode provides the totals for every group every time there is a new batch; `update` provides totals for only the groups that have updates in the latest batch; and `append` adds raw records to the target topic. The `append` mode is not meant for aggregates, but works well for passing a filtered subset to the target topic.
 
 In our next example, the producer streams random letters into Kafka under a `letters` topic. Then, Spark will act as the stream processor, reading the `letters` topic and computing unique letters, which are then written back to Kafka under the `totals` topic. We'll use the `update` mode when writing back into Kafka; that is, only the totals that changed will be sent to Kafka. This change is determined after each batch from the `letters` topic:
 
@@ -500,7 +500,7 @@ sparklyr::stream_generate_test(datasets::iris, "shiny/shiny-stream",
                                rep(5, 10^3))
 ```
 
-```{r streaming-shiny-app, eval = TRUE,  fig.align = 'center', fig.cap = 'Progression of Spark reactive loading data into Shiny app', echo = FALSE}
+```{r streaming-shiny-app, eval = TRUE,  fig.align = 'center', fig.cap = 'Progression of Spark reactive loading data into the Shiny app', echo = FALSE}
 render_image("images/streaming-shiny-app.png")
 ```
 
