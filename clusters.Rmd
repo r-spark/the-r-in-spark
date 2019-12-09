@@ -6,17 +6,19 @@ library(ggplot2)
 
 # Clusters {#clusters}
 
-> "I have a very large army and very large dragons."
+> I have a very large army and very large dragons.
 >
 > --- Daenerys Targaryen
 
-Previous chapters focused on using Spark over a single computing instance, your personal computer. In this chapter we will introduce techniques to run Spark over multiple computing instances, also known as a computing cluster. This chapter and subsequent ones will introduce and make use of concepts applicable to computing clusters; however, it's not required to use a computing cluster to follow along, you can still use your personal computer. It's worth mentioning that while previous chapters focused on single computing instances, all the data analysis and modeling techniques we presented, can also be used in a computing cluster without changing any code.
+Previous chapters focused on using Spark over a single computing instance, your personal computer. In this chapter, we introduce techniques to run Spark over multiple computing instances, also known as a _computing_ cluster. This chapter and subsequent ones will introduce and make use of concepts applicable to computing clusters; however, it’s not required to use a computing cluster to follow along, so you can still use your personal computer. It’s worth mentioning that while previous chapters focused on single computing instances, you can also use all the data analysis and modeling techniques we presented in a computing cluster without changing any code.
 
-For those of you who already have a Spark cluster in your organization, you could consider skipping to the next chapter, [Connections](#connections), which will teach you how to connect to an existing cluster. Otherwise, if you don't have a cluster or are considering improvements to your existing infrastructure, this chapter will introduce the cluster trends, managers, and providers available today.
+If you already have a Spark cluster in your organization, you could consider skipping to [Chapter 7](#connections), which teaches you how to connect to an existing cluster. Otherwise, if you don’t have a cluster or are considering improvements to your existing infrastructure, this chapter introduces the cluster trends, managers, and providers available today.
 
 ## Overview {#clusters-overview}
 
-There are three major trends in cluster computing worth discussing: *On-Premise*, *Cloud* computing, and *Kubernetes*. Framing these trends over time will help us understand how they came to be, what they are, and what their future might be. To illustrate this, Figure \@ref(fig:clusters-trends) plots these trends over time using data from Google trends.
+There<!--((("clusters", "overview of", id="Cover06")))--> are three major trends in cluster computing worth discussing: _on-premises_, _cloud_ computing, and _Kubernetes_. Framing these trends over time will help us understand how they came to be, what they are, and what their future might be. To illustrate this, Figure \@ref(fig:clusters-trends) plots these trends over time using data from Google trends.
+
+For on-premises clusters, you or someone in your organization purchased physical computers that were intended to be used for cluster computing. The computers in this cluster are<!--((("off-the-shelf hardware")))((("high-performance hardware")))--> made of _off-the-shelf_ hardware, meaning that someone placed an order to purchase computers usually found on store shelves, or _high-performance_ hardware, meaning that a computing vendor provided highly customized computing hardware, which also comes optimized for high-performance network connectivity, power consumption, and so on.
 
 ```{r clusters-trends-code, echo=FALSE}
 library(dplyr)
@@ -41,46 +43,43 @@ read.csv("data/clusters-trends.csv", skip = 2) %>%
 render_image("images/clusters-trends.png", "Google trends for on-premise (mainframe), cloud computing and Kubernetes")
 ```
 
-For *on-premise* clusters, yourself or someone in your organization purchased physical computers that were intended to be used for cluster computing. The computers in this cluster are made of _off-the-shelf_ hardware, meaning that someone placed an order to purchase computers usually found in stores shelves or, _high-performance_ hardware, meaning that a computing vendor provided highly customized computing hardware which also comes optimized for high-performance network connectivity, power consumption, etc.
+When purchasing hundreds or thousands of computing instances, it doesn’t make sense to keep them in the usual computing case that we are all familiar with; instead, it makes sense to stack them as efficiently as possible on top of one another to minimize the space the use. This<!--((("racks")))--> group of efficiently stacked computing instances is known as a [_rack_](https://oreil.ly/zKOr-). After a cluster grows to thousands of computers, you will also need to host hundreds of racks of computing devices; at this scale, you would also need significant physical space to host those racks.
 
-When purchasing hundreds or thousands of computing instances, it doesn't make sense to keep them in the usual computing case that we are all familiar with; instead, it makes sense to stack them as efficiently as possible on top of each other to minimize the space the use. This group of efficiently stacked computing instances is known as a [rack](https://en.wikipedia.org/wiki/Rack_unit). Once a cluster grows to thousands of computers, you will also need to host hundreds of racks of computing devices, at this scale, you would also need significant physical space to hosts those racks.
+A<!--((("datacenters")))--> building that provides racks of computing instances is usually known as a _datacenter_. At the scale of a datacenter, you would also need to find ways to make the building more efficient, especially the cooling system, power supplies, network connectivity, and so on. Since<!--((("Open Compute Project")))--> this is time-consuming, a few organizations have come together to open source their infrastructure under the [Open Compute Project](http://www.opencompute.org/) initiative, which provides a set of datacenter blueprints free for anyone to use.
 
-A building that provides racks of computing instances is usually known as a _data center_. At the scale of a data center, you would also need to find ways to make the building more efficient, specially the cooling system, power supplies, network connectivity, and so on. Since this is time consuming, a few organizations have come together to open source their infrastructure under the [Open Compute Project](http://www.opencompute.org/) initiative, which provides a set of data center blueprints free for anyone to use.
+There is nothing preventing you from building our own datacenter, and, in fact, many organizations have followed this path. For instance, Amazon started as an online bookstore, but over the years it grew to sell much more than just books. Along with its online store growth, its datacenters also grew in size. In 2002, Amazon<!--((("Amazon Web Services (AWS)")))--> considered [renting servers in their datacenters to the public](https://oreil.ly/Nx3BD), and two years later, Amazon Web Services (AWS) launched as a way to let anyone rent servers in the company's datacenters on demand, meaning that you did not need to purchase, configure, maintain, or tear down your own clusters; rather, you could rent them directly from AWS.
 
-There is nothing preventing you from building our own data center and in fact, many organizations have followed this path. For instance, Amazon started as an online book store, over the years Amazon grew to sell much more than just books and, with its online store growth, their data centers also grew in size. In 2002, Amazon considered [renting servers in their data centers to the public](https://en.wikipedia.org/wiki/Amazon_Web_Services#History), two year later, Amazon Web Services launched as a way to let anyone rent servers in their data centers on-demand, meaning that, one did not have to purchase, configure, maintain nor tear down it's own clusters but could rather rent them from Amazon directly.
+This<!--((("cloud computing", "defined")))--> on-demand compute model is what we know today as _cloud computing_. In the cloud, the cluster you use is not owned by you, and it’s not in your physical building; instead it’s a datacenter owned and managed by someone else. Today, there are many<!--((("cloud providers")))--> cloud providers in this space, including AWS, Databricks, Google, Microsoft, Qubole, and many others. Most cloud computing platforms provide a user interface through either a web application or command line to request and manage resources.
 
-This on-demand compute model is what we know today as *Cloud Computing*. In the cloud, the cluster you use is not owned by you and it's neither in your physical building, but rather, it's a data center owned and managed by someone else. Today, there are many cloud providers in this space ranging from Amazon, Databricks, IBM, Google, Microsoft and many others. Most cloud computing platforms provide a user interface either through a web application and command line to request and manage resources.
+While the benefits of processing data in the _cloud_ were obvious for many years, picking a cloud provider had the unintended side effect of locking in organizations with one particular provider, making it hard to switch between providers or back to on-premises clusters. _Kubernetes_, <!--((("Kubernetes")))-->announced by Google in 2014, is an [open source system for managing containerized applications across multiple hosts](https://oreil.ly/u6H5X). In practice, it makes it easier to deploy across multiple cloud providers and on-premises as well.
 
-While the benefits of processing data in the _cloud_ were obvious for many years, picking a cloud provider had the unintended side-effect of locking organizations with one particular provider, making it hard to switch between providers or back to on-premise clusters. *Kubernetes*, announced by Google in 2014, is an [open source system for managing containerized applications across multiple hosts](https://github.com/kubernetes/kubernetes/). In practice, it makes it easier to deploy across multiple cloud providers and on-premise as well.
-
-In summary, we have seen a transition from on-premise to cloud computing and more recently Kubernetes. These technologies are often loosely described as the *private cloud*, the *public cloud* and as one of the orchestration services that can enable a *hybrid cloud*, respectively. This chapter will walk you through each cluster computing trend in the context of Spark and R.
+In summary, we have seen a transition from on-premises to cloud computing and, more recently, Kubernetes. These<!--((("private cloud")))((("public cloud")))((("hybrid cloud")))--> technologies are often loosely described as the _private cloud_, the _public cloud_, and as one of the orchestration services that can enable a _hybrid cloud_, respectively. This chapter walks you through each cluster computing trend in the context of Spark and R.<!--((("", startref="Cover06")))-->
 
 ## On-Premise
 
-As mentioned in the overview section, on-premise clusters represent a set of computing instances procured and managed by staff members from your organization. These clusters can be highly customized and controlled; however, they can also incur higher initial expenses and maintenance costs.
+As<!--((("clusters", "on-premises cluster computing", id="Conprem06")))((("on-premises cluster computing", "overview of")))--> mentioned in the overview section, on-premises clusters represent a set of computing instances procured and managed by staff members from your organization. These clusters can be highly customized and controlled; however, they can also incur higher initial expenses and maintenance costs.
 
-When using On-Premise Spark clusters, there are two concepts you should consider:
+When using on-premises Spark clusters, there are two concepts you should consider:
 
-- *Cluster Manager*: In a similar way as to how an Operating Systems (like Windows os OS X) allows you to run multiple applications in the same computer; a cluster manager allows multiple applications to be run in the same cluster. You will have to choose one yourself when working with On-Premise clusters.
-- *Spark Distribution*: While you can install Spark from the Apache Spark site, many companies partner with companies that can provide support and enhancements to Apache Spark which we often refer as, Spark distributions.
+Cluster manager
+: In a similar way as to how an operating system (like Windows or macOS) allows you to run multiple applications in the same computer, a cluster manager allows multiple applications to be run in the same cluster. You need to choose one yourself when working with on-premises clusters.
+
+Spark distribution
+: While you can install Spark from the Apache Spark site, many organizations partner with companies that can provide support and enhancements to Apache Spark, which we often refer to as Spark _distributions_.
 
 ### Managers {#clusters-manager}
 
-In order to run Spark within a computing cluster, you will need to run software capable of initializing Spark over each physical machine and register all the available computing nodes, this software is known as a [cluster manager](https://en.wikipedia.org/wiki/Cluster_manager). The available cluster managers in Spark are: *Spark Standalone*, *YARN*, *Mesos* and *Kubernetes*.
+To<!--((("cluster managers", "purpose of")))((("on-premises cluster computing", "cluster managers", id="OPCCmanag06")))--> run Spark within a computing cluster, you will need to run software capable of initializing Spark over each physical machine and register all the available computing nodes. This software is known as a [cluster manager](https://oreil.ly/Ye4zH). The available cluster managers in Spark are _Spark Standalone_, _YARN_, _Mesos_, and _Kubernetes_.
 
-**Note:** In distributed systems and clusters literature, we often refer to each physical machine as a compute instance, compute node, instance or node.
+**Note:** In<!--((("compute instances")))((("compute nodes")))((("instances")))((("nodes")))--> distributed systems and clusters literature, we often refer to each physical machine as a _compute instance_, _compute node_, _instance_, or _node_.
 
 #### Standalone {#clusters-standalone}
 
-In *Spark Standalone*, Spark uses itself as its own cluster manager, which allows you to use Spark without installing additional software in your cluster. This can be useful if you are planning to use your cluster to only run Spark applications; if this cluster is not dedicated to Spark, a generic cluster manager like YARN, Mesos or Kubernetes would be more suitable. The Spark Standalone documentation is available under [spark.apache.org](https://spark.apache.org/docs/latest/spark-standalone.html) [@clusters-spark-standalone-mode] and contains detailed information on configuring, launching, monitoring and enabling high-availability, see Figure \@ref(fig:clusters-spark-standalone).
+In _Spark Standalone_, Spark<!--((("Standalone clusters", id="standalonec06")))((("cluster managers", "Spark Standalone", id="CMstand06")))((("Spark Standalone", id="spstand06")))--> uses itself as its own cluster manager, which allows you to use Spark without installing additional software in your cluster. This can be useful if you are planning to use your cluster to run only Spark applications; if this cluster is not dedicated to Spark, a generic cluster manager like YARN, Mesos, or Kubernetes would be more suitable. The Spark Standalone [documentation](http://bit.ly/307YtM6) contains detailed information on configuring, launching, monitoring, and enabling high availability, as illustrated in Figure \@ref(fig:clusters-spark-standalone).
 
-```{r clusters-spark-standalone, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Spark Standalone Site'}
-render_image("images/clusters-spark-standalone.png", "Spark Standalone Site")
-```
+However, since Spark Standalone is contained within a Spark installation, by completing [Chapter 2](#starting), you have now a Spark installation available that you can use to initialize a local Spark Standalone cluster on your own machine. In practice, you would want to start the worker nodes on different machines, but for simplicity, we present the code to start a standalone cluster on a single machine.
 
-However, since Spark Standalone is contained within a Spark installation; then, by completing the Getting Started chapter, you have now a Spark installation available that you can use to initialize a local Spark Standalone cluster in your own machine. In practice, you would want to start the worker nodes in different machines but, for simplicity, we will present the code to start a standalone cluster in a single machine.
-
-First, retrieve the `SPARK_HOME` directory by running `spark_home_dir()` then starting the master node and a worker node as follows:
+First, retrieve the `SPARK_HOME` directory by running *`spark_home_dir()`*, and then start the master node and a worker node as follows:
 
 ```{r clusters-start-master, message=FALSE}
 # Retrieve the Spark installation directory
@@ -93,7 +92,19 @@ spark_path <- file.path(spark_home, "bin", "spark-class")
 system2(spark_path, "org.apache.spark.deploy.master.Master", wait = FALSE)
 ```
 
-The previous command initialized the master node, the master node interface can be accessed under [localhost:8080](http://localhost:8080) as captured in Figure \@ref(fig:clusters-spark-standalone-web). Please note the Spark master URL is specified as `spark://address:port`, you will need this URL to initialize worker nodes.
+```{r clusters-spark-standalone, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Spark Standalone Site'}
+render_image("images/clusters-spark-standalone.png", "Spark Standalone Site")
+```
+
+The previous command initializes the master node. You can access the master node interface at  [_localhost:8080_](http://localhost:8080), as captured in Figure \@ref(fig:clusters-spark-standalone-web). Note that the Spark master URL is specified as _spark://address:port_; you will need this URL to initialize worker nodes.
+
+We then can initialize a single worker using the master URL; however, you could use a similar approach to initialize multiple workers by running the code multiple times and, potentially, across different machines:
+
+```{r clusters-start-worker}
+# Start worker node, find master URL at http://localhost:8080/
+system2(spark_path, c("org.apache.spark.deploy.worker.Worker",
+                      "spark://address:port"), wait = FALSE)
+```
 
 ```{r clusters-spark-standalone-web-code, echo=FALSE}
 invisible(webshot::webshot(
@@ -108,15 +119,7 @@ invisible(webshot::webshot(
 render_image("images/clusters-spark-standalone-web-ui.png")
 ```
 
-We can then initialize a single worker using the master URL; although, a similar approach could be used to initialize multiple workers by running the code multiple times and, potentially, across different machines.
-
-```{r clusters-start-worker}
-# Start worker node, find master URL at http://localhost:8080/
-system2(spark_path, c("org.apache.spark.deploy.worker.Worker",
-                      "spark://address:port"), wait = FALSE)
-```
-
-Notice that there is one worker register in Spark standalone, you can follow the link to this worker node to see, Figure \@ref(fig:clusters-spark-standalone-webui), details for this particular worker like available memory and cores.
+There is one worker register in Spark Standalone. Click the link to this worker node to view details for this particular worker, like available memory and cores, as shown in Figure \@ref(fig:clusters-spark-standalone-webui).
 
 ```{r clusters-spark-standalone-webui-code, echo=FALSE}
 invisible(webshot::webshot(
@@ -131,7 +134,7 @@ invisible(webshot::webshot(
 render_image("images/clusters-spark-standalone-web-ui-worker.png")
 ```
 
-Once you are done performing computations in this cluster, you will need to stop the master and worker nodes, you can use `jps` to list to identify the process numbers to terminate. In this particular example `15330` and `15353` are the process you can terminate to finalize this cluster. To terminate a process, you can use `system("Taskkill /PID ##### /F")` in Windows or `system("kill -9 #####")` in OS X and Linux.
+After you are done performing computations in this cluster, you will need to stop the master and worker nodes. You can use the `jps` command to identify the process numbers to terminate. In the following example, `15330` and `15353` are the processes that you can terminate to finalize this cluster. To terminate a process, you can use `system("Taskkill /PID ##### /F")` in Windows, or `system("kill -9 #####")` in macOS and Linux.
 
 ```{r}
 system("jps")
@@ -143,89 +146,99 @@ system("jps")
 1689 QuorumPeerMain
 ```
 
-A similar approach can be followed to configure a cluster by the initialization code over each machine in the cluster.
+You can follow a similar approach to configure a cluster by running the initialization code over each machine in the cluster.
 
-While it's possible to initialize a simple standalone cluster, configuring a proper Spark standalone cluster that can recover from computer restarts, failures, supports multiple users, permissions, etc. is usually a much longer process that falls beyond the scope of this book. The following sections will present several alternatives that can be much easier to manage on-premise or through cloud services, we will start by introducing YARN.
+While it’s possible to initialize a simple standalone cluster, configuring a proper Spark Standalone cluster that can recover from computer restarts and failures, and supports multiple users, permissions, and so on, is usually a much longer process that falls beyond the scope of this book. The following sections present several alternatives that can be much easier to manage on-premises or through cloud services. We will start by introducing YARN.<!--((("", startref="spstand06")))((("", startref="CMstand06")))((("", startref="standalonec06")))-->
 
 #### Yarn
 
-YARN for short, or Hadoop YARN, is the resource manager of the Hadoop project. It was originally developed in the Hadoop project but, refactored into its own project in Hadoop 2. As we mentioned in the Introduction chapter, Spark was built to speed up computation over Hadoop and therefore, it's very common to find Spark installed on Hadoop clusters.
+Hadoop<!--((("cluster managers", "Hadoop YARN")))((("Hadoop YARN")))((("YARN")))--> YARN, or simply YARN, as it is commonly called, is the resource manager of the Hadoop project. It was originally developed in the Hadoop project but was  refactored into its own project in Hadoop 2. As we mentioned in [Chapter 1](#intro), Spark was built to speed up computation over Hadoop, and therefore it’s very common to find Spark installed on Hadoop clusters.
 
-One advantage of YARN, is that it is likely to be already installed in many existing clusters that support Hadoop; which means that you can easily use Spark with many existing Hadoop clusters without requesting any major changes to the existing cluster infrastructure. It is also very common to find Spark deployed in YARN clusters since many started out as Hadoop clusters that were eventually upgraded to also support Spark.
+One advantage of YARN is that it is likely to be already installed in many existing clusters that support Hadoop; this means that you can easily use Spark with many existing Hadoop clusters without requesting any major changes to the existing cluster infrastructure. It is also very common to find Spark deployed in YARN clusters since many started out as Hadoop clusters and were eventually upgraded to also support Spark.
 
-YARN applications can be submitted in two modes: *yarn-client* and *yarn-cluster*. In yarn-cluster mode the driver is running remotely (potentially), while in yarn-client mode, the driver is running locally, both modes are supported and are explained further in the Connections chapter.
+You can submit YARN applications in two modes: _yarn-client_ and _yarn-cluster_. In yarn-cluster mode the driver is running remotely (potentially), while in yarn-client mode, the driver is running locally. Both modes are supported, and we explain them further in [Chapter 7](#connections).
 
-YARN provides a resource management user interface useful to access logs, monitor available resources, terminate applications, etc. Once connecting to Spark from R, you will be able to manage the running application in YARN, this is shown in Figure \@ref(fig:clusters-hadoop-yarn-site).
+YARN provides a resource management user interface useful to access logs, monitor available resources, terminate applications, and more. After you connect to Spark from R, you will be able to manage the running application in YARN, as shown in Figure \@ref(fig:clusters-hadoop-yarn-site).
+
+Since YARN is the cluster manager from the Hadoop project, you can find YARN’s documentation at  [hadoop.apache.org](http://bit.ly/2TDGsCX). You can also reference the "Running Spark on YARN" guide at [spark.apache.org](http://bit.ly/306WsQx).
 
 ```{r clusters-hadoop-yarn-site, eval=TRUE, fig.align='center', echo=FALSE, fig.cap="YARN's Resource Manager running sparklyr application"}
 render_image("images/clusters-yarn-resource-manager.png")
 ```
 
-Since YARN is the cluster manager from the Hadoop project, YARN's documentation can be found under the [hadoop.apache.org](https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html) [@clusters-hadoop-yarn], you can also reference the "Running Spark on YARN" guide from [spark.apache.org](https://spark.apache.org/docs/latest/running-on-yarn.html). [@clusters-spark-on-yarn]
-
 #### Mesos
 
-Apache Mesos is an open-source project to manage computer clusters. Mesos began as a research project in the UC Berkeley RAD Lab and makes use of Linux [Cgroups](https://en.wikipedia.org/wiki/Cgroups) to provide isolation for CPU, memory, I/O and file system access.
+Apache Mesos<!--((("cluster managers", "Apache Mesos")))((("Apache Mesos")))((("Mesos")))--> is an open source project to manage computer clusters. Mesos began as a research project in the UC Berkeley RAD Lab. It<!--((("Cgroups")))((("Linux Cgroups")))--> makes use of Linux [Cgroups](http://bit.ly/2Z9KEeW) to provide isolation for CPU, memory, I/O, and file system access.
 
-Mesos, like YARN, supports executing many cluster frameworks, including Spark. However, one advantage particular to Mesos is that, it allows cluster framework like Spark to implement custom task schedulers. A scheduler is the component that coordinates in a cluster which applications get execution time and which resources are assigned to them. Spark uses a coarse-grained scheduler [@clusters-spark-mesos-run-modes] which schedules resources for the duration of the application; however, other frameworks might use Mesos' fine-grained scheduler, which can increase the overall efficiency in the cluster by scheduling tasks in shorter intervals allowing them to share resources between them.
+Mesos, like YARN, supports executing many cluster frameworks, including Spark. However, one advantage particular to Mesos is that it allows cluster frameworks like Spark to implement custom task schedulers. A scheduler is the component that coordinates in a cluster which applications are allocated execution time and which resources are assigned to them. Spark<!--((("coarse-grained scheduler")))--> uses a [coarse-grained scheduler](https://oreil.ly/9WQvg), which schedules resources for the duration of the application; however, other frameworks<!--((("fine-grained scheduler")))--> might use Mesos’ fine-grained scheduler, which can increase the overall efficiency in the cluster by scheduling tasks in shorter intervals, allowing them to share resources between them.
 
-Mesos provides a web interface to manage your running applications, resources, and so on. After connecting to Spark from R, your application will be registered like any other application running in Mesos, Figure \@ref(fig:clusters-mesos-webui) shows a successful connection to Spark from R.
+Mesos provides a web interface to manage your running applications, resources, and so on. After connecting to Spark from R, your application will be registered like any other application running in Mesos. Figure \@ref(fig:clusters-mesos-webui) shows a successful connection to Spark from R.
+
+Mesos is an Apache project with its documentation available at [mesos.apache.org](https://mesos.apache.org/). The [_Running Spark on Mesos_](http://bit.ly/31H4LCT) guide is also a great resource if you choose to use Mesos as your cluster manager.<!--((("", startref="OPCCmanag06")))-->
 
 ```{r clusters-mesos-webui, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Mesos web interface running Spark from R'}
 render_image("images/clusters-mesos-webui.png")
 ```
 
-Mesos is an Apache project with its documentation available under [mesos.apache.org](https://mesos.apache.org/). The "Running Spark on Mesos" guide from [spark.apache.org](https://spark.apache.org/docs/latest/running-on-mesos.html) is also a great resource if you choose to use Mesos as your cluster manager.
-
 ### Distributions
 
-One can use a cluster manager in on-premise clusters as described in the previous section; however, many organizations choose to partner with companies providing additional management software, services and resources to help manage applications in their cluster; including, but not limited to, Apache Spark. Some of the on-premise cluster providers include: *Cloudera*, *Hortonworks* and *MapR* to mention a few which we will be briefly introduce next. 
+You<!--((("Spark distributions", id="spdist06")))((("Cloudera", id="cloudera06")))((("on-premises cluster computing", "Spark distributions", id="OPCCspark06")))--> can use a cluster manager in on-premises clusters, as described in the previous section; however, many organizations—including, but not limited to, Apache Spark—choose to partner with companies providing additional management software, services, and resources to help manage applications in their cluster. Some of the on-premises cluster<!--((("Hortonworks", id="hortonw06")))((("MapR")))--> providers include _Cloudera_, _Hortonworks_, and _MapR_, which we briefly introduce next.
 
-*Cloudera*, Inc. is a United States-based software company that provides Apache Hadoop and Apache Spark-based software, support and services, and training to business customers. Cloudera's hybrid open-source Apache Hadoop distribution, CDH (Cloudera Distribution Including Apache Hadoop), targets enterprise-class deployments of that technology. Cloudera donates more than 50% of its engineering output to the various Apache-licensed open source projects (Apache Hive, Apache Avro, Apache HBase, and so on) that combine to form the Apache Hadoop platform. Cloudera is also a sponsor of the Apache Software Foundation. [@clusters-cloudera-wikipedia]
+_Cloudera_, Inc., is a US-based software company that provides Apache Hadoop and Apache Spark–based software, support and services, and training to business customers. Cloudera’s hybrid open source Apache Hadoop distribution, Cloudera Distribution Including Apache Hadoop (CDH), targets enterprise-class deployments of that technology. Cloudera donates more than 50% of its engineering output to the various Apache-licensed open source projects (Apache Hive, Apache Avro, Apache HBase, and so on) that combine to form the Apache Hadoop platform. [Cloudera](http://bit.ly/2KJmcfe) is also a sponsor of the Apache Software Foundation.
 
-Cloudera clusters make use of *parcels*, which are binary distributions containing program files and metadata [@clusters-cloudera-parcel], Spark happens to be installed as a parcel in Cloudera. It's beyond the scope of this book to present how to configure Cloudera clusters, resources and documentation can be found under [cloudera.com](https://www.cloudera.com/products/open-source/apache-hadoop/apache-spark.html), and ["Introducing sparklyr, an R Interface for Apache Spark"](https://blog.cloudera.com/blog/2016/09/introducing-sparklyr-an-r-interface-for-apache-spark/) [@clusters-cloudera-engineering-blog] under Cloudera's Engineering Blog.
+Cloudera clusters<!--((("parcels")))--> make use of [_parcels_](http://bit.ly/33LHpxU), which are binary distributions containing program files and metadata. Spark happens to be installed as a parcel in Cloudera. It’s beyond the scope of this book to present how to configure Cloudera clusters, but resources and documentation can be found under [cloudera.com](http://bit.ly/33yUUkp), and ["Introducing sparklyr, an R Interface for Apache Spark"](http://bit.ly/2HbAtjY) on the Cloudera blog.
 
-Cloudera provides the Cloudera Manager web interface to manage resources, services, parcels, diagnostics, etc. Figure \@ref(fig:clusters-cloudera-manager-spark) shows a Spark parcel running in Cloduera Manager which you can later use to connect from R.
+Cloudera provides the Cloudera Manager web interface to manage resources, services, parcels, diagnostics, and more. Figure \@ref(fig:clusters-cloudera-manager-spark) shows a Spark parcel running in Cloudera Manager, which you can later use to connect from R.
 
 ```{r clusters-cloudera-manager-spark, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Cloudera Manager running Spark parcel'}
 render_image("images/clusters-cloudera-manager.png")
 ```
 
-`sparklyr` is certified with Cloudera; [@clusters-cloudera-sparklyr-certification] meaning that, Cloudera's support is aware of `sparklyr` and can be effective helping organizations that are using Spark and R, the following table summarizes the versions currently certified.
+[`sparklyr` is certified with Cloudera](http://bit.ly/2z1yydc), meaning that Cloudera’s support is aware of `sparklyr` and can be effective helping organizations that are using Spark and R. Table \@ref(tab:clusters-cloudera-table) summarizes<!--((("sparklyr package", "versions certified with Cloudera")))--> the versions currently certified.
 
-| Cloudera Version | Product   | Version | Components  | Kerberos |
-|------------------|-----------|---------|-------------|----------|
-| CDH5.9           | sparklyr  | 0.5     | HDFS, Spark | Yes      |
-| CDH5.9           | sparklyr  | 0.6     | HDFS, Spark | Yes      |
-| CDH5.9           | sparklyr  | 0.7     | HDFS, Spark | Yes      |
+<!--[[table0601]]
+[cols=",,,,",options="header",]-->
+```{r clusters-cloudera-table, eval=TRUE, echo=FALSE}
+knitr::kable(
+  data.frame(
+    `Cloudera Version` = rep("CDH5.9", 3),
+    `Product`          = rep("sparklyr", 3),
+    Version            = c(0.5, 0.6, 0.7),
+    Components         = rep("HDFS, Spark", 3),
+    Kerberos           = rep("Yes", 3)
+  ),
+  booktabs = TRUE,
+  caption = 'Versions of sparklyr certified with Cloudera.'
+)
+```
 
-*Hortonworks* is a big data software company based in Santa Clara, California. The company develops, supports, and provides expertise on an expansive set of entirely open source software designed to manage data and processing for everything from IOT, to advanced analytics and machine learning. Hortonworks believes it is a data management company bridging the cloud and the datacenter. [@clusters-hortonworks-wikipedia]
+_Hortonworks_ is a big data software company based in Santa Clara, California. The company develops, supports, and provides expertise on an expansive set of entirely open source software designed to manage data and processing for everything from Internet of Things (IoT) to advanced analytics and machine learning. [Hortonworks](http://bit.ly/2KTufpV) believes that it is a data management company bridging the cloud and the datacenter.
 
-Hortonworks partnered with Microsoft [@clusters-hortonworks-microsoft] to improve support in Microsoft Windows for Hadoop and Spark, this used to be a differentiation point; however, comparing Hortonworks and Cloudera is less relevant today since both companies are merging in 2019. [@clusters-hortonworks-cloudera] While the companies are merging, support for the Cloudera and Hortonworks Spark distributions are still available. Additional resources to configure Spark under Hortonworks are available under [hortonworks.com](https://hortonworks.com/apache/spark/).
+[Hortonworks partnered with Microsoft](http://bit.ly/2NbfuBH) to improve support in Microsoft Windows for Hadoop and Spark, which used to be a differentiation point from Cloudera; however, comparing Hortonworks and Cloudera is less relevant today since the [companies merged in January 2019](http://bit.ly/2Mk1UMt). Despite the merger, support for the Cloudera and Hortonworks Spark distributions are still available. Additional resources to configure Spark under Hortonworks are available at [hortonworks.com](http://bit.ly/2Z8M8Kh).
 
-*MapR* is a business software company headquartered in Santa Clara, California. MapR provides access to a variety of data sources from a single computer cluster, including big data workloads such as Apache Hadoop and Apache Spark, a distributed file system, a multi-model database management system, and event stream processing, combining analytics in real-time with operational applications. Its technology runs on both commodity hardware and public cloud computing services. [@clusters-mapr-wikipedia]
+_MapR_ is<!--((("MapR")))--> a business software company headquartered in Santa Clara, California. [MapR](http://bit.ly/33DU8Cs) provides access to a variety of data sources from a single computer cluster, including big data workloads such as Apache Hadoop and Apache Spark, a distributed file system, a multimodel database management system, and event stream processing, combining analytics in real time with operational applications. Its technology runs on both commodity hardware and public cloud computing services.<!--((("", startref="Conprem06")))((("", startref="OPCCspark06")))((("", startref="spdist06")))((("", startref="cloudera06")))((("", startref="hortonw06")))-->
 
 ## Cloud
 
-If you don't have an on-prem cluster nor spare machines to reuse, starting with a cloud cluster can be quite convenient since it will allow you to access a proper cluster in a matter of minutes. This section will briefly mention some of the major cloud infrastructure providers and give you resources to help you get started if you choose to use a cloud provider.
+If<!--((("cloud computing", "overview of")))((("clusters", "cloud cluster computing", id="Ccloud06")))--> you have neither an on-premises cluster nor spare machines to reuse, starting with a cloud cluster can be quite convenient since it will allow you to access a proper cluster in a matter of minutes. This section briefly mentions some of the major cloud infrastructure providers and gives you resources to help you get started if you choose to use a cloud provider.
 
-In cloud services, the compute instances are billed for as long the Spark cluster runs; you start getting billed when the cluster launches and stops when the cluster stops. This cost needs to be multiplied by the number of instances reserved for your cluster. SO for instance, if a cloud provider charges $1.00USD per compute instance per hour and you start a three node cluster that you use for one hour and 10 minutes; it is likely that you'll get billed `$1.00 * 2 hours * 3 nodes = $6.00`. Some cloud providers charge per minute but, at least, you can rely on all of them charging per compute hour.
+In cloud services, the compute instances are billed for as long the Spark cluster runs; your billing starts when the cluster launches, and it stops when the cluster stops. This cost needs to be multiplied by the number of instances reserved for your cluster. So, for instance, if a cloud provider charges \$1.00 per compute instance per hour, and you start a three-node cluster that you use for one hour and 10 minutes, it is likely that you’ll receive a bill for \$1.00 x 2 hours x 3 nodes = \$6.00. Some cloud providers charge per minute, but at least you can rely on all of them charging per compute hour.
 
-Please be aware that, while computing costs can be quite low for small clusters, accidentally leaving a cluster running can cause significant billing expenses. Therefore, is is worth taking the extra time to check twice that your cluster is terminated when you no longer need it. It's also a good practice to monitor costs daily while using clusters to make sure  your expectations match the daily bill.
+Be aware that, while computing costs can be quite low for small clusters, accidentally leaving a cluster running can cause significant billing expenses. Therefore, it's worth taking the extra time to check twice that your cluster is terminated when you no longer need it. It’s also a good practice to monitor costs daily while using clusters to make sure your expectations match the daily bill.
 
-From past experience, you should also plan to request compute resources in advance while dealing with large-scale projects; various cloud providers will not allow you to start a cluster with hundreds of machines before requesting them explicitly through a support request. While this can be cumbersome, it's also a way to help you control costs in your organization.
+From past experience, you should also plan to request compute resources in advance while dealing with large-scale projects; various cloud providers will not allow you to start a cluster with hundreds of machines before requesting them explicitly through a support request. While this can be cumbersome, it’s also a way to help you control costs in your organization.
 
-Since the cluster size is flexible, it is a good practice to start with small clusters and scale compute resources as needed. Even if you know in advance that a cluster of significant size will be required, starting small provides an opportunity to troubleshoot issues at a lower cost since it's unlikely that your data analysis will run at scale flawlessly on the first try. As a rule of thumb, grow the instances exponentially; if you need to run a computation over an eight node cluster, start with one node and an eighth of the entire dataset, then two nodes with a fourth, then four nodes with a half the dataset and then, finally, eight nodes and the entire dataset. As you become more experienced, you'll develop a good sense of how to troubleshoot issues, the size of the required cluster and you'll be able to skip intermediate steps, but for starters, this is a good practice to follow.
+Since the cluster size is flexible, it is a good practice to start with small clusters and scale compute resources as needed. Even if you know in advance that a cluster of significant size will be required, starting small provides an opportunity to troubleshoot issues at a lower cost since it’s unlikely that your data analysis will run at scale flawlessly on the first try. As a rule of thumb, grow the instances exponentially; if you need to run a computation over an eight-node cluster, start with one node and an eighth of the entire dataset, then two nodes with a fourth, then four nodes with half of the dataset, and then, finally, eight nodes and the entire dataset. As you become more experienced, you’ll develop a good sense of how to troubleshoot issues, and of the size of the required cluster, and you’ll be able to skip intermediate steps, but for starters, this is a good practice to follow.
 
-One can also use a cloud provider to acquire bare computing resources and then, install the on-premise distributions presented in the previous section yourself; for instance, you can run the Cloudera distribution on Amazon Elastic Compute Cloud (EC2). This model would avoid procuring colocated hardware, but still allow you to closely manage and customize your cluster. This book presents an overview of only the fully-managed Spark services available by cloud providers; however, you can usually find with ease instructions online on how to install on-premise distributions in the cloud.
+You can also use a cloud provider to acquire bare computing resources and then install the on-premises distributions presented in the previous section yourself; for instance, you can run the Cloudera distribution on Amazon Elastic Compute Cloud (Amazon EC2). This model would avoid procuring colocated hardware, but it still allows you to closely manage and customize your cluster. This book presents an overview of only the fully managed Spark services available by cloud providers; however, you can usually find with ease instructions online on how to install on-premises distributions in the cloud.
 
-Some of the major providers of cloud computing infrastructure are: Amazon, Databricks, Google, IBM and Microsoft that this section will briefly introduce.
+Some of the major providers of cloud computing infrastructure are Amazon, Databricks, Google, IBM, and Microsoft and Qubole. The subsections that follow briefly introduce each one.
 
 ### Amazon {#clusters-amazon-emr}
 
-Amazon provides cloud services through [Amazon Web Services](https://aws.amazon.com/)(Amazon AWS); more specifically, provides an on-demand Spark cluster through [Amazon Elastic MapReduce](https://aws.amazon.com/emr/) or EMR for short,
+Amazon<!--((("Amazon Web Services (AWS)", id="aws06")))((("Amazon EMR", id="emr06")))((("cloud computing", "Amazon", id="CCamazon06")))--> provides cloud services through [AWS](https://aws.amazon.com/); more specifically, it provides an on-demand Spark cluster through [Amazon EMR](https://aws.amazon.com/emr/).
 
-Detailed instructions on using R with Amazon EMR was published under Amazon's Big Data Blog: ["Running sparklyr on Amazon EMR"](https://aws.amazon.com/blogs/big-data/running-sparklyr-rstudios-r-interface-to-spark-on-amazon-emr/) [@clusters-amazon-emr-sparklyr-blog], this post introduced the launch of `sparklyr` and instructions to configure EMR clusters with `sparklyr`. For instance, it suggests you can use the [Amazon Command Line Interface](https://aws.amazon.com/cli/) to launch a cluster with three nodes as follows:
+Detailed instructions on using R with Amazon EMR were published under Amazon’s Big Data blog in a post called ["Running sparklyr on Amazon EMR"](https://amzn.to/2OYWMQ5). This post introduced the launch of `sparklyr` and instructions to configure Amazon EMR clusters with `sparklyr`. For instance, it suggests you can use the [Amazon Command Line Interface](https://aws.amazon.com/cli/) to launch a cluster with three nodes, as follows:
 
 ```{bash eval=FALSE}
 aws emr create-cluster --applications Name=Hadoop Name=Spark Name=Hive \
@@ -237,63 +250,80 @@ rstudio-sparklyr/rstudio_sparklyr_emr5.sh,Args=["--user-pw", "<password>", \
   "--rstudio", "--arrow"] --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole
 ```
 
-You can then see the cluster launching, and eventually running under the AWS portal, see Figure \@ref(fig:clusters-amazon-emr-launching).
+You can then see the cluster launching and then eventually running under the AWS portal, as illustrated in Figure \@ref(fig:clusters-amazon-emr-launching).
+
+You then can navigate to the Master Public DNS and find RStudio under port 8787—for example, `ec2-12-34-567-890.us-west-1.compute.amazonaws.com:8787`—and then log in with user `hadoop` and password `password`.
 
 ```{r clusters-amazon-emr-launching, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Launching an Amazon EMR Cluster'}
 render_image("images/clusters-amazon-emr-launching.png")
 ```
 
-You can then navigate to the Master Public DNS and find RStudio under port 8787, for instance: `ec2-12-34-567-890.us-west-1.compute.amazonaws.com:8787`, and then login with user `hadoop` and password `<password>`.
+It is also possible to launch the Amazon EMR cluster using the web interface; the same introductory post contains additional details and walkthroughs specifically designed for Amazon EMR.
 
-It is also possible to launch the EMR cluster using the web interface, the same introductory post contains additional details and walkthroughs specifically designed for EMR.
+Remember to turn off your cluster to avoid unnecessary charges and use appropriate security restrictions when starting Amazon EMR clusters for sensitive data analysis.
 
-Please remember to turn off your cluster to avoid unnecessary charges and use appropriate security restrictions when starting EMR clusters for sensitive data analysis.
+Regarding cost, you can find the most up-to-date information at https://amzn.to/2YRGb5r[Amazon EMR Pricing]. Table \@ref(tab:clusters-amazon-pricing) presents some of the instance types available in the `us-west-1` region (as of this writing); this is meant to provide a glimpse of the resources and costs associated with cloud processing. Notice that the "EMR price is in addition to the Amazon EC2 price (the price for the underlying servers)".
 
-Regarding cost, the most up to date information can be found under [aws.amazon.com/emr/pricing](https://aws.amazon.com/emr/pricing/). As of this writing, these are some of the instance types available in the `us-west-1` region, it is meant to provide a glimpse of the resources and costs associated with cloud processing. Notice that the "EMR price is in addition to the Amazon EC2 price (the price for the underlying servers)".
+```{r clusters-amazon-pricing, eval=TRUE, echo=FALSE}
+knitr::kable(
+  data.frame(
+    Instance   = c(    "c1.medium",    "m3.2xlarge",    "i2.8xlarge"),
+    CPUs       = c(              2,               8,              32),
+    Memory     = c(        "1.7GB",          "30GB",         "244GB"),
+    Storage    = c(        "350GB",         "160GB",        "6400GB"),
+    `EC2 Cost` = c("$0.148 USD/hr", "$0.616 USD/hr", "$7.502 USD/hr"),
+    `EMR Cost` = c("$0.030 USD/hr", "$0.140 USD/hr", "$0.270 USD/hr")
+  ),
+  booktabs = TRUE,
+  caption = "Amazon EMR pricing information"
+)
+```
 
-| Instance   | CPUs | Memory | Storage | EC2 Cost      | EMR Cost      |
-|------------|------|--------|---------|---------------|---------------|
-| c1.medium  | 2    | 1.7GB  | 350GB   | $0.148 USD/hr | $0.030 USD/hr |
-| m3.2xlarge | 8    | 30GB   | 160GB   | $0.616 USD/hr | $0.140 USD/hr |
-| i2.8xlarge | 32   | 244GB  | 6400GB  | $7.502 USD/hr | $0.270 USD/hr |
-
-**Note:** We are only presenting a subset of the available compute instances for Amazon and subsequent cloud providers during 2019; however, please note that hardware (CPU speed, hard drive speed, etc.) varies between vendors and locations; therefore, you can't use these hardware tables as an accurate price comparison, an accurate comparison would require running your particular workloads and considering other aspects beyond compute instance cost. 
+**Note:** We are presenting only a subset of the available compute instances for Amazon and subsequent cloud providers as of 2019; however, note that hardware (CPU speed, hard drive speed, etc.) varies between vendors and locations; therefore, you can’t use these hardware tables as an accurate price comparison. Accurate comparison would require running your particular workloads and considering other aspects beyond compute instance cost.<!--((("", startref="CCamazon06")))((("", startref="emr06")))((("", startref="aws06")))-->
 
 ### Databricks
 
-[Databricks](http://databricks.com) is a company founded by the creators of Apache Spark, that aims to help clients with cloud-based big data processing using Spark. Databricks grew out of the [AMPLab](https://amplab.cs.berkeley.edu/) project at the University of California, Berkeley. [@clusters-databricks-wikipedia]
+[Databricks](https://databricks.com) is<!--((("Databricks")))((("AMPLab project")))((("cloud computing", "Databricks")))--> a company founded by the creators of Apache Spark, whose aim is to help clients with cloud-based big data processing using Spark. Databricks grew out of the [AMPLab](https://oreil.ly/W2Eoe) project at the University of California, Berkeley.
 
-Databricks provides enterprise-level cluster computing plans, while also providing a free/community tier to explore functionality and get familiar with their environment. 
+Databricks provides enterprise-level cluster computing plans as well as a free/community tier to explore functionality and become familiar with their environment.
 
-Once a cluster is launched, R and `sparklyr` can be used from Databricks notebooks following the steps from the Getting Started chapter or, by installing [RStudio on Databricks](https://docs.databricks.com/spark/latest/sparkr/rstudio.html). [@clusters-databricks-rstudio] Figure \@ref(fig:clusters-databricks-notebook) shows a Databricks notebook using Spark through `sparkylr`.
+After<!--((("RStudio", "Databricks and")))--> a cluster is launched, you can use R and `sparklyr` from Databricks notebooks following the steps provided in [Chapter 2](#starting) or by installing [RStudio on Databricks](http://bit.ly/2KCDax6). Figure \@ref(fig:clusters-databricks-notebook) shows a Databricks notebook using Spark through `sparkylyr`.
 
 ```{r clusters-databricks-notebook, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Databricks community notebook running sparklyr'}
 render_image("images/clusters-databricks-sparklyr.png")
 ```
 
-Additional resources are available under the Databricks Engineering Blog post: ["Using sparklyr in Databricks"]( https://databricks.com/blog/2017/05/25/using-sparklyr-databricks.html) [@clusters-databricks-blog-sparklyr] and the ["Databricks Documentation for sparklyr"](https://docs.databricks.com/spark/latest/sparkr/sparklyr.html). [@clusters-databricks-documentation-sparklyr]
+Additional resources are available under the Databricks Engineering Blog post ["Using sparklyr in Databricks"](http://bit.ly/2N59jyR) and the [Databricks documentation for `sparklyr`](http://bit.ly/2MkOYWC).
 
-The latest pricing information can be found under [databricks.com/product/pricing](https://databricks.com/product/pricing), as of this writing, available plans 
+You can find the latest pricing 
+information at [_databricks.com/product/pricing_](http://bit.ly/305Rnrt). Table \@ref(tab:clusters-databricks-pricing) lists the available plans as of this writing.
 
-| Plan           | Basic         | Data Engineering | Data Analytics |
-|----------------|---------------|------------------|----------------|
-| AWS Standard   | $0.07 USD/DBU | $0.20 USD/DBU    | $0.40 USD/DBU  |
-| Azure Standard |               | $0.20 USD/DBU    | $0.40 USD/DBU  |
-| Azure Premium  |               | $0.35 USD/DBU    | $0.55 USD/DBU  |
+```{r clusters-databricks-pricing, eval=TRUE, echo=FALSE}
+knitr::kable(
+  data.frame(
+    Plan               = c( "AWS Standard", "Azure Standard", "Azure Premium"),
+    Basic              = c("$0.07 USD/DBU",               "",              ""),
+    `Data Engineering` = c("$0.20 USD/DBU",  "$0.20 USD/DBU", "$0.35 USD/DBU"),
+    `Data Analytics`   = c("$0.40 USD/DBU",  "$0.40 USD/DBU", "$0.55 USD/DBU")
+  ),
+  booktabs = TRUE,
+  caption = "Databricks procong information."
+)
+```
 
-Notice that pricing is based on cost of DBU/hr. From Databricks, "A Databricks Unit (DBU) is a unit of Apache Spark processing capability per hour. For a varied set of instances, DBUs are a more transparent way to view usage instead of the node-hour". [@clusters-databricks-dbu]
+Notice<!--((("DBU per hour")))--> that pricing is based on cost of DBU per hour. From Databricks, "a [Databricks Unit](https://oreil.ly/3muQq) (DBU) is a unit of Apache Spark processing capability per hour. For a varied set of instances, DBUs are a more transparent way to view usage instead of the node-hour".
 
 ### Google
 
-Google provides Google Cloud Dataproc as a cloud-based managed Spark and Hadoop service offered on Google Cloud Platform. Dataproc utilizes many Google Cloud Platform technologies such as Google Compute Engine and Google Cloud Storage to offer fully managed clusters running popular data processing frameworks such as Apache Hadoop and Apache Spark. [@clusters-dataproc-wikipedia]
+Google<!--((("cloud computing", "Google")))((("Google Cloud Platform (GCP)")))--> provides Google Cloud Dataproc as a cloud-based managed Spark and Hadoop service offered on Google Cloud Platform (GCP). Dataproc utilizes many GCP technologies, such as Google Compute Engine and Google Cloud Storage, to offer fully managed clusters running popular data processing frameworks such as Apache Hadoop and Apache Spark.
 
-A cluster can be easily created from the Google Cloud console or the Google Cloud command line interface as illustrated in Figure \@ref(fig:clusters-google-dataproc-launch).
+You can easily create a cluster from the Google Cloud console or the Google Cloud command-line interface (CLI) as illustrated in Figure \@ref(fig:clusters-google-dataproc-launch).
 
 ```{r clusters-google-dataproc-launch, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Launching a Dataproc cluster'}
 render_image("images/clusters-dataproc-launching.png")
 ```
 
-Once created, ports can be forwarded to allow you to access this cluster from your machine; for instance, by launching Chrome to make use of this proxy and securely connect to the Dataproc cluster. Configuring this connection looks as follows:
+After you've created your cluster, ports can be forwarded to allow you to access this cluster from your machine—for instance, by launching Chrome to make use of this proxy and securely connect to the Dataproc cluster. Configuring this connection looks as follows:
 
 ```{bash eval=FALSE}
 gcloud compute ssh sparklyr-m --project=<project> --zone=<region> -- -D 1080 \
@@ -301,103 +331,133 @@ gcloud compute ssh sparklyr-m --project=<project> --zone=<region> -- -D 1080 \
   --user-data-dir="/tmp/sparklyr-m" http://sparklyr-m:8088
 ```
 
-There are various tutorials available under [cloud.google.com/dataproc/docs/tutorials](https://cloud.google.com/dataproc/docs/tutorials), including, a comprehensive tutorial to configure RStudio and `sparklyr`. [@clusters-dataproc-rstudio]
+There are various [tutorials available](http://bit.ly/2OYyo18) (cloud.google.com/dataproc/docs/tutorials), including a comprehensive [tutorial to configure RStudio and `sparklyr`](http://bit.ly/2MhSgKg). 
 
-The latest pricing information can be found under [cloud.google.com/dataproc/pricing](https://cloud.google.com/dataproc/pricing). Notice that the cost is split between Compute Engine and a Dataproc Premium.
+You can find the latest pricing information at [_cloud.google.com/dataproc/pricing_](http://bit.ly/31J0uyC). In Table \@ref(tab:clusters-google-pricing) notice that the cost is split between compute engine and a dataproc premium.
 
-| Instance       | CPUs | Memory | Compute Engine | Dataproc Premium |
-|----------------|------|--------|----------------|------------------|
-| n1-standard-1  | 1    | 3.75GB | $0.0475 USD/hr | $0.010 USD/hr    |
-| n1-standard-8  | 8    | 30GB   | $0.3800 USD/hr | $0.080 USD/hr    |
-| n1-standard-64 | 64   | 244GB  | $3.0400 USD/hr | $0.640 USD/hr    |
+```{r clusters-google-pricing, eval=TRUE, echo=FALSE}
+knitr::kable(
+  data.frame(
+    Instance           = c( "n1-standard-1",  "n1-standard-8", "n1-standard-64"),
+    CPUs               = c(               1,                8,               64),
+    Memory             = c(        "3.75GB",           "30GB",          "244GB"),
+    `Compute Engine`   = c("$0.0475 USD/hr", "$0.3800 USD/hr", "$3.0400 USD/hr"),
+    `Dataproc Premium` = c( "$0.010 USD/hr",  "$0.080 USD/hr",  "$0.640 USD/hr")
+  ),
+  booktabs = TRUE,
+  caption = "Databricks procong information."
+)
+```
 
 ### IBM
 
-IBM cloud computing is a set of cloud computing services for business offered by the information technology company IBM. IBM cloud includes infrastructure as a service (IaaS), software as a service (SaaS) and platform as a service (PaaS) offered through public, private and hybrid cloud delivery models, in addition to the components that make up those clouds. [@clusters-ibm-wikipedia]
+IBM cloud<!--((("cloud computing", "IBM")))((("IBM Cloud")))--> computing is a set of cloud computing services for business. IBM cloud includes Infrastructure as a Service (IaaS), Software as a Service (SaaS), and Platform as a Service (PaaS) offered through public, private, and hybrid cloud delivery models, in addition to the components that make up those clouds.
 
-From within IBM Cloud, open Watson Studio and create a Data Science project, add a Spark cluster under the project settings and launch RStudio from the Launch IDE menu. Please note that, as of this writing, the provided version of `sparklyr` was not the latest version available in CRAN, since `sparklyr` was modified to run under the IBM Cloud. In any case, please follow IBMs documentation as an authoritative reference to run R and Spark on the IBM Cloud and particularly, on how to upgrade `sparklyr` appropriately. Figure \@ref(fig:clusters-ibm-portal) captures IBM's Cloud portal launching a Spark cluster.
+From within IBM Cloud, open Watson Studio and create a Data Science project, add a Spark cluster under the project settings, and then, on the Launch IDE menu, start RStudio. Please note that, as of this writing, the provided version of `sparklyr` was not the latest version available in CRAN, since `sparklyr` was modified to run under the IBM Cloud. In any case, follow IBM's documentation as an authoritative reference to run R and Spark on the IBM Cloud and particularly on how to upgrade `sparklyr` appropriately. Figure \@ref(fig:clusters-ibm-portal) captures IBM’s Cloud portal launching a Spark cluster.
 
 ```{r clusters-ibm-portal, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='IBM Watson Studio launching Spark with R support'}
 render_image("images/clusters-ibm-sparklyr.png")
 ```
 
-The most up to date pricing information is available under [ibm.com/cloud/pricing](https://www.ibm.com/cloud/pricing). In the following table, compute cost was normalized using 31 days from the per-month costs.
+The most up-to-date pricing information is available at [_ibm.com/cloud/pricing_](https://www.ibm.com/cloud/pricing). In Table \@ref(tab:clusters-ibm-pricing), compute cost was normalized using 31 days from the per-month costs.
 
-| Instance          | CPUs | Memory | Storage | Cost          |
-|-------------------|------|--------|---------|---------------|
-| C1.1x1x25         | 1    | 1GB    | 25GB    | $0.033 USD/hr |
-| C1.4x4x25         | 4    | 4GB    | 25GB    | $0.133 USD/hr |
-| C1.32x32x25       | 32   | 25GB   | 25GB    | $0.962 USD/hr |
+```{r clusters-ibm-pricing, eval=TRUE, echo=FALSE}
+knitr::kable(
+  data.frame(
+    Instance = c(    "C1.1x1x25",     "C1.4x4x25",   "C1.32x32x25"),
+    CPUs =     c(              1,               4,              32),
+    Memory =   c(          "1GB",           "4GB",          "25GB"),
+    Storage =  c(         "25GB",          "25GB",          "25GB"),
+    Cost =     c("$0.033 USD/hr", "$0.133 USD/hr", "$0.962 USD/hr")
+  ),
+  booktabs = TRUE,
+  caption = "IBM Cloud pricing information"
+)
+```
 
 ### Microsoft
 
-Microsoft Azure is a cloud computing service created by Microsoft for building, testing, deploying, and managing applications and services through a global network of Microsoft-managed data centers. It provides software as a service (SaaS), platform as a service (PaaS) and infrastructure as a service (IaaS) and supports many different programming languages, tools and frameworks, including both Microsoft-specific and third-party software and systems. [@clusters-azure-wikipedia]
+Microsoft Azure<!--((("Microsoft Azure")))((("Azure")))((("cloud computing", "Microsoft")))--> is a cloud computing service created by Microsoft for building, testing, deploying, and managing applications and services through a global network of Microsoft-managed datacenters. It provides SaaS, PaaS, and IaaS and supports many different programming languages, tools, and frameworks, including both Microsoft-specific and third-party software and systems.
 
-From the Azure portal, the Azure HDInsight service provides support for on-demand Spark clusters. An HDInsight cluster with support for Spark and RStudio can be easily created by selecting the ML Services cluster type. Please note that the provided version of `sparklyr` might not be the latest version available in CRAN since the default package repo seems to be initialized using an MRAN (Microsoft R Application Network) snapshot, not directly from CRAN. Figure \@ref(fig:clusters-azure-hdinsight-mlservices) shows the Azure portal launching a Spark cluster with support for R.
+From the Azure portal, the Azure<!--((("Microsoft HDInsight")))((("HDInsight")))--> HDInsight service provides support for on-demand Spark clusters. You can easily create HDInsight cluster with support for Spark and RStudio by selecting the ML Services cluster type. Note that the provided version of `sparklyr` might not be the latest version available in CRAN since the default package repository seems to be initialized using a Microsoft R Application Network (MRAN) snapshot, not directly from CRAN. Figure \@ref(fig:clusters-azure-hdinsight-mlservices) shows the Azure portal launching a Spark cluster with support for R.
 
 ```{r clusters-azure-hdinsight-mlservices, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Creating an Azure HDInsight Spark Cluster'}
 render_image("images/clusters-azure-mlservices.png")
 ```
 
-Up to date pricing for HDInsight is available under [azure.microsoft.com/en-us/pricing/details/hdinsight](https://azure.microsoft.com/en-us/pricing/details/hdinsight/).
+Up-to-date pricing for HDInsight is available at [_azure.microsoft.com/en-us/pricing/details/hdinsight_](http://bit.ly/2H9Ce0X); Table \@ref(tab:clusters-azure-pricing) lists the pricing as of this writing.
 
-| Instance       | CPUs | Memory | Total Cost   |
-|----------------|------|--------|--------------|
-| D1 v2          | 1    | 3.5 GB | $0.074/hour  |
-| D4 v2          | 8    | 28 GB  | $0.59/hour   |
-| G5             | 64   | 448 GB | $9.298/hour  |
+```{r clusters-azure-pricing, eval=TRUE, echo=FALSE}
+knitr::kable(
+  data.frame(
+    Instance     = c(      "D1 v2",      "D4 v2",          "G5"),
+    CPUs         = c(            1,            8,            64),
+    Memory       = c(     "3.5 GB",      "28 GB",      "448 GB"),
+    `Total Cost` = c("$0.074/hour", "$0.59/hour", "$9.298/hour")
+  ),
+  booktabs = TRUE,
+  caption = "Azure HDInsight pricing information"
+)
+```
 
 ### Qubole
 
-[Qubole](https://www.qubole.com) is a company founded in 2013 with a mission to close the data accessibility gap. Qubole delivers a Self-Service Platform for Big Data Analytics built on Amazon, Microsoft, Google and Oracle Clouds. In Qubole, you can launch Spark clusters which you can then use from [Qubole notebooks](https://docs.qubole.com/en/latest/user-guide/notebooks-and-dashboards/notebooks/notebook.html) or RStudio Server. Figure \@ref(fig:clusters-qubole-notebook) shows a Qubole notebook using Spark through `sparkylr`.
+[Qubole](https://www.qubole.com) was<!--((("cloud computing", "Qubole")))((("Qubole")))--> founded in 2013 with a mission to close the data accessibility gap. Qubole delivers a self-service platform for big data analytics built on Amazon, Microsoft, Google, and Oracle Clouds. In Qubole, you can launch Spark clusters, which you can then use from [Qubole notebooks](http://bit.ly/33ChKYk) or RStudio Server. Figure \@ref(fig:clusters-qubole-notebook) shows a Qubole cluster initialized with RStudio and `sparklyr`.
 
 ```{r clusters-qubole-notebook, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='A Qubole cluster initialized with RStudio and sparklyr'}
 render_image("images/clusters-qubole-sparklyr.png")
 ```
 
-The latest pricing information can be found under [qubole.com/qubole-pricing/](https://www.qubole.com/qubole-pricing/), as of this writing the following plans are described in their pricing page:
+You can find the latest pricing information at http://bit.ly/33AuKh8[Qubole's pricing page]. Table \@ref(tab:clusters-qubole-pricing) lists the price for Qubole's current plan, as of this writing. Notice that pricing is based on cost of QCU/hr, which stands for “Qubole Compute Unit per hour,” and the Enterprise Edition requires an annual contract.<!--((("", startref="Ccloud06")))-->
 
-|   Test Drive  | Full-Featured Trial | Enterprise Edition |
-|---------------|---------------------|--------------------|
-|        $0 USD |              $0 USD |     $0.14 USD/QCU  |
-
-Notice that pricing is based on cost of QCU/hr which stands for "Qubole Compute Unit per hour" and the "Enterprise Edition" requires an annual contract as of this writing.
+```{r clusters-qubole-pricing, eval=TRUE, echo=FALSE}
+knitr::kable(
+  data.frame(
+    `Test Drive`          = "$0 USD",
+    `Full-Featured Trial` = "$0 USD",
+    `Enterprise Edition`  = "$0.14 USD/QCU"
+  ),
+  booktabs = TRUE,
+  caption = "Qubole pricing information"
+)
+```
 
 ## Kubernetes
 
-Kubernetes is an open-source container-orchestration system for automating deployment, scaling and management of containerized applications that was originally designed by Google and now maintained by the [Cloud Native Computing Foundation](https://www.cncf.io/). Kubernetes was originally based on [Docker](https://www.docker.com/) while, like Mesos, it's also based on Linux Cgroups.
+Kubernetes<!--((("Kubernetes")))((("clusters", "Kubernetes cluster computing")))--> is an open source container orchestration system for automating deployment, scaling, and management of containerized applications that was originally designed by Google<!--((("Cloud Native Computing Foundation (CNCF)")))--> and is now maintained by the [Cloud Native Computing Foundation](https://www.cncf.io/) (CNCF). Kubernetes<!--((("Docker")))--> was originally based on [Docker](https://www.docker.com/), while, like Mesos, it’s also based on<!--((("Linux Cgroups")))((("Cgroups")))--> Linux Cgroups.
 
-Kubernetes can execute many cluster applications and frameworks that can be highly customized by using container images with specific resources and libraries. This allows a single Kubernetes cluster to be used for many different purposes beyond data analysis, which in turn helps organizations manage their compute resources with ease. One trade off from using custom images is that they add additional configuration overhead but make kubernetes clusters extremely flexible. Nevertheless, this flexibility has proven to be instrumental to administrate with ease cluster resources in many organizations and, as shown in the [overview](#clusters-overview) section, it's becoming a very popular cluster framework.
+Kubernetes can execute many cluster applications and frameworks that you can highly customize by using container images with specific resources and libraries. This allows a single Kubernetes cluster to be used for many different purposes beyond data analysis, which in turn helps organizations manage their compute resources with ease. One trade-off from using custom images is that they add further configuration overhead but make Kubernetes clusters extremely flexible. Nevertheless, this flexibility has proven to be instrumental to easily administer cluster resources in many organizations and, as pointed out in [Overview](#clusters-overview), Kubernetes is becoming a very popular cluster framework.
 
-Kubernetes is supported across all major cloud providers. They all provide extensive documentation as to how to launch, manage and tear down Kubernetes clusters; Figure \@ref(fig:clusters-kubernetes-google-console) shows Google Gloud's console while creating a Kubernetes cluster. Spark can be deployed over any Kubernetes cluster and R used to connect, analyze, model and so on.
+Kubernetes is supported across all major cloud providers. They all provide extensive documentation as to how to launch, manage, and tear down Kubernetes clusters; Figure \@ref(fig:clusters-kubernetes-google-console) shows the GCP console while creating a Kubernetes cluster. You can deploy Spark over any Kubernetes cluster, and you can use R to connect, analyze, model, and more.
 
 ```{r clusters-kubernetes-google-console, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Creating a Kubernetes cluster for Spark and R using Google Cloud'}
 render_image("images/clusters-kubernetes-google-console.png", "Creating a Kubernetes cluster for Spark and R using Google Cloud")
 ```
 
-You can learn more about [kubernetes.io](https://kubernetes.io/), and the "Running Spark on Kubernetes" guide from [spark.apache.org](https://spark.apache.org/docs/latest/running-on-kubernetes.html).
+You can learn more at [kubernetes.io](https://kubernetes.io/), and read the _Running Spark on Kubernetes_ guide from [spark.apache.org](http://bit.ly/2KAZze7).
 
-Strictly speaking, Kubernetes is a cluster technology not a specific cluster architecture. However, Kubernetes represents a larger trend often referred to as a hybrid cloud. A hybrid cloud is a computing environment that makes use of on-premises and public cloud services with orchestration between the various platforms. It's still too early to precisely categorize the leading technologies that will form a hybrid approach to cluster computing; while Kubernetes is the leading one, many more are likely to form to complement or even replace existing technologies.
+Strictly speaking, Kubernetes is a cluster technology, not a specific cluster architecture. However, Kubernetes represents a larger trend<!--((("hybrid cloud")))--> often referred to as a _hybrid cloud_. A hybrid cloud is a computing environment that makes use of on-premises and public cloud services with orchestration between the various platforms. It’s still too early to precisely categorize the leading technologies that will form a hybrid approach to cluster computing; although, as previously mentioned,  Kubernetes is the leading one, many more are likely to form to complement or even replace existing technologies.
+
 
 ## Tools
 
-While using only R and Spark can be sufficient for some clusters, it is common to install complementary tools in your cluster to improve: monitoring, sql analysis, workflow coordination, etc. with applications like [Ganglia](http://ganglia.info/), [Hue](http://gethue.com/) and [Oozie](https://oozie.apache.org) respectively. This section is not meant to cover all, but rather mention the ones that are commonly used.
+While<!--((("clusters", "complementary tools used for", id="Ctools06")))--> using only R and Spark can be sufficient for some clusters, it is common to install complementary tools in your cluster to improve monitoring, SQL analysis, workflow coordination, and more, with applications<!--((("Ganglia")))((("Hue")))((("Oozie")))--> like [Ganglia](http://ganglia.info/), [Hue](http://gethue.com/), and [Oozie](https://oozie.apache.org), respectively. This section is not meant to cover all tools; rather, it mentions the ones that are commonly used.
 
 ### RStudio
 
-From reading the Introduction chapter, you are aware that RStudio is a well known, free, desktop development environment for R; therefore, it is likely that you are following the examples in this book using RStudio Desktop; however, you might not be aware that RStudio can also be run as a web service inside a Spark cluster, this version of RStudio is known as RStudio Server. You can see RStudio Server running in Figure \@ref(fig:clusters-rstudio-server). In the same way that the Spark UI runs in the cluster, RStudio Server can be installed inside the cluster, then you can connect to RStudio Server and use RStudio in exactly the same way you use RStudio Desktop but with the ability to run code against the Spark cluster. As you can see on the following image, RStudio Server is running on a web browser inside a Spark cluster; it looks and feels just like RStudio Desktop, but adds support to run commands efficiently by being located within the cluster.
+From<!--((("RStudio Server")))--> reading [Chapter 1](#intro), you are aware that RStudio is a well-known and free desktop development environment for R; therefore, it is likely that you are following the examples in this book using RStudio Desktop. However, you might not be aware that you can run RStudio as a web service within a Spark cluster. This version of RStudio is known as _RStudio Server_. You can see RStudio Server running in Figure \@ref(fig:clusters-rstudio-server). In the same way that the Spark UI runs in the cluster, you can install RStudio Server within the cluster. Then you can connect to RStudio Server and use RStudio in exactly the same way you use RStudio Desktop but with the ability to run code against the Spark cluster. As you can see in Figure \@ref(fig:clusters-rstudio-server), RStudio Server looks and feels just like RStudio Desktop, but adds support to run commands efficiently by being located within the cluster.
 
 ```{r clusters-rstudio-server, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='RStudio Server Pro running inside Apache Spark'}
 render_image("images/clusters-rstudio-server.png", "RStudio Server")
 ```
 
-For those familiar with R, Shiny is a very popular tool for building interactive web applications from R; which it is also recommended you install directly in your Spark cluster.
+If you're familiar with R, Shiny Server<!--((("Shiny Server")))--> is a very popular tool for building interactive web applications from R. We recommended that you install Shiny directly in your Spark cluster.
 
-RStudio Server and Shiny Server are a free and open source; however, RStudio also provides professional products, like: RStudio Server, [RStudio Server Pro](https://www.rstudio.com/products/rstudio-server-pro/) [@clusters-rstudio-server-pro], [Shiny Server Pro](https://www.rstudio.com/products/shiny-server-pro/) [@clusters-shiny-server-pro] and [RStudio Connect](https://www.rstudio.com/products/connect/) [@clusters-rstudio-connect] which can be installed within the cluster to support additional R workflows, while `sparklyr` does not require any additional tools, they provide significant productivity gains worth considering. You can learn more about them at [rstudio.com/products/](https://www.rstudio.com/products/).
+RStudio Server and Shiny Server are a free and open source; however, RStudio also provides professional products like RStudio Server, [RStudio Server Pro](http://bit.ly/2KCaxQn), [Shiny Server Pro](http://bit.ly/30aV0fK), and [RStudio Connect](http://bit.ly/306fHcY), which you can install within the cluster to support additional R workflows. While `sparklyr` does not require any additional tools, they provide significant productivity gains worth considering. You can learn more about them at [_rstudio.com/products/_](http://bit.ly/2MihHLP).
 
 ### Jupyter
 
-Project [Jupyter](http://jupyter.org/) exists to develop open-source software, open-standards, and services for interactive computing across dozens of programming languages. A Jupyter notebook, provide support for various programming languages, including R. `sparklyr` can be used with Jupyter notebooks using the R Kernel. Figure \@ref(fig:clusters-jupyter-sparklyr) shows `sparklyr` running inside a local Jupyter notebook.
+Project<!--((("Jupyter")))--> [Jupyter](http://jupyter.org/) exists to develop open source software, open standards, and services for interactive computing across dozens of programming languages. A Jupyter notebook provides support for various programming languages, including R. You can use `sparklyr` with Jupyter notebooks using the R Kernel. Figure \@ref(fig:clusters-jupyter-sparklyr) shows `sparklyr` running within a local Jupyter notebook.
 
 ```{r clusters-jupyter-sparklyr, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Jupyter notebook running sparklyr'}
 render_image("images/clusters-jupyter.png", "Jupyter notebook running sparklyr")
@@ -405,9 +465,9 @@ render_image("images/clusters-jupyter.png", "Jupyter notebook running sparklyr")
 
 ### Livy {#clusters-livy}
 
-[Apache Livy](https://livy.incubator.apache.org/) is an incubation project in Apache providing support to use Spark clusters remotely through a web interface. It is ideal to connect directly into the Spark cluster; however, there are times where connecting directly to the cluster is not feasible. When facing those constraints, one can consider installing Livy in their cluster and secure it properly to enable remote use over web protocols. However, there is a significant performance overhead from using Livy in `sparklyr`.
+[Apache Livy](http://bit.ly/2L2TZAn) is<!--((("Apache Livy")))((("Livy")))--> an incubation project in Apache providing support to use Spark clusters remotely through a web interface. It is ideal to connect directly into the Spark cluster; however, there are times where connecting directly to the cluster is not feasible. When facing those constraints, you can consider installing Livy in the cluster and secure it properly to enable remote use over web protocols. Be aware, though, that there is a significant performance overhead from using Livy in `sparklyr`.
 
-To help test Livy locally, `sparklyr` provides support to list, install, start and stop a local Livy instance by executing `livy_available_versions()`:
+To help test Livy locally, `sparklyr` provides support to list, install, start, and stop a local Livy instance by executing `livy_available_versions()`:
 
 ```{r clusters-livy-header, echo=FALSE, eval=TRUE}
 library(sparklyr)
@@ -416,7 +476,7 @@ library(sparklyr)
 livy_available_versions()
 ```
 
-Which lists the versions that you can install, we recommend installing the latest version and verifying the installed version as follows
+This lists the versions that you can install; we recommend installing the latest version and verifying it as follows:
 
 ```{r clusters-livy-install}
 # Install default Livy version
@@ -429,13 +489,13 @@ livy_installed_versions()
 livy_service_start()
 ```
 
-You can then navigate to this local Livy session under http://localhost:8998, the Connections chapter will detail how to connect through Livy; once connected, you can navigate to the Livy web application as captured by Figure \@ref(fig:clusters-livy-local).
+You then can navigate to the local Livy session at http://localhost:8998. [Chapter 7](#connections) will detail how to connect through Livy. After you're connected, you can navigate to the Livy web application, as shown in Figure \@ref(fig:clusters-livy-local).
 
 ```{r clusters-livy-local, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Apache Livy running as a local service'}
 render_image("images/clusters-livy-local.png", "Apache Livy running as a local service")
 ```
 
-Make sure you also stop the Livy service when working with local Livy instances, for proper Livy services running in a cluster, you won't have to.
+Make<!--((("", startref="Ctools06")))--> sure you also stop the Livy service when working with local Livy instances (for proper Livy services running in a cluster, you won’t have to):
 
 ```{r clusters-livy-stop}
 # Stops the Livy service
@@ -444,8 +504,8 @@ livy_service_stop()
 
 ## Recap
 
-This chapter explained the history and tradeoffs of on-premise, cloud computing and presented Kubernetes as a promising framework to provide flexibility across on-premise and cloud providers. It also introduced cluster managers (Spark Standalone, YARN, Mesos and Kubernetes) as the software needed to run Spark as a cluster application. This chapter briefly mentioned on-premise cluster providers like Cloudera, Hortonworks and MapR as well as the major cloud providers: Amazon, Google and Microsoft.
+This chapter explained the history and trade-offs of on-premises and cloud computing and presented Kubernetes as a promising framework to provide flexibility across on-premises or multiple cloud providers. It also introduced cluster managers (Spark Standalone, YARN, Mesos, and Kubernetes) as the software needed to run Spark as a cluster application. This chapter briefly mentioned on-premises cluster providers like Cloudera, Hortonworks, and MapR, as well as the major Spark cloud providers: Amazon, Databricks, IBM, Google, Microsoft, and Qubole.
 
-While this chapter provided a solid foundation to understand current cluster computing trends,  tools and providers useful to perform data science at scale; it did not provide a comprehensive framework to decide which cluster technologies to choose. Instead, use this chapter as an overview and a starting point to reach out to additional resources to help you find the cluster stack that best fits your organization needs.
+While this chapter provided a solid foundation to understand current cluster computing trends, tools, and service providers useful to perform data science at scale, it did not provide a comprehensive framework to help you decide which cluster technologies to choose. Instead, use this chapter as an overview and a starting point to seek out additional resources to help you find the cluster stack that best fits your organization needs.
 
-The next chapter, [connections](#connections), will focus on understanding how to connect to existing clusters; therefore, it assumes a Spark cluster like the ones presented in this chapter, is already available to you.
+[Chapter 7](#connections) will focus on understanding how to connect to existing clusters; therefore, it assumes a Spark cluster like those we presented in this chapter is already available to you.
