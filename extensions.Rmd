@@ -7,45 +7,45 @@ library(ggplot2)
 
 # Extensions {#extensions}
 
-> "I try to know as many people as I can. You never know which one you’ll need."
+> I try to know as many people as I can. You never know which one you’ll need.
 >
 > --- Tyrion Lannister
 
-In the previous chapter, [Tuning](tuning), you learned how Spark processes data at large-scale by allowing users to configure the cluster resources, partition data implicitly or explicitly, execute commands across distributed compute nodes, shuffle data across them when needed, cache data to improve performance and serialize data efficiently over the network. You also learned how to configure the different Spark settings used while connecting, submitting a job, running and application and particular settings applicable only to R and R extensions that we will present in this chapter.
+In [Chapter 9](#tuning), you learned how Spark processes data at large scale by allowing users to configure the cluster resources, partition data implicitly or explicitly, execute commands across distributed compute nodes, shuffle data across them when needed, cache data to improve performance, and serialize data efficiently over the network. You also learned how to configure the different Spark settings used while connecting, submitting a job, and running an application, as well as particular settings applicable only to R and R extensions that we present in this chapter.
 
-The [Analysis](#analysis), [Modeling](#modeling) and Data chapters provided a foundation to read and understand most datasets. However, the functionality that was presented was scoped to Spark's built-in features and tabular datasets. This chapter will go beyond tabular data and explore how to analyze and model networks of interconnected objects through graph processing, analyze genomics datasets, prepare data for deep learning, analyze geographic datasets and use advanced modeling libraries like H2O and XGBoost over large-scale datasets.
+Chapters [3](#analysis)-[4](#modeling), and [8](#data) provided a foundation to read and understand most datasets. However, the functionality that was presented was scoped to Spark’s built-in features and tabular datasets. This chapter goes beyond tabular data and explores how to analyze and model networks of interconnected objects through graph processing, analyze genomics datasets, prepare data for deep learning, analyze geographic datasets, and use advanced modeling libraries like H2O and XGBoost over large-scale datasets.
 
-The combination of all the content presented in all the previous chapters should take care of most of your large-scale computing needs. However, for those few use cases where functionality is still lacking, the following chapters will provide tools to extend Spark yourself; either, through custom R transformation, custom Scala code or through recent new execution mode in Spark that enable analyzing real-time datasets. Although, before reinventing the wheel, we will present some of the extensions available in Spark.
+The combination of all the content presented in the previous chapters should take care of most of your large-scale computing needs. However, for those few use cases for which functionality is still lacking, the following chapters provide tools to extend Spark yourself—through custom R transformation, custom Scala code, or a recent new execution mode in Spark that enables analyzing real-time datasets. However, before reinventing the wheel, let's examine some of the extensions available in Spark.
 
 ## Overview
 
-In the Introduction chapter we presented the R community as a vibrant group of individuals collaborating with each other in many ways, one of them, by moving open science forward by creating R packages that can be installed from CRAN. In a similar way, but in a much smaller scale, the R community has contributed extensions that increase the functionality initially supported in Spark and R. Spark itself also provides support for creating Spark extensions and, in-fact, many R extensions make use of Spark extensions.
+In [Chapter 1](#intro), we<!--((("extensions", "overview of", id="Eover10")))--> presented the R community as a vibrant group of individuals collaborating with each other in many ways—for example, moving open science forward by creating R packages that you can install from CRAN. In a similar way, but at a much smaller scale, the R community has contributed extensions that increase the functionality initially supported in Spark and R. Spark itself also provides support for creating Spark extensions and, in fact, many R extensions make use of Spark extensions.
 
-Extensions are constantly being created so this section will be outdated at any given point in time, in addition, we might not even be aware of many Spark and R extensions; however, at the very least we can track the extensions that are available in CRAN by looking at the "reverse imports" for `sparklyr` in CRAN. [@extensions-sparklyr-cran] Extensions and R packages published in CRAN tend to be the most stable since when a package is published in CRAN, it will go through a review process which increases the overall quality of a contribution.
+Extensions are constantly being created, so this section will be outdated at some given point in time. In addition, we might not even be aware of many Spark and R extensions. However, at the very least we can track the extensions that are available in CRAN by looking at the ["reverse imports" for `sparklyr` in CRAN](http://bit.ly/2Z568xz). Extensions and R packages published in CRAN tend to be the most stable since when a package is published in CRAN, it goes through a review process that increases the overall quality of a contribution.
 
-While we wish we could present all the extensions, we' will've scoped this chapter to the extensions that should be the most interesting to most readers. You can find additional ones under the [github.com/r-spark](https://github.com/r-spark) organization or by searching repos on GitHub with the `sparklyr` tag.
+While we wish we could present all the extensions, we’ve instead scoped this chapter to the extensions that should be the most interesting to you. You can find additional extensions at the [github.com/r-spark](https://github.com/r-spark) organization or by searching repositories on GitHub with the `sparklyr` tag.
 
 rsparkling
 : The `rsparkling` extensions allows you to use H2O and Spark from R. This extension is what we would consider advanced modeling in Spark. While Spark's built-in modeling library, Spark MLlib, is quite useful in many cases; H2O's modeling capabilities can compute additional statistical metrics and can provide performance and scalability improvements over Spark MLlib. We, ourselves, have not performed detailed comparisons nor benchmarks between MLlib and H2O; so this is something you will have to research on your own to create a complete picture of when to use H2O's capabilities.
 
 graphframes
-: The `graphframes` extensions adds support to process graphs in Spark. A graph is a structure that describes a set of objects in which some pairs of the objects are in some sense related. As you learned in the Introduction chapter, ranking web pages was an early motivation to develop precursors to Spark powered by MapReduce; web pages happen to form a graph if you consider a link between pages as the relationship between each pair of pages. Computing operations likes PageRank over graphs can be quite useful in web search and social networks to mention a few applications.
+: The `graphframes` extensions<!--((("graphframes extensions")))--> adds support to process graphs in Spark. A graph is a structure that describes a set of objects in which some pairs of the objects are in some sense related. As you learned in [Chapter 1](#intro), ranking web pages was an early motivation to develop precursors to Spark powered by MapReduce; web pages happen to form a graph if you consider a link between pages as the relationship between each pair of pages. Computing operations likes PageRank over graphs can be quite useful in web search and social networks, for example.
 
 sparktf
-: The `sparktf` extension provides support to write TensorFlow records in Spark. TensorFlow is one of the leading deep learning frameworks and it is often used with large amounts of numerical data represented as TensorFlow records, a file format optimized for TensorFlow. Spark it is often used to process unstructured and large-scale datasets into smaller numerical datasets that can easily fit into a GPU. You can use this extension to save datasets in the TensorFLow record file format.
+: The `sparktf` extension<!--((("sparktf extension")))((("TensorFlow")))--> provides support to write TensorFlow records in Spark. TensorFlow is one of the leading deep learning frameworks, and it is often used with large amounts of numerical data represented as TensorFlow records, a file format optimized for TensorFlow. Spark is often used to process unstructured and large-scale datasets into smaller numerical datasets that can easily fit into a GPU. You can use this extension to save datasets in the TensorFlow record file format.
 
 xgboost
-: The `xgboost` extension brings the well-known XGBoost modeling library to the world of large-scale computing. XGBoost is a scalable, portable and distributed library for gradient boosting. It became well known in the machine learning competition circles after its use in the winning solution of the Higgs Machine Learning Challenge [@extensions-higgs-challenge] and has remained popular in other Kaggle competitions since then.
+: The `xgboost` extension<!--((("xgboost extension")))--> brings the well-known XGBoost modeling library to the world of large-scale computing. XGBoost is a scalable, portable, and distributed library for gradient boosting. It became well known in the machine learning competition circles after its use in the winning solution of the [Higgs Boson Machine Learning Challenge](http://bit.ly/2YPE2qO) and has remained popular in other Kaggle competitions since then.
 
 variantspark
-: The `variantspark` extension provides an interface to use Variant Spark, a scalable toolkit for genome-wide association studies (GWAS). It currently provides functionality to build random forest models, estimating variable importance and reading Variant Call Format (VCF) files. While there are other random forest implementations in Spark, most of them are not optimized to deal with GWAS datasets, which usually come with thousands of samples and millions of variables.
+: The `variantspark` extension<!--((("variantspark extension")))--> provides an interface to use Variant Spark, a scalable toolkit for<!--((("genome-wide association studies (GWAS)")))--> genome-wide association studies (GWAS). It currently provides functionality to build random forest models, estimating variable importance, and reading variant call format (VCF) files. While there are other random forest implementations in Spark, most of them are not optimized to deal with GWAS datasets, which usually come with thousands of samples and millions of pass:[<span class="keep-together">variables</span>].
 
 geospark
-: The `geospark` extensions enables us to load and query large-scale geographic datasets. Usually datasets containing latitude and longitude points or complex areas defined in the Well-known Text (WKT) format, a text markup language for representing vector geometry objects on a map.
+: The `geospark` extension<!--((("geospark extensios")))--> enables us to load and query large-scale geographic datasets. Usually datasets containing latitude and longitude points or complex areas are defined in the<!--((("Well-Known Text (WKT) format")))--> well-known text (WKT) format, a text markup language for representing vector geometry objects on a map.
 
-Before you learn how and when to use each extension, we should first briefly explain how extensions can be used with R and Spark.
+Before<!--((("extensions", "using with R and Spark")))((("Spark using R", "using extensions with")))--> you learn how and when to use each extension, we should first briefly explain how you can use extensions with R and Spark.
 
-First, a Spark extension is just and R package that happens to be aware of Spark. As any other R package, you will first have to install the R package. Once installed, it is important to know that you will need to reconnect to Spark before the extension can be used. So, in general, the pattern you should follow goes as follows:
+First, a Spark extension is just an R package that happens to be aware of Spark. As with any other R package, you will first need to install the extension. After you've installed it, it is important to know that you will need to reconnect to Spark before the extension can be used. So, in general, here's the pattern you should follow:
 
 ```{r eval=FALSE}
 library(sparkextension)
@@ -54,17 +54,17 @@ library(sparklyr)
 sc <- spark_connect(master = "<master>")
 ```
 
-Notice that `sparklyr` is loaded after the extensions to allow the extension to register properly. If you had to install and load a new extension you would simply have to disconnect first using `spark_disconnect(sc)`, restart your R session, and repeat the steps above with the new extension.
+Notice that `sparklyr` is loaded after the extension to allow the extension to register properly. If you had to install and load a new extension, you would first need to disconnect using `spark_disconnect(sc)`, restart your R session, and repeat the preceding steps with the new extension.
 
-It's not hard to install and use Spark extensions from R; however, each extension can be a world on it's own so most of the time you will have to spend time understanding what the extension is, when to use it and how to use it properly. The first extension you will learn about is the `rsparkling` extension which enables you to use H2O in Spark with R.
+It’s not difficult to install and use Spark extensions from R; however, each extension can be a world of its own, so most of the time you will need to spend time understanding what the extension is, when to use it, and how to use it properly. The first extension you will learn about is the `rsparkling` extension, which enables you to use H2O in Spark with R.<!--((("", startref="Eover10")))-->
 
 ## H2O
 
-[H2O](https://www.h2o.ai/) is open-source software for large-scale modeling created by H2O.ai, which allows you to fit thousands of potential models as part of discovering patterns in data. You can consider using H2O to complement or replace Spark's default modeling algorithms. It is common to Spark's default modeling algorithms and transition to H2O when Spark's algorithms fall short or when advanced functionality (like additional modeling metrics or automatic model selection) are desired
+[H2O](https://www.h2o.ai/), created by H2O.ai, is open source software<!--((("extensions", "H2O", id="Eh2o10")))((("H2O", id="h2o10")))--> for large-scale modeling that allows you to fit thousands of potential models as part of discovering patterns in data. You can consider using H2O to complement or replace Spark’s default modeling algorithms. It is common to use Spark’s default modeling algorithms and transition to H2O when Spark’s algorithms fall short or when advanced functionality (like additional modeling metrics or automatic model selection) is desired.
 
-We can't do justice to H2O's great modeling capabilities in a single paragraph, explaining H2O properly will require a book in itself. Instead, we would like to recommend reading the "Practical machine learning with H2O" [@extensions-practical-h2o] book to explore in-depth H2O's modeling algorithms and features. In the meantime, you can use this section as a brief guide to get started using H2O in Spark with R.
+We can’t do justice to H2O’s great modeling capabilities in a single paragraph; explaining H2O properly would require a book in and of  itself. Instead, we would like to recommend reading Darren Cook's [_Practical Machine Learning with H2O_](https://oreil.ly/l5RHI) (O'Reilly) to explore in-depth H2O’s modeling algorithms and features. In the meantime, you can use this section as a brief guide to get started using H2O in Spark with R.
 
-In order to use H2O with Spark, it is important to know that there are four components involved: H2O, Sparkling Water, [rsparkling](https://github.com/h2oai/sparkling-water/tree/master/r) and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and `rsparkling` as the R front-end for Sparkling Water, this is illustrated in Figure \@ref(fig:extensions-h2o-diagram).
+To use H2O with Spark, it is important to know that there are four components involved: H2O, Sparkling Water, [`rsparkling`](http://bit.ly/2MlFxqa), and Spark. Sparkling Water allows users to combine the fast, scalable machine learning algorithms of H2O with the capabilities of Spark. You can think of Sparkling Water as a component bridging Spark with H2O and `rsparkling` as the R frontend for Sparkling Water, as depicted in Figure \@ref(fig:extensions-h2o-diagram).
 
 ```{r extensions-h2o-diagram, eval=TRUE, echo=FALSE, fig.cap='H2O components with Spark and R', out.height = '280pt', out.width = 'auto', fig.align = 'center'}
 render_nomnoml("
@@ -82,7 +82,7 @@ render_nomnoml("
 ", "images/extensions-h2o-diagram.png")
 ```
 
-First, install `rsparkling` and `h2o` as specified in the `rsparkling` documentation site. [@extensions-h2o-rsparkling-docs]
+First, install `rsparkling` and `h2o` as specified on the [`rsparkling` documentation site](http://bit.ly/2Z78MD0).
 
 ```{r extensions-h2o-install, exercise=TRUE}
 install.packages("h2o", type = "source",
@@ -91,14 +91,14 @@ install.packages("rsparkling", type = "source",
   repos = "http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/31/R")
 ```
 
-It is important to notice that you need to use compatible versions of Spark, Sparkling Water and H2O as specified in their docs; we present instructions for Spark 2.3, but using different Spark versions will require you to install different versions. So let's start by checking the version of H2O by running,
+It is important to note that you need to use compatible versions of Spark, Sparkling Water, and H2O as specified in their documentation; we present instructions for Spark 2.3, but using different Spark versions will require you to install different versions. So let’s start by checking the version of H2O by running the following:
 
 ```{r extensions-h2o-version, eval=TRUE}
 packageVersion("h2o")
 packageVersion("rsparkling")
 ```
 
-We can then connect with the supported Spark versions as follows, you will have to adjust the `master` parameter for your particular cluster.
+We then can connect with the supported Spark versions as follows (you will have to adjust the `master` parameter for your particular cluster):
 
 ```{r extensions-h2o-connect}
 library(rsparkling)
@@ -111,11 +111,7 @@ sc <- spark_connect(master = "local", version = "2.3",
 cars <- copy_to(sc, mtcars)
 ```
 
-H2O provides a web interface which can help you monitor training and access much of H2O's functionality. The web interface can be accessed through `h2o_flow(sc)`, it is referred to as H2O Flow and is shown in Figure \@ref(fig:extensions-h2o-flow).
-
-```{r extensions-h2o-flow, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='H2O Flow Interface using Spark with R'}
-render_image("images/extensions-h2o-flow.png")
-```
+H2O provides a web interface that can help you monitor training and access much of H2O’s functionality. You can access the web interface (called H2O Flow) through `h2o_flow(sc)`, as shown in Figure \@ref(fig:extensions-h2o-flow).
 
 When using H2O, you will have to convert your Spark DataFrame into and H2O DataFrame through `as_h2o_frame`:
 
@@ -135,7 +131,11 @@ cars_h2o
 [32 rows x 11 columns] 
 ```
 
-Then you can use many of the modeling functions available in the `h2o` package with ease. For instance, we can fit a generalized linear model with ease:
+```{r extensions-h2o-flow, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='H2O Flow Interface using Spark with R'}
+render_image("images/extensions-h2o-flow.png")
+```
+
+Then, you can use many of the modeling functions available in the `h2o` package with ease. For instance, we can fit a generalized linear model with ease:
 
 ```{r extensions-h2o-glm}
 model <- h2o.glm(x = c("wt", "cyl"),
@@ -144,7 +144,7 @@ model <- h2o.glm(x = c("wt", "cyl"),
                  lambda_search = TRUE)
 ```
 
-H2O provides additional metrics not necessarily available in Spark's modeling algorithms, the model that we just fit  `Residual Deviance` is provided in the model while this would not be a standard metric when using Spark MLlib.
+H2O provides additional metrics not necessarily available in Spark’s modeling algorithms. The model that we just fit, `Residual Deviance`, is provided in the model, while this would not be a standard metric when using Spark MLlib.
 
 ```{r extensions-h2o-model}
 model
@@ -164,7 +164,7 @@ Residual D.o.F. :29
 AIC :156.2425
 ```
 
-Then you can run prediction over the generalized linear model, a similar approach would work for many other models available in H2O:
+Then, you can run prediction over the generalized linear model (GLM). A similar approach would work for many other models available in H2O:
 
 ```{r extensions-h2o-predict}
 predictions <- as_h2o_frame(sc, copy_to(sc, data.frame(wt = 2, cyl = 6)))
@@ -177,7 +177,7 @@ h2o.predict(model, predictions)
 [1 row x 1 column]
 ```
 
-H2O can also be used to perform automatic training and tuning of many models; meaning that, H2O can choose which model to use for you using AutoML. [@extensions-h2o-automl]
+You can also use H2O to perform automatic training and tuning of many models, meaning that H2O can choose which model to use for you using [AutoML](https://oreil.ly/Ck9Ao):
 
 ```{r extensions-h2o-automl}
 automl <- h2o.automl(x = c("wt", "cyl"), y = "mpg",
@@ -186,9 +186,7 @@ automl <- h2o.automl(x = c("wt", "cyl"), y = "mpg",
                      seed = 1)
 ```
 
-For this particular dataset, H2O finds out that a Deep Learning model is a better fit than GLM[^1]. Specifically, H2O's AutoML explored using XGBoost, Deep Learning, GLM and a Stacked Ensemble models.
-
-[^1]: Notice that AutoML uses cross-validation which we did not use in GLM.
+For this particular dataset, H2O determines that a deep learning model is a better fit than a GLM.^[Notice that AutoML uses cross-validation, which we did not use in GLM.] Specifically, H2O’s AutoML explored using XGBoost, deep learning, GLM, and a Stacked Ensemble model:
 
 ```{r extensions-h2o-automl-print}
 automl@leaderboard
@@ -203,7 +201,7 @@ model_id              mean_residual_dev…     rmse      mse      mae     rmsle
 6 XGBoost_3_…                   7.313948 2.704431 7.313948 2.088791 0.1348819
 ```
 
-Rather than using the leaderboard, you can focus on the best model through `automl@leader`; for example, you can glance at the particular parameters from this Deep Learning model as follows:
+Rather than using the leaderboard, you can focus on the best model through `automl@leader`; for example, you can glance at the particular parameters from this deep learning model as follows:
 
 ```{r}
 tibble::tibble(parameter = names(automl@leader@parameters),
@@ -235,7 +233,7 @@ tibble::tibble(parameter = names(automl@leader@parameters),
 20 y                                 mpg 
 ```
 
-You can then predict using the leader as follows,
+You can then predict using the leader as follows:
 
 ```{r}
 h2o.predict(automl@leader, predictions)
@@ -247,9 +245,9 @@ h2o.predict(automl@leader, predictions)
 [1 row x 1 column] 
 ```
 
-Many additional examples are available under [spark.rstudio.com/guides/h2o](http://spark.rstudio.com/guides/h2o/), you can also request help from [github.com/h2oai/sparkling-water/tree/master/r](https://github.com/h2oai/sparkling-water/tree/master/r), the official GitHub repository for the `rsparkling` package.
+Many additional examples are [available](http://bit.ly/2NdTIwX), and you can also request help from the official [GitHub repository](http://bit.ly/2MlFxqa) for the `rsparkling` package.
 
-The next extension, `graphframes`, will allow you to process large-scale relational datasets; however, before you start using it, make sure to disconnect with `spark_disconnect(sc)` and restart your R session since using a different extensions requires you to reconnect to Spark and reload `sparklyr`.
+The next extension, `graphframes`, allows you to process large-scale relational datasets. Before you start using it, make sure to disconnect with `spark_disconnect(sc)` and restart your R session since using a different extension requires you to reconnect to Spark and reload `sparklyr`.<!--((("", startref="h2o10")))((("", startref="Eh2o10")))-->
 
 ```{r extensions-h2o-disconnect, echo=FALSE}
 spark_disconnect(sc)
@@ -257,15 +255,15 @@ spark_disconnect(sc)
 
 ## Graphs
 
-The first paper in the history of graph theory was written by Leonhard Euler on the Seven Bridges of Königsberg in 1736. The problem was to devise a walk through the city that would cross each of those bridges once and only, the original diagram is shown in Figure \@ref(fig:extensions-eulers-paths).
+The<!--((("extensions", "graphs", id="Egraph10")))((("graphs", "graph theory")))--> first paper in the history of graph theory was written by Leonhard Euler on the Seven Bridges of Königsberg in 1736. The problem was to devise a walk through the city that would cross each bridge once and only once. Figure \@ref(fig:extensions-eulers-paths) presents the original diagram.
 
 ```{r extensions-eulers-paths, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Seven Bridges of Königsberg from the Euler Archive'}
 render_image("images/extensions-eulers-paths.png")
 ```
 
-Today, a graph is defined as an ordered pair $G=(V,E)$, with $V$ a set of vertices (nodes or points) and $E \subseteq \{\{x, y\} | (x, y) ∈ \mathrm{V}^2 \land x \ne y\}$ a set of edges (links or lines) which are either an unordered pair for *undirected graphs* or an ordered pair for *directed graphs*. The former describing links where the direction does not matter and the latter linked where it does.
+Today, a<!--((("graphs", "directed and undirected")))((("directed graphs")))((("undirected graphs")))--> graph is defined as an ordered pair $G=(V,E)$, with $V$ a set of vertices (nodes or points) and $E \subseteq \{\{x, y\} | (x, y) ∈ \mathrm{V}^2 \land x \ne y\}$ a set of edges (links or lines), which are either an unordered pair for _undirected graphs_ or an ordered pair for _directed graphs_. The former describes links where the direction does not matter, and the latter describes links where it does.
 
-As a simple example, we can use the `highschool` dataset from the `ggraph` package which tracks friendship among high school boys. In this dataset, the vertices are the students and the edges describe pairs of students who happen to be friends in a particular year.
+As a simple example, we can use the `highschool` dataset from the `ggraph` package, which tracks friendship among high school boys. In this dataset, the vertices are the students and the edges describe pairs of students who happen to be friends in a particular year:
 
 ```{r eval=FALSE, exercise=TRUE}
 install.packages("ggraph")
@@ -291,15 +289,15 @@ ggraph::highschool
 # … with 496 more rows
 ```
 
-While the highschool dataset can be easily processed in R, even medium size graph datasets can be hard to process without distributing this work across a cluster of machines which Spark is suited for. Spark supports processing graphs through the [graphframes](https://github.com/rstudio/graphframes) extension which in turn uses the [GraphX](https://spark.apache.org/graphx/) Spark component. GraphX is Apache Spark's API for graphs and graph-parallel computation, it's comparable in performance to the fastest specialized graph processing systems and provides a growing library of graph algorithms.
+While<!--((("graphs", "GraphX component")))((("GraphX component")))--> the high school dataset can easily be processed in R, even medium-size graph datasets can be difficult to process without distributing this work across a cluster of machines, for which Spark is well suited. Spark supports processing graphs through the [`graphframes`](http://bit.ly/2Z5hVYB) extension, which in turn uses the [GraphX](http://bit.ly/30cbKU6) Spark component. GraphX is Apache Spark’s API for graphs and<!--((("parallel execution")))--> graph-parallel computation.  It’s comparable in performance to the fastest specialized graph-processing systems and provides a growing library of graph algorithms.
 
-A graph in Spark is also represented as a dataframe of edges and vertices; however, the format is slightly different since we will need to construct a dataframe for vertices. Lets first install the [GraphFrames](https://graphframes.github.io/) extension,
+A<!--((("DataFrames", "constructing for vertices")))--> graph in Spark is also represented as a DataFrame of edges and vertices; however, our format is slightly different since we will need to construct a DataFrame for vertices. Let's first install the [`graphframes`](http://bit.ly/2Z5hVYB) extension:
 
 ```{r eval=FALSE}
 install.packages("graphframes")
 ```
 
-Followed by connecting, copying the `highschool` dataset and transforming the graph to the format that this extension expects, we will scope this dataset to the friendships of year 1957.
+Next, we need to connect, copying the `highschool` dataset and transforming the graph to the format that this extension expects. Here, we scope this dataset to the friendships of the year 1957:
 
 ```{r extensions-graphframes}
 library(graphframes)
@@ -341,7 +339,7 @@ vertices_tbl
 # … with more rows
 ```
 
-While the `edges_tbl` is expected to have a `src` and `dst` columns:
+And the `edges_tbl` is expected to have `src` and `dst` columns:
 
 ```{r extensions-graphframes-eedges}
 edges_tbl
@@ -363,13 +361,13 @@ edges_tbl
 # … with more rows
 ```
 
-You can now create a GraphFrame,
+You can now create a GraphFrame:
 
 ```{r}
 graph <- gf_graphframe(vertices_tbl, edges_tbl)
 ```
 
-We can now use this graph to start analyzing this dataset. For instance, by finding out how many friends on average every one has, this is referred as the degree or valency of a vertex:
+We<!--((("graphs", "degree of a vertex")))((("degree of a vertex")))((("valency of a vertex")))--> now can use this graph to start analyzing this dataset. For instance, we'll find out how many friends on average every boy has, which is referred to as the _degree_ or _valency_ of a _vertex_:
 
 ```{r}
 gf_degrees(graph) %>% summarise(friends = mean(degree))
@@ -381,7 +379,7 @@ gf_degrees(graph) %>% summarise(friends = mean(degree))
 1    6.94
 ```
 
-We can then find what the shortest path to some specific vertex (person for this dataset). Since the data is anonymized, we can just pick the person identified as `33` and find how many degrees of separation exist between them:
+We then can find what the shortest path to some specific vertex (a boy for this dataset). Since the data is anonymized, we can just pick the boy identified as `33` and find how many degrees of separation exist between them:
 
 ```{r}
 gf_shortest_paths(graph, 33) %>%
@@ -406,7 +404,7 @@ gf_shortest_paths(graph, 33) %>%
 # … with more rows
 ```
 
-Finally, we can also compute PageRank over this graph, which was presented in the Introduction chapter as Google's web page ranking algorithm:
+Finally, we<!--((("graphs", "PageRank algorithm")))((("PageRank algorithm")))--> can also compute PageRank over this graph, which was presented in [Chapter 1](#intro)'s discussion of Google’s page ranking algorithm:
 
 ```{r echo=FALSE, eval=FALSE}
 model <- gf_graphframe(vertices_tbl, edges_tbl) %>%
@@ -432,7 +430,7 @@ Edges:
   $ weight <dbl> 0.25000000, 0.25000000, 0.25000000, 0.25000000, 0.25000000,…
 ```
 
-To give you some insights into this dataset, Figure \@ref(fig:extensions-graph-pagerank) plots this chart using the `ggraph` and highlights the highest PageRank scores for this dataset, 
+To give you some insights into this dataset, Figure \@ref(fig:extensions-graph-pagerank) plots this chart using the `ggraph` and highlights the highest PageRank scores for the following dataset:
 
 ```{r extensions-graph-pagerank-plot, eval=FALSE}
 highschool_tbl %>%
@@ -463,7 +461,7 @@ highschool_rdf %>% igraph::graph_from_data_frame(directed = FALSE) %>%
 render_image("images/extensions-graph-pagerank.png")
 ```
 
-There are many more graph algorithms provided in `graphframes`, to mention some: breadth-first search, connected components, label propagation for detecting communities, strongly connected components and triangle count. For questions on this extension refer to the official GitHub repo, [github.com/rstudio/graphframes](https://github.com/rstudio/graphframes). We will now present a popular gradient boosting framework, make sure to disconnect, restart before trying the next extension.
+There<!--((("graphs", "additional graph algorithms")))--> are many more graph algorithms provided in `graphframes`—for example, breadth-first search, connected components, label propagation for detecting communities, strongly connected components, and triangle count. For questions on this extension refer to the official [GitHub repository](http://bit.ly/2Z5hVYB). We now present a popular gradient-boosting framework—make sure to disconnect and restart before trying the next extension.<!--((("", startref="Egraph10")))-->
 
 ```{r echo=FALSE}
 spark_disconnect(sc)
@@ -471,7 +469,7 @@ spark_disconnect(sc)
 
 ## XGBoost
 
-A decision tree is a flowchart-like structure in which each internal node represents a test on an attribute, each branch represents the outcome of the test, and each leaf node represents a class label. For example, the diagram in Figure \@ref(fig:extensions-decision-diagram) shows an a decision tree that could help classify if an employee is likely to leave given a set of factors, like job satisfaction and overtime. When a decision tree is used to predict continuous variables instead of discrete outcomes, say, how likely someone is to leave a company,  decision trees are referred to as regression trees.
+A _decision tree_ is<!--((("decision trees")))((("extensions", "XGBoost")))((("xgboost extension")))--> a flowchart-like structure in which each internal node represents a test on an attribute, each branch represents the outcome of the test, and each leaf node represents a class label. For example, Figure \@ref(fig:extensions-decision-diagram) shows a decision tree that could help classify whether an employee is likely to leave given a set of factors like job satisfaction and overtime. When a decision tree is used to predict continuous variables instead of discrete outcomes—say, how likely someone is to leave a company—it is referred to as a<!--((("regression trees")))--> _regression tree_.
 
 ```{r extensions-decision-diagram, eval=TRUE, echo=FALSE, fig.align='center', fig.cap='A Decision tree to predict job attrition based on known factors', out.height = '280pt', out.width = 'auto', fig.align = 'center'}
 render_nomnoml("
@@ -485,19 +483,21 @@ render_nomnoml("
 ", "images/extensions-decision-diagram.png")
 ```
 
-While a decision tree representation is quite easy to understand and to interpret, finding out the decisions in the tree requires mathematical techniques like gradient descent to find a local minimum. Gradient descent takes steps proportional to the negative of the gradient of the function at the current point. The gradient is represented by $\nabla$, the learning rate by $\gamma$ and one simply starts from a given state $a_n$ and compute the next iteration $a_{n+1}$ by simply following the direction of the gradient:
+While a decision tree representation is quite easy to understand and to interpret, finding out the decisions in the tree requires mathematical techniques<!--((("gradient descent")))--> like _gradient descent_ to find a local minimum. Gradient descent takes steps proportional to the negative of the gradient of the function at the current point. The gradient is represented by $\nabla$, and the learning rate by $\gamma$. You simply start from a given state $a_n$ and compute the next iteration $a_{n+1}$ by following the direction of the gradient:
 
+<center style="margin-top: 30px; margin-bottom: 30px">
 $a_{n+1} = a_n - \gamma \nabla F(a_n)$
+</center>
 
-XGBoost is an open-source software library which provides a gradient boosting framework. It aims to provide a scalable, portable and distributed gradient boosting for training gradient-boosted decision trees (GBDT) and gradient-boosted regression trees (GBDT). Gradient-boosted means xgboost uses gradient descent and boosting, which is a technique that chooses each predictor sequentially.
+XGBoost is an open source software library that provides a gradient-boosting framework. It aims to provide scalable, portable, and distributed gradient boosting for training gradient-boosted decision trees (GBDT) and gradient-boosted <!--((("gradient-boosted decision trees (GBDT)")))((("gradient-boosted regression trees (GBRT)")))-->regression trees (GBRT). Gradient-boosted means XGBoost uses gradient descent and boosting, which is a technique that chooses each predictor sequentially.
 
-`sparkxgb` is an extension that you can use to train XGBoost models in Spark; however, please beware that currently Windows is unsupported. To use this extension, first install it from CRAN:
+`sparkxgb` is an extension that you can use to train XGBoost models in Spark; however, be aware that currently Windows is unsupported. To use this extension, first install it from CRAN:
 
 ```{r extensions-xgb-install, eval=FALSE, exercise=TRUE}
 install.packages("sparkxgb")
 ```
 
-Then you would need to import the `sparkxgb` extension followed by your usual Spark connection code, adjusting `master` as needed:
+Then, you need to import the `sparkxgb` extension followed by your usual Spark connection code, adjusting `master` as needed:
 
 ```{r extensions-xgb-connect}
 library(sparkxgb)
@@ -507,7 +507,7 @@ library(dplyr)
 sc <- spark_connect(master = "local", version = "2.3")
 ```
 
-For this example, we will use the `attrition` dataset from the `rsample` package which you would need to install with `install.packages("rsample")`. This dataset is a fictional dataset created by IBM data scientists to uncover the factors that lead to employee attrition.
+For this example, we use the `attrition` dataset from the `rsample` package, which you would need to install by using `install.packages("rsample")`. This is a fictional dataset created by IBM data scientists to uncover the factors that lead to employee attrition:
 
 ```{r extensions-xgb-copy}
 attrition <- copy_to(sc, rsample::attrition)
@@ -539,7 +539,7 @@ attrition
 #   YearsSinceLastPromotion <int>, YearsWithCurrManager <int>
 ```
 
-To build an XGBoost model in Spark use `xgboost_classifier()`, we will compute attrition against all other features by using the `Attrition ~ .` formula and specify two for the number of classes since the attrition attribute tracks only whether an employee leaves or not. Then you can use `ml_predict()` to predict over large-scale datasets:
+To build an XGBoost model in Spark, use `xgboost_classifier()`. We will compute attrition against all other features by using the `Attrition ~ .` formula and specify `2` for the number of classes since the attrition attribute tracks only whether an employee leaves or stays. Then, you can use `ml_predict()` to predict over large-scale datasets:
 
 ```{r extensions-xgb-model}
 xgb_model <- xgboost_classifier(attrition,
@@ -563,7 +563,7 @@ $ probability_No  <dbl> 0.753938094, 0.024780750, 0.915146366, 0.143568754, 0.07
 $ probability_Yes <dbl> 0.24606191, 0.97521925, 0.08485363, 0.85643125, 0.927375…
 ```
 
-XGBoost became well known in the competition circles after its use in the winning solution of the Higgs Machine Learning Challenge which uses the ATLAS experiment to identify the Higgs boson. Since then, it has become a popular model and used for a large number of Kaggle competitions. However, decision trees could prove limiting especially in datasets with non tabular data like images, audio and text which you can tackle with deep learning models, should we remind you to disconnect and restart?
+XGBoost became well known in the competition circles after its use in the winning solution of the Higgs Machine Learning Challenge, which uses the ATLAS experiment to identify the Higgs boson. Since then, it has become a popular model and used for a large number of Kaggle competitions. However, decision trees could prove limiting especially in datasets with nontabular data like images, audio, and text, which you can better tackle with deep learning models—should we remind you to disconnect and restart?
 
 ```{r echo=FALSE}
 spark_disconnect(sc)
@@ -571,24 +571,24 @@ spark_disconnect(sc)
 
 ## Deep Learning
 
-A perceptron is a mathematical model introduced by Rosenblatt [@extensions-rosenblatt-perceptron] who developed it as a theory for a hypothetical nervous system. The perceptron maps stimuli to numeric inputs that are weighted into a threshold function that activates only when enough stimuli is present, mathematically:
+A _perceptron_ is<!--((("perceptrons")))((("extensions", "deep learning", id="Edeep10")))((("deep learning", id="deep10")))--> a mathematical model introduced by Frank Rosenblatt,^[Rosenblatt F (1958). “The perceptron: a probabilistic model for information storage and organization in the brain.” _Psychological review_.] who developed it as a theory for a hypothetical nervous system. The perceptron maps stimuli to numeric inputs that are weighted into a threshold function that activates only when enough stimuli is present, mathematically:
 
 $f(x) = \begin{cases} 1 & \sum_{i=1}^m w_i x_i + b > 0\\ 0 & \text{otherwise} \end{cases}$
 
-Minsky found out that a single perceptron can only classify datasets that are linearly separable; however, he also presented in his perceptrons book [@extensions-minsky-perceptrons] that layering perceptrons would bring additional classification capabilities, the original diagram showcasing a multi-layered perceptron is presented in Figure \@ref(fig:extensions-minsky-layered).
+Minsky<!--((("multilayered perceptrons")))--> and Papert found out that a single perceptron can classify only datasets that are linearly separable; however, they also revealed in their book _Perceptrons_ that layering perceptrons would bring additional classification capabilities.^[Minsky M, Papert SA (2017). _Perceptrons: An introduction to computational geometry_. MIT press.] Figure \@ref(fig:extensions-minsky-layered) presents the original diagram showcasing a multilayered perceptron.
 
 ```{r extensions-minsky-layered, eval=TRUE, echo=FALSE, fig.cap='Layered perceptrons as illustrated in the perceptrons book', fig.align = 'center'}
 render_image("images/extensions-minsky-multi-layers.png")
 ```
 
-Before we start, let's first install all the packages we are about to use,
+Before we start, let’s first install all the packages that we are about to use:
 
 ```{r eval=FALSE, exercise=TRUE}
 install.packages("sparktf")
 install.packages("tfdatasets")
 ```
 
-Using Spark we can create a multi-layer perceptron classifier with `ml_multilayer_perceptron_classifier()` and gradient descent to classify and predict over large datasets. Gradient descent was introduced to layered perceptrons by Geoff Hinton [@extensions-hinton-layered] and like XGBoost, it also makes use of gradient descent.
+Using Spark we can create a multilayer perceptron classifier with `ml_multilayer_perceptron_classifier()` and gradient descent to classify and predict over large datasets. Gradient descent was introduced to layered perceptrons by Geoff Hinton.^[Ackley DH, Hinton GE, Sejnowski TJ (1985). “A learning algorithm for Boltzmann machines.” _Cognitive science_.]
 
 ```{r}
 library(sparktf)
@@ -619,13 +619,14 @@ $ probability_No  <dbl> 0.8439275, 0.8439275, 0.8439275, 0.8439275, 0.8439275,�
 $ probability_Yes <dbl> 0.1560725, 0.1560725, 0.1560725, 0.1560725, 0.1560725,…
 ```
 
-Notice that the columns must be numeric so you will have to manually convert them with feature transforming techniques presented in the Modeling chapter. It is natural to try to add more layers to classify more complex datasets; however, adding too many layers will cause the gradient to vanish and other techniques will have to use these deep layered networks also known as, deep learning models.
+Notice that the columns must be numeric, so you will need to manually convert them with the feature transforming techniques presented in [Chapter 4](#modeling). It is natural to try to add more layers to classify more complex datasets; however, adding too many layers will cause the gradient to vanish, and other techniques will need to use these deep layered networks, also known as _deep learning models_.
 
-Deep learning models solve the vanishing gradient problem by making use of special activation functions, dropout, data augmentation and graphic processing units (GPUs). You can use Spark to retrieve and preprocess large datasets into numerical-only datasets that can fit in a GPU for deep learning training. Tensorflow is one of the most popular deep learning frameworks and supports a binary format known as TensorFlow Records.
+Deep learning models solve the vanishing gradient problem by making use of special activation functions, dropout, data augmentation and GPUs. You can use Spark to retrieve and preprocess large datasets into numerical-only datasets that can fit in a GPU for deep learning training. TensorFlow is one of the most popular deep learning frameworks. As mentioned previously, it supports a binary format known as TensorFlow records.
 
-You can write TensorFlow records using the `sparktf` in Spark which you can prepare to process in GPU instances with libraries like Keras or TensorFlow. 
+You can write TensorFlow records using the `sparktf` in Spark, which you can prepare to process in GPU instances with libraries like Keras or TensorFlow.
 
-You can then preprocess large datasets in Spark and write it as TensorFlow records using `spark_write_tf()`:
+You can then preprocess large datasets in Spark and write them as TensorFlow records using `spark_write_tf()`:
+
 
 ```{r}
 copy_to(sc, iris) %>%
@@ -636,7 +637,7 @@ copy_to(sc, iris) %>%
   spark_write_tfrecord(path = "tfrecord")
 ```
 
-Once trained, you can use the `tfdatasets` package to load the dataset followed by training with `keras` or `tensorflow`. You will also need to install the TensorFlow runtime with `install_tensorflow()` and install Python on your own. To learn more about training deep learning models with Keras we recommend reading "Deep Learning with R". [@extensions-chollet-jj]
+After you have trained the dataset with Keras or TensorFlow, you can use the `tfdatasets` package to load it. You will also need to install the TensorFlow runtime by using `install_tensorflow()` and install Python on your own. To learn more about training deep learning models with Keras, we recommend reading _Deep Learning with R_.^[Chollet F, Allaire J (2018). _Deep Learning with R_. Manning Publications.]
 
 ```{r eval=FALSE}
 tensorflow::install_tensorflow()
@@ -646,7 +647,7 @@ tfdatasets::tfrecord_dataset("tfrecord/part-r-00000")
 <DatasetV1Adapter shapes: (), types: tf.string>
 ```
 
-Training deep learning models in a single local node with one or more GPUs is often enough for most applications; however, recent state-of-the-art deep learning models train using distributed computing frameworks like Apache Spark. Distributed computing frameworks are used to achieve higher petaflops each day the systems spends training these models. OpenAI analyzed trends in the field of *Artificial Intelligence* and cluster computing [@extensions-openai-compute] and illustrated in Figure \@ref(fig:extensions-distributed-training). It should be obvious from the figure that there is a trend in recent years to use distributed computing frameworks.
+Training deep learning models in a single local node with one or more GPUs is often enough for most applications; however, recent state-of-the-art deep learning models train using distributed computing frameworks like Apache Spark. Distributed computing frameworks<!--((("OpenAI")))((("artificial intelligence (AI)")))--> are used to achieve higher petaflops each day the systems spends training these models. [OpenAI](http://bit.ly/2HawofQ) analyzed trends in the field of _artificial intelligence_ (AI) and cluster computing (illustrated in Figure \@ref(fig:extensions-distributed-training)). It should be obvious from the figure that there is a trend in recent years to use distributed computing frameworks.
 
 ```{r echo=FALSE, eval=FALSE}
 data.frame(
@@ -680,7 +681,7 @@ data.frame(
 render_image("images/extensions-distributed-training.png")
 ```
 
-Training large-scale deep learning models is possible in Spark and TensorFlow through frameworks like Horovod. Today, it's possible to use Horovod with Spark from R using the `reticulate` package since Horovod requires Python and Open MPI which goes beyond the scope of this book. Instead, we will introduce a different Spark extension in the domain of genomics.
+Training large-scale deep learning models is possible in Spark and TensorFlow through frameworks like Horovod. Today, it’s possible to use Horovod with Spark from R using the `reticulate` package, since Horovod requires Python and Open MPI, this goes beyond the scope of this book. Next, we will introduce a different Spark extension in the domain of genomics.<!--((("", startref="Edeep10")))((("", startref="deep10")))-->
 
 ```{r echo=FALSE}
 spark_disconnect(sc)
@@ -688,15 +689,15 @@ spark_disconnect(sc)
 
 ## Genomics
 
-The human genome consists of two copies of about three billion base pairs of DNA within the 23 chromosome pairs, Figure \@ref(fig:extensions-genomics-diagram) shows the organization of the genome into chromosomes. DNA strands are composed of nucleotides, each composed of one of four nitrogen-containing nucleobases: cytosine (C), guanine (G), adenine (A) or thymine (T). [@extensions-genomics-wikipedia] Since the DNA of all humans is nearly identical, we only need to store the differences from the reference genome in the form of a Variant Call Format (VCF) file.
+The [human genome](http://bit.ly/2z2gMqn) consists<!--((("extensions", "genomics", id="Egenomics10")))((("genomics", id="genomics10")))--> of two copies of about 3 billion base pairs of DNA within the 23 chromosome pairs. Figure \@ref(fig:extensions-genomics-diagram) shows the organization of the genome into chromosomes. DNA strands are composed of nucleotides, each composed of one of four nitrogen-containing nucleobases: cytosine (C), guanine (G), adenine (A), or thymine (T). Since the DNA of all humans is nearly identical, we need to store only the differences from the reference genome<!--((("variant call format (VCF)")))--> in the form of a variant call format (VCF) file.
 
 ```{r extensions-genomics-diagram, eval=TRUE, echo=FALSE, fig.cap='The idealized human diploid karyotype showing the organization of the genome into chromosomes', fig.align = 'center'}
 render_image("images/extensions-genomics-diagram.png")
 ```
 
-VariantSpark is a framework based on scala and spark to analyze genome datasets. It is being developed by CSIRO Bioinformatics team in Australia. VariantSpark was tested on datasets with 3000 samples each one containing 80 million features in either unsupervised clustering approaches and supervised applications, like classification and regression. VariantSpark can read VCF files and run analyses while using familiar Spark DataFrames.
+`variantspark`<!--((("variantspark extension")))--> is a framework based on Scala and Spark to analyze genome datasets. It is being developed by CSIRO Bioinformatics team in Australia. `variantspark` was tested on datasets with 3,000 samples, each one containing 80 million features in either unsupervised clustering approaches or supervised applications, like classification and regression. `variantspark`<!--((("DataFrames", "reading VCF files and running analyses")))--> can read VCF files and run analyses while using familiar Spark DataFrames.
 
-To get started, install `variantspark` from CRAN, connect to Spark and retrieve a `vsc` connection to VariantSpark:
+To get started, install `variantspark` from CRAN, connect to Spark, and retrieve a `vsc` connection to `variantspark`:
 
 ```{r extensions-genomics-connect}
 library(variantspark)
@@ -708,7 +709,7 @@ sc <- spark_connect(master = "local", version = "2.3",
 vsc <- vs_connect(sc)
 ```
 
-We can start by loading a VCF file,
+We can start by loading a VCF file:
 
 ```{r extensions-genomics-read-vcf}
 vsc_data <- system.file("extdata/", package = "variantspark")
@@ -718,7 +719,7 @@ hipster_labels <- vs_read_csv(vsc, file.path(vsc_data, "hipster_labels.txt"))
 labels <- vs_read_labels(vsc, file.path(vsc_data, "hipster_labels.txt"))
 ```
 
-VariantSpark uses Random Forest to assign an Importance score to each tested variant reflecting its association to the interest phenotype. A variant with higher Importance score implies it is more strongly associated with the phenotype of interest. You can compute the Importance and transform it into a Spark table as follows,
+`variantspark` uses random forest to assign an importance score to each tested variant reflecting its association to the interest phenotype. A variant with higher importance score implies it is more strongly associated with the phenotype of interest. You can compute the importance and transform it into a Spark table, as follows:
 
 ```{r extensions-genomics-importance-code}
 importance_tbl <- vs_importance_analysis(vsc, hipster_vcf, 
@@ -744,7 +745,7 @@ importance_tbl
 # … with more rows
 ```
 
-You can then use `dplyr` and `ggplot2` to transform the output and visualize it,
+You then can use `dplyr` and `ggplot2` to transform the output and visualize it (see Figure \@ref(fig:extensions-genomics-importance)):
 
 ```{r extensions-genomics-plot-code}
 library(dplyr)
@@ -780,7 +781,7 @@ ggplot(importance_df) +
 render_image("images/extensions-genomics-importance.png")
 ```
 
-This concludes a brief introduction to genomic analysis in Spark using the variantspark extensions. Next, we will move away from microscopic genes, to macroscopic datasets that contain geographic locations across the world.
+This concludes a brief introduction to genomic analysis in Spark using the `variantspark` extension. Next, we move away from microscopic genes to macroscopic datasets that contain geographic locations across the world.<!--((("", startref="Egenomics10")))((("", startref="genomics10")))-->
 
 ```{r extensions-genomics-disconnect, echo=FALSE}
 spark_disconnect(sc)
@@ -788,15 +789,15 @@ spark_disconnect(sc)
 
 ## Spatial 
 
-[geospark](https://CRAN.R-project.org/package=geospark) enables distributed geospatial computing using a grammar compatible with [`dplyr`](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf) and [`sf`](https://github.com/rstudio/cheatsheets/raw/master/sf.pdf) package which provides a set of tools for working with geospatial vectors.
+[`geospark`](http://bit.ly/2zbTEW8) enables<!--((("extensions", "spatial")))((("geospark extensions")))((("spatial operations")))--> distributed geospatial computing using a grammar compatible with [`dplyr`](http://bit.ly/2KYKOAC) and [`sf`](http://bit.ly/2ZerAwb), which provides a set of tools for working with geospatial vectors.
 
-You can install `geospark` from CRAN as follows:
+You can install `geospark` from CRAN, as follows:
 
 ```{r eval=FALSE, exercise=TRUE}
 install.packages("geospark")
 ```
 
-Then we will initialize the geospark extension and connect to Spark:
+Then, initialize the `geospark` extension and connect to Spark:
 
 ```{r}
 library(geospark)
@@ -805,7 +806,7 @@ library(sparklyr)
 sc <- spark_connect(master = "local", version = "2.3")
 ```
 
-Next we will load a spatial dataset containing polygons and points.
+Next, we load a spatial dataset containing polygons and points:
 
 ```{r}
 polygons <- system.file("examples/polygons.txt", package="geospark") %>%
@@ -818,13 +819,13 @@ polygons_wkt <- copy_to(sc, polygons)
 points_wkt <- copy_to(sc, points)
 ```
 
-There are various spatial operations defined in `geospark`, which Figure \@ref(fig:extensions-geospark-operations) describes. These operations allow you to control how geospatial data should be queried based on overlap, intersection, disjoint sets, etc.
+There are various spatial operations defined in `geospark`, as depicted in Figure \@ref(fig:extensions-geospark-operations). These operations allow you to control how geospatial data should be queried based on overlap, intersection, disjoint sets, and so on.
 
 ```{r extensions-geospark-operations, eval=TRUE, fig.width=4, fig.align='center', echo=FALSE, fig.cap='Spatial operations available in geospark.'}
 render_image("images/extensions-geospark-operations.png")
 ```
 
-For instance, we can use these operations to find the polygons that contain a given set of points using `st_contains()`,
+For instance, we can use these operations to find the polygons that contain a given set of points using `st_contains()`:
 
 ```{r}
 library(dplyr)
@@ -849,7 +850,9 @@ inner_join(polygons_wkt,
 5 dakota area     SD        1
 ```
 
-You can also plot these datasets by collecting a subset of the entire dataset or aggregating the geometries in spark before collecting them, one package you should look into is the `sf` package. We will now start closing this chapter by presenting a couple troubleshooting techniques applicable to all extensions.
+You can also plot these datasets by collecting a subset of the entire dataset or aggregating the geometries in Spark before collecting them. One package you should look into is `sf`.
+
+We close this chapter by presenting a couple of troubleshooting techniques applicable to all extensions.
 
 ```{r echo=FALSE}
 spark_disconnect(sc)
@@ -857,7 +860,7 @@ spark_disconnect(sc)
 
 ## Troubleshooting
 
-When using a new extension for the first time, we recommend increasing the connection timeout since Spark will usually have to download extension dependencies and changing logging to verbose to help troubleshoot when the download process does not complete:
+When<!--((("extensions", "troubleshooting")))((("troubleshooting", "extensions")))--> you are using a new extension for the first time, we recommend increasing the connection timeout (given that Spark will usually need to download extension dependencies) and changing logging to verbose to help you troubleshoot when the download process does not complete:
 
 ```{r eval=FALSE}
 config <- spark_config()
@@ -867,13 +870,13 @@ config$sparklyr.log.console = TRUE
 sc <- spark_connect(master = "local", config = config)
 ```
 
-In addition, you should know that [Apache IVY](http://ant.apache.org/ivy/) is a popular dependency manager focusing on flexibility, simplicity, and is used by Apache Spark while installing extensions. When the connection fails while using an extension, consider clearing your [IVY Cache](http://ant.apache.org/ivy/history/2.0.0/settings/caches.html) by running:
+In addition, you should know that [Apache IVY](http://ant.apache.org/ivy) is a popular dependency manager focusing on flexibility and simplicity, and is used by Apache Spark for installing extensions. When the connection fails while you are using an extension, consider clearing your [IVY cache](http://bit.ly/2Zcubun) by running the following:
 
 ```{r extensions-rsparkling-cache, eval=FALSE}
 unlink("~/.ivy2", recursive = TRUE)
 ```
 
-In addition, you can also consider opening GitHub issues from the following extensions repos to get help from the extension authors:
+In addition, you can also consider opening GitHub issues from the following extensions repositories to get help from the extension authors:
 
 - *rsparkling*: [github.com/h2oai/sparkling-water](https://github.com/h2oai/sparkling-water).
 - *sparkxgb*: [github.com/rstudio/sparkxgb](https://github.com/rstudio/sparkxgb).
@@ -883,8 +886,8 @@ In addition, you can also consider opening GitHub issues from the following exte
 
 ## Recap
 
-This chapter provided a brief overview on using some of the Spark extensions available in R, which happens to be as easy as installing a package. You then learned how to use the `rsparkling` extension which provides access to H2O in Spark to which provides additional modeling functionality like enhanced metrics and ability to automatically select models. We then jumped to `graphframes`, an extension to help you process relational datasets which are formally referred as graphs; you learned how to compute simple connection metrics or run complex algorithms like pagerank.
+This chapter provided a brief overview on using some of the Spark extensions available in R, which happens to be as easy as installing a package. You then learned how to use the `rsparkling` extension, which provides access to H2O in Spark, which in turn provides additional modeling functionality like enhanced metrics and the ability to automatically select models. We then jumped to `graphframes`, an extension to help you process relational datasets that are formally referred to as graphs. You also learned how to compute simple connection metrics or run complex algorithms like PageRank.
 
-THe XGBoost and Deep Learning sections provided alternate modeling techniques that use gradient descent, the former over decision trees and the latter over deep multi-layered perceptrons where Spark can be used to preprocess datasets into records that can then be later consument by TensorFlow and Keras using the `sparktf` extension. The last two sections introduced extensions to process genomic and spatial datasets through the `variantspark` and `geospark` extensions.
+The XGBoost and deep learning sections provided alternate modeling techniques that use gradient descent: the former over decision trees, and the latter over deep multilayered perceptrons where we can use Spark to preprocess datasets into records that later can be consumed by TensorFlow and Keras using the `sparktf` extension. The last two sections introduced extensions to process genomic and spatial datasets through the `variantspark` and `geospark` extensions.
 
-These extensions and many more, provide a comprehensive library of advanced functionality that in combination with analysis and modeling techniques presented, should cover most tasks required to run in computing clusters. However, when functionality is lacking, you can consider writing your own extension as we will present in the Contributing chapter or you can apply custom transformations over each partition using R code as we will describe in the next chapter, Distributed R.
+These extensions, and many more, provide a comprehensive library of advanced functionality that, in combination with the analysis and modeling techniques presented, should cover most tasks required to run in computing clusters. However, when functionality is lacking, you can consider writing your own extension, which is what we discuss in [Chapter 13](#contributing), or you can apply custom transformations over each partition using R code, as we describe in [Chapter 11](distributed).
