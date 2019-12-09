@@ -290,17 +290,19 @@ Now that we have seen the pipelines API in action, let’s talk more formally ab
 
 ## Operating Modes
 
-By<!--((("pipelines", "operating modes")))((("commands", "ft_string_indexer()")))((("commands", "ml_logistic_regression()")))--> now, you have likely noticed that the pipeline stage functions, such as `ft_string_indexer()` and `ml_logistic_regression()`, return different types of objects depending on the first argument passed to them. <!--<<table0501>>--> presents the full pattern.<!--((("DataFrames", "operating modes in ML functions")))-->
+By<!--((("pipelines", "operating modes")))((("commands", "ft_string_indexer()")))((("commands", "ml_logistic_regression()")))--> now, you have likely noticed that the pipeline stage functions, such as `ft_string_indexer()` and `ml_logistic_regression()`, return different types of objects depending on the first argument passed to them. Table \@ref(tab:pipelines-operating-modes) presents the full pattern.<!--((("DataFrames", "operating modes in ML functions")))-->
 
-<!--[[table0501]]
-.Operating modes in machine learning functions
-[cols=",,",options="header",]-->
-| First argument                | Returns                         | Example                                          |
-|-------------------------------|---------------------------------|--------------------------------------------------|
-| Spark connection              | Estimator or transformer object | `ft_string_indexer(sc)`                          |
-| Pipeline                      | Pipeline                        | `ml_pipeline(sc) %>% ft_string_indexer()`        |
-| Data frame, without formula   | Data frame                      | `ft_string_indexer(iris, "Species", "indexed")`  |
-| Data frame, with formula      | sparklyr ML model object        | `ml_logistic_regression(iris, Species ~ .)`      |
+```{r pipelines-operating-modes, eval=TRUE, echo=FALSE}
+knitr::kable(
+  data.frame(
+    `First argument` = c("Spark connection", "Pipeline", "Data frame, without formula", "Data frame, with formula"),
+    Returns = c("Estimator or transformer object", "Pipeline", "Data frame", "sparklyr ML model object"),
+    Example = c("ft_string_indexer(sc)", "ml_pipeline(sc) %>% ft_string_indexer()", "ft_string_indexer(iris, \"Species\", \"indexed\")", "ml_logistic_regression(iris, Species ~ .)")
+  ),
+  booktabs = TRUE,
+  caption = "Operating modes in machine learning functions."
+)
+```
 
 These<!--((("S3")))--> functions are implemented using [S3](https://adv-r.hadley.nz/s3.html), which is the most popular object-oriented programming paradigm provided by R. For our purposes, it suffices to know that the behavior of an `ml_` or `ft_` function is dictated by the class of the first argument provided. This allows us to provide a wide range of features without introducing additional function names. We now can summarize the behavior of these functions:
 
