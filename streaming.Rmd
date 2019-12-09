@@ -7,36 +7,27 @@ library(ggplot2)
 
 # Streaming {#streaming}
 
-> "Our stories aren't over yet."
+> Our stories aren’t over yet.
 >
 > --- Arya Stark
 
-We can look back at the previous eleven chapters and think, what else are we missing? We've done everything from analysing tabular datasets, performed unsupervised learning over raw text, analyzed graphs and geographic datasets and even transformed data with custom R code! So now what?
+Looking back at the previous chapters, we've covered a good deal, but not everything. We’ve analyzed tabular datasets, performed unsupervised learning over raw text, analyzed graphs and geographic datasets, and even transformed data with custom R code! So now what?
 
-We were not explicit about this, but we've always assumed your data is static, we assumed it doesn't change over time. But suppose for a moment your job is to analyze traffic patterns to give recommendations to the department of transportation. A very reasonable approach would be to analyze historical data and then design predictive models that compute forecasts overnight. Overnight? That's very useful but traffic patterns change to the hour and even by the minute. You could try to preprocess and predict faster and faster, but eventually this model breaks -- you can't load large-scale datasets, transform them, score them, unload them and repeat this process by the second.
+Though we weren't explicit about this, we’ve assumed until this point that your data is static, and didn't change over time. But suppose for a moment your job is to analyze traffic patterns to give recommendations to the department of transportation. A reasonable approach would be to analyze historical data and then design predictive models that compute forecasts overnight. Overnight? That’s very useful, but traffic patterns change by the hour and even by the minute. You could try to preprocess and predict faster and faster, but eventually this model breaks—you can’t load large-scale datasets, transform them, score them, unload them, and repeat this process by the second.
 
-Instead, we need to introduce a different kind of dataset, one that is not static but rather dynamic; one that is like a table but is growing constantly, we will refer to such datasets as streams.
+Instead, we need to introduce a different kind of dataset—one that is not static but rather dynamic, one that is like a table but is growing constantly. We will refer to such datasets as _streams_.
 
 ## Overview
 
-We know how to work with large-scale static datasets, all the previous chapters dealt with them; but how should we reason about large-scale real-time datasets? We will define as *streams* -- datasets with an infinite amount entries.
+We<!--((("streaming", "overview of")))--> know how to work with large-scale static datasets, but how can we reason about large-scale real-time datasets? Datasets with an infinite amount of entries are known as __streams__.
 
-For instance, if we wanted to do real-time scoring using a pre-trained topic model, the entries would be lines of text for static datasets; for real-time datasets, we would perform the same scoring over an infinite amount of lines of text. Now, in practice, you will never process an infinite amount of records, you will eventually stop the stream -- or this universe might end, whatever comes first -- regardless, thinking of them as infinite datasets makes it so much easier to reason about them.
+For static datasets, if we were to do real-time scoring using a pretrained topic model, the entries would be lines of text; for real-time datasets, we would perform the same scoring over an infinite number of lines of text. Now, in practice, you will never process an infinite number of records. You will eventually stop the stream—or this universe might end, whichever comes first. Regardless, thinking of the datasets as infinite makes it much easier to reason about them.
 
-Streams are most relevant when processing real time data; for example, when analyzing a Twitter feed or stock prices. Both examples have well defined columns, like 'tweet' or 'price', but there are always new rows of data to be analyzed.
+Streams are most relevant when processing real-time data—for example, when analyzing a Twitter feed or stock prices. Both examples have well-defined columns, like "tweet" or "price," but there are always new rows of data to be analyzed.
 
-Spark *Structured Streams* provide scalable and fault-tolerant data processing over streams of data. That means, one can use many machines to process multiple streaming sources, perform joins with other streams or static sources, and recover from failures with at-least-once guarantees (each message is certain to be delivered, but may do so multiple times).
+_Spark Streaming_ provides<!--((("Spark Streaming")))--> scalable and fault-tolerant data processing over streams of data. That means you can use many machines to process multiple streaming sources, perform joins with other streams or static sources, and recover from failures with at-least-once guarantees (each message is certain to be delivered, but may do so multiple times).
 
-In Spark, you create streams by defining a *source*, a *transformation* and a *sink*; you can think of these steps as reading, transforming and writing a stream, which Figure \@ref(fig:streaming-working) describes.
-
-Reading
-: Streams read data using any of the `stream_read_*()` functions, the read operation defines the *source* of the stream; you can define one or multiple sources from which to read from.
-
-Transforming
-: A stream can perform one or multiple **transformation** using `dplyr`, `SQL`, feature transformers, scoring pipelines or distributed R code. Transformations can join against streaming sources or static datasets.
-
-Writing
-: The write operations are performed with the family of `stream_write_*()` functions, the read operation defined the *sink* of the stream. You can specify a single sink to write data to or multiple ones.
+In Spark, you<!--((("source")))((("sink")))--> create streams by defining a _source_, a _transformation_, and a _sink_; you can think of these steps as reading, transforming, and writing a stream, as shown in Figure \@ref(fig:streaming-working) describes.
 
 ```{r streaming-working, echo=FALSE, fig.cap='Working with Spark Streams', fig.align = 'center', eval = TRUE, fig.align='center', out.height = '280pt', out.width = 'auto'}
 render_nomnoml("
@@ -57,21 +48,38 @@ render_nomnoml("
 ", "images/streaming-working.png")
 ```
 
-You can read and write to streams in several different file formats: CSV, JSON, Parquet, ORC and text; and form Kafka which we will introduce later on.
+Let's take a look at each of these a little more closely:
 
-| Format  | Read                | Write                |
-|---------|---------------------|----------------------|
-| CSV     | stream_read_csv     | stream_write_csv     |
-| JSON    | stream_read_json    | stream_write_json    |
-| Kafka   | stream_read_kafka   | stream_write_kafka   |
-| ORC     | stream_read_orc     | stream_write_orc     |
-| Parquet | stream_read_parquet | stream_write_parquet |
-| Text    | stream_read_text    | stream_write_text    |
-| Memory  |                     | stream_write_memory  |
+Reading
+: Streams read data using any of the `stream_read_*()` functions; the read operation defines the _source_ of the stream. You can define one or multiple sources from which to read.
+
+Transforming
+: A stream can perform one or multiple transformations using `dplyr`, `SQL`, feature transformers, scoring pipelines, or distributed R code. Transformations can not only be applied to one or more streams, but can also use a combination of streams and static data sources; for instance, those loaded into Spark with `spark_read_()` functions—this means that you can combine static data and real-time data sources with ease.
+
+Writing
+: The write operations are performed with the family of `stream_write_*()` functions, while the read operation defined the sink of the stream. You can specify a single sink or multiple ones to write data to.
+
+You can read and write to streams in several different file formats: CSV, JSON, Parquet, Optimized Row Columnar (ORC), and text (see Table \@ref(tab:streaming-functions-table)). You<!--((("Kafka", "reading and writing from")))--> also can read and write from and to Kafka, which we will introduce later on.
+
+```{r streaming-functions-table, eval=TRUE, echo=FALSE}
+knitr::kable(
+  data.frame(
+    Format = c("CSV", "JSON", "Kafka", "ORC", "Parquet", "Text", "Memory"),
+    Read   = c("stream_read_csv", "stream_read_json", "stream_read_kafka",
+               "stream_read_orc", "stream_read_parquet", "stream_read_text",
+               ""),
+    Write  = c("stream_write_csv", "stream_write_json", "stream_write_kafka",
+               "stream_write_orc", "stream_write_parquet", "stream_write_text",
+               "stream_write_memory")
+  ),
+  booktabs = TRUE,
+  caption = "Spark functions to read and write streams"
+)
+```
 
 Since the transformation step is optional, the simplest stream we can define is one that continuously copies text files between source and destination.
 
-First, install the `future` package with `install.packages("future")` and connect to Spark:
+First, install the `future` package using `install.packages("future")` and connect to Spark.
 
 ```{r streaming-overview-prepare, echo=FALSE}
 library(sparklyr)
@@ -91,9 +99,9 @@ stream <- stream_read_text(sc, "source/") %>%
   stream_write_text("destination/")
 ```
 
-The streams starts running with `stream_write_*()`; once executed, the stream will monitor the `source` path and process data into the `destination/` path as it arrives.
+The<!--((("commands", "stream_write_*()")))--> streams starts running with `stream_write_*()`; once executed, the stream will monitor the _`source`_ path and process data into the _++destination /++_ path as it arrives.
 
-We can use `stream_generate_test()` to produce a file every second containing lines of text that follow a given distribution, you can read more about this in the Appendix. In practice, you would connect to existing sources without having to generate data artificially. We can then use `view_stream()` to track the **rows per second (rps)** being processed in the source, destination and their latest values over time. The result is shown in Figure .
+We can use `stream_generate_test()` to produce a file every second containing lines of text that follow a given distribution; you can read more about this in [Appendix](#appendix). In practice, you would connect to existing sources without having to generate data artificially. We can then use `view_stream()` to track the rows per second (rps) being processed in the source, and in the destination, and their latest values over time:
 
 ```{r streaming-overview-test}
 future::future(stream_generate_test(interval = 0.5))
@@ -102,33 +110,35 @@ future::future(stream_generate_test(interval = 0.5))
 stream_view(stream)
 ```
 
+The result is shown in Figure \@ref(fig:streaming-view-stream).
+
 ```{r streaming-view-stream, eval=TRUE, fig.align='center', echo=FALSE, fig.cap='Monitoring a stream generating rows following a binomial distribution'}
 render_image("images/streaming-stream-view.png")
 ```
 
-Notice that the rows-per-second in the destination stream are higher than the rows-per-second in the source stream; this is expected and desirable since Spark measures incoming rates from the source, but actual row processing times in the destination stream. For example, if 10 rows-per-second are written to the `source/` path, the incoming rate is 10 RPS. However, if it takes Spark only 0.01 seconds to write all those 10 rows, the output rate is 100 RPS.
+Notice that the rps rate in the destination stream is higher than that in the source stream. This is expected and desirable since Spark measures incoming rates from the source stream, but also actual row-processing times in the destination stream. For example, if 10 rows per second are written to the _source/_ path, the incoming rate is 10 rps. However, if it takes Spark only 0.01 seconds to write all those 10 rows, the output rate is 100 rps.
 
-Use `stream_stop()` to properly stop processing data from this stream.
+Use `stream_stop()` to properly stop processing data from this stream:
 
 ```{r streaming-overview-stop, eval=FALSE}
 stream_stop(stream)
 ```
 
-This exercise introduced how we can easily start a Spark stream that reads and writes data based on a simulated stream, let's do something more interesting than just copying data with proper transformations.
+This exercise introduced how we can easily start a Spark stream that reads and writes data based on a simulated stream. Let’s do something more interesting than just copying data with proper transformations.
 
 ## Transformations 
 
-In a real life scenario, the incoming data from a stream would not be written as-is to the output.  The Spark Stream job would make transformations to the data, and then write the transformed data.
+In<!--((("streaming", "transformations", id="Strans12")))((("transformations", "overview of")))--> a real-life scenario, the incoming data from a stream would not be written as is to the output. The Spark Streaming job would make transformations to the data, and then write the transformed data.
 
-Streams can be transformed using `dplyr`, SQL queries, ML Pipelines or R code. We can use as many transformations as needed in the same way that Spark data frames can be transformed with `sparklyr`. 
+Streams<!--((("DataFrames", "transforming")))--> can be transformed using `dplyr`, SQL queries, ML pipelines, or R code. We can use as many transformations as needed in the same way that Spark DataFrames can be transformed with `sparklyr`.
 
-The source of the transformation can be a stream or data frame, but the output is always a stream. If needed, one can always take a snapshot from the destination stream, and then save the output as a data frame. That is what `sparklyr` will do for you if a destination stream is not specified. 
+The source of the transformation can be a stream or DataFrame, but the output is always a stream. If needed, you can always take a snapshot from the destination stream and then save the output as a DataFrame. That is what `sparklyr` will do for you if a destination stream is not specified.
 
-Each sub-section will cover an option provided by `sparklyr` to perform transformations on a stream. 
+Each of the following subsections covers an option provided by `sparklyr` to perform transformations on a stream.
 
 ### Analysis
 
-You can analyze streams with `dplyr` verbs and SQL using `DBI`, as a quick example, we will filter rows and add columns over a stream. We won't explicitly call `stream_generate_test()`, but you can call it on your own through the `later` package if you feel the urge to verify that data is being processed continuously.
+You<!--((("transformations", "analysis")))--> can analyze streams with `dplyr` verbs and SQL using `DBI`. As a quick example, we will filter rows and add columns over a stream. We won’t explicitly call `stream_generate_test()`, but you can call it on your own through the `later` package if you feel the urge to verify that data is being processed continuously:
 
 ```{r streaming-analysis}
 library(dplyr)
@@ -154,7 +164,7 @@ stream_read_csv(sc, "source") %>%
 # … with more rows
 ```
 
-It is also possible to perform aggregations over the entire history of the stream.  The history could be filtered or not.
+It's also possible to perform aggregations over the entire history of the stream. The history could be filtered or not:
 
 ```{r streaming-analysis-aggregations}
 stream_read_csv(sc, "source") %>%
@@ -172,7 +182,7 @@ stream_read_csv(sc, "source") %>%
 4     7 12692
 ```
 
-Grouped aggregations of the latest data in the stream require a timestamp.  The timestamp will be of when reading function, in this case `stream_read_csv()` , first "saw" that specific record. In Spark stream terms, that timestamp is called a "watermark".  The `spark_watermark()` function is used to add the timestamp.  For this exercise, the watermark will be the same for all records, since the five files were read by the stream after they were created.  Please note that only Kafka and memory *outputs* support watermarks.  
+Grouped aggregations of the latest data in the stream require a timestamp. The timestamp will note when the reading function (in this case `stream_read_csv()`) first "saw" that specific record. In Spark Streaming terminology, the timestamp<!--((("watermarks")))--> is called a _watermark_. The `spark_watermark()` function adds the timestamp. In this example, the watermark will be the same for all records, since the five files were read by the stream after they were created. Note that only<!--((("Kafka", "reading and writing from")))--> Kafka and memory _outputs_ support watermarks:
 
 ```{r streaming-analysis-watermark}
 stream_read_csv(sc, "source") %>%
@@ -195,7 +205,7 @@ stream_read_csv(sc, "source") %>%
 # … with more rows
 ```
 
-After the watermark is created, it can be used in the `group_by()` verb.  It can then be piped into a `summarise()` function to get some stats of the stream.
+After the watermark is created, you can use it in the `group_by()` verb. You can then pipe it into a `summarise()` function to get some stats of the stream:
 
 ```{r streaming-analysis-watermark-agg}
 stream_read_csv(sc, "source") %>%
@@ -216,11 +226,11 @@ stream_read_csv(sc, "source") %>%
 
 ### Modeling
 
-Spark streams currently do not support training on reael-time datasets, aside from the technical challenges; even if it were possible, it would be quite challenging to train models since the model itself would have to adapt over time, this is known as *online learning* and perhaps something that Spark will support in the future.
+Spark<!--((("transformations", "modeling")))((("online learning")))((("modeling", "Spark streams")))--> streams currently don't support training on real-time datasets. Aside from the technical challenges, even if it were possible, it would be quite difficult to train models since the model itself would need to adapt over time. Known as _online learning_, this is perhaps something that Spark will support in the future.
 
-That said, there are other modeling concepts we can use with streams, like feature transformers and scoring, lets try out a feature transformer with streams and leave scoring for the next section since we will need to train a model.
+That said, there are other modeling concepts we can use with streams, like feature transformers and scoring. Let's try out a feature transformer with streams, and leave scoring for the next section, since we will need to train a model.
 
-The next example makes use of the `ft_bucketizer()` feature transformer to modify the stream followed by regular `dplyr` functions which you can use just as you would with static datasets.
+The<!--((("commands", "ft_bucketizer()")))--> next example uses the `ft_bucketizer()` feature transformer to modify the stream followed by regular `dplyr` functions, which you can use just as you would with static datasets:
 
 ```{r streaming-modeling-featureese}
 stream_read_csv(sc, "source") %>%
@@ -248,9 +258,9 @@ stream_read_csv(sc, "source") %>%
 
 ### Pipelines
 
-Spark pipelines can be used for scoring streams, but not to train over streaming data. The former is fully supported while the latter is a feature under active development by the Spark community.
+Spark<!--((("transformations", "pipelines")))((("pipelines", "Spark pipelines")))--> pipelines can be used for scoring streams, but not to train over streaming data. The former is fully supported, while the latter is a feature under active development by the Spark community.
 
-In order to score a stream, it is necessary to first create a our model. So lets build, fit and save a simple pipeline.
+To score a stream, it's necessary to first create our model. So let's build, fit, and save a simple pipeline:
 
 ```{r streaming-pipelines}
 cars <- copy_to(sc, mtcars)
@@ -262,9 +272,9 @@ model <- ml_pipeline(sc) %>%
   ml_fit(cars)
 ```
 
-**Tip:** If you choose to, you can make use of other concepts presented in the Pipelines chapter, like saving and reloading pipelines through `ml_save()` and `ml_load()` before scoring streams.
+**Tip:** If you choose to, you can make use of other concepts presented in [Chapter 5](#pipelines), like saving and reloading pipelines through `ml_save()` and `ml_load()` before scoring streams.
 
-We can then generate a stream based on `mtcars` using `stream_generate_test()` and score the model using `ml_transform()`:
+We can then generate a stream based on `mtcars` using `stream_generate_test()`, and score the model using `ml_transform()`:
 
 ```{r streaming-pipelines-transform}
 future::future(stream_generate_test(mtcars, "cars-stream", iterations = 5))
@@ -289,11 +299,11 @@ ml_transform(model, stream_read_csv(sc, "cars-stream"))
 #   rawPrediction <list>, probability <list>, prediction <dbl>
 ```
 
-Even though the example this example was put together with a few lines of code, it is actually quite impressive what we just accomplished: You copied data into Spark, performed feature engineering, traineed a model and scored the model over a real-time dataset, with seven lines of code! -- Let's try now to use custom transformations, in real-time.
+Though this example was put together with a few lines of code, what we just accomplished is actually quite impressive. You copied data into Spark, performed feature engineering, trained a model, and scored the model over a real-time dataset, with just seven lines of code! Let’s try now to use custom transformations, in real time.
 
 ### Distributed R {streaming-r-code}
 
-Arbitrary R code can also be used to transform a stream with the use of `spark_apply()`. This approach follows the same principles discussed in the Distributed R chapter, as in, `spark_apply()` runs R code over each executor in the cluster where data is available, this enables processing high-throughput streams and fulfill low-latency requirements.
+Arbitrary<!--((("transformations", "distributed R")))((("distributed R", "streaming")))--> R code can also be used to transform a stream with the use of `spark_apply()`. This approach follows the same principles discussed in [Chapter 11](#distributed), where `spark_apply()` runs R code over each executor in the cluster where data is available. This enables processing high-throughput streams and fulfills low-latency requirements:
 
 ```{r streaming-distributed}
 stream_read_csv(sc, "cars-stream") %>%
@@ -302,7 +312,7 @@ stream_read_csv(sc, "cars-stream") %>%
   stream_write_csv("cars-round")
 ```
 
-Which as you would expect, processes data from `cars-stream` into `cars-round` by running the custom `round()` R function, let's pick into the output sink:
+which, as you would expect, processes data from `cars-stream` into `cars-round` by running the custom `round()` R function. Let’s peek into the output sink:
 
 ```{r streaming-distributed-read}
 spark_read_csv(sc, "cars-round")
@@ -324,9 +334,9 @@ spark_read_csv(sc, "cars-round")
 # … with more rows
 ```
 
-Again, make sure you apply the concepts you already know about `spark_apply()` when using streams; for instance, you should consider using `arrow` to significantly improve performance. 
+Again, make sure you apply the concepts you already know about `spark_apply()` when using streams; for instance, you should consider using `arrow` to significantly improve performance. Before we move on, disconnect from Spark:
 
-This was our last transformation for streams, you will now learn how to use Spark streams with Shiny, a package that makes it easy to build interactive web applications from R. 
+This was our last transformation for streams. We'll now learn how to use Spark Streaming with Kafka.<!--((("", startref="Strans12")))-->
 
 ```{r streaming-distributed-disconnect}
 spark_disconnect(sc)
@@ -334,9 +344,9 @@ spark_disconnect(sc)
 
 ## Kafka
 
-Apache Kafka is an open-source stream-processing software platform developed by LinkedIn and donated to the Apache Software Foundation, written in Scala and Java. As an analogy. Kafka is to real-time storage as what Hadoop is to static storage.
+Apache Kafka<!--((("Kafka", "streaming")))((("Apache Kafka", "streaming")))((("streaming", "Kafka")))--> is an open source stream-processing software platform developed by LinkedIn and donated to the Apache Software Foundation. It is written in Scala and Java. To describe it using an analogy, Kafka is to real-time storage what Hadoop is to static storage.
 
-Kafka stores the stream as records which consist of a key, a value and a timestamp. Kafka can handle multiple streams that contain different information by categorizing them into topic. Kafka is commonly used to connect multiple real-time applications, a *producer* is an application that streams data into Kafka, while a *consumer* is the one that reads from Kafka; in Kafka terminology, a consumer application subscribes to topics. Therefore, the most basic workflow we can accomplish with Kafka is one with a single producer and a single consumer, illustrated in Figure \@ref(fig:streaming-kafka-apis).
+Kafka stores the stream as records, which consist of a key, a value, and a timestamp. It can handle multiple streams that contain different information, by categorizing them by topic. Kafka is commonly used to connect multiple real-time applications. A _producer_ is<!--((("producers")))((("consumers")))((("subscribers")))--> an application that streams data into Kafka, while a _consumer_ is the one that reads from Kafka; in Kafka terminology, a consumer application _subscribes_ to topics. Therefore, the most basic workflow we can accomplish with Kafka is one with a single producer and a single consumer; this is illustrated in Figure \@ref(fig:streaming-kafka-apis).
 
 ```{r streaming-kafka-apis, echo=FALSE, fig.cap='Basic workflow', fig.align = 'center', eval = TRUE, fig.align='center', out.height = '100pt', out.width = 'auto'}
 render_nomnoml("
@@ -350,9 +360,9 @@ render_nomnoml("
 ", "images/streaming-kafka-apis.png")
 ```
 
-If you are new to Kafka, we don't recommend you try to run the code from this section; but if you are really motivated to follow along , first you will need to install Kafka as explained in the Appendix or deploy Kafka in your cluster.
+If you are new to Kafka, we don’t recommend you run the code from this section. However, if you're really motivated to follow along, you will first need to install Kafka as explained in [Appendix](#appendix) or deploy it in your cluster.
 
-Using Kafka also requires the Kafka package when connecting to Spark, make sure is specified in your connection `config`:
+Using Kafka also requires you to have the Kafka package when connecting to Spark. Make sure this is specified in your connection `config`:
 
 ```{r streaming-kafka-connect}
 library(sparklyr)
@@ -363,7 +373,7 @@ sc <- spark_connect(master = "local", config = list(
 ))
 ```
 
-Once connected, it's straightforward to read data from a stream:
+Once connected, it’s straightforward to read data from a stream:
     
 ```{r streaming-kafka-read, eval=FALSE}
 stream_read_kafka(
@@ -375,9 +385,9 @@ stream_read_kafka(
   ) 
 ```
 
-However, notice that you need to properly configure the `options` list; `kafka.bootstrap.server` expects a list of Kafka hosts, `topic` and `subscribe` define which topic should be used when writing or reading from Kafka respectively.
+However, notice that you need to properly configure the `options` list; `kafka.bootstrap.server` expects a list of Kafka hosts, while `topic` and `subscribe` define which topic should be used when writing or reading from Kafka, respectively.
 
-While we started by presenting first a simple single-producer and single-consumer use case; Kafka also allows much more complex interactions. Next we will read from one topic, process its data and then write the results to a different topic -- systems that are producers and consumers from the same topic are referred as, *stream processors*. In Figure \@ref(fig:streaming-kafka-two-outputs), the stream processor reads topic A, and then writes results to topic B. This allows for a given *consumer* application to read results instead of “raw” feed data.
+Though we've started by presenting a simple single-producer and single-consumer use case, Kafka also allows much more complex interactions. We will next read from one topic, process its data, and then write the results to a different topic. Systems that are producers and consumers from the same topic are referred to as _stream processors_. In Figure \@ref(fig:streaming-kafka-two-outputs), the stream processor reads topic A and then writes results to topic B. This allows for a given consumer application to read results instead of "raw" feed data.
 
 ```{r streaming-kafka-two-outputs, echo=FALSE, fig.cap='Kafka workflow', fig.align = 'center', eval = TRUE, fig.align='center', out.height = '260pt', out.width = 'auto'}
 render_nomnoml("
@@ -391,9 +401,9 @@ render_nomnoml("
 ", "images/streaming-kafka-two-outputs.png")
 ```
 
-There are three modes available when processing Kafka streams in Spark: *complete*, *update* and *append*. The *complete* mode will provide the totals for every group every time there is a new batch, *update* provides totals for only the groups that have updates in the latest batch, *append* adds raw records to the target topic. This *append* mode is not meant for aggregates, but works well for passing a filtered subset to the target topic.
+Three modes are available when processing Kafka streams in Spark: _++complete++_, _++update++_, and _++append++_. The `complete` mode provides the totals for every group every time there is a new batch; `update` provides totals for only the groups that have updates in the latest batch; and `append` adds raw records to the target topic. The `append` mode is not meant for aggregates, but works well for passing a filtered subset to the target topic.
 
-In our next example, the *producer* will stream random letters into Kafka under a `letters` topic. Then Spark will act as the *stream processor* reading the `letters` topic and computing unique letter which are then written back to Kafka under the `totals` topic. We will use the `update` mode when writing back into Kafka, only the totals that changed will be sent to Kafka. This change is determined after each batch from the `letters` topic.
+In our next example, the producer streams random letters into Kafka under a `letters` topic. Then, Spark will act as the stream processor, reading the `letters` topic and computing unique letters, which are then written back to Kafka under the `totals` topic. We'll use the `update` mode when writing back into Kafka; that is, only the totals that changed will be sent to Kafka. This change is determined after each batch from the `letters` topic:
 
 ```{r streaming-kafka-read-write, eval=FALSE}
 hosts  <- "localhost:9092"
@@ -409,13 +419,13 @@ stream_read_kafka(sc, options = read_options) %>%
                      options = write_options)
 ```
 
-You can take a quick look at totals by reading from Kafka,
+You can take a quick look at totals by reading from Kafka: 
 
 ```{r streaming-kafka-preview, eval=FALSE}
 stream_read_kafka(sc, options = totals_options)
 ```
 
-Using a new terminal session, use Kafka's command line tool to manually write single letter into the `letters` topic.
+Using a new terminal session, use Kafka’s command-line tool to manually add single letters into the `letters` topic:
 
 ```
 kafka-console-producer.sh --broker-list localhost:9092 --topic letters
@@ -424,17 +434,17 @@ kafka-console-producer.sh --broker-list localhost:9092 --topic letters
 >C
 ```
 
-The letters that you input are pushed to Kaka, read by Spark, aggregated within Spark and pushed back into Kafka and then, finally, consumed by Spark again to give you a glimpse into `totals` topic. This was quite a setup, but also a realistic configuration which is common to find in real-time processing projects.
+The letters that you input are pushed to Kafka, read by Spark, aggregated within Spark, and pushed back into Kafka, Then, finally, they are consumed by Spark again to give you a glimpse into the `totals` topic. This was quite a setup, but also a realistic configuration commonly found in real-time processing projects.
 
-Next, we will use the Shiny framework to visualize streams, in real-time!
+Next, we will use the Shiny framework to visualize streams, in real time!
 
 ## Shiny
 
-Shiny's reactive framework is well suited to support streaming information which you can use to display real-time data from Spark using the `reactiveSpark()`, reactive. There is much to learn about Shiny which we can possibly present; however, if you are already familiar with Shiny, this example should be quite easy to understand.
+Shiny’s reactive<!--((("Shiny Server")))((("streaming", "Shiny")))--> framework is well suited to support streaming information, which you can use to display real-time data from Spark using `reactiveSpark()`. There is far more to learn about Shiny than we could possibly present here. However, if you're already familiar with Shiny, this example should be quite easy to understand.
 
-We have a modified version of the k-means Shiny example which, instead of getting the data from the static `iris` dataset, gets generated with `stream_generate_test()`, consumed by Spark, retrieved to Shiny through `reactiveSpark()` and displayed as captured in Figure \@ref(fig:streaming-shiny-app).
+We have a modified version of the _k_-means Shiny example that, instead of getting the data from the static `iris` dataset, is generated with `stream_generate_test()`, consumed by Spark, retrieved to Shiny through `reactiveSpark()`, and then displayed as shown in Figure \@ref(fig:streaming-shiny-app).
 
-To run this example, store the following Shiny app under `shiny/shiny-stream.R`.
+To run this example, store the following Shiny app under `shiny/shiny-stream.R`:
 
 ```{r streaming-shiny, eval=FALSE, exercise=TRUE}
 library(sparklyr)
@@ -477,13 +487,13 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-This Shiny application can then be launched with `runApp()`,
+This Shiny application can then be launched with `runApp()`, like so:
 
 ```{r eval=FALSE, exercise=TRUE}
 shiny::runApp("shiny/shiny-stream.R")
 ```
 
-While the shiny app runs, launch a new R session from the same directory and create a test stream with `stream_generate_test()`; this will generate a stream of continuous data that Spark can process and Shiny visualize.
+While the Shiny app is running, launch a new R session from the same directory and create a test stream with `stream_generate_test()`. This will generate a stream of continuous data that Spark can process and Shiny can visualize (as illustrated in Figure \@ref(fig:streaming-shiny-app)):
 
 ```{r eval=FALSE, exercise=TRUE}
 sparklyr::stream_generate_test(datasets::iris, "shiny/shiny-stream",
@@ -494,9 +504,9 @@ sparklyr::stream_generate_test(datasets::iris, "shiny/shiny-stream",
 render_image("images/streaming-shiny-app.png")
 ```
 
-This section showed how easy it is to create a Shiny app that can be used for several purposes, such as monitoring, and dashboarding.  
+In this section you learned how easy it is to create a Shiny app that can be used for several different purposes, such as monitoring and dashboarding.
 
-In a more complex implementation, the source would more likely be a Kafka stream.  The next section will cover how to integrate Kafka, Spark Stream and `sparklyr`. 
+In a more complex implementation, the source would more likely be a Kafka stream.
 
 Before we transition, disconnect from Spark and clear the folders that we used:
 
@@ -509,12 +519,12 @@ unlink(c("source", "destination", "cars-stream",
 
 ## Recap
 
-From static datasets to real-time datasets, you've truly mastered many of the large-scale computing techniques. Specifically, in this chapter, we learned how static data can be generalized to real-time if we think of it as an infinite table. We were then able to create a simple stream without any data transformations, meaning, a simple stream that copies data from point a to point b.
+From static datasets to real-time datasets, you’ve truly mastered many of the large-scale computing techniques. Specifically, in this chapter, you learned how static data can be generalized to real time if we think of it as an infinite table. We were then able to create a simple stream, without any data transformations, that copies data from point A to point B.
 
-A humble start that became quite useful when we learned about the several different transformations you can apply to stream; from data analysis transformations using the `dplyr` and `DBI` packages, to feature transformers introduced while modeling, to fully-fledged pipelines capable of scoring in real-time and, last but not least, transforming datasets with custom R code; a lot to digest for sure.
+This humble start became quite useful when you learned about the several different transformations you can apply to streaming data—from data analysis transformations using the `dplyr` and `DBI` packages, to feature transformers introduced while modeling, to fully fledged pipelines capable of scoring in real time, to, last but not least, transforming datasets with custom R code. This was a lot to digest, for sure.
 
-We then presented Apache Kafka as a reliable and scalable solution for real-time data, you had a chance to see how a real-time system would be structured by introducing you to consumers, producers and topics; which when properly combined, create powerful abstractions to process real-time data.
+We then presented Apache Kafka as a reliable and scalable solution for real-time data. We showed you how a real-time system could be structured by introducing you to consumers, producers, and topics. These, when properly combined, create powerful abstractions to process real-time data.
 
-Then we closed this chapter with "a cherry on top of the cake" by presenting how to use Spark streams in Shiny, which to our surprise, was quite easy to accomplish since a stream can be transformed into a reactive, which is the lingua franca in the world of reactivity.
+Then we closed with "a cherry on top of the sundae": presenting how to use Spark Streaming in Shiny. Since a stream can be transformed into a reactive (which is the lingua franca of the world of reactivity), the ease of this approach was a nice surprise. 
 
-It is time now to move to our very last and quite short chapter, Contributing; where we will try to recruit you -- brainwash you -- into using your newly acquired knowledge for the benefit of Spark and R community at large.
+It's time now to move on to our very last (and quite short) chapter, [Chapter 13](#contributing); there we'll try to persuade you to use your newly acquired knowledge for the benefit of the Spark and R communities at large.
