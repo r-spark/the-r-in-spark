@@ -661,7 +661,9 @@ Aggregate data in Spark, visualize in R.
 `r ''````{r  fig.align='center', warning=FALSE}
 library(ggplot2)
 cars %>%
-  group_by(cyl) %>% summarise(mpg = mean(mpg)) %>%
+  group_by(cyl) %>% 
+  summarise(mpg = mean(mpg)) %>%
+  collect() %>%
   ggplot(aes(cyl, mpg)) + geom_bar(stat="identity")
 ```
 
